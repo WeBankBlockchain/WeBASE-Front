@@ -30,11 +30,11 @@ spring:
     console:
        enabled: true
 
-server: 
+server:
   port: [#port]
   context-path: /fisco-bcos-front
 
-sdk: 
+sdk:
   orgName: [#orgName]
   keystorePass: 123456
   clientCertPass: 123456
@@ -45,10 +45,10 @@ sdk:
   queueCapacity: 100
   keepAlive: 60
 
-constant:  
+constant:
   nodeDir: [#nodeDir]
   mgrIpPorts: [#mgrIpPorts]
   transMaxWait: 30
 
-logging: 
+logging:
   config: classpath:log4j2.xml

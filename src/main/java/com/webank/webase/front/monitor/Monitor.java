@@ -1,0 +1,22 @@
+package com.webank.webcaf.front.monitor;
+
+import lombok.Data;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.math.BigInteger;
+
+@Entity
+@Data
+public class Monitor {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Long id;
+    private BigInteger blockHeight;
+    private BigInteger pbftView;
+    private BigInteger pendingTransactionCount;
+    private Long timestamp;
+}
