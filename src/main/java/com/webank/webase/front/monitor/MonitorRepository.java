@@ -1,4 +1,4 @@
-package com.webank.webcaf.front.monitor;
+package com.webank.webase.front.monitor;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

@@ -32,10 +32,10 @@ spring:
 
 server: 
   port: [#port]
-  context-path: /fisco-bcos-front
+  context-path: /webase-front
 
 sdk: 
-  orgName: [#orgName]
+  orgName: orgTest
   keystorePass: 123456
   clientCertPass: 123456
   caCertPath: classpath:ca.crt
@@ -45,9 +45,9 @@ sdk:
   queueCapacity: 100
   keepAlive: 60
 
-constant:  
-  nodeDir: [#nodeDir]
-  mgrIpPorts: [#mgrIpPorts]
+constant:
+  nodeDir: /data/app/build/node0
+  mgrIpPorts: 10.0.0.1:8082
   transMaxWait: 30
 
 logging: 
