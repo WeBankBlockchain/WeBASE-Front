@@ -4,7 +4,7 @@
 		<Console name="console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%F:%L) - %m%n" />
 		</Console>
-        
+
 		<RollingFile name="front" fileName="./log/fisco-bcos-front.log"
 					 filePattern="./log/fisco-bcos-front.log.%d{yyyy-MM-dd}.%i.log.gz">
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
@@ -15,22 +15,35 @@
 			<DefaultRolloverStrategy max="24" />
 		</RollingFile>
 
-        <RollingFile name="web3sdk" fileName="./log/web3sdk.log"
-                     filePattern="./log/web3sdk.log.%d{yyyy-MM-dd}.%i.log.gz">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="200 MB" />
-            </Policies>
-            <DefaultRolloverStrategy max="24" />
-        </RollingFile>
+		<RollingFile name="front-error" fileName="./log/fisco-bcos-front-error.log"
+					 filePattern="./log/fisco-bcos-front-error.log.%d{yyyy-MM-dd}.%i.log.gz">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="200 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="24" />
+		</RollingFile>
+
+		<RollingFile name="web3sdk" fileName="./log/web3sdk.log"
+					 filePattern="./log/web3sdk.log.%d{yyyy-MM-dd}.%i.log.gz">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="200 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="24" />
+		</RollingFile>
 
 		<Async name="asyncWeb3sdk" bufferSize="512">
 			<AppenderRef ref="web3sdk" />
 		</Async>
 
 		<Async name="asyncFront" bufferSize="512">
-			 <AppenderRef ref="front" />
+			<AppenderRef ref="front" />
+		</Async>
+		<Async name="asyncFrontError" bufferSize="512">
+			<AppenderRef ref="front-error" />
 		</Async>
 	</Appenders>
 
@@ -39,12 +52,16 @@
 			<AppenderRef ref="asyncWeb3sdk" />
 		</Logger>
 
-        <Logger name="org.bcos.web3j" level="debug" additivity="false">
-            <AppenderRef ref="asyncWeb3sdk" />
-        </Logger>
+		<Logger name="org.bcos.web3j" level="debug" additivity="false">
+			<AppenderRef ref="asyncWeb3sdk" />
+		</Logger>
 
 		<Root level="debug">
-            <AppenderRef ref="asyncFront" />
+			<AppenderRef ref="asyncFront" />
 		</Root>
+		<Root level="error">
+			<AppenderRef ref="asyncFrontError" />
+		</Root>
+
 	</Loggers>
 </Configuration>

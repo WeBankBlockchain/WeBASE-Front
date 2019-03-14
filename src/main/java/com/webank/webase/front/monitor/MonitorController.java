@@ -1,6 +1,6 @@
-package com.webank.webcaf.front.monitor;
+package com.webank.webase.front.monitor;
 
-import com.webank.webcaf.front.performance.result.PerformanceData;
+import com.webank.webase.front.performance.result.PerformanceData;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;

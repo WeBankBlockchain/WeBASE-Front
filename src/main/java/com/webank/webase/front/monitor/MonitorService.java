@@ -1,9 +1,8 @@
-package com.webank.webcaf.front.monitor;
+package com.webank.webase.front.monitor;
 
-import com.webank.webcaf.front.performance.Performance;
-import com.webank.webcaf.front.performance.result.Data;
-import com.webank.webcaf.front.performance.result.LineDataList;
-import com.webank.webcaf.front.performance.result.PerformanceData;
+import com.webank.webase.front.performance.result.Data;
+import com.webank.webase.front.performance.result.LineDataList;
+import com.webank.webase.front.performance.result.PerformanceData;
 import lombok.extern.slf4j.Slf4j;
 import org.bcos.web3j.protocol.Web3j;
 import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
@@ -51,8 +50,8 @@ public class MonitorService {
         List<BigDecimal> blockHeightValueList = new ArrayList<>();
         List<BigDecimal> pbftViewValueList = new ArrayList<>();
         for (Monitor monitor : monitorList) {
-            blockHeightValueList.add(new BigDecimal(monitor.getBlockHeight()));
-            pbftViewValueList.add(new BigDecimal(monitor.getPbftView()));
+            blockHeightValueList.add(monitor.getBlockHeight()==null? null: new BigDecimal(monitor.getBlockHeight()));
+            pbftViewValueList.add(monitor.getPbftView()==null? null: new BigDecimal(monitor.getPbftView()));
             timestampList.add(monitor.getTimestamp());
         }
         monitorList.clear();
@@ -90,7 +89,7 @@ public class MonitorService {
         for (int i = 0; i < monitorList.size() - 1; i++) {
             Long startTime = monitorList.get(i).getTimestamp();
             Long endTime = monitorList.get(i + 1).getTimestamp();
-            if (endTime - startTime > 6000) {
+            if (endTime - startTime > 6900) {
                 log.info("****startTime" + startTime);
                 log.info("****endTime" + endTime);
                 while (endTime - startTime > 5000) {
