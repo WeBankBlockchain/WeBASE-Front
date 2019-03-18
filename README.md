@@ -28,7 +28,7 @@
 
 执行命令：
 ```
-git clone http://xxx/webase-front.git
+git clone https://github.com/WeBankFinTech/webase-front.git
 ```
 
 ## 4.2 编译代码
