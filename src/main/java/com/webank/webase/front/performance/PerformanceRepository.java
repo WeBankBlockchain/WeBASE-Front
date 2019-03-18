@@ -1,11 +1,3 @@
-package com.webank.webase.front.performance;
-
-import java.util.List;
-import javax.transaction.Transactional;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -21,6 +13,15 @@ import org.springframework.data.repository.CrudRepository;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.performance;
+
+import java.util.List;
+import javax.transaction.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+
 public interface PerformanceRepository extends CrudRepository<Performance, Long> {
 
     @Query(value = "select p from Performance p where p.timestamp between ?1 and ?2 "

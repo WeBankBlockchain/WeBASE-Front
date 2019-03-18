@@ -1,9 +1,3 @@
-package com.webank.webase.front.performance.disk;
-
-import java.util.List;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -19,6 +13,13 @@ import org.springframework.data.repository.CrudRepository;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.performance.disk;
+
+import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+
 public interface DiskRepository extends CrudRepository<Disk, Long> {
 
     @Query(value = "select d from Disk d where d.timestamp between ?1 and ?2")

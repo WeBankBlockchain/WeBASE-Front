@@ -1,18 +1,3 @@
-package com.webank.webase.front.web3api;
-
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.exception.FrontException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import java.math.BigInteger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -28,6 +13,21 @@ import org.springframework.web.bind.annotation.RestController;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.web3api;
+
+import com.webank.webase.front.base.BaseResponse;
+import com.webank.webase.front.base.exception.FrontException;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import java.math.BigInteger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Web3ApiController.
