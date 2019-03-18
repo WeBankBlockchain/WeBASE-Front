@@ -13,7 +13,7 @@
 | 环境     | 版本              |
 | ------ | --------------- |
 | java   | jdk1.8.0_121或以上版本|
-| gradle | gradle-2.1或以上版本 |
+| gradle | gradle-5.0或以上版本 |
 | python | Python2.7 |
 | fisco-bcos |v1.3.x版本  |
 备注：安装说明请参看附录。
@@ -28,7 +28,14 @@
 
 执行命令：
 ```
-git clone http://xxx/webase-front.git
+git clone https://github.com/WeBankFinTech/webase-front.git
+```
+
+**注意**：代码拉取后，切换到相应分支。
+
+```shell
+cd webase-front
+git checkout XXXXX
 ```
 
 ## 4.2 编译代码
@@ -51,7 +58,7 @@ cd dist/conf
 修改节点管理服务ip端口：sed -i "s/10.0.0.1:8082/${your_ip_port}/g" application.yml
 例子（将端口由8081改为8090）：sed -i "s/8081/8090/g" application.yml
 ```
-
+**备注：如果字符串中存在'/'，在前面加单个反斜杠'\\'转义**
 （2）进入目录：
 ```
 cd dist/report
@@ -82,7 +89,7 @@ cd dist
 停止：sh stop.sh
 检查：sh status.sh
 ```
-<font color="#dd0000">备注：如果脚本执行错误，尝试以下命令: </font>
+**备注**：如果脚本执行错误，尝试以下命令:
 ```
 赋权限：chmod + *.sh
 转格式：dos2unix *.sh
@@ -135,7 +142,7 @@ unzip -d /software/ gradleXXX.zip
 （2）配置环境变量
 
 ```shell
-export GRADLE_HOME=/software/gradle-2.1
+export GRADLE_HOME=/software/gradle-XXX
 export PATH=$GRADLE_HOME/bin:$PATH
 ```
 
