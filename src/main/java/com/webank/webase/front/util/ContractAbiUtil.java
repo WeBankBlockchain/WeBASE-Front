@@ -1,0 +1,347 @@
+package com.webank.webase.front.util;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.exception.FrontException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.bcos.web3j.abi.datatypes.Type;
+import org.bcos.web3j.protocol.ObjectMapperFactory;
+import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
+
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * ContractAbiUtil.
+ * 
+ */
+@Slf4j
+public class ContractAbiUtil {
+
+    public static HashMap<String, List<VersionEvent>> contractEventMap = new HashMap<>();
+
+    @Data
+    public static class VersionEvent {
+        private String version;
+        private HashMap<String, List<Class<? extends Type>>> events;
+        private HashMap<String, Boolean> functions;// constant or not
+        private HashMap<String, List<String>> funcInputs;
+        private HashMap<String, List<String>> funcOutputs;
+
+        /**
+         * VersionEvent.
+         * 
+         * @param version contract version
+         * @param events events
+         * @param functions functions
+         * @param funcInputs funcInputs
+         * @param funcOutputs funcOutputs
+         */
+        public VersionEvent(String version, HashMap<String, List<Class<? extends Type>>> events,
+                HashMap<String, Boolean> functions, HashMap<String, List<String>> funcInputs,
+                HashMap<String, List<String>> funcOutputs) {
+            this.version = version;
+            this.events = events;
+            this.functions = functions;
+            this.funcInputs = funcInputs;
+            this.funcOutputs = funcOutputs;
+        }
+    }
+
+    static {
+        try {
+            initAllContractAbi();
+        } catch (Exception ex) {
+            log.error("initAllContractAbi fail");
+        }
+    }
+
+    /**
+     * init from config abi dir.
+     * 
+     */
+    public static void initAllContractAbi() throws Exception {
+        File f = new File(Constants.ABI_DIR);
+
+        File[] files = f.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            String[] arr = file.getName().split(Constants.SEP);
+            String version = "";
+            if (arr.length >= 2) {
+                version = arr[1];
+            }
+            List<AbiDefinition> abiList = loadContractDefinition(file);
+            setContractWithAbi(arr[0], version, JSONArray.parseArray(JSON.toJSONString(abiList)),
+                    false);
+        }
+    }
+
+    /**
+     * loadContractDefinition.
+     * 
+     * @param abiFile file
+     * @return
+     */
+    public static List<AbiDefinition> loadContractDefinition(File abiFile) throws IOException {
+        ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+        AbiDefinition[] abiDefinition = objectMapper.readValue(abiFile, AbiDefinition[].class);
+        return Arrays.asList(abiDefinition);
+    }
+
+    /**
+     * set contract in map and save file.
+     * 
+     * @param contractName contractName
+     * @param version version
+     * @param abiArr abi info
+     * @return
+     */
+    public static void setContractWithAbi(String contractName, String version, JSONArray abiArr,
+            boolean ifSaveFile) throws FrontException {
+
+        List<VersionEvent> versionEventList = null;
+        if (contractEventMap.containsKey(contractName)) {
+            versionEventList = contractEventMap.get(contractName);
+        } else {
+            versionEventList = new ArrayList<>();
+        }
+
+        for (VersionEvent versionEvent : versionEventList) {
+            if (version.equals(versionEvent.getVersion())) {
+                log.error("contract:{} version:{} is existed.", contractName, version);
+                throw new FrontException(ConstantCode.CONTRACT_DEPLOYED_ERROR);
+            }
+        }
+
+        HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
+        HashMap<String, Boolean> functions = new HashMap<>();
+        HashMap<String, List<String>> funcInputs = new HashMap<>();
+        HashMap<String, List<String>> funcOutputs = new HashMap<>();
+
+        for (Object object : abiArr) {
+            AbiDefinition abiDefinition = JSON.parseObject(object.toString(), AbiDefinition.class);
+            if (Constants.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {
+                List<NamedType> inputs = abiDefinition.getInputs();
+                List<String> inputList = new ArrayList<>();
+
+                for (NamedType input : inputs) {
+                    inputList.add(input.getType());
+                }
+
+                functions.put(contractName, false);
+                funcInputs.put(contractName, inputList);
+            } else if (Constants.TYPE_FUNCTION.equals(abiDefinition.getType())) {
+                List<NamedType> inputs = abiDefinition.getInputs();
+                List<String> inputList = new ArrayList<>();
+                List<NamedType> outputs = abiDefinition.getOutputs();
+                List<String> outputList = new ArrayList<>();
+
+                for (NamedType input : inputs) {
+                    inputList.add(input.getType());
+                }
+                for (NamedType output : outputs) {
+                    outputList.add(output.getType());
+                }
+
+                functions.put(abiDefinition.getName(), abiDefinition.isConstant());
+                funcInputs.put(abiDefinition.getName(), inputList);
+                funcOutputs.put(abiDefinition.getName(), outputList);
+            }
+        }
+
+        versionEventList.add(new VersionEvent(version, events, functions, funcInputs, funcOutputs));
+        contractEventMap.put(contractName, versionEventList);
+
+        if (ifSaveFile) {
+            saveAbiFile(contractName, version, abiArr);
+        }
+    }
+
+    /**
+     * save abi file to disk which dir declare in config.
+     * 
+     * @param contractName contractName
+     * @param version version
+     * @param abi info
+     * @return
+     */
+    public static void saveAbiFile(String contractName, String version, JSONArray abi)
+            throws FrontException {
+        FileOutputStream outputStream = null;
+        try {
+            File file = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName
+                    + Constants.SEP + version);
+            if (file.exists()) {
+                file.delete();
+                file.createNewFile();
+            } else {
+                file.createNewFile();
+            }
+            outputStream = new FileOutputStream(file);
+            outputStream.write(abi.toString().getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error("saveAbiFile failed.");
+            throw new FrontException(ConstantCode.ABI_SAVE_ERROR);
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                throw new FrontException(ConstantCode.ABI_SAVE_ERROR);
+            }
+        }
+        return;
+    }
+
+    /**
+     * check if the contract has been deployed.
+     * 
+     * @param contractName contractName
+     * @param contractVersion version
+     * @return
+     */
+    public static Boolean ifContractAbiExisted(String contractName, String contractVersion) {
+        boolean ifExisted = false;
+        Map<String, List<String>> contracts = getAllContract();
+        for (String contract : contracts.keySet()) {
+            if (contract.equals(contractName)) {
+                List<String> versions = contracts.get(contract);
+                if (versions.contains(contractVersion)) {
+                    ifExisted = true;
+                    break;
+                }
+            }
+        }
+        return ifExisted;
+    }
+
+    /**
+     * check if the function is constant.
+     * 
+     * @param contractName contractName
+     * @param funcName funcName
+     * @param version version
+     * @return
+     */
+    public static String ifConstantFunc(String contractName, String funcName, String version) {
+        if (!contractEventMap.containsKey(contractName)) {
+            return null;
+        }
+        List<VersionEvent> versionEventList = contractEventMap.get(contractName);
+        VersionEvent target = null;
+        for (VersionEvent versionEvent : versionEventList) {
+            if (versionEvent.getVersion().equals(version)) {
+                target = versionEvent;
+                break;
+            }
+        }
+        if (target == null) {
+            return null;
+        }
+        return target.getFunctions().get(funcName).toString();
+    }
+
+    /**
+     * get input types.
+     * 
+     * @param contractName contractName
+     * @param funcName funcName
+     * @param version version
+     * @return
+     */
+    public static List<String> getFuncInputType(String contractName, String funcName,
+            String version) {
+        if (!contractEventMap.containsKey(contractName)) {
+            return null;
+        }
+        List<VersionEvent> versionEventList = contractEventMap.get(contractName);
+        VersionEvent target = null;
+        for (VersionEvent versionEvent : versionEventList) {
+            if (versionEvent.getVersion().equals(version)) {
+                target = versionEvent;
+                break;
+            }
+        }
+        if (target == null) {
+            return null;
+        }
+        return target.getFuncInputs().get(funcName);
+    }
+
+    /**
+     * get output types.
+     * 
+     * @param contractName contractName
+     * @param funcName funcName
+     * @param version version
+     * @return
+     */
+    public static List<String> getFuncOutputType(String contractName, String funcName,
+            String version) {
+        if (!contractEventMap.containsKey(contractName)) {
+            return null;
+        }
+
+        List<VersionEvent> versionEventList = contractEventMap.get(contractName);
+        VersionEvent target = null;
+        for (VersionEvent versionEvent : versionEventList) {
+            if (versionEvent.getVersion().equals(version)) {
+                target = versionEvent;
+                break;
+            }
+        }
+        if (target == null) {
+            return null;
+        }
+        return target.getFuncOutputs().get(funcName);
+    }
+
+    /**
+     * get all contract from contractEventMap.
+     * 
+     * @return
+     */
+    private static Map<String, List<String>> getAllContract() {
+        Map<String, List<String>> contracts = new HashMap<>();
+        for (String contract : contractEventMap.keySet()) {
+            List<VersionEvent> versionEventList = contractEventMap.get(contract);
+            List<String> versions = new ArrayList<>();
+            for (VersionEvent versionEvent : versionEventList) {
+                versions.add(versionEvent.getVersion());
+            }
+            contracts.put(contract, versions);
+        }
+        return contracts;
+    }
+}

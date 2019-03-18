@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:~/.h2/db;DB_CLOSE_ON_EXIT=FALSE
+    databaseName: db
+    driverClassName: org.h2.Driver
+    serverName:
+    username:
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    database: H2
+    openInView: false
+    show_sql: false
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+      naming-strategy: org.hibernate.cfg.EJB3NamingStrategy
+      session:
+        events:
+          log: false
+    properties:
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: false
+  h2:
+    console:
+       enabled: true
+
+server: 
+  port: 8081
+  context-path: /webase-front
+
+sdk: 
+  orgName: orgTest
+  keystorePass: 123456
+  clientCertPass: 123456
+  caCertPath: classpath:ca.crt
+  clientKeystorePath: classpath:client.keystore
+  corePoolSize: 50
+  maxPoolSize: 100
+  queueCapacity: 100
+  keepAlive: 60
+
+constant:  
+  nodeDir: /data/app/build/node0
+  mgrIpPorts: 10.0.0.1:8082
+  transMaxWait: 30
+
+logging: 
+  config: classpath:log4j2.xml
