@@ -1,7 +1,3 @@
-package com.webank.webase.front.contract;
-
-import lombok.Data;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -17,6 +13,11 @@ import lombok.Data;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.contract;
+
+import lombok.Data;
+
 @Data
 public class KeyStoreInfo {
     private String publicKey;

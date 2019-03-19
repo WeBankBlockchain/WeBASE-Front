@@ -1,14 +1,3 @@
-package com.webank.webase.front.base;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.webank.webase.front.base.exception.FrontException;
-import java.util.List;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -24,6 +13,17 @@ import org.springframework.validation.ObjectError;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.base;
+ 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.webank.webase.front.base.exception.FrontException;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 
 /**
  * BaseController.

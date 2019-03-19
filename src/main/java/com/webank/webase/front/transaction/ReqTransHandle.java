@@ -1,12 +1,3 @@
-package com.webank.webase.front.transaction;
-
-import com.webank.webase.front.base.ConstantCode;
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.constraints.NotNull;
-import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -22,6 +13,15 @@ import org.hibernate.validator.constraints.NotBlank;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.transaction;
+
+import com.webank.webase.front.base.ConstantCode;
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.constraints.NotNull;
+import lombok.Data;
+import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * transHandler interface parameter.

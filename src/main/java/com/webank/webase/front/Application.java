@@ -1,10 +1,3 @@
-package com.webank.webase.front;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -20,6 +13,13 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * Startup class.

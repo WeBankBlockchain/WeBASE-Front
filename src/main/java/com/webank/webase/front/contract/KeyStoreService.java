@@ -1,14 +1,3 @@
-package com.webank.webase.front.contract;
-
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
-import lombok.extern.slf4j.Slf4j;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.utils.Numeric;
-import org.springframework.stereotype.Service;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -24,6 +13,17 @@ import org.springframework.stereotype.Service;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.contract;
+
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.BaseResponse;
+import com.webank.webase.front.base.ConstantCode;
+import lombok.extern.slf4j.Slf4j;
+import org.bcos.web3j.crypto.ECKeyPair;
+import org.bcos.web3j.crypto.Keys;
+import org.bcos.web3j.utils.Numeric;
+import org.springframework.stereotype.Service;
 
 /**
  * KeyStoreService.

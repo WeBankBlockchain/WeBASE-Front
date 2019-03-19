@@ -1,12 +1,3 @@
-package com.webank.webase.front.config;
-
-import lombok.Data;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -22,6 +13,16 @@ import org.springframework.web.client.RestTemplate;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.config;
+
+import lombok.Data;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
+
 @Data
 @Configuration
 public class RestTemplateConfig {

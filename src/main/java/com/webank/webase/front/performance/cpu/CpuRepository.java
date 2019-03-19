@@ -1,9 +1,3 @@
-package com.webank.webase.front.performance.cpu;
-
-import java.util.List;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -19,6 +13,13 @@ import org.springframework.data.repository.CrudRepository;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.performance.cpu;
+
+import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+
 public interface CpuRepository extends CrudRepository<Cpu, Long> {
 
     @Query(value = "select c from Cpu c where c.timestamp between ?1 and ?2")
