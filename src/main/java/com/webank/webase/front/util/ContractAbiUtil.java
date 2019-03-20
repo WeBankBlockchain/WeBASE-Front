@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.protocol.ObjectMapperFactory;
-import org.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -147,6 +147,7 @@ public class ContractAbiUtil {
         HashMap<String, List<String>> funcInputs = new HashMap<>();
         HashMap<String, List<String>> funcOutputs = new HashMap<>();
 
+        // todo fill with solidity type  only need the type
         for (Object object : abiArr) {
             AbiDefinition abiDefinition = JSON.parseObject(object.toString(), AbiDefinition.class);
             if (Constants.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {

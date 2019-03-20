@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
-import org.bcos.web3j.abi.FunctionEncoder;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.crypto.Credentials;
-import org.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.abi.FunctionEncoder;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -125,19 +125,8 @@ public class ContractService {
         Credentials credentials = Credentials.create(privateKey);
 
         // contract deploy
-        CommonContract commonContract = null;
-        try {
-            commonContract =
-                    CommonContract
-                            .deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
-                                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor)
-                            .get();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("commonContract deploy failed.");
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
-        }
-        String contractAddress = commonContract.getContractAddress();
-        log.info("commonContract deploy success. contractAddress:{}", contractAddress);
+        String contractAddress = deployContract(bytecodeBin, encodedConstructor, credentials);
+
 
         // cns Params
         List<Object> cnsParams = new ArrayList<>();
@@ -165,6 +154,22 @@ public class ContractService {
         baseRsp.setData(contractAddress);
         log.info("contract deploy end. baseRsp:{}", JSON.toJSONString(baseRsp));
         return baseRsp;
+    }
+
+    private String deployContract(String bytecodeBin, String encodedConstructor, Credentials credentials) throws FrontException {
+        CommonContract commonContract = null;
+        try {
+            commonContract =
+                    CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
+                                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor)
+                            .send();
+        } catch (Exception e) {
+            log.error("commonContract deploy failed.");
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+        }
+        log.info("commonContract deploy success. contractAddress:{}", commonContract.getContractAddress());
+        return commonContract.getContractAddress();
+
     }
 
     /**
