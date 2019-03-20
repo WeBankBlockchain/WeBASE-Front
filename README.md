@@ -103,8 +103,9 @@ report服务日志：tail -f report/log/report.log
 
 # 5. <a id="chapter-5"></a>问题排查
 
-## 5.1 编译错误
-配置一下lombok，lombok的配置和使用请在网上查询。
+## 5.1 gradle build失败
+
+如果出现以下错误，**请配置一下lombok**，lombok的配置和使用请在网上查询。
 ```
 > Task :compileJava
 E:\webase-transcation\src\main\java\com\webank\webase\transaction\Application.java:21: 错误: 找不到符号
@@ -114,13 +115,10 @@ E:\webase-transcation\src\main\java\com\webank\webase\transaction\Application.ja
   位置: 类 Application
 ```
 
-## 5.2 gradle build失败
-
-```shell
-gradle build
+如果出现以下错误，**请检查gradle版本，需要使用5.0或以上版本。**
 ```
-执行后，出现下面错误。**请检查gradle版本，需要使用5.0以上版本。**
-`Could not find method annotationProcessor() for arguments [org.projectlombok:lombok:1.18.2] on object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.`
+> Could not find method annotationProcessor() for arguments [org.projectlombok:lombok:1.18.2] on object of type org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
+```
 
 # 6. <a id="chapter-6"></a>附录
 
