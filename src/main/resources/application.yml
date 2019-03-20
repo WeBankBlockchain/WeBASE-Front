@@ -31,10 +31,7 @@ server:
 
 sdk: 
   orgName: orgTest
-  keystorePass: 123456
-  clientCertPass: 123456
-  caCertPath: classpath:ca.crt
-  clientKeystorePath: classpath:client.keystore
+  groupId: 1
   corePoolSize: 50
   maxPoolSize: 100
   queueCapacity: 100

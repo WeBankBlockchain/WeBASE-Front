@@ -30,8 +30,6 @@ import org.springframework.context.annotation.Configuration;
 public class NodeConfig implements InitializingBean {
     @Autowired
     private Constants constants;
-
-    private String systemproxyaddress;
     private String orgName;
     private String p2pip;
     private String listenip;
@@ -51,7 +49,6 @@ public class NodeConfig implements InitializingBean {
             throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
         }
         this.p2pip = p2pip;
-        this.systemproxyaddress = nodeConfig.getSystemproxyaddress();
         this.listenip = nodeConfig.getListenip();
         this.rpcport = nodeConfig.getRpcport();
         this.p2pport = nodeConfig.getP2pport();
@@ -62,7 +59,6 @@ public class NodeConfig implements InitializingBean {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
-        sb.append("\"systemproxyaddress\":\"").append(systemproxyaddress).append('\"');
         sb.append(",\"orgName\":\"").append(orgName).append('\"');
         sb.append(",\"p2pip\":\"").append(p2pip).append('\"');
         sb.append(",\"listenip\":\"").append(listenip).append('\"');
