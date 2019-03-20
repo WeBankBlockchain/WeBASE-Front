@@ -118,19 +118,20 @@ public class Web3ApiController {
         return web3ApiService.getCode(address, blockNumber);
     }
 
-    @ApiOperation(value = "getTransCnt",
-            notes = "Get the number of execution transactions for the specified "
-                    + "account at the specified block height")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "address", value = "address", required = true,
-                    dataType = "String", paramType = "path"),
-            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-                    dataType = "BigInteger", paramType = "path")})
-    @GetMapping("/transCnt/{address}/{blockNumber}")
-    public BaseResponse getTransCnt(@PathVariable String address,
-            @PathVariable BigInteger blockNumber) throws FrontException {
-        return web3ApiService.getTransCnt(address, blockNumber);
-    }
+// todo
+//    @ApiOperation(value = "getTransCnt",
+//            notes = "Get the number of execution transactions for the specified "
+//                    + "account at the specified block height")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "address", value = "address", required = true,
+//                    dataType = "String", paramType = "path"),
+//            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
+//                    dataType = "BigInteger", paramType = "path")})
+//    @GetMapping("/transCnt/{address}/{blockNumber}")
+//    public BaseResponse getTransCnt(@PathVariable String address,
+//            @PathVariable BigInteger blockNumber) throws FrontException {
+//        return web3ApiService.getTransCnt(address, blockNumber);
+//    }
 
     @ApiOperation(value = "getTransByBlockHashAndIndex",
             notes = "Gets the transaction information for the specified "
@@ -160,20 +161,6 @@ public class Web3ApiController {
         return web3ApiService.getTransByBlockNumberAndIndex(blockNumber, transactionIndex);
     }
 
-    @ApiOperation(value = "getNodeInfo", notes = "Get node information")
-    @GetMapping("/nodeInfo")
-    public BaseResponse getNodeInfo() {
-        return web3ApiService.getNodeInfo();
-    }
-
-    @ApiOperation(value = "getSystemProxyInfo",
-            notes = "Gets the routing information of the node system")
-    @ApiImplicitParam(name = "userID", value = "userID", required = true, dataType = "BigInteger",
-            paramType = "path")
-    @GetMapping("/systemProxy/{userID}")
-    public BaseResponse getSystemProxyInfo(@PathVariable Integer userId) throws FrontException {
-        return web3ApiService.getSystemProxyInfo(userId);
-    }
 
     @ApiOperation(value = "nodeHeartBeat", notes = "Verify that the node is alive")
     @GetMapping("/nodeHeartBeat")

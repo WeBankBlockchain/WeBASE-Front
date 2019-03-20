@@ -1,14 +1,17 @@
 package com.webank.webase.front.contract;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.Future;
-import org.bcos.web3j.abi.datatypes.Function;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.crypto.Credentials;
-import org.bcos.web3j.protocol.Web3j;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.bcos.web3j.tx.Contract;
+import org.fisco.bcos.web3j.abi.datatypes.Function;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.RemoteCall;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
+import org.fisco.bcos.web3j.tx.Contract;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -34,7 +37,7 @@ public final class CommonContract extends Contract {
 
     private CommonContract(String contractAddress, Web3j web3j, Credentials credentials,
             BigInteger gasPrice, BigInteger gasLimit) {
-        super("", contractAddress, web3j, credentials, gasPrice, gasLimit, false);
+        super("", contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
     // private CommonContract(String contractAddress, Web3j web3j, TransactionManager
@@ -42,28 +45,24 @@ public final class CommonContract extends Contract {
     // super("", contractAddress, web3j, transactionManager, gasPrice, gasLimit, false);
     // }
 
-    private CommonContract(String contractAddress, Web3j web3j, Credentials credentials,
-            BigInteger gasPrice, BigInteger gasLimit, Boolean isInitByName) {
-        super("", contractAddress, web3j, credentials, gasPrice, gasLimit, isInitByName);
-    }
 
     // private CommonContract(String contractAddress, Web3j web3j, TransactionManager
     // transactionManager, BigInteger gasPrice, BigInteger gasLimit, Boolean isInitByName) {
     // super("", contractAddress, web3j, transactionManager, gasPrice, gasLimit, isInitByName);
     // }
 
-    public Future<TransactionReceipt> execTransaction(Function function) {
-        return executeTransactionAsync(function);
+    public TransactionReceipt execTransaction(Function function) throws IOException, TransactionException {
+        return executeTransaction(function);
     }
 
-    public Future<List<Type>> execCall(Function function) {
-        return executeCallMultipleValueReturnAsync(function);
+    public List<Type> execCall(Function function) throws IOException {
+        return executeCallMultipleValueReturn(function);
     }
 
-    public static Future<CommonContract> deploy(Web3j web3j, Credentials credentials,
-            BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue,
-            String contractBin, String encodedConstructor) {
-        return deployAsync(CommonContract.class, web3j, credentials, gasPrice, gasLimit,
+    public static RemoteCall<CommonContract> deploy(Web3j web3j, Credentials credentials,
+                                                    BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue,
+                                                    String contractBin, String encodedConstructor) {
+        return deployRemoteCall(CommonContract.class, web3j, credentials, gasPrice, gasLimit,
                 contractBin, encodedConstructor, initialWeiValue);
     }
 
@@ -85,7 +84,7 @@ public final class CommonContract extends Contract {
 
     public static CommonContract loadByName(String contractName, Web3j web3j,
             Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
-        return new CommonContract(contractName, web3j, credentials, gasPrice, gasLimit, true);
+        return new CommonContract(contractName, web3j, credentials, gasPrice, gasLimit);
     }
 
     // public static CommonContract loadByName(String contractName, Web3j web3j, TransactionManager

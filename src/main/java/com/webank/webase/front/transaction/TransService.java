@@ -8,9 +8,12 @@ import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.KeyStoreInfo;
+import com.webank.webase.front.util.AbiTypes;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.ContractTypeUtil;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,13 +23,14 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.TypeReference;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.Function;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.crypto.Credentials;
-import org.bcos.web3j.protocol.Web3j;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.abi.TypeReference;
+import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
+import org.fisco.bcos.web3j.abi.datatypes.Function;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -158,13 +162,7 @@ public class TransService {
         List<TypeReference<?>> finalOutputs = outputFormat(funOutputTypes);
 
         // get privateKey
-        String privateKey = Optional.ofNullable(getPrivateKey(userId))
-                .map(info -> info.getPrivateKey()).orElse(null);
-        if (privateKey == null) {
-            log.warn("transRequest userId:{} privateKey is null", userId);
-            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
-        }
-        Credentials credentials = Credentials.create(privateKey);
+        Credentials credentials = getCredentials(userId);
 
         // contract load
         CommonContract commonContract =
@@ -181,6 +179,16 @@ public class TransService {
         return baseRsp;
     }
 
+    private Credentials getCredentials(int userId) throws FrontException {
+        String privateKey = Optional.ofNullable(getPrivateKey(userId))
+                .map(info -> info.getPrivateKey()).orElse(null);
+        if (privateKey == null) {
+            log.warn("transRequest userId:{} privateKey is null", userId);
+            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
+        }
+        return Credentials.create(privateKey);
+    }
+
     /**
      * execCall.
      * 
@@ -193,14 +201,14 @@ public class TransService {
     static BaseResponse execCall(List<String> funOutputTypes, Function function,
             CommonContract commonContract, BaseResponse baseRsp) throws FrontException {
         try {
-            List<Type> typeList = commonContract.execCall(function).get();
+            List<Type> typeList = commonContract.execCall(function);
             if (typeList.size() > 0) {
                 baseRsp = ethCallResultParse(funOutputTypes, typeList, baseRsp);
             } else {
                 baseRsp.setData(typeList);
             }
             return baseRsp;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (IOException e) {
             log.error("execCall failed.");
             throw new FrontException(ConstantCode.TRANSACTION_QUERY_FAILED);
         }
@@ -218,8 +226,8 @@ public class TransService {
             BaseResponse baseRsp) throws FrontException {
         TransactionReceipt transactionReceipt = null;
         try {
-            transactionReceipt = commonContract.execTransaction(function).get();
-        } catch (InterruptedException | ExecutionException e) {
+            transactionReceipt = commonContract.execTransaction(function);
+        } catch (IOException | TransactionException e) {
             log.error("execTransaction failed.");
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
         }
@@ -245,9 +253,9 @@ public class TransService {
                 List<Object> arrList =
                         new ArrayList<>(Arrays.asList(params.get(i).toString().split(",")));
                 List<Type> arrParams = new ArrayList<>();
+                inputType = AbiTypes.getType(funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")));
+
                 for (int j = 0; j < arrList.size(); j++) {
-                    inputType = ContractTypeUtil.getType(
-                            funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")));
                     input = ContractTypeUtil.parseByType(
                             funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")),
                             arrList.get(j).toString());
@@ -255,7 +263,7 @@ public class TransService {
                 }
                 finalInputs.add(new DynamicArray<>(arrParams));
             } else {
-                inputType = ContractTypeUtil.getType(funcInputTypes.get(i));
+                inputType = AbiTypes.getType(funcInputTypes.get(i));
                 input = ContractTypeUtil.parseByType(funcInputTypes.get(i),
                         params.get(i).toString());
                 finalInputs.add(ContractTypeUtil.encodeString(input.toString(), inputType));
@@ -281,7 +289,7 @@ public class TransService {
                 typeReference = ContractTypeUtil.getArrayType(
                         funOutputTypes.get(i).substring(0, funOutputTypes.get(i).indexOf("[")));
             } else {
-                outputType = ContractTypeUtil.getType(funOutputTypes.get(i));
+                outputType = AbiTypes.getType(funOutputTypes.get(i));
                 typeReference = TypeReference.create(outputType);
             }
             finalOutputs.add(typeReference);
@@ -302,21 +310,21 @@ public class TransService {
         if (funOutputTypes.size() == typeList.size()) {
             List<Object> ressult = new ArrayList<>();
             for (int i = 0; i < funOutputTypes.size(); i++) {
-                Class<? extends Type> outputType = null;
+                Class<?> outputType = null;
                 Object value = null;
                 if (funOutputTypes.get(i).indexOf("[") != -1
                         && funOutputTypes.get(i).indexOf("]") != -1) {
                     List<Object> values = new ArrayList<>();
                     List<Type> results = (List<Type>) typeList.get(i).getValue();
                     for (int j = 0; j < results.size(); j++) {
-                        outputType = ContractTypeUtil.getType(funOutputTypes.get(i).substring(0,
+                        outputType = AbiTypes.getType(funOutputTypes.get(i).substring(0,
                                 funOutputTypes.get(i).indexOf("[")));
                         value = ContractTypeUtil.decodeResult(results.get(j), outputType);
                         values.add(value);
                     }
                     ressult.add(values);
                 } else {
-                    outputType = ContractTypeUtil.getType(funOutputTypes.get(i));
+                    outputType = AbiTypes.getType(funOutputTypes.get(i));
                     value = ContractTypeUtil.decodeResult(typeList.get(i), outputType);
                     ressult.add(value);
                 }

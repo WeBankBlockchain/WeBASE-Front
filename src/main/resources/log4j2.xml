@@ -53,11 +53,11 @@
     </Appenders>
     
     <Loggers>
-        <Logger name="org.bcos.channel" level="debug" additivity="false">
+        <Logger name="org.fisco.bcos.channel" level="debug" additivity="false">
             <AppenderRef ref="asyncWeb3sdk" />
         </Logger>
         
-        <Logger name="org.bcos.web3j" level="debug" additivity="false">
+        <Logger name="org.fisco.bcos.web3j" level="debug" additivity="false">
             <AppenderRef ref="asyncWeb3sdk" />
         </Logger>
         

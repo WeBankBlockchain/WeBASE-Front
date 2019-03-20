@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import lombok.Data;
-import org.bcos.channel.client.Service;
-import org.bcos.channel.handler.ChannelConnections;
-import org.bcos.web3j.protocol.Web3j;
-import org.bcos.web3j.protocol.channel.ChannelEthereumService;
+import org.fisco.bcos.channel.client.Service;
+import org.fisco.bcos.channel.handler.ChannelConnections;
+import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
+import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,12 +43,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class Web3Config {
     @Autowired
     NodeConfig nodeConfig;
-
     private String orgName;
-    private String caCertPath;
-    private String clientKeystorePath;
-    private String keystorePass;
-    private String clientCertPass;
+    private int groupId;
     private int corePoolSize;
     private int maxPoolSize;
     private int queueCapacity;
@@ -61,26 +58,22 @@ public class Web3Config {
     @Bean
     public Service service() {
         List<String> connectionsList = new ArrayList<>();
-        connectionsList.add(String.format(Constants.NODE_CONNECTION, nodeConfig.getListenip(),
-                nodeConfig.getChannelPort()));
+        connectionsList.add( nodeConfig.getListenip()+ ":" + nodeConfig.getChannelPort());
 
-        ChannelConnections connectionsStr = new ChannelConnections();
-        connectionsStr.setCaCertPath(caCertPath);
-        connectionsStr.setClientKeystorePath(clientKeystorePath);
-        connectionsStr.setKeystorePassWord(keystorePass);
-        connectionsStr.setClientCertPassWord(clientCertPass);
-        connectionsStr.setConnectionsStr(connectionsList);
+        ChannelConnections channelConnections = new ChannelConnections();
+        channelConnections.setConnectionsStr(connectionsList);
+        List<ChannelConnections> channelConnectionsList = new ArrayList<>();
+        channelConnectionsList.add(channelConnections);
 
-        ConcurrentHashMap<String, ChannelConnections> allChannelConnections =
-                new ConcurrentHashMap<String, ChannelConnections>();
-        allChannelConnections.put(orgName, connectionsStr);
+        GroupChannelConnectionsConfig groupChannelConnectionsConfig = new GroupChannelConnectionsConfig();
+        groupChannelConnectionsConfig.setAllChannelConnections(channelConnectionsList);
 
         nodeConfig.setOrgName(orgName);
-
         Service service = new Service();
         service.setOrgID(orgName);
+        service.setGroupId(groupId);
         service.setThreadPool(sdkThreadPool());
-        service.setAllChannelConnections(allChannelConnections);
+        service.setAllChannelConnections(groupChannelConnectionsConfig);
         return service;
     }
 
@@ -114,6 +107,6 @@ public class Web3Config {
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(3000);
         channelEthereumService.setChannelService(service());
-        return Web3j.build(channelEthereumService);
+        return Web3j.build(channelEthereumService,groupId);
     }
 }
