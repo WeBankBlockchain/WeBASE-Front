@@ -42,14 +42,14 @@ import org.fisco.bcos.web3j.abi.datatypes.generated.*;
 public class ContractTypeUtil {
 
     /**
-     * encodeString.
+     * generateClassFromInput.
      * 
      * @param input input
      * @param type type
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Type> T encodeString(String input, Class<T> type)
+    public static <T extends Type> T generateClassFromInput(String input, Class<T> type)
             throws FrontException {
         try {
             if (Address.class.isAssignableFrom(type)) {
@@ -72,7 +72,7 @@ public class ContractTypeUtil {
         } catch (FrontException e) {
             throw e;
         } catch (Exception e) {
-            log.error("encodeString failed input:{} type:{}", input, type.getName());
+            log.error("generateClassFromInput failed input:{} type:{}", input, type.getName());
             throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
         }
     }
