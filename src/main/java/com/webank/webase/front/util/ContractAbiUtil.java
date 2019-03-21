@@ -1,7 +1,6 @@
 package com.webank.webase.front.util;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -110,8 +109,7 @@ public class ContractAbiUtil {
                 version = arr[1];
             }
             List<AbiDefinition> abiList = loadContractDefinition(file);
-            setContractWithAbi(arr[0], version, JSONArray.parseArray(JSON.toJSONString(abiList)),
-                    false);
+            setContractWithAbi(arr[0], version, abiList,false);
         }
     }
 
@@ -135,26 +133,26 @@ public class ContractAbiUtil {
      * @param abiArr abi info
      * @return
      */
-    public static void setContractWithAbi(String contractName, String version, JSONArray abiArr,
+    public static void setContractWithAbi(String contractName, String version,List<AbiDefinition> abiDefinitionList,
             boolean ifSaveFile) throws FrontException {
 
         List<VersionEvent> versionEventList = getAbiVersionList(contractName, version);
-        setFunctionFromAbi(contractName, version, abiArr, versionEventList);
+        setFunctionFromAbi(contractName, version, abiDefinitionList, versionEventList);
 
         if (ifSaveFile) {
-            saveAbiFile(contractName, version, abiArr);
+            saveAbiFile(contractName, version, abiDefinitionList);
         }
     }
 
-    private static void setFunctionFromAbi(String contractName, String version, JSONArray abiArr, List<VersionEvent> versionEventList) {
+    private static void setFunctionFromAbi(String contractName, String version, List<AbiDefinition> AbiDefinitionList, List<VersionEvent> versionEventList) {
         HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
         HashMap<String, Boolean> functions = new HashMap<>();
         HashMap<String, List<String>> funcInputs = new HashMap<>();
         HashMap<String, List<String>> funcOutputs = new HashMap<>();
 
         // todo fill with solidity type  only need the type
-        for (Object object : abiArr) {
-            AbiDefinition abiDefinition = JSON.parseObject(object.toString(), AbiDefinition.class);
+            for (AbiDefinition abiDefinition : AbiDefinitionList) {
+
             if (Constants.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {
                 List<NamedType> inputs = abiDefinition.getInputs();
                 List<String> inputList = new ArrayList<>();
@@ -211,10 +209,10 @@ public class ContractAbiUtil {
      * 
      * @param contractName contractName
      * @param version version
-     * @param abi info
+     * @param abiDefinitionList
      * @return
      */
-    public static void saveAbiFile(String contractName, String version, JSONArray abi)
+    public static void saveAbiFile(String contractName, String version, List<AbiDefinition> abiDefinitionList)
             throws FrontException {
         FileOutputStream outputStream = null;
         try {
@@ -225,7 +223,9 @@ public class ContractAbiUtil {
             }
                 file.createNewFile();
             outputStream = new FileOutputStream(file);
-            outputStream.write(abi.toString().getBytes());
+
+            //todo
+            outputStream.write(JSON.toJSONString(abiDefinitionList).getBytes());
             outputStream.flush();
         } catch (IOException e) {
             log.error("saveAbiFile failed.");

@@ -19,6 +19,7 @@ import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,8 +67,13 @@ public class ContractService {
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
         if (!ifExisted) {
             // save abi
-            JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
-            ContractAbiUtil.setContractWithAbi(contractName, version, jsonArray, true);
+           // JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
+            List<AbiDefinition> ilist = new ArrayList<>();
+            for(Object o : abiInfos) {
+                ilist.add((AbiDefinition) o);
+            }
+
+            ContractAbiUtil.setContractWithAbi(contractName, version, ilist, true);
         }
 
         log.info("sendAbi end. contractname:{} ,version:{}", contractName, version);
@@ -92,8 +98,13 @@ public class ContractService {
         // Check if contractAbi existed
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
         if (!ifExisted) {
-            JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
-            ContractAbiUtil.setContractWithAbi(contractName, version, jsonArray, true);
+
+            List<AbiDefinition> ilist = new ArrayList<>();
+            for(Object o : abiInfos) {
+                ilist.add((AbiDefinition) o);
+            }
+        //  JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
+            ContractAbiUtil.setContractWithAbi(contractName, version, ilist, true);
         }
 
         // Constructor encoded
