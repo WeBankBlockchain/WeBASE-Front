@@ -9,6 +9,8 @@ import lombok.Data;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,5 +110,12 @@ public class Web3Config {
         channelEthereumService.setTimeout(3000);
         channelEthereumService.setChannelService(service());
         return Web3j.build(channelEthereumService,groupId);
+    }
+
+    @Bean
+    public CnsService getCnsService(Web3j web3j) {
+         Credentials credentials =
+                Credentials.create("b83261efa42895c38c6c2364ca878f43e77f3cddbc922bf57d0d48070f79feb6");
+        return new CnsService(web3j, credentials);
     }
 }
