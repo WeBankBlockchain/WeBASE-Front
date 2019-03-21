@@ -49,9 +49,6 @@ public class ContractService {
     Web3j web3j;
     @Autowired
     TransService transService;
-    @Autowired
-    Constants constants;
-
     /**
      * sendAbi.
      * 
