@@ -222,10 +222,8 @@ public class ContractAbiUtil {
                     + Constants.SEP + version);
             if (file.exists()) {
                 file.delete();
-                file.createNewFile();
-            } else {
-                file.createNewFile();
             }
+                file.createNewFile();
             outputStream = new FileOutputStream(file);
             outputStream.write(abi.toString().getBytes());
             outputStream.flush();
