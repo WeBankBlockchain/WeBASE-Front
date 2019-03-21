@@ -101,9 +101,10 @@ public class ContractService {
 
         // Constructor encoded
         String encodedConstructor = "";
+        String functionName = contractName;
         // input handle
         List<String> funcInputTypes =
-                ContractAbiUtil.getFuncInputType(contractName, contractName, version);
+                ContractAbiUtil.getFuncInputType(contractName, functionName, version);
         if (funcInputTypes != null && funcInputTypes.size() > 0) {
             if (funcInputTypes.size() == params.size()) {
                 List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
