@@ -3,6 +3,9 @@ package com.webank.webase.front.util;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
@@ -14,9 +17,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
+import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
@@ -45,7 +54,8 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedTy
 public class ContractAbiUtil {
 
     public static HashMap<String, List<VersionEvent>> contractEventMap = new HashMap<>();
-
+    private static final String regex = "(\\w+)(?:\\[(.*?)\\])(?:\\[(.*?)\\])?";
+    private static final Pattern pattern = Pattern.compile(regex);
     @Data
     public static class VersionEvent {
         private String version;
@@ -128,20 +138,15 @@ public class ContractAbiUtil {
     public static void setContractWithAbi(String contractName, String version, JSONArray abiArr,
             boolean ifSaveFile) throws FrontException {
 
-        List<VersionEvent> versionEventList = null;
-        if (contractEventMap.containsKey(contractName)) {
-            versionEventList = contractEventMap.get(contractName);
-        } else {
-            versionEventList = new ArrayList<>();
-        }
+        List<VersionEvent> versionEventList = getAbiVersionList(contractName, version);
+        setFunctionFromAbi(contractName, version, abiArr, versionEventList);
 
-        for (VersionEvent versionEvent : versionEventList) {
-            if (version.equals(versionEvent.getVersion())) {
-                log.error("contract:{} version:{} is existed.", contractName, version);
-                throw new FrontException(ConstantCode.CONTRACT_DEPLOYED_ERROR);
-            }
+        if (ifSaveFile) {
+            saveAbiFile(contractName, version, abiArr);
         }
+    }
 
+    private static void setFunctionFromAbi(String contractName, String version, JSONArray abiArr, List<VersionEvent> versionEventList) {
         HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
         HashMap<String, Boolean> functions = new HashMap<>();
         HashMap<String, List<String>> funcInputs = new HashMap<>();
@@ -155,12 +160,12 @@ public class ContractAbiUtil {
                 List<String> inputList = new ArrayList<>();
 
                 for (NamedType input : inputs) {
-                    inputList.add(input.getType());
+                    inputList.add(buildTypeName(input.getType()).toString());
                 }
-
                 functions.put(contractName, false);
                 funcInputs.put(contractName, inputList);
-            } else if (Constants.TYPE_FUNCTION.equals(abiDefinition.getType())) {
+            }
+            else if (Constants.TYPE_FUNCTION.equals(abiDefinition.getType())) {
                 List<NamedType> inputs = abiDefinition.getInputs();
                 List<String> inputList = new ArrayList<>();
                 List<NamedType> outputs = abiDefinition.getOutputs();
@@ -177,14 +182,27 @@ public class ContractAbiUtil {
                 funcInputs.put(abiDefinition.getName(), inputList);
                 funcOutputs.put(abiDefinition.getName(), outputList);
             }
+
+                versionEventList.add(new VersionEvent(version, events, functions, funcInputs, funcOutputs));
+                contractEventMap.put(contractName, versionEventList);
+            }
         }
 
-        versionEventList.add(new VersionEvent(version, events, functions, funcInputs, funcOutputs));
-        contractEventMap.put(contractName, versionEventList);
-
-        if (ifSaveFile) {
-            saveAbiFile(contractName, version, abiArr);
+    private static List<VersionEvent> getAbiVersionList(String contractName, String version) throws FrontException {
+        List<VersionEvent> versionEventList = null;
+        if (contractEventMap.containsKey(contractName)) {
+            versionEventList = contractEventMap.get(contractName);
+        } else {
+            versionEventList = new ArrayList<>();
         }
+
+        for (VersionEvent versionEvent : versionEventList) {
+            if (version.equals(versionEvent.getVersion())) {
+                log.error("contract:{} version:{} is existed.", contractName, version);
+                throw new FrontException(ConstantCode.CONTRACT_DEPLOYED_ERROR);
+            }
+        }
+        return versionEventList;
     }
 
     /**
@@ -344,5 +362,58 @@ public class ContractAbiUtil {
             contracts.put(contract, versions);
         }
         return contracts;
+    }
+
+
+    static TypeName buildTypeName(String typeDeclaration) {
+        String type = trimStorageDeclaration(typeDeclaration);
+        Matcher matcher = pattern.matcher(type);
+        if (matcher.find()) {
+            Class<?> baseType = org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes.getType(matcher.group(1));
+            String firstArrayDimension = matcher.group(2);
+            String secondArrayDimension = matcher.group(3);
+
+            TypeName typeName;
+
+            if ("".equals(firstArrayDimension)) {
+                typeName = ParameterizedTypeName.get(DynamicArray.class, baseType);
+            } else {
+                Class<?> rawType = getStaticArrayTypeReferenceClass(firstArrayDimension);
+                typeName = ParameterizedTypeName.get(rawType, baseType);
+            }
+
+            if (secondArrayDimension != null) {
+                if ("".equals(secondArrayDimension)) {
+                    return ParameterizedTypeName.get(ClassName.get(DynamicArray.class), typeName);
+                } else {
+                    Class<?> rawType = getStaticArrayTypeReferenceClass(secondArrayDimension);
+                    return ParameterizedTypeName.get(ClassName.get(rawType), typeName);
+                }
+            }
+
+            return typeName;
+        } else {
+            Class<?> cls = AbiTypes.getType(type);
+            return ClassName.get(cls);
+        }
+    }
+
+
+    private static Class<?> getStaticArrayTypeReferenceClass(String type) {
+        try {
+            return Class.forName("org.fisco.bcos.web3j.abi.datatypes.generated.StaticArray" + type);
+        } catch (ClassNotFoundException e) {
+            // Unfortunately we can't encode it's length as a type if it's > 32.
+            return StaticArray.class;
+        }
+    }
+
+
+    private static String trimStorageDeclaration(String type) {
+        if (type.endsWith(" storage") || type.endsWith(" memory")) {
+            return type.split(" ")[0];
+        } else {
+            return type;
+        }
     }
 }
