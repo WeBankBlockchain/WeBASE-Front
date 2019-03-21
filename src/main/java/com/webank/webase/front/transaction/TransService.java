@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.TypeReference;
@@ -242,6 +242,7 @@ public class TransService {
      * @param params list
      * @return
      */
+    // todo 拼接动态数组
     public static List<Type> inputFormat(List<String> funcInputTypes, List<Object> params)
             throws FrontException {
         List<Type> finalInputs = new ArrayList<>();
@@ -259,14 +260,14 @@ public class TransService {
                     input = ContractTypeUtil.parseByType(
                             funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")),
                             arrList.get(j).toString());
-                    arrParams.add(ContractTypeUtil.encodeString(input.toString(), inputType));
+                    arrParams.add(ContractTypeUtil.generateClassFromInput(input.toString(), inputType));
                 }
                 finalInputs.add(new DynamicArray<>(arrParams));
             } else {
                 inputType = AbiTypes.getType(funcInputTypes.get(i));
                 input = ContractTypeUtil.parseByType(funcInputTypes.get(i),
                         params.get(i).toString());
-                finalInputs.add(ContractTypeUtil.encodeString(input.toString(), inputType));
+                finalInputs.add(ContractTypeUtil.generateClassFromInput(input.toString(), inputType));
             }
         }
         return finalInputs;
