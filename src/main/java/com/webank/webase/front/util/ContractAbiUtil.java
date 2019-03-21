@@ -160,7 +160,7 @@ public class ContractAbiUtil {
                 List<String> inputList = new ArrayList<>();
 
                 for (NamedType input : inputs) {
-                    inputList.add(buildTypeName(input.getType()).toString());
+                    inputList.add(input.getType());
                 }
                 functions.put(contractName, false);
                 funcInputs.put(contractName, inputList);
@@ -182,10 +182,11 @@ public class ContractAbiUtil {
                 funcInputs.put(abiDefinition.getName(), inputList);
                 funcOutputs.put(abiDefinition.getName(), outputList);
             }
+        }
 
                 versionEventList.add(new VersionEvent(version, events, functions, funcInputs, funcOutputs));
                 contractEventMap.put(contractName, versionEventList);
-            }
+
         }
 
     private static List<VersionEvent> getAbiVersionList(String contractName, String version) throws FrontException {

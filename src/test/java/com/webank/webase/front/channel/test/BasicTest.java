@@ -14,8 +14,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class BasicTest extends TestBase {
-  private static BigInteger gasPrice = new BigInteger("300000000");
-  private static BigInteger gasLimit = new BigInteger("300000000");
 
   @Ignore
   @Test
