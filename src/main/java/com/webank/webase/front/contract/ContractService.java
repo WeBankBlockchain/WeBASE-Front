@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,8 @@ public class ContractService {
     Web3j web3j;
     @Autowired
     TransService transService;
+    @Autowired
+    CnsService cnsService;
     /**
      * sendAbi.
      * 
@@ -86,7 +90,7 @@ public class ContractService {
      * @param req request data
      * @return
      */
-    public BaseResponse deploy(ReqDeploy req) throws FrontException {
+    public BaseResponse deploy(ReqDeploy req) throws Exception {
 
         int userId = req.getUserId();
         String contractName = req.getContractName();
@@ -137,29 +141,29 @@ public class ContractService {
         String contractAddress = deployContract(bytecodeBin, encodedConstructor, credentials);
 
 
-        // cns Params
-        List<Object> cnsParams = new ArrayList<>();
-        cnsParams.add(contractName + Constants.DIAGONAL + version);
-        cnsParams.add(contractName);
-        cnsParams.add(version);
-        cnsParams.add(JSON.toJSONString(abiInfos));
-        cnsParams.add(contractAddress);
+//        // cns Params
+//        List<Object> cnsParams = new ArrayList<>();
+//        cnsParams.add(contractName + Constants.DIAGONAL + version);
+//        cnsParams.add(contractName);
+//        cnsParams.add(version);
+//        cnsParams.add(JSON.toJSONString(abiInfos));
+//        cnsParams.add(contractAddress);
+
+        String result =  cnsService.registerCns(contractName ,version,contractAddress,JSON.toJSONString(abiInfos));
 
         // trans Params
-        ReqTransHandle reqTransHandle = new ReqTransHandle();
-        reqTransHandle.setUserId(userId);
-        reqTransHandle.setContractName(Constants.CNS_CONTRAC_TNAME);
-        reqTransHandle.setVersion("");
-        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_ADDABI);
-        reqTransHandle.setFuncParam(cnsParams);
+//        ReqTransHandle reqTransHandle = new ReqTransHandle();
+//        reqTransHandle.setUserId(userId);
+//        reqTransHandle.setContractName(Constants.CNS_CONTRAC_TNAME);
+//        reqTransHandle.setVersion("");
+//        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_ADDABI);
+//        reqTransHandle.setFuncParam(cnsParams);
 
         // cns add
-        BaseResponse baseRsp = transService.transRequest(reqTransHandle);
+//        BaseResponse baseRsp = transService.transRequest(reqTransHandle);
 
         // result
-        if (baseRsp.getCode() != 0) {
-            return baseRsp;
-        }
+        BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
         baseRsp.setData(contractAddress);
         log.info("contract deploy end. baseRsp:{}", JSON.toJSONString(baseRsp));
         return baseRsp;

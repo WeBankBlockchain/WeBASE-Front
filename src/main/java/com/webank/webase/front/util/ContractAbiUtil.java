@@ -130,7 +130,7 @@ public class ContractAbiUtil {
      * 
      * @param contractName contractName
      * @param version version
-     * @param abiArr abi info
+     * @param abiDefinitionList abi info
      * @return
      */
     public static void setContractWithAbi(String contractName, String version,List<AbiDefinition> abiDefinitionList,

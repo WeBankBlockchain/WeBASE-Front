@@ -2,6 +2,7 @@ package com.webank.webase.front.transaction;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
@@ -28,7 +29,11 @@ import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
+import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +68,8 @@ public class TransService {
     Constants constants;
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    CnsService cnsService;
 
     Map<Integer, KeyStoreInfo> keyMap = new HashMap<>();
 
@@ -72,7 +79,7 @@ public class TransService {
      * @param req request
      * @return
      */
-    public BaseResponse transHandle(ReqTransHandle req) throws FrontException {
+    public BaseResponse transHandle(ReqTransHandle req) throws Exception {
 
         // Check if contractAbi existed
         boolean ifExisted =
@@ -93,34 +100,31 @@ public class TransService {
      * 
      * @param req request
      */
-    public void checkAndSaveAbiFromCns(ReqTransHandle req) throws FrontException {
+    public void checkAndSaveAbiFromCns(ReqTransHandle req) throws Exception {
         // cns Params
-        List<Object> cnsParams = new ArrayList<>();
-        cnsParams.add(req.getContractName() + Constants.DIAGONAL + req.getVersion());
+//        List<Object> cnsParams = new ArrayList<>();
+//        cnsParams.add(req.getContractName() + Constants.DIAGONAL + req.getVersion());
 
         // transaction Params
-        ReqTransHandle reqTransHandle = new ReqTransHandle();
-        reqTransHandle.setUserId(req.getUserId());
-        reqTransHandle.setContractName(Constants.CNS_CONTRAC_TNAME);
-        reqTransHandle.setVersion("");
-        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_GETABI);
-        reqTransHandle.setFuncParam(cnsParams);
-
+//        ReqTransHandle reqTransHandle = new ReqTransHandle();
+//        reqTransHandle.setUserId(req.getUserId());
+//        reqTransHandle.setContractName(Constants.CNS_CONTRAC_TNAME);
+//        reqTransHandle.setVersion("");
+//        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_GETABI);
+//        reqTransHandle.setFuncParam(cnsParams);
+        List<CnsInfo> cnsInfoList =  cnsService.queryCnsByNameAndVersion(req.getContractName() ,req.getVersion());
         // transaction request
-        BaseResponse baseRsp = transRequest(reqTransHandle);
-        if (baseRsp.getCode() != 0) {
-            throw new FrontException(ConstantCode.ABI_GET_ERROR);
-        }
-        String abiInfo = (String) JSONArray.parseArray(baseRsp.getData().toString()).get(0);
-
+        ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+        List abiDefinitionList = objectMapper.readValue(cnsInfoList.get(0).getAbi(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, AbiDefinition.class));
         // check if contract has been deployed
-        if (StringUtils.isBlank(abiInfo)) {
+        if (StringUtils.isBlank(cnsInfoList.get(0).getAbi())) {
             throw new FrontException(ConstantCode.CONTRACT_NOT_DEPLOY_ERROR);
         }
 
         // save abi
         ContractAbiUtil.setContractWithAbi(req.getContractName(), req.getVersion(),
-                JSON.parseArray(abiInfo), true);
+                abiDefinitionList, true);
     }
 
     /**
