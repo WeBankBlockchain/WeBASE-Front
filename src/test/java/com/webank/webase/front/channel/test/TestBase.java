@@ -9,13 +9,16 @@ import org.junit.BeforeClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.math.BigInteger;
+
 public class TestBase {
   public static ApplicationContext context = null;
   // 初始化交易签名私钥
   public Credentials credentials =
       Credentials.create("b83261efa42895c38c6c2364ca878f43e77f3cddbc922bf57d0d48070f79feb6");
   protected static Web3j web3j;
-
+  public static BigInteger gasPrice = new BigInteger("300000000");
+  public static BigInteger gasLimit = new BigInteger("300000000");
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     // 获取spring配置文件，生成上下文
