@@ -65,7 +65,7 @@
             <AppenderRef ref="asyncError" />
         </Logger>
         
-        <Root level="info">
+        <Root level="debug">
             <AppenderRef ref="asyncFront" />
         </Root>
     </Loggers>
