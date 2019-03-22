@@ -1,24 +1,21 @@
 package com.webank.webase.front.contract;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.transaction.ReqTransHandle;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
@@ -68,17 +65,7 @@ public class ContractService {
         List<Object> abiInfos = req.getAbiInfo();
 
         // Check if it has been deployed based on the contract name and version number
-        boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
-        if (!ifExisted) {
-            // save abi
-           // JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
-            List<AbiDefinition> ilist = new ArrayList<>();
-            for(Object o : abiInfos) {
-                ilist.add((AbiDefinition) o);
-            }
-
-            ContractAbiUtil.setContractWithAbi(contractName, version, ilist, true);
-        }
+        checkContractAbiExistedAndSave(contractName, version, abiInfos);
 
         log.info("sendAbi end. contractname:{} ,version:{}", contractName, version);
         return baseRsp;
@@ -100,42 +87,11 @@ public class ContractService {
         List<Object> params = req.getFuncParam();
 
         // Check if contractAbi existed
-        boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
-        if (!ifExisted) {
-
-            List<AbiDefinition> ilist = new ArrayList<>();
-            for(Object o : abiInfos) {
-                ilist.add((AbiDefinition) o);
-            }
-        //  JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
-            ContractAbiUtil.setContractWithAbi(contractName, version, ilist, true);
-        }
-
-        // Constructor encoded
-        String encodedConstructor = "";
-        String functionName = contractName;
-        // input handle
-        List<String> funcInputTypes =
-                ContractAbiUtil.getFuncInputType(contractName, functionName, version);
-        if (funcInputTypes != null && funcInputTypes.size() > 0) {
-            if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
-                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deploy encodedConstructor:{}", encodedConstructor);
-            } else {
-                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-            }
-        }
+        checkContractAbiExistedAndSave(contractName, version, abiInfos);
+        String encodedConstructor = constructorEncoded(contractName, version, params);
 
         // get privateKey
-        String privateKey = Optional.ofNullable(transService.getPrivateKey(userId))
-                .map(info -> info.getPrivateKey()).orElse(null);
-        if (privateKey == null) {
-            log.error("userId:{} privateKey is null.", userId);
-            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
-        }
-        Credentials credentials = Credentials.create(privateKey);
+        Credentials credentials = getCredentials(userId);
 
         // contract deploy
         String contractAddress = deployContract(bytecodeBin, encodedConstructor, credentials);
@@ -169,13 +125,53 @@ public class ContractService {
         return baseRsp;
     }
 
+    public static String constructorEncoded(String contractName, String version, List<Object> params) throws FrontException {
+        // Constructor encoded
+        String encodedConstructor = "";
+        String functionName = contractName;
+        // input handle
+        List<String> funcInputTypes = ContractAbiUtil.getFuncInputType(contractName, functionName, version);
+        if (funcInputTypes != null && funcInputTypes.size() > 0) {
+            if (funcInputTypes.size() == params.size()) {
+                List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
+                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
+                log.info("deploy encodedConstructor:{}", encodedConstructor);
+            } else {
+                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+            }
+        }
+        return encodedConstructor;
+    }
+
+    private Credentials getCredentials(int userId) throws FrontException {
+        String privateKey = Optional.ofNullable(transService.getPrivateKey(userId))
+                .map(info -> info.getPrivateKey()).orElse(null);
+        if (privateKey == null) {
+            log.error("userId:{} privateKey is null.", userId);
+            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
+        }
+        return Credentials.create(privateKey);
+    }
+
+    private void checkContractAbiExistedAndSave(String contractName, String version, List<Object> abiInfos) throws FrontException {
+        boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
+        if (!ifExisted) {
+
+            List<AbiDefinition> ilist = new ArrayList<>();
+            for (Object o : abiInfos) {
+                ilist.add((AbiDefinition) o);
+            }
+            //  JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
+            ContractAbiUtil.setContractWithAbi(contractName, version, ilist, true);
+        }
+    }
+
     private String deployContract(String bytecodeBin, String encodedConstructor, Credentials credentials) throws FrontException {
         CommonContract commonContract = null;
         try {
-            commonContract =
-                    CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
-                                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor)
-                            .send();
+            commonContract = CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
+                                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
         } catch (Exception e) {
             log.error("commonContract deploy failed.");
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
