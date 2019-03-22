@@ -80,7 +80,7 @@ public class ContractController extends BaseController {
     @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true,
             dataType = "ReqDeploy")
     @PostMapping("/deploy")
-    public BaseResponse deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) throws FrontException {
+    public BaseResponse deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) throws Exception {
         log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
         return contractService.deploy(reqDeploy);

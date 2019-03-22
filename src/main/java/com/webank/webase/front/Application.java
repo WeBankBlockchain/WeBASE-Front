@@ -1,8 +1,10 @@
 package com.webank.webase.front;
 
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /*
