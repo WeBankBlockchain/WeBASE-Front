@@ -57,7 +57,7 @@ public class TransController extends BaseController {
             dataType = "ReqTransHandle")
     @PostMapping("/handle")
     public BaseResponse transHandle(@Valid @RequestBody ReqTransHandle reqTransHandle,
-            BindingResult result) throws FrontException {
+            BindingResult result) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
         checkParamResult(result);
         return transServiceImpl.transHandle(reqTransHandle);
