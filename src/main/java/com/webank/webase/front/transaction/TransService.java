@@ -198,7 +198,7 @@ public class TransService {
      * @param baseRsp response
      * @return
      */
-    static BaseResponse execCall(List<String> funOutputTypes, Function function,
+    public static BaseResponse execCall(List<String> funOutputTypes, Function function,
             CommonContract commonContract, BaseResponse baseRsp) throws FrontException {
         try {
             List<Type> typeList = commonContract.execCall(function);
@@ -222,7 +222,7 @@ public class TransService {
      * @param baseRsp response
      * @return
      */
-    static BaseResponse execTransaction(Function function, CommonContract commonContract,
+    public static BaseResponse execTransaction(Function function, CommonContract commonContract,
             BaseResponse baseRsp) throws FrontException {
         TransactionReceipt transactionReceipt = null;
         try {
@@ -231,7 +231,7 @@ public class TransService {
             log.error("execTransaction failed.");
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
         }
-        baseRsp.setData(JSON.parse(JSON.toJSONString(transactionReceipt)));
+        baseRsp.setData(transactionReceipt);
         return baseRsp;
     }
 
