@@ -12,6 +12,7 @@ import org.fisco.bcos.web3j.protocol.core.RemoteCall;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.fisco.bcos.web3j.tx.Contract;
+import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -44,8 +45,10 @@ public final class CommonContract extends Contract {
     // transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
     // super("", contractAddress, web3j, transactionManager, gasPrice, gasLimit, false);
     // }
-
-
+    protected CommonContract(String contractAddress, Web3j web3j, Credentials credentials,
+                       ContractGasProvider gasProvider) {
+    super("",contractAddress,web3j,credentials,gasProvider);
+    }
     // private CommonContract(String contractAddress, Web3j web3j, TransactionManager
     // transactionManager, BigInteger gasPrice, BigInteger gasLimit, Boolean isInitByName) {
     // super("", contractAddress, web3j, transactionManager, gasPrice, gasLimit, isInitByName);
