@@ -1,24 +1,24 @@
 package com.webank.webase.front.contract;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.transaction.ReqTransHandle;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,8 +50,7 @@ public class ContractService {
     @Autowired
     TransService transService;
     @Autowired
-    Constants constants;
-
+    CnsService cnsService;
     /**
      * sendAbi.
      * 
@@ -66,12 +65,7 @@ public class ContractService {
         List<Object> abiInfos = req.getAbiInfo();
 
         // Check if it has been deployed based on the contract name and version number
-        boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
-        if (!ifExisted) {
-            // save abi
-            JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
-            ContractAbiUtil.setContractWithAbi(contractName, version, jsonArray, true);
-        }
+        checkContractAbiExistedAndSave(contractName, version, abiInfos);
 
         log.info("sendAbi end. contractname:{} ,version:{}", contractName, version);
         return baseRsp;
@@ -83,7 +77,7 @@ public class ContractService {
      * @param req request data
      * @return
      */
-    public BaseResponse deploy(ReqDeploy req) throws FrontException {
+    public BaseResponse deploy(ReqDeploy req) throws Exception {
 
         int userId = req.getUserId();
         String contractName = req.getContractName();
@@ -93,18 +87,50 @@ public class ContractService {
         List<Object> params = req.getFuncParam();
 
         // Check if contractAbi existed
-        boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
-        if (!ifExisted) {
-            JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
-            ContractAbiUtil.setContractWithAbi(contractName, version, jsonArray, true);
-        }
+        checkContractAbiExistedAndSave(contractName, version, abiInfos);
+        String encodedConstructor = constructorEncoded(contractName, version, params);
 
+        // get privateKey
+        Credentials credentials = getCredentials(userId);
+
+        // contract deploy
+        String contractAddress = deployContract(bytecodeBin, encodedConstructor, credentials);
+
+
+//        // cns Params
+//        List<Object> cnsParams = new ArrayList<>();
+//        cnsParams.add(contractName + Constants.DIAGONAL + version);
+//        cnsParams.add(contractName);
+//        cnsParams.add(version);
+//        cnsParams.add(JSON.toJSONString(abiInfos));
+//        cnsParams.add(contractAddress);
+
+        String result =  cnsService.registerCns(contractName ,version,contractAddress,JSON.toJSONString(abiInfos));
+
+        // trans Params
+//        ReqTransHandle reqTransHandle = new ReqTransHandle();
+//        reqTransHandle.setUserId(userId);
+//        reqTransHandle.setContractName(Constants.CNS_CONTRAC_TNAME);
+//        reqTransHandle.setVersion("");
+//        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_ADDABI);
+//        reqTransHandle.setFuncParam(cnsParams);
+
+        // cns add
+//        BaseResponse baseRsp = transService.transRequest(reqTransHandle);
+
+        // result
+        BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
+        baseRsp.setData(contractAddress);
+        log.info("contract deploy end. baseRsp:{}", JSON.toJSONString(baseRsp));
+        return baseRsp;
+    }
+
+    public static String constructorEncoded(String contractName, String version, List<Object> params) throws FrontException {
         // Constructor encoded
         String encodedConstructor = "";
         String functionName = contractName;
         // input handle
-        List<String> funcInputTypes =
-                ContractAbiUtil.getFuncInputType(contractName, functionName, version);
+        List<String> funcInputTypes = ContractAbiUtil.getFuncInputType(contractName, functionName, version);
         if (funcInputTypes != null && funcInputTypes.size() > 0) {
             if (funcInputTypes.size() == params.size()) {
                 List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
@@ -115,55 +141,37 @@ public class ContractService {
                 throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
             }
         }
+        return encodedConstructor;
+    }
 
-        // get privateKey
+    private Credentials getCredentials(int userId) throws FrontException {
         String privateKey = Optional.ofNullable(transService.getPrivateKey(userId))
                 .map(info -> info.getPrivateKey()).orElse(null);
         if (privateKey == null) {
             log.error("userId:{} privateKey is null.", userId);
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
         }
-        Credentials credentials = Credentials.create(privateKey);
+        return Credentials.create(privateKey);
+    }
 
-        // contract deploy
-        String contractAddress = deployContract(bytecodeBin, encodedConstructor, credentials);
+    private void checkContractAbiExistedAndSave(String contractName, String version, List<Object> abiInfos) throws FrontException {
+        boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
+        if (!ifExisted) {
 
-
-        // cns Params
-        List<Object> cnsParams = new ArrayList<>();
-        cnsParams.add(contractName + Constants.DIAGONAL + version);
-        cnsParams.add(contractName);
-        cnsParams.add(version);
-        cnsParams.add(JSON.toJSONString(abiInfos));
-        cnsParams.add(contractAddress);
-
-        // trans Params
-        ReqTransHandle reqTransHandle = new ReqTransHandle();
-        reqTransHandle.setUserId(userId);
-        reqTransHandle.setContractName(Constants.CNS_CONTRAC_TNAME);
-        reqTransHandle.setVersion("");
-        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_ADDABI);
-        reqTransHandle.setFuncParam(cnsParams);
-
-        // cns add
-        BaseResponse baseRsp = transService.transRequest(reqTransHandle);
-
-        // result
-        if (baseRsp.getCode() != 0) {
-            return baseRsp;
+            List<AbiDefinition> ilist = new ArrayList<>();
+            for (Object o : abiInfos) {
+                ilist.add((AbiDefinition) o);
+            }
+            //  JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
+            ContractAbiUtil.setContractWithAbi(contractName, version, ilist, true);
         }
-        baseRsp.setData(contractAddress);
-        log.info("contract deploy end. baseRsp:{}", JSON.toJSONString(baseRsp));
-        return baseRsp;
     }
 
     private String deployContract(String bytecodeBin, String encodedConstructor, Credentials credentials) throws FrontException {
         CommonContract commonContract = null;
         try {
-            commonContract =
-                    CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
-                                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor)
-                            .send();
+            commonContract = CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
+                                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
         } catch (Exception e) {
             log.error("commonContract deploy failed.");
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
