@@ -34,4 +34,5 @@ public class ReqSendAbi {
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<Object> abiInfo;
+    private String binaryCode;
 }

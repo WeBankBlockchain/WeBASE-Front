@@ -41,18 +41,10 @@ public final class CommonContract extends Contract {
         super("", contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
-    // private CommonContract(String contractAddress, Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-    // super("", contractAddress, web3j, transactionManager, gasPrice, gasLimit, false);
-    // }
     protected CommonContract(String contractAddress, Web3j web3j, Credentials credentials,
                        ContractGasProvider gasProvider) {
     super("",contractAddress,web3j,credentials,gasProvider);
     }
-    // private CommonContract(String contractAddress, Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit, Boolean isInitByName) {
-    // super("", contractAddress, web3j, transactionManager, gasPrice, gasLimit, isInitByName);
-    // }
 
     public TransactionReceipt execTransaction(Function function) throws IOException, TransactionException {
         return executeTransaction(function);
@@ -69,29 +61,15 @@ public final class CommonContract extends Contract {
                 contractBin, encodedConstructor, initialWeiValue);
     }
 
-    // public static Future<CommonContract> deploy(Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue) {
-    // return deployAsync(CommonContract.class, web3j, transactionManager, gasPrice, gasLimit,
-    // BINARY, "", initialWeiValue);
-    // }
-
     public static CommonContract load(String contractAddress, Web3j web3j, Credentials credentials,
             BigInteger gasPrice, BigInteger gasLimit) {
         return new CommonContract(contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
-    // public static CommonContract load(String contractAddress, Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-    // return new CommonContract(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
-    // }
 
     public static CommonContract loadByName(String contractName, Web3j web3j,
             Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
         return new CommonContract(contractName, web3j, credentials, gasPrice, gasLimit);
     }
 
-    // public static CommonContract loadByName(String contractName, Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-    // return new CommonContract(contractName, web3j, transactionManager, gasPrice, gasLimit, true);
-    // }
 }

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.BaseController;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.file.FileContent;
 import com.webank.webase.front.keystore.KeyStoreService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -12,14 +13,17 @@ import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -53,7 +57,7 @@ public class ContractController extends BaseController {
     KeyStoreService keyService;
 
     /**
-     * sendAbi.
+     * saveAbi.
      * 
      * @param reqSendAbi request data
      * @param result checkResult
@@ -62,11 +66,26 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "send abi", notes = "send abi")
     @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/abiInfo")
-    public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)
-            throws FrontException {
-        log.info("sendAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
+    public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)throws FrontException {
+       // log.info("saveAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
         checkParamResult(result);
-        return contractService.sendAbi(reqSendAbi);
+        return contractService.saveAbi(reqSendAbi);
+    }
+
+
+    /**
+     * compile java .
+     * @param reqSendAbi request data
+     * @param result checkResult
+     * @return
+     */
+    @ApiOperation(value = "compile java", notes = "compile java")
+    @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
+    @PostMapping("/compile-java")
+    public ResponseEntity<InputStreamResource> compileJavaFile(@Valid @RequestBody ReqSendAbi reqSendAbi, @RequestParam String packageName, BindingResult result) throws FrontException, IOException {
+        checkParamResult(result);
+       FileContent fileContent =  contractService.compileToJavaFile(reqSendAbi.getContractName(),reqSendAbi.getAbiInfo(),reqSendAbi.getBinaryCode(),packageName);
+        return ResponseEntity.ok().headers(headers(fileContent.getFileName())).body(new InputStreamResource(fileContent.getInputStream()));
     }
 
     /**
@@ -98,5 +117,21 @@ public class ContractController extends BaseController {
         log.info("deleteAbi start. contractName:{} version:{}", contractName, version);
         return contractService.deleteAbi(contractName, version);
     }
+
+    public HttpHeaders headers(String fileName) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,"attachment;filename*=UTF-8''"+encode(fileName));
+        return httpHeaders;
+    }
+
+    private String encode(String name){
+        try {
+            return URLEncoder.encode(name, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }

@@ -122,7 +122,7 @@ public class TransService {
         }
 
         // save abi
-        ContractAbiUtil.setContractWithAbi(req.getContractName(), req.getVersion(),
+        ContractAbiUtil.addAbiToCacheMapAndSaveToFile(req.getContractName(), req.getVersion(),
                 abiDefinitionList, true);
     }
 

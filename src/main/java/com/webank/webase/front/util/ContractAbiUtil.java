@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
 import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
@@ -109,7 +110,7 @@ public class ContractAbiUtil {
                 version = arr[1];
             }
             List<AbiDefinition> abiList = loadContractDefinition(file);
-            setContractWithAbi(arr[0], version, abiList,false);
+            addAbiToCacheMapAndSaveToFile(arr[0], version, abiList,false);
         }
     }
 
@@ -133,8 +134,8 @@ public class ContractAbiUtil {
      * @param abiDefinitionList abi info
      * @return
      */
-    public static void setContractWithAbi(String contractName, String version,List<AbiDefinition> abiDefinitionList,
-            boolean ifSaveFile) throws FrontException {
+    public static void addAbiToCacheMapAndSaveToFile(String contractName, String version, List<AbiDefinition> abiDefinitionList,
+                                                     boolean ifSaveFile) throws FrontException {
 
         List<VersionEvent> versionEventList = getAbiVersionList(contractName, version);
         setFunctionFromAbi(contractName, version, abiDefinitionList, versionEventList);
@@ -212,9 +213,7 @@ public class ContractAbiUtil {
      * @param abiDefinitionList
      * @return
      */
-    public static void saveAbiFile(String contractName, String version, List<AbiDefinition> abiDefinitionList)
-            throws FrontException {
-        FileOutputStream outputStream = null;
+    public static void saveAbiFile(String contractName, String version, List<AbiDefinition> abiDefinitionList) throws FrontException {
         try {
             File file = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName
                     + Constants.SEP + version);
@@ -222,24 +221,12 @@ public class ContractAbiUtil {
                 file.delete();
             }
                 file.createNewFile();
-            outputStream = new FileOutputStream(file);
-
+            FileUtils.writeStringToFile(file, JSON.toJSONString(abiDefinitionList));
             //todo
-            outputStream.write(JSON.toJSONString(abiDefinitionList).getBytes());
-            outputStream.flush();
         } catch (IOException e) {
             log.error("saveAbiFile failed.");
             throw new FrontException(ConstantCode.ABI_SAVE_ERROR);
-        } finally {
-            try {
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            } catch (IOException e) {
-                throw new FrontException(ConstantCode.ABI_SAVE_ERROR);
-            }
         }
-        return;
     }
 
     /**

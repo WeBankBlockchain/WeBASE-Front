@@ -5,16 +5,26 @@ import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.exception.FileException;
+import com.webank.webase.front.file.FileContent;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -40,7 +50,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * contract management.
- * 
  */
 @Slf4j
 @Service
@@ -51,29 +60,45 @@ public class ContractService {
     TransService transService;
     @Autowired
     CnsService cnsService;
+
     /**
-     * sendAbi.
-     * 
+     * saveAbi.
+     *
      * @param req request data
      * @return
      */
-    public BaseResponse sendAbi(ReqSendAbi req) throws FrontException {
+    public BaseResponse saveAbi(ReqSendAbi req) throws FrontException {
         BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
 
         String contractName = req.getContractName();
         String version = req.getVersion();
         List<Object> abiInfos = req.getAbiInfo();
+        String binary = req.getBinaryCode() == null ? "" : req.getBinaryCode();
 
         // Check if it has been deployed based on the contract name and version number
         checkContractAbiExistedAndSave(contractName, version, abiInfos);
-
-        log.info("sendAbi end. contractname:{} ,version:{}", contractName, version);
+        saveBinary(contractName, version, binary);
         return baseRsp;
+    }
+
+    private void saveBinary(String contractName, String version, String binary) throws FrontException {
+        try {
+            File file = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            FileUtils.writeStringToFile(file, binary);
+            //todo
+        } catch (IOException e) {
+            log.error("saveAbiFile failed.");
+            throw new FrontException(ConstantCode.ABI_SAVE_ERROR);
+        }
     }
 
     /**
      * contract deploy.
-     * 
+     *
      * @param req request data
      * @return
      */
@@ -105,7 +130,7 @@ public class ContractService {
 //        cnsParams.add(JSON.toJSONString(abiInfos));
 //        cnsParams.add(contractAddress);
 
-        String result =  cnsService.registerCns(contractName ,version,contractAddress,JSON.toJSONString(abiInfos));
+        String result = cnsService.registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
 
         // trans Params
 //        ReqTransHandle reqTransHandle = new ReqTransHandle();
@@ -163,7 +188,7 @@ public class ContractService {
                 ilist.add((AbiDefinition) o);
             }
             //  JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
-            ContractAbiUtil.setContractWithAbi(contractName, version, ilist, true);
+            ContractAbiUtil.addAbiToCacheMapAndSaveToFile(contractName, version, ilist, true);
         }
     }
 
@@ -171,7 +196,7 @@ public class ContractService {
         CommonContract commonContract = null;
         try {
             commonContract = CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
-                                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
+                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
         } catch (Exception e) {
             log.error("commonContract deploy failed.");
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
@@ -183,19 +208,43 @@ public class ContractService {
 
     /**
      * deleteAbi.
-     * 
+     *
      * @param contractName not null
-     * @param version not null
+     * @param version      not null
      * @return
      */
     public BaseResponse deleteAbi(String contractName, String version) throws FrontException {
         BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
-        boolean result = CommonUtils.deleteFile(
-                Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
+        boolean result = CommonUtils.deleteFile(Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
         if (!result) {
             log.warn("deleteAbi fail. contractname:{} ,version:{}", contractName, version);
             throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
         }
         return baseRsp;
     }
+
+    public FileContent compileToJavaFile(String contractName, List<Object> abiInfo, String binaryCode, String packageName) throws IOException {
+
+
+        File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + "abi");
+        FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
+        File binFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + "bin");
+        FileUtils.writeStringToFile(binFile, JSON.toJSONString(binaryCode));
+
+
+        SolidityFunctionWrapperGenerator.main(
+                Arrays.asList(
+                        "-a", abiFile.getPath(),
+                        "-b", binFile.getPath(),
+                        "-p", packageName,
+                        "-o", Constants.JAVA_DIR)
+                        .toArray(new String[0]));
+
+        File file = new File(Constants.JAVA_DIR+ Constants.DIAGONAL+ contractName+".java");
+        InputStream targetStream = new FileInputStream(file);
+        return new FileContent(contractName+".java",targetStream);
+    }
+
+
+
 }

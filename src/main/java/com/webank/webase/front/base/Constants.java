@@ -48,7 +48,9 @@ public class Constants {
     public static final String CONFIG_FILE = "/config.ini";
     public static final String TOOL = "/tool/";
     public static final String OUTPUT = "output/";
-    public static final String ABI_DIR = "./conf/files";
+    public static final String ABI_DIR = "./conf/files/abi";
+    public static final String BIN_DIR = "./conf/files/bin";
+    public static final String JAVA_DIR = "./conf/files/java";
     public static final String FILE_ABI = ".abi";
     public static final String FILE_SOL = ".sol";
     public static final String FILE_ADDRESS = ".address";
