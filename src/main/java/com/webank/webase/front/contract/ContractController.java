@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.BaseController;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.keystore.KeyStoreService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -59,8 +60,7 @@ public class ContractController extends BaseController {
      * @return
      */
     @ApiOperation(value = "send abi", notes = "send abi")
-    @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true,
-            dataType = "ReqSendAbi")
+    @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/abiInfo")
     public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)
             throws FrontException {
@@ -77,8 +77,7 @@ public class ContractController extends BaseController {
      * @return
      */
     @ApiOperation(value = "contract deploy", notes = "contract deploy")
-    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true,
-            dataType = "ReqDeploy")
+    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
     @PostMapping("/deploy")
     public BaseResponse deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) throws Exception {
         log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
@@ -86,12 +85,6 @@ public class ContractController extends BaseController {
         return contractService.deploy(reqDeploy);
     }
 
-    @ApiOperation(value = "get PrivateKey", notes = "get PrivateKey")
-    @GetMapping("/privateKey")
-    public BaseResponse getPrivateKey() {
-        log.info("get privateKey start.");
-        return keyService.getPrivateKey();
-    }
 
     @ApiOperation(value = "delete contract abi", notes = "delete contract abi")
     @ApiImplicitParams({

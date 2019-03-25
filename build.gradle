@@ -48,16 +48,39 @@ List swagger = [
     'io.springfox:springfox-swagger-ui:2.8.0'
 ]
 
+List web3sdk = [
+    'org.fisco-bcos:web3sdk:2.0.2',
+    'org.apache.httpcomponents:httpclient:4.5.2',
+    'org.bouncycastle:bcprov-jdk15on:1.54',
+    'com.lambdaworks:scrypt:1.4.0',
+    'com.squareup:javapoet:1.7.0',
+    'io.reactivex.rxjava2:rxjava:2.2.7',
+	'com.github.jnr:jnr-unixsocket:0.15'
+]
+
+def log4j_version="2.9.0"
+List logger = [
+        "org.apache.logging.log4j:log4j-api:$log4j_version",
+        "org.apache.logging.log4j:log4j-core:$log4j_version",
+        "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
+        "org.apache.logging.log4j:log4j-web:$log4j_version",
+        "org.slf4j:jcl-over-slf4j:1.7.12"
+]
+
+List netty = [
+ 'io.netty:netty-all:4.1.15.Final',
+ 'io.netty:netty-tcnative:2.0.0.Final'
+]
+
 dependencies {
-    compile spring,spring_boot,swagger
+    compile spring,spring_boot,swagger,web3sdk,logger,netty
 
-    compile 'org.apache.commons:commons-lang3:3.6'
-	compile 'org.fisco-bcos:web3sdk:2.0.2'
+	compile 'org.fisco-bcos:web3sdk:2.0.0-rc1'
     compile 'com.alibaba:fastjson:1.2.29'
-    compile 'org.projectlombok:lombok:1.16.20'
 	compile 'com.h2database:h2:1.4.197'
-
-	compile files('lib/sigar.jar')
+    compile 'org.fusesource:sigar:1.6.4'
+    annotationProcessor 'org.projectlombok:lombok:1.18.2'
+    compileOnly 'org.projectlombok:lombok:1.18.2'
 
 	testCompile 'junit:junit:4.12',
 				'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
@@ -101,16 +124,8 @@ jar {
             into 'dist/conf'
         }
         copy {
-            from file('files/')
-            into 'dist/files'
-        }
-        copy {
             from file('report/')
             into 'dist/report'
-        }
-        copy {
-            from file('tool/')
-            into 'dist/tool'
         }
 		copy {
 			from configurations.runtime
