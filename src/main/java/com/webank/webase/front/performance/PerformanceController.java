@@ -2,7 +2,7 @@ package com.webank.webase.front.performance;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
-import com.webank.webase.front.performance.relust.PerformanceData;
+import com.webank.webase.front.performance.result.PerformanceData;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;

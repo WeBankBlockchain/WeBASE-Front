@@ -1,8 +1,13 @@
 package com.webank.webase.front.performance;
 
-import com.webank.webase.front.performance.relust.Data;
-import com.webank.webase.front.performance.relust.LineDataList;
-import com.webank.webase.front.performance.relust.PerformanceData;
+import com.webank.webase.front.performance.result.Data;
+import com.webank.webase.front.performance.result.LineDataList;
+import com.webank.webase.front.performance.result.PerformanceData;
+import lombok.extern.slf4j.Slf4j;
+import org.hyperic.sigar.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -155,7 +160,7 @@ public class PerformanceService {
      */
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncPerformanceInfo() throws SigarException {
-        log.info("begin sync");
+        log.info("begin sync performance");
         Performance performance = new Performance();
         performance.setMemoryUseRatio(getMemoryRatio());
         performance.setCpuUseRatio(getCpuRatio());
@@ -180,7 +185,7 @@ public class PerformanceService {
      */
     @Scheduled(cron = "0 0 0 * * ?")
     public void deletePerformanceInfoPerWeek() throws SigarException {
-        log.info("begin delete");
+        log.info("begin delete performance");
         Long currentTime = System.currentTimeMillis();
         Long weekAgo = currentTime - 3600 * 24 * 7 * 1000;
         int i = performanceRepository.deleteTimeAgo(weekAgo);
