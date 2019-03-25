@@ -75,7 +75,7 @@ List netty = [
 dependencies {
     compile spring,spring_boot,swagger,web3sdk,logger,netty
 
-    compile 'org.apache.commons:commons-lang3:3.6'
+	compile 'org.fisco-bcos:web3sdk:2.0.0-rc1'
     compile 'com.alibaba:fastjson:1.2.29'
 	compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
