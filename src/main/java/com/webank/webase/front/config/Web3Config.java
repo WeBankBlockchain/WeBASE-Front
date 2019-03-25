@@ -1,9 +1,7 @@
 package com.webank.webase.front.config;
 
-import com.webank.webase.front.base.Constants;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import lombok.Data;
 import org.fisco.bcos.channel.client.Service;
@@ -60,10 +58,11 @@ public class Web3Config {
     @Bean
     public Service service() {
         List<String> connectionsList = new ArrayList<>();
-        connectionsList.add( nodeConfig.getListenip()+ ":" + nodeConfig.getChannelPort());
+        connectionsList.add(nodeConfig.getListenip()+ ":" + nodeConfig.getChannelPort());
 
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections.setConnectionsStr(connectionsList);
+        channelConnections.setGroupId(groupId);
         List<ChannelConnections> channelConnectionsList = new ArrayList<>();
         channelConnectionsList.add(channelConnections);
 
@@ -109,7 +108,7 @@ public class Web3Config {
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(3000);
         channelEthereumService.setChannelService(service());
-        return Web3j.build(channelEthereumService,groupId);
+        return Web3j.build(channelEthereumService, groupId);
     }
 
     @Bean
