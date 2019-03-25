@@ -45,10 +45,10 @@ public class Constants {
     public static final String TYPE_CONSTRUCTOR = "constructor";
     public static final String SHELL_COMMAND = "babel-node deploy.js %s %s %s %s";
     public static final String NODE_CONNECTION = "node@%s:%s";
-    public static final String CONFIG_JSON = "/config.json";
+    public static final String CONFIG_FILE = "/config.ini";
     public static final String TOOL = "/tool/";
     public static final String OUTPUT = "output/";
-    public static final String ABI_DIR = "./files";
+    public static final String ABI_DIR = "./conf/files";
     public static final String FILE_ABI = ".abi";
     public static final String FILE_SOL = ".sol";
     public static final String FILE_ADDRESS = ".address";

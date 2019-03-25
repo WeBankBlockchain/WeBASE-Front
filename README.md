@@ -39,7 +39,7 @@ gradle build
 ```
 构建完成后，会在根目录webase-front下生成已编译的代码目录dist。
 
-## 4.3 配置
+## 4.3 配置修改
 （1）进入目录：
 ```
 cd dist/conf
@@ -60,15 +60,6 @@ cd dist/report
 修改节点管理服务ip：sed -i "s/10.0.0.1/${your_ip }/g" config.json
 修改节点管理服务端口：sed -i "s/8082/${your_ port}/g" config.json
 修改节点目录：sed -i "s/\/data\/app\/build\/node0/${your_node_dir}/g" config.json
-```
-
-（3）进入目录：
-```
-cd dist/tool
-```
-复制文件（复制到‘/usr/lib’或‘/usr/lib64’）：
-```
-sudo cp libsigar-amd64-linux.so /usr/lib
 ```
 
 ## 4.4 服务启停

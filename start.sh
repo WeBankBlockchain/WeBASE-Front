@@ -29,7 +29,6 @@ if [ ! -f ${CURRENT_DIR}/conf/ca.crt ];then
 fi
 
 mkdir -p log
-mkdir -p files
 
 tradePortalPID=0
 getTradeProtalPID(){

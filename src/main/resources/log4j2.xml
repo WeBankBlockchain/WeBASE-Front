@@ -22,6 +22,9 @@
         <RollingFile name="error" fileName="${logPath}/webase-front-error.log"
                      filePattern="${logPath}/webase-front-error.log.%d{yyyy-MM-dd}.%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
+            <Filters>
+                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
             <Policies>
                 <TimeBasedTriggeringPolicy />
                 <SizeBasedTriggeringPolicy size="200 MB" />
@@ -61,12 +64,9 @@
             <AppenderRef ref="asyncWeb3sdk" />
         </Logger>
         
-        <Logger name="com.webank.webase.front" level="error" additivity="true">
-            <AppenderRef ref="asyncError" />
-        </Logger>
-        
         <Root level="info">
             <AppenderRef ref="asyncFront" />
+            <AppenderRef ref="asyncError" />
         </Root>
     </Loggers>
 </Configuration>
