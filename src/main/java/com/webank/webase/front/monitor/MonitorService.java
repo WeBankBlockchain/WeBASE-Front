@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
+import org.fisco.bcos.web3j.protocol.core.methods.response.PendingTxSize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -49,9 +51,12 @@ public class MonitorService {
         List<Long> timestampList = new ArrayList<>();
         List<BigDecimal> blockHeightValueList = new ArrayList<>();
         List<BigDecimal> pbftViewValueList = new ArrayList<>();
+        List<BigDecimal> pendingCountValueList = new ArrayList<>();
         for (Monitor monitor : monitorList) {
             blockHeightValueList.add(new BigDecimal(monitor.getBlockHeight()));
             pbftViewValueList.add(new BigDecimal(monitor.getPbftView()));
+            pbftViewValueList.add(new BigDecimal(monitor.getPbftView()));
+            pendingCountValueList.add(new BigDecimal(monitor.getPendingTransactionCount()));
             timestampList.add(monitor.getTimestamp());
         }
         monitorList.clear();
@@ -59,15 +64,18 @@ public class MonitorService {
         List<Long> contrastTimestampList = new ArrayList<>();
         List<BigDecimal> contrastBlockHeightValueList = new ArrayList<>();
         List<BigDecimal> contrastPbftViewValueList = new ArrayList<>();
+        List<BigDecimal> contrastPendingCountValueList = new ArrayList<>();
         for (Monitor monitor : contrastMonitorList) {
             contrastBlockHeightValueList.add(new BigDecimal(monitor.getBlockHeight()));
             contrastPbftViewValueList.add(new BigDecimal(monitor.getPbftView()));
+            contrastPendingCountValueList.add(new BigDecimal(monitor.getPendingTransactionCount()));
             contrastTimestampList.add(monitor.getTimestamp());
         }
         contrastMonitorList.clear();
         List<PerformanceData> performanceDataList = new ArrayList<>();
         performanceDataList.add(new PerformanceData("blockHeight", new Data(new LineDataList(timestampList, blockHeightValueList), new LineDataList(contrastTimestampList, contrastBlockHeightValueList))));
         performanceDataList.add(new PerformanceData("pbftView", new Data(new LineDataList(null, pbftViewValueList), new LineDataList(null, contrastPbftViewValueList))));
+        performanceDataList.add(new PerformanceData("pendingCount", new Data(new LineDataList(null, pendingCountValueList), new LineDataList(null, contrastPendingCountValueList))));
         return performanceDataList;
     }
 
@@ -106,15 +114,17 @@ public class MonitorService {
         return newMonitorList;
     }
     @Scheduled(cron = "0/5 * * * * ?")
-    public void syncMonitorInfo() throws  ExecutionException, InterruptedException {
+    public void syncMonitorInfo() throws ExecutionException, InterruptedException, IOException {
         log.info("begin sync chain data");
         Monitor monitor = new Monitor();
         Long currentTime = System.currentTimeMillis();
         CompletableFuture<BlockNumber> blockHeightFuture =  web3j.getBlockNumber().sendAsync();
         CompletableFuture<PbftView> pbftViewFuture = web3j.getPbftView().sendAsync();
+        CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3j.getPendingTxSize().sendAsync();
 
         monitor.setBlockHeight(blockHeightFuture.get().getBlockNumber());
         monitor.setPbftView(pbftViewFuture.get().getPbftView());
+        monitor.setPendingTransactionCount(pendingTxSizeFuture.get().getPendingTxSize());
         monitor.setTimestamp(currentTime);
         monitorRepository.save(monitor);
         log.info("insert success =  " + monitor.getId());
