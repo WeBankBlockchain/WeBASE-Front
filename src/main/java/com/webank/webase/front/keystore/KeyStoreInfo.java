@@ -1,4 +1,4 @@
-package com.webank.webase.front.contract;
+package com.webank.webase.front.keystore;
 
 import lombok.Data;
 
