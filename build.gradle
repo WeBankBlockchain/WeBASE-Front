@@ -51,8 +51,7 @@ List swagger = [
 dependencies {
     compile spring,spring_boot,swagger
 
-    compile 'org.apache.commons:commons-lang3:3.6'
-	compile 'org.fisco-bcos:web3sdk:2.0.2'
+	compile 'org.fisco-bcos:web3sdk:2.0.0-rc1'
     compile 'com.alibaba:fastjson:1.2.29'
     compile 'org.projectlombok:lombok:1.16.20'
 	compile 'com.h2database:h2:1.4.197'
