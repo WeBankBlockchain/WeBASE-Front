@@ -63,8 +63,8 @@
         <Logger name="org.fisco.bcos.web3j" level="debug" additivity="false">
             <AppenderRef ref="asyncWeb3sdk" />
         </Logger>
-        
-        <Root level="info">
+
+        <Root level="debug">
             <AppenderRef ref="asyncFront" />
             <AppenderRef ref="asyncError" />
         </Root>
