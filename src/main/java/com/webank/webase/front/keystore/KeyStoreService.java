@@ -1,8 +1,9 @@
-package com.webank.webase.front.contract;
+package com.webank.webase.front.keystore;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.keystore.KeyStoreInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;

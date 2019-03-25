@@ -11,8 +11,11 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
@@ -109,6 +112,29 @@ public class CommonUtils {
         }
         inputStream.close();
         return result.toString();
+    }
+    
+    /**
+     * read File.
+     * 
+     * @param filePath filePath
+     * @return
+     */
+    public static List<String> readFileToList(String filePath) throws IOException {
+    	log.info("readFile dir:{}", filePath);
+    	File dirFile = new File(filePath);
+    	if (!dirFile.exists()) {
+    		return null;
+    	}
+    	List<String> result = new ArrayList<String>();
+    	InputStream inputStream = new FileInputStream(dirFile);
+    	BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    	String line = null;
+    	while ((line = reader.readLine()) != null) {
+    		result.add(line);
+    	}
+    	inputStream.close();
+    	return result;
     }
 
     /**

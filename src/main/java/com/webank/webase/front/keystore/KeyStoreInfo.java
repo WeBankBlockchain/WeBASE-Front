@@ -1,4 +1,6 @@
-package com.webank.webase.front.performance.relust;
+package com.webank.webase.front.keystore;
+
+import lombok.Data;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -15,13 +17,9 @@ package com.webank.webase.front.performance.relust;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@lombok.Data
-public class PerformanceData {
-    private String metricType;
-    private Data data;
-
-    public PerformanceData(String metricType, Data data) {
-        this.metricType = metricType;
-        this.data = data;
-    }
+@Data
+public class KeyStoreInfo {
+    private String publicKey;
+    private String privateKey;
+    private String address;
 }
