@@ -84,7 +84,7 @@ public class ContractController extends BaseController {
     @PostMapping("/compile-java")
     public ResponseEntity<InputStreamResource> compileJavaFile(@Valid @RequestBody ReqSendAbi reqSendAbi, @RequestParam String packageName, BindingResult result) throws FrontException, IOException {
         checkParamResult(result);
-       FileContent fileContent =  contractService.compileToJavaFile(reqSendAbi.getContractName(),reqSendAbi.getAbiInfo(),reqSendAbi.getBinaryCode(),packageName);
+       FileContent fileContent =  ContractService.compileToJavaFile(reqSendAbi.getContractName(),reqSendAbi.getAbiInfo(),reqSendAbi.getBinaryCode(),packageName);
         return ResponseEntity.ok().headers(headers(fileContent.getFileName())).body(new InputStreamResource(fileContent.getInputStream()));
     }
 

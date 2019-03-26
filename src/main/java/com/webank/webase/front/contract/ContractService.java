@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,7 +73,7 @@ public class ContractService {
 
         String contractName = req.getContractName();
         String version = req.getVersion();
-        List<Object> abiInfos = req.getAbiInfo();
+        List<AbiDefinition> abiInfos = req.getAbiInfo();
         String binary = req.getBinaryCode() == null ? "" : req.getBinaryCode();
 
         // Check if it has been deployed based on the contract name and version number
@@ -107,7 +108,7 @@ public class ContractService {
         int userId = req.getUserId();
         String contractName = req.getContractName();
         String version = req.getVersion();
-        List<Object> abiInfos = req.getAbiInfo();
+        List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
 
@@ -179,16 +180,16 @@ public class ContractService {
         return Credentials.create(privateKey);
     }
 
-    private void checkContractAbiExistedAndSave(String contractName, String version, List<Object> abiInfos) throws FrontException {
+    private void checkContractAbiExistedAndSave(String contractName, String version, List<AbiDefinition> abiInfos) throws FrontException {
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
         if (!ifExisted) {
 
-            List<AbiDefinition> ilist = new ArrayList<>();
-            for (Object o : abiInfos) {
-                ilist.add((AbiDefinition) o);
-            }
+//            List<AbiDefinition> ilist = new ArrayList<>();
+//            for (Object o : abiInfos) {
+//                ilist.add((AbiDefinition) o);
+//            }
             //  JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
-            ContractAbiUtil.addAbiToCacheMapAndSaveToFile(contractName, version, ilist, true);
+            ContractAbiUtil.addAbiToCacheMapAndSaveToFile(contractName, version, abiInfos, true);
         }
     }
 
@@ -223,14 +224,12 @@ public class ContractService {
         return baseRsp;
     }
 
-    public FileContent compileToJavaFile(String contractName, List<Object> abiInfo, String binaryCode, String packageName) throws IOException {
+    public static FileContent compileToJavaFile(String contractName, List<AbiDefinition> abiInfo, String binaryCode, String packageName) throws IOException {
 
-
-        File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + "abi");
+        File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
         FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
-        File binFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + "bin");
+        File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
         FileUtils.writeStringToFile(binFile, JSON.toJSONString(binaryCode));
-
 
         SolidityFunctionWrapperGenerator.main(
                 Arrays.asList(
@@ -240,7 +239,11 @@ public class ContractService {
                         "-o", Constants.JAVA_DIR)
                         .toArray(new String[0]));
 
-        File file = new File(Constants.JAVA_DIR+ Constants.DIAGONAL+ contractName+".java");
+        String outputDirectory="" ;
+        if (!packageName.isEmpty()) {
+              outputDirectory= packageName.replace(".",File.separator);
+        }
+        File file = new File(Constants.JAVA_DIR+ File.separator+ outputDirectory+ File.separator+ contractName+".java");
         InputStream targetStream = new FileInputStream(file);
         return new FileContent(contractName+".java",targetStream);
     }
