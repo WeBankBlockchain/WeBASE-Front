@@ -28,7 +28,7 @@ import org.junit.Test;
 public class AbiTest {
 
   @Test
-  public void simpleTest() throws IOException {
+  public void simpleTest()   {
     String contractAbi =
         "[{"
             + "\"name\":\"simpleFunction\","
@@ -50,7 +50,7 @@ public class AbiTest {
   }
 
   @Test
-  public void simpleLegacyTest() throws IOException {
+  public void simpleLegacyTest()  {
     String contractAbi =
         "[{"
             + "\"name\":\"simpleFunction\","

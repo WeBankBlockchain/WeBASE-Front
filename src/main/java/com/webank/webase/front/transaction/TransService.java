@@ -354,16 +354,16 @@ public class TransService {
         for (String ipPort : ipPortArr) {
             try {
                 String url = String.format(Constants.MGR_PRIVATE_KEY_URI, ipPort, userId);
-                log.info("getPrivateKey url:{}", url);
+                log.info("createPrivateKey url:{}", url);
                 BaseResponse response = restTemplate.getForObject(url, BaseResponse.class);
-                log.info("getPrivateKey response:{}", JSON.toJSONString(response));
+                log.info("createPrivateKey response:{}", JSON.toJSONString(response));
                 if (response.getCode() == 0) {
                     keyStoreInfo =
                             CommonUtils.object2JavaBean(response.getData(), KeyStoreInfo.class);
                     break;
                 }
             } catch (Exception e) {
-                log.warn("userId:{} getPrivateKey from ipPort:{} exception", userId, ipPort, e);
+                log.warn("userId:{} createPrivateKey from ipPort:{} exception", userId, ipPort, e);
                 continue;
             }
         }
