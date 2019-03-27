@@ -53,23 +53,36 @@ public class ContractController extends BaseController {
 
     @Autowired
     ContractService contractService;
-    @Autowired
-    KeyStoreService keyService;
+
+    /**
+     * saveabi.
+     *
+     * @param reqSendAbi request data
+     * @param result checkResult
+     * @return
+     */
+
+    @PostMapping("/abiInfo")
+    public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)throws FrontException {
+        // log.info("saveAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
+        checkParamResult(result);
+        return contractService.saveAbi(reqSendAbi);
+    }
 
     /**
      * saveAbi.
      * 
-     * @param reqSendAbi request data
+     * @param contract request data
      * @param result checkResult
      * @return
      */
     @ApiOperation(value = "send abi", notes = "send abi")
     @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
-    @PostMapping("/abiInfo")
-    public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)throws FrontException {
+    @PostMapping
+    public void sendAbi(@Valid @RequestBody Contract contract, BindingResult result) throws FrontException {
        // log.info("saveAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
         checkParamResult(result);
-        return contractService.saveAbi(reqSendAbi);
+        contractService.saveContract(contract);
     }
 
 
@@ -106,14 +119,10 @@ public class ContractController extends BaseController {
 
 
     @ApiOperation(value = "delete contract abi", notes = "delete contract abi")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "contractName", value = "contractName", required = true,
-                    dataType = "String"),
-            @ApiImplicitParam(name = "version", value = "version", required = true,
-                    dataType = "String")})
+    @ApiImplicitParams({@ApiImplicitParam(name = "contractName", value = "contractName", required = true, dataType = "String"),
+    @ApiImplicitParam(name = "version", value = "version", required = true, dataType = "String")})
     @DeleteMapping("/deleteAbi/{contractName}/{version:.+}")
-    public BaseResponse deleteAbi(@PathVariable String contractName, @PathVariable String version)
-            throws FrontException {
+    public BaseResponse deleteAbi(@PathVariable String contractName, @PathVariable String version) throws FrontException {
         log.info("deleteAbi start. contractName:{} version:{}", contractName, version);
         return contractService.deleteAbi(contractName, version);
     }

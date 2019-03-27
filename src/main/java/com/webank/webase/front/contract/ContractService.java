@@ -31,6 +31,7 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 /*
@@ -61,6 +62,8 @@ public class ContractService {
     TransService transService;
     @Autowired
     CnsService cnsService;
+    @Autowired
+    ContractRepository contractRepository;
 
     /**
      * saveAbi.
@@ -249,5 +252,7 @@ public class ContractService {
     }
 
 
-
+    public void saveContract(Contract contract) {
+        contractRepository.save(contract);
+    }
 }
