@@ -9,16 +9,14 @@ import com.webank.webase.front.transaction.TransService;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -307,9 +305,7 @@ public class Web3ApiService {
 
         BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
         try {
-            Optional<Transaction> opt =
-                    web3j.getTransactionByBlockHashAndIndex(blockHash, transactionIndex).send()
-                            .getTransaction();
+            Optional<Transaction> opt = web3j.getTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getTransaction();
             if (opt.isPresent()) {
                 baseRspEntity.setData(opt.get());
             }
@@ -380,7 +376,6 @@ public class Web3ApiService {
      * @return
      */
     public BaseResponse nodeHeartBeat() throws FrontException {
-        log.info("nodeHeartBeat start.");
         BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
         try {
             BigInteger currentBlockNumber = web3j.getBlockNumber().send().getBlockNumber();
@@ -405,4 +400,31 @@ public class Web3ApiService {
         }
         return baseRspEntity;
     }
+
+    public List<String> getGroupPeers() throws IOException {
+        GroupPeers groupPeers = web3j.getGroupPeers().send();
+        return groupPeers.getGroupPeers() ;
+    }
+
+    public List<String> getGroupList() throws IOException {
+        return web3j.getGroupList().send().getGroupList();
+    }
+
+    // get all peers of chain
+    public List<Peers.Peer> getPeers() throws IOException {
+        return web3j.getPeers().send().getPeers();
+    }
+
+    public  String getConsensusStatus() throws IOException {
+        return web3j.getConsensusStatus().sendForReturnString();
+    }
+
+    public String getSyncStatus() throws IOException {
+        return web3j.getConsensusStatus().sendForReturnString();
+    }
+
+    public String getSystemConfigByKey(String key) throws IOException {
+        return web3j.getSystemConfigByKey(key).send().getSystemConfigByKey();
+    }
+
 }

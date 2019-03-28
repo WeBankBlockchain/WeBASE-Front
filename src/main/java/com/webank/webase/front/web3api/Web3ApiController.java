@@ -6,7 +6,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
+
+import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -148,24 +153,18 @@ public class Web3ApiController {
             notes = "Gets the transaction information for the specified "
                     + "location of the specified block")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true,
-                    dataType = "String", paramType = "path"),
-            @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex",
-                    required = true, dataType = "BigInteger", paramType = "path")})
+            @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true, dataType = "String", paramType = "path"),
+            @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex", required = true, dataType = "BigInteger", paramType = "path")})
     @GetMapping("/transByBlockHashAndIndex/{blockHash}/{transactionIndex}")
     public BaseResponse getTransByBlockHashAndIndex(@PathVariable String blockHash,
             @PathVariable BigInteger transactionIndex) throws FrontException {
         return web3ApiService.getTransByBlockHashAndIndex(blockHash, transactionIndex);
     }
 
-    @ApiOperation(value = "getTransByBlockNumberAndIndex",
-            notes = "Gets the transaction information for the specified "
-                    + "location of the specified block")
+    @ApiOperation(value = "getTransByBlockNumberAndIndex", notes = "Gets the transaction information for the specified " + "location of the specified block")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-                    dataType = "BigInteger", paramType = "path"),
-            @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex",
-                    required = true, dataType = "BigInteger", paramType = "path")})
+            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true, dataType = "BigInteger", paramType = "path"),
+            @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex", required = true, dataType = "BigInteger", paramType = "path")})
     @GetMapping("/transByBlockNumberAndIndex/{blockNumber}/{transactionIndex}")
     public BaseResponse getTransByBlockNumberAndIndex(@PathVariable BigInteger blockNumber,
             @PathVariable BigInteger transactionIndex) throws FrontException {
@@ -178,4 +177,34 @@ public class Web3ApiController {
     public BaseResponse nodeHeartBeat() throws FrontException {
         return web3ApiService.nodeHeartBeat();
     }
+
+    @GetMapping("/groupPeers")
+    public List<String> getGroupPeers() throws IOException {
+          return web3ApiService.getGroupPeers();
+    }
+
+    @GetMapping("/groupList")
+    public  List<String> getGroupList() throws IOException {
+        return web3ApiService.getGroupList();
+    }
+
+    @GetMapping("/peers")
+    public  List<Peers.Peer> getPeers() throws IOException {
+        return web3ApiService.getPeers();
+    }
+
+    @GetMapping("/consensusStatus")
+    public  String getConsensusStatus() throws IOException {
+        return web3ApiService.getConsensusStatus();
+    }
+
+    @GetMapping("/syncStatus")
+    public  String getSyncStatus() throws IOException {
+        return web3ApiService.getSyncStatus();
+    }
+    @GetMapping("/systemConfigByKey/{key}")
+    public  String getSystemConfigByKey(@PathVariable String key ) throws IOException {
+        return web3ApiService.getSystemConfigByKey(key);
+    }
+
 }

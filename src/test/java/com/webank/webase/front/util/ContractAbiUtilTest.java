@@ -1,11 +1,8 @@
 package com.webank.webase.front.util;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
-import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.channel.test.Ok;
 import com.webank.webase.front.channel.test.TestBase;
 import com.webank.webase.front.contract.CommonContract;
@@ -14,13 +11,11 @@ import com.webank.webase.front.transaction.TransService;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

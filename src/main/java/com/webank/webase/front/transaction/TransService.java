@@ -81,16 +81,15 @@ public class TransService {
     public BaseResponse transHandle(ReqTransHandle req) throws Exception {
 
         // Check if contractAbi existed
-        boolean ifExisted =
-                ContractAbiUtil.ifContractAbiExisted(req.getContractName(), req.getVersion());
-        if (!ifExisted) {
-            // check and save abi
-            checkAndSaveAbiFromCns(req);
+        if(req.getContractAddress()==null) {
+            boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(req.getContractName(), req.getVersion());
+            if (!ifExisted) {
+                // check and save abi
+                checkAndSaveAbiFromCns(req);
+            }
         }
-
-        BaseResponse baseRsp = transRequest(req);
-        log.info("transHandle end. name:{} func:{} baseRsp:{}", req.getContractName(),
-                req.getFuncName(), JSON.toJSONString(baseRsp));
+        BaseResponse baseRsp = dealWithtrans(req);
+        log.info("transHandle end. name:{} func:{} baseRsp:{}", req.getContractName(), req.getFuncName(), JSON.toJSONString(baseRsp));
         return baseRsp;
     }
 
@@ -113,17 +112,16 @@ public class TransService {
 //        reqTransHandle.setFuncParam(cnsParams);
         List<CnsInfo> cnsInfoList =  cnsService.queryCnsByNameAndVersion(req.getContractName() ,req.getVersion());
         // transaction request
+        log.info("cnsinfo" + cnsInfoList.get(0).getAddress());
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-        List abiDefinitionList = objectMapper.readValue(cnsInfoList.get(0).getAbi(),
-                objectMapper.getTypeFactory().constructCollectionType(List.class, AbiDefinition.class));
+        List abiDefinitionList = objectMapper.readValue(cnsInfoList.get(0).getAbi(), objectMapper.getTypeFactory().constructCollectionType(List.class, AbiDefinition.class));
         // check if contract has been deployed
         if (StringUtils.isBlank(cnsInfoList.get(0).getAbi())) {
             throw new FrontException(ConstantCode.CONTRACT_NOT_DEPLOY_ERROR);
         }
 
         // save abi
-        ContractAbiUtil.setContractWithAbi(req.getContractName(), req.getVersion(),
-                abiDefinitionList, true);
+        ContractAbiUtil.setContractWithAbi(req.getContractName(), req.getVersion(), abiDefinitionList, true);
     }
 
     /**
@@ -132,8 +130,8 @@ public class TransService {
      * @param req request
      * @return
      */
-    public BaseResponse transRequest(ReqTransHandle req) throws FrontException {
-        log.info("transRequest start. ReqTransHandle:[{}]", JSON.toJSONString(req));
+    public BaseResponse dealWithtrans(ReqTransHandle req) throws FrontException {
+        log.info("dealWithtrans start. ReqTransHandle:[{}]", JSON.toJSONString(req));
         BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
 
         int userId = req.getUserId();
@@ -145,33 +143,34 @@ public class TransService {
         // if function is constant
         String constant = ContractAbiUtil.ifConstantFunc(contractName, funcName, version);
         if (constant == null) {
-            log.warn("transRequest fail. contract name:{} func:{} is not existed", contractName,
-                    funcName);
+            log.warn("dealWithtrans fail. contract name:{} func:{} is not existed", contractName, funcName);
             throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
 
         // inputs format
-        List<String> funcInputTypes =
-                ContractAbiUtil.getFuncInputType(contractName, funcName, version);
+        List<String> funcInputTypes = ContractAbiUtil.getFuncInputType(contractName, funcName, version);
         if (funcInputTypes == null || funcInputTypes.size() != params.size()) {
-            log.warn("transRequest fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+            log.warn("dealWithtrans fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
             throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
         }
         List<Type> finalInputs = inputFormat(funcInputTypes, params);
 
         // outputs format
-        List<String> funOutputTypes =
-                ContractAbiUtil.getFuncOutputType(contractName, funcName, version);
+        List<String> funOutputTypes = ContractAbiUtil.getFuncOutputType(contractName, funcName, version);
         List<TypeReference<?>> finalOutputs = outputFormat(funOutputTypes);
 
         // get privateKey
         Credentials credentials = getCredentials(userId);
 
         // contract load
-        CommonContract commonContract =
-                CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3j,
-                        credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
-
+        CommonContract commonContract;
+      if(req.getContractAddress()==null) {
+           commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3j,
+                  credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+       } else{
+          commonContract=  CommonContract.load(req.getContractAddress() + Constants.SYMPOL + version, web3j,
+                  credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+      }
         // request
         Function function = new Function(funcName, finalInputs, finalOutputs);
         if ("true".equals(constant)) {
@@ -187,7 +186,7 @@ public class TransService {
                 .map(info -> info.getPrivateKey()).orElse(null);
         if (privateKey == null) {
             //todo add system user
-//            log.warn("transRequest userId:{} privateKey is null", userId);
+//            log.warn("dealWithtrans userId:{} privateKey is null", userId);
             privateKey = "3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4";
         }
         return Credentials.create(privateKey);

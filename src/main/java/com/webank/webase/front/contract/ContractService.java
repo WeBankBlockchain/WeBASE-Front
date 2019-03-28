@@ -1,6 +1,8 @@
 package com.webank.webase.front.contract;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
@@ -62,7 +64,7 @@ public class ContractService {
 
         String contractName = req.getContractName();
         String version = req.getVersion();
-        List<Object> abiInfos = req.getAbiInfo();
+        List<AbiDefinition> abiInfos = req.getAbiInfo();
 
         // Check if it has been deployed based on the contract name and version number
         checkContractAbiExistedAndSave(contractName, version, abiInfos);
@@ -82,7 +84,7 @@ public class ContractService {
         int userId = req.getUserId();
         String contractName = req.getContractName();
         String version = req.getVersion();
-        List<Object> abiInfos = req.getAbiInfo();
+        List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
 
@@ -116,7 +118,7 @@ public class ContractService {
 //        reqTransHandle.setFuncParam(cnsParams);
 
         // cns add
-//        BaseResponse baseRsp = transService.transRequest(reqTransHandle);
+//        BaseResponse baseRsp = transService.dealWithtrans(reqTransHandle);
 
         // result
         BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -145,16 +147,11 @@ public class ContractService {
     }
 
 
-    private void checkContractAbiExistedAndSave(String contractName, String version, List<Object> abiInfos) throws FrontException {
+    private void checkContractAbiExistedAndSave(String contractName, String version, List<AbiDefinition> abiInfos) throws FrontException {
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
         if (!ifExisted) {
 
-            List<AbiDefinition> ilist = new ArrayList<>();
-            for (Object o : abiInfos) {
-                ilist.add((AbiDefinition) o);
-            }
-            //  JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
-            ContractAbiUtil.setContractWithAbi(contractName, version, ilist, true);
+            ContractAbiUtil.setContractWithAbi(contractName, version, abiInfos, true);
         }
     }
 
