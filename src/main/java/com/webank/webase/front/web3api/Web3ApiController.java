@@ -107,31 +107,42 @@ public class Web3ApiController {
 
     @ApiOperation(value = "getCode",
             notes = "Get the binary code of the specified contract for the specified block")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "address", value = "address", required = true,
-                    dataType = "String", paramType = "path"),
-            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-                    dataType = "BigInteger", paramType = "path")})
+    @ApiImplicitParams({@ApiImplicitParam(name = "address", value = "address", required = true, dataType = "String", paramType = "path"),
+    @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true, dataType = "BigInteger", paramType = "path")})
     @GetMapping("/code/{address}/{blockNumber}")
     public BaseResponse getCode(@PathVariable String address, @PathVariable BigInteger blockNumber)
             throws FrontException {
         return web3ApiService.getCode(address, blockNumber);
     }
 
+
 // todo
-//    @ApiOperation(value = "getTransCnt",
-//            notes = "Get the number of execution transactions for the specified "
-//                    + "account at the specified block height")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "address", value = "address", required = true,
-//                    dataType = "String", paramType = "path"),
-//            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-//                    dataType = "BigInteger", paramType = "path")})
-//    @GetMapping("/transCnt/{address}/{blockNumber}")
-//    public BaseResponse getTransCnt(@PathVariable String address,
-//            @PathVariable BigInteger blockNumber) throws FrontException {
-//        return web3ApiService.getTransCnt(address, blockNumber);
-//    }
+////    @ApiOperation(value = "getTransCnt",
+////            notes = "Get the number of execution transactions for the specified "
+////                    + "account at the specified block height")
+////    @ApiImplicitParams({
+////            @ApiImplicitParam(name = "address", value = "address", required = true,
+////                    dataType = "String", paramType = "path"),
+////            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
+////                    dataType = "BigInteger", paramType = "path")})
+////    @GetMapping("/transCnt/{address}/{blockNumber}")
+////    public BaseResponse getTransCnt(@PathVariable String address,
+////            @PathVariable BigInteger blockNumber) throws FrontException {
+////        return web3ApiService.getTransCnt(address, blockNumber);
+////    }
+
+    // todo
+    @ApiOperation(value = "getTotalTransactionCount",
+            notes = "Get the  total number of execution transactions count ")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "address", value = "address", required = true,
+                    dataType = "String", paramType = "path"),
+            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
+                    dataType = "BigInteger", paramType = "path")})
+    @GetMapping("/transaction-total")
+    public BaseResponse getTransTotalCnt() throws FrontException {
+        return web3ApiService.getTransCnt();
+    }
 
     @ApiOperation(value = "getTransByBlockHashAndIndex",
             notes = "Gets the transaction information for the specified "

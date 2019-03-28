@@ -30,6 +30,12 @@ public class BasicTest extends TestBase {
   }
 
   @Test
+  public void getBlockNumber() throws Exception {
+    System.out.println(web3j.getBlockByNumber(DefaultBlockParameter.valueOf("1"),true).send());
+    assertNotNull(web3j.getConsensusStatus().sendForReturnString());
+  }
+
+  @Test
   public void syncTest() throws Exception {
     System.out.println(web3j.getSyncStatus().send().isSyncing());
     assertNotNull(web3j.getSyncStatus().send().isSyncing());

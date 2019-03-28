@@ -49,8 +49,7 @@ public class ContractController extends BaseController {
 
     @Autowired
     ContractService contractService;
-    @Autowired
-    KeyStoreService keyService;
+
 
     /**
      * sendAbi.

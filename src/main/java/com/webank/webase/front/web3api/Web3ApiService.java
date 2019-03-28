@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,7 +233,7 @@ public class Web3ApiService {
         BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
         Map<String, String> map = new HashMap<String, String>();
         try {
-            String version = web3j.getClientVersion().send().getWeb3ClientVersion();
+            String version = web3j.getNodeVersion().send().getNodeVersion().getVersion();
             map.put("version", version);
             baseRspEntity.setData(map);
         } catch (IOException e) {
@@ -270,33 +271,27 @@ public class Web3ApiService {
         return baseRspEntity;
     }
 
-//    /**
-//     * get transaction counts.
-//     * @param address address
-//     * @param blockNumber blockNumber
-//     * @return
-//     */
-//    public BaseResponse getTransCnt(String address, BigInteger blockNumber) throws FrontException {
-//        log.info("getTransCnt start. address:{} blockNumber:{}", address, blockNumber);
-//
-//        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-//        Map<String, BigInteger> map = new HashMap<String, BigInteger>();
-//        try {
-//            if (blockNumberCheck(blockNumber)) {
-//                baseRspEntity = new BaseResponse(ConstantCode.BLOCK_NUMBER_ERROR);
-//                return baseRspEntity;
-//            }
-//            BigInteger transactionCount = web3j
-//                    .ethGetTransactionCount(address, DefaultBlockParameter.valueOf(blockNumber))
-//                    .send().getTransactionCount();
-//            map.put("transactionCount", transactionCount);
-//            baseRspEntity.setData(map);
-//        } catch (IOException e) {
-//            log.error("getTransCnt fail.");
-//            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
-//        }
-//        return baseRspEntity;
-//    }
+    /**
+     * get transaction counts.
+     * @return
+     */
+    public BaseResponse getTransCnt() throws FrontException {
+
+        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
+        Map<String, BigInteger> map = new HashMap<String, BigInteger>();
+        try {
+
+            TotalTransactionCount.TransactionCount transactionCount = web3j
+                    .getTotalTransactionCount().send().getTotalTransactionCount();
+            map.put("transactionCount", transactionCount.getTxSum());
+            map.put("blockNumber", transactionCount.getBlockNumber());
+            baseRspEntity.setData(map);
+        } catch (IOException e) {
+            log.error("getTransCnt fail.");
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
+        return baseRspEntity;
+    }
 
     /**
      * getTransByBlockHashAndIndex.
