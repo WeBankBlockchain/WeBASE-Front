@@ -7,7 +7,7 @@
 > * [附录](#chapter-6)
 
 # 1. <a id="chapter-1"></a>功能说明
-节点前置是和fisco-bcos节点配合使用的一个子系统，可以通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象。同时具备了可视化控制台。可以通过HTTP请求的形式发交易，降低了开发者的门槛。
+节点前置是和fisco-bcos节点配合使用的一个子系统，需要跟节点同机部署。可以通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象。同时具备了可视化控制台。可以通过HTTP请求的形式发交易，降低了开发者的门槛。
 
 # 2. <a id="chapter-2"></a>前提条件
 
@@ -44,7 +44,7 @@ git checkout XXXXX
 
 在代码的根目录webase-front执行构建命令：
 ```
-gradle build
+gradle build -x test
 ```
 构建完成后，会在根目录webase-front下生成已编译的代码目录dist。
 
@@ -67,8 +67,8 @@ cd dist/conf
 cd dist/report
 ```
 ```
-修改节点管理服务ip：sed -i "s/10.0.0.1/${your_ip }/g" config.json
-修改节点管理服务端口：sed -i "s/8082/${your_ port}/g" config.json
+修改节点管理服务ip：sed -i "s/10.0.0.1/${your_ip}/g" config.json
+修改节点管理服务端口：sed -i "s/8082/${your_port}/g" config.json
 修改节点目录：sed -i "s/\/data\/app\/build\/node0/${your_node_dir}/g" config.json
 ```
 
