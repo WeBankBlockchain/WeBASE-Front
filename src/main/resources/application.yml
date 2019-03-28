@@ -38,7 +38,7 @@ sdk:
   keepAlive: 60
 
 constant:  
-  nodeDir: /data/app/build/node0
+  nodeDir: /data/shuoyanhe/fisco-node-2.0/FISCO-BCOS/tools/nodes/10.107.105.58/node0
   mgrIpPorts: 10.0.0.1:8082
   transMaxWait: 30
 
