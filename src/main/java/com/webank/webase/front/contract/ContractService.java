@@ -91,7 +91,7 @@ public class ContractService {
         String encodedConstructor = constructorEncoded(contractName, version, params);
 
         // get privateKey
-        Credentials credentials = getCredentials(userId);
+        Credentials credentials =  transService.getCredentials(userId);
 
         // contract deploy
         String contractAddress = deployContract(bytecodeBin, encodedConstructor, credentials);
@@ -144,15 +144,6 @@ public class ContractService {
         return encodedConstructor;
     }
 
-    private Credentials getCredentials(int userId) throws FrontException {
-        String privateKey = Optional.ofNullable(transService.getPrivateKey(userId))
-                .map(info -> info.getPrivateKey()).orElse(null);
-        if (privateKey == null) {
-            log.error("userId:{} privateKey is null.", userId);
-            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
-        }
-        return Credentials.create(privateKey);
-    }
 
     private void checkContractAbiExistedAndSave(String contractName, String version, List<Object> abiInfos) throws FrontException {
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);

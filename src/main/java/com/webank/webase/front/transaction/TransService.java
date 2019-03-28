@@ -182,12 +182,13 @@ public class TransService {
         return baseRsp;
     }
 
-    private Credentials getCredentials(int userId) throws FrontException {
+    public Credentials getCredentials(int userId) throws FrontException {
         String privateKey = Optional.ofNullable(getPrivateKey(userId))
                 .map(info -> info.getPrivateKey()).orElse(null);
         if (privateKey == null) {
-            log.warn("transRequest userId:{} privateKey is null", userId);
-            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
+            //todo add system user
+//            log.warn("transRequest userId:{} privateKey is null", userId);
+            privateKey = "3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4";
         }
         return Credentials.create(privateKey);
     }
