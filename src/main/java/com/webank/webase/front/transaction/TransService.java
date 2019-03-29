@@ -78,7 +78,7 @@ public class TransService {
      * @param req request
      * @return
      */
-    public BaseResponse transHandle(ReqTransHandle req) throws Exception {
+    public Object transHandle(ReqTransHandle req) throws Exception {
 
         // Check if contractAbi existed
         if(req.getContractAddress()==null) {
@@ -88,7 +88,7 @@ public class TransService {
                 checkAndSaveAbiFromCns(req);
             }
         }
-        BaseResponse baseRsp = dealWithtrans(req);
+        Object baseRsp = dealWithtrans(req);
         log.info("transHandle end. name:{} func:{} baseRsp:{}", req.getContractName(), req.getFuncName(), JSON.toJSONString(baseRsp));
         return baseRsp;
     }
@@ -130,9 +130,9 @@ public class TransService {
      * @param req request
      * @return
      */
-    public BaseResponse dealWithtrans(ReqTransHandle req) throws FrontException {
+    public Object dealWithtrans(ReqTransHandle req) throws FrontException {
         log.info("dealWithtrans start. ReqTransHandle:[{}]", JSON.toJSONString(req));
-        BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
+        Object result =null;
 
         int userId = req.getUserId();
         String contractName = req.getContractName();
@@ -174,11 +174,11 @@ public class TransService {
         // request
         Function function = new Function(funcName, finalInputs, finalOutputs);
         if ("true".equals(constant)) {
-            baseRsp = execCall(funOutputTypes, function, commonContract, baseRsp);
+            result = execCall(funOutputTypes, function, commonContract);
         } else {
-            baseRsp = execTransaction(function, commonContract, baseRsp);
+            result = execTransaction(function, commonContract);
         }
-        return baseRsp;
+        return result;
     }
 
     public Credentials getCredentials(int userId) throws FrontException {
@@ -198,19 +198,17 @@ public class TransService {
      * @param funOutputTypes list
      * @param function function
      * @param commonContract contract
-     * @param baseRsp response
      * @return
      */
-    public static BaseResponse execCall(List<String> funOutputTypes, Function function,
-            CommonContract commonContract, BaseResponse baseRsp) throws FrontException {
+    public static Object execCall(List<String> funOutputTypes, Function function,
+            CommonContract commonContract) throws FrontException {
         try {
             List<Type> typeList = commonContract.execCall(function);
+            Object result = null;
             if (typeList.size() > 0) {
-                baseRsp = ethCallResultParse(funOutputTypes, typeList, baseRsp);
-            } else {
-                baseRsp.setData(typeList);
+                result = ethCallResultParse(funOutputTypes, typeList);
             }
-            return baseRsp;
+            return result;
         } catch (IOException e) {
             log.error("execCall failed.");
             throw new FrontException(ConstantCode.TRANSACTION_QUERY_FAILED);
@@ -222,11 +220,9 @@ public class TransService {
      * 
      * @param function function
      * @param commonContract contract
-     * @param baseRsp response
      * @return
      */
-    public static BaseResponse execTransaction(Function function, CommonContract commonContract,
-            BaseResponse baseRsp) throws FrontException {
+    public static TransactionReceipt execTransaction(Function function, CommonContract commonContract) throws FrontException {
         TransactionReceipt transactionReceipt = null;
         try {
             transactionReceipt = commonContract.execTransaction(function);
@@ -234,8 +230,7 @@ public class TransService {
             log.error("execTransaction failed.");
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
         }
-        baseRsp.setData(transactionReceipt);
-        return baseRsp;
+        return transactionReceipt;
     }
 
     /**
@@ -306,11 +301,9 @@ public class TransService {
      * 
      * @param funOutputTypes list
      * @param typeList list
-     * @param baseRsp response
      * @return
      */
-    static BaseResponse ethCallResultParse(List<String> funOutputTypes, List<Type> typeList,
-            BaseResponse baseRsp) throws FrontException {
+    static Object ethCallResultParse(List<String> funOutputTypes, List<Type> typeList) throws FrontException {
         if (funOutputTypes.size() == typeList.size()) {
             List<Object> ressult = new ArrayList<>();
             for (int i = 0; i < funOutputTypes.size(); i++) {
@@ -333,9 +326,10 @@ public class TransService {
                     ressult.add(value);
                 }
             }
-            baseRsp.setData(JSON.parse(JSON.toJSONString(ressult)));
+            return JSON.parse(JSON.toJSONString(ressult));
         }
-        return baseRsp;
+        throw new FrontException("output parameter not match");
+
     }
 
     /**
