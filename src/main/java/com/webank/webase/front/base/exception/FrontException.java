@@ -36,6 +36,9 @@ public class FrontException extends Exception {
         super(msg);
         this.retCode = new RetCode(code, msg);
     }
+    public FrontException( String msg) {
+        super(msg);
+    }
 
     public RetCode getRetCode() {
         return retCode;

@@ -79,7 +79,7 @@ public class ContractService {
      * @param req request data
      * @return
      */
-    public BaseResponse deploy(ReqDeploy req) throws Exception {
+    public String deploy(ReqDeploy req) throws Exception {
 
         int userId = req.getUserId();
         String contractName = req.getContractName();
@@ -121,10 +121,7 @@ public class ContractService {
 //        BaseResponse baseRsp = transService.dealWithtrans(reqTransHandle);
 
         // result
-        BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
-        baseRsp.setData(contractAddress);
-        log.info("contract deploy end. baseRsp:{}", JSON.toJSONString(baseRsp));
-        return baseRsp;
+        return contractAddress;
     }
 
     public static String constructorEncoded(String contractName, String version, List<Object> params) throws FrontException {

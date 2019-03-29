@@ -1,6 +1,5 @@
 package com.webank.webase.front.web3api;
 
-import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -10,8 +9,12 @@ import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,65 +51,58 @@ public class Web3ApiController {
 
     @ApiOperation(value = "getBlockNumber", notes = "Get the latest block height of the node")
     @GetMapping("/blockNumber")
-    public BaseResponse getBlockNumber() throws FrontException {
+    public BigInteger getBlockNumber() throws FrontException {
         return web3ApiService.getBlockNumber();
     }
 
     @ApiOperation(value = "getBlockByNumber", notes = "Get block information based on block height")
-    @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-            dataType = "BigInteger", paramType = "path")
+    @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true, dataType = "BigInteger", paramType = "path")
     @GetMapping("/blockByNumber/{blockNumber}")
-    public BaseResponse getBlockByNumber(@PathVariable BigInteger blockNumber)
+    public BcosBlock.Block getBlockByNumber(@PathVariable BigInteger blockNumber)
             throws FrontException {
         return web3ApiService.getBlockByNumber(blockNumber);
     }
 
     @ApiOperation(value = "getBlockByHash", notes = "Get block information based on block hash")
-    @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true, dataType = "String",
-            paramType = "path")
+    @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true, dataType = "String", paramType = "path")
     @GetMapping("/blockByHash/{blockHash}")
-    public BaseResponse getBlockByHash(@PathVariable String blockHash) throws FrontException {
+    public BcosBlock.Block getBlockByHash(@PathVariable String blockHash) throws FrontException {
         return web3ApiService.getBlockByHash(blockHash);
     }
 
     @ApiOperation(value = "getBlockTransCntByNumber",
             notes = "Get the number of transactions in the block based on the block height")
-    @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-            dataType = "BigInteger", paramType = "path")
+    @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true, dataType = "BigInteger", paramType = "path")
     @GetMapping("/blockTransCnt/{blockNumber}")
-    public BaseResponse getBlockTransCntByNumber(@PathVariable BigInteger blockNumber)
+    public int getBlockTransCntByNumber(@PathVariable BigInteger blockNumber)
             throws FrontException {
         return web3ApiService.getBlockTransCntByNumber(blockNumber);
     }
 
     @ApiOperation(value = "getPbftView", notes = "Get PbftView")
     @GetMapping("/pbftView")
-    public BaseResponse getPbftView() throws FrontException {
+    public BigInteger getPbftView() throws FrontException {
         return web3ApiService.getPbftView();
     }
 
-    @ApiOperation(value = "getTransactionReceipt",
-            notes = "Get a transaction receipt based on the transaction hash")
-    @ApiImplicitParam(name = "transHash", value = "transHash", required = true, dataType = "String",
-            paramType = "path")
+    @ApiOperation(value = "getTransactionReceipt", notes = "Get a transaction receipt based on the transaction hash")
+    @ApiImplicitParam(name = "transHash", value = "transHash", required = true, dataType = "String", paramType = "path")
     @GetMapping("/transactionReceipt/{transHash}")
-    public BaseResponse getTransactionReceipt(@PathVariable String transHash)
-            throws FrontException {
+    public TransactionReceipt getTransactionReceipt(@PathVariable String transHash) throws FrontException {
         return web3ApiService.getTransactionReceipt(transHash);
     }
 
     @ApiOperation(value = "getTransactionByHash",
             notes = "Get transaction information based on transaction hash")
-    @ApiImplicitParam(name = "transHash", value = "transHash", required = true, dataType = "String",
-            paramType = "path")
+    @ApiImplicitParam(name = "transHash", value = "transHash", required = true, dataType = "String", paramType = "path")
     @GetMapping("/transaction/{transHash}")
-    public BaseResponse getTransactionByHash(@PathVariable String transHash) throws FrontException {
+    public Transaction getTransactionByHash(@PathVariable String transHash) throws FrontException {
         return web3ApiService.getTransactionByHash(transHash);
     }
 
     @ApiOperation(value = "getClientVersion", notes = "Get the web3j version")
     @GetMapping("/clientVersion")
-    public BaseResponse getClientVersion() throws FrontException {
+    public String getClientVersion() throws FrontException {
         return web3ApiService.getClientVersion();
     }
 
@@ -115,7 +111,7 @@ public class Web3ApiController {
     @ApiImplicitParams({@ApiImplicitParam(name = "address", value = "address", required = true, dataType = "String", paramType = "path"),
     @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true, dataType = "BigInteger", paramType = "path")})
     @GetMapping("/code/{address}/{blockNumber}")
-    public BaseResponse getCode(@PathVariable String address, @PathVariable BigInteger blockNumber)
+    public String getCode(@PathVariable String address, @PathVariable BigInteger blockNumber)
             throws FrontException {
         return web3ApiService.getCode(address, blockNumber);
     }
@@ -145,7 +141,7 @@ public class Web3ApiController {
             @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
                     dataType = "BigInteger", paramType = "path")})
     @GetMapping("/transaction-total")
-    public BaseResponse getTransTotalCnt() throws FrontException {
+    public Map<String, BigInteger> getTransTotalCnt() throws FrontException {
         return web3ApiService.getTransCnt();
     }
 
@@ -156,8 +152,8 @@ public class Web3ApiController {
             @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true, dataType = "String", paramType = "path"),
             @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex", required = true, dataType = "BigInteger", paramType = "path")})
     @GetMapping("/transByBlockHashAndIndex/{blockHash}/{transactionIndex}")
-    public BaseResponse getTransByBlockHashAndIndex(@PathVariable String blockHash,
-            @PathVariable BigInteger transactionIndex) throws FrontException {
+    public Transaction getTransByBlockHashAndIndex(@PathVariable String blockHash,
+                                                   @PathVariable BigInteger transactionIndex) throws FrontException {
         return web3ApiService.getTransByBlockHashAndIndex(blockHash, transactionIndex);
     }
 
@@ -166,15 +162,15 @@ public class Web3ApiController {
             @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true, dataType = "BigInteger", paramType = "path"),
             @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex", required = true, dataType = "BigInteger", paramType = "path")})
     @GetMapping("/transByBlockNumberAndIndex/{blockNumber}/{transactionIndex}")
-    public BaseResponse getTransByBlockNumberAndIndex(@PathVariable BigInteger blockNumber,
-            @PathVariable BigInteger transactionIndex) throws FrontException {
+    public Transaction getTransByBlockNumberAndIndex(@PathVariable BigInteger blockNumber,
+                                                     @PathVariable BigInteger transactionIndex) throws FrontException {
         return web3ApiService.getTransByBlockNumberAndIndex(blockNumber, transactionIndex);
     }
 
 
     @ApiOperation(value = "nodeHeartBeat", notes = "Verify that the node is alive")
     @GetMapping("/nodeHeartBeat")
-    public BaseResponse nodeHeartBeat() throws FrontException {
+    public Map<String, BigInteger> nodeHeartBeat() throws FrontException {
         return web3ApiService.nodeHeartBeat();
     }
 
