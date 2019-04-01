@@ -31,14 +31,14 @@ server:
 
 sdk: 
   orgName: orgTest
-  groupId: 1
+  groupIdList: [1,2]
   corePoolSize: 50
   maxPoolSize: 100
   queueCapacity: 100
   keepAlive: 60
 
 constant:  
-  nodeDir: /data/shuoyanhe/fisco-node-2.0/FISCO-BCOS/tools/nodes/127.0.0.1/node0
+  nodeDir: D:\config
   mgrIpPorts: 10.0.0.1:8082
   transMaxWait: 30
 

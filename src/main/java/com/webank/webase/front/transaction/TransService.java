@@ -62,13 +62,13 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class TransService {
     @Autowired
-    Web3j web3j;
+   Map<Integer,Web3j> web3jMap;
     @Autowired
     Constants constants;
     @Autowired
     RestTemplate restTemplate;
     @Autowired
-    CnsService cnsService;
+    Map<Integer, CnsService> cnsServiceMap;
 
     Map<Integer, KeyStoreInfo> keyMap = new HashMap<>();
 
@@ -110,7 +110,7 @@ public class TransService {
 //        reqTransHandle.setVersion("");
 //        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_GETABI);
 //        reqTransHandle.setFuncParam(cnsParams);
-        List<CnsInfo> cnsInfoList =  cnsService.queryCnsByNameAndVersion(req.getContractName() ,req.getVersion());
+        List<CnsInfo> cnsInfoList =  cnsServiceMap.get(req.getGroupId()).queryCnsByNameAndVersion(req.getContractName() ,req.getVersion());
         // transaction request
         log.info("cnsinfo" + cnsInfoList.get(0).getAddress());
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
@@ -139,7 +139,7 @@ public class TransService {
         String version = req.getVersion();
         String funcName = req.getFuncName();
         List<Object> params = req.getFuncParam();
-
+        int groupId = req.getGroupId();
         // if function is constant
         String constant = ContractAbiUtil.ifConstantFunc(contractName, funcName, version);
         if (constant == null) {
@@ -165,10 +165,10 @@ public class TransService {
         // contract load
         CommonContract commonContract;
       if(req.getContractAddress()==null) {
-           commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3j,
+           commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3jMap.get(groupId),
                   credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
        } else{
-          commonContract=  CommonContract.load(req.getContractAddress() + Constants.SYMPOL + version, web3j,
+          commonContract=  CommonContract.load(req.getContractAddress() + Constants.SYMPOL + version, web3jMap.get(groupId),
                   credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
       }
         // request
@@ -200,8 +200,7 @@ public class TransService {
      * @param commonContract contract
      * @return
      */
-    public static Object execCall(List<String> funOutputTypes, Function function,
-            CommonContract commonContract) throws FrontException {
+    public static Object execCall(List<String> funOutputTypes, Function function, CommonContract commonContract) throws FrontException {
         try {
             List<Type> typeList = commonContract.execCall(function);
             Object result = null;
