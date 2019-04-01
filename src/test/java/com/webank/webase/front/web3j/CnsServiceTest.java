@@ -9,8 +9,6 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import static org.junit.Assert.assertEquals;
-
 public class CnsServiceTest extends TestBase {
 
   public Credentials credentials =
@@ -83,7 +81,5 @@ public class CnsServiceTest extends TestBase {
     System.out.println(okLoaded.isValid());
     BigInteger balance = okLoaded.get().send();
     System.out.println("balance = " + balance);
-    assertEquals(
-        cnsService.getAddressByContractNameAndVersion(name + ":10.0"), okDemo.getContractAddress());
   }
 }

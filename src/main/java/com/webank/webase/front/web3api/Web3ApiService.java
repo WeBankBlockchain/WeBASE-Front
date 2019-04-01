@@ -44,10 +44,9 @@ import java.util.Optional;
 public class Web3ApiService {
 
     @Autowired
-    Web3j web3j;
+    Map<Integer, Web3j> web3jMap;
     @Autowired
     NodeConfig nodeConfig;
-    @Autowired
 
     private static BigInteger blockNumber = new BigInteger("0");
     private static BigInteger pbftView = new BigInteger("0");
@@ -57,12 +56,11 @@ public class Web3ApiService {
      * 
      * @return
      */
-    public BigInteger getBlockNumber() throws FrontException {
+    public BigInteger getBlockNumber(int groupId) throws FrontException {
 
         BigInteger blockNumber;
         try {
-             blockNumber = web3j.getBlockNumber().send().getBlockNumber();
-
+             blockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
         } catch (IOException e) {
             log.error("getBlockNumber fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -76,13 +74,13 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      * @return
      */
-    public BcosBlock.Block getBlockByNumber(BigInteger blockNumber) throws FrontException {
+    public BcosBlock.Block getBlockByNumber(int groupId,BigInteger blockNumber) throws FrontException {
         BcosBlock.Block block;
         try {
-            if (blockNumberCheck(blockNumber)) {
+            if (blockNumberCheck(groupId,blockNumber)) {
                 throw new FrontException("requst blockNumber is greater than latest");
             }
-             block = web3j.getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
+             block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                             .send().getBlock();
         } catch (IOException e) {
             log.error("getBlockByNumber fail. blockNumber:{} ", blockNumber);
@@ -97,10 +95,10 @@ public class Web3ApiService {
      * @param blockHash blockHash
      * @return
      */
-    public BcosBlock.Block getBlockByHash(String blockHash) throws FrontException {
+    public BcosBlock.Block getBlockByHash(int groupId , String blockHash) throws FrontException {
         BcosBlock.Block block;
         try {
-            block = web3j.getBlockByHash(blockHash, true).send().getBlock();
+            block = web3jMap.get(groupId).getBlockByHash(blockHash, true).send().getBlock();
 
         } catch (IOException e) {
             log.error("getBlockByHash fail. blockHash:{} ", blockHash);
@@ -115,13 +113,13 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      * @return
      */
-    public int getBlockTransCntByNumber(BigInteger blockNumber) throws FrontException {
+    public int getBlockTransCntByNumber(int groupId,BigInteger blockNumber) throws FrontException {
         int transCnt;
         try {
-            if (blockNumberCheck(blockNumber)) {
+            if (blockNumberCheck(groupId,blockNumber)) {
                 throw new FrontException("requst blockNumber is greater than latest");
             }
-            BcosBlock.Block block = web3j.getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
+            BcosBlock.Block block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                             .send().getBlock();
              transCnt = block.getTransactions().size();
 //            BigInteger transCnt = web3j
@@ -140,11 +138,11 @@ public class Web3ApiService {
      * 
      * @return
      */
-    public BigInteger getPbftView() throws FrontException {
+    public BigInteger getPbftView(int groupId) throws FrontException {
 
        BigInteger result;
         try {
-            result = web3j.getPbftView().send().getPbftView();
+            result = web3jMap.get(groupId).getPbftView().send().getPbftView();
         } catch (IOException e) {
             log.error("getPbftView fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -158,12 +156,11 @@ public class Web3ApiService {
      * @param transHash transHash
      * @return
      */
-    public TransactionReceipt getTransactionReceipt(String transHash) throws FrontException {
+    public TransactionReceipt getTransactionReceipt(int groupId,String transHash) throws FrontException {
 
         TransactionReceipt transactionReceipt =null;
         try {
-            Optional<TransactionReceipt> opt =
-                    web3j.getTransactionReceipt(transHash).send().getTransactionReceipt();
+            Optional<TransactionReceipt> opt = web3jMap.get(groupId).getTransactionReceipt(transHash).send().getTransactionReceipt();
             if (opt.isPresent()) {
                 transactionReceipt= opt.get();
             }
@@ -180,11 +177,11 @@ public class Web3ApiService {
      * @param transHash transHash
      * @return
      */
-    public Transaction getTransactionByHash(String transHash) throws FrontException {
+    public Transaction getTransactionByHash(int groupId, String transHash) throws FrontException {
 
         Transaction transaction= null;
         try {
-            Optional<Transaction> opt = web3j.getTransactionByHash(transHash).send().getTransaction();
+            Optional<Transaction> opt = web3jMap.get(groupId).getTransactionByHash(transHash).send().getTransaction();
             if (opt.isPresent()) {
                 transaction = opt.get();
             }
@@ -203,7 +200,7 @@ public class Web3ApiService {
     public String getClientVersion() throws FrontException {
         String version;
         try {
-             version = web3j.getNodeVersion().send().getNodeVersion().getVersion();
+             version = web3jMap.get(1).getNodeVersion().send().getNodeVersion().getVersion();
         } catch (IOException e) {
             log.error("getClientVersion fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -218,13 +215,13 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      * @return
      */
-        public String  getCode(String address, BigInteger blockNumber) throws FrontException {
+        public String  getCode(int groupId, String address, BigInteger blockNumber) throws FrontException {
             String code;
             try {
-            if (blockNumberCheck(blockNumber)) {
+            if (blockNumberCheck(groupId,blockNumber)) {
                 throw new FrontException("requst blockNumber is greater than latest");
             }
-             code = web3j.getCode(address, DefaultBlockParameter.valueOf(blockNumber)).send().getCode();
+             code = web3jMap.get(groupId).getCode(address, DefaultBlockParameter.valueOf(blockNumber)).send().getCode();
         } catch (IOException e) {
             log.error("getCode fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -236,20 +233,15 @@ public class Web3ApiService {
      * get transaction counts.
      * @return
      */
-    public Map<String, BigInteger> getTransCnt() throws FrontException {
-
-        Map<String, BigInteger> map = new HashMap<String, BigInteger>();
+    public TotalTransactionCount.TransactionCount getTransCnt(int groupId) throws FrontException {
+        TotalTransactionCount.TransactionCount transactionCount;
         try {
-
-            TotalTransactionCount.TransactionCount transactionCount = web3j
-                    .getTotalTransactionCount().send().getTotalTransactionCount();
-            map.put("transactionCount", transactionCount.getTxSum());
-            map.put("blockNumber", transactionCount.getBlockNumber());
+             transactionCount = web3jMap.get(groupId).getTotalTransactionCount().send().getTotalTransactionCount();
         } catch (IOException e) {
             log.error("getTransCnt fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return map;
+        return transactionCount;
     }
 
     /**
@@ -259,12 +251,12 @@ public class Web3ApiService {
      * @param transactionIndex index
      * @return
      */
-    public Transaction getTransByBlockHashAndIndex(String blockHash, BigInteger transactionIndex)
+    public Transaction getTransByBlockHashAndIndex(int groupId, String blockHash, BigInteger transactionIndex)
             throws FrontException {
 
        Transaction transaction= null;
         try {
-            Optional<Transaction> opt = web3j.getTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getTransaction();
+            Optional<Transaction> opt = web3jMap.get(groupId).getTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getTransaction();
             if (opt.isPresent()) {
                 transaction= opt.get();
             }
@@ -282,13 +274,13 @@ public class Web3ApiService {
      * @param transactionIndex index
      * @return
      */
-    public Transaction getTransByBlockNumberAndIndex(BigInteger blockNumber, BigInteger transactionIndex) throws FrontException {
+    public Transaction getTransByBlockNumberAndIndex(int groupId, BigInteger blockNumber, BigInteger transactionIndex) throws FrontException {
         Transaction transaction= null;
         try {
-            if (blockNumberCheck(blockNumber)) {
+            if (blockNumberCheck(groupId,blockNumber)) {
                throw new FrontException("requst blockNumber is greater than latest");
             }
-            Optional<Transaction> opt = web3j
+            Optional<Transaction> opt = web3jMap.get(groupId)
                     .getTransactionByBlockNumberAndIndex(DefaultBlockParameter.valueOf(blockNumber), transactionIndex).send().getTransaction();
             if (opt.isPresent()) {
                 transaction= opt.get();
@@ -300,8 +292,8 @@ public class Web3ApiService {
         return transaction;
     }
 
-    private boolean blockNumberCheck(BigInteger blockNumber) throws IOException {
-        BigInteger currentNumber = web3j.getBlockNumber().send().getBlockNumber();
+    private boolean blockNumberCheck(int groupId, BigInteger blockNumber) throws IOException {
+        BigInteger currentNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
         if (blockNumber.compareTo(currentNumber) == 1) {
             return true;
         }
@@ -327,10 +319,10 @@ public class Web3ApiService {
      * 
      * @return
      */
-    public Map<String, BigInteger> nodeHeartBeat() throws FrontException {
+    public Map<String, BigInteger> nodeHeartBeat(int groupId) throws FrontException {
         try {
-            BigInteger currentBlockNumber = web3j.getBlockNumber().send().getBlockNumber();
-            BigInteger currentPbftView = web3j.getPbftView().send().getPbftView();
+            BigInteger currentBlockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
+            BigInteger currentPbftView = web3jMap.get(groupId).getPbftView().send().getPbftView();
             log.info("nodeHeartBeat blockNumber:{} current:{} pbftView:{} current:{}",
                     this.blockNumber, currentBlockNumber, this.pbftView, currentPbftView);
             if (currentBlockNumber.equals(this.blockNumber) && currentPbftView.equals(this.pbftView)) {
@@ -350,30 +342,30 @@ public class Web3ApiService {
 
     }
 
-    public List<String> getGroupPeers() throws IOException {
-        GroupPeers groupPeers = web3j.getGroupPeers().send();
+    public List<String> getGroupPeers(int groupId) throws IOException {
+        GroupPeers groupPeers = web3jMap.get(groupId).getGroupPeers().send();
         return groupPeers.getGroupPeers() ;
     }
 
     public List<String> getGroupList() throws IOException {
-        return web3j.getGroupList().send().getGroupList();
+        return web3jMap.get(1).getGroupList().send().getGroupList();
     }
 
     // get all peers of chain
-    public List<Peers.Peer> getPeers() throws IOException {
-        return web3j.getPeers().send().getPeers();
+    public List<Peers.Peer> getPeers(int groupId) throws IOException {
+        return web3jMap.get(groupId).getPeers().send().getPeers();
     }
 
-    public  String getConsensusStatus() throws IOException {
-        return web3j.getConsensusStatus().sendForReturnString();
+    public  String getConsensusStatus(int groupId) throws IOException {
+        return web3jMap.get(groupId).getConsensusStatus().sendForReturnString();
     }
 
-    public String getSyncStatus() throws IOException {
-        return web3j.getSyncStatus().sendForReturnString();
+    public String getSyncStatus(int groupId) throws IOException {
+        return web3jMap.get(groupId).getSyncStatus().sendForReturnString();
     }
 
-    public String getSystemConfigByKey(String key) throws IOException {
-        return web3j.getSystemConfigByKey(key).send().getSystemConfigByKey();
+    public String getSystemConfigByKey(int groupId, String key) throws IOException {
+        return web3jMap.get(groupId).getSystemConfigByKey(key).send().getSystemConfigByKey();
     }
 
 }

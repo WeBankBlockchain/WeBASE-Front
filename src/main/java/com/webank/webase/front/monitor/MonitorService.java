@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -25,11 +26,11 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class MonitorService {
     @Autowired
-    Web3j web3j;
+    Map<Integer,Web3j> web3jMap;
     @Autowired
     MonitorRepository monitorRepository;
 
-    public List<PerformanceData> findContrastDataByTime(LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap) throws Exception {
+    public List<PerformanceData> findContrastDataByTime(int groupId, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap) throws Exception {
 
         List<Monitor> monitorList;
         if (startTime == null && endTime == null) {
@@ -118,9 +119,10 @@ public class MonitorService {
         log.info("begin sync chain data");
         Monitor monitor = new Monitor();
         Long currentTime = System.currentTimeMillis();
-        CompletableFuture<BlockNumber> blockHeightFuture =  web3j.getBlockNumber().sendAsync();
-        CompletableFuture<PbftView> pbftViewFuture = web3j.getPbftView().sendAsync();
-        CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3j.getPendingTxSize().sendAsync();
+        //to do  add  more group
+        CompletableFuture<BlockNumber> blockHeightFuture = web3jMap.get(1).getBlockNumber().sendAsync();
+        CompletableFuture<PbftView> pbftViewFuture = web3jMap.get(1).getPbftView().sendAsync();
+        CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3jMap.get(1).getPendingTxSize().sendAsync();
 
         monitor.setBlockHeight(blockHeightFuture.get().getBlockNumber());
         monitor.setPbftView(pbftViewFuture.get().getPbftView());
