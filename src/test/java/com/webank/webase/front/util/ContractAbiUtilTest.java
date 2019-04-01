@@ -10,12 +10,14 @@ import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
+import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.webank.webase.front.transaction.TransService.outputFormat;
@@ -84,6 +86,9 @@ public class ContractAbiUtilTest extends TestBase {
 
     @Test
     public void testBuildType() {
+
+        HashMap web3jMap= new HashMap<Integer, Web3j>();
+        web3jMap.put("1", web3j);
         String s = ContractAbiUtil.buildTypeName("address[]").toString();
         String s1 = ContractAbiUtil.buildTypeName("address[4]").toString();
         assertEquals(s, "org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.Address>");

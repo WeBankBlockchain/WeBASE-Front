@@ -294,6 +294,7 @@ public class Web3ApiService {
 
     private boolean blockNumberCheck(int groupId, BigInteger blockNumber) throws IOException {
         BigInteger currentNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
+        System.out.println("****" + currentNumber);
         if (blockNumber.compareTo(currentNumber) == 1) {
             return true;
         }
