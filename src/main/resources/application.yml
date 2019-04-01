@@ -31,7 +31,6 @@ server:
 
 sdk: 
   orgName: orgTest
-  groupIdList: [1,2]
   corePoolSize: 50
   maxPoolSize: 100
   queueCapacity: 100
