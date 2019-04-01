@@ -55,15 +55,13 @@ public class Web3Config {
     public GroupChannelConnectionsConfig getGroupChannelConnectionsConfig(){
         List<ChannelConnections> channelConnectionsList = new ArrayList<>();
 
-        for(int i = 0 ; i< groupIdList.size(); i++) {
             List<String> connectionsList = new ArrayList<>();
             connectionsList.add(nodeConfig.getListenip() + ":" + nodeConfig.getChannelPort());
             System.out.println("*****" + nodeConfig.getListenip() + ":" + nodeConfig.getChannelPort());
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setConnectionsStr(connectionsList);
-            channelConnections.setGroupId(groupIdList.get(i));
+            channelConnections.setGroupId(1);
             channelConnectionsList.add(channelConnections);
-        }
 
         GroupChannelConnectionsConfig groupChannelConnectionsConfig = new GroupChannelConnectionsConfig();
         groupChannelConnectionsConfig.setAllChannelConnections(channelConnectionsList);
@@ -81,7 +79,7 @@ public class Web3Config {
         nodeConfig.setOrgName(orgName);
         Service service = new Service();
         service.setOrgID(orgName);
-        service.setGroupId(groupIdList.get(0));
+        service.setGroupId(1);
         service.setThreadPool(sdkThreadPool());
         service.setAllChannelConnections(groupChannelConnectionsConfig);
         return service;
@@ -116,9 +114,11 @@ public class Web3Config {
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(3000);
         channelEthereumService.setChannelService(service);
+        Web3j web3j = Web3j.build(channelEthereumService);
+        List<String> groupIdList = web3j.getGroupList().send().getGroupList();
         HashMap web3jMap= new HashMap<Integer,Web3j>();
         for (int i = 0; i < groupIdList.size(); i++) {
-            web3jMap.put(groupIdList.get(i), Web3j.build(channelEthereumService, groupIdList.get(i)));
+            web3jMap.put(Integer.parseInt(groupIdList.get(i)), Web3j.build(channelEthereumService,  Integer.parseInt(groupIdList.get(i))));
         }
         return web3jMap;
     }
@@ -131,7 +131,7 @@ public class Web3Config {
 
         while (entries.hasNext()) {
             Map.Entry entry = (Map.Entry) entries.next();
-            Integer key = (Integer) entry.getKey();
+            Integer key =  (Integer)entry.getKey();
             Web3j value = (Web3j) entry.getValue();
 
             cnsServiceMap.put(key, new CnsService(value, credentials));
