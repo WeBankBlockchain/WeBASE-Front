@@ -49,6 +49,7 @@ public class Web3Config {
     private int corePoolSize;
     private int maxPoolSize;
     private int queueCapacity;
+    private int timeout=3000;
     private int keepAlive;
 
     @Bean
@@ -112,7 +113,7 @@ public class Web3Config {
     public HashMap<Integer, Web3j> web3j(Service service) throws Exception {
         service.run();
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setTimeout(3000);
+        channelEthereumService.setTimeout(timeout);
         channelEthereumService.setChannelService(service);
         Web3j web3j = Web3j.build(channelEthereumService);
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
