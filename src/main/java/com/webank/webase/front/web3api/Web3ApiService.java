@@ -56,7 +56,7 @@ public class Web3ApiService {
      * 
      * @return
      */
-    public BigInteger getBlockNumber(int groupId) throws FrontException {
+    public BigInteger getBlockNumber(int groupId)  {
 
         BigInteger blockNumber;
         try {
@@ -74,7 +74,7 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      * @return
      */
-    public BcosBlock.Block getBlockByNumber(int groupId,BigInteger blockNumber) throws FrontException {
+    public BcosBlock.Block getBlockByNumber(int groupId,BigInteger blockNumber)  {
         BcosBlock.Block block;
         try {
             if (blockNumberCheck(groupId,blockNumber)) {
@@ -95,7 +95,7 @@ public class Web3ApiService {
      * @param blockHash blockHash
      * @return
      */
-    public BcosBlock.Block getBlockByHash(int groupId , String blockHash) throws FrontException {
+    public BcosBlock.Block getBlockByHash(int groupId , String blockHash)  {
         BcosBlock.Block block;
         try {
             block = web3jMap.get(groupId).getBlockByHash(blockHash, true).send().getBlock();
@@ -113,7 +113,7 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      * @return
      */
-    public int getBlockTransCntByNumber(int groupId,BigInteger blockNumber) throws FrontException {
+    public int getBlockTransCntByNumber(int groupId,BigInteger blockNumber)  {
         int transCnt;
         try {
             if (blockNumberCheck(groupId,blockNumber)) {
@@ -138,7 +138,7 @@ public class Web3ApiService {
      * 
      * @return
      */
-    public BigInteger getPbftView(int groupId) throws FrontException {
+    public BigInteger getPbftView(int groupId)  {
 
        BigInteger result;
         try {
@@ -156,7 +156,7 @@ public class Web3ApiService {
      * @param transHash transHash
      * @return
      */
-    public TransactionReceipt getTransactionReceipt(int groupId,String transHash) throws FrontException {
+    public TransactionReceipt getTransactionReceipt(int groupId,String transHash)  {
 
         TransactionReceipt transactionReceipt =null;
         try {
@@ -177,7 +177,7 @@ public class Web3ApiService {
      * @param transHash transHash
      * @return
      */
-    public Transaction getTransactionByHash(int groupId, String transHash) throws FrontException {
+    public Transaction getTransactionByHash(int groupId, String transHash)  {
 
         Transaction transaction= null;
         try {
@@ -197,7 +197,7 @@ public class Web3ApiService {
      * 
      * @return
      */
-    public String getClientVersion() throws FrontException {
+    public String getClientVersion()  {
         String version;
         try {
              version = web3jMap.get(1).getNodeVersion().send().getNodeVersion().getVersion();
@@ -215,7 +215,7 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      * @return
      */
-        public String  getCode(int groupId, String address, BigInteger blockNumber) throws FrontException {
+        public String  getCode(int groupId, String address, BigInteger blockNumber)  {
             String code;
             try {
             if (blockNumberCheck(groupId,blockNumber)) {
@@ -233,7 +233,7 @@ public class Web3ApiService {
      * get transaction counts.
      * @return
      */
-    public TotalTransactionCount.TransactionCount getTransCnt(int groupId) throws FrontException {
+    public TotalTransactionCount.TransactionCount getTransCnt(int groupId)  {
         TotalTransactionCount.TransactionCount transactionCount;
         try {
              transactionCount = web3jMap.get(groupId).getTotalTransactionCount().send().getTotalTransactionCount();
@@ -252,7 +252,7 @@ public class Web3ApiService {
      * @return
      */
     public Transaction getTransByBlockHashAndIndex(int groupId, String blockHash, BigInteger transactionIndex)
-            throws FrontException {
+             {
 
        Transaction transaction= null;
         try {
@@ -274,7 +274,7 @@ public class Web3ApiService {
      * @param transactionIndex index
      * @return
      */
-    public Transaction getTransByBlockNumberAndIndex(int groupId, BigInteger blockNumber, BigInteger transactionIndex) throws FrontException {
+    public Transaction getTransByBlockNumberAndIndex(int groupId, BigInteger blockNumber, BigInteger transactionIndex)  {
         Transaction transaction= null;
         try {
             if (blockNumberCheck(groupId,blockNumber)) {
@@ -292,8 +292,13 @@ public class Web3ApiService {
         return transaction;
     }
 
-    private boolean blockNumberCheck(int groupId, BigInteger blockNumber) throws IOException {
-        BigInteger currentNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
+    private boolean blockNumberCheck(int groupId, BigInteger blockNumber)  {
+        BigInteger currentNumber = null;
+        try {
+            currentNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         System.out.println("****" + currentNumber);
         if (blockNumber.compareTo(currentNumber) == 1) {
             return true;
@@ -301,26 +306,13 @@ public class Web3ApiService {
         return false;
     }
 
-    /**
-     * getNodeInfo.
-     * 
-     * @return
-     */
-    public BaseResponse getNodeInfo() {
-        log.info("getNodeInfo start.");
-
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-        log.info("getNodeInfo data:{}", nodeConfig.toString());
-        baseRspEntity.setData(JSON.parse(nodeConfig.toString()));
-        return baseRspEntity;
-    }
 
     /**
      * nodeHeartBeat.
      * 
      * @return
      */
-    public Map<String, BigInteger> nodeHeartBeat(int groupId) throws FrontException {
+    public Map<String, BigInteger> nodeHeartBeat(int groupId)  {
         try {
             BigInteger currentBlockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
             BigInteger currentPbftView = web3jMap.get(groupId).getPbftView().send().getPbftView();
@@ -343,30 +335,55 @@ public class Web3ApiService {
 
     }
 
-    public List<String> getGroupPeers(int groupId) throws IOException {
-        GroupPeers groupPeers = web3jMap.get(groupId).getGroupPeers().send();
+    public List<String> getGroupPeers(int groupId)  {
+        GroupPeers groupPeers = null;
+        try {
+            groupPeers = web3jMap.get(groupId).getGroupPeers().send();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
         return groupPeers.getGroupPeers() ;
     }
 
-    public List<String> getGroupList() throws IOException {
-        return web3jMap.get(1).getGroupList().send().getGroupList();
+    public List<String> getGroupList()  {
+        try {
+            return web3jMap.get(1).getGroupList().send().getGroupList();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
     }
 
     // get all peers of chain
-    public List<Peers.Peer> getPeers(int groupId) throws IOException {
-        return web3jMap.get(groupId).getPeers().send().getPeers();
+    public List<Peers.Peer> getPeers(int groupId)  {
+        try {
+            return web3jMap.get(groupId).getPeers().send().getPeers();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
     }
 
-    public  String getConsensusStatus(int groupId) throws IOException {
-        return web3jMap.get(groupId).getConsensusStatus().sendForReturnString();
+    public  String getConsensusStatus(int groupId) {
+        try {
+            return web3jMap.get(groupId).getConsensusStatus().sendForReturnString();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
     }
 
-    public String getSyncStatus(int groupId) throws IOException {
-        return web3jMap.get(groupId).getSyncStatus().sendForReturnString();
+    public String getSyncStatus(int groupId)  {
+        try {
+            return web3jMap.get(groupId).getSyncStatus().sendForReturnString();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
     }
 
-    public String getSystemConfigByKey(int groupId, String key) throws IOException {
-        return web3jMap.get(groupId).getSystemConfigByKey(key).send().getSystemConfigByKey();
+    public String getSystemConfigByKey(int groupId, String key)   {
+        try {
+            return web3jMap.get(groupId).getSystemConfigByKey(key).send().getSystemConfigByKey();
+        } catch (IOException e) {
+           throw new FrontException(e.getMessage());
+        }
     }
 
 }
