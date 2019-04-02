@@ -4,6 +4,7 @@ import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
@@ -16,8 +17,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -25,11 +25,11 @@ import java.util.concurrent.ExecutionException;
 @Service
 public class MonitorService {
     @Autowired
-    Web3j web3j;
+    Map<Integer,Web3j> web3jMap;
     @Autowired
     MonitorRepository monitorRepository;
 
-    public List<PerformanceData> findContrastDataByTime(LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap) throws Exception {
+    public List<PerformanceData> findContrastDataByTime(int groupId, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap) throws Exception {
 
         List<Monitor> monitorList;
         if (startTime == null && endTime == null) {
@@ -38,6 +38,7 @@ public class MonitorService {
             monitorList = new ArrayList<>();
         } else {
             monitorList = monitorRepository.findByTimeBetween(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+          //  log.info("*******" + monitorList.get(monitorList.size()-1).getGroupId());
         }
         List<Monitor> contrastMonitorList = new ArrayList<>();
         if (contrastStartTime != null && contrastEndTime != null) {
@@ -118,9 +119,10 @@ public class MonitorService {
         log.info("begin sync chain data");
         Monitor monitor = new Monitor();
         Long currentTime = System.currentTimeMillis();
-        CompletableFuture<BlockNumber> blockHeightFuture =  web3j.getBlockNumber().sendAsync();
-        CompletableFuture<PbftView> pbftViewFuture = web3j.getPbftView().sendAsync();
-        CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3j.getPendingTxSize().sendAsync();
+        //to do  add  more group
+        CompletableFuture<BlockNumber> blockHeightFuture = web3jMap.get(1).getBlockNumber().sendAsync();
+        CompletableFuture<PbftView> pbftViewFuture = web3jMap.get(1).getPbftView().sendAsync();
+        CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3jMap.get(1).getPendingTxSize().sendAsync();
 
         monitor.setBlockHeight(blockHeightFuture.get().getBlockNumber());
         monitor.setPbftView(pbftViewFuture.get().getPbftView());

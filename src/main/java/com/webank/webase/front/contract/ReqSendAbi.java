@@ -3,6 +3,7 @@ package com.webank.webase.front.contract;
 import com.webank.webase.front.base.ConstantCode;
 import java.util.List;
 import lombok.Data;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -33,5 +34,5 @@ public class ReqSendAbi {
     @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
-    private List<Object> abiInfo;
+    private List<AbiDefinition> abiInfo;
 }

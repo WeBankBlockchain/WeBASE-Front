@@ -30,6 +30,12 @@ public class BasicTest extends TestBase {
   }
 
   @Test
+  public void getBlockNumber() throws Exception {
+    System.out.println(web3j.getBlockByNumber(DefaultBlockParameter.valueOf("1"),true).send());
+    assertNotNull(web3j.getConsensusStatus().sendForReturnString());
+  }
+
+  @Test
   public void syncTest() throws Exception {
     System.out.println(web3j.getSyncStatus().send().isSyncing());
     assertNotNull(web3j.getSyncStatus().send().isSyncing());
@@ -47,7 +53,7 @@ public class BasicTest extends TestBase {
   @Test
   public void peersTest() throws Exception {
     Peers ethPeers = web3j.getPeers().send();
-    System.out.println(ethPeers.getValue().get(0).getNodeID());
+    System.out.println(ethPeers.getPeers().get(0).getNodeID());
     assertNotNull(ethPeers);
   }
 

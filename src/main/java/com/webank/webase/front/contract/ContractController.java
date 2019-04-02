@@ -4,22 +4,16 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.BaseController;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.keystore.KeyStoreService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -49,8 +43,6 @@ public class ContractController extends BaseController {
 
     @Autowired
     ContractService contractService;
-    @Autowired
-    KeyStoreService keyService;
 
     /**
      * sendAbi.
@@ -62,8 +54,7 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "send abi", notes = "send abi")
     @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/abiInfo")
-    public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)
-            throws FrontException {
+    public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result) throws FrontException {
         log.info("sendAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
         checkParamResult(result);
         return contractService.sendAbi(reqSendAbi);
@@ -79,7 +70,7 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "contract deploy", notes = "contract deploy")
     @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
     @PostMapping("/deploy")
-    public BaseResponse deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) throws Exception {
+    public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) throws Exception {
         log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
         return contractService.deploy(reqDeploy);
@@ -88,15 +79,17 @@ public class ContractController extends BaseController {
 
     @ApiOperation(value = "delete contract abi", notes = "delete contract abi")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "contractName", value = "contractName", required = true,
-                    dataType = "String"),
-            @ApiImplicitParam(name = "version", value = "version", required = true,
-                    dataType = "String")})
+            @ApiImplicitParam(name = "contractName", value = "contractName", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "version", value = "version", required = true, dataType = "String")})
     @DeleteMapping("/deleteAbi/{contractName}/{version:.+}")
-    public BaseResponse deleteAbi(@PathVariable String contractName, @PathVariable String version)
-            throws FrontException {
+    public BaseResponse deleteAbi(@PathVariable String contractName, @PathVariable String version) throws FrontException {
         log.info("deleteAbi start. contractName:{} version:{}", contractName, version);
         return contractService.deleteAbi(contractName, version);
+    }
+
+    @GetMapping("/cns")
+    public   String  getAddressByContractNameAndVersion(@RequestParam int groupId, @RequestParam String name, @RequestParam String version) {
+       return  contractService.getAddressByContractNameAndVersion(groupId, name ,version);
     }
 
 }

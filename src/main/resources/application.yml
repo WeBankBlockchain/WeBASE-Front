@@ -31,14 +31,14 @@ server:
 
 sdk: 
   orgName: orgTest
-  groupId: 1
   corePoolSize: 50
   maxPoolSize: 100
   queueCapacity: 100
+  timeout: 3000
   keepAlive: 60
 
 constant:  
-  nodeDir: /data/app/build/node0
+  nodeDir: D:\config
   mgrIpPorts: 10.0.0.1:8082
   transMaxWait: 30
 
