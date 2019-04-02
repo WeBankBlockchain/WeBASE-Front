@@ -1,4 +1,4 @@
-package com.webank.webase.front.web3j.solidity;
+package com.webank.webase.front.web3j;
 
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.*;
 

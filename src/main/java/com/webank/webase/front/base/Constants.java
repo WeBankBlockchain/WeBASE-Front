@@ -39,7 +39,7 @@ public class Constants {
 
     public static final String SEP = "_";
     public static final String DIAGONAL = "/";
-    public static final String SYMPOL = "@";
+    public static final String SYMPOL = ":";
     public static final String TYPE_EVENT = "event";
     public static final String TYPE_FUNCTION = "function";
     public static final String TYPE_CONSTRUCTOR = "constructor";

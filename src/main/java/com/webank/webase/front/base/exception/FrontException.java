@@ -22,7 +22,7 @@ import com.webank.webase.front.base.RetCode;
  * FrontException.
  * 
  */
-public class FrontException extends Exception {
+public class FrontException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
     private RetCode retCode;
@@ -35,6 +35,9 @@ public class FrontException extends Exception {
     public FrontException(int code, String msg) {
         super(msg);
         this.retCode = new RetCode(code, msg);
+    }
+    public FrontException( String msg) {
+        super(msg);
     }
 
     public RetCode getRetCode() {

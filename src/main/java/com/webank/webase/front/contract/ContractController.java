@@ -5,12 +5,10 @@ import com.webank.webase.front.base.BaseController;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.file.FileContent;
-import com.webank.webase.front.keystore.KeyStoreService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -20,10 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -111,7 +111,7 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "contract deploy", notes = "contract deploy")
     @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
     @PostMapping("/deploy")
-    public BaseResponse deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) throws Exception {
+    public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) throws Exception {
         log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
         return contractService.deploy(reqDeploy);
@@ -142,5 +142,10 @@ public class ContractController extends BaseController {
         }
     }
 
+
+    @GetMapping("/cns")
+    public   String  getAddressByContractNameAndVersion(@RequestParam int groupId, @RequestParam String name, @RequestParam String version) {
+       return  contractService.getAddressByContractNameAndVersion(groupId, name ,version);
+    }
 
 }

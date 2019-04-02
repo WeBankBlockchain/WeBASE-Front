@@ -5,19 +5,17 @@ import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.config.NodeConfig;
-import com.webank.webase.front.transaction.TransService;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,34 +44,28 @@ import java.util.Optional;
 public class Web3ApiService {
 
     @Autowired
-    Web3j web3j;
+    Map<Integer, Web3j> web3jMap;
     @Autowired
     NodeConfig nodeConfig;
-    @Autowired
-    TransService transService;
 
-    private BigInteger blockNumber = new BigInteger("0");
-    private BigInteger pbftView = new BigInteger("0");
+    private static BigInteger blockNumber = new BigInteger("0");
+    private static BigInteger pbftView = new BigInteger("0");
 
     /**
      * getBlockNumber.
      * 
      * @return
      */
-    public BaseResponse getBlockNumber() throws FrontException {
-        log.info("getBlockNumber start.");
+    public BigInteger getBlockNumber(int groupId)  {
 
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-        Map<String, BigInteger> map = new HashMap<String, BigInteger>();
+        BigInteger blockNumber;
         try {
-            BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
-            map.put("blockNumber", blockNumber);
-            baseRspEntity.setData(map);
+             blockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
         } catch (IOException e) {
             log.error("getBlockNumber fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return blockNumber;
     }
 
     /**
@@ -82,24 +74,19 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      * @return
      */
-    public BaseResponse getBlockByNumber(BigInteger blockNumber) throws FrontException {
-        log.info("getBlockByNumber start. blockNumber:{}", blockNumber);
-
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
+    public BcosBlock.Block getBlockByNumber(int groupId,BigInteger blockNumber)  {
+        BcosBlock.Block block;
         try {
-            if (blockNumberCheck(blockNumber)) {
-                baseRspEntity = new BaseResponse(ConstantCode.BLOCK_NUMBER_ERROR);
-                return baseRspEntity;
+            if (blockNumberCheck(groupId,blockNumber)) {
+                throw new FrontException("requst blockNumber is greater than latest");
             }
-            BcosBlock.Block block =
-                    web3j.getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
+             block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                             .send().getBlock();
-            baseRspEntity.setData(block);
         } catch (IOException e) {
             log.error("getBlockByNumber fail. blockNumber:{} ", blockNumber);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return block;
     }
 
     /**
@@ -108,18 +95,16 @@ public class Web3ApiService {
      * @param blockHash blockHash
      * @return
      */
-    public BaseResponse getBlockByHash(String blockHash) throws FrontException {
-        log.info("getBlockByHash start. blockHash:{}", blockHash);
-
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
+    public BcosBlock.Block getBlockByHash(int groupId , String blockHash)  {
+        BcosBlock.Block block;
         try {
-            BcosBlock.Block block = web3j.getBlockByHash(blockHash, true).send().getBlock();
-            baseRspEntity.setData(block);
+            block = web3jMap.get(groupId).getBlockByHash(blockHash, true).send().getBlock();
+
         } catch (IOException e) {
             log.error("getBlockByHash fail. blockHash:{} ", blockHash);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return block;
     }
 
     /**
@@ -128,30 +113,24 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      * @return
      */
-    public BaseResponse getBlockTransCntByNumber(BigInteger blockNumber) throws FrontException {
-        log.info("getBlockTransCntByNumber start. blockNumber:{}", blockNumber);
-
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-        Map<String, BigInteger> map = new HashMap<String, BigInteger>();
+    public int getBlockTransCntByNumber(int groupId,BigInteger blockNumber)  {
+        int transCnt;
         try {
-            if (blockNumberCheck(blockNumber)) {
-                baseRspEntity = new BaseResponse(ConstantCode.BLOCK_NUMBER_ERROR);
-                return baseRspEntity;
+            if (blockNumberCheck(groupId,blockNumber)) {
+                throw new FrontException("requst blockNumber is greater than latest");
             }
-            BcosBlock.Block block =
-                    web3j.getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
+            BcosBlock.Block block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                             .send().getBlock();
-            int transCnt = block.getTransactions().size();
+             transCnt = block.getTransactions().size();
 //            BigInteger transCnt = web3j
 //                    .ethGetBlockTransactionCountByNumber(DefaultBlockParameter.valueOf(blockNumber))
 //                    .send().getTransactionCount();
-           map.put("transactionCount", BigInteger.valueOf(transCnt));
-            baseRspEntity.setData(map);
+
         } catch (IOException e) {
             log.error("getBlockTransCntByNumber fail. blockNumber:{} ", blockNumber);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return transCnt;
     }
 
     /**
@@ -159,20 +138,16 @@ public class Web3ApiService {
      * 
      * @return
      */
-    public BaseResponse getPbftView() throws FrontException {
-        log.info("getPbftView start.");
+    public BigInteger getPbftView(int groupId)  {
 
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-        Map<String, BigInteger> map = new HashMap<String, BigInteger>();
+       BigInteger result;
         try {
-            BigInteger pbftView = web3j.getPbftView().send().getPbftView();
-            map.put("pbftView", pbftView);
-            baseRspEntity.setData(map);
+            result = web3jMap.get(groupId).getPbftView().send().getPbftView();
         } catch (IOException e) {
             log.error("getPbftView fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return result;
     }
 
     /**
@@ -181,21 +156,19 @@ public class Web3ApiService {
      * @param transHash transHash
      * @return
      */
-    public BaseResponse getTransactionReceipt(String transHash) throws FrontException {
-        log.info("getTransactionReceipt start. transHash:{}", transHash);
+    public TransactionReceipt getTransactionReceipt(int groupId,String transHash)  {
 
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
+        TransactionReceipt transactionReceipt =null;
         try {
-            Optional<TransactionReceipt> opt =
-                    web3j.getTransactionReceipt(transHash).send().getTransactionReceipt();
+            Optional<TransactionReceipt> opt = web3jMap.get(groupId).getTransactionReceipt(transHash).send().getTransactionReceipt();
             if (opt.isPresent()) {
-                baseRspEntity.setData(opt.get());
+                transactionReceipt= opt.get();
             }
         } catch (IOException e) {
             log.error("getTransactionReceipt fail. transHash:{} ", transHash);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return transactionReceipt;
     }
 
     /**
@@ -204,21 +177,19 @@ public class Web3ApiService {
      * @param transHash transHash
      * @return
      */
-    public BaseResponse getTransactionByHash(String transHash) throws FrontException {
-        log.info("getTransactionByHash start. transHash:{}", transHash);
+    public Transaction getTransactionByHash(int groupId, String transHash)  {
 
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
+        Transaction transaction= null;
         try {
-            Optional<Transaction> opt =
-                    web3j.getTransactionByHash(transHash).send().getTransaction();
+            Optional<Transaction> opt = web3jMap.get(groupId).getTransactionByHash(transHash).send().getTransaction();
             if (opt.isPresent()) {
-                baseRspEntity.setData(opt.get());
+                transaction = opt.get();
             }
         } catch (IOException e) {
             log.error("getTransactionByHash fail. transHash:{} ", transHash);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return transaction;
     }
 
     /**
@@ -226,20 +197,15 @@ public class Web3ApiService {
      * 
      * @return
      */
-    public BaseResponse getClientVersion() throws FrontException {
-        log.info("getClientVersion start.");
-
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-        Map<String, String> map = new HashMap<String, String>();
+    public String getClientVersion()  {
+        String version;
         try {
-            String version = web3j.getClientVersion().send().getWeb3ClientVersion();
-            map.put("version", version);
-            baseRspEntity.setData(map);
+             version = web3jMap.get(1).getNodeVersion().send().getNodeVersion().getVersion();
         } catch (IOException e) {
             log.error("getClientVersion fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return version;
     }
 
     /**
@@ -249,54 +215,34 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      * @return
      */
-    public BaseResponse getCode(String address, BigInteger blockNumber) throws FrontException {
-        log.info("getCode start. address:{} blockNumber:{}", address, blockNumber);
-
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-        Map<String, String> map = new HashMap<String, String>();
-        try {
-            if (blockNumberCheck(blockNumber)) {
-                baseRspEntity = new BaseResponse(ConstantCode.BLOCK_NUMBER_ERROR);
-                return baseRspEntity;
+        public String  getCode(int groupId, String address, BigInteger blockNumber)  {
+            String code;
+            try {
+            if (blockNumberCheck(groupId,blockNumber)) {
+                throw new FrontException("requst blockNumber is greater than latest");
             }
-            String code = web3j.getCode(address, DefaultBlockParameter.valueOf(blockNumber))
-                    .send().getCode();
-            map.put("code", code);
-            baseRspEntity.setData(map);
+             code = web3jMap.get(groupId).getCode(address, DefaultBlockParameter.valueOf(blockNumber)).send().getCode();
         } catch (IOException e) {
             log.error("getCode fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return code;
     }
 
-//    /**
-//     * get transaction counts.
-//     * @param address address
-//     * @param blockNumber blockNumber
-//     * @return
-//     */
-//    public BaseResponse getTransCnt(String address, BigInteger blockNumber) throws FrontException {
-//        log.info("getTransCnt start. address:{} blockNumber:{}", address, blockNumber);
-//
-//        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-//        Map<String, BigInteger> map = new HashMap<String, BigInteger>();
-//        try {
-//            if (blockNumberCheck(blockNumber)) {
-//                baseRspEntity = new BaseResponse(ConstantCode.BLOCK_NUMBER_ERROR);
-//                return baseRspEntity;
-//            }
-//            BigInteger transactionCount = web3j
-//                    .ethGetTransactionCount(address, DefaultBlockParameter.valueOf(blockNumber))
-//                    .send().getTransactionCount();
-//            map.put("transactionCount", transactionCount);
-//            baseRspEntity.setData(map);
-//        } catch (IOException e) {
-//            log.error("getTransCnt fail.");
-//            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
-//        }
-//        return baseRspEntity;
-//    }
+    /**
+     * get transaction counts.
+     * @return
+     */
+    public TotalTransactionCount.TransactionCount getTransCnt(int groupId)  {
+        TotalTransactionCount.TransactionCount transactionCount;
+        try {
+             transactionCount = web3jMap.get(groupId).getTotalTransactionCount().send().getTotalTransactionCount();
+        } catch (IOException e) {
+            log.error("getTransCnt fail.");
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
+        return transactionCount;
+    }
 
     /**
      * getTransByBlockHashAndIndex.
@@ -305,24 +251,20 @@ public class Web3ApiService {
      * @param transactionIndex index
      * @return
      */
-    public BaseResponse getTransByBlockHashAndIndex(String blockHash, BigInteger transactionIndex)
-            throws FrontException {
-        log.info("getTransByBlockHashAndIndex start. blockHash:{} transactionIndex:{}", blockHash,
-                transactionIndex);
+    public Transaction getTransByBlockHashAndIndex(int groupId, String blockHash, BigInteger transactionIndex)
+             {
 
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
+       Transaction transaction= null;
         try {
-            Optional<Transaction> opt =
-                    web3j.getTransactionByBlockHashAndIndex(blockHash, transactionIndex).send()
-                            .getTransaction();
+            Optional<Transaction> opt = web3jMap.get(groupId).getTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getTransaction();
             if (opt.isPresent()) {
-                baseRspEntity.setData(opt.get());
+                transaction= opt.get();
             }
         } catch (IOException e) {
             log.error("getTransByBlockHashAndIndex fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return transaction;
     }
 
     /**
@@ -332,70 +274,52 @@ public class Web3ApiService {
      * @param transactionIndex index
      * @return
      */
-    public BaseResponse getTransByBlockNumberAndIndex(BigInteger blockNumber,
-            BigInteger transactionIndex) throws FrontException {
-        log.info("getTransByBlockNumberAndIndex start. blockNumber:{} transactionIndex:{}",
-                blockNumber, transactionIndex);
-
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
+    public Transaction getTransByBlockNumberAndIndex(int groupId, BigInteger blockNumber, BigInteger transactionIndex)  {
+        Transaction transaction= null;
         try {
-            if (blockNumberCheck(blockNumber)) {
-                baseRspEntity = new BaseResponse(ConstantCode.BLOCK_NUMBER_ERROR);
-                return baseRspEntity;
+            if (blockNumberCheck(groupId,blockNumber)) {
+               throw new FrontException("requst blockNumber is greater than latest");
             }
-            Optional<Transaction> opt = web3j
-                    .getTransactionByBlockNumberAndIndex(
-                            DefaultBlockParameter.valueOf(blockNumber), transactionIndex)
-                    .send().getTransaction();
+            Optional<Transaction> opt = web3jMap.get(groupId)
+                    .getTransactionByBlockNumberAndIndex(DefaultBlockParameter.valueOf(blockNumber), transactionIndex).send().getTransaction();
             if (opt.isPresent()) {
-                baseRspEntity.setData(opt.get());
+                transaction= opt.get();
             }
         } catch (IOException e) {
             log.error("getTransByBlockNumberAndIndex fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+        return transaction;
     }
 
-    private boolean blockNumberCheck(BigInteger blockNumber) throws IOException {
-        BigInteger currentNumber = web3j.getBlockNumber().send().getBlockNumber();
+    private boolean blockNumberCheck(int groupId, BigInteger blockNumber)  {
+        BigInteger currentNumber = null;
+        try {
+            currentNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("****" + currentNumber);
         if (blockNumber.compareTo(currentNumber) == 1) {
             return true;
         }
         return false;
     }
 
-    /**
-     * getNodeInfo.
-     * 
-     * @return
-     */
-    public BaseResponse getNodeInfo() {
-        log.info("getNodeInfo start.");
-
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-        log.info("getNodeInfo data:{}", nodeConfig.toString());
-        baseRspEntity.setData(JSON.parse(nodeConfig.toString()));
-        return baseRspEntity;
-    }
 
     /**
      * nodeHeartBeat.
      * 
      * @return
      */
-    public BaseResponse nodeHeartBeat() throws FrontException {
-        log.info("nodeHeartBeat start.");
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
+    public Map<String, BigInteger> nodeHeartBeat(int groupId)  {
         try {
-            BigInteger currentBlockNumber = web3j.getBlockNumber().send().getBlockNumber();
-            BigInteger currentPbftView = web3j.getPbftView().send().getPbftView();
+            BigInteger currentBlockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
+            BigInteger currentPbftView = web3jMap.get(groupId).getPbftView().send().getPbftView();
             log.info("nodeHeartBeat blockNumber:{} current:{} pbftView:{} current:{}",
                     this.blockNumber, currentBlockNumber, this.pbftView, currentPbftView);
-            if (currentBlockNumber.equals(this.blockNumber)
-                    && currentPbftView.equals(this.pbftView)) {
-                baseRspEntity = new BaseResponse(ConstantCode.BLOCKNUMBER_AND_PBFTVIEW_UNCHANGED);
-                return baseRspEntity;
+            if (currentBlockNumber.equals(this.blockNumber) && currentPbftView.equals(this.pbftView)) {
+                throw new FrontException("blockNumber and pbftView unchanged");
             } else {
                 this.blockNumber = currentBlockNumber;
                 this.pbftView = currentPbftView;
@@ -403,11 +327,63 @@ public class Web3ApiService {
             Map<String, BigInteger> map = new HashMap<String, BigInteger>();
             map.put("blockNumber", currentBlockNumber);
             map.put("pbftView", currentPbftView);
-            baseRspEntity.setData(map);
+            return map;
         } catch (IOException e) {
             log.error("nodeHeartBeat Exception.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
-        return baseRspEntity;
+
     }
+
+    public List<String> getGroupPeers(int groupId)  {
+        GroupPeers groupPeers = null;
+        try {
+            groupPeers = web3jMap.get(groupId).getGroupPeers().send();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
+        return groupPeers.getGroupPeers() ;
+    }
+
+    public List<String> getGroupList()  {
+        try {
+            return web3jMap.get(1).getGroupList().send().getGroupList();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
+    }
+
+    // get all peers of chain
+    public List<Peers.Peer> getPeers(int groupId)  {
+        try {
+            return web3jMap.get(groupId).getPeers().send().getPeers();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
+    }
+
+    public  String getConsensusStatus(int groupId) {
+        try {
+            return web3jMap.get(groupId).getConsensusStatus().sendForReturnString();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
+    }
+
+    public String getSyncStatus(int groupId)  {
+        try {
+            return web3jMap.get(groupId).getSyncStatus().sendForReturnString();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
+    }
+
+    public String getSystemConfigByKey(int groupId, String key)   {
+        try {
+            return web3jMap.get(groupId).getSystemConfigByKey(key).send().getSystemConfigByKey();
+        } catch (IOException e) {
+           throw new FrontException(e.getMessage());
+        }
+    }
+
 }

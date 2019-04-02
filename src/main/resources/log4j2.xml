@@ -64,8 +64,9 @@
             <AppenderRef ref="asyncWeb3sdk" />
         </Logger>
 
-        <Root level="debug">
-            <AppenderRef ref="asyncFront" />
+
+        <Root level="info">
+            <AppenderRef ref="console" />
             <AppenderRef ref="asyncError" />
         </Root>
     </Loggers>

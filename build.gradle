@@ -15,6 +15,7 @@ repositories {
     maven {
         url "http://maven.aliyun.com/nexus/content/groups/public/"
     }
+	maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 	maven { url 'https://dl.bintray.com/ethereum/maven/' }
 	maven { url 'http://repo.typesafe.com/typesafe/maven-releases/' }
 
@@ -48,15 +49,6 @@ List swagger = [
     'io.springfox:springfox-swagger-ui:2.8.0'
 ]
 
-List web3sdk = [
-    'org.fisco-bcos:web3sdk:2.0.2',
-    'org.apache.httpcomponents:httpclient:4.5.2',
-    'org.bouncycastle:bcprov-jdk15on:1.54',
-    'com.lambdaworks:scrypt:1.4.0',
-    'com.squareup:javapoet:1.7.0',
-    'io.reactivex.rxjava2:rxjava:2.2.7',
-	'com.github.jnr:jnr-unixsocket:0.15'
-]
 
 def log4j_version="2.9.0"
 List logger = [
@@ -67,20 +59,18 @@ List logger = [
         "org.slf4j:jcl-over-slf4j:1.7.12"
 ]
 
-List netty = [
- 'io.netty:netty-all:4.1.15.Final',
- 'io.netty:netty-tcnative:2.0.0.Final'
-]
 
 dependencies {
-    compile spring,spring_boot,swagger,web3sdk,logger,netty
+    compile spring,spring_boot,swagger,logger
 
-	compile 'org.fisco-bcos:web3sdk:2.0.0-rc1'
-    compile 'com.alibaba:fastjson:1.2.29'
+	//compile 'org.fisco-bcos:web3sdk:2.0.2'
+	//compile "org.fisco-bcos:web3sdk:2.0.0-SNAPSHOT"
+	compile group:"org.fisco-bcos", name:"web3sdk", version:"2.0.0-SNAPSHOT", changing: true
+	compile 'com.alibaba:fastjson:1.2.29'
 	compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.2'
-    compileOnly 'org.projectlombok:lombok:1.18.2'
+	compile 'org.projectlombok:lombok:1.18.2'
 
 	testCompile 'junit:junit:4.12',
 				'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
@@ -96,16 +86,9 @@ configurations {
     all*.exclude group: 'com.mchange', module: '*'
 }
 
-sourceSets {
-	main {
-		java {
-	        srcDir 'src/main/java'
-		}
-        resources  {
-            srcDir 'src/main/resources'
-        }
-	}
-}
+//configurations.all {
+//	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+//}
 
 clean {
     delete 'dist'

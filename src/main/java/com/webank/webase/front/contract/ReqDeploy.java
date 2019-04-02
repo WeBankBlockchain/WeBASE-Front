@@ -41,5 +41,6 @@ public class ReqDeploy {
     private List<AbiDefinition> abiInfo;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
     private String bytecodeBin;
+    private  int groupId = 1;
     private List<Object> funcParam = new ArrayList<>();
 }
