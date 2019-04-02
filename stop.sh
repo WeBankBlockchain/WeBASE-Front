@@ -37,4 +37,4 @@ stopFront(){
 # stop front
 stopFront
 # stop report
-cd ./report && sh report_stop.sh
+#cd ./report && sh report_stop.sh
