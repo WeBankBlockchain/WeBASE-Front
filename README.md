@@ -30,7 +30,7 @@
 ## 4.1 拉取代码
 
 执行命令：
-```
+```shell
 git clone https://github.com/WeBankFinTech/webase-front.git
 
 ```
@@ -45,14 +45,14 @@ git checkout dev
 ## 4.2 编译代码
 
 在代码的根目录webase-front执行构建命令：
-```
+```shell
 gradle build -x test
 ```
 构建完成后，会在根目录webase-front下生成已编译的代码目录dist。
 
 ## 4.3 修改配置
 （1）进入目录：
-```
+```shell
 cd dist/conf
 ```
 ```
@@ -65,7 +65,7 @@ cd dist/conf
 **备注：如果字符串中存在斜杠'/'，在前面加单个反斜杠'\\'转义**
 
 （2）进入目录：
-```
+```shell
 cd dist/report
 ```
 ```
@@ -86,7 +86,7 @@ cd dist
 检查：sh status.sh
 ```
 **备注**：如果脚本执行错误，尝试以下命令:
-```
+```shell
 赋权限：chmod + *.sh
 转格式：dos2unix *.sh
 ```
