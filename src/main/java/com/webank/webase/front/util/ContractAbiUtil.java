@@ -216,8 +216,7 @@ public class ContractAbiUtil {
             throws FrontException {
         FileOutputStream outputStream = null;
         try {
-            File file = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName
-                    + Constants.SEP + version);
+            File file = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
             if (file.exists()) {
                 file.delete();
             }
