@@ -1,3 +1,5 @@
+# 节点前置服务说明
+
 # 目录
 > * [功能说明](#chapter-1)
 > * [前提条件](#chapter-2)
@@ -33,11 +35,11 @@ git clone https://github.com/WeBankFinTech/webase-front.git
 
 ```
 
-**注意**：代码拉取后，切换到相应分支。
+**注意**：代码拉取后，可以切换到相应分支（如：dev）。
 
 ```shell
 cd webase-front
-git checkout XXXXX
+git checkout dev
 ```
 
 ## 4.2 编译代码
