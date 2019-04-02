@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -103,7 +102,7 @@ public class ContractService {
      * @param req request data
      * @return
      */
-    public String deploy(ReqDeploy req) throws Exception {
+    public String deploy(ReqDeploy req)  {
 
         int userId = req.getUserId();
         String contractName = req.getContractName();
@@ -122,29 +121,13 @@ public class ContractService {
         String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
         checkContractAbiExistedAndSave(contractName, version, abiInfos);
-//        // cns Params
-//        List<Object> cnsParams = new ArrayList<>();
-//        cnsParams.add(contractName + Constants.DIAGONAL + version);
-//        cnsParams.add(contractName);
-//        cnsParams.add(version);
-//        cnsParams.add(JSON.toJSONString(abiInfos));
-//        cnsParams.add(contractAddress);
 
-         cnsServiceMap.get(groupId).registerCns(contractName ,version, contractAddress,JSON.toJSONString(abiInfos));
+        try {
+            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
+        } catch(Exception e) {
+            throw new FrontException("register cns failed:  " + e.getMessage());
+        }
 
-
-        // trans Params
-//        ReqTransHandle reqTransHandle = new ReqTransHandle();
-//        reqTransHandle.setUserId(userId);
-//        reqTransHandle.setContractName(Constants.CNS_CONTRAC_TNAME);
-//        reqTransHandle.setVersion("");
-//        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_ADDABI);
-//        reqTransHandle.setFuncParam(cnsParams);
-
-        // cns add
-//        BaseResponse baseRsp = transService.dealWithtrans(reqTransHandle);
-
-        // result
         return contractAddress;
     }
 
@@ -172,16 +155,11 @@ public class ContractService {
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
         if (!ifExisted) {
 
-//            List<AbiDefinition> ilist = new ArrayList<>();
-//            for (Object o : abiInfos) {
-//                ilist.add((AbiDefinition) o);
-//            }
-            //  JSONArray jsonArray = JSONArray.parseArray(JSON.toJSONString(abiInfos));
             ContractAbiUtil.addAbiToCacheMapAndSaveToFile(contractName, version, abiInfos, true);
         }
     }
 
-    private String deployContract(int groupId, String bytecodeBin, String encodedConstructor, Credentials credentials) throws FrontException {
+    private String deployContract(int groupId, String bytecodeBin, String encodedConstructor, Credentials credentials)   {
         CommonContract commonContract = null;
         try {
             commonContract = CommonContract.deploy(web3jMap.get(groupId), credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
@@ -212,30 +190,34 @@ public class ContractService {
         return baseRsp;
     }
 
-    public static FileContent compileToJavaFile(String contractName, List<AbiDefinition> abiInfo, String binaryCode, String packageName) throws IOException {
+    public static FileContent compileToJavaFile(String contractName, List<AbiDefinition> abiInfo, String binaryCode, String packageName) {
 
-        File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
-        FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
-        File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
-        FileUtils.writeStringToFile(binFile, JSON.toJSONString(binaryCode));
+        try {
+            File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
 
-        SolidityFunctionWrapperGenerator.main(
-                Arrays.asList(
-                        "-a", abiFile.getPath(),
-                        "-b", binFile.getPath(),
-                        "-p", packageName,
-                        "-o", Constants.JAVA_DIR)
-                        .toArray(new String[0]));
+            FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
+            File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
+            FileUtils.writeStringToFile(binFile, JSON.toJSONString(binaryCode));
 
-        String outputDirectory="" ;
-        if (!packageName.isEmpty()) {
-              outputDirectory= packageName.replace(".",File.separator);
+            SolidityFunctionWrapperGenerator.main(
+                    Arrays.asList(
+                            "-a", abiFile.getPath(),
+                            "-b", binFile.getPath(),
+                            "-p", packageName,
+                            "-o", Constants.JAVA_DIR)
+                            .toArray(new String[0]));
+
+            String outputDirectory = "";
+            if (!packageName.isEmpty()) {
+                outputDirectory = packageName.replace(".", File.separator);
+            }
+            File file = new File(Constants.JAVA_DIR + File.separator + outputDirectory + File.separator + contractName + ".java");
+            InputStream targetStream = new FileInputStream(file);
+            return new FileContent(contractName + ".java", targetStream);
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
         }
-        File file = new File(Constants.JAVA_DIR+ File.separator+ outputDirectory+ File.separator+ contractName+".java");
-        InputStream targetStream = new FileInputStream(file);
-        return new FileContent(contractName+".java",targetStream);
     }
-
 
     public void saveContract(Contract contract) {
         contractRepository.save(contract);
@@ -244,5 +226,12 @@ public class ContractService {
     public String getAddressByContractNameAndVersion(int groupId, String name, String version) {
         return cnsServiceMap.get(groupId).getAddressByContractNameAndVersion(name+":"+version);
 
+    }
+
+    public List<Contract> findByCriteria(String contractName, String version, String address) {
+        if (address != null) {
+            return contractRepository.findBycontractAddress(address);
+        }
+        return contractRepository.findByContractNameAndVersion(contractName, version);
     }
 }

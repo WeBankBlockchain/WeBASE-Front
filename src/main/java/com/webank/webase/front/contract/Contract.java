@@ -14,7 +14,6 @@ public class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
     private String contractName;
     private String version;
     private String abi;
@@ -23,4 +22,5 @@ public class Contract {
     private String contractAddress;
     private LocalDateTime deployTime;
     private String deployedUser;
+    private int groupId;
 }

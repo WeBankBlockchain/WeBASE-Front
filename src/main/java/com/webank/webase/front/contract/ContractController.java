@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 
 /*
@@ -76,13 +77,19 @@ public class ContractController extends BaseController {
      * @param result checkResult
      * @return
      */
-    @ApiOperation(value = "send abi", notes = "send abi")
-    @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping
-    public void sendAbi(@Valid @RequestBody Contract contract, BindingResult result) throws FrontException {
+    public void saveContract( @RequestBody Contract contract, BindingResult result) throws FrontException {
        // log.info("saveAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
         checkParamResult(result);
         contractService.saveContract(contract);
+    }
+
+    @GetMapping
+    public List<Contract> findContract(@RequestParam String contractName, @RequestParam String version, @RequestParam String contractAddress, BindingResult result) throws FrontException {
+        // log.info("saveAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
+        checkParamResult(result);
+        return  contractService.findByCriteria(contractName, version, contractAddress);
+
     }
 
 
@@ -95,7 +102,7 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "compile java", notes = "compile java")
     @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/compile-java")
-    public ResponseEntity<InputStreamResource> compileJavaFile(@Valid @RequestBody ReqSendAbi reqSendAbi, @RequestParam String packageName, BindingResult result) throws FrontException, IOException {
+    public ResponseEntity<InputStreamResource> compileJavaFile(@Valid @RequestBody ReqSendAbi reqSendAbi, @RequestParam String packageName, BindingResult result)  {
         checkParamResult(result);
        FileContent fileContent =  ContractService.compileToJavaFile(reqSendAbi.getContractName(),reqSendAbi.getAbiInfo(),reqSendAbi.getBinaryCode(),packageName);
         return ResponseEntity.ok().headers(headers(fileContent.getFileName())).body(new InputStreamResource(fileContent.getInputStream()));
@@ -111,7 +118,7 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "contract deploy", notes = "contract deploy")
     @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
     @PostMapping("/deploy")
-    public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) throws Exception {
+    public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) {
         log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
         return contractService.deploy(reqDeploy);
