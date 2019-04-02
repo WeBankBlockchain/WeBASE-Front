@@ -64,4 +64,4 @@ startFront(){
 # start front
 startFront
 # start report
-cd ./report && chmod +x *.sh && dos2unix *.sh && sh report_start.sh
+#cd ./report && chmod +x *.sh && dos2unix *.sh && sh report_start.sh
