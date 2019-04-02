@@ -1,5 +1,6 @@
 package com.webank.webase.front.performance;
 
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
@@ -80,7 +81,7 @@ public class PerformanceService {
      */
     public List<PerformanceData> findContrastDataByTime(LocalDateTime startTime,
             LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
-            int gap) throws Exception {
+            int gap)  {
 
         List<Performance> performanceList;
         if (startTime == null && endTime == null) {
@@ -299,9 +300,9 @@ public class PerformanceService {
      * @param gap gap
      * @return
      */
-    public List transferListByGap(List arrayList, int gap) throws Exception {
+    public List transferListByGap(List arrayList, int gap)  {
         if (gap == 0) {
-            throw new Exception("gap cannot be 0");
+             throw new FrontException("gap cannot be 0");
         }
         List newPerformanceList = fillList(arrayList);
         List ilist = new ArrayList<>();

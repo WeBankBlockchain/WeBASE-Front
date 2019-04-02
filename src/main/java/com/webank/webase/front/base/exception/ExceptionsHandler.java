@@ -50,7 +50,7 @@ public class ExceptionsHandler {
     public BaseResponse myExceptionHandler(FrontException frontException) throws Exception {
         log.warn("catch business exception", frontException);
         RetCode retCode = Optional.ofNullable(frontException).map(FrontException::getRetCode)
-                .orElse(ConstantCode.SYSTEM_ERROR);
+                .orElse(new RetCode(101001, frontException.getMessage()));
 
         BaseResponse rep = new BaseResponse(retCode);
         log.warn("business exception return:{}", mapper.writeValueAsString(rep));

@@ -1,5 +1,6 @@
 package com.webank.webase.front.monitor;
 
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
@@ -29,7 +30,7 @@ public class MonitorService {
     @Autowired
     MonitorRepository monitorRepository;
 
-    public List<PerformanceData> findContrastDataByTime(int groupId, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap) throws Exception {
+    public List<PerformanceData> findContrastDataByTime(int groupId, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap)  {
 
         List<Monitor> monitorList;
         if (startTime == null && endTime == null) {
@@ -38,7 +39,6 @@ public class MonitorService {
             monitorList = new ArrayList<>();
         } else {
             monitorList = monitorRepository.findByTimeBetween(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-          //  log.info("*******" + monitorList.get(monitorList.size()-1).getGroupId());
         }
         List<Monitor> contrastMonitorList = new ArrayList<>();
         if (contrastStartTime != null && contrastEndTime != null) {
@@ -80,9 +80,9 @@ public class MonitorService {
         return performanceDataList;
     }
 
-    public List transferListByGap(List arrayList, int gap) throws Exception {
+    public List transferListByGap(List arrayList, int gap)  {
         if (gap == 0) {
-            throw new Exception("gap cannot be 0");
+             throw new FrontException("gap cannot be 0");
         }
         List newMonitorList= fillList(arrayList);
         List ilist = new ArrayList<>();
