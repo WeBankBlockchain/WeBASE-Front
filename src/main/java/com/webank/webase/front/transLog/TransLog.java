@@ -16,9 +16,10 @@ public class TransLog {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     private String contractName;
+    private String contractVersion;
     private String contractAddress;
     private int  group;
     private LocalDateTime transTime;
-    private List<Object> funcParam;
+    private String funcParam;
     private TransType type;
 }

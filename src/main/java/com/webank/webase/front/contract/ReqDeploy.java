@@ -32,7 +32,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Data
 public class ReqDeploy {
     @NotNull(message = ConstantCode.PARAM_FAIL_USERID_IS_EMPTY)
-    private Integer userId;
+    private String userId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
     private String contractName;
     @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
@@ -42,5 +42,6 @@ public class ReqDeploy {
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
     private String bytecodeBin;
     private  int groupId = 1;
+    private String sol;
     private List<Object> funcParam = new ArrayList<>();
 }

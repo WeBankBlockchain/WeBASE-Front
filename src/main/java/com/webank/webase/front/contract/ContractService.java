@@ -6,6 +6,9 @@ import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.file.FileContent;
+import com.webank.webase.front.transLog.TransLog;
+import com.webank.webase.front.transLog.TransLogService;
+import com.webank.webase.front.transLog.TransType;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
@@ -25,6 +28,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +65,8 @@ public class ContractService {
     HashMap<Integer, CnsService> cnsServiceMap;
     @Autowired
     ContractRepository contractRepository;
+    @Autowired
+    TransLogService transLogService;
     /**
      * saveAbi.
      *
@@ -104,7 +110,7 @@ public class ContractService {
      */
     public String deploy(ReqDeploy req)  {
 
-        int userId = req.getUserId();
+        String userId = req.getUserId();
         String contractName = req.getContractName();
         String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
@@ -120,7 +126,10 @@ public class ContractService {
         // contract deploy
         String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
+        saveToDBAndSaveLog(req,  contractAddress);
+
         checkContractAbiExistedAndSave(contractName, version, abiInfos);
+
 
         try {
             cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
@@ -129,6 +138,30 @@ public class ContractService {
         }
 
         return contractAddress;
+    }
+
+    private void saveToDBAndSaveLog(ReqDeploy req, String contractAddress) {
+        Contract c = new Contract();
+        c.setAbi(JSON.toJSONString(req.getAbiInfo()));
+        c.setFuncParam(JSON.toJSONString(req.getFuncParam()));
+        c.setBinary(req.getBytecodeBin());
+        c.setContractAddress(contractAddress);
+        c.setContractName(req.getContractName());
+        c.setVersion(req.getVersion());
+        c.setDeployTime(LocalDateTime.now());
+        c.setGroupId(req.getGroupId());
+        c.setSol(req.getSol());
+        contractRepository.save(c);
+
+        TransLog transLog = new TransLog();
+        transLog.setGroup(req.getGroupId());
+        transLog.setContractAddress(contractAddress);
+        transLog.setTransTime(LocalDateTime.now());
+        transLog.setContractName(req.getContractName());
+        transLog.setContractVersion(req.getVersion());
+        transLog.setType(TransType.DEPLOY);
+        transLog.setFuncParam(JSON.toJSONString(req.getFuncParam()));
+        transLogService.save(transLog);
     }
 
     public static String constructorEncoded(String contractName, String version, List<Object> params) throws FrontException {

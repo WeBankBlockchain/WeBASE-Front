@@ -39,7 +39,6 @@ sdk:
 
 constant:  
   nodeDir: D:\config
-  mgrIpPorts: 10.0.0.1:8082
   transMaxWait: 30
 
 logging: 

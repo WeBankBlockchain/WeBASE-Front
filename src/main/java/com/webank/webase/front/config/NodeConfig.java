@@ -1,15 +1,15 @@
 package com.webank.webase.front.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.CommonUtils;
 import lombok.Data;
-import java.util.List;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 public class NodeConfig implements InitializingBean {
-    @JsonIgnore
     @Autowired
     private Constants constants;
 

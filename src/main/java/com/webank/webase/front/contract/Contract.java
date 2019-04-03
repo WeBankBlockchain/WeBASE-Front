@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -22,5 +23,6 @@ public class Contract {
     private String contractAddress;
     private LocalDateTime deployTime;
     private String deployedUser;
+    private String funcParam;
     private int groupId;
 }

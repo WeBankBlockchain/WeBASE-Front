@@ -8,6 +8,9 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.keystore.KeyStoreInfo;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.transLog.TransLog;
+import com.webank.webase.front.transLog.TransLogService;
+import com.webank.webase.front.transLog.TransType;
 import com.webank.webase.front.util.AbiTypes;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.ContractTypeUtil;
@@ -30,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /*
@@ -58,6 +62,8 @@ public class TransService {
     Map<Integer, Web3j> web3jMap;
     @Autowired
     Map<Integer, CnsService> cnsServiceMap;
+    @Autowired
+    TransLogService transLogService;
 
 
     /**
@@ -167,7 +173,20 @@ public class TransService {
         } else {
             result = execTransaction(function, commonContract);
         }
+        SaveLog(req);
         return result;
+    }
+
+    private void SaveLog(ReqTransHandle req) {
+        TransLog transLog = new TransLog();
+        transLog.setGroup(req.getGroupId());
+        transLog.setContractAddress(req.getContractAddress());
+        transLog.setTransTime(LocalDateTime.now());
+        transLog.setContractName(req.getContractName());
+        transLog.setContractVersion(req.getVersion());
+        transLog.setType(TransType.TRANS);
+        transLog.setFuncParam(JSON.toJSONString(req.getFuncParam()));
+        transLogService.save(transLog);
     }
 
     public Credentials getCredentials(String userId) throws FrontException {
