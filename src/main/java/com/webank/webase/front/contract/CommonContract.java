@@ -61,8 +61,7 @@ public final class CommonContract extends Contract {
                 contractBin, encodedConstructor, initialWeiValue);
     }
 
-    public static CommonContract load(String contractAddress, Web3j web3j, Credentials credentials,
-            BigInteger gasPrice, BigInteger gasLimit) {
+    public static CommonContract load(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
         return new CommonContract(contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 

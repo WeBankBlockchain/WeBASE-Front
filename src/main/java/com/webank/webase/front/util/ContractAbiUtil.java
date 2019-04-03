@@ -9,7 +9,6 @@ import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -237,10 +236,10 @@ public class ContractAbiUtil {
      */
     public static Boolean ifContractAbiExisted(String contractName, String contractVersion) {
         boolean ifExisted = false;
-        Map<String, List<String>> contracts = getAllContract();
-        for (String contract : contracts.keySet()) {
-            if (contract.equals(contractName)) {
-                List<String> versions = contracts.get(contract);
+        Map<String, List<String>> contracts = getAllContractByContractName();
+        for (String name : contracts.keySet()) {
+            if (name.equals(contractName)) {
+                List<String> versions = contracts.get(name);
                 if (versions.contains(contractVersion)) {
                     ifExisted = true;
                     break;
@@ -336,15 +335,15 @@ public class ContractAbiUtil {
      * 
      * @return
      */
-    private static Map<String, List<String>> getAllContract() {
+    private static Map<String, List<String>> getAllContractByContractName() {
         Map<String, List<String>> contracts = new HashMap<>();
-        for (String contract : contractEventMap.keySet()) {
-            List<VersionEvent> versionEventList = contractEventMap.get(contract);
+        for (String contractName : contractEventMap.keySet()) {
+            List<VersionEvent> versionEventList = contractEventMap.get(contractName);
             List<String> versions = new ArrayList<>();
             for (VersionEvent versionEvent : versionEventList) {
                 versions.add(versionEvent.getVersion());
             }
-            contracts.put(contract, versions);
+            contracts.put(contractName, versions);
         }
         return contracts;
     }
