@@ -2,25 +2,15 @@ package com.webank.webase.front.transaction;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.keystore.KeyStoreInfo;
+import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.AbiTypes;
-import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.ContractTypeUtil;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.TypeReference;
@@ -38,6 +28,9 @@ import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.util.*;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -62,26 +55,21 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class TransService {
     @Autowired
-   Map<Integer,Web3j> web3jMap;
-    @Autowired
-    Constants constants;
-    @Autowired
-    RestTemplate restTemplate;
+    Map<Integer, Web3j> web3jMap;
     @Autowired
     Map<Integer, CnsService> cnsServiceMap;
 
-    Map<Integer, KeyStoreInfo> keyMap = new HashMap<>();
 
     /**
      * transHandle.
-     * 
+     *
      * @param req request
      * @return
      */
     public Object transHandle(ReqTransHandle req) throws Exception {
 
         // Check if contractAbi existed
-        if(req.getContractAddress()==null) {
+        if (req.getContractAddress() == null) {
             boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(req.getContractName(), req.getVersion());
             if (!ifExisted) {
                 // check and save abi
@@ -95,7 +83,7 @@ public class TransService {
 
     /**
      * checkAndSaveAbiFromCns.
-     * 
+     *
      * @param req request
      */
     public void checkAndSaveAbiFromCns(ReqTransHandle req) throws Exception {
@@ -110,7 +98,7 @@ public class TransService {
 //        reqTransHandle.setVersion("");
 //        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_GETABI);
 //        reqTransHandle.setFuncParam(cnsParams);
-        List<CnsInfo> cnsInfoList =  cnsServiceMap.get(req.getGroupId()).queryCnsByNameAndVersion(req.getContractName() ,req.getVersion());
+        List<CnsInfo> cnsInfoList = cnsServiceMap.get(req.getGroupId()).queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
         // transaction request
         log.info("cnsinfo" + cnsInfoList.get(0).getAddress());
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
@@ -127,15 +115,15 @@ public class TransService {
 
     /**
      * transaction request.
-     * 
+     *
      * @param req request
      * @return
      */
     public Object dealWithtrans(ReqTransHandle req) throws FrontException {
         log.info("dealWithtrans start. ReqTransHandle:[{}]", JSON.toJSONString(req));
-        Object result =null;
+        Object result = null;
 
-        int userId = req.getUserId();
+        String userId = req.getUserId();
         String contractName = req.getContractName();
         String version = req.getVersion();
         String funcName = req.getFuncName();
@@ -165,13 +153,13 @@ public class TransService {
 
         // contract load
         CommonContract commonContract;
-      if(req.getContractAddress()==null) {
-           commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3jMap.get(groupId),
-                  credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
-       } else{
-          commonContract=  CommonContract.load(req.getContractAddress() + Constants.SYMPOL + version, web3jMap.get(groupId),
-                  credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
-      }
+        if (req.getContractAddress() == null) {
+            commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3jMap.get(groupId),
+                    credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        } else {
+            commonContract = CommonContract.load(req.getContractAddress() + Constants.SYMPOL + version, web3jMap.get(groupId),
+                    credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        }
         // request
         Function function = new Function(funcName, finalInputs, finalOutputs);
         if ("true".equals(constant)) {
@@ -182,7 +170,7 @@ public class TransService {
         return result;
     }
 
-    public Credentials getCredentials(int userId) throws FrontException {
+    public Credentials getCredentials(String userId) throws FrontException {
         String privateKey = Optional.ofNullable(getPrivateKey(userId))
                 .map(info -> info.getPrivateKey()).orElse(null);
         if (privateKey == null) {
@@ -195,9 +183,9 @@ public class TransService {
 
     /**
      * execCall.
-     * 
+     *
      * @param funOutputTypes list
-     * @param function function
+     * @param function       function
      * @param commonContract contract
      * @return
      */
@@ -217,8 +205,8 @@ public class TransService {
 
     /**
      * execTransaction.
-     * 
-     * @param function function
+     *
+     * @param function       function
      * @param commonContract contract
      * @return
      */
@@ -235,9 +223,9 @@ public class TransService {
 
     /**
      * input params format.
-     * 
+     *
      * @param funcInputTypes list
-     * @param params list
+     * @param params         list
      * @return
      */
     // todo 拼接动态数组
@@ -273,7 +261,7 @@ public class TransService {
 
     /**
      * output params format.
-     * 
+     *
      * @param funOutputTypes list
      * @return
      */
@@ -298,9 +286,9 @@ public class TransService {
 
     /**
      * ethCall Result Parse.
-     * 
+     *
      * @param funOutputTypes list
-     * @param typeList list
+     * @param typeList       list
      * @return
      */
     static Object ethCallResultParse(List<String> funOutputTypes, List<Type> typeList) throws FrontException {
@@ -334,34 +322,19 @@ public class TransService {
 
     /**
      * get PrivateKey.
-     * 
+     *
      * @param userId userId
      * @return
      */
-    public KeyStoreInfo getPrivateKey(int userId) {
-        if (this.keyMap.get(userId) != null && this.keyMap.get(userId).getPrivateKey() != null) {
-            return this.keyMap.get(userId);
+    public KeyStoreInfo getPrivateKey(String userId) {
+        if (KeyStoreService.keyMap.get(userId) != null && KeyStoreService.keyMap.get(userId).getPrivateKey() != null) {
+            return KeyStoreService.keyMap.get(userId);
         }
+        throw new FrontException("no user is found");
+//        KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
+////todo
+//        KeyStoreService.keyMap.put(userId, keyStoreInfo);
+//        return keyStoreInfo;
 
-        KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
-        String[] ipPortArr = constants.getMgrIpPorts().split(",");
-        for (String ipPort : ipPortArr) {
-            try {
-                String url = String.format(Constants.MGR_PRIVATE_KEY_URI, ipPort, userId);
-                log.info("createPrivateKey url:{}", url);
-                BaseResponse response = restTemplate.getForObject(url, BaseResponse.class);
-                log.info("createPrivateKey response:{}", JSON.toJSONString(response));
-                if (response.getCode() == 0) {
-                    keyStoreInfo =
-                            CommonUtils.object2JavaBean(response.getData(), KeyStoreInfo.class);
-                    break;
-                }
-            } catch (Exception e) {
-                log.warn("userId:{} createPrivateKey from ipPort:{} exception", userId, ipPort, e);
-                continue;
-            }
-        }
-        this.keyMap.put(userId, keyStoreInfo);
-        return keyStoreInfo;
     }
 }
