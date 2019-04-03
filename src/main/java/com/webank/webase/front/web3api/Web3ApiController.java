@@ -1,6 +1,8 @@
 package com.webank.webase.front.web3api;
 
+import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.config.NodeConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -199,6 +201,12 @@ public class Web3ApiController {
     @GetMapping("/systemConfigByKey/{key}")
     public  String getSystemConfigByKey(@PathVariable int groupId,@PathVariable String key ) throws IOException {
         return web3ApiService.getSystemConfigByKey(groupId,key);
+    }
+
+    @ApiOperation(value = "getNodeInfo", notes = "Get node information")
+    @GetMapping("/nodeInfo")
+    public Object getNodeInfo() {
+        return web3ApiService.getNodeInfo();
     }
 
 }
