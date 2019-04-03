@@ -386,4 +386,13 @@ public class Web3ApiService {
         }
     }
 
+    /**
+     * getNodeInfo.
+     *
+     * @return
+     */
+    public Object getNodeInfo() {
+        return JSON.parse(nodeConfig.toString());
+    }
+
 }
