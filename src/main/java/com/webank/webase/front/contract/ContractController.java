@@ -85,10 +85,13 @@ public class ContractController extends BaseController {
     }
 
     @GetMapping
-    public List<Contract> findContract(@RequestParam String contractName, @RequestParam String version, @RequestParam String contractAddress, BindingResult result) throws FrontException {
+    public List<Contract> findContract(@RequestParam(required = false) String contractName,
+                                        @RequestParam(required = false) String version,
+                                        @RequestParam(required = false) String contractAddress,
+                                        @RequestParam int groupId, BindingResult result) throws FrontException {
         // log.info("saveAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
         checkParamResult(result);
-        return  contractService.findByCriteria(contractName, version, contractAddress);
+        return  contractService.findByCriteria(groupId, contractName, version, contractAddress);
 
     }
 

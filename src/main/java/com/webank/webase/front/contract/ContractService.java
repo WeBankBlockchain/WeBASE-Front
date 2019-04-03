@@ -261,10 +261,10 @@ public class ContractService {
 
     }
 
-    public List<Contract> findByCriteria(String contractName, String version, String address) {
+    public List<Contract> findByCriteria(int groupId, String contractName, String version, String address) {
         if (address != null) {
-            return contractRepository.findBycontractAddress(address);
+            return contractRepository.findBycontractByGroupIdAndAddress(groupId,address);
         }
-        return contractRepository.findByContractNameAndVersion(contractName, version);
+        return contractRepository.findByGroupIdAndContractNameAndVersion(groupId,contractName, version);
     }
 }
