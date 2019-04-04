@@ -1,6 +1,5 @@
 package com.webank.webase.front.transLog;
 
-import com.webank.webase.front.contract.Contract;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,7 @@ public class TransLogService {
 
     public List<TransLog> findByCriteria(int groupId, String contractName, String version, String contractAddress) {
         if (contractAddress != null) {
-            return transLogRepository.findBycontractByGroupIdAndAddress(groupId, contractAddress);
+            return transLogRepository.findByByGroupIdAndAddress(groupId, contractAddress);
         }
             return transLogRepository.findByGroupIdAndContractNameAndVersion(groupId, contractName, version);
     }
