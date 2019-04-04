@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface ContractRepository   extends CrudRepository<Contract, Long> {
-    List<Contract> findBycontractByGroupIdAndAddress(int groupId,String contractAddress);
+    List<Contract> findContractByGroupIdAndContractAddress(int groupId, String contractAddress);
     List<Contract> findByGroupIdAndContractNameAndVersion(int groupId, String contractName , String version );
 
 }

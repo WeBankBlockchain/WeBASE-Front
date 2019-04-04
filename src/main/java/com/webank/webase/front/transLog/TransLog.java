@@ -18,7 +18,7 @@ public class TransLog {
     private String contractName;
     private String contractVersion;
     private String contractAddress;
-    private int  group;
+    private int  groupId;
     private LocalDateTime transTime;
     private String funcParam;
     private TransType type;

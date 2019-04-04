@@ -154,7 +154,7 @@ public class ContractService {
         contractRepository.save(c);
 
         TransLog transLog = new TransLog();
-        transLog.setGroup(req.getGroupId());
+        transLog.setGroupId(req.getGroupId());
         transLog.setContractAddress(contractAddress);
         transLog.setTransTime(LocalDateTime.now());
         transLog.setContractName(req.getContractName());
@@ -263,7 +263,7 @@ public class ContractService {
 
     public List<Contract> findByCriteria(int groupId, String contractName, String version, String address) {
         if (address != null) {
-            return contractRepository.findBycontractByGroupIdAndAddress(groupId,address);
+            return contractRepository.findContractByGroupIdAndContractAddress(groupId,address);
         }
         return contractRepository.findByGroupIdAndContractNameAndVersion(groupId,contractName, version);
     }

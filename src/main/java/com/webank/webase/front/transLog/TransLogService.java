@@ -17,8 +17,8 @@ public class TransLogService {
 
     public List<TransLog> findByCriteria(int groupId, String contractName, String version, String contractAddress) {
         if (contractAddress != null) {
-            return transLogRepository.findByByGroupIdAndAddress(groupId, contractAddress);
+            return transLogRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
         }
-            return transLogRepository.findByGroupIdAndContractNameAndVersion(groupId, contractName, version);
+            return transLogRepository.findByGroupIdAndContractNameAndContractVersion(groupId, contractName, version);
     }
 }

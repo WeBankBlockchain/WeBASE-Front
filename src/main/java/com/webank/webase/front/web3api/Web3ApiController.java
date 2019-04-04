@@ -44,7 +44,7 @@ public class Web3ApiController {
     @Autowired
     Web3ApiService web3ApiService;
 
-    @GetMapping("/blockNumber")
+    @GetMapping("/search")
     public Object searchByCriteria(@PathVariable int groupId, @RequestParam String input) {
         return web3ApiService.searchByCriteria(groupId, input);
     }

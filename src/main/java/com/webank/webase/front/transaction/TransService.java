@@ -179,7 +179,7 @@ public class TransService {
 
     private void SaveLog(ReqTransHandle req) {
         TransLog transLog = new TransLog();
-        transLog.setGroup(req.getGroupId());
+        transLog.setGroupId(req.getGroupId());
         transLog.setContractAddress(req.getContractAddress());
         transLog.setTransTime(LocalDateTime.now());
         transLog.setContractName(req.getContractName());
