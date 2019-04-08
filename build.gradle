@@ -84,8 +84,8 @@ dependencies {
    	compile 'org.quartz-scheduler:quartz:2.3.0'
 
    	// web3j依赖
-	compile files('lib/web3sdk-1.2.4.jar')
-	compile files('lib/sigar.jar')
+	compile 'org.fisco-bcos:web3sdk:1.2.5'
+	compile 'org.fusesource:sigar:1.6.4'
    	compile 'org.apache.httpcomponents:httpclient:4.5.2',
             'org.bouncycastle:bcprov-jdk15on:1.54',
             'com.lambdaworks:scrypt:1.4.0',
