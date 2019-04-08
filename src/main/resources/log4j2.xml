@@ -1,72 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info">
-    <Properties>
-        <Property name="logPath">./log</Property>
-    </Properties>
-    
-    <Appenders>
-        <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%F:%L) - %m%n" />
-        </Console>
-        
-        <RollingFile name="front" fileName="${logPath}/webase-front.log"
-                     filePattern="${logPath}/webase-front.log.%d{yyyy-MM-dd}.%i.log.gz">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="200 MB" />
-            </Policies>
-            <DefaultRolloverStrategy max="24" />
-        </RollingFile>
-        
-        <RollingFile name="error" fileName="${logPath}/webase-front-error.log"
-                     filePattern="${logPath}/webase-front-error.log.%d{yyyy-MM-dd}.%i.log.gz">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
-            <Filters>
-                <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
-            </Filters>
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="200 MB" />
-            </Policies>
-            <DefaultRolloverStrategy max="24" />
-        </RollingFile>
-        
-        <RollingFile name="web3sdk" fileName="${logPath}/web3sdk.log"
-                     filePattern="${logPath}/web3sdk.log.%d{yyyy-MM-dd}.%i.log.gz">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="200 MB" />
-            </Policies>
-            <DefaultRolloverStrategy max="24" />
-        </RollingFile>
-        
-        <Async name="asyncFront" bufferSize="512">
-             <AppenderRef ref="front" />
-        </Async>
-        
-        <Async name="asyncError" bufferSize="512">
-             <AppenderRef ref="error" />
-        </Async>
-        
-        <Async name="asyncWeb3sdk" bufferSize="512">
-            <AppenderRef ref="web3sdk" />
-        </Async>
-    </Appenders>
-    
-    <Loggers>
-        <Logger name="org.bcos.channel" level="debug" additivity="false">
-            <AppenderRef ref="asyncWeb3sdk" />
-        </Logger>
-        
-        <Logger name="org.bcos.web3j" level="debug" additivity="false">
-            <AppenderRef ref="asyncWeb3sdk" />
-        </Logger>
-        
-        <Root level="info">
-            <AppenderRef ref="asyncFront" />
-            <AppenderRef ref="asyncError" />
-        </Root>
-    </Loggers>
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%F:%L) - %m%n" />
+		</Console>
+
+		<RollingFile name="front" fileName="${logPath}/webase-front.log"
+					 filePattern="${logPath}/webase-front.log.%d{yyyy-MM-dd}.%i.log.gz">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="200 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="24" />
+		</RollingFile>
+
+		<RollingFile name="error" fileName="${logPath}/webase-front-error.log"
+					 filePattern="${logPath}/webase-front-error.log.%d{yyyy-MM-dd}.%i.log.gz">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
+			<Filters>
+				<ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+			</Filters>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="200 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="24" />
+		</RollingFile>
+
+		<RollingFile name="web3sdk" fileName="${logPath}/web3sdk.log"
+					 filePattern="${logPath}/web3sdk.log.%d{yyyy-MM-dd}.%i.log.gz">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="200 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="24" />
+		</RollingFile>
+
+		<Async name="asyncFront" bufferSize="512">
+			<AppenderRef ref="front" />
+		</Async>
+
+		<Async name="asyncError" bufferSize="512">
+			<AppenderRef ref="error" />
+		</Async>
+
+		<Async name="asyncWeb3sdk" bufferSize="512">
+			<AppenderRef ref="web3sdk" />
+		</Async>
+	</Appenders>
+
+	<Loggers>
+		<Logger name="org.bcos.channel" level="debug" additivity="false">
+			<AppenderRef ref="asyncWeb3sdk" />
+		</Logger>
+
+		<Logger name="org.bcos.web3j" level="debug" additivity="false">
+			<AppenderRef ref="asyncWeb3sdk" />
+		</Logger>
+
+		<Root level="info">
+			<AppenderRef ref="asyncFront" />
+			<AppenderRef ref="asyncError" />
+		</Root>
+	</Loggers>
 </Configuration>

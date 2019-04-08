@@ -1,3 +1,4 @@
+group 'fisco-bcos-front'
 version '1.0'
 
 apply plugin: 'maven'
@@ -5,6 +6,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 
+//指定JDK版本,改成系统中版本
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -13,6 +15,7 @@ targetCompatibility = 1.8
 // In this section you declare where to find the dependencies of your project
 repositories {
     maven {
+    	//url "http://maven.weoa.com/nexus/content/groups/public/"
         url "http://maven.aliyun.com/nexus/content/groups/public/"
     }
     mavenLocal()
@@ -24,10 +27,12 @@ List spring =[
 	"org.springframework:spring-core:$spring_version", 
 	"org.springframework:spring-beans:$spring_version", 
 	"org.springframework:spring-context:$spring_version", 
+	"org.springframework:spring-context-support:$spring_version",
 	"org.springframework:spring-tx:$spring_version", 
 	"org.springframework:spring-web:$spring_version", 
 	"org.springframework:spring-webmvc:$spring_version", 
-	"org.springframework:spring-jdbc:$spring_version"
+	"org.springframework:spring-jdbc:$spring_version", 
+	"org.springframework:spring-test:$spring_version"
 ]
 
 def spring_boot_version="1.5.9.RELEASE"
@@ -35,7 +40,6 @@ List spring_boot =[
 	"org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
 	"org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
 	"org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
-	"org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version",
 	"org.springframework.boot:spring-boot-starter-log4j2:$spring_boot_version"
 ]
 
@@ -44,44 +48,64 @@ List netty = [
 	'io.netty:netty-tcnative:2.0.0.Final'
 ]
 
+List alibaba = [
+    "com.alibaba:fastjson:1.2.29"
+]
+
+List apache_commons = [
+    "commons-codec:commons-codec:1.9",//处理常用的编码方法的工具类包
+    "org.apache.commons:commons-lang3:3.6"//提供了一系列static的方法Utils类
+]
+
+/*日志支持包*/
+def log4j_version="2.9.0"
+List logger = [
+        "org.apache.logging.log4j:log4j-api:$log4j_version",
+        "org.apache.logging.log4j:log4j-core:$log4j_version",
+        "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
+        "org.apache.logging.log4j:log4j-web:$log4j_version"
+]
+
+List lombok = [
+	'org.projectlombok:lombok:1.16.20'
+]
+
 List swagger = [
     'io.springfox:springfox-swagger2:2.8.0',
     'io.springfox:springfox-swagger-ui:2.8.0'
 ]
 
-List web3sdk = [
-    'org.fisco-bcos:web3sdk:1.2.5',
-    'org.apache.httpcomponents:httpclient:4.5.2',
-    'org.bouncycastle:bcprov-jdk15on:1.54',
-    'com.lambdaworks:scrypt:1.4.0',
-    'com.squareup:javapoet:1.7.0',
-    'io.reactivex:rxjava:1.2.4',
-	'com.github.jnr:jnr-unixsocket:0.15'
-]
-
+// In this section you declare the dependencies for your production and test code
 dependencies {
-    compile spring,spring_boot,netty,swagger,web3sdk
+    compile spring,spring_boot,netty,alibaba,apache_commons,logger,lombok,swagger
 
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.11'
-    compile 'org.apache.commons:commons-lang3:3.6'
-    compile 'com.alibaba:fastjson:1.2.29'
-	compile 'com.h2database:h2:1.4.197'
+    compile "com.fasterxml.jackson.core:jackson-databind:2.8.11"
+   	compile 'com.google.guava:guava:19.0'
+   	compile 'org.quartz-scheduler:quartz:2.3.0'
+
+   	// web3j依赖
+	compile 'org.fisco-bcos:web3sdk:1.2.5'
 	compile 'org.fusesource:sigar:1.6.4'
-    annotationProcessor 'org.projectlombok:lombok:1.18.2'
-    compileOnly 'org.projectlombok:lombok:1.18.2'
+   	compile 'org.apache.httpcomponents:httpclient:4.5.2',
+            'org.bouncycastle:bcprov-jdk15on:1.54',
+            'com.lambdaworks:scrypt:1.4.0',
+            'com.squareup:javapoet:1.7.0',
+            'io.reactivex:rxjava:1.2.4',
+			'com.github.jnr:jnr-unixsocket:0.15'
+	compile("org.springframework.boot:spring-boot-starter-data-jpa:1.5.9.RELEASE")
+	compile("com.h2database:h2:1.4.197")
+
 
 	testCompile 'junit:junit:4.12',
-		'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
-	    'com.github.macdao:moscow:0.1.0',
-	    'com.squareup.okhttp3:okhttp:3.1.2'
+				"org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE",
+				"com.github.macdao:moscow:0.1.0",
+				"com.squareup.okhttp3:okhttp:3.1.2"
 }
 
 configurations {
     all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     all*.exclude group: 'log4j', module: 'log4j'
-    all*.exclude group: 'com.github.jnr', module: 'jnr-posix'
-    all*.exclude group: 'com.mchange', module: '*'
 }
 
 sourceSets {
@@ -110,6 +134,10 @@ jar {
         copy {
             from file('src/main/resources/')
             into 'dist/conf'
+        }
+        copy {
+            from file('files/')
+            into 'dist/files'
         }
         copy {
             from file('report/')
