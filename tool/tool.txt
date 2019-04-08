@@ -1,2 +1,1 @@
-1 linux    libsigar-amd64-Linux.so（64bit）【libsigar-x86-linux.so，32bit】添加到/usr/lib64或者/lib64或者/lib或者/usr/lib
-2 windows  C:\Windows\System32中加入sigar-amd64-winnt.dll
+﻿将tool目录下libsigar-amd64-Linux.so（64bit）添加到服务器的/usr/lib64或者/lib64或者/lib或者/usr/lib目录即可
