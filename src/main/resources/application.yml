@@ -1,5 +1,10 @@
 spring:
+  #  profiles:
+  #    active: dev
   datasource:
+    #dataSourceClassName: org.h2.jdbcx.JdbcDataSource
+    #url: jdbc:h2:mem:myDb;DB_CLOSE_DELAY=-1
+    #url: jdbc:h2:file:~/.h2/DBName;DB_CLOSE_DELAY=-1
     url: jdbc:h2:file:~/.h2/db;DB_CLOSE_ON_EXIT=FALSE
     databaseName: db
     driverClassName: org.h2.Driver
@@ -26,7 +31,7 @@ spring:
        enabled: true
 
 server: 
-  port: 8081
+  port: [#port]
   context-path: /webase-front
 
 sdk: 
@@ -40,7 +45,7 @@ sdk:
   queueCapacity: 100
   keepAlive: 60
 
-constant:  
+constant:
   nodeDir: /data/app/build/node0
   mgrIpPorts: 10.0.0.1:8082
   transMaxWait: 30
