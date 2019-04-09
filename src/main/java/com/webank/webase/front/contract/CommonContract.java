@@ -27,39 +27,72 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.tx.Contract;
 
 /**
- * CommonContract.
+ * common contract handle class.
  *
  */
 public final class CommonContract extends Contract {
 
+    /**
+     * constructor.
+     * 
+     * @param contractAddress
+     * @param web3j
+     * @param credentials
+     * @param gasPrice
+     * @param gasLimit
+     */
     private CommonContract(String contractAddress, Web3j web3j, Credentials credentials,
             BigInteger gasPrice, BigInteger gasLimit) {
         super("", contractAddress, web3j, credentials, gasPrice, gasLimit, false);
     }
 
-    // private CommonContract(String contractAddress, Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-    // super("", contractAddress, web3j, transactionManager, gasPrice, gasLimit, false);
-    // }
-
+    /**
+     * constructor.
+     * 
+     * @param contractAddress
+     * @param web3j
+     * @param credentials
+     * @param gasPrice
+     * @param gasLimit
+     * @param isInitByName
+     */
     private CommonContract(String contractAddress, Web3j web3j, Credentials credentials,
             BigInteger gasPrice, BigInteger gasLimit, Boolean isInitByName) {
         super("", contractAddress, web3j, credentials, gasPrice, gasLimit, isInitByName);
     }
 
-    // private CommonContract(String contractAddress, Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit, Boolean isInitByName) {
-    // super("", contractAddress, web3j, transactionManager, gasPrice, gasLimit, isInitByName);
-    // }
-
+    /**
+     * send transaction to block chain.
+     * 
+     * @param function
+     * @return
+     */
     public Future<TransactionReceipt> execTransaction(Function function) {
         return executeTransactionAsync(function);
     }
 
+    /**
+     * query transaction from block chain.
+     * 
+     * @param function
+     * @return
+     */
     public Future<List<Type>> execCall(Function function) {
         return executeCallMultipleValueReturnAsync(function);
     }
 
+    /**
+     * contract deploy.
+     * 
+     * @param web3j
+     * @param credentials
+     * @param gasPrice
+     * @param gasLimit
+     * @param initialWeiValue
+     * @param contractBin
+     * @param encodedConstructor
+     * @return
+     */
     public static Future<CommonContract> deploy(Web3j web3j, Credentials credentials,
             BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue,
             String contractBin, String encodedConstructor) {
@@ -67,29 +100,33 @@ public final class CommonContract extends Contract {
                 contractBin, encodedConstructor, initialWeiValue);
     }
 
-    // public static Future<CommonContract> deploy(Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue) {
-    // return deployAsync(CommonContract.class, web3j, transactionManager, gasPrice, gasLimit,
-    // BINARY, "", initialWeiValue);
-    // }
-
+    /**
+     * load contract by contract address.
+     * 
+     * @param contractAddress
+     * @param web3j
+     * @param credentials
+     * @param gasPrice
+     * @param gasLimit
+     * @return
+     */
     public static CommonContract load(String contractAddress, Web3j web3j, Credentials credentials,
             BigInteger gasPrice, BigInteger gasLimit) {
         return new CommonContract(contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
-    // public static CommonContract load(String contractAddress, Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-    // return new CommonContract(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
-    // }
-
+    /**
+     * load contract by contract name.
+     * 
+     * @param contractName
+     * @param web3j
+     * @param credentials
+     * @param gasPrice
+     * @param gasLimit
+     * @return
+     */
     public static CommonContract loadByName(String contractName, Web3j web3j,
             Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
         return new CommonContract(contractName, web3j, credentials, gasPrice, gasLimit, true);
     }
-
-    // public static CommonContract loadByName(String contractName, Web3j web3j, TransactionManager
-    // transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
-    // return new CommonContract(contractName, web3j, transactionManager, gasPrice, gasLimit, true);
-    // }
 }
