@@ -52,8 +52,7 @@ public class TransController extends BaseController {
      * @return
      */
     @ApiOperation(value = "transaction handing", notes = "transaction handing")
-    @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true,
-            dataType = "ReqTransHandle")
+    @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
     @PostMapping("/handle")
     public Object transHandle(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));

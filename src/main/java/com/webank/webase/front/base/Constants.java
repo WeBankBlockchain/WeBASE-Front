@@ -56,4 +56,5 @@ public class Constants {
     public static final String CONSTANT_PREFIX = "constant";
     private String nodeDir = "/data/app/build/node0";
     private int transMaxWait = 30;
+    private String monitorDisk = "/data";
 }
