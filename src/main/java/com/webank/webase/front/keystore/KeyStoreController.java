@@ -4,15 +4,12 @@ import com.webank.webase.front.base.BaseController;
 import com.webank.webase.front.base.BaseResponse;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Method;
 
 @RestController
-@RequestMapping(value = "/privateKey")
+@RequestMapping(value = "{groupId}/privateKey")
 public class KeyStoreController extends BaseController {
 
     @Autowired
@@ -21,7 +18,7 @@ public class KeyStoreController extends BaseController {
 
     @ApiOperation(value = "get PrivateKey", notes = "get PrivateKey")
     @RequestMapping(method = RequestMethod.GET)
-    public BaseResponse getPrivateKey() {
+    public BaseResponse getPrivateKey(@PathVariable int groupId) {
         return keyStoreService.getPrivateKey();
     }
 }
