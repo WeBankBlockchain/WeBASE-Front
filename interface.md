@@ -77,7 +77,7 @@ HTTP POST
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/contract/deploy**
+**http://localhost:8081/webase-front/1/contract/deploy**
 
 ### 调用方法
 
@@ -148,7 +148,7 @@ data:{
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/contract/privateKey**
+**http://localhost:8081/webase-front/1/contract/privateKey**
 
 ### 调用方法
 
@@ -200,7 +200,7 @@ HTTP GET
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/contract/deleteAbi
+**http://localhost:8081/webase-front/1/contract/deleteAbi
 /{contractName}/{version}**
 
 ### 调用方法
@@ -218,7 +218,7 @@ HTTP DELETE
 
 1. **数据格式**
 
-http://localhost:8081/webase-front/contract/deleteAbi/HelloWorld/2.0
+http://localhost:8081/webase-front/1/contract/deleteAbi/HelloWorld/2.0
 
 ### 响应参数
 
@@ -252,7 +252,7 @@ http://localhost:8081/webase-front/contract/deleteAbi/HelloWorld/2.0
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/trans/handle**
+**http://localhost:8081/webase-front/1/trans/handle**
 
 ### 调用方法
 
@@ -288,7 +288,7 @@ HTTP POST
 
 示例：curl -l -H "Content-type: application/json" -X POST -d '{"contractName":
 "HelloWorld", "funcName": "set", "funcParam": ["Hi,Welcome!"], "userId": 700001, "version":
-"1.0"}' http://10.0.0.1:8081/webase-front/trans/handle
+"1.0"}' http://10.0.0.1:8081/webase-front/1/trans/handle
 
 ### 响应参数
 
@@ -376,7 +376,7 @@ c、异常时返回值信息（信息详情请参看附录4.1）
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/blockNumber**
+**http://localhost:8081/webase-front/1/web3/blockNumber**
 
 ### 调用方法
 
@@ -424,7 +424,7 @@ HTTP GET
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/blockByNumber/{blockNumber}**
+**http://localhost:8081/webase-front/1/web3/blockByNumber/{blockNumber}**
 
 ### 调用方法
 
@@ -440,7 +440,7 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/blockByNumber/100
+http://localhost:8081/webase-front/1/web3/blockByNumber/100
 
 ### 响应参数
 
@@ -595,7 +595,7 @@ http://localhost:8081/webase-front/web3/blockByNumber/100
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/blockByHash/{blockHash}**
+**http://localhost:8081/webase-front/1/web3/blockByHash/{blockHash}**
 
 ### 调用方法
 
@@ -611,7 +611,7 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/blockByHash/0xf27ff42d4be65329a1e7b11365e190086d92f9836168d0379e92642786db7ade
+http://localhost:8081/webase-front/1/web3/blockByHash/0xf27ff42d4be65329a1e7b11365e190086d92f9836168d0379e92642786db7ade
 
 ### 响应参数
 
@@ -766,7 +766,7 @@ http://localhost:8081/webase-front/web3/blockByHash/0xf27ff42d4be65329a1e7b11365
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/blockTransCnt/{blockNumber}**
+**http://localhost:8081/webase-front/1/web3/blockTransCnt/{blockNumber}**
 
 ### 调用方法
 
@@ -782,7 +782,7 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/blockTransCnt/100
+http://localhost:8081/webase-front/1/web3/blockTransCnt/100
 
 ### 响应参数
 
@@ -818,7 +818,7 @@ http://localhost:8081/webase-front/web3/blockTransCnt/100
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/pbftView**
+**http://localhost:8081/webase-front/1/web3/pbftView**
 
 ### 调用方法
 
@@ -866,7 +866,7 @@ HTTP GET
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/transactionReceipt/{transHash}**
+**http://localhost:8081/webase-front/1/web3/transactionReceipt/{transHash}**
 
 ### 调用方法
 
@@ -882,7 +882,7 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transactionReceipt/0xb2c733b742045e61c0fd6e7e2bafece04d56262a4887de9f78dad2c5dd2f944b
+http://localhost:8081/webase-front/1/web3/transactionReceipt/0xb2c733b742045e61c0fd6e7e2bafece04d56262a4887de9f78dad2c5dd2f944b
 
 ### 响应参数
 
@@ -989,7 +989,7 @@ http://localhost:8081/webase-front/web3/transactionReceipt/0xb2c733b742045e61c0f
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/transaction/{transHash}**
+**http://localhost:8081/webase-front/1/web3/transaction/{transHash}**
 
 ### 调用方法
 
@@ -1005,7 +1005,7 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transaction/0xa6750b812b1a7e36313879b09f0c41fc583b463c15e57608416f3a32688b432b
+http://localhost:8081/webase-front/1/web3/transaction/0xa6750b812b1a7e36313879b09f0c41fc583b463c15e57608416f3a32688b432b
 
 ### 响应参数
 
@@ -1088,7 +1088,7 @@ http://localhost:8081/webase-front/web3/transaction/0xa6750b812b1a7e36313879b09f
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/clientVersion**
+**http://localhost:8081/webase-front/1/web3/clientVersion**
 
 ### 调用方法
 
@@ -1136,7 +1136,7 @@ HTTP GET
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/code/{address}/{blockNumber}**
+**http://localhost:8081/webase-front/1/web3/code/{address}/{blockNumber}**
 
 ### 调用方法
 
@@ -1153,7 +1153,7 @@ HTTP GET
 
 1. **数据格式**
 
-http://localhost:8081/webase-front/web3/code/0x0000000000000000000000000000000000000000/1
+http://localhost:8081/webase-front/1/web3/code/0x0000000000000000000000000000000000000000/1
 
 ### 响应参数
 
@@ -1189,7 +1189,7 @@ http://localhost:8081/webase-front/web3/code/0x000000000000000000000000000000000
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3//transCnt/{address}/{blockNumber}**
+**http://localhost:8081/webase-front/1/web3//transCnt/{address}/{blockNumber}**
 
 ### 调用方法
 
@@ -1206,7 +1206,7 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transCnt/0x0000000000000000000000000000000000000000/1
+http://localhost:8081/webase-front/1/web3/transCnt/0x0000000000000000000000000000000000000000/1
 
 ### 响应参数
 
@@ -1242,7 +1242,7 @@ http://localhost:8081/webase-front/web3/transCnt/0x00000000000000000000000000000
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/transByBlockHashAndIndex/{blockHash}/{transactionIndex}**
+**http://localhost:8081/webase-front/1/web3/transByBlockHashAndIndex/{blockHash}/{transactionIndex}**
 
 ### 调用方法
 
@@ -1259,7 +1259,7 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transByBlockHashAndIndex/0xf27ff42d4be65329a1e7b11365e190086d92f9836168d0379e92642786db7ade/0
+http://localhost:8081/webase-front/1/web3/transByBlockHashAndIndex/0xf27ff42d4be65329a1e7b11365e190086d92f9836168d0379e92642786db7ade/0
 
 ### 响应参数
 
@@ -1342,7 +1342,7 @@ http://localhost:8081/webase-front/web3/transByBlockHashAndIndex/0xf27ff42d4be65
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/transByBlockNumberAndIndex/{blockNumber}/{transactionIndex}**
+**http://localhost:8081/webase-front/1/web3/transByBlockNumberAndIndex/{blockNumber}/{transactionIndex}**
 
 ### 调用方法
 
@@ -1359,7 +1359,7 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transByBlockNumberAndIndex/100/0
+http://localhost:8081/webase-front/1/web3/transByBlockNumberAndIndex/100/0
 
 ### 响应参数
 
@@ -1442,7 +1442,7 @@ http://localhost:8081/webase-front/web3/transByBlockNumberAndIndex/100/0
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/nodeInfo**
+**http://localhost:8081/webase-front/1/web3/nodeInfo**
 
 ### 调用方法
 
@@ -1512,7 +1512,7 @@ HTTP GET
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/systemProxy/{userId}**
+**http://localhost:8081/webase-front/1/web3/systemProxy/{userId}**
 
 ### 调用方法
 
@@ -1528,7 +1528,7 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/systemProxy/700001
+http://localhost:8081/webase-front/1/web3/systemProxy/700001
 
 ### 响应参数
 
@@ -1662,7 +1662,7 @@ http://localhost:8081/webase-front/web3/systemProxy/700001
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/nodeHeartBeat**
+**http://localhost:8081/webase-front/1/web3/nodeHeartBeat**
 
 ### 调用方法
 
