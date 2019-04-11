@@ -54,9 +54,9 @@ public class MonitorService {
         List<BigDecimal> pbftViewValueList = new ArrayList<>();
         List<BigDecimal> pendingCountValueList = new ArrayList<>();
         for (Monitor monitor : monitorList) {
-            blockHeightValueList.add(new BigDecimal(monitor.getBlockHeight()));
-            pbftViewValueList.add(new BigDecimal(monitor.getPbftView()));
-            pendingCountValueList.add(new BigDecimal(monitor.getPendingTransactionCount()));
+            blockHeightValueList.add(monitor.getBlockHeight()==null? null: new BigDecimal(monitor.getBlockHeight()));
+            pbftViewValueList.add(monitor.getPbftView()==null? null: new BigDecimal(monitor.getPbftView()));
+            pendingCountValueList.add(monitor.getPendingTransactionCount()==null? null: new BigDecimal(monitor.getPendingTransactionCount()));
             timestampList.add(monitor.getTimestamp());
         }
         monitorList.clear();
@@ -66,9 +66,9 @@ public class MonitorService {
         List<BigDecimal> contrastPbftViewValueList = new ArrayList<>();
         List<BigDecimal> contrastPendingCountValueList = new ArrayList<>();
         for (Monitor monitor : contrastMonitorList) {
-            contrastBlockHeightValueList.add(new BigDecimal(monitor.getBlockHeight()));
-            contrastPbftViewValueList.add(new BigDecimal(monitor.getPbftView()));
-            contrastPendingCountValueList.add(new BigDecimal(monitor.getPendingTransactionCount()));
+            contrastBlockHeightValueList.add(monitor.getBlockHeight()==null? null:new BigDecimal(monitor.getBlockHeight()));
+            contrastPbftViewValueList.add(monitor.getPbftView()==null? null: new BigDecimal(monitor.getPbftView()));
+            contrastPendingCountValueList.add(monitor.getPendingTransactionCount()==null? null:new BigDecimal(monitor.getPendingTransactionCount()));
             contrastTimestampList.add(monitor.getTimestamp());
         }
         contrastMonitorList.clear();
