@@ -72,7 +72,6 @@ cd dist
 ```
 前置服务日志：tail -f log/webase-front.log
 web3连接日志：tail -f log/web3sdk.log
-report服务日志：tail -f dist/report/log/report.log
 ```
 
 # 5. <a id="chapter-5"></a>附录
