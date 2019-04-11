@@ -18,7 +18,13 @@ public class KeyStoreController extends BaseController {
 
     @ApiOperation(value = "get PrivateKey", notes = "get PrivateKey")
     @RequestMapping(method = RequestMethod.GET)
-    public BaseResponse getPrivateKey(@PathVariable int groupId) {
-        return keyStoreService.getPrivateKey();
+    public KeyStoreInfo getPrivateKey() {
+        return keyStoreService.createPrivateKey();
+    }
+
+    @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
+    @RequestMapping(method = RequestMethod.GET)
+    public KeyStoreInfo importPrivateKey(String privateKey) {
+        return keyStoreService.getKeyStoreFromPrivateKey(privateKey);
     }
 }

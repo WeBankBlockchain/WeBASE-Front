@@ -3,6 +3,7 @@ package com.webank.webase.front.keystore;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
@@ -36,17 +37,14 @@ public class KeyStoreService {
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
 
     /**
-     * getPrivateKey.
-     * 
+     * createPrivateKey.
+     *
      * @return
      */
-    public BaseResponse getPrivateKey() {
-        BaseResponse baseRspEntity = new BaseResponse(ConstantCode.RET_SUCCEED);
-
+    public KeyStoreInfo createPrivateKey() {
         try {
             ECKeyPair keyPair = Keys.createEcKeyPair();
-            String publicKey = Numeric.toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(),
-                    PUBLIC_KEY_LENGTH_IN_HEX);
+            String publicKey = Numeric.toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
             String privateKey = Numeric.toHexStringNoPrefix(keyPair.getPrivateKey());
             String address = "0x" + Keys.getAddress(publicKey);
 
@@ -54,14 +52,27 @@ public class KeyStoreService {
             keyStoreInfo.setPublicKey(publicKey);
             keyStoreInfo.setPrivateKey(privateKey);
             keyStoreInfo.setAddress(address);
-            baseRspEntity.setData(keyStoreInfo);
 
-            log.info("getPrivateKey finish. baseRspEntity[{}]", JSON.toJSONString(baseRspEntity));
-            return baseRspEntity;
+            return keyStoreInfo;
         } catch (Exception e) {
-            log.error("createEcKeyPair fail.");
-            baseRspEntity = new BaseResponse(ConstantCode.SYSTEM_ERROR);
-            return baseRspEntity;
+            throw new FrontException("create keyinfo failed");
+        }
+    }
+
+    public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey) {
+        try {
+            ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
+            String publicKey = Numeric.toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
+            String address = "0x" + Keys.getAddress(keyPair.getPublicKey());
+            KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
+            keyStoreInfo.setPublicKey(publicKey);
+            keyStoreInfo.setPrivateKey(privateKey);
+            keyStoreInfo.setAddress(address);
+
+            return keyStoreInfo;
+        } catch (Exception e) {
+            throw new FrontException("create keyinfo failed");
         }
     }
 }
+

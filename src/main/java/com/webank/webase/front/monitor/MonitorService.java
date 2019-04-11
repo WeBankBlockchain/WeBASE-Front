@@ -56,7 +56,6 @@ public class MonitorService {
         for (Monitor monitor : monitorList) {
             blockHeightValueList.add(new BigDecimal(monitor.getBlockHeight()));
             pbftViewValueList.add(new BigDecimal(monitor.getPbftView()));
-            pbftViewValueList.add(new BigDecimal(monitor.getPbftView()));
             pendingCountValueList.add(new BigDecimal(monitor.getPendingTransactionCount()));
             timestampList.add(monitor.getTimestamp());
         }
