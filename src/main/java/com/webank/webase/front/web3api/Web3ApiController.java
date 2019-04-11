@@ -115,21 +115,6 @@ public class Web3ApiController {
     }
 
 
-// todo
-////    @ApiOperation(value = "getTransCnt",
-////            notes = "Get the number of execution transactions for the specified "
-////                    + "account at the specified block height")
-////    @ApiImplicitParams({
-////            @ApiImplicitParam(name = "address", value = "address", required = true,
-////                    dataType = "String", paramType = "path"),
-////            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-////                    dataType = "BigInteger", paramType = "path")})
-////    @GetMapping("/transCnt/{address}/{blockNumber}")
-////    public BaseResponse getTransCnt(@PathVariable String address,
-////            @PathVariable BigInteger blockNumber)  {
-////        return web3ApiService.getTransCnt(address, blockNumber);
-////    }
-
     // todo
     @ApiOperation(value = "getTotalTransactionCount",
             notes = "Get the  total number of execution transactions count ")
