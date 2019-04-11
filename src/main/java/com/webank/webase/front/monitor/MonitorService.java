@@ -34,15 +34,13 @@ public class MonitorService {
 
         List<Monitor> monitorList;
         if (startTime == null && endTime == null) {
-            // startTime= LocalDate.now().atTime(0,0,0);
-            //endTime = LocalDateTime.now();
             monitorList = new ArrayList<>();
         } else {
-            monitorList = monitorRepository.findByTimeBetween(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            monitorList = monitorRepository.findByTimeBetween(groupId,startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
         List<Monitor> contrastMonitorList = new ArrayList<>();
         if (contrastStartTime != null && contrastEndTime != null) {
-            contrastMonitorList = monitorRepository.findByTimeBetween(contrastStartTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), contrastEndTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+            contrastMonitorList = monitorRepository.findByTimeBetween(groupId, contrastStartTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), contrastEndTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
         return transferToPerformanceData(transferListByGap(monitorList, gap), transferListByGap(contrastMonitorList, gap));
 
@@ -115,21 +113,24 @@ public class MonitorService {
         return newMonitorList;
     }
     @Scheduled(cron = "0/5 * * * * ?")
-    public void syncMonitorInfo() throws ExecutionException, InterruptedException, IOException {
+    public void syncMonitorInfo() throws ExecutionException, InterruptedException {
         log.info("begin sync chain data");
         Monitor monitor = new Monitor();
         Long currentTime = System.currentTimeMillis();
         //to do  add  more group
-        CompletableFuture<BlockNumber> blockHeightFuture = web3jMap.get(1).getBlockNumber().sendAsync();
-        CompletableFuture<PbftView> pbftViewFuture = web3jMap.get(1).getPbftView().sendAsync();
-        CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3jMap.get(1).getPendingTxSize().sendAsync();
+        for(int i : web3jMap.keySet()) {
+            CompletableFuture<BlockNumber> blockHeightFuture = web3jMap.get(i).getBlockNumber().sendAsync();
+            CompletableFuture<PbftView> pbftViewFuture = web3jMap.get(i).getPbftView().sendAsync();
+            CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3jMap.get(i).getPendingTxSize().sendAsync();
 
-        monitor.setBlockHeight(blockHeightFuture.get().getBlockNumber());
-        monitor.setPbftView(pbftViewFuture.get().getPbftView());
-        monitor.setPendingTransactionCount(pendingTxSizeFuture.get().getPendingTxSize());
-        monitor.setTimestamp(currentTime);
-        monitorRepository.save(monitor);
-        log.info("insert success =  " + monitor.getId());
+            monitor.setBlockHeight(blockHeightFuture.get().getBlockNumber());
+            monitor.setPbftView(pbftViewFuture.get().getPbftView());
+            monitor.setPendingTransactionCount(pendingTxSizeFuture.get().getPendingTxSize());
+            monitor.setTimestamp(currentTime);
+            monitor.setGroupId(i);
+            monitorRepository.save(monitor);
+            log.info("insert success =  " + monitor.getId());
+        }
     }
 
 
