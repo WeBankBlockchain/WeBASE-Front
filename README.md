@@ -14,7 +14,6 @@
 | ------ | --------------- |
 | java   | jdk1.8.0_121或以上版本|
 | gradle | gradle-2.1或以上版本 |
-| python | Python2.7 |
 | fisco-bcos |v1.3.x版本  |
 备注：安装说明请参看附录。
 
@@ -32,37 +31,22 @@ git clone https://github.com/WeBankFinTech/webase-front.git
 ```
 
 ## 4.2 编译代码
-
+ 拷贝节点sdk目录下的ca.crt、node.crt、node.key证书到项目的src/test/resources目录。
+ 然后修改application.yml配置文件。
+```
+constant:  
+  nodeDir: D:\config        // 指定节点的config.ini所在目录
+  transMaxWait: 30          //交易等待时间
+  monitorDisk: D:\config   //要监控的硬盘目录
+```
 在代码的根目录webase-front执行构建命令：
 ```
-gradle build
+gradle build -x test
 ```
 构建完成后，会在根目录webase-front下生成已编译的代码目录dist。
 
-## 4.3 配置修改
-（1）进入目录：
-```
-cd dist/conf
-```
-```
-修改当前服务端口：sed -i "s/8081/${your_server_port}/g" application.yml
-修改机构名称：sed -i "s/orgTest/${your_org_name}/g" application.yml
-修改节点目录：sed -i "s/\/data\/app\/build\/node0/${your_node_dir}/g" application.yml
-修改节点管理服务ip端口：sed -i "s/10.0.0.1:8082/${your_ip_port}/g" application.yml
-例子（将端口由8081改为8090）：sed -i "s/8081/8090/g" application.yml
-```
 
-（2）进入目录：
-```
-cd dist/report
-```
-```
-修改节点管理服务ip：sed -i "s/10.0.0.1/${your_ip }/g" config.json
-修改节点管理服务端口：sed -i "s/8082/${your_ port}/g" config.json
-修改节点目录：sed -i "s/\/data\/app\/build\/node0/${your_node_dir}/g" config.json
-```
-
-## 4.4 服务启停
+## 4.3 服务启停
 
 进入到已编译的代码根目录：
 ```shell
@@ -79,7 +63,7 @@ cd dist
 转格式：dos2unix *.sh
 ```
 
-## 4.5 查看日志
+## 4.4 查看日志
 
 进入到已编译的代码根目录：
 ```shell
@@ -130,8 +114,3 @@ export GRADLE_HOME=/software/gradle-2.1
 export PATH=$GRADLE_HOME/bin:$PATH
 ```
 
-## 5.3 Python部署
-
-```shell
-pip install requests或yum install requests
-```
