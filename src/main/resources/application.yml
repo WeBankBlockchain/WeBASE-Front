@@ -37,10 +37,11 @@ sdk:
   timeout: 3000
   keepAlive: 60
 
+logging:
+  config: classpath:log4j2.xml
+
 constant:  
   nodeDir: D:\config
   transMaxWait: 30
   monitorDisk: D:\config
 
-logging: 
-  config: classpath:log4j2.xml
