@@ -198,7 +198,7 @@ public class ContractService {
             commonContract = CommonContract.deploy(web3jMap.get(groupId), credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
                                     Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
         } catch (Exception e) {
-            log.error("commonContract deploy failed.");
+            log.error("commonContract deploy failed.",e);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
         log.info("commonContract deploy success. contractAddress:{}", commonContract.getContractAddress());
