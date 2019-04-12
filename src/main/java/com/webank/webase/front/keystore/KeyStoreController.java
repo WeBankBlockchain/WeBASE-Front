@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.lang.reflect.Method;
 
 @RestController
-@RequestMapping(value = "{groupId}/privateKey")
+@RequestMapping(value = "/privateKey")
 public class KeyStoreController extends BaseController {
 
     @Autowired
@@ -23,7 +23,7 @@ public class KeyStoreController extends BaseController {
     }
 
     @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET,value = "/import")
     public KeyStoreInfo importPrivateKey(String privateKey) {
         return keyStoreService.getKeyStoreFromPrivateKey(privateKey);
     }
