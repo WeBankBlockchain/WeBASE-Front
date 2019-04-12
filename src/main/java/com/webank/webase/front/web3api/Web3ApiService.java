@@ -304,7 +304,6 @@ public class Web3ApiService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("****" + currentNumber);
         if (blockNumber.compareTo(currentNumber) == 1) {
             return true;
         }
@@ -417,5 +416,13 @@ public class Web3ApiService {
         }
 
         return null;
+    }
+
+    public int getPendingTransactions(int groupId) {
+        try {
+          return   web3jMap.get(groupId).getPendingTransaction().send().getPendingTransactions().size();
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
+        }
     }
 }
