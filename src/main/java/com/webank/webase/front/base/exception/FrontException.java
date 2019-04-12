@@ -1,6 +1,8 @@
 package com.webank.webase.front.base.exception;
 
 import com.webank.webase.front.base.RetCode;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /*
  * Copyright 2012-2019 the original author or authors.
