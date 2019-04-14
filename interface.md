@@ -1244,7 +1244,7 @@ HTTP GET
 | 3.8      | data路径     | datadir            | String   | 是       |                       |
 
 **2）数据格式**
-
+```
 {
 
 "channelPort": "8545",
@@ -1264,7 +1264,7 @@ HTTP GET
 "rpcport": "8861"
 
 }
-
+```
 
 ## 3.14. 节点心跳接口
 
