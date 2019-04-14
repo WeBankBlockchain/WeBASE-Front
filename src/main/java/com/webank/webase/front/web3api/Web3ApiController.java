@@ -189,6 +189,11 @@ public class Web3ApiController {
         return web3ApiService.getPeers(groupId);
     }
 
+    @GetMapping("/pending-transactions-count")
+    public int getPendingTransactions(@PathVariable int groupId) throws IOException {
+        return web3ApiService.getPendingTransactions(groupId);
+    }
+
     @GetMapping("/consensusStatus")
     public  String getConsensusStatus(@PathVariable int groupId) throws IOException {
         return web3ApiService.getConsensusStatus(groupId);
