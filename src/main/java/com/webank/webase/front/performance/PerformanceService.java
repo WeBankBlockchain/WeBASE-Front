@@ -1,5 +1,6 @@
 package com.webank.webase.front.performance;
 
+import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
@@ -52,6 +53,8 @@ public class PerformanceService {
 
     @Autowired
     private PerformanceRepository performanceRepository;
+    @Autowired
+    private Constants constants;
 
 
     private static Sigar sigar = new Sigar();
@@ -174,7 +177,7 @@ public class PerformanceService {
             performance.setTxbps(new BigDecimal(map.get("txbps")));
             performance.setRxbps(new BigDecimal(map.get("rxbps")));
         } catch (Exception e) {
-            log.error("get net speed failed.");
+            log.error("get net speed failed.",e);
         }
 
         performanceRepository.save(performance);
@@ -214,7 +217,7 @@ public class PerformanceService {
      */
     public BigDecimal getDiskRatio() throws SigarException {
         double use;
-        use = sigar.getFileSystemUsage("/data").getUsePercent();
+        use = sigar.getFileSystemUsage(constants.getMonitorDisk()).getUsePercent();
         return new BigDecimal(use * 100); // 硬盘使用百分率%
     }
 
@@ -284,8 +287,8 @@ public class PerformanceService {
         long use;
         FileSystem[] fslist = sigar.getFileSystemList();
         log.info("****fs " + fslist.length);
-        use = sigar.getFileSystemUsage("/data").getUsed();
-        total = sigar.getFileSystemUsage("/data").getTotal();
+        use = sigar.getFileSystemUsage(constants.getMonitorDisk()).getUsed();
+        total = sigar.getFileSystemUsage(constants.getMonitorDisk()).getTotal();
         System.out.println("文件系统总量:    " + total);
         System.out.println("文件系统已使用量:    " + use);
         configMap.put("diskTotalSize", Long.toString(total));

@@ -12,21 +12,6 @@ if [ ${NODE_DIR}"" = "" ];then
 	exit -1
 fi
 
-rm -rf ${CURRENT_DIR}/conf/ca.crt
-if [ -f $NODE_DIR/fisco-data/ca.crt ]; then
-	cp $NODE_DIR/fisco-data/ca.crt ${CURRENT_DIR}/conf/
-fi
-if [ -f $NODE_DIR/webank-data/ca.crt ]; then
-	cp $NODE_DIR/webank-data/ca.crt ${CURRENT_DIR}/conf/
-fi
-if [ -f $NODE_DIR/data/ca.crt ]; then
-	cp $NODE_DIR/data/ca.crt ${CURRENT_DIR}/conf/
-fi
-if [ ! -f ${CURRENT_DIR}/conf/ca.crt ];then
-	echo "node's ca.crt is not existed"
-	echo "nodeDir:"$NODE_DIR
-	exit -1
-fi
 
 mkdir -p log
 
@@ -60,8 +45,4 @@ startFront(){
 	    fi
 	fi
 }
-
-# start front
 startFront
-# start report
-#cd ./report && chmod +x *.sh && dos2unix *.sh && sh report_start.sh
