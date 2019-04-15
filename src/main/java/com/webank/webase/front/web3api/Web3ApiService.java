@@ -1,6 +1,7 @@
 package com.webank.webase.front.web3api;
 
 import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
@@ -360,7 +361,16 @@ public class Web3ApiService {
     // get all peers of chain
     public List<Peers.Peer> getPeers(int groupId) {
         try {
-            return web3jMap.get(groupId).getPeers().send().getPeers();
+            String syncStatus = web3jMap.get(groupId).getSyncStatus().sendForReturnString();
+             ObjectMapper objectMapper = new ObjectMapper();
+             SyncStatus syncStatus1 = objectMapper.readValue(syncStatus,SyncStatus.class);
+            List<String> ilist = web3jMap.get(groupId).getGroupPeers().send().getGroupPeers();
+               Peers.Peer localPeers = new Peers.Peer();
+               localPeers.setIPAndPort(nodeConfig.getListenip()+":"+nodeConfig.getP2pport());
+               localPeers.setNodeID(syncStatus1.getNodeId());
+            List<Peers.Peer> peers =  web3jMap.get(groupId).getPeers().send().getPeers();
+            peers.add(localPeers);
+            return peers;
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }

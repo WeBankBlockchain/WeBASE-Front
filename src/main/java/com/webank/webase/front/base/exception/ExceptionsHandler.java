@@ -5,10 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.RetCode;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -31,7 +36,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * ExceptionsHandler.
- * 
  */
 @ControllerAdvice
 @Slf4j
@@ -41,25 +45,30 @@ public class ExceptionsHandler {
 
     /**
      * myExceptionHandler.
-     * 
      * @param frontException e
      * @return
      */
     @ResponseBody
     @ExceptionHandler(value = FrontException.class)
-    public BaseResponse myExceptionHandler(FrontException frontException) throws Exception {
-        log.warn("catch business exception", frontException);
-        RetCode retCode = Optional.ofNullable(frontException).map(FrontException::getRetCode)
-                .orElse(new RetCode(101001, frontException.getMessage()));
+    public ResponseEntity myExceptionHandler(FrontException frontException) throws Exception {
+      //  log.warn("catch business exception", frontException);
+//        RetCode retCode = Optional.ofNullable(frontException).map(FrontException::getRetCode)
+//                .orElse(new RetCode(101001, frontException.getMessage()));
+//
+//        BaseResponse rep = new BaseResponse(retCode);
 
-        BaseResponse rep = new BaseResponse(retCode);
-        log.warn("business exception return:{}", mapper.writeValueAsString(rep));
-        return rep;
+     //   log.warn("business exception return:{}", mapper.writeValueAsString(rep));
+
+        Map<String, Object> map = new HashMap<>();
+      //  map.put("exception", frontException);
+        map.put("errorMessage", frontException.getMessage());
+        map.put("statusCode",  500);
+       return  ResponseEntity.status(500).body(map);
+
     }
 
     /**
      * exceptionHandler.
-     * 
      * @param exc e
      * @return
      */

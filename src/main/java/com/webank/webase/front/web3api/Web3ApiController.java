@@ -1,21 +1,17 @@
 package com.webank.webase.front.web3api;
 
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.config.NodeConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.fisco.bcos.web3j.protocol.core.methods.response.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-
-import org.fisco.bcos.web3j.protocol.core.methods.response.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -169,6 +165,11 @@ public class Web3ApiController {
 
     @GetMapping("/peers")
     public List<Peers.Peer> getPeers(@PathVariable int groupId) throws IOException {
+        return web3ApiService.getPeers(groupId);
+    }
+
+    @GetMapping("/peers-info")
+    public List<Peers.Peer> getPeersInfo(@PathVariable int groupId) throws IOException {
         return web3ApiService.getPeers(groupId);
     }
 
