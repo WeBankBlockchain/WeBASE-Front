@@ -54,8 +54,8 @@ public class MonitorController {
                                                  @RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime contrastBeginDate,
                                                  @RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime contrastEndDate,
                                                  @RequestParam(required = false, defaultValue = "1") int gap,
-                                                 @RequestParam(defaultValue = "1") int groupId)   {
-        List<PerformanceData> performanceList = monitorService.findContrastDataByTime(groupId, beginDate,endDate,contrastBeginDate,contrastEndDate,gap);
+                                                 @RequestParam(defaultValue = "1") int group)   {
+        List<PerformanceData> performanceList = monitorService.findContrastDataByTime(group, beginDate,endDate,contrastBeginDate,contrastEndDate,gap);
         return performanceList;
     }
 }

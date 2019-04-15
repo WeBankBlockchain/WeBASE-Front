@@ -20,7 +20,6 @@ import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
@@ -29,11 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -57,6 +57,7 @@ public class MonitorService {
         if (contrastStartTime != null && contrastEndTime != null) {
             contrastMonitorList = monitorRepository.findByTimeBetween(groupId, contrastStartTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), contrastEndTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
+        System.out.println("&&&&&&&"+ monitorList.size());
         return transferToPerformanceData(transferListByGap(monitorList, gap), transferListByGap(contrastMonitorList, gap));
 
     }
@@ -144,7 +145,7 @@ public class MonitorService {
             monitor.setTimestamp(currentTime);
             monitor.setGroupId(i);
             monitorRepository.save(monitor);
-            log.info("insert success =  " + monitor.getId());
+            log.info("monitor insert success =  " + monitor.getId());
         }
     }
 

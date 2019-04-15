@@ -24,7 +24,7 @@ import java.util.List;
 
 public interface MonitorRepository extends CrudRepository<Monitor, Long> {
 
-    @Query(value="select m from Monitor m where m.groupId = ?1 and m.timestamp between ?2 and ?3 order by m.timestamp")
+    @Query(value="select m from Monitor m where m.timestamp between ?2 and ?3 and  m.groupId = ?1 order by m.timestamp")
     public List<Monitor> findByTimeBetween(int groupId, Long startTime, Long endTime);
 
     @Modifying

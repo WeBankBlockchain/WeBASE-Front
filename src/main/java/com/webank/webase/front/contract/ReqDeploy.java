@@ -39,7 +39,7 @@ public class ReqDeploy {
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
+    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTEBIN_IS_EMPTY)
     private String bytecodeBin;
     private  int groupId = 1;
     private String sol;

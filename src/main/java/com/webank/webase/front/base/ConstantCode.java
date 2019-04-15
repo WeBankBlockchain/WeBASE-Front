@@ -35,7 +35,7 @@ public interface ConstantCode {
     String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"msg\":\"abiInfo cannot be empty\"}";
     String PARAM_FAIL_CONTRACTBIN_IS_EMPTY =
             "{\"code\":201007,\"msg\":\"contractBin cannot be empty\"}";
-
+    String PARAM_FAIL_BYTEBIN_IS_EMPTY =   "{\"code\":201007,\"msg\":\"byteBin cannot be empty\"}";
     /* general error */
     RetCode CONTRACT_DEPLOYED_ERROR =
             RetCode.mark(201008, "contract's current version has been deployed");
@@ -58,4 +58,5 @@ public interface ConstantCode {
     /* system error */
     RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
     RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
+
 }
