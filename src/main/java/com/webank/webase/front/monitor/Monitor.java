@@ -18,6 +18,6 @@ public class Monitor {
     private BigInteger blockHeight;
     private BigInteger pbftView;
     private BigInteger pendingTransactionCount;
-   // private int groupId=1;
+    private int groupId=1;
     private Long timestamp;
 }
