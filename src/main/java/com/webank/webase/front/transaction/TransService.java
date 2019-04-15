@@ -14,6 +14,7 @@ import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.ContractTypeUtil;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
@@ -119,7 +121,7 @@ public class TransService {
      * @param req request
      * @return
      */
-    public Object dealWithtrans(ReqTransHandle req) throws FrontException {
+    public Object dealWithtrans(ReqTransHandle req) throws FrontException, IOException {
         log.info("dealWithtrans start. ReqTransHandle:[{}]", JSON.toJSONString(req));
         Object result =null;
 
@@ -153,11 +155,15 @@ public class TransService {
 
         // contract load
         CommonContract commonContract;
+       Web3j web3j =  web3jMap.get(groupId);
+        BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
+        JsonRpc2_0Web3j jsonRpc2_0Web3j =  (JsonRpc2_0Web3j)web3j;
+        jsonRpc2_0Web3j.setBlockNumber(blockNumber);
       if(req.getContractAddress()==null) {
-           commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3jMap.get(groupId),
+           commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3j,
                   credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
        } else{
-          commonContract=  CommonContract.load(req.getContractAddress() + Constants.SYMPOL + version, web3jMap.get(groupId),
+          commonContract=  CommonContract.load(req.getContractAddress() + Constants.SYMPOL + version, web3j,
                   credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
       }
         // request
