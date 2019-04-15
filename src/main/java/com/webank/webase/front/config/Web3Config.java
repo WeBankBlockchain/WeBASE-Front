@@ -1,5 +1,6 @@
 package com.webank.webase.front.config;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import lombok.Data;
@@ -75,7 +76,7 @@ public class Web3Config {
      * @return
      */
     @Bean
-    public Service getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig) {
+    public Web3j getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig) throws Exception {
 
         nodeConfig.setOrgName(orgName);
         Service service = new Service();
@@ -83,7 +84,12 @@ public class Web3Config {
         service.setGroupId(1);
         service.setThreadPool(sdkThreadPool());
         service.setAllChannelConnections(groupChannelConnectionsConfig);
-        return service;
+        service.run();
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setTimeout(timeout);
+        channelEthereumService.setChannelService(service);
+        Web3j web3j = Web3j.build(channelEthereumService);
+        return web3j;
     }
 
     /**
@@ -110,15 +116,20 @@ public class Web3Config {
      * @return
      */
     @Bean
-    public HashMap<Integer, Web3j> web3j(Service service) throws Exception {
-        service.run();
-        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setTimeout(timeout);
-        channelEthereumService.setChannelService(service);
-        Web3j web3j = Web3j.build(channelEthereumService);
+    public HashMap<Integer, Web3j> web3j(Web3j web3j, GroupChannelConnectionsConfig groupChannelConnectionsConfig) throws Exception {
+
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
         HashMap web3jMap= new HashMap<Integer,Web3j>();
         for (int i = 0; i < groupIdList.size(); i++) {
+            Service service1 = new Service();
+            service1.setOrgID(orgName);
+            service1.setGroupId(1);
+            service1.setThreadPool(sdkThreadPool());
+            service1.setAllChannelConnections(groupChannelConnectionsConfig);
+            service1.run();
+            ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+            channelEthereumService.setTimeout(timeout);
+            channelEthereumService.setChannelService(service1);
             web3jMap.put(Integer.parseInt(groupIdList.get(i)), Web3j.build(channelEthereumService,  Integer.parseInt(groupIdList.get(i))));
         }
         return web3jMap;

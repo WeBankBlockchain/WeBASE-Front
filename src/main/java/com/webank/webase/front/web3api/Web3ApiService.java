@@ -394,7 +394,19 @@ public class Web3ApiService {
         return JSON.parse(nodeConfig.toString());
     }
 
-    public int getPendingTransactions(int groupId) throws IOException {
-       return web3jMap.get(groupId).getPendingTransaction().send().getPendingTransactions().size();
+    public List<Transaction> getPendingTransactions(int groupId) throws IOException {
+       return web3jMap.get(groupId).getPendingTransaction().send().getPendingTransactions();
+    }
+
+    public BigInteger  getPendingTransactionsSize(int groupId) throws IOException {
+       return web3jMap.get(groupId).getPendingTxSize().send().getPendingTxSize();
+    }
+
+    public List<String> getSealerList(int groupId) throws IOException {
+        return web3jMap.get(groupId).getSealerList().send().getSealerList();
+    }
+
+    public List<String> getObserverList(int groupId) throws IOException {
+        return web3jMap.get(groupId).getObserverList().send().getObserverList();
     }
 }

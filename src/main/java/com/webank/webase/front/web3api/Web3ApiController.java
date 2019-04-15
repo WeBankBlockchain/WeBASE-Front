@@ -189,9 +189,14 @@ public class Web3ApiController {
         return web3ApiService.getPeers(groupId);
     }
 
-    @GetMapping("/pending-transactions-count")
-    public int getPendingTransactions(@PathVariable int groupId) throws IOException {
+    @GetMapping("/pending-transactions")
+    public List<Transaction> getPendingTransactions(@PathVariable int groupId) throws IOException {
         return web3ApiService.getPendingTransactions(groupId);
+    }
+
+    @GetMapping("/pending-transactions-count")
+    public BigInteger getPendingTransactionsSize(@PathVariable int groupId) throws IOException {
+        return web3ApiService.getPendingTransactionsSize(groupId);
     }
 
     @GetMapping("/consensusStatus")
@@ -206,6 +211,15 @@ public class Web3ApiController {
     @GetMapping("/systemConfigByKey/{key}")
     public  String getSystemConfigByKey(@PathVariable int groupId,@PathVariable String key ) throws IOException {
         return web3ApiService.getSystemConfigByKey(groupId,key);
+    }
+
+    @GetMapping("/sealerList")
+    public  List<String> getSealerList(@PathVariable int groupId ) throws IOException {
+        return web3ApiService.getSealerList(groupId);
+    }
+    @GetMapping("/observerList")
+    public  List<String> getObserverList(@PathVariable int groupId ) throws IOException {
+        return web3ApiService.getObserverList(groupId);
     }
 
     @ApiOperation(value = "getNodeInfo", notes = "Get node information")
