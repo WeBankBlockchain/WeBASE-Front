@@ -45,3 +45,4 @@ startFront(){
 	    fi
 	fi
 }
+startFront
