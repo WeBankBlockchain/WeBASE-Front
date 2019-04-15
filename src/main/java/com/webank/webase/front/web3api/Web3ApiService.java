@@ -8,6 +8,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.config.NodeConfig;
 import com.webank.webase.front.contract.ContractService;
 import com.webank.webase.front.transLog.TransLogService;
+import com.webank.webase.front.util.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
@@ -17,10 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.net.InetAddress;
+import java.util.*;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -359,18 +358,38 @@ public class Web3ApiService {
     }
 
     // get all peers of chain
-    public List<Peers.Peer> getPeers(int groupId) {
+    public List<PeerInfo> getPeers(int groupId) {
         try {
-            String syncStatus = web3jMap.get(groupId).getSyncStatus().sendForReturnString();
-             ObjectMapper objectMapper = new ObjectMapper();
-             SyncStatus syncStatus1 = objectMapper.readValue(syncStatus,SyncStatus.class);
+            String syncStatusString = web3jMap.get(groupId).getSyncStatus().sendForReturnString();
+            ObjectMapper objectMapper = new ObjectMapper();
+            SyncStatus syncStatus = objectMapper.readValue(syncStatusString, SyncStatus.class);
+
             List<String> ilist = web3jMap.get(groupId).getGroupPeers().send().getGroupPeers();
-               Peers.Peer localPeers = new Peers.Peer();
-               localPeers.setIPAndPort(nodeConfig.getListenip()+":"+nodeConfig.getP2pport());
-               localPeers.setNodeID(syncStatus1.getNodeId());
-            List<Peers.Peer> peers =  web3jMap.get(groupId).getPeers().send().getPeers();
-            peers.add(localPeers);
-            return peers;
+
+            PeerInfo localPeers = new PeerInfo();
+            String ip = CommonUtils.getCurrentIp();
+            System.out.println("********  ip   "+ ip);
+            localPeers.setIpAndPort(ip + ":" + nodeConfig.getP2pport());
+            localPeers.setNodeId(syncStatus.getNodeId());
+            localPeers.setBlockNumber(syncStatus.getBlockNumber());
+            List<Peers.Peer> peers = web3jMap.get(groupId).getPeers().send().getPeers();
+
+            List peerInfoList = new ArrayList();
+            for (PeerOfSyncStatus p : syncStatus.getPeers()) {
+                PeerInfo peerInfo = new PeerInfo();
+                for (int i = 0; i < peers.size(); i++) {
+                    if (p.getNodeId() == peers.get(i).getNodeID())
+                        System.out.println("blocknumber " + p.getBlockNumber());
+                    peerInfo.setBlockNumber(p.getBlockNumber());
+                    peerInfo.setIpAndPort(peers.get(i).getIPAndPort());
+                    peerInfo.setNodeId(p.getNodeId());
+                    peerInfoList.add(peerInfo);
+                }
+            }
+
+            peerInfoList.add(localPeers);
+
+            return peerInfoList;
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }

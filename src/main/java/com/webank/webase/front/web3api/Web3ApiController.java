@@ -164,12 +164,12 @@ public class Web3ApiController {
     }
 
     @GetMapping("/peers")
-    public List<Peers.Peer> getPeers(@PathVariable int groupId) throws IOException {
+    public List<PeerInfo>  getPeers(@PathVariable int groupId) throws IOException {
         return web3ApiService.getPeers(groupId);
     }
 
     @GetMapping("/peers-info")
-    public List<Peers.Peer> getPeersInfo(@PathVariable int groupId) throws IOException {
+    public List<PeerInfo> getPeersInfo(@PathVariable int groupId) throws IOException {
         return web3ApiService.getPeers(groupId);
     }
 
