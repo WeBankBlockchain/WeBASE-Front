@@ -394,4 +394,7 @@ public class Web3ApiService {
         return JSON.parse(nodeConfig.toString());
     }
 
+    public int getPendingTransactions(int groupId) throws IOException {
+       return web3jMap.get(groupId).getPendingTransaction().send().getPendingTransactions().size();
+    }
 }
