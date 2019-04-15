@@ -12,6 +12,9 @@ import com.webank.webase.front.transLog.TransType;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
+
+
+import java.math.BigInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
@@ -20,6 +23,7 @@ import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -195,7 +199,11 @@ public class ContractService {
     private String deployContract(int groupId, String bytecodeBin, String encodedConstructor, Credentials credentials)   {
         CommonContract commonContract = null;
         try {
-            commonContract = CommonContract.deploy(web3jMap.get(groupId), credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
+            Web3j web3j = web3jMap.get(groupId);
+            BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
+            JsonRpc2_0Web3j jsonRpc2_0Web3j =  (JsonRpc2_0Web3j)web3j;
+            jsonRpc2_0Web3j.setBlockNumber(blockNumber);
+            commonContract = CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
                                     Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
         } catch (Exception e) {
             log.error("commonContract deploy failed.",e);
