@@ -6,7 +6,7 @@
 > * [附录](#chapter-5)
 
 # 1. <a id="chapter-1"></a>功能说明
-节点前置是和fisco-bcos节点配合使用的一个子系统，可以通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象。同时具备了可视化控制台。可以通过HTTP请求的形式发交易，降低了开发者的门槛。
+节点前置是和fisco-bcos节点配合使用的一个子系统，可以通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象。同时具备了可视化控制台。降低了开发者的门槛。
 
 # 2. <a id="chapter-2"></a>前提条件
 
@@ -14,7 +14,7 @@
 | ------ | --------------- |
 | java   | jdk1.8.0_121或以上版本|
 | gradle | gradle-2.1或以上版本 |
-| fisco-bcos |v1.3.x版本  |
+| fisco-bcos |v2.0.x版本  |
 |sigar  |   linux 64位机器 | 
 
  ﻿ 服务器性能监控功能需要使用sigar，只需将tool目录下libsigar-amd64-Linux.so（64bit）添加到服务器的usr/lib目录即可 
@@ -60,6 +60,7 @@ cd dist
 启动: sh start.sh
 停止: sh stop.sh
 检查: sh status.sh
+然后可以在浏览器中打开控制台 输入网址即可http://{节点IP}:8081/webase-front/#/index.html
 ```
 <font color="#dd0000">备注：如果脚本执行错误，尝试以下命令: </font>
 ```
