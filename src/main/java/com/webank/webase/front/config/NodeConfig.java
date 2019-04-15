@@ -1,5 +1,6 @@
 package com.webank.webase.front.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 public class NodeConfig implements InitializingBean {
+    @JsonIgnore
     @Autowired
     private Constants constants;
 

@@ -35,8 +35,8 @@ public class ReqTransHandle {
     private String contractName;
     @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
     private String version;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
     private String contractAddress;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
     private String funcName;
     private int groupId=1;
     private List<Object> funcParam = new ArrayList<>();

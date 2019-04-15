@@ -99,17 +99,6 @@ public class TransService {
      * @param req request
      */
     public void checkAndSaveAbiFromCns(ReqTransHandle req) throws Exception {
-        // cns Params
-//        List<Object> cnsParams = new ArrayList<>();
-//        cnsParams.add(req.getContractName() + Constants.DIAGONAL + req.getVersion());
-
-        // transaction Params
-//        ReqTransHandle reqTransHandle = new ReqTransHandle();
-//        reqTransHandle.setUserId(req.getUserId());
-//        reqTransHandle.setContractName(Constants.CNS_CONTRAC_TNAME);
-//        reqTransHandle.setVersion("");
-//        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_GETABI);
-//        reqTransHandle.setFuncParam(cnsParams);
         List<CnsInfo> cnsInfoList =  cnsServiceMap.get(req.getGroupId()).queryCnsByNameAndVersion(req.getContractName() ,req.getVersion());
         // transaction request
         log.info("cnsinfo" + cnsInfoList.get(0).getAddress());
