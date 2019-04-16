@@ -11,6 +11,7 @@ import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 
+import java.math.BigInteger;
 import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -99,28 +101,19 @@ public class ContractService {
         String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
         checkContractAbiExistedAndSave(contractName, version, abiInfos);
-//        // cns Params
-//        List<Object> cnsParams = new ArrayList<>();
-//        cnsParams.add(contractName + Constants.DIAGONAL + version);
-//        cnsParams.add(contractName);
-//        cnsParams.add(version);
-//        cnsParams.add(JSON.toJSONString(abiInfos));
-//        cnsParams.add(contractAddress);
 
-         cnsServiceMap.get(groupId).registerCns(contractName ,version, contractAddress,JSON.toJSONString(abiInfos));
 
-        // trans Params
-//        ReqTransHandle reqTransHandle = new ReqTransHandle();
-//        reqTransHandle.setUserId(userId);
-//        reqTransHandle.setContractName(Constants.CNS_CONTRAC_TNAME);
-//        reqTransHandle.setVersion("");
-//        reqTransHandle.setFuncName(Constants.CNS_FUNCTION_ADDABI);
-//        reqTransHandle.setFuncParam(cnsParams);
+         // CnsService cnsService = cnsServiceMap.get(groupId);
 
-        // cns add
-//        BaseResponse baseRsp = transService.dealWithtrans(reqTransHandle);
+        Web3j web3j = web3jMap.get(groupId);
+        BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
+        log.info("*******2 deploy   blockNumber" + blockNumber );
+        Credentials cnsCredentials = Credentials.create("b83261efa42895c38c6c2364ca878f43e77f3cddbc922bf57d0d48070f79feb6");
+        JsonRpc2_0Web3j jsonRpc2_0Web3j =  (JsonRpc2_0Web3j)web3j;
+        jsonRpc2_0Web3j.setBlockNumber(blockNumber);
+        CnsService cnsService = new CnsService(web3j,cnsCredentials);
+        cnsService.registerCns(contractName ,version, contractAddress,JSON.toJSONString(abiInfos));
 
-        // result
         return contractAddress;
     }
 
@@ -155,7 +148,12 @@ public class ContractService {
     private String deployContract(int groupId, String bytecodeBin, String encodedConstructor, Credentials credentials) throws FrontException {
         CommonContract commonContract = null;
         try {
-            commonContract = CommonContract.deploy(web3jMap.get(groupId), credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
+            Web3j web3j = web3jMap.get(groupId);
+            BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
+            log.info("******* 1 deploy   blockNumber" + blockNumber );
+            JsonRpc2_0Web3j jsonRpc2_0Web3j =  (JsonRpc2_0Web3j)web3j;
+            jsonRpc2_0Web3j.setBlockNumber(blockNumber);
+            commonContract = CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
                                     Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
         } catch (Exception e) {
             log.error("commonContract deploy failed.",e);

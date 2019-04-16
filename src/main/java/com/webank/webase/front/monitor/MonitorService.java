@@ -129,10 +129,11 @@ public class MonitorService {
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncMonitorInfo() throws ExecutionException, InterruptedException {
         log.info("begin sync chain data");
-        Monitor monitor = new Monitor();
+
         Long currentTime = System.currentTimeMillis();
         //to do  add  more group
         for(int i : web3jMap.keySet()) {
+            Monitor monitor = new Monitor();
             CompletableFuture<BlockNumber> blockHeightFuture = web3jMap.get(i).getBlockNumber().sendAsync();
             CompletableFuture<PbftView> pbftViewFuture = web3jMap.get(i).getPbftView().sendAsync();
             CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3jMap.get(i).getPendingTxSize().sendAsync();

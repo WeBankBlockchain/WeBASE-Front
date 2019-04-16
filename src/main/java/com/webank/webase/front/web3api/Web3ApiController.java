@@ -214,4 +214,13 @@ public class Web3ApiController {
         return web3ApiService.getNodeInfo();
     }
 
+
+    @GetMapping("/sealerList")
+    public  List<String> getSealerList(@PathVariable int groupId ) throws IOException {
+        return web3ApiService.getSealerList(groupId);
+    }
+    @GetMapping("/observerList")
+    public  List<String> getObserverList(@PathVariable int groupId ) throws IOException {
+        return web3ApiService.getObserverList(groupId);
+    }
 }

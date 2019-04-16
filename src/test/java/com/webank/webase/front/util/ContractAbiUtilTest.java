@@ -31,7 +31,7 @@ public class ContractAbiUtilTest extends TestBase {
     public void testDepolyContract() throws Exception {
 
         String contractName = "hello";
-        String version = "1.0";
+        String version = "2.0";
         List<AbiDefinition> abiList = ContractAbiUtil.loadContractDefinition(new File("src/test/resources/solidity/Ok.abi"));
         ContractAbiUtil.setContractWithAbi(contractName, version, abiList, false);
 

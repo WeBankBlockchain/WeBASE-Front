@@ -49,7 +49,7 @@ public class Web3Config {
     private int corePoolSize;
     private int maxPoolSize;
     private int queueCapacity;
-    private int timeout=3000;
+    private int timeout=30000;
     private int keepAlive;
 
     @Bean
