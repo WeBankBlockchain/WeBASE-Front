@@ -156,10 +156,6 @@ public class TransService {
         // contract load
         CommonContract commonContract;
        Web3j web3j =  web3jMap.get(groupId);
-        BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
-        JsonRpc2_0Web3j jsonRpc2_0Web3j =  (JsonRpc2_0Web3j)web3j;
-        jsonRpc2_0Web3j.setBlockNumber(blockNumber);
-        log.info("*******3 trans   blockNumber" + blockNumber );
       if(req.getContractAddress()==null) {
            commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3j,
                   credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
