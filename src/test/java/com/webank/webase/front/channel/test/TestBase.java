@@ -41,7 +41,7 @@ public class TestBase {
     ChannelEthereumService channelEthereumService = new ChannelEthereumService();
     channelEthereumService.setChannelService(service);
 
-    web3j = Web3j.build(channelEthereumService, service.getGroupId());
+    web3j = Web3j.build(channelEthereumService, 2);
     // EthBlockNumber ethBlockNumber = web3.ethBlockNumber().send();
 
     Ok ok = Ok.deploy(web3j, credentials, new StaticGasProvider(gasPrice, gasLimit)).send();
