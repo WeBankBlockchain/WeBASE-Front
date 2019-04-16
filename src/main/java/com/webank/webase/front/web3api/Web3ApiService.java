@@ -60,7 +60,7 @@ public class Web3ApiService {
         try {
             blockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
         } catch (IOException e) {
-            log.error("getBlockNumber fail.");
+            log.error("getBlockNumber fail.",e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
         return blockNumber;
@@ -198,7 +198,7 @@ public class Web3ApiService {
     public String getClientVersion() {
         String version;
         try {
-            version = web3jMap.get(1).getNodeVersion().send().getNodeVersion().getVersion();
+            version = web3jMap.get(1).getNodeVersion().send().getWeb3ClientVersion();
         } catch (IOException e) {
             log.error("getClientVersion fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -355,7 +355,7 @@ public class Web3ApiService {
     // get all peers of chain
     public List<Peers.Peer> getPeers(int groupId) {
         try {
-            return web3jMap.get(groupId).getPeers().send().getPeers();
+            return web3jMap.get(groupId).getPeers().send().getValue();
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }
@@ -403,10 +403,10 @@ public class Web3ApiService {
     }
 
     public List<String> getSealerList(int groupId) throws IOException {
-        return web3jMap.get(groupId).getSealerList().send().getSealerList();
+        return web3jMap.get(groupId).getSealerList().send().getGroupList();
     }
 
     public List<String> getObserverList(int groupId) throws IOException {
-        return web3jMap.get(groupId).getObserverList().send().getObserverList();
+        return web3jMap.get(groupId).getObserverList().send().getGroupList();
     }
 }
