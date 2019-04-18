@@ -34,7 +34,7 @@ sdk:
   corePoolSize: 50
   maxPoolSize: 100
   queueCapacity: 100
-  timeout: 5000
+  timeout: 10000
   keepAlive: 60
 
 logging:
