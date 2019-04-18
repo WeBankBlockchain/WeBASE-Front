@@ -60,7 +60,7 @@ public class Web3ApiService {
         try {
             blockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
         } catch (IOException e) {
-            log.error("getBlockNumber fail.");
+            log.error("getBlockNumber fail.",e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
         return blockNumber;

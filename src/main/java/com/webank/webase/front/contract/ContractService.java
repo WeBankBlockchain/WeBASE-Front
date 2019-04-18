@@ -102,17 +102,7 @@ public class ContractService {
 
         checkContractAbiExistedAndSave(contractName, version, abiInfos);
 
-
-         // CnsService cnsService = cnsServiceMap.get(groupId);
-
-        Web3j web3j = web3jMap.get(groupId);
-        BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
-        log.info("*******2 deploy   blockNumber" + blockNumber );
-        Credentials cnsCredentials = Credentials.create("b83261efa42895c38c6c2364ca878f43e77f3cddbc922bf57d0d48070f79feb6");
-        JsonRpc2_0Web3j jsonRpc2_0Web3j =  (JsonRpc2_0Web3j)web3j;
-        jsonRpc2_0Web3j.setBlockNumber(blockNumber);
-        CnsService cnsService = new CnsService(web3j,cnsCredentials);
-        cnsService.registerCns(contractName ,version, contractAddress,JSON.toJSONString(abiInfos));
+        cnsServiceMap.get(groupId).registerCns(contractName ,version, contractAddress,JSON.toJSONString(abiInfos));
 
         return contractAddress;
     }
@@ -149,10 +139,6 @@ public class ContractService {
         CommonContract commonContract = null;
         try {
             Web3j web3j = web3jMap.get(groupId);
-            BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();
-            log.info("******* 1 deploy   blockNumber" + blockNumber );
-            JsonRpc2_0Web3j jsonRpc2_0Web3j =  (JsonRpc2_0Web3j)web3j;
-            jsonRpc2_0Web3j.setBlockNumber(blockNumber);
             commonContract = CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
                                     Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
         } catch (Exception e) {
