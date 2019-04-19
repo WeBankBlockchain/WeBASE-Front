@@ -76,15 +76,12 @@ public class ExceptionsHandler {
      */
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
-    public BaseResponse exceptionHandler(Exception exc) {
+    public ResponseEntity exceptionHandler(Exception exc) {
         log.info("catch  exception", exc);
-        RetCode retCode = ConstantCode.SYSTEM_ERROR;
-        BaseResponse rep = new BaseResponse(retCode);
-        try {
-            log.warn("exceptionHandler system exception return:{}", mapper.writeValueAsString(rep));
-        } catch (JsonProcessingException ex) {
-            log.warn("exceptionHandler system exception");
-        }
-        return rep;
+        Map<String, Object> map = new HashMap<>();
+        //  map.put("exception", frontException);
+        map.put("errorMessage", exc.getMessage());
+        map.put("statusCode",  500);
+        return  ResponseEntity.status(500).body(map);
     }
 }

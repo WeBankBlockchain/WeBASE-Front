@@ -75,14 +75,11 @@ public class Web3ApiService {
     public BcosBlock.Block getBlockByNumber(int groupId, BigInteger blockNumber) {
         BcosBlock.Block block;
         try {
-            if (blockNumberCheck(groupId, blockNumber)) {
-                throw new FrontException("requst blockNumber is greater than latest");
-            }
             block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                     .send().getBlock();
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("getBlockByNumber fail. blockNumber:{} ", blockNumber);
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+            block = null;
         }
         return block;
     }

@@ -18,7 +18,7 @@ public class Web3jApITest extends TestBase {
   @Test
   public void getNodeVersion() throws IOException {
   	NodeVersion nodeVersion = web3j.getNodeVersion().send();
-    assertNotNull(nodeVersion.getWeb3ClientVersion());
+    assertNotNull(nodeVersion.getNodeVersion());
 
   }
   
@@ -57,7 +57,7 @@ public class Web3jApITest extends TestBase {
   @Test
   public void peers() throws Exception {
     Peers peers = web3j.getPeers().send();
-    assertNotNull(peers.getValue());
+    assertNotNull(peers.getPeers());
   }
 
   @Test
@@ -75,13 +75,13 @@ public class Web3jApITest extends TestBase {
   @Test
   public void getSealerList() throws Exception {
   	SealerList sealerList = web3j.getSealerList().send();
-  	assertNotNull(sealerList.getGroupList());
+  	assertNotNull(sealerList.getSealerList());
   }
   
   @Test
   public void getObserverList() throws Exception {
   	ObserverList observerList = web3j.getObserverList().send();
-  	assertNotNull(observerList.getGroupList());
+  	assertNotNull(observerList.getObserverList());
   }
   
   @Test
