@@ -1279,7 +1279,7 @@ HTTP GET
 | 3.8      | data路径     | datadir            | String   | 是       |                       |
 
 **2）数据格式**
-
+```
 {
 
 "channelPort": "8545",
@@ -1299,7 +1299,7 @@ HTTP GET
 "rpcport": "8861"
 
 }
-
+```
 
 ## 3.14. 节点心跳接口
 
@@ -1389,13 +1389,11 @@ HTTP GET
 
 ### 响应参数
 **1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       |                       |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
+``` 
+{
+  [{"metricType":"cpu","data":{"lineDataList":{"timestampList":[],"valueList":[]},"contrastDataList":{"timestampList":[],"valueList":[]}}},{"metricType":"memory","data":{"lineDataList":{"timestampList":null,"valueList":[]},"contrastDataList":{"timestampList":null,"valueList":[]}}},{"metricType":"disk","data":{"lineDataList":{"timestampList":null,"valueList":[]},"contrastDataList":{"timestampList":null,"valueList":[]}}},{"metricType":"txbps","data":{"lineDataList":{"timestampList":null,"valueList":[]},"contrastDataList":{"timestampList":null,"valueList":[]}}},{"metricType":"rxbps","data":{"lineDataList":{"timestampList":null,"valueList":[]},"contrastDataList":{"timestampList":null,"valueList":[]}}}]}
+}
+```
 # 附录
 
 ## 1. 返回码信息列表
