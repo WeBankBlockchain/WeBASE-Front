@@ -22,11 +22,21 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.solidity.Abi;
 import org.junit.Test;
 
 public class AbiTest {
 
+
+  @Test
+  public void testGenerateKey() throws Exception {
+    Credentials credentials = Credentials.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+    System.out.println( credentials.getAddress());
+    System.out.println( credentials.getEcKeyPair().getPrivateKey());
+    System.out.println(  credentials.getEcKeyPair().getPublicKey());
+
+  }
   @Test
   public void simpleTest() throws IOException {
     String contractAbi =
