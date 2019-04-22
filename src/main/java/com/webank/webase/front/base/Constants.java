@@ -55,7 +55,7 @@ public class Constants {
     public static final String MGR_PRIVATE_KEY_URI = "http://%s/webase-node-mgr/user/privateKey/%s";
 
     public static final String CONSTANT_PREFIX = "constant";
-    private String nodeDir = "/data/app/build/node0";
+    private String nodeDir = "";
     private String mgrIpPorts = "10.0.0.1:8082";
     private int transMaxWait = 30;
     private String monitorDisk = "/data";
