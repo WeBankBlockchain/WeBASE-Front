@@ -40,8 +40,7 @@ sdk:
 logging:
   config: classpath:log4j2.xml
 
-constant:  
-  nodeDir: /data/fisco-node-2.0/FISCO-BCOS/tools/nodes/127.0.0.1/node0
+constant:
   mgrIpPorts: 10.0.0.1:8082
   transMaxWait: 30
   monitorDisk: /data
