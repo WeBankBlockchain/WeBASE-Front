@@ -42,8 +42,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 @ConfigurationProperties(prefix = "sdk")
 public class Web3Config {
-    @Autowired
-    NodeConfig nodeConfig;
+//    @Autowired
+//    NodeConfig nodeConfig;
     private String orgName;
     private List<Integer> groupIdList;
     private int corePoolSize;
@@ -51,14 +51,15 @@ public class Web3Config {
     private int queueCapacity;
     private int timeout=30000;
     private int keepAlive;
+    private String ip= "127.0.0.1";
+    private String channelPort= "8545";
 
     @Bean
     public GroupChannelConnectionsConfig getGroupChannelConnectionsConfig(){
         List<ChannelConnections> channelConnectionsList = new ArrayList<>();
 
             List<String> connectionsList = new ArrayList<>();
-            connectionsList.add("127.0.0.1" + ":" + nodeConfig.getChannelPort());
-            System.out.println("*****" + nodeConfig.getListenip() + ":" + nodeConfig.getChannelPort());
+            connectionsList.add(ip + ":" + channelPort);
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setConnectionsStr(connectionsList);
             channelConnections.setGroupId(1);
@@ -77,7 +78,6 @@ public class Web3Config {
     @Bean
     public Web3j getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig) throws Exception {
 
-        nodeConfig.setOrgName(orgName);
         Service service = new Service();
         service.setOrgID(orgName);
         service.setGroupId(1);
@@ -120,7 +120,7 @@ public class Web3Config {
         List<ChannelConnections> channelConnectionsList = groupChannelConnectionsConfig.getAllChannelConnections();
         for (int i = 1; i < groupIdList.size(); i++) {
             List<String> connectionsList = new ArrayList<>();
-            connectionsList.add(nodeConfig.getListenip() + ":" + nodeConfig.getChannelPort());
+            connectionsList.add(ip + ":" + channelPort);
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setConnectionsStr(connectionsList);
             channelConnections.setGroupId(Integer.valueOf(groupIdList.get(i)));

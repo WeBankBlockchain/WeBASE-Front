@@ -7,6 +7,8 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.CommonUtils;
 import lombok.Data;
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@Slf4j
 @Data
 @Configuration
 public class NodeConfig implements InitializingBean {
@@ -42,10 +45,14 @@ public class NodeConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        if(constants.getNodeDir()=="") {
+            return ;
+        }
         List<String> nodeInfos = CommonUtils.readFileToList(constants.getNodeDir() + Constants.CONFIG_FILE);
 
         if (nodeInfos == null || nodeInfos.size() == 0) {
-            throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
+          //  throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
+            log.info("cannot read config.ini");
         }
         
         this.p2pip = CommonUtils.getCurrentIp();
