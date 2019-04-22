@@ -57,7 +57,7 @@ public class Web3Config {
         List<ChannelConnections> channelConnectionsList = new ArrayList<>();
 
             List<String> connectionsList = new ArrayList<>();
-            connectionsList.add(nodeConfig.getListenip() + ":" + nodeConfig.getChannelPort());
+            connectionsList.add("127.0.0.1" + ":" + nodeConfig.getChannelPort());
             System.out.println("*****" + nodeConfig.getListenip() + ":" + nodeConfig.getChannelPort());
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setConnectionsStr(connectionsList);
