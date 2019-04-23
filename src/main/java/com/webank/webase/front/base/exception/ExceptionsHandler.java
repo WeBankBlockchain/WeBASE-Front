@@ -63,8 +63,8 @@ public class ExceptionsHandler {
         Map<String, Object> map = new HashMap<>();
       //  map.put("exception", frontException);
         map.put("errorMessage", frontException.getMessage());
-        map.put("statusCode",  500);
-       return  ResponseEntity.status(500).body(map);
+        map.put("statusCode",  frontException.getRetCode());
+       return  ResponseEntity.status(422).body(map);
 
     }
 
