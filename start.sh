@@ -6,12 +6,6 @@ CURRENT_DIR=`pwd`
 LOG_DIR=${CURRENT_DIR}/log
 CONF_DIR=${CURRENT_DIR}/conf
 
-NODE_DIR=$(cat $CONF_DIR/application.yml| grep "nodeDir" | awk '{print $2}'| sed 's/\r//')
-if [ ${NODE_DIR}"" = "" ];then
-	echo "$CONF_DIR/application.yml nodeDir is not configured"
-	exit -1
-fi
-
 
 mkdir -p log
 
