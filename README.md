@@ -38,10 +38,9 @@ git clone https://github.com/WeBankFinTech/webase-front.git
  然后修改application.yml配置文件。
 ```
 constant:  
-  nodeDir: D:\config        // 指定节点的config.ini所在目录
   transMaxWait: 30          //交易等待时间
   mgrIpPorts: 10.0.0.1:8082 // 配置node-managerIP和端口
-  monitorDisk: D:\config   //要监控的硬盘目录
+  monitorDisk: /data   //要监控的硬盘目录
 ```
 在代码的根目录webase-front执行构建命令：
 ```

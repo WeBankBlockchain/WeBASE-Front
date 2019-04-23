@@ -52,7 +52,7 @@ public class Web3Config {
     private int timeout=30000;
     private int keepAlive;
     private String ip= "127.0.0.1";
-    private String channelPort= "8545";
+    private String channelPort= "20200";
 
     @Bean
     public GroupChannelConnectionsConfig getGroupChannelConnectionsConfig(){
@@ -60,6 +60,7 @@ public class Web3Config {
 
             List<String> connectionsList = new ArrayList<>();
             connectionsList.add(ip + ":" + channelPort);
+            log.info("*********" + ip +  ":" + channelPort);
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setConnectionsStr(connectionsList);
             channelConnections.setGroupId(1);
