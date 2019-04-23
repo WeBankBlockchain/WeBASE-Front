@@ -121,7 +121,7 @@ public class TransService {
      * @param req request
      * @return
      */
-    public Object dealWithtrans(ReqTransHandle req) throws FrontException, IOException {
+    public Object dealWithtrans(ReqTransHandle req) throws FrontException {
         log.info("dealWithtrans start. ReqTransHandle:[{}]", JSON.toJSONString(req));
         Object result =null;
 
