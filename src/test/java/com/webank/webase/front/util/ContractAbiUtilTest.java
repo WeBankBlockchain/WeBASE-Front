@@ -57,7 +57,7 @@ public class ContractAbiUtilTest extends TestBase {
         String funcName = "trans";
         List<String> funcInputTypes = versionEvents.get(0).getFuncInputs().get(funcName);
         ArrayList a = new ArrayList();
-        a.add(123);
+        a.add("ssd");
         List<Object> params = a;
         List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
         List<String> funOutputTypes = ContractAbiUtil.getFuncOutputType(contractName, "trans", version);
