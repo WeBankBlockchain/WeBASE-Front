@@ -38,6 +38,7 @@ git clone https://github.com/WeBankFinTech/webase-front.git
  然后修改application.yml配置文件。
 ```
 constant:  
+  channelPort: 20200    //连接节点的channelPort端口
   transMaxWait: 30          //交易等待时间
   mgrIpPorts: 127.0.0.1:8080 // 配置node-managerIP和端口
   monitorDisk: /home   //要监控的硬盘目录
