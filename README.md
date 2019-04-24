@@ -57,7 +57,7 @@ gradle build -x test
 cd dist
 ```
 ```shell
-启动: sudo sh start.sh
+启动: sh start.sh
 停止: sh stop.sh
 检查: sh status.sh
 ```
