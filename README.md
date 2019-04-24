@@ -13,7 +13,7 @@
 | 环境     | 版本              |
 | ------ | --------------- |
 | java   | jdk1.8.0_121或以上版本|
-| gradle | gradle-5.0或以上版本 |
+| gradle | gradle-4.10或以上版本 |
 | fisco-bcos |v2.0.x版本  |
  
 ﻿  服务器性能监控功能需要使用sigar，只需将tool目录下libsigar-amd64-Linux.so（64bit）添加到服务器的usr/lib目录即可。 
