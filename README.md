@@ -6,7 +6,7 @@
 > * [附录](#chapter-5)
 
 # 1. <a id="chapter-1"></a>功能说明
-节点前置是和fisco-bcos节点配合使用的一个子系统，可以通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象。同时具备了可视化控制台。可以通过HTTP请求的形式发交易，降低了开发者的门槛。
+节点前置是和fisco-bcos节点配合使用的一个子系统，可以通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象。同时具备了可视化控制台。可以通过HTTP请求的形式发交易，降低了开发者的门槛, 前置需要跟节点同机部署。
 
 # 2. <a id="chapter-2"></a>前提条件
 
@@ -57,7 +57,7 @@ gradle build -x test
 cd dist
 ```
 ```shell
-启动: sh start.sh
+启动: sudo sh start.sh
 停止: sh stop.sh
 检查: sh status.sh
 ```
