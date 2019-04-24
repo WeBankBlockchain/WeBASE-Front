@@ -34,17 +34,18 @@ git clone https://github.com/WeBankFinTech/webase-front.git
 ```
 
 ## 4.2 编译代码
- 拷贝节点sdk目录下的ca.crt、node.crt、node.key证书到项目的src/resources目录。
+ 拷贝节点sdk目录下的ca.crt、node.crt、node.key证书到项目的src/main/resources目录。
  然后修改application.yml配置文件。
 ```
 constant:  
   transMaxWait: 30          //交易等待时间
-  mgrIpPorts: 10.0.0.1:8082 // 配置node-managerIP和端口
-  monitorDisk: /data   //要监控的硬盘目录
+  mgrIpPorts: 127.0.0.1:8080 // 配置node-managerIP和端口
+  monitorDisk: /home   //要监控的硬盘目录
 ```
 在代码的根目录webase-front执行构建命令：
 ```
-gradle build -x test （没有安装gradle  则使用 ./gradlew build -x test）
+gradle build -x test 
+（没有安装gradle  则使用 ./gradlew build -x test）
 ```
 构建完成后，会在根目录webase-front下生成已编译的代码目录dist。
 
