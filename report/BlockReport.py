@@ -93,7 +93,7 @@ def uploadBlockInfo(nodes_state):
             node_state = nodes_state[name]
             time.sleep(float(UPLODA_BLOCK_GAP)/float(len(UPLOAD_BLOCK_NODES)))
             block_number = getBrowserBlockNumber(node_state)
-            #logger.info("Browser block number of "+ name + ": " + str(block_number))
+            logger.debug("mgr's block number of "+ name + ": " + str(block_number))
 
             if block_number is not None and block_number is 0:
                 block_number = -1
