@@ -43,12 +43,12 @@ git checkout dev
 
 ## 4.2 编译代码
 
-在代码的根目录webase-front编译</a>
-方式一：服务器已安装gradle，且版本为gradle-4.10或以上
+在代码的根目录webase-front编译，如果出现问题可以查看[常见问题解答](install_FAQ.md)</br>
+方式一：如果服务器已安装gradle，且版本为gradle-4.10或以上
 ```shell
 gradle build -x test
 ```
-方式二：服务器未安装gradle，或者版本不是gradle-4.10或以上，使用gradlew编译
+方式二：如果服务器未安装gradle，或者版本不是gradle-4.10或以上，使用gradlew编译
 ```shell
 ./gradlew build -x test
 ```
