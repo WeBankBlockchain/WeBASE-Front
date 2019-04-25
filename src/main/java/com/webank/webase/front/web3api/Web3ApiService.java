@@ -78,7 +78,8 @@ public class Web3ApiService {
             block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                     .send().getBlock();
         } catch (Exception e) {
-            log.error("getBlockByNumber fail. blockNumber:{} ", blockNumber);
+            log.info("get blocknumber failed"+ e.getMessage());
+            log.error("getBlockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
             block = null;
         }
         return block;
@@ -117,9 +118,6 @@ public class Web3ApiService {
             BcosBlock.Block block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                     .send().getBlock();
             transCnt = block.getTransactions().size();
-//            BigInteger transCnt = web3j
-//                    .ethGetBlockTransactionCountByNumber(DefaultBlockParameter.valueOf(blockNumber))
-//                    .send().getTransactionCount();
 
         } catch (IOException e) {
             log.error("getBlockTransCntByNumber fail. blockNumber:{} ", blockNumber);

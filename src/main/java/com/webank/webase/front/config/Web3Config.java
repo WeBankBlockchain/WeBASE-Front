@@ -2,6 +2,8 @@ package com.webank.webase.front.config;
 
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+
+import com.webank.webase.front.base.Constants;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
