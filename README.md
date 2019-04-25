@@ -14,7 +14,7 @@
 | ------ | --------------- |
 | java   | jdk1.8.0_121或以上版本|
 | gradle | gradle-4.10或以上版本 |
-| fisco-bcos |v2.0.x版本  | 
+| fisco-bcos |v2.0.x版本        | 
 
  备注：安装说明请参看附录。
 
@@ -36,11 +36,17 @@ git clone https://github.com/WeBankFinTech/webase-front.git
  然后修改application.yml配置文件。
 ```
 constant:  
-  channelPort: 20200    //连接节点的channelPort端口
   transMaxWait: 30          //交易等待时间
   mgrIpPorts: 127.0.0.1:8080 // 配置node-managerIP和端口
-  monitorDisk: /home   //要监控的硬盘目录
+  monitorDisk: /home   //要监控的硬盘目录  
 ```
+ sdk的配置采用默认配置，无需修改。如果想修改连接的节点和端口，设置如下：
+``` 
+ sdk: 
+   ip: 127.0.0.1   //连接节点的ip
+   channelPort: 20200 // 连接节点的端口
+```
+   
 在代码的根目录webase-front执行构建命令：
 ```
 gradle build -x test 
