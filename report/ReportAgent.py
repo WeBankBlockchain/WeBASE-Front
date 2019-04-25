@@ -41,8 +41,7 @@ class NodeState(object):
 def accessNodeByTime(interval, node):
     """query and report every interval"""
     while True:
-        #print "post_queue size " + str(post_queue.qsize())
-        logger.info( "accessNodeInfo " + node["name"] + " " + str(node["rpcport"]) + " " + str(node["p2pport"]) + " " + str(node["logconf"]))
+        logger.debug( "accessNodeInfo " + node["name"] + " " + str(node["rpcport"]) + " " + str(node["p2pport"]) + " " + str(node["logconf"]))
         SinglePointReport.accessRpc(nodes_state[node["name"]])
         time.sleep(interval)
 

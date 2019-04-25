@@ -31,7 +31,7 @@ def readLogs(path, linenum=None):
         else:
             content_list = linecache.getlines(path)
             # log_line = len(cache_data)
-        logger.info(content_list)
+        logger.debug(content_list)
         return content_list
     else:
         return NO_FILE_FOUND
@@ -40,7 +40,7 @@ def readLogs(path, linenum=None):
 
 def getErrorLogName(log_dir):
     log_name_list = os.listdir(log_dir)
-    logger.info("error log file dir：{}".format(log_dir))
+    #logger.info("error log file dir：{}".format(log_dir))
     if len(log_name_list) == 0:
         logger.info("No Error Log File!")
         return NO_FILE_FOUND
@@ -82,7 +82,7 @@ def getReportLines(node_state):
         rsp = randomPost(log_info_sessions, BROWSER_SERVER_INFO_URLS, arguement)
         rsp_data = json.loads(rsp.text)
         if rsp_data["code"] == 0 and rsp_data["data"] is not None:
-            logger.info(rsp_data)
+            logger.debug(rsp_data)
             return rsp_data["data"]
         else:
             return None
@@ -113,7 +113,7 @@ def getLogTime(log_content):
     # DEFAULT_TIME_STR = DEFAULT_TIME.strftime('%Y-%m-%d %H:%M:%S')
     pattern = re.compile(r"\d{4}-\d{2}-\d{2}\s{1}\d{2}:\d{2}:\d{2}")
     result = re.findall(pattern, log_content)
-    logger.info("Matching time result：{}".format(result))
+    logger.debug("Matching time result：{}".format(result))
     try:
         return result[0]
     except:
@@ -176,9 +176,9 @@ def uploadLogsInfo(nodes_state):
             error_log = getErrorLogName(node_state.log_dir)
             if not ALL_ERROR_LOG_NAME:
                 continue
-            logger.info(ALL_ERROR_LOG_NAME)
+            # logger.info(ALL_ERROR_LOG_NAME)
             last_report_line = getReportLines(node_state)
-            logger.info("last report log line：{}".format(last_report_line))
+            logger.debug("last report log line：{}".format(last_report_line))
             if not last_report_line:
                 cycleReportLog(node_state)
             else:
@@ -187,7 +187,6 @@ def uploadLogsInfo(nodes_state):
                 last_report_file_index = ALL_ERROR_LOG_NAME.index(file_name)
 
                 not_report_error_log = ALL_ERROR_LOG_NAME[last_report_file_index+1:]
-                logger.info("not report file：{}".format(not_report_error_log))
                 # for log_name in ALL_ERROR_LOG_NAME:
                 log_path = node_state.log_dir + file_name
                 log_content_list = readLogs(log_path)
