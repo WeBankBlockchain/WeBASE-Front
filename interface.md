@@ -1,6 +1,39 @@
+# 目录
+<!-- TOC -->
+- [1.合约接口]( )    
+   - [1.1. 发送abi接口（未使用）](#11-发送abi接口)
+   - [1.2. 合约部署接口](#12-合约部署接口)       
+   - [1.3. 获取公私钥接口](#13-获取公私钥接口)        
+   - [1.4. 删除abi接口（未使用）](#14-删除abi接口未使用)     
+- [2. 交易接口](#2-交易接口)  
+   - [2.1. 交易处理接口](#21-交易处理接口) 
+ - [3. web3接口](#3-web3接口)    
+   - [3.1. 获取块高接口](#31-获取块高接口)       
+   - [3.2. 根据块高获取块信息接口](#32-根据块高获取块信息接口)    
+   - [3.3. 根据块hash获取块信息接口](#33-根据块hash获取块信息接口)      
+   - [3.4. 获取块中交易个数接口](#34-获取块中交易个数接口)     
+   - [3.5. 获取PbftView接口](#35-获取pbftview接口)       
+   - [3.6. 获取交易回执接口](#36-获取交易回执接口)       
+   - [3.7. 根据交易hash获取交易信息接口](#37-根据交易hash获取交易信息接口)       
+   - [3.8. 获取web3j版本接口](#38-获取web3j版本接口)      
+   - [3.9. 获取合约二进制代码接口](#39-获取合约二进制代码接口)         
+   - [3.10. 获取指定账户交易数接口](#310-获取指定账户交易数接口)     
+   - [3.11. 根据块hash和交易index获取交易接口](#311-根据块hash和交易index获取交易接口)      
+   - [3.12. 根据块高和交易index获取交易接口](#312-根据块高和交易index获取交易接口)      
+   - [3.13. 获取节点信息接口](#313-获取节点信息接口)  
+   - [3.14. 节点心跳接口](#314-节点心跳接口)     
+- [4. 性能检测接口](#4-性能检测接口)   
+   - [4.1. 获取机器配置信息](#41-获取机器配置信息)      
+   - [4.2. 获取机器历史性能信息](#42-获取机器历史性能信息)      
+ - [附录](#附录)    
+   - [1. 返回码信息列表](#1-返回码信息列表)
+ <!-- /TOC --> 
+ 
+  
 # 1.合约接口
 
-## 1.1. 发送abi接口（未使用）
+## 1.1. 发送abi接口
+ [top](#目录)
 
 ### 接口描述
 
@@ -25,7 +58,7 @@ HTTP POST
 | 3        | 合约abi  | abiInfo      | List\<Object\> |              | 是       | abi文件里面的内容，是一个JSONArray |
 
 **2）数据格式**
-
+```
 {
 
 "contractName": "HelloWorld",
@@ -46,7 +79,7 @@ HTTP POST
 ]
 
 }
-
+```
 ### 响应参数
 
 **1）参数表**
@@ -58,7 +91,7 @@ HTTP POST
 | 3        | 返回数据 | data       | Object   |          |                       |
 
 **2）数据格式**
-
+```
 {
 
 "code": 0,
@@ -68,8 +101,9 @@ HTTP POST
 "data": null
 
 }
-
+```
 ## 1.2. 合约部署接口
+[top](#目录)
 
 ### 接口描述
 
@@ -95,9 +129,9 @@ HTTP POST
 | 4        | 合约abi      | abiInfo      | List\<Object\> |              | 是       |          |
 | 5        | 合约bin      | bytecodeBin  | String         |              | 是       |          |
 | 6        | 构造函数参数 | funcParam    | List\<Object\> |              | 否       |          |
-
+| 7        | 群组ID       | groupId      | int |              | 否       |          |
 **2）数据格式**
-
+```
 {
 
 "userId":700001,
@@ -113,34 +147,18 @@ HTTP POST
 "funcParam":[]
 
 }
-
+```
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          | 合约地址              |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
 
-"code": 0,
-
-"message": "success",
-
-data:{
-
 "0x60aac015d5d41adc74217419ea77815ecb9a2192"
-
 }
-
-}
-
-## 1.3. 获取公私钥接口
+```
+## 1.3. 获取公私钥接口 
+[top](#目录)
 
 ### 接口描述
 
@@ -148,7 +166,7 @@ data:{
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/contract/privateKey**
+**http://localhost:8081/webase-front/privateKey**
 
 ### 调用方法
 
@@ -164,35 +182,19 @@ HTTP GET
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
 
 "publicKey":"1c7073dc185af0644464b178da932846666a858bc492450e9e94c77203428ed54e2ce45679dbb36bfed714dbe055a215dc1aaf4a75faeddce6a62b39c0158e1e",
 
 "privateKey":"008cf98bd0f37fb0984ab43ed6fc2dcdf58811522af7e4a3bedbe84636a79a501c",
 
 "address":"0x2e8ff65fb1b2ce5b0c9476b8f8beb221445f42ee"
-
 }
-
-}
-
+```
 ## 1.4. 删除abi接口（未使用）
+[top](#目录)
 
 ### 接口描述
 
@@ -200,7 +202,7 @@ HTTP GET
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/contract/deleteAbi
+**http://localhost:8081/webase-front/1/contract/deleteAbi
 /{contractName}/{version}**
 
 ### 调用方法
@@ -218,7 +220,7 @@ HTTP DELETE
 
 1. **数据格式**
 
-http://localhost:8081/webase-front/contract/deleteAbi/HelloWorld/2.0
+http://localhost:8081/webase-front/1/contract/deleteAbi/HelloWorld/2.0
 
 ### 响应参数
 
@@ -231,7 +233,7 @@ http://localhost:8081/webase-front/contract/deleteAbi/HelloWorld/2.0
 | 3        | 返回数据 | data       | Object   |          |                       |
 
 **2）数据格式**
-
+```
 {
 
 "code": 0,
@@ -241,10 +243,11 @@ http://localhost:8081/webase-front/contract/deleteAbi/HelloWorld/2.0
 "data": null
 
 }
-
+```
 # 2. 交易接口
 
-## 2.1. 交易处理接口
+## 2.1. 交易处理接口 
+[top](#目录)
 
 ### 接口描述
 
@@ -269,9 +272,10 @@ HTTP POST
 | 3        | 合约版本 | version      | String         |              | 是       |          |
 | 4        | 方法名   | funcName     | String         |              | 是       |          |
 | 5        | 方法参数 | funcParam    | List\<Object\> |              |          |JSONArray，对应合约方法参数，多个参数以“,”分隔|
+| 6        | 群组ID | groupId    | int |              |          |    |
 
 **2）数据格式**
-
+```
 {
 
 "userId ":700001,
@@ -282,40 +286,27 @@ HTTP POST
 
 "funcName":"set",
 
-"funcParam":["Hi,Welcome!"]
-
+"funcParam":["Hi,Welcome!"],
+"groupId" :"1"
 }
-
+```
 示例：curl -l -H "Content-type: application/json" -X POST -d '{"contractName":
 "HelloWorld", "funcName": "set", "funcParam": ["Hi,Welcome!"], "userId": 700001, "version":
-"1.0"}' http://10.0.0.1:8081/webase-front/trans/handle
+"1.0","groupId": 1}' http://10.0.0.1:8081/webase-front/1/trans/handle
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
 
 1. **数据格式**
 
 a、正确查询交易返回值信息
-
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": ["Hi,Welcome!"]
-
+"Hi,Welcome!"
 }
-
-b、正确发送数据上链返回值信息
-
+```
+b、正确发送数据上链返回值信息(交易收据)
+```
 {
 
 "code": 0,
@@ -353,22 +344,12 @@ b、正确发送数据上链返回值信息
 }
 
 }
-
-c、异常时返回值信息（信息详情请参看附录4.1）
-
-{
-
-"code": 201015,
-
-"message": "user's privateKey is null",
-
-"data": null
-
-}
+```
 
 # 3. web3接口
 
-## 3.1. 获取块高接口
+## 3.1. 获取块高接口 
+[top](#目录)
 
 ### 接口描述
 
@@ -376,7 +357,7 @@ c、异常时返回值信息（信息详情请参看附录4.1）
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/blockNumber**
+**http://localhost:8081/webase-front/1/web3/blockNumber**
 
 ### 调用方法
 
@@ -391,32 +372,16 @@ HTTP GET
 **2）数据格式**
 
 ### 响应参数
-
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
-
-"blockNumber": 8346
-
+8346
 }
+```
 
-}
 
-## 3.2. 根据块高获取块信息接口
+## 3.2. 根据块高获取块信息接口 
+[top](#目录)
 
 ### 接口描述
 
@@ -424,7 +389,7 @@ HTTP GET
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/blockByNumber/{blockNumber}**
+**http://localhost:8081/webase-front/1/web3/blockByNumber/{blockNumber}**
 
 ### 调用方法
 
@@ -440,20 +405,12 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/blockByNumber/100
+http://localhost:8081/webase-front/1/web3/blockByNumber/100
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
 
 "code": 0,
@@ -586,8 +543,9 @@ http://localhost:8081/webase-front/web3/blockByNumber/100
 }
 
 }
-
-## 3.3. 根据块hash获取块信息接口
+```
+## 3.3. 根据块hash获取块信息接口 
+[top](#目录)
 
 ### 接口描述
 
@@ -595,7 +553,7 @@ http://localhost:8081/webase-front/web3/blockByNumber/100
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/blockByHash/{blockHash}**
+**http://localhost:8081/webase-front/1/web3/blockByHash/{blockHash}**
 
 ### 调用方法
 
@@ -603,35 +561,15 @@ HTTP GET
 
 ### 请求参数
 
-1. **参数表**
+**1）数据格式**
 
-| **序号** | **中文** | **参数名** | **类型** | **最大长度** | **必填** | **说明** |
-| -------- | -------- | ---------- | -------- | ------------ | -------- | -------- |
-| 1        | 块hash   | blockHash  | String   |              | 是       |          |
-
-**2）数据格式**
-
-http://localhost:8081/webase-front/web3/blockByHash/0xf27ff42d4be65329a1e7b11365e190086d92f9836168d0379e92642786db7ade
+http://localhost:8081/webase-front/1/web3/blockByHash/0xf27ff42d4be65329a1e7b11365e190086d92f9836168d0379e92642786db7ade
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
 
 "number": 100,
 
@@ -757,8 +695,10 @@ http://localhost:8081/webase-front/web3/blockByHash/0xf27ff42d4be65329a1e7b11365
 }
 
 }
+```
 
-## 3.4. 获取块中交易个数接口
+## 3.4. 获取块中交易个数接口  
+[top](#目录)
 
 ### 接口描述
 
@@ -766,7 +706,7 @@ http://localhost:8081/webase-front/web3/blockByHash/0xf27ff42d4be65329a1e7b11365
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/blockTransCnt/{blockNumber}**
+**http://localhost:8081/webase-front/1/web3/blockTransCnt/{blockNumber}**
 
 ### 调用方法
 
@@ -782,35 +722,20 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/blockTransCnt/100
+http://localhost:8081/webase-front/1/web3/blockTransCnt/100
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
-
-"transactionCount": 1
-
+ 1
+}
+```
 }
 
-}
-
-## 3.5. 获取PbftView接口
+## 3.5. 获取PbftView接口  
+[top](#目录)
 
 ### 接口描述
 
@@ -818,7 +743,7 @@ http://localhost:8081/webase-front/web3/blockTransCnt/100
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/pbftView**
+**http://localhost:8081/webase-front/1/web3/pbftView**
 
 ### 调用方法
 
@@ -834,31 +759,15 @@ HTTP GET
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
-
-"pbftView": 160565
-
+ 160565
 }
+```
 
-}
-
-## 3.6. 获取交易回执接口
+## 3.6. 获取交易回执接口 
+[top](#目录)
 
 ### 接口描述
 
@@ -866,7 +775,7 @@ HTTP GET
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/transactionReceipt/{transHash}**
+**http://localhost:8081/webase-front/1/web3/transactionReceipt/{transHash}**
 
 ### 调用方法
 
@@ -882,27 +791,13 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transactionReceipt/0xb2c733b742045e61c0fd6e7e2bafece04d56262a4887de9f78dad2c5dd2f944b
+http://localhost:8081/webase-front/1/web3/transactionReceipt/0xb2c733b742045e61c0fd6e7e2bafece04d56262a4887de9f78dad2c5dd2f944b
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
 **2）数据格式**
-
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
 
 "transactionHash":
 "0xb2c733b742045e61c0fd6e7e2bafece04d56262a4887de9f78dad2c5dd2f944b",
@@ -978,10 +873,10 @@ http://localhost:8081/webase-front/web3/transactionReceipt/0xb2c733b742045e61c0f
 "cumulativeGasUsedRaw": "0x1d8ce"
 
 }
+```
 
-}
-
-## 3.7. 根据交易hash获取交易信息接口
+## 3.7. 根据交易hash获取交易信息接口  
+[top](#目录)
 
 ### 接口描述
 
@@ -989,7 +884,7 @@ http://localhost:8081/webase-front/web3/transactionReceipt/0xb2c733b742045e61c0f
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/transaction/{transHash}**
+**http://localhost:8081/webase-front/1/web3/transaction/{transHash}**
 
 ### 调用方法
 
@@ -1005,27 +900,14 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transaction/0xa6750b812b1a7e36313879b09f0c41fc583b463c15e57608416f3a32688b432b
+http://localhost:8081/webase-front/1/web3/transaction/0xa6750b812b1a7e36313879b09f0c41fc583b463c15e57608416f3a32688b432b
 
 ### 响应参数
 
-**1）参数表**
 
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
 
 "hash": "0xb2c733b742045e61c0fd6e7e2bafece04d56262a4887de9f78dad2c5dd2f944b",
 
@@ -1078,9 +960,10 @@ http://localhost:8081/webase-front/web3/transaction/0xa6750b812b1a7e36313879b09f
 
 }
 
-}
+```
 
-## 3.8. 获取web3j版本接口
+## 3.8. 获取web3j版本接口  
+[top](#目录)
 
 ### 接口描述
 
@@ -1088,7 +971,7 @@ http://localhost:8081/webase-front/web3/transaction/0xa6750b812b1a7e36313879b09f
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/clientVersion**
+**http://localhost:8081/webase-front/1/web3/clientVersion**
 
 ### 调用方法
 
@@ -1128,7 +1011,8 @@ HTTP GET
 
 }
 
-## 3.9. 获取合约二进制代码接口
+## 3.9. 获取合约二进制代码接口  
+[top](#目录)
 
 ### 接口描述
 
@@ -1136,7 +1020,7 @@ HTTP GET
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/code/{address}/{blockNumber}**
+**http://localhost:8081/webase-front/1/web3/code/{address}/{blockNumber}**
 
 ### 调用方法
 
@@ -1153,43 +1037,26 @@ HTTP GET
 
 1. **数据格式**
 
-http://localhost:8081/webase-front/web3/code/0x0000000000000000000000000000000000000000/1
+http://localhost:8081/webase-front/1/web3/code/0x0000000000000000000000000000000000000000/1
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
 **2）数据格式**
-
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
-
 "code": "0x"
-
 }
-
-}
-
-## 3.10. 获取指定账户交易数接口
+```
+## 3.10. 获取指定账户交易数接口  
+[top](#目录)
 
 ### 接口描述
 
-> 获取指定合约地址在指定块高的交易数量
+> 获取总交易数量
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3//transCnt/{address}/{blockNumber}**
+**http://localhost:8081/webase-front/1/transaction-total**
 
 ### 调用方法
 
@@ -1199,42 +1066,21 @@ HTTP GET
 
 **1）参数表**
 
-| **序号** | **中文** | **参数名**  | **类型**   | **最大长度** | **必填** | **说明** |
-| -------- | -------- | ----------- | ---------- | ------------ | -------- | -------- |
-| 1        | 合约地址 | address     | String     |              | 是       |          |
-| 2        | 块高     | blockNumber | BigInteger |              | 是       |          |
-
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transCnt/0x0000000000000000000000000000000000000000/1
+http://localhost:8081/webase-front/1/web3/transCnt/0x0000000000000000000000000000000000000000/1
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
 **2）数据格式**
-
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
-
-"transactionCount": 0
-
+ 0
 }
+```
 
-}
-
-## 3.11. 根据块hash和交易index获取交易接口
+## 3.11. 根据块hash和交易index获取交易接口  
+[top](#目录)
 
 ### 接口描述
 
@@ -1242,7 +1088,7 @@ http://localhost:8081/webase-front/web3/transCnt/0x00000000000000000000000000000
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/transByBlockHashAndIndex/{blockHash}/{transactionIndex}**
+**http://localhost:8081/webase-front/1/web3/transByBlockHashAndIndex/{blockHash}/{transactionIndex}**
 
 ### 调用方法
 
@@ -1259,27 +1105,14 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transByBlockHashAndIndex/0xf27ff42d4be65329a1e7b11365e190086d92f9836168d0379e92642786db7ade/0
+http://localhost:8081/webase-front/1/web3/transByBlockHashAndIndex/0xf27ff42d4be65329a1e7b11365e190086d92f9836168d0379e92642786db7ade/0
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
 
 **2）数据格式**
-
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
 
 "hash": "0xb2c733b742045e61c0fd6e7e2bafece04d56262a4887de9f78dad2c5dd2f944b",
 
@@ -1331,10 +1164,10 @@ http://localhost:8081/webase-front/web3/transByBlockHashAndIndex/0xf27ff42d4be65
 "gasRaw": "0x1c9c380"
 
 }
+```
 
-}
-
-## 3.12. 根据块高和交易index获取交易接口
+## 3.12. 根据块高和交易index获取交易接口  
+[top](#目录)
 
 ### 接口描述
 
@@ -1342,7 +1175,7 @@ http://localhost:8081/webase-front/web3/transByBlockHashAndIndex/0xf27ff42d4be65
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/transByBlockNumberAndIndex/{blockNumber}/{transactionIndex}**
+**http://localhost:8081/webase-front/1/web3/transByBlockNumberAndIndex/{blockNumber}/{transactionIndex}**
 
 ### 调用方法
 
@@ -1359,27 +1192,13 @@ HTTP GET
 
 **2）数据格式**
 
-http://localhost:8081/webase-front/web3/transByBlockNumberAndIndex/100/0
+http://localhost:8081/webase-front/1/web3/transByBlockNumberAndIndex/100/0
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
 
 "hash": "0xb2c733b742045e61c0fd6e7e2bafece04d56262a4887de9f78dad2c5dd2f944b",
 
@@ -1431,10 +1250,10 @@ http://localhost:8081/webase-front/web3/transByBlockNumberAndIndex/100/0
 "gasRaw": "0x1c9c380"
 
 }
+```
 
-}
-
-## 3.13. 获取节点信息接口
+## 3.13. 获取节点信息接口  
+[top](#目录)
 
 ### 接口描述
 
@@ -1442,7 +1261,7 @@ http://localhost:8081/webase-front/web3/transByBlockNumberAndIndex/100/0
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/nodeInfo**
+**http://localhost:8081/webase-front/1/web3/nodeInfo**
 
 ### 调用方法
 
@@ -1475,14 +1294,8 @@ HTTP GET
 | 3.8      | data路径     | datadir            | String   | 是       |                       |
 
 **2）数据格式**
-
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
 
 "channelPort": "8545",
 
@@ -1501,160 +1314,10 @@ HTTP GET
 "rpcport": "8861"
 
 }
+```
 
-}
-
-## 3.14. 获取系统合约信息
-
-### 接口描述
-
-获取系统合约地址
-
-### 接口URL
-
-**http://localhost:8081/webase-front/web3/systemProxy/{userId}**
-
-### 调用方法
-
-HTTP GET
-
-### 请求参数
-
-1. **参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **最大长度** | **必填** | **说明** |
-| -------- | -------- | ---------- | -------- | ------------ | -------- | -------- |
-| 1        | 用户编号 | userId     | Integer  |              | 是       |          |
-
-**2）数据格式**
-
-http://localhost:8081/webase-front/web3/systemProxy/700001
-
-### 响应参数
-
-**1）参数表**
-
-| **序号** | **中文** | **参数名**  | **类型** | **必填** | **说明**              |
-| -------- | -------- | ----------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code        | String   | 是       | 返回码信息请参看附录1 |
-| 2        | 提示信息 | message     | String   | 是       |                       |
-| 3        | 返回数据 | data        | Object   |          |                       |
-| 3.1      | 合约名   | name        | String   | 是       |                       |
-| 3.2      | 合约地址 | address     | String   | 是       |                       |
-| 3.3      | 是否隐藏 | cache       | String   | 是       |                       |
-| 3.4      | 块高     | blockNumber | Integer  | 是       |                       |
-
-**2）数据格式**
-
-{
-
-"code": 0,
-
-"message": "success",
-
-"data": [
-
-{
-
-"name": "TransactionFilterChain",
-
-"address": "0x7e14ea2a053762bade40047dd3da43d68a5860a1",
-
-"cache": "false",
-
-"blockNumber": 13
-
-},
-
-{
-
-"name": "ConfigAction",
-
-"address": "0x05e7ba20dea2b38842f6fcb02bedd9425d2bc9bb",
-
-"cache": "false",
-
-"blockNumber": 14
-
-},
-
-{
-
-"name": "NodeAction",
-
-"address": "0x71e38270e5cf1e6be8bca40ebc3cca2a8c0bb521",
-
-"cache": "false",
-
-"blockNumber": 15
-
-},
-
-{
-
-"name": "ConsensusControlMgr",
-
-"address": "0xb2a05f273247a3eafb732dad6b3f1b26a3856d43",
-
-"cache": "false",
-
-"blockNumber": 16
-
-},
-
-{
-
-"name": "CAAction",
-
-"address": "0x73603698fa1d7c6ae28395269b88aeff021a7533",
-
-"cache": "false",
-
-"blockNumber": 17
-
-},
-
-{
-
-"name": "ContractAbiMgr",
-
-"address": "0x2450f04ddc5305ad846fda465e739aa2dc2fc7d8",
-
-"cache": "false",
-
-"blockNumber": 18
-
-},
-
-{
-
-"name": "FileInfoManager",
-
-"address": "0x9cb02231e9cc0f7f514921ab46873090a79dfee9",
-
-"cache": "false",
-
-"blockNumber": 19
-
-},
-
-{
-
-"name": "FileServerManager",
-
-"address": "0x8ceeded12652bcedaa41468a417092922b8677d6",
-
-"cache": "false",
-
-"blockNumber": 20
-
-}
-
-]
-
-}
-
-## 3.15. 节点心跳接口
+## 3.14. 节点心跳接口  
+[top](#目录)
 
 ### 接口描述
 
@@ -1662,7 +1325,7 @@ http://localhost:8081/webase-front/web3/systemProxy/700001
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/web3/nodeHeartBeat**
+**http://localhost:8081/webase-front/1/web3/nodeHeartBeat**
 
 ### 调用方法
 
@@ -1678,35 +1341,22 @@ HTTP GET
 
 ### 响应参数
 
-**1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**                             |
-| -------- | -------- | ---------- | -------- | -------- | ------------------------------------ |
-| 1        | 返回码   | code       | String   | 是       | code是0表示节点存活，不是0表示不存活 |
-| 2        | 提示信息 | message    | String   | 是       |                                      |
-| 3        | 返回数据 | data       | Object   |          |                                      |
-
-**2）数据格式**
-
+**1）数据格式**
+```
 {
-
-"code": 0,
-
-"message": "success",
-
-"data": {
 
 "blockNumber": 1,
 
 "pbftView": 1232
 
 }
+```
 
-}
 
 # 4. 性能检测接口
 
-## 4.1. 获取机器配置信息
+## 4.1. 获取机器配置信息  
+[top](#目录)
 
 ### 接口描述
 
@@ -1727,15 +1377,9 @@ HTTP GET
 无入参
 
 ### 响应参数
-**1）参数表**
 
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       |                       |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
-## 4.2. 获取机器历史性能信息
+## 4.2. 获取机器历史性能信息  
+[top](#目录)
 
 ### 接口描述
 
@@ -1763,16 +1407,15 @@ HTTP GET
 
 ### 响应参数
 **1）参数表**
-
-| **序号** | **中文** | **参数名** | **类型** | **必填** | **说明**              |
-| -------- | -------- | ---------- | -------- | -------- | --------------------- |
-| 1        | 返回码   | code       | String   | 是       |                       |
-| 2        | 提示信息 | message    | String   | 是       |                       |
-| 3        | 返回数据 | data       | Object   |          |                       |
-
+``` 
+{
+  [{"metricType":"cpu","data":{"lineDataList":{"timestampList":[],"valueList":[]},"contrastDataList":{"timestampList":[],"valueList":[]}}},{"metricType":"memory","data":{"lineDataList":{"timestampList":null,"valueList":[]},"contrastDataList":{"timestampList":null,"valueList":[]}}},{"metricType":"disk","data":{"lineDataList":{"timestampList":null,"valueList":[]},"contrastDataList":{"timestampList":null,"valueList":[]}}},{"metricType":"txbps","data":{"lineDataList":{"timestampList":null,"valueList":[]},"contrastDataList":{"timestampList":null,"valueList":[]}}},{"metricType":"rxbps","data":{"lineDataList":{"timestampList":null,"valueList":[]},"contrastDataList":{"timestampList":null,"valueList":[]}}}]}
+}
+```
 # 附录
 
-## 1. 返回码信息列表
+## 1. 返回码信息列表 
+ [top](#目录)
 
 ------
 
