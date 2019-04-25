@@ -15,7 +15,12 @@
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="200 MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="24" />
+			<DefaultRolloverStrategy max="24" >
+                <Delete basePath="${logPath}/" >
+                    <IfFileName glob="webase-front.log.*.log.gz" />
+                    <IfLastModified age="15d" />
+                </Delete>
+            </DefaultRolloverStrategy>
 		</RollingFile>
 
 		<RollingFile name="error" fileName="${logPath}/webase-front-error.log"
@@ -28,7 +33,12 @@
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="200 MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="24" />
+			<DefaultRolloverStrategy max="24" >
+                <Delete basePath="${logPath}/" >
+                    <IfFileName glob="webase-front-error.log.*.log.gz" />
+                    <IfLastModified age="15d" />
+                </Delete>
+            </DefaultRolloverStrategy>
 		</RollingFile>
 
 		<RollingFile name="web3sdk" fileName="${logPath}/web3sdk.log"
@@ -38,7 +48,12 @@
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="200 MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="24" />
+			<DefaultRolloverStrategy max="24" >
+                <Delete basePath="${logPath}/" >
+                    <IfFileName glob="web3sdk.log.*.log.gz" />
+                    <IfLastModified age="15d" />
+                </Delete>
+            </DefaultRolloverStrategy>
 		</RollingFile>
 
 		<Async name="asyncFront" bufferSize="512">
