@@ -40,7 +40,7 @@ def readLogs(path, linenum=None):
 
 def getErrorLogName(log_dir):
     log_name_list = os.listdir(log_dir)
-    logger.info("error log file dir：{}".format(log_dir))
+    #logger.info("error log file dir：{}".format(log_dir))
     if len(log_name_list) == 0:
         logger.info("No Error Log File!")
         return NO_FILE_FOUND
