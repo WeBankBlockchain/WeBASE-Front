@@ -105,7 +105,7 @@ def postWorker(idx):
             while True:
                 try:
                     if arguement["metricDataList"] != []:
-                        # logger.info("report contents：{}".format(arguement))
+                        logger.info("report contents：{}".format(arguement))
                         rsp = randomPost(post_sessions, browser_server_urls, arguement)
                     break
                 except:
