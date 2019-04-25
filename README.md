@@ -61,11 +61,17 @@ cd dist/conf
 ```
 修改application.yml
 ```
+...
+server: 
+  # 服务端口
+  port: 8081
+...
 constant:
   # 对应节点路径（需指明到节点目录）
   nodeDir: /data/app/build/node0
   # 节点管理服务ip端口
   mgrIpPorts: 10.0.0.1:8082
+...
 ```
 
 （2）进入目录：
@@ -74,6 +80,7 @@ cd dist/report
 ```
 修改config.json
 ```
+...
 "node_manager_servers": [
 	{
 		"ip": "10.0.0.1", // 节点管理服务ip
@@ -90,6 +97,7 @@ cd dist/report
 		"front_error_log_dir":"default"
 	}
 ]
+...
 ```
 
 ## 4.4 服务启停
