@@ -36,7 +36,7 @@ sdk:
   queueCapacity: 100
   timeout: 10000
   keepAlive: 60
-  ip: 10.107.105.58
+  ip: 127.0.0.1
   channelPort: 20200
 
 logging:
