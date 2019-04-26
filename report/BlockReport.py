@@ -19,7 +19,6 @@ def getBrowserBlockNumber(node_state):
         "attr": GET_LAST_BLOCK,
         "nodeP2PPort": int(node_state.p2pport),
         "hostIp": HOST_IP
-
     }
 
     try:
@@ -31,9 +30,8 @@ def getBrowserBlockNumber(node_state):
         else:
             return None
     except Exception, e:
-        logger.error(e)
         info=sys.exc_info()  
-        logger.error( "get browser block number except for " + str(info[0]) + "." + str(info[1]))
+        logger.error("get block number except for " + str(info[0]) + "." + str(info[1]))
         return None
 
 
