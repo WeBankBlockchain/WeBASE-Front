@@ -110,7 +110,7 @@ public class MonitorService {
         for (int i = 0; i < monitorList.size() - 1; i++) {
             Long startTime = monitorList.get(i).getTimestamp();
             Long endTime = monitorList.get(i + 1).getTimestamp();
-            if (endTime - startTime > 6000) {
+            if (endTime - startTime > 10000) {
                 log.info("****startTime" + startTime);
                 log.info("****endTime" + endTime);
                 while (endTime - startTime > 5000) {
