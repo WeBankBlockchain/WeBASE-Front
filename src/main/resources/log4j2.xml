@@ -16,10 +16,6 @@
 				<SizeBasedTriggeringPolicy size="200 MB" />
 			</Policies>
 			<DefaultRolloverStrategy max="24" >
-                <Delete basePath="${logPath}/" >
-                    <IfFileName glob="webase-front.log.*.log.gz" />
-                    <IfLastModified age="15d" />
-                </Delete>
             </DefaultRolloverStrategy>
 		</RollingFile>
 
@@ -34,10 +30,6 @@
 				<SizeBasedTriggeringPolicy size="200 MB" />
 			</Policies>
 			<DefaultRolloverStrategy max="24" >
-                <Delete basePath="${logPath}/" >
-                    <IfFileName glob="webase-front-error.log.*.log.gz" />
-                    <IfLastModified age="15d" />
-                </Delete>
             </DefaultRolloverStrategy>
 		</RollingFile>
 
@@ -49,10 +41,6 @@
 				<SizeBasedTriggeringPolicy size="200 MB" />
 			</Policies>
 			<DefaultRolloverStrategy max="24" >
-                <Delete basePath="${logPath}/" >
-                    <IfFileName glob="web3sdk.log.*.log.gz" />
-                    <IfLastModified age="15d" />
-                </Delete>
             </DefaultRolloverStrategy>
 		</RollingFile>
 
