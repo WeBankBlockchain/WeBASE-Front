@@ -321,7 +321,7 @@ public class PerformanceService {
         for (int i = 0; i < performanceList.size() - 1; i++) {
             Long startTime = performanceList.get(i).getTimestamp();
             Long endTime = performanceList.get(i + 1).getTimestamp();
-            if (endTime - startTime > 6000) {
+            if (endTime - startTime > 10000) {
                 log.info("****startTime" + startTime);
                 log.info("****endTime" + endTime);
                 while (endTime - startTime > 5000) {
