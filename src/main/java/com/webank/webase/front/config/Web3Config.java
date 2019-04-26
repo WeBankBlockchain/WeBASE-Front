@@ -121,16 +121,18 @@ public class Web3Config {
     public HashMap<Integer, Web3j> web3j(Web3j web3j, GroupChannelConnectionsConfig groupChannelConnectionsConfig) throws Exception {
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
         List<ChannelConnections> channelConnectionsList = groupChannelConnectionsConfig.getAllChannelConnections();
-        for (int i = 1; i < groupIdList.size(); i++) {
+        channelConnectionsList.clear();
+        for (int i = 0; i < groupIdList.size(); i++) {
             List<String> connectionsList = new ArrayList<>();
-            connectionsList.add(ip + ":" + channelPort);
+            connectionsList.add( ip + ":" + channelPort);
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setConnectionsStr(connectionsList);
             channelConnections.setGroupId(Integer.valueOf(groupIdList.get(i)));
+            log.info("*** groupId " +  groupIdList.get(i));
             channelConnectionsList.add(channelConnections);
         }
         HashMap web3jMap= new HashMap<Integer,Web3j>();
-        for (int i = 1; i < groupIdList.size(); i++) {
+        for (int i = 0; i < groupIdList.size(); i++) {
             Service service1 = new Service();
             service1.setOrgID(orgName);
             service1.setGroupId(Integer.valueOf(groupIdList.get(i)));
@@ -143,7 +145,6 @@ public class Web3Config {
             Web3j web3j1= Web3j.build(channelEthereumService, service1.getGroupId() );
             web3jMap.put(Integer.valueOf(groupIdList.get(i)) ,web3j1 );
         }
-        web3jMap.put(1,web3j);
         return web3jMap;
     }
 
