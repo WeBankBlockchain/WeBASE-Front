@@ -71,8 +71,8 @@ def main():
 
 
         # report logs
-        upload_logs_thread = threading.Thread(target=callReportLogs, name="callReportLogs")
-        upload_logs_thread.start()
+        # upload_logs_thread = threading.Thread(target=callReportLogs, name="callReportLogs")
+        # upload_logs_thread.start()
 
         # every queue has a thread
         for i in range(0, POST_WORKER_NUM):
