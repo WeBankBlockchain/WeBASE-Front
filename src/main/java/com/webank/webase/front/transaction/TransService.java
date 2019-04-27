@@ -195,6 +195,8 @@ public class TransService {
     public static Object execCall(List<String> funOutputTypes, Function function, CommonContract commonContract) throws FrontException {
         try {
             List<Type> typeList = commonContract.execCall(function);
+            log.info("&&&&&&&&&&&&result");
+           typeList.stream().forEach(x->System.out.println(x.getValue()));
             Object result = null;
             if (typeList.size() > 0) {
                 result = ethCallResultParse(funOutputTypes, typeList);
@@ -317,6 +319,7 @@ public class TransService {
                     ressult.add(value);
                 }
             }
+            log.info("&&&&result" + JSON.toJSONString(ressult));
             return JSON.parse(JSON.toJSONString(ressult));
         }
         throw new FrontException("output parameter not match");
