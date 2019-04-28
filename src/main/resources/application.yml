@@ -43,7 +43,7 @@ logging:
   config: classpath:log4j2.xml
 
 constant:
-  mgrIpPorts: 10.0.0.1:8082
+  mgrIpPorts: 127.0.0.1:8080
   transMaxWait: 30
   monitorDisk: /home
 

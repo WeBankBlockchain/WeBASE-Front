@@ -92,6 +92,7 @@ public class ContractService {
         List<Object> params = req.getFuncParam();
         int groupId = req.getGroupId();
         // Check if contractAbi existed
+        ContractAbiUtil.setContractWithAbi(contractName, version,abiInfos,false);
         String encodedConstructor = constructorEncoded(contractName, version, params);
 
         // get privateKey

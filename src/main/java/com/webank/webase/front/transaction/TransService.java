@@ -160,7 +160,7 @@ public class TransService {
            commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3j,
                   credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
        } else{
-          commonContract=  CommonContract.load(req.getContractAddress() + Constants.SYMPOL + version, web3j,
+          commonContract=  CommonContract.load(req.getContractAddress(), web3j,
                   credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
       }
         // request
@@ -317,6 +317,7 @@ public class TransService {
                     ressult.add(value);
                 }
             }
+            log.info("&&&&result" + JSON.toJSONString(ressult));
             return JSON.parse(JSON.toJSONString(ressult));
         }
         throw new FrontException("output parameter not match");
