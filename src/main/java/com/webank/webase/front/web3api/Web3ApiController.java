@@ -172,7 +172,7 @@ public class Web3ApiController {
     }
 
     @GetMapping("/groupPeers")
-    public List<String> getGroupPeers(@PathVariable int groupId) throws IOException {
+    public List<String> getGroupPeers(@PathVariable int groupId)  {
           return web3ApiService.getGroupPeers(groupId);
     }
 
@@ -182,7 +182,7 @@ public class Web3ApiController {
     }
 
     @GetMapping("/peers")
-    public  List<Peers.Peer> getPeers(@PathVariable int groupId) throws IOException {
+    public  List<Peers.Peer> getPeers(@PathVariable int groupId)   {
         return web3ApiService.getPeers(groupId);
     }
 
@@ -192,16 +192,16 @@ public class Web3ApiController {
     }
 
     @GetMapping("/consensusStatus")
-    public  String getConsensusStatus(@PathVariable int groupId) throws IOException {
+    public  String getConsensusStatus(@PathVariable int groupId)   {
         return web3ApiService.getConsensusStatus(groupId);
     }
 
     @GetMapping("/syncStatus")
-    public  String getSyncStatus(@PathVariable int groupId) throws IOException {
+    public  String getSyncStatus(@PathVariable int groupId)   {
         return web3ApiService.getSyncStatus(groupId);
     }
     @GetMapping("/systemConfigByKey/{key}")
-    public  String getSystemConfigByKey(@PathVariable int groupId,@PathVariable String key ) throws IOException {
+    public  String getSystemConfigByKey(@PathVariable int groupId,@PathVariable String key )   {
         return web3ApiService.getSystemConfigByKey(groupId,key);
     }
 
@@ -219,5 +219,10 @@ public class Web3ApiController {
     @GetMapping("/observerList")
     public  List<String> getObserverList(@PathVariable int groupId ) throws IOException {
         return web3ApiService.getObserverList(groupId);
+    }
+
+    @GetMapping("/refresh")
+    public  void refresh(@PathVariable int groupId )  {
+         web3ApiService.refreshWeb3jMap();
     }
 }
