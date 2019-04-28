@@ -4,11 +4,16 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.config.NodeConfig;
+import com.webank.webase.front.config.Web3Config;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.channel.handler.ChannelConnections;
+import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
 import org.fisco.bcos.web3j.protocol.core.methods.response.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -42,6 +47,10 @@ public class Web3ApiService {
     Map<Integer, Web3j> web3jMap;
     @Autowired
     NodeConfig nodeConfig;
+    @Autowired
+    GroupChannelConnectionsConfig groupChannelConnectionsConfig;
+    @Autowired
+    ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     private static BigInteger blockNumber = new BigInteger("0");
     private static BigInteger pbftView = new BigInteger("0");
@@ -57,7 +66,7 @@ public class Web3ApiService {
         try {
             blockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
         } catch (IOException e) {
-            log.error("getBlockNumber fail.",e);
+            log.error("getBlockNumber fail.", e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
         return blockNumber;
@@ -75,7 +84,7 @@ public class Web3ApiService {
             block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                     .send().getBlock();
         } catch (Exception e) {
-            log.info("get blocknumber failed"+ e.getMessage());
+            log.info("get blocknumber failed" + e.getMessage());
             log.error("getBlockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
             block = null;
         }
@@ -88,7 +97,7 @@ public class Web3ApiService {
      * @param blockHash blockHash
      * @return
      */
-    public BcosBlock.Block getBlockByHash(int groupId , String blockHash)  {
+    public BcosBlock.Block getBlockByHash(int groupId, String blockHash) {
         BcosBlock.Block block;
         try {
             block = web3jMap.get(groupId).getBlockByHash(blockHash, true).send().getBlock();
@@ -191,7 +200,7 @@ public class Web3ApiService {
         String version;
         try {
             Set<Integer> iset = web3jMap.keySet();
-            version = web3jMap.get( iset.toArray()[0]).getNodeVersion().send().getNodeVersion().getVersion();
+            version = web3jMap.get(iset.toArray()[0]).getNodeVersion().send().getNodeVersion().getVersion();
         } catch (IOException e) {
             log.error("getClientVersion fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -243,8 +252,7 @@ public class Web3ApiService {
      * @param transactionIndex index
      * @return
      */
-    public Transaction getTransByBlockHashAndIndex(int groupId, String blockHash, BigInteger transactionIndex)
-             {
+    public Transaction getTransByBlockHashAndIndex(int groupId, String blockHash, BigInteger transactionIndex) {
 
         Transaction transaction = null;
         try {
@@ -340,9 +348,38 @@ public class Web3ApiService {
     public List<String> getGroupList() {
         try {
             Set<Integer> iset = web3jMap.keySet();
-            return  web3jMap.get( iset.toArray()[0]).getGroupList().send().getGroupList();
+            return web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
+        }
+    }
+
+    public void refreshWeb3jMap() throws FrontException {
+        List<String> groupList = getGroupList();
+        List<ChannelConnections> channelConnectionsList = groupChannelConnectionsConfig.getAllChannelConnections();
+
+        for (int i = 0; i < groupList.size(); i++) {
+            if (web3jMap.get(new Integer(groupList.get(i))) == null) {
+                ChannelConnections channelConnections = new ChannelConnections();
+                channelConnections.setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
+                channelConnections.setGroupId(Integer.valueOf(groupList.get(i)));
+                channelConnectionsList.add(channelConnections);
+                org.fisco.bcos.channel.client.Service service1 = new org.fisco.bcos.channel.client.Service();
+                service1.setOrgID(Web3Config.orgName);
+                service1.setGroupId(Integer.valueOf(groupList.get(i)));
+                service1.setThreadPool(threadPoolTaskExecutor);
+                service1.setAllChannelConnections(groupChannelConnectionsConfig);
+                try {
+                    service1.run();
+                } catch (Exception e) {
+                    new FrontException("refresh web3j failed");
+                }
+                ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+                channelEthereumService.setTimeout(Web3Config.timeout);
+                channelEthereumService.setChannelService(service1);
+                Web3j web3j1 = Web3j.build(channelEthereumService, service1.getGroupId());
+                web3jMap.put(Integer.valueOf(groupList.get(i)), web3j1);
+            }
         }
     }
 
@@ -389,10 +426,10 @@ public class Web3ApiService {
     }
 
     public int getPendingTransactions(int groupId) throws IOException {
-       return web3jMap.get(groupId).getPendingTransaction().send().getPendingTransactions().size();
+        return web3jMap.get(groupId).getPendingTransaction().send().getPendingTransactions().size();
     }
 
-    public BigInteger  getPendingTransactionsSize(int groupId) throws IOException {
+    public BigInteger getPendingTransactionsSize(int groupId) throws IOException {
         return web3jMap.get(groupId).getPendingTxSize().send().getPendingTxSize();
     }
 

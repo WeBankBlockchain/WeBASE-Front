@@ -46,12 +46,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class Web3Config {
 //    @Autowired
 //    NodeConfig nodeConfig;
-    private String orgName;
+    public   static String orgName;
     private List<Integer> groupIdList;
     private int corePoolSize;
     private int maxPoolSize;
     private int queueCapacity;
-    private int timeout=30000;
+    public static int timeout=30000;
     private int keepAlive;
     private String ip= "127.0.0.1";
     private String channelPort= "20200";

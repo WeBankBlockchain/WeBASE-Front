@@ -29,3 +29,8 @@ FAILURE: Build failed with an exception.
 ```
  //annotationProcessor 'org.projectlombok:lombok:1.18.6'
 ```
+
+   
+* 3: 节点运行一段时间后新增了一个群组，front查不到新群组信息。 
+ 
+   答： 调用 http://{ip}:{port}/webase-front/8081/1/web3/refresh 方法，即可手动更新。
