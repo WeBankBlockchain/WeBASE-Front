@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = Constants.CONSTANT_PREFIX)
 public class Constants {
-    public static final BigInteger GAS_PRICE = new BigInteger("100000000");
+    public static final BigInteger GAS_PRICE = new BigInteger("1");
     public static final BigInteger GAS_LIMIT = new BigInteger("100000000");
     public static final BigInteger INITIAL_WEI_VALUE = new BigInteger("0");
 

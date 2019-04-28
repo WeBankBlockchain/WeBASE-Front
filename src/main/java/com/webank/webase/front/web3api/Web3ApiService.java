@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -193,7 +190,8 @@ public class Web3ApiService {
     public String getClientVersion() {
         String version;
         try {
-            version = web3jMap.get(1).getNodeVersion().send().getNodeVersion().getVersion();
+            Set<Integer> iset = web3jMap.keySet();
+            version = web3jMap.get( iset.toArray()[0]).getNodeVersion().send().getNodeVersion().getVersion();
         } catch (IOException e) {
             log.error("getClientVersion fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -341,7 +339,8 @@ public class Web3ApiService {
 
     public List<String> getGroupList() {
         try {
-            return web3jMap.get(1).getGroupList().send().getGroupList();
+            Set<Integer> iset = web3jMap.keySet();
+            return  web3jMap.get( iset.toArray()[0]).getGroupList().send().getGroupList();
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }
