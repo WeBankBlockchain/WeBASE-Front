@@ -160,7 +160,7 @@ public class TransService {
            commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version, web3j,
                   credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
        } else{
-          commonContract=  CommonContract.load(req.getContractAddress() + Constants.SYMPOL + version, web3j,
+          commonContract=  CommonContract.load(req.getContractAddress(), web3j,
                   credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
       }
         // request
@@ -195,8 +195,6 @@ public class TransService {
     public static Object execCall(List<String> funOutputTypes, Function function, CommonContract commonContract) throws FrontException {
         try {
             List<Type> typeList = commonContract.execCall(function);
-            log.info("&&&&&&&&&&&&result");
-           typeList.stream().forEach(x->System.out.println(x.getValue()));
             Object result = null;
             if (typeList.size() > 0) {
                 result = ethCallResultParse(funOutputTypes, typeList);
