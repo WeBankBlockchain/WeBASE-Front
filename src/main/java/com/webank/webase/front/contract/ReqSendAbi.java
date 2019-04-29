@@ -29,10 +29,11 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 @Data
 public class ReqSendAbi {
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
+  //  @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
     private String contractName;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
+ //   @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
+    private String binaryCode;
 }

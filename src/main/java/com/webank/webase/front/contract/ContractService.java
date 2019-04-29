@@ -7,16 +7,23 @@ import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.file.FileContent;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -56,6 +63,8 @@ public class ContractService {
     TransService transService;
     @Autowired
     HashMap<Integer, CnsService> cnsServiceMap;
+    @Autowired
+    ContractRepository contractRepository;
     /**
      * sendAbi.
      * 
@@ -171,5 +180,41 @@ public class ContractService {
 
     public String getAddressByContractNameAndVersion(int groupId, String name, String version) {
         return cnsServiceMap.get(groupId).getAddressByContractNameAndVersion(name+":"+version);
+    }
+
+    public static FileContent compileToJavaFile(String contractName, List<AbiDefinition> abiInfo, String binaryCode, String packageName) throws IOException {
+
+        File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
+        FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
+        File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
+        FileUtils.writeStringToFile(binFile, JSON.toJSONString(binaryCode));
+
+        SolidityFunctionWrapperGenerator.main(
+                Arrays.asList(
+                        "-a", abiFile.getPath(),
+                        "-b", binFile.getPath(),
+                        "-p", packageName,
+                        "-o", Constants.JAVA_DIR)
+                        .toArray(new String[0]));
+
+        String outputDirectory="" ;
+        if (!packageName.isEmpty()) {
+            outputDirectory= packageName.replace(".",File.separator);
+        }
+        File file = new File(Constants.JAVA_DIR+ File.separator+ outputDirectory+ File.separator+ contractName+".java");
+        InputStream targetStream = new FileInputStream(file);
+        return new FileContent(contractName+".java",targetStream);
+    }
+
+    public void saveContract(Contract contract) {
+        contractRepository.save(contract);
+    }
+
+
+    public List<Contract> findByCriteria(int groupId, String contractName, String version, String address) {
+        if (address != null) {
+            return contractRepository.findBycontractByGroupIdAndAddress(groupId,address);
+        }
+        return contractRepository.findByGroupIdAndContractNameAndVersion(groupId,contractName, version);
     }
 }
