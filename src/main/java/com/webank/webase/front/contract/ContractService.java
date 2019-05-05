@@ -213,7 +213,7 @@ public class ContractService {
 
     public List<Contract> findByCriteria(int groupId, String contractName, String version, String address) {
         if (address != null) {
-            return contractRepository.findBycontractByGroupIdAndAddress(groupId,address);
+            return contractRepository.findByGroupIdAndContractAddress(groupId,address);
         }
         return contractRepository.findByGroupIdAndContractNameAndVersion(groupId,contractName, version);
     }
