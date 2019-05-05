@@ -143,6 +143,8 @@ public class Web3Config {
             channelEthereumService.setTimeout(timeout);
             channelEthereumService.setChannelService(service1);
             Web3j web3j1= Web3j.build(channelEthereumService, service1.getGroupId() );
+            //for getClockNumber local
+            web3j1.getBlockNumberCache();
             web3jMap.put(Integer.valueOf(groupIdList.get(i)) ,web3j1 );
         }
         return web3jMap;
