@@ -8,6 +8,7 @@ import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.keystore.KeyStoreInfo;
+import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.AbiTypes;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
@@ -72,7 +73,6 @@ public class TransService {
     @Autowired
     Map<Integer, CnsService> cnsServiceMap;
 
-    Map<Integer, KeyStoreInfo> keyMap = new HashMap<>();
 
     /**
      * transHandle.
@@ -125,7 +125,7 @@ public class TransService {
         log.info("dealWithtrans start. ReqTransHandle:[{}]", JSON.toJSONString(req));
         Object result =null;
 
-        int userId = req.getUserId();
+        String userId = req.getUserId();
         String contractName = req.getContractName();
         String version = req.getVersion();
         String funcName = req.getFuncName();
@@ -173,9 +173,8 @@ public class TransService {
         return result;
     }
 
-    public Credentials getCredentials(int userId) throws FrontException {
-        String privateKey = Optional.ofNullable(getPrivateKey(userId))
-                .map(info -> info.getPrivateKey()).orElse(null);
+    public Credentials getCredentials(String userId) throws FrontException {
+        String privateKey = Optional.ofNullable(getPrivateKey(userId)).orElse(null);
         if (privateKey == null) {
             //todo add system user
 //            log.warn("dealWithtrans userId:{} privateKey is null", userId);
@@ -317,7 +316,6 @@ public class TransService {
                     ressult.add(value);
                 }
             }
-            log.info("&&&&result" + JSON.toJSONString(ressult));
             return JSON.parse(JSON.toJSONString(ressult));
         }
         throw new FrontException("output parameter not match");
@@ -330,9 +328,9 @@ public class TransService {
      * @param userId userId
      * @return
      */
-    public KeyStoreInfo getPrivateKey(int userId) {
-        if (this.keyMap.get(userId) != null && this.keyMap.get(userId).getPrivateKey() != null) {
-            return this.keyMap.get(userId);
+    public String getPrivateKey(String userId) {
+        if (KeyStoreService.keyMap.get(userId) != null && KeyStoreService.keyMap.get(userId) != null) {
+            return KeyStoreService.keyMap.get(userId);
         }
 
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
@@ -353,7 +351,7 @@ public class TransService {
                 continue;
             }
         }
-        this.keyMap.put(userId, keyStoreInfo);
-        return keyStoreInfo;
+        KeyStoreService.keyMap.put(userId, keyStoreInfo.getPrivateKey());
+        return keyStoreInfo.getPrivateKey();
     }
 }

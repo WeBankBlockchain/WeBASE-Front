@@ -11,6 +11,8 @@ import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -36,6 +38,7 @@ import org.springframework.stereotype.Service;
 public class KeyStoreService {
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
 
+    public static HashMap<String, String> keyMap = new HashMap();
     /**
      * createPrivateKey.
      *
@@ -52,7 +55,7 @@ public class KeyStoreService {
             keyStoreInfo.setPublicKey(publicKey);
             keyStoreInfo.setPrivateKey(privateKey);
             keyStoreInfo.setAddress(address);
-
+            keyMap.put(address,privateKey);
             return keyStoreInfo;
         } catch (Exception e) {
             throw new FrontException("create keyinfo failed");
@@ -68,6 +71,7 @@ public class KeyStoreService {
             keyStoreInfo.setPublicKey(publicKey);
             keyStoreInfo.setPrivateKey(privateKey);
             keyStoreInfo.setAddress(address);
+            keyMap.put(address,privateKey);
 
             return keyStoreInfo;
         } catch (Exception e) {
