@@ -93,7 +93,7 @@ public class ContractService {
      */
     public String deploy(ReqDeploy req) throws Exception {
 
-        int userId = req.getUserId();
+        String userId = req.getUserId();
         String contractName = req.getContractName();
         String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
