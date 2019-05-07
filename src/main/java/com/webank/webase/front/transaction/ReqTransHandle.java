@@ -29,8 +29,8 @@ import org.hibernate.validator.constraints.NotBlank;
  */
 @Data
 public class ReqTransHandle {
-    @NotNull(message = ConstantCode.PARAM_FAIL_USERID_IS_EMPTY)
-    private String userId;
+    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
+    private String user;
  //   @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
     private String contractName;
   //  @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)

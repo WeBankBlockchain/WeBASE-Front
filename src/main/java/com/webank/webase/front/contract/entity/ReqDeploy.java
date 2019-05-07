@@ -1,7 +1,9 @@
-package com.webank.webase.front.contract;
+package com.webank.webase.front.contract.entity;
 
 import com.webank.webase.front.base.ConstantCode;
+import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.hibernate.validator.constraints.NotBlank;
@@ -24,16 +26,24 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 
 /**
- * abiMeta interface parameter.
+ * deploy interface parameter.
  * 
  */
 @Data
-public class ReqSendAbi {
-  //  @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
+public class ReqDeploy {
+    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
+    private String  user;
+//    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
     private String contractName;
  //   @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
-    private String binaryCode;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
+    private String bytecodeBin;
+    private String contractBinary;
+    private String contractSource;
+    private  int groupId = 1;
+    private  Long contractId;
+    private List<Object> funcParam = new ArrayList<>();
 }

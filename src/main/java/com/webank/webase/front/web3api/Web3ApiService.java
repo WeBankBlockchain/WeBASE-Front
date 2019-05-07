@@ -13,6 +13,7 @@ import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
 import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.*;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -198,11 +199,11 @@ public class Web3ApiService {
      *
      * @return
      */
-    public String getClientVersion() {
-        String version;
+    public Version getClientVersion() {
+        Version version;
         try {
             Set<Integer> iset = web3jMap.keySet();
-            version = web3jMap.get(iset.toArray()[0]).getNodeVersion().send().getWeb3ClientVersion();
+            version = web3jMap.get(iset.toArray()[0]).getNodeVersion().send().getNodeVersion();
         } catch (IOException e) {
             log.error("getClientVersion fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -388,7 +389,7 @@ public class Web3ApiService {
     // get all peers of chain
     public List<Peers.Peer> getPeers(int groupId) {
         try {
-            return web3jMap.get(groupId).getPeers().send().getValue();
+            return web3jMap.get(groupId).getPeers().send().getPeers();
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }
@@ -436,10 +437,10 @@ public class Web3ApiService {
     }
 
     public List<String> getSealerList(int groupId) throws IOException {
-        return web3jMap.get(groupId).getSealerList().send().getGroupList();
+        return web3jMap.get(groupId).getSealerList().send().getSealerList();
     }
 
     public List<String> getObserverList(int groupId) throws IOException {
-        return web3jMap.get(groupId).getObserverList().send().getGroupList();
+        return web3jMap.get(groupId).getObserverList().send().getObserverList();
     }
 }
