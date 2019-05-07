@@ -167,6 +167,7 @@ public class Web3ApiService {
             if (opt.isPresent()) {
                 transactionReceipt = opt.get();
             }
+            transactionReceipt.setCumulativeGasUsed("0");
         } catch (IOException e) {
             log.error("getTransactionReceipt fail. transHash:{} ", transHash);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
