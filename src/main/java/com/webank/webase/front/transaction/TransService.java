@@ -221,6 +221,7 @@ public class TransService {
             log.error("execTransaction failed.");
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
         }
+        transactionReceipt.setCumulativeGasUsed("0");
         return transactionReceipt;
     }
 
