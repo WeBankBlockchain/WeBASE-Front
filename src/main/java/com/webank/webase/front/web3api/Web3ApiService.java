@@ -84,6 +84,9 @@ public class Web3ApiService {
         try {
             block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                     .send().getBlock();
+           block.setDifficulty("0");
+           block.setTotalDifficulty("0");
+           block.setSize("0");
         } catch (Exception e) {
             log.info("get blocknumber failed" + e.getMessage());
             log.error("getBlockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
