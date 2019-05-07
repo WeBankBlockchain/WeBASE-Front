@@ -1,11 +1,14 @@
 package com.webank.webase.front.contract;
 
+import com.webank.webase.front.contract.entity.Contract;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
+public interface ContractRepository extends CrudRepository<Contract, Long>,
+    JpaSpecificationExecutor<Contract> {
 
-public interface ContractRepository   extends CrudRepository<Contract, Long> {
-    List<Contract> findByGroupIdAndContractAddress(int groupId,String contractAddress);
-    List<Contract> findByGroupIdAndContractNameAndVersion(int groupId, String contractName , String version );
+    Contract findByGroupIdAndContractPathAndContractName(int groupId, String contractPath,
+        String contractName);
 
+    Contract findByGroupIdAndId(int groupId, Long contractId);
 }
