@@ -84,6 +84,9 @@ public class Web3ApiService {
         try {
             block = web3jMap.get(groupId).getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                     .send().getBlock();
+           block.setDifficulty("0");
+           block.setTotalDifficulty("0");
+           block.setSize("0");
         } catch (Exception e) {
             log.info("get blocknumber failed" + e.getMessage());
             log.error("getBlockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
@@ -164,6 +167,7 @@ public class Web3ApiService {
             if (opt.isPresent()) {
                 transactionReceipt = opt.get();
             }
+            transactionReceipt.setCumulativeGasUsed("0");
         } catch (IOException e) {
             log.error("getTransactionReceipt fail. transHash:{} ", transHash);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
