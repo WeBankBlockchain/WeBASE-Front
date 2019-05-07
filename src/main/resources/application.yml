@@ -36,8 +36,8 @@ sdk:
   queueCapacity: 100
   timeout: 10000
   keepAlive: 60
-  ip: 127.0.0.1
-  channelPort: 20200
+  ip: 10.107.105.138
+  channelPort: 20300
 
 logging:
   config: classpath:log4j2.xml
