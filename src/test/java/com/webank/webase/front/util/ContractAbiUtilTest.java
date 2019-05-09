@@ -87,7 +87,7 @@ public class ContractAbiUtilTest extends TestBase {
         String funcName = "trans";
         List<String> funcInputTypes = versionEvents.get(0).getFuncInputs().get(funcName);
         ArrayList a = new ArrayList();
-        a.add("ssd");
+        a.add("123");
         List<Object> params = a;
         List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
         List<String> funOutputTypes = ContractAbiUtil.getFuncOutputType(contractName, "trans", version);
@@ -98,6 +98,7 @@ public class ContractAbiUtilTest extends TestBase {
         CommonContract commonContract = CommonContract.load(okDemo.getContractAddress(), web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
 
         TransactionReceipt t  = TransService.execTransaction(function, commonContract);
+        System.out.println("***********************");
         System.out.println(t);
 
         //invoke get function

@@ -63,7 +63,7 @@ List logger = [
 dependencies {
     compile spring,spring_boot,swagger,logger
 
-	compile 'org.fisco-bcos:web3sdk:2.0.0-rc2'
+	compile 'org.fisco-bcos:web3sdk:2.0.2-SNAPSHOT'
 //	compile "org.fisco-bcos:web3sdk:2.0.0-SNAPSHOT"
 //	compile group:"org.fisco-bcos", name:"web3sdk", version:"2.0.0-SNAPSHOT", changing: true
 	compile 'com.alibaba:fastjson:1.2.29'
