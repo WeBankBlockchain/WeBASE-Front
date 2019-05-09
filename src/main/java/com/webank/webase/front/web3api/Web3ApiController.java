@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.fisco.bcos.web3j.protocol.core.methods.response.*;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -99,7 +100,7 @@ public class Web3ApiController {
 
     @ApiOperation(value = "getClientVersion", notes = "Get the web3j version")
     @GetMapping("/clientVersion")
-    public String getClientVersion()  {
+    public Version getClientVersion()  {
         return web3ApiService.getClientVersion();
     }
 

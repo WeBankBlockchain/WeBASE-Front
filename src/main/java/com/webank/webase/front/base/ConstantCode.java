@@ -1,24 +1,22 @@
-package com.webank.webase.front.base;
-
-/*
+/**
  * Copyright 2012-2019 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
+package com.webank.webase.front.base;
+
 
 /**
  * Code Constant.
- * 
+ *
  */
 public interface ConstantCode {
 
@@ -27,18 +25,18 @@ public interface ConstantCode {
 
     /* paramaters check */
     String PARAM_FAIL_UUID_IS_EMPTY = "{\"code\":201001,\"msg\":\"uuid cannot be empty\"}";
-    String PARAM_FAIL_USERID_IS_EMPTY = "{\"code\":201002,\"msg\":\"userId cannot be empty\"}";
+    String PARAM_FAIL_USER_IS_EMPTY = "{\"code\":201002,\"msg\":\"user cannot be empty\"}";
     String PARAM_FAIL_CONTRACTNAME_IS_EMPTY =
-            "{\"code\":201003,\"msg\":\"contractName cannot be empty\"}";
+        "{\"code\":201003,\"msg\":\"contractName cannot be empty\"}";
     String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"msg\":\"version cannot be empty\"}";
     String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"msg\":\"funcName cannot be empty\"}";
     String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"msg\":\"abiInfo cannot be empty\"}";
     String PARAM_FAIL_CONTRACTBIN_IS_EMPTY =
-            "{\"code\":201007,\"msg\":\"contractBin cannot be empty\"}";
+        "{\"code\":201007,\"msg\":\"contractBin cannot be empty\"}";
 
     /* general error */
     RetCode CONTRACT_DEPLOYED_ERROR =
-            RetCode.mark(201008, "contract's current version has been deployed");
+        RetCode.mark(201008, "contract's current version has been deployed");
     RetCode CONTRACT_NOT_DEPLOY_ERROR = RetCode.mark(201009, "contract is not deployed");
     RetCode ABI_SAVE_ERROR = RetCode.mark(201010, "save abi error");
     RetCode IN_FUNCPARAM_ERROR = RetCode.mark(201011, "contract funcParam is error");
@@ -49,11 +47,15 @@ public interface ConstantCode {
     RetCode FILE_IS_NOT_EXIST = RetCode.mark(201016, "file is not exist");
     RetCode GET_NODE_CONFIG_FAILE = RetCode.mark(201017, "failed to get node config");
     RetCode BLOCKNUMBER_AND_PBFTVIEW_UNCHANGED =
-            RetCode.mark(201018, "blockNumber and pbftView unchanged");
+        RetCode.mark(201018, "blockNumber and pbftView unchanged");
     RetCode IN_FUNCTION_ERROR = RetCode.mark(201019, "request function is error");
     RetCode TRANSACTION_QUERY_FAILED = RetCode.mark(201020, "transaction query from chain failed");
     RetCode TRANSACTION_SEND_FAILED = RetCode.mark(201021, "transaction send to chain failed");
     RetCode NODE_REQUEST_FAILED = RetCode.mark(201022, "node request failed");
+    RetCode CONTRACT_EXISTS = RetCode.mark(201023, "contract already exists");
+    RetCode CONTRACT_NAME_REPEAT = RetCode.mark(201024, "contract name cannot be repeated");
+    RetCode INVALID_CONTRACT_ID = RetCode.mark(201025, "invalid contract id");
+    RetCode CONTRACT_HAS_BEAN_DEPLOYED = RetCode.mark(201026, "contract has been deployed");
 
     /* system error */
     RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");

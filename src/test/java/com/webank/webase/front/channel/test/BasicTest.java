@@ -10,6 +10,7 @@ import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
 import org.fisco.bcos.web3j.protocol.core.methods.response.*;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock.Block;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -31,7 +32,12 @@ public class BasicTest extends TestBase {
 
   @Test
   public void getBlockNumber() throws Exception {
-    System.out.println(web3j.getBlockByNumber(DefaultBlockParameter.valueOf("1"),true).send());
+    BcosBlock bcosBlock = web3j.getBlockByNumber(DefaultBlockParameter.valueOf("latest"),true).send();
+    System.out.println(bcosBlock.getBlock());
+    Block block = bcosBlock.getBlock();
+    block.setDifficulty("0");
+    System.out.println(bcosBlock.getBlock().getNonce());
+    System.out.println(web3j.getBlockByNumber(DefaultBlockParameter.valueOf("latest"),true).send());
     assertNotNull(web3j.getConsensusStatus().sendForReturnString());
   }
 

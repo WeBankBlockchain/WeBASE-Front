@@ -1,49 +1,59 @@
+/**
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.webank.webase.front.contract;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.BaseController;
+import com.webank.webase.front.base.BasePageResponse;
 import com.webank.webase.front.base.BaseResponse;
+import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.file.FileContent;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import javax.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-/*
- * Copyright 2012-2019 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 /**
  * ContractController.
- *
  */
 @Api(value = "/contract", tags = "contract interface")
 @Slf4j
@@ -56,43 +66,49 @@ public class ContractController extends BaseController {
 
     /**
      * deploy.
-     * 
+     *
      * @param reqDeploy request data
      * @param result checkResult
-     * @return
      */
     @ApiOperation(value = "contract deploy", notes = "contract deploy")
     @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
     @PostMapping("/deploy")
-    public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result) throws Exception {
+    public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
+        throws Exception {
         log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
-        return contractService.deploy(reqDeploy);
+        return contractService.caseDeploy(reqDeploy);
     }
 
 
     /**
      * compile java .
+     *
      * @param reqSendAbi request data
      * @param result checkResult
-     * @return
      */
     @ApiOperation(value = "compile java", notes = "compile java")
     @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/compile-java")
-    public ResponseEntity<InputStreamResource> compileJavaFile(@Valid @RequestBody ReqSendAbi reqSendAbi, @RequestParam String packageName, BindingResult result) throws FrontException, IOException {
+    public ResponseEntity<InputStreamResource> compileJavaFile(
+        @Valid @RequestBody ReqSendAbi reqSendAbi, @RequestParam String packageName,
+        BindingResult result) throws FrontException, IOException {
         checkParamResult(result);
-        FileContent fileContent =  contractService.compileToJavaFile(reqSendAbi.getContractName(),reqSendAbi.getAbiInfo(),reqSendAbi.getBinaryCode(),packageName);
-        return ResponseEntity.ok().headers(headers(fileContent.getFileName())).body(new InputStreamResource(fileContent.getInputStream()));
+        FileContent fileContent = contractService
+            .compileToJavaFile(reqSendAbi.getContractName(), reqSendAbi.getAbiInfo(),
+                reqSendAbi.getBinaryCode(), packageName);
+        return ResponseEntity.ok().headers(headers(fileContent.getFileName()))
+            .body(new InputStreamResource(fileContent.getInputStream()));
     }
 
 
     @ApiOperation(value = "delete contract abi", notes = "delete contract abi")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "contractName", value = "contractName", required = true, dataType = "String"),
-            @ApiImplicitParam(name = "version", value = "version", required = true, dataType = "String")})
+        @ApiImplicitParam(name = "contractName", value = "contractName", required = true, dataType = "String"),
+        @ApiImplicitParam(name = "version", value = "version", required = true, dataType = "String")})
     @DeleteMapping("/deleteAbi/{contractName}/{version:.+}")
-    public BaseResponse deleteAbi(@PathVariable String contractName, @PathVariable String version) throws FrontException {
+    public BaseResponse deleteAbi(@PathVariable String contractName, @PathVariable String version)
+        throws FrontException {
         log.info("deleteAbi start. contractName:{} version:{}", contractName, version);
         return contractService.deleteAbi(contractName, version);
     }
@@ -102,12 +118,12 @@ public class ContractController extends BaseController {
      *
      * @param reqSendAbi request data
      * @param result checkResult
-     * @return
      */
     @ApiOperation(value = "send abi", notes = "send abi")
     @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/abiInfo")
-    public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result) throws FrontException {
+    public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)
+        throws FrontException {
         log.info("sendAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
         checkParamResult(result);
         return contractService.sendAbi(reqSendAbi);
@@ -115,18 +131,20 @@ public class ContractController extends BaseController {
 
 
     @GetMapping("/cns")
-    public   String  getAddressByContractNameAndVersion(@RequestParam int groupId, @RequestParam String name, @RequestParam String version) {
-       return  contractService.getAddressByContractNameAndVersion(groupId, name ,version);
+    public String getAddressByContractNameAndVersion(@RequestParam int groupId,
+        @RequestParam String name, @RequestParam String version) {
+        return contractService.getAddressByContractNameAndVersion(groupId, name, version);
     }
 
     public HttpHeaders headers(String fileName) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,"attachment;filename*=UTF-8''"+encode(fileName));
+        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
+            "attachment;filename*=UTF-8''" + encode(fileName));
         return httpHeaders;
     }
 
-    private String encode(String name){
+    private String encode(String name) {
         try {
             return URLEncoder.encode(name, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
@@ -134,14 +152,46 @@ public class ContractController extends BaseController {
         }
     }
 
-    @GetMapping
-    public List<Contract> findContract(@RequestParam(required = false) String contractName,
-                                       @RequestParam(required = false) String version,
-                                       @RequestParam(required = false) String contractAddress,
-                                       @RequestParam int groupId, BindingResult result) throws FrontException {
-        // log.info("saveAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
+    /**
+     * save contract.
+     */
+    @ApiOperation(value = "save contract", notes = "save contract ")
+    @ApiImplicitParam(name = "req", value = "contract info", required = true, dataType = "ReqContractSave")
+    @PostMapping(value = "/save")
+    public Contract saveContract(@RequestBody @Valid ReqContractSave contract, BindingResult result)
+        throws FrontException {
         checkParamResult(result);
-        return  contractService.findByCriteria(groupId, contractName, version, contractAddress);
+        return contractService.saveContract(contract);
+    }
 
+    /**
+     * delete by contractId.
+     */
+    @ApiOperation(value = "delete by contractId", notes = "delete by contractId")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "Integer"),
+        @ApiImplicitParam(name = "contractId", value = "contractId", required = true, dataType = "Long")})
+    @DeleteMapping("/{groupId}/{contractId}")
+    public BaseResponse deleteByContractId(@PathVariable Integer groupId,
+        @PathVariable Long contractId) throws FrontException {
+        log.info("deleteByContractId start. groupId:{} contractId:{}", groupId, contractId);
+        contractService.deleteContract(contractId, groupId);
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    /**
+     * query list of contract.
+     */
+    @ApiOperation(value = "query list of contract", notes = "query list of contract ")
+    @ApiImplicitParam(name = "req", value = "param info", required = true, dataType = "ReqPageContract")
+    @PostMapping(value = "/contractList")
+    public BasePageResponse findByPage(@RequestBody @Valid ReqPageContract req, BindingResult result)
+        throws FrontException {
+        checkParamResult(result);
+        Page<Contract> page = contractService.findContractByPage(req);
+        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
+        response.setTotalCount(page.getTotalElements());
+        response.setData(page.getContent());
+        return response;
     }
 }

@@ -4,13 +4,13 @@ spring:
     databaseName: db
     driverClassName: org.h2.Driver
     serverName:
-    username:
-    password:
+    username: root
+    password: root
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     database: H2
     openInView: false
-    show_sql: false
+    show_sql: true
     generate-ddl: true
     hibernate:
       ddl-auto: update
@@ -36,7 +36,7 @@ sdk:
   queueCapacity: 100
   timeout: 10000
   keepAlive: 60
-  ip: 127.0.0.1
+  ip: 192.168.36.128
   channelPort: 20200
 
 logging:
@@ -45,5 +45,5 @@ logging:
 constant:
   mgrIpPorts: 127.0.0.1:8080
   transMaxWait: 30
-  monitorDisk: /home
+  monitorDisk: H:\temp
 
