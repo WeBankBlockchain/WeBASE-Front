@@ -1,5 +1,6 @@
 package com.webank.webase.front.web3api;
 
+import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -166,10 +167,10 @@ public class Web3ApiController {
     }
 
 
-    @ApiOperation(value = "nodeHeartBeat", notes = "Verify that the node is alive")
-    @GetMapping("/nodeHeartBeat")
-    public Map<String, BigInteger> nodeHeartBeat(@PathVariable int groupId)  {
-        return web3ApiService.nodeHeartBeat(groupId);
+    @ApiOperation(value = "getNodeStatusList", notes = "get list of node status info")
+    @GetMapping("/getNodeStatusList")
+    public List<NodeStatusInfo> getNodeStatusList(@PathVariable int groupId)  {
+        return web3ApiService.getNodeStatusList(groupId);
     }
 
     @GetMapping("/groupPeers")

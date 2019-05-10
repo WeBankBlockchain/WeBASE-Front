@@ -128,7 +128,7 @@ public class MonitorService {
     }
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncMonitorInfo() throws ExecutionException, InterruptedException {
-        log.info("begin sync chain data");
+        log.debug("begin sync chain data");
 
         Long currentTime = System.currentTimeMillis();
         //to do  add  more group
@@ -144,17 +144,17 @@ public class MonitorService {
             monitor.setTimestamp(currentTime);
             monitor.setGroupId(i);
             monitorRepository.save(monitor);
-            log.info("insert success =  " + monitor.getId());
+            log.debug("insert success =  " + monitor.getId());
         }
     }
 
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void deleteMonitorInfoPerWeek()   {
-        log.info("begin delete monitor");
+        log.debug("begin delete monitor");
         Long currentTime = System.currentTimeMillis();
         Long aWeekAgo = currentTime - 3600 * 24 * 7 * 1000;
         int i = monitorRepository.deleteTimeAgo(aWeekAgo);
-        log.info("delete record count = " + i);
+        log.debug("delete record count = " + i);
     }
 }

@@ -13,9 +13,8 @@
  */
 package com.webank.webase.front.base;
 
-import com.webank.webase.front.contract.entity.Contract;
+import com.alibaba.fastjson.JSON;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,12 +32,12 @@ import org.apache.commons.lang3.StringUtils;
 @Log4j2
 public class FrontUtils {
 
-    private static List<String> IGNORE_PARAM = Arrays.asList("pageNumber","pageSize");
+    private static List<String> IGNORE_PARAM = Arrays.asList("pageNumber", "pageSize");
 
     /**
      * build Predicate by param.
      */
-    public static Predicate buildPredicate(Root<?> root,CriteriaBuilder builder, Object param) {
+    public static Predicate buildPredicate(Root<?> root, CriteriaBuilder builder, Object param) {
         Objects.requireNonNull(builder, "CriteriaBuilder is null");
         Objects.requireNonNull(param, "param is null");
 
@@ -52,22 +51,35 @@ public class FrontUtils {
         List<Predicate> list = new ArrayList<>();
         for (Field field : fields) {
             String fieldName = field.getName();//field name
-            if(IGNORE_PARAM.contains(fieldName)){
+            if (IGNORE_PARAM.contains(fieldName)) {
                 continue;
             }
             try {
                 Method method = clazz.getMethod("get" + StringUtils.capitalize(fieldName));
                 Object fieldValue = method.invoke(param);
-                if(Objects.nonNull(fieldValue)){
+                if (Objects.nonNull(fieldValue) && fieldValue != "") {
                     list.add(builder.equal(root.get(fieldName).as(String.class), fieldValue));
                 }
             } catch (Exception ex) {
-                log.warn("fail buildPredicate",ex);
+                log.warn("fail buildPredicate", ex);
                 continue;
             }
         }
 
         Predicate[] p = new Predicate[list.size()];
         return builder.and(list.toArray(p));
+    }
+
+    /**
+     * conver object to java bean.
+     */
+    public static <T> T object2JavaBean(Object obj, Class<T> clazz) {
+        if (obj == null || clazz == null) {
+            log.warn("object2JavaBean. obj or clazz null");
+            return null;
+        }
+        String jsonStr = JSON.toJSONString(obj);
+
+        return JSON.parseObject(jsonStr, clazz);
     }
 }
