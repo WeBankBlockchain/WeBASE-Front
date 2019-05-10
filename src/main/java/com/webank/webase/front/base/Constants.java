@@ -44,7 +44,7 @@ public class Constants {
     public static final String TYPE_FUNCTION = "function";
     public static final String TYPE_CONSTRUCTOR = "constructor";
     public static final String SHELL_COMMAND = "babel-node deploy.js %s %s %s %s";
-    public static final String NODE_CONNECTION = "node@%s:%s";
+    public static final String NODE_CONNECTION = "node@127.0.0.1:%s";
     public static final String CONFIG_JSON = "/config.json";
     public static final String TOOL = "/tool/";
     public static final String OUTPUT = "output/";
