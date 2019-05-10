@@ -49,6 +49,7 @@ constant:
   nodeDir: /data/app/build/node0
   mgrIpPorts: 10.0.0.1:8082
   transMaxWait: 30
+  monitorDisk: /home
 
 logging: 
   config: classpath:log4j2.xml
