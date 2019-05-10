@@ -16,6 +16,7 @@
 
 package com.webank.webase.front.performance;
 
+import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
@@ -214,7 +215,7 @@ public class PerformanceService {
      */
     public BigDecimal getDiskRatio() throws SigarException {
         double use;
-        use = sigar.getFileSystemUsage("/data").getUsePercent();
+        use = sigar.getFileSystemUsage(Constants.monitorDisk).getUsePercent();
         return new BigDecimal(use * 100); // 硬盘使用百分率%
     }
 

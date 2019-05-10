@@ -59,4 +59,5 @@ public class Constants {
     private String nodeDir = "/data/app/build/node0";
     private String mgrIpPorts = "10.0.0.1:8082";
     private int transMaxWait = 30;
+    public static String monitorDisk = "/data";
 }
