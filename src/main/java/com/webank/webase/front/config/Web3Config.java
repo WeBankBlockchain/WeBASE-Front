@@ -61,8 +61,7 @@ public class Web3Config {
     @Bean
     public Service service() {
         List<String> connectionsList = new ArrayList<>();
-        connectionsList.add(String.format(Constants.NODE_CONNECTION, nodeConfig.getListenip(),
-                nodeConfig.getChannelPort()));
+        connectionsList.add(String.format(Constants.NODE_CONNECTION, nodeConfig.getChannelPort()));
 
         ChannelConnections connectionsStr = new ChannelConnections();
         connectionsStr.setCaCertPath(caCertPath);
