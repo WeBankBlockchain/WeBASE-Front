@@ -77,26 +77,29 @@ public class ContractController extends BaseController {
         throws Exception {
         log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
-        return contractService.caseDeploy(reqDeploy);
+        String contractAddress = contractService.caseDeploy(reqDeploy);
+        log.info("success deploy. result:{}", contractAddress);
+        return contractAddress;
     }
 
 
     /**
      * compile java .
      *
-     * @param reqSendAbi request data
+     * @param param request data
      * @param result checkResult
      */
     @ApiOperation(value = "compile java", notes = "compile java")
     @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/compile-java")
     public ResponseEntity<InputStreamResource> compileJavaFile(
-        @Valid @RequestBody ReqSendAbi reqSendAbi, @RequestParam String packageName,
+        @Valid @RequestBody ReqSendAbi param,
         BindingResult result) throws FrontException, IOException {
+        log.info("compileJavaFile start. reqSendAbi:{}", JSON.toJSONString(param));
         checkParamResult(result);
         FileContent fileContent = contractService
-            .compileToJavaFile(reqSendAbi.getContractName(), reqSendAbi.getAbiInfo(),
-                reqSendAbi.getBinaryCode(), packageName);
+            .compileToJavaFile(param.getContractName(), param.getAbiInfo(), param.getContractBin(),
+                param.getPackageName());
         return ResponseEntity.ok().headers(headers(fileContent.getFileName()))
             .body(new InputStreamResource(fileContent.getInputStream()));
     }
@@ -133,6 +136,7 @@ public class ContractController extends BaseController {
     @GetMapping("/cns")
     public String getAddressByContractNameAndVersion(@RequestParam int groupId,
         @RequestParam String name, @RequestParam String version) {
+        log.info("cns start. groupId:{} name:{} version:{}", groupId, name, version);
         return contractService.getAddressByContractNameAndVersion(groupId, name, version);
     }
 
@@ -160,6 +164,7 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/save")
     public Contract saveContract(@RequestBody @Valid ReqContractSave contract, BindingResult result)
         throws FrontException {
+        log.info("saveContract start. contract:{}", JSON.toJSONString(contract));
         checkParamResult(result);
         return contractService.saveContract(contract);
     }
@@ -185,8 +190,9 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "query list of contract", notes = "query list of contract ")
     @ApiImplicitParam(name = "req", value = "param info", required = true, dataType = "ReqPageContract")
     @PostMapping(value = "/contractList")
-    public BasePageResponse findByPage(@RequestBody @Valid ReqPageContract req, BindingResult result)
-        throws FrontException {
+    public BasePageResponse findByPage(@RequestBody @Valid ReqPageContract req,
+        BindingResult result) throws FrontException {
+        log.info("findByPage start. ReqPageContract:{}", JSON.toJSONString(req));
         checkParamResult(result);
         Page<Contract> page = contractService.findContractByPage(req);
         BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:~/.h2/db1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:./h2/db1;DB_CLOSE_ON_EXIT=FALSE
     databaseName: db
     driverClassName: org.h2.Driver
     serverName:
@@ -23,7 +23,11 @@ spring:
       hibernate.generate_statistics: false
   h2:
     console:
-       enabled: true
+      enabled: true
+      path: /console
+      settings:
+        web-allow-others: false
+        trace: true
 
 server: 
   port: 8081
@@ -45,5 +49,5 @@ logging:
 constant:
   mgrIpPorts: 127.0.0.1:8080
   transMaxWait: 30
-  monitorDisk: H:\temp
+  monitorDisk: /temp
 

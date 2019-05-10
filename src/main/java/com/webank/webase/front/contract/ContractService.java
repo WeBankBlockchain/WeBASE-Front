@@ -112,12 +112,11 @@ public class ContractService {
     }
 
     private String deployLocalContract(ReqDeploy req) throws Exception {
-        //check contractId
-        verifyContractIdExist(req.getContractId(), req.getGroupId());
-        req.setVersion(Instant.now().toEpochMilli() + "");
+        //check contract status
         Contract contract = verifyContractNotDeploy(req.getContractId(), req.getGroupId());
 
         //deploy
+        req.setVersion(Instant.now().toEpochMilli() + "");
         String contractAddress = deploy(req);
         if (StringUtils.isNotBlank(contractAddress)) {
             //save address
@@ -232,12 +231,12 @@ public class ContractService {
     }
 
     public static FileContent compileToJavaFile(String contractName, List<AbiDefinition> abiInfo,
-        String binaryCode, String packageName) throws IOException {
+        String contractBin, String packageName) throws IOException {
 
         File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
         FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
         File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
-        FileUtils.writeStringToFile(binFile, JSON.toJSONString(binaryCode));
+        FileUtils.writeStringToFile(binFile, contractBin);
 
         SolidityFunctionWrapperGenerator.main(
             Arrays.asList(
@@ -382,7 +381,14 @@ public class ContractService {
         if (Objects.isNull(localContract)) {
             return;
         }
-        if (contractId != localContract.getId()) {
+        if (Objects.isNull(contractId)) {
+            log.warn("fail verifyContractNameNotExist. contractId is null");
+            throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
+        }
+        Long localId = localContract.getId();
+        if (contractId.longValue() != localId.longValue()) {
+            log.info("contract name repeat. groupId:{} path:{} name:{} contractId:{} localId:{}",
+                groupId, path, name, contractId, localId);
             throw new FrontException(ConstantCode.CONTRACT_NAME_REPEAT);
         }
     }
