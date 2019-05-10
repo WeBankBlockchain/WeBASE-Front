@@ -85,18 +85,16 @@ public class ContractService {
      *
      * @param req request data
      */
-    public BaseResponse sendAbi(ReqSendAbi req) throws FrontException {
-        BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
+    public void sendAbi(ReqSendAbi req) throws FrontException {
 
         String contractName = req.getContractName();
-        String version = req.getVersion();
+        String address =  req.getAddress();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
 
         // Check if it has been deployed based on the contract name and version number
-        checkContractAbiExistedAndSave(contractName, version, abiInfos);
+        checkContractAbiExistedAndSave(contractName, address, abiInfos);
 
-        log.info("sendAbi end. contractname:{} ,version:{}", contractName, version);
-        return baseRsp;
+        log.info("sendAbi end. contractname:{} ,version:{}", contractName, address);
     }
 
 

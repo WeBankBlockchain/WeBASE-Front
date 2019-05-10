@@ -125,11 +125,12 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "send abi", notes = "send abi")
     @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/abiInfo")
-    public BaseResponse sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)
+    public ResponseEntity sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)
         throws FrontException {
         log.info("sendAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
         checkParamResult(result);
-        return contractService.sendAbi(reqSendAbi);
+         contractService.sendAbi(reqSendAbi);
+         return ResponseEntity.ok().build();
     }
 
 

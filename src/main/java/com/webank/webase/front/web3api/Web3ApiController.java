@@ -47,8 +47,6 @@ public class Web3ApiController {
     @Autowired
     Web3ApiService web3ApiService;
 
-
-
     @ApiOperation(value = "getBlockNumber", notes = "Get the latest block height of the node")
     @GetMapping("/blockNumber")
     public BigInteger getBlockNumber(@PathVariable int groupId)   {
