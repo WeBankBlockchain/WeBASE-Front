@@ -71,6 +71,7 @@ constant:
   nodeDir: /data/app/build/node0
   # 节点管理服务ip端口
   mgrIpPorts: 10.0.0.1:8082
+  monitorDisk: /home
 ...
 ```
 
