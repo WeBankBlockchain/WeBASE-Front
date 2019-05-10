@@ -30,6 +30,7 @@ public class ReqSendAbi {
     private String contractName;
     //   @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
     private String version;
+    private String address;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
     private String contractBin;
