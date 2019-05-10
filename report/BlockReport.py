@@ -19,23 +19,19 @@ def getBrowserBlockNumber(node_state):
         "attr": GET_LAST_BLOCK,
         "nodeP2PPort": int(node_state.p2pport),
         "hostIp": HOST_IP
-
     }
 
     try:
         rsp = randomPost(block_info_sessions, BROWSER_SERVER_INFO_URLS, arguement)
         rsp_data = json.loads(rsp.text)
         #logger.info("Server rsp: " + str(rsp_data))
-        #print rsp_data
         if rsp_data["code"] == 0:
-            logger.info(rsp_data)
             return rsp_data["data"]["latestBlock"]
         else:
             return None
     except Exception, e:
-        logger.error(e)
         info=sys.exc_info()  
-        logger.error( "get browser block number except for " + str(info[0]) + "." + str(info[1]))
+        logger.error("get block number except for " + str(info[0]) + "." + str(info[1]))
         return None
 
 
@@ -77,7 +73,6 @@ def blockInfoFilter(info):
                         "transactions": trans_hash_list
                     }
     }
-    # print filted_info
     return filted_info
               
 
@@ -96,7 +91,7 @@ def uploadBlockInfo(nodes_state):
             node_state = nodes_state[name]
             time.sleep(float(UPLODA_BLOCK_GAP)/float(len(UPLOAD_BLOCK_NODES)))
             block_number = getBrowserBlockNumber(node_state)
-            logger.info("Browser block number of "+ name + ": " + str(block_number))
+            logger.debug("mgr's block number of "+ name + ": " + str(block_number))
 
             if block_number is not None and block_number is 0:
                 block_number = -1
