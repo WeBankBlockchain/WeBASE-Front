@@ -30,7 +30,6 @@ def randomPost(_sessions, urls, json_args):
 
     while True:
         try:
-
             if json_args.has_key("attr") and json_args["attr"] == GET_LAST_BLOCK:
                 rsp = _sessions[f].get(get_block_urls[f])
             elif json_args.has_key("attr") and json_args["attr"] == GET_LAST_NODE_LOG:
@@ -105,12 +104,11 @@ def postWorker(idx):
             while True:
                 try:
                     if arguement["metricDataList"] != []:
-                        # logger.info("report contents：{}".format(arguement))
+                        logger.info("report contents：{}".format(arguement))
                         rsp = randomPost(post_sessions, browser_server_urls, arguement)
                     break
                 except:
                     info = sys.exc_info()
-                    logger.error(arguement)
                     logger.error("Post queue[" + str(idx) + "] to browser server except for " + str(info[0]) + "." + str(info[1]))
                     time.sleep(0.7)
             logger.info("Post worker done post_queues[" + str(idx) + "] size " + str(post_queues[idx].qsize()))

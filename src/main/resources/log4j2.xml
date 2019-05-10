@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info">
+	<Properties>
+        <Property name="logPath">./log</Property>
+    </Properties>
 	<Appenders>
 		<Console name="console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%F:%L) - %m%n" />
@@ -12,7 +15,8 @@
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="200 MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="24" />
+			<DefaultRolloverStrategy max="24" >
+            </DefaultRolloverStrategy>
 		</RollingFile>
 
 		<RollingFile name="error" fileName="${logPath}/webase-front-error.log"
@@ -25,7 +29,8 @@
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="200 MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="24" />
+			<DefaultRolloverStrategy max="24" >
+            </DefaultRolloverStrategy>
 		</RollingFile>
 
 		<RollingFile name="web3sdk" fileName="${logPath}/web3sdk.log"
@@ -35,7 +40,8 @@
 				<TimeBasedTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="200 MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="24" />
+			<DefaultRolloverStrategy max="24" >
+            </DefaultRolloverStrategy>
 		</RollingFile>
 
 		<Async name="asyncFront" bufferSize="512">

@@ -1,1 +1,0 @@
-﻿将tool目录下libsigar-amd64-Linux.so（64bit）添加到服务器的/usr/lib64或者/lib64或者/lib或者/usr/lib目录即可
