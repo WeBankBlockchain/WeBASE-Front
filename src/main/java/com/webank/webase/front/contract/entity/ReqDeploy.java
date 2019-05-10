@@ -35,13 +35,14 @@ public class ReqDeploy {
     private String  user;
 //    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
     private String contractName;
+    private String contractPath;
  //   @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
     private String bytecodeBin;
-    private String contractBinary;
+    private String contractBin;
     private String contractSource;
     private  int groupId = 1;
     private  Long contractId;

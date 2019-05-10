@@ -31,7 +31,7 @@ public class Contract {
     @Column(columnDefinition = "text")
     private String contractAbi;
     @Column(columnDefinition = "text")
-    private String contractBinary;
+    private String contractBin;
     @Column(columnDefinition = "text")
     private String bytecodeBin;
     private String contractAddress;
