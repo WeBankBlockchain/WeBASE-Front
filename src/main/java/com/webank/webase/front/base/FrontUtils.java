@@ -82,4 +82,32 @@ public class FrontUtils {
 
         return JSON.parseObject(jsonStr, clazz);
     }
+
+
+    /**
+     * remove "0x" and last character.
+     */
+    public static String removeBinFirstAndLast(String contractBin, int removaLastLength) {
+        if (StringUtils.isBlank(contractBin)) {
+            return null;
+        }
+        contractBin = removeFirstStr(contractBin, "0x");
+        if (contractBin.length() > removaLastLength) {
+            contractBin = contractBin.substring(0, contractBin.length() - removaLastLength);
+        }
+        return contractBin;
+    }
+
+    /**
+     * remove fist string.
+     */
+    public static String removeFirstStr(String constant, String target) {
+        if (StringUtils.isBlank(constant) || StringUtils.isBlank(target)) {
+            return constant;
+        }
+        if (constant.startsWith(target)) {
+            constant = StringUtils.removeStart(constant, target);
+        }
+        return constant;
+    }
 }
