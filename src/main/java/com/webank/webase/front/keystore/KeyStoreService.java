@@ -21,6 +21,8 @@ import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreInfo;
 import com.webank.webase.front.util.CommonUtils;
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +70,20 @@ public class KeyStoreService {
      * get KeyStoreInfo by privateKey.
      */
     public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey) {
-        ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
+        log.debug("start getKeyStoreFromPrivateKey. privateKey:{}", privateKey);
+        if (StringUtils.isBlank(privateKey)) {
+            log.error("fail getKeyStoreFromPrivateKey. private key is null");
+            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
+        }
+        byte[] base64decodedBytes = Base64.getDecoder().decode(privateKey);
+        String decodeKey = null;
+        try {
+            decodeKey = new String(base64decodedBytes, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            log.error("fail getKeyStoreFromPrivateKey", e);
+            throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
+        }
+        ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(decodeKey));
         return keyPair2KeyStoreInfo(keyPair);
     }
 
@@ -81,6 +96,7 @@ public class KeyStoreService {
             .toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
         String privateKey = Numeric.toHexStringNoPrefix(keyPair.getPrivateKey());
         String address = "0x" + Keys.getAddress(keyPair.getPublicKey());
+        log.debug("publicKey:{} privateKey:{} address:{}", publicKey, privateKey, address);
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setPublicKey(publicKey);
         keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
