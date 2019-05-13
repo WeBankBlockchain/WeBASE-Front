@@ -75,6 +75,7 @@ public class Web3ApiService {
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 3000L;
+    private static final int HASH_OF_TRANSACTION_LENGTH = 66;
 
     /**
      * getBlockNumber.
@@ -554,5 +555,22 @@ public class Web3ApiService {
 
     public List<String> getObserverList(int groupId) throws IOException {
         return web3jMap.get(groupId).getObserverList().send().getObserverList();
+    }
+
+    /**
+     * search By Criteria
+     */
+    public Object searchByCriteria(int groupId, String input) {
+        if (StringUtils.isBlank(input)) {
+            log.warn("fail searchByCriteria. input is null");
+            return null;
+        }
+        if (StringUtils.isNumeric(input)) {
+            return getBlockByNumber(groupId, new BigInteger(input));
+        } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
+            return getTransactionByHash(groupId, input);
+        }
+
+        return null;
     }
 }

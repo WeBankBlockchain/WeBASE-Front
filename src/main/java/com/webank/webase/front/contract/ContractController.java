@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +91,7 @@ public class ContractController extends BaseController {
      * @param result checkResult
      */
     @ApiOperation(value = "compile java", notes = "compile java")
-    @ApiImplicitParam(name = "ompile java", value = "abi info", required = true, dataType = "ReqSendAbi")
+    @ApiImplicitParam(name = "param", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/compile-java")
     public ResponseEntity<InputStreamResource> compileJavaFile(
         @Valid @RequestBody ReqSendAbi param,
@@ -129,8 +130,12 @@ public class ContractController extends BaseController {
         throws FrontException {
         log.info("sendAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
         checkParamResult(result);
-         contractService.sendAbi(reqSendAbi);
-         return ResponseEntity.ok().build();
+        if (Objects.isNull(reqSendAbi.getGroupId())) {
+            log.warn("fail sendAbi. groupId is null");
+            throw new FrontException(ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY);
+        }
+        contractService.sendAbi(reqSendAbi);
+        return ResponseEntity.ok().build();
     }
 
 

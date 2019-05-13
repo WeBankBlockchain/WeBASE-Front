@@ -7,6 +7,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.FrontUtils;
 import com.webank.webase.front.base.exception.FrontException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -218,14 +219,7 @@ public class ContractAbiUtil {
         try {
             File file = new File(
                 Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
-            File parentFile = file.getParentFile();
-            if (!parentFile.exists()) {
-                parentFile.mkdirs();
-            }
-            if (file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
+            FrontUtils.createFileIfNotExist(file,true);
             outputStream = new FileOutputStream(file);
 
             //todo

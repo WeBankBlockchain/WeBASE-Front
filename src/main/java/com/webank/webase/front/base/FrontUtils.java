@@ -14,6 +14,8 @@
 package com.webank.webase.front.base;
 
 import com.alibaba.fastjson.JSON;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -109,5 +111,27 @@ public class FrontUtils {
             constant = StringUtils.removeStart(constant, target);
         }
         return constant;
+    }
+
+    /**
+     * create file if not exist.
+     */
+    public static void createFileIfNotExist(File targetFile, boolean deketeOld) throws IOException {
+        Objects.requireNonNull(targetFile, "fail create file. targetFile is null");
+        File parentFile = targetFile.getParentFile();
+        if (!parentFile.exists()) {
+            parentFile.mkdirs();
+        }
+        if (deketeOld) {
+            targetFile.deleteOnExit();
+        }
+
+        if (!targetFile.exists()) {
+            if (targetFile.isFile()) {
+                targetFile.createNewFile();
+            } else if (targetFile.isDirectory()) {
+                targetFile.mkdir();
+            }
+        }
     }
 }
