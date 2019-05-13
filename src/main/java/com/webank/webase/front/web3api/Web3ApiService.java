@@ -573,10 +573,4 @@ public class Web3ApiService {
 
         return null;
     }
-
-    public static void main(String args[]){
-        String input = "group2";
-        boolean b = StringUtils.isNumeric(input);
-        System.out.println(b);
-    }
 }
