@@ -14,6 +14,7 @@
 package com.webank.webase.front.keystore;
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.AesUtils;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
@@ -41,6 +42,8 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class KeyStoreService {
 
+    @Autowired
+    private AesUtils aesUtils;
     @Autowired
     Constants constants;
     @Autowired
@@ -80,8 +83,9 @@ public class KeyStoreService {
         String address = "0x" + Keys.getAddress(keyPair.getPublicKey());
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setPublicKey(publicKey);
-        keyStoreInfo.setPrivateKey(privateKey);
+        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
         keyStoreInfo.setAddress(address);
+
         keyMap.put(address, privateKey);
 
         return keyStoreInfo;
@@ -133,7 +137,7 @@ public class KeyStoreService {
             }
         }
 
-        return keyStoreInfo.getPrivateKey();
+        return aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
     }
 }
 

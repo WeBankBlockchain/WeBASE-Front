@@ -102,7 +102,6 @@ public class ContractService {
         try {
             cnsServiceMap.get(req.getGroupId())
                 .registerCns(contractName, address, address, JSON.toJSONString(abiInfos));
-
         } catch (Exception ex) {
             log.error("fail sendAbi.", ex);
             throw new FrontException(ConstantCode.SEND_ABI_INFO_FAIL);
@@ -123,7 +122,13 @@ public class ContractService {
             log.error("fail addressIsValid. contractBin is empty");
             throw new FrontException(ConstantCode.CONTRACT_BIN_NULL);
         }
-        String binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+        String binOnChain;
+        try {
+            binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+        } catch (Exception e) {
+            log.error("fail addressIsValid.", e);
+            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+        }
         log.debug("addressIsValid address:{} binOnChain:{}", contractAddress, binOnChain);
         if (StringUtils.isBlank(binOnChain)) {
             log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
@@ -282,8 +287,10 @@ public class ContractService {
         String contractBin, String packageName) throws IOException {
 
         File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
+        FrontUtils.createFileIfNotExist(abiFile,true);
         FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
         File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
+        FrontUtils.createFileIfNotExist(binFile,true);
         FileUtils.writeStringToFile(binFile, contractBin);
 
         SolidityFunctionWrapperGenerator.main(
@@ -301,6 +308,7 @@ public class ContractService {
         File file = new File(
             Constants.JAVA_DIR + File.separator + outputDirectory + File.separator + contractName
                 + ".java");
+        FrontUtils.createFileIfNotExist(file,true);
         InputStream targetStream = new FileInputStream(file);
         return new FileContent(contractName + ".java", targetStream);
     }
