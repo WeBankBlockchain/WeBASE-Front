@@ -23,7 +23,7 @@ public interface ConstantCode {
     RetCode RET_SUCCEED = RetCode.mark(0, "success");
 
     /* paramaters check */
-    String PARAM_FAIL_GROUP_ID_IS_EMPTY = "{\"code\":201001,\"msg\":\"groupId cannot be empty\"}";
+    RetCode PARAM_FAIL_GROUP_ID_IS_EMPTY =  RetCode.mark(201001, "groupId cannot be empty");
     String PARAM_FAIL_USER_IS_EMPTY = "{\"code\":201002,\"msg\":\"user cannot be empty\"}";
     String PARAM_FAIL_CONTRACTNAME_IS_EMPTY =
         "{\"code\":201003,\"msg\":\"contractName cannot be empty\"}";
