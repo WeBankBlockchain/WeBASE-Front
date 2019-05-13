@@ -59,6 +59,7 @@ public interface ConstantCode {
     RetCode CONTRACT_BIN_NULL = RetCode.mark(201028, "contractbin is null");
     RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(201029, "contractAddress is null");
     RetCode CONTRACT_ADDRESS_INVALID = RetCode.mark(201030, "contractAddress invalid");
+    RetCode PRIVATE_KEY_DECODE_FAIL = RetCode.mark(201031, "privateKey decode fail");
 
 
     /* system error */
