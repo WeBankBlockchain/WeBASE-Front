@@ -305,6 +305,9 @@ public class ContractService {
         if (!packageName.isEmpty()) {
             outputDirectory = packageName.replace(".", File.separator);
         }
+        if(contractName.length()>1) {
+            contractName = contractName.substring(0, 1).toUpperCase() + contractName.substring(1);
+        }
         File file = new File(
             Constants.JAVA_DIR + File.separator + outputDirectory + File.separator + contractName
                 + ".java");
