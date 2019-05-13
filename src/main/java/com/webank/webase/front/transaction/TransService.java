@@ -78,15 +78,21 @@ public class TransService {
      */
     public Object transHandle(ReqTransHandle req) throws Exception {
 
+        boolean ifExisted;
         // Check if contractAbi existed
         if (req.getContractAddress() == null) {
-            boolean ifExisted = ContractAbiUtil
+            ifExisted = ContractAbiUtil
                 .ifContractAbiExisted(req.getContractName(), req.getVersion());
-            if (!ifExisted) {
-                // check and save abi
-                checkAndSaveAbiFromCns(req);
-            }
+        } else {
+            ifExisted = ContractAbiUtil
+                .ifContractAbiExisted(req.getContractName(), req.getContractAddress());
         }
+
+        if (!ifExisted) {
+            // check and save abi
+            checkAndSaveAbiFromCns(req);
+        }
+
         Object baseRsp = dealWithtrans(req);
         log.info("transHandle end. name:{} func:{} baseRsp:{}", req.getContractName(),
             req.getFuncName(), JSON.toJSONString(baseRsp));
@@ -126,9 +132,14 @@ public class TransService {
         Object result = null;
         String contractName = req.getContractName();
         String version = req.getVersion();
+        String address = req.getContractAddress();
         String funcName = req.getFuncName();
         List<Object> params = req.getFuncParam();
         int groupId = req.getGroupId();
+        if (StringUtils.isBlank(version) && StringUtils.isNotBlank(address)) {
+            version = address;
+        }
+
         // if function is constant
         String constant = ContractAbiUtil.ifConstantFunc(contractName, funcName, version);
         if (constant == null) {
