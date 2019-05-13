@@ -16,7 +16,6 @@ package com.webank.webase.front.base;
 
 /**
  * Code Constant.
- *
  */
 public interface ConstantCode {
 
@@ -24,7 +23,7 @@ public interface ConstantCode {
     RetCode RET_SUCCEED = RetCode.mark(0, "success");
 
     /* paramaters check */
-    String PARAM_FAIL_UUID_IS_EMPTY = "{\"code\":201001,\"msg\":\"uuid cannot be empty\"}";
+    String PARAM_FAIL_GROUP_ID_IS_EMPTY = "{\"code\":201001,\"msg\":\"groupId cannot be empty\"}";
     String PARAM_FAIL_USER_IS_EMPTY = "{\"code\":201002,\"msg\":\"user cannot be empty\"}";
     String PARAM_FAIL_CONTRACTNAME_IS_EMPTY =
         "{\"code\":201003,\"msg\":\"contractName cannot be empty\"}";
@@ -56,6 +55,11 @@ public interface ConstantCode {
     RetCode CONTRACT_NAME_REPEAT = RetCode.mark(201024, "contract name cannot be repeated");
     RetCode INVALID_CONTRACT_ID = RetCode.mark(201025, "invalid contract id");
     RetCode CONTRACT_HAS_BEAN_DEPLOYED = RetCode.mark(201026, "contract has been deployed");
+    RetCode SEND_ABI_INFO_FAIL = RetCode.mark(201027, "send abiInfo fail");
+    RetCode CONTRACT_BIN_NULL = RetCode.mark(201028, "contractbin is null");
+    RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(201029, "contractAddress is null");
+    RetCode CONTRACT_ADDRESS_INVALID = RetCode.mark(201030, "contractAddress invalid");
+
 
     /* system error */
     RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");

@@ -11,6 +11,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,7 +48,6 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedTy
 
 /**
  * ContractAbiUtil.
- * 
  */
 @Slf4j
 public class ContractAbiUtil {
@@ -55,8 +55,10 @@ public class ContractAbiUtil {
     public static HashMap<String, List<VersionEvent>> contractEventMap = new HashMap<>();
     private static final String regex = "(\\w+)(?:\\[(.*?)\\])(?:\\[(.*?)\\])?";
     private static final Pattern pattern = Pattern.compile(regex);
+
     @Data
     public static class VersionEvent {
+
         private String version;
         private HashMap<String, List<Class<? extends Type>>> events;
         private HashMap<String, Boolean> functions;// constant or not
@@ -65,7 +67,7 @@ public class ContractAbiUtil {
 
         /**
          * VersionEvent.
-         * 
+         *
          * @param version contract version
          * @param events events
          * @param functions functions
@@ -73,8 +75,8 @@ public class ContractAbiUtil {
          * @param funcOutputs funcOutputs
          */
         public VersionEvent(String version, HashMap<String, List<Class<? extends Type>>> events,
-                HashMap<String, Boolean> functions, HashMap<String, List<String>> funcInputs,
-                HashMap<String, List<String>> funcOutputs) {
+            HashMap<String, Boolean> functions, HashMap<String, List<String>> funcInputs,
+            HashMap<String, List<String>> funcOutputs) {
             this.version = version;
             this.events = events;
             this.functions = functions;
@@ -93,7 +95,6 @@ public class ContractAbiUtil {
 
     /**
      * init from config abi dir.
-     * 
      */
     public static void initAllContractAbi() throws Exception {
         File f = new File(Constants.ABI_DIR);
@@ -109,15 +110,14 @@ public class ContractAbiUtil {
                 version = arr[1];
             }
             List<AbiDefinition> abiList = loadContractDefinition(file);
-            setContractWithAbi(arr[0], version, abiList,false);
+            setContractWithAbi(arr[0], version, abiList, false);
         }
     }
 
     /**
      * loadContractDefinition.
-     * 
+     *
      * @param abiFile file
-     * @return
      */
     public static List<AbiDefinition> loadContractDefinition(File abiFile) throws IOException {
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
@@ -127,14 +127,14 @@ public class ContractAbiUtil {
 
     /**
      * set contract in map and save file.
-     * 
+     *
      * @param contractName contractName
      * @param version version
      * @param abiDefinitionList abi info
-     * @return
      */
-    public static void setContractWithAbi(String contractName, String version,List<AbiDefinition> abiDefinitionList,
-            boolean ifSaveFile) throws FrontException {
+    public static void setContractWithAbi(String contractName, String version,
+        List<AbiDefinition> abiDefinitionList,
+        boolean ifSaveFile) throws FrontException {
 
         List<VersionEvent> versionEventList = getAbiVersionList(contractName, version);
         setFunctionFromAbi(contractName, version, abiDefinitionList, versionEventList);
@@ -144,14 +144,15 @@ public class ContractAbiUtil {
         }
     }
 
-    private static void setFunctionFromAbi(String contractName, String version, List<AbiDefinition> AbiDefinitionList, List<VersionEvent> versionEventList) {
+    private static void setFunctionFromAbi(String contractName, String version,
+        List<AbiDefinition> AbiDefinitionList, List<VersionEvent> versionEventList) {
         HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
         HashMap<String, Boolean> functions = new HashMap<>();
         HashMap<String, List<String>> funcInputs = new HashMap<>();
         HashMap<String, List<String>> funcOutputs = new HashMap<>();
 
         // todo fill with solidity type  only need the type
-            for (AbiDefinition abiDefinition : AbiDefinitionList) {
+        for (AbiDefinition abiDefinition : AbiDefinitionList) {
 
             if (Constants.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {
                 List<NamedType> inputs = abiDefinition.getInputs();
@@ -162,8 +163,7 @@ public class ContractAbiUtil {
                 }
                 functions.put(contractName, false);
                 funcInputs.put(contractName, inputList);
-            }
-            else if (Constants.TYPE_FUNCTION.equals(abiDefinition.getType())) {
+            } else if (Constants.TYPE_FUNCTION.equals(abiDefinition.getType())) {
                 List<NamedType> inputs = abiDefinition.getInputs();
                 List<String> inputList = new ArrayList<>();
                 List<NamedType> outputs = abiDefinition.getOutputs();
@@ -182,12 +182,13 @@ public class ContractAbiUtil {
             }
         }
 
-                versionEventList.add(new VersionEvent(version, events, functions, funcInputs, funcOutputs));
-                contractEventMap.put(contractName, versionEventList);
+        versionEventList.add(new VersionEvent(version, events, functions, funcInputs, funcOutputs));
+        contractEventMap.put(contractName, versionEventList);
 
-        }
+    }
 
-    private static List<VersionEvent> getAbiVersionList(String contractName, String version) throws FrontException {
+    private static List<VersionEvent> getAbiVersionList(String contractName, String version)
+        throws FrontException {
         List<VersionEvent> versionEventList = null;
         if (contractEventMap.containsKey(contractName)) {
             versionEventList = contractEventMap.get(contractName);
@@ -206,28 +207,32 @@ public class ContractAbiUtil {
 
     /**
      * save abi file to disk which dir declare in config.
-     * 
+     *
      * @param contractName contractName
      * @param version version
-     * @param abiDefinitionList
-     * @return
      */
-    public static void saveAbiFile(String contractName, String version, List<AbiDefinition> abiDefinitionList)
-            throws FrontException {
+    public static void saveAbiFile(String contractName, String version,
+        List<AbiDefinition> abiDefinitionList)
+        throws FrontException {
         FileOutputStream outputStream = null;
         try {
-            File file = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
+            File file = new File(
+                Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
+            File parentFile = file.getParentFile();
+            if (!parentFile.exists()) {
+                parentFile.mkdirs();
+            }
             if (file.exists()) {
                 file.delete();
             }
-                file.createNewFile();
+            file.createNewFile();
             outputStream = new FileOutputStream(file);
 
             //todo
             outputStream.write(JSON.toJSONString(abiDefinitionList).getBytes());
             outputStream.flush();
         } catch (IOException e) {
-            log.error("saveAbiFile failed.");
+            log.error("saveAbiFile failed.", e);
             throw new FrontException(ConstantCode.ABI_SAVE_ERROR);
         } finally {
             try {
@@ -243,10 +248,9 @@ public class ContractAbiUtil {
 
     /**
      * check if the contract has been deployed.
-     * 
+     *
      * @param contractName contractName
      * @param contractVersion version
-     * @return
      */
     public static Boolean ifContractAbiExisted(String contractName, String contractVersion) {
         boolean ifExisted = false;
@@ -265,11 +269,10 @@ public class ContractAbiUtil {
 
     /**
      * check if the function is constant.
-     * 
+     *
      * @param contractName contractName
      * @param funcName funcName
      * @param version version
-     * @return
      */
     public static String ifConstantFunc(String contractName, String funcName, String version) {
         if (!contractEventMap.containsKey(contractName)) {
@@ -291,14 +294,13 @@ public class ContractAbiUtil {
 
     /**
      * get input types.
-     * 
+     *
      * @param contractName contractName
      * @param funcName funcName
      * @param version version
-     * @return
      */
     public static List<String> getFuncInputType(String contractName, String funcName,
-            String version) {
+        String version) {
         if (!contractEventMap.containsKey(contractName)) {
             return null;
         }
@@ -318,14 +320,13 @@ public class ContractAbiUtil {
 
     /**
      * get output types.
-     * 
+     *
      * @param contractName contractName
      * @param funcName funcName
      * @param version version
-     * @return
      */
     public static List<String> getFuncOutputType(String contractName, String funcName,
-            String version) {
+        String version) {
         if (!contractEventMap.containsKey(contractName)) {
             return null;
         }
@@ -346,8 +347,6 @@ public class ContractAbiUtil {
 
     /**
      * get all contract from contractEventMap.
-     * 
-     * @return
      */
     private static Map<String, List<String>> getAllContract() {
         Map<String, List<String>> contracts = new HashMap<>();
@@ -367,7 +366,8 @@ public class ContractAbiUtil {
         String type = trimStorageDeclaration(typeDeclaration);
         Matcher matcher = pattern.matcher(type);
         if (matcher.find()) {
-            Class<?> baseType = org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes.getType(matcher.group(1));
+            Class<?> baseType = org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes
+                .getType(matcher.group(1));
             String firstArrayDimension = matcher.group(2);
             String secondArrayDimension = matcher.group(3);
 

@@ -90,7 +90,7 @@ public class ContractController extends BaseController {
      * @param result checkResult
      */
     @ApiOperation(value = "compile java", notes = "compile java")
-    @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
+    @ApiImplicitParam(name = "ompile java", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/compile-java")
     public ResponseEntity<InputStreamResource> compileJavaFile(
         @Valid @RequestBody ReqSendAbi param,

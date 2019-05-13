@@ -18,10 +18,12 @@ import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -79,24 +81,64 @@ public class ContractService {
     private ContractRepository contractRepository;
     @Autowired
     private KeyStoreService keyStoreService;
+    @Autowired
+    private Web3ApiService web3ApiService;
 
     /**
      * sendAbi.
      *
      * @param req request data
      */
-    public void sendAbi(ReqSendAbi req) throws FrontException {
+    public void sendAbi(ReqSendAbi req) {
 
         String contractName = req.getContractName();
-        String address =  req.getAddress();
+        String address = req.getAddress();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
 
+        //check address is valid
+        addressIsValid(req.getGroupId(), req.getAddress(), req.getContractBin());
         // Check if it has been deployed based on the contract name and version number
         checkContractAbiExistedAndSave(contractName, address, abiInfos);
+        try {
+            cnsServiceMap.get(req.getGroupId())
+                .registerCns(contractName, address, address, JSON.toJSONString(abiInfos));
+
+        } catch (Exception ex) {
+            log.error("fail sendAbi.", ex);
+            throw new FrontException(ConstantCode.SEND_ABI_INFO_FAIL);
+        }
 
         log.info("sendAbi end. contractname:{} ,version:{}", contractName, address);
     }
 
+    /**
+     * check address is valid.
+     */
+    private void addressIsValid(int groupId, String contractAddress, String contractBin) {
+        if (StringUtils.isBlank(contractAddress)) {
+            log.error("fail addressIsValid. contractAddress is empty");
+            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
+        }
+        if (StringUtils.isBlank(contractBin)) {
+            log.error("fail addressIsValid. contractBin is empty");
+            throw new FrontException(ConstantCode.CONTRACT_BIN_NULL);
+        }
+        String binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+        log.debug("addressIsValid address:{} binOnChain:{}", contractAddress, binOnChain);
+        if (StringUtils.isBlank(binOnChain)) {
+            log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
+            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+        }
+
+        String subChainAddress = FrontUtils.removeBinFirstAndLast(binOnChain, 68);
+        String subInputBin = FrontUtils.removeFirstStr(contractBin, "0x");
+        log.info("address:{} subBinOnChain:{} subInputBin:{}", contractAddress, subChainAddress,
+            subInputBin);
+        if (!subInputBin.contains(subChainAddress)) {
+            log.error("fail addressIsValid contractAddress:{}", contractAddress);
+            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+        }
+    }
 
     /**
      * case deploy type.
@@ -114,7 +156,6 @@ public class ContractService {
         Contract contract = verifyContractNotDeploy(req.getContractId(), req.getGroupId());
 
         //deploy
-        req.setVersion(Instant.now().toEpochMilli() + "");
         String contractAddress = deploy(req);
         if (StringUtils.isNotBlank(contractAddress)) {
             //save address
@@ -139,6 +180,11 @@ public class ContractService {
         List<Object> params = req.getFuncParam();
         int groupId = req.getGroupId();
         // Check if contractAbi existed
+        String uuid = null;
+        if (version == null) {
+            uuid = UUID.randomUUID() + "";
+            version = uuid;
+        }
         ContractAbiUtil.setContractWithAbi(contractName, version, abiInfos, false);
         String encodedConstructor = constructorEncoded(contractName, version, params);
 
@@ -148,10 +194,15 @@ public class ContractService {
         String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor,
             credentials);
 
-        checkContractAbiExistedAndSave(contractName, version, abiInfos);
-
-        cnsServiceMap.get(groupId)
-            .registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
+        if (uuid == null) {
+            checkContractAbiExistedAndSave(contractName, version, abiInfos);
+            cnsServiceMap.get(groupId)
+                .registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
+        } else {
+            checkContractAbiExistedAndSave(contractName, contractAddress, abiInfos);
+            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress, contractAddress,
+                JSON.toJSONString(abiInfos));
+        }
 
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
@@ -184,7 +235,6 @@ public class ContractService {
         List<AbiDefinition> abiInfos) throws FrontException {
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
         if (!ifExisted) {
-
             ContractAbiUtil.setContractWithAbi(contractName, version, abiInfos, true);
         }
     }
