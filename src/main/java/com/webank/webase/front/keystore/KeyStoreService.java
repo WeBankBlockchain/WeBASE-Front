@@ -57,20 +57,21 @@ public class KeyStoreService {
     /**
      * createPrivateKey.
      */
-    public KeyStoreInfo createPrivateKey() {
+    public KeyStoreInfo createPrivateKey(boolean useAes) {
         try {
             ECKeyPair keyPair = Keys.createEcKeyPair();
-            return keyPair2KeyStoreInfo(keyPair);
+            return keyPair2KeyStoreInfo(keyPair, useAes);
         } catch (Exception e) {
-            throw new FrontException("create keyinfo failed");
+            log.error("fail createPrivateKey.", e);
+            throw new FrontException("create keyInfo failed");
         }
     }
 
     /**
      * get KeyStoreInfo by privateKey.
      */
-    public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey) {
-        log.debug("start getKeyStoreFromPrivateKey. privateKey:{}", privateKey);
+    public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey, boolean useAes) {
+        log.debug("start getKeyStoreFromPrivateKey. privateKey:{} useAes", privateKey, useAes);
         if (StringUtils.isBlank(privateKey)) {
             log.error("fail getKeyStoreFromPrivateKey. private key is null");
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
@@ -84,13 +85,13 @@ public class KeyStoreService {
             throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
         }
         ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(decodeKey));
-        return keyPair2KeyStoreInfo(keyPair);
+        return keyPair2KeyStoreInfo(keyPair, useAes);
     }
 
     /**
      * convert ECKeyPair to KeyStoreInfo.
      */
-    private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair) {
+    private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, boolean useAes) {
 
         String publicKey = Numeric
             .toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
@@ -99,11 +100,17 @@ public class KeyStoreService {
         log.debug("publicKey:{} privateKey:{} address:{}", publicKey, privateKey, address);
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setPublicKey(publicKey);
-        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
+        keyStoreInfo.setPrivateKey(privateKey);
         keyStoreInfo.setAddress(address);
 
         keyMap.put(address, privateKey);
 
+        if (useAes) {
+            keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(keyStoreInfo.getPrivateKey()));
+        } else {
+            keyStoreInfo.setPrivateKey(privateKey);
+        }
+        log.info("keyPair2KeyStoreInfo=======================keyMap:{}", JSON.toJSONString(keyMap));
         return keyStoreInfo;
     }
 
@@ -111,8 +118,8 @@ public class KeyStoreService {
     /**
      * get credential.
      */
-    public Credentials getCredentials(String user) throws FrontException {
-        String privateKey = Optional.ofNullable(getPrivateKey(user)).orElse(null);
+    public Credentials getCredentials(String user, boolean useAes) throws FrontException {
+        String privateKey = Optional.ofNullable(getPrivateKey(user, useAes)).orElse(null);
         if (StringUtils.isBlank(privateKey)) {
             log.warn("fail getCredentials. user:{} privateKey is null", user);
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
@@ -126,8 +133,8 @@ public class KeyStoreService {
      *
      * @param user userId or userAddress.
      */
-    public String getPrivateKey(String user) {
-
+    public String getPrivateKey(String user, boolean useAes) {
+        log.info("getPrivateKey=======================keyMap:{}", JSON.toJSONString(keyMap));
         if (KeyStoreService.keyMap != null && KeyStoreService.keyMap.get(user) != null) {
             //get privateKey by address
             return KeyStoreService.keyMap.get(user);
@@ -152,8 +159,11 @@ public class KeyStoreService {
                 continue;
             }
         }
+        if (useAes) {
+            return aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+        }
 
-        return aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+        return keyStoreInfo.getPrivateKey();
     }
 }
 
