@@ -42,6 +42,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class Web3Config {
     @Autowired
     NodeConfig nodeConfig;
+    @Autowired
+    private Constants constants;
 
     private String orgName;
     private String caCertPath;
@@ -61,7 +63,8 @@ public class Web3Config {
     @Bean
     public Service service() {
         List<String> connectionsList = new ArrayList<>();
-        connectionsList.add(String.format(Constants.NODE_CONNECTION, nodeConfig.getChannelPort()));
+        connectionsList.add(String.format(Constants.NODE_CONNECTION, 
+                constants.getNodeListenIp(), nodeConfig.getChannelPort()));
 
         ChannelConnections connectionsStr = new ChannelConnections();
         connectionsStr.setCaCertPath(caCertPath);
