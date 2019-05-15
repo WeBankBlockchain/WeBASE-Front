@@ -168,9 +168,9 @@ public class Web3ApiController {
 
     @ApiOperation(value = "getSystemProxyInfo",
             notes = "Gets the routing information of the node system")
-    @ApiImplicitParam(name = "userID", value = "userID", required = true, dataType = "BigInteger",
+    @ApiImplicitParam(name = "userId", value = "userId", required = true, dataType = "BigInteger",
             paramType = "path")
-    @GetMapping("/systemProxy/{userID}")
+    @GetMapping("/systemProxy/{userId}")
     public BaseResponse getSystemProxyInfo(@PathVariable Integer userId) throws FrontException {
         return web3ApiService.getSystemProxyInfo(userId);
     }

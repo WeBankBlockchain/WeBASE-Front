@@ -41,7 +41,9 @@ sdk:
   keepAlive: 60
 
 constant:
+  nodeListenIp: 127.0.0.1
   nodeDir: /data/app/build/node0
+  mgrBaseUrl: http://%s/webase-node-mgr
   mgrIpPorts: 10.0.0.1:8082
   transMaxWait: 30
   monitorDisk: /home

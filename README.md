@@ -69,7 +69,9 @@ server:
 constant:
   # 对应节点路径（需指明到节点目录）
   nodeDir: /data/app/build/node0
-  # 节点管理服务ip端口
+  # 节点管理服务请求url
+  mgrBaseUrl: http://%s/webase-node-mgr
+  # 节点管理服务ip端口，可配置多个（如：10.0.0.1:8082,10.0.0.1:8083）
   mgrIpPorts: 10.0.0.1:8082
   # 监控的磁盘目录
   monitorDisk: /home
@@ -83,6 +85,7 @@ cd dist/report
 修改config.json
 ```
 ...
+// 节点管理服务，可以配置多个
 "node_manager_servers": [
 	{
 		"ip": "10.0.0.1", // 节点管理服务ip
@@ -98,7 +101,9 @@ cd dist/report
 		"node_dir":"/data/app/build/node0", // 对应节点路径（需指明到节点目录）
 		"front_error_log_dir":"default"
 	}
-]
+],
+// 节点管理服务数据上报接口url
+"browser_request_url": "/webase-node-mgr/report/blockChainInfo",
 ...
 ```
 
