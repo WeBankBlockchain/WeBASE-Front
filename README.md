@@ -6,10 +6,7 @@
 > * [附录](#chapter-5)
 
 # 1. <a id="chapter-1"></a>功能说明
-webase-front是和fisco-bcos节点配合使用的一个子系统，此分支支持fisco-bcos 2.0以上版本。
-webase-front可以通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象。
-具备可视化控制台，可以在控制台上查看交易和区块详情，开发智能合约，管理私钥，并对节点健康度进行监控和统计。
-
+webase-front是和fisco-bcos节点配合使用的一个子系统，此分支支持fisco-bcos 2.0以上版本，可通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象，具备可视化控制台，可以在控制台上查看交易和区块详情，开发智能合约，管理私钥，并对节点健康度进行监控和统计。
 注意：webase-front需要跟节点同机部署。
 
 # 2. <a id="chapter-2"></a>前提条件
@@ -32,11 +29,15 @@ webase-front可以通过HTTP请求和节点进行通信，集成了web3jsdk，�
 
 执行命令：
 ```
-git clone https://github.com/WeBankFinTech/webase-front.git
+git clone -b dev-0.7 https://github.com/WeBankFinTech/webase-front.git
 ```
 
-## 4.2 编译代码
+## 4.2 拷贝证书
+ 
  拷贝节点sdk目录下的ca.crt、node.crt、node.key证书到项目的src/main/resources目录。
+ cp ~/nodes/127.0.0.1/sdk/*  ~/webase-front/src/main/resources
+
+## 4.3 修改配置文件
  然后修改application.yml配置文件。
 ```
 constant:  
@@ -51,6 +52,7 @@ constant:
    channelPort: 20200 // 连接节点的端口
 ```
    
+## 4.4 编译
 在代码的根目录webase-front执行构建命令：
 ```
 gradle build -x test 
@@ -59,7 +61,7 @@ gradle build -x test
 构建完成后，会在根目录webase-front下生成已编译的代码目录dist。 安装碰到问题，请参考 [安装问题帮助](install_FAQ.md)
 
 
-## 4.3 服务启停
+## 4.5 服务启停
 
 进入到已编译的代码根目录：
 ```shell
@@ -76,7 +78,7 @@ cd dist
 转格式：dos2unix *.sh
 ```
 
-## 4.4 查看日志
+## 4.6 查看日志
 
 进入到已编译的代码根目录：
 ```shell
