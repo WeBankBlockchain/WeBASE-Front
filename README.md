@@ -35,8 +35,10 @@ git clone -b dev-0.7 https://github.com/WeBankFinTech/webase-front.git
 ## 4.2 拷贝证书
  
  拷贝节点sdk目录下的ca.crt、node.crt、node.key证书到项目的src/main/resources目录。
+ ```
  cp ~/nodes/127.0.0.1/sdk/*  ~/webase-front/src/main/resources
-
+ ```
+ 
 ## 4.3 修改配置文件
  然后修改application.yml配置文件。
 ```
