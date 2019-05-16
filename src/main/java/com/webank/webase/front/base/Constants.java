@@ -44,7 +44,7 @@ public class Constants {
     public static final String TYPE_FUNCTION = "function";
     public static final String TYPE_CONSTRUCTOR = "constructor";
     public static final String SHELL_COMMAND = "babel-node deploy.js %s %s %s %s";
-    public static final String NODE_CONNECTION = "node@127.0.0.1:%s";
+    public static final String NODE_CONNECTION = "node@%s:%s";
     public static final String CONFIG_JSON = "/config.json";
     public static final String TOOL = "/tool/";
     public static final String OUTPUT = "output/";
@@ -52,12 +52,13 @@ public class Constants {
     public static final String FILE_ABI = ".abi";
     public static final String FILE_SOL = ".sol";
     public static final String FILE_ADDRESS = ".address";
-    public static final String MGR_PRIVATE_KEY_URI =
-            "http://%s/webase-node-mgr/user/privateKey/%s";
+    public static final String GET_PRIVATE_KEY = "/user/privateKey/%s";
 
     public static final String CONSTANT_PREFIX = "constant";
+    private String nodeListenIp = "127.0.0.1";
     private String nodeDir = "/data/app/build/node0";
+    private String mgrBaseUrl = "http://%s/webase-node-mgr";
     private String mgrIpPorts = "10.0.0.1:8082";
     private int transMaxWait = 30;
-    public static String monitorDisk = "/data";
+    private String monitorDisk = "/data";
 }

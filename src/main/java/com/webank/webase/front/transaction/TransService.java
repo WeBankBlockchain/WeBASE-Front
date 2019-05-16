@@ -341,7 +341,8 @@ public class TransService {
         String[] ipPortArr = constants.getMgrIpPorts().split(",");
         for (String ipPort : ipPortArr) {
             try {
-                String url = String.format(Constants.MGR_PRIVATE_KEY_URI, ipPort, userId);
+                String url = String.format(constants.getMgrBaseUrl(), ipPort) 
+                        + String.format(Constants.GET_PRIVATE_KEY, userId);
                 log.info("getPrivateKey url:{}", url);
                 BaseResponse response = restTemplate.getForObject(url, BaseResponse.class);
                 log.info("getPrivateKey response:{}", JSON.toJSONString(response));

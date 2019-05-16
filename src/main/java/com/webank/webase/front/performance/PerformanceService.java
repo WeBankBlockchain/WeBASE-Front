@@ -16,15 +16,6 @@
 
 package com.webank.webase.front.performance;
 
-import com.webank.webase.front.base.Constants;
-import com.webank.webase.front.performance.result.Data;
-import com.webank.webase.front.performance.result.LineDataList;
-import com.webank.webase.front.performance.result.PerformanceData;
-import lombok.extern.slf4j.Slf4j;
-import org.hyperic.sigar.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -34,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.FileSystem;
@@ -46,6 +36,11 @@ import org.hyperic.sigar.SigarException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.performance.result.Data;
+import com.webank.webase.front.performance.result.LineDataList;
+import com.webank.webase.front.performance.result.PerformanceData;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -53,6 +48,8 @@ public class PerformanceService {
 
     @Autowired
     private PerformanceRepository performanceRepository;
+    @Autowired
+    private Constants constants;
 
 
     private static Sigar sigar = new Sigar();
@@ -215,7 +212,7 @@ public class PerformanceService {
      */
     public BigDecimal getDiskRatio() throws SigarException {
         double use;
-        use = sigar.getFileSystemUsage(Constants.monitorDisk).getUsePercent();
+        use = sigar.getFileSystemUsage(constants.getMonitorDisk()).getUsePercent();
         return new BigDecimal(use * 100); // 硬盘使用百分率%
     }
 
