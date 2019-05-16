@@ -50,7 +50,7 @@ constant:
  application.yml配置文件中sdk的配置采用默认配置，无需修改。如果想修改连接的节点和端口，设置如下：
 ``` 
  sdk: 
-   ip: 127.0.0.1   //连接节点的ip
+   ip: 127.0.0.1   //连接节点的ip，是本机ip，建议写成内网ip
    channelPort: 20200 // 连接节点的端口
 ```
    
@@ -90,6 +90,12 @@ cd dist
 前置服务日志：tail -f log/webase-front.log
 web3连接日志：tail -f log/web3sdk.log
 ```
+
+## 4.7 打开控制台
+
+http://nodeIP:8081/webase-front
+
+基于可视化控制台，可以查看节点数据概览，查看链上节点的运行情况，开发智能合约，管理私钥等。
 
 # 5. <a id="chapter-5"></a>附录
 
