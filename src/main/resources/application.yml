@@ -4,8 +4,8 @@ spring:
     databaseName: db
     driverClassName: org.h2.Driver
     serverName:
-    username: root
-    password: root
+    username:
+    password:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     database: H2
