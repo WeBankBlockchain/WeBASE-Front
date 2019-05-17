@@ -6,8 +6,11 @@
 > * [附录](#chapter-5)
 
 # 1. <a id="chapter-1"></a>功能说明
-webase-front是和fisco-bcos节点配合使用的一个子系统，此分支支持fisco-bcos 2.0以上版本，可通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象，具备可视化控制台，可以在控制台上查看交易和区块详情，开发智能合约，管理私钥，并对节点健康度进行监控和统计。
-注意：webase-front需要跟节点同机部署。
+webase-front是和fisco-bcos节点配合使用的一个子系统，此分支支持fisco-bcos 2.0以上版本，可通过HTTP请求和节点进行通信，集成了web3jsdk，对接口进行了封装和抽象，具备可视化控制台，可以在控制台上查看交易和区块详情，开发智能合约，管理私钥，并对节点健康度进行监控和统计。 
+  
+   部署方式有两种: (1)可以front组件单独部署作为独立控制台使用,打开http://{nodeIP}:8081/webase-front 即可访问控制台界面；(2)也可以结合[webase-node-mgr](https://github.com/WeBankFinTech/webase-node-mgr) 和 [webase-web](https://github.com/WeBankFinTech/webase-web)服务一起部署。
+
+ 注意：webase-front需要跟节点同机部署。一台机器部署多个节点，建议只部署一个front服务即可。
 
 # 2. <a id="chapter-2"></a>前提条件
 
@@ -43,9 +46,9 @@ git clone -b dev-0.7 https://github.com/WeBankFinTech/webase-front.git
  然后修改application.yml配置文件。
 ```
 constant:  
-  transMaxWait: 30          //交易等待时间
-  mgrIpPorts: 10.0.0.1:8080 // 配置node-managerIP和端口
-  monitorDisk: /home   //要监控的硬盘目录  
+  transMaxWait: 30            //交易等待时间
+  monitorDisk: /home          //要监控的硬盘目录 
+  mgrIpPorts: 10.0.0.1:8080   // 配置node-managerIP和端口（front独立使用可不配） 
 ```
  application.yml配置文件中sdk的配置采用默认配置，无需修改。如果想修改连接的节点和端口，设置如下：
 ``` 
@@ -93,7 +96,7 @@ web3连接日志：tail -f log/web3sdk.log
 
 ## 4.7 打开控制台
 
-http://nodeIP:8081/webase-front
+http://{nodeIP}:8081/webase-front
 
 基于可视化控制台，可以查看节点数据概览，查看链上节点的运行情况，开发智能合约，管理私钥等。
 
