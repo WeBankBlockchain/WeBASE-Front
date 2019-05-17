@@ -30,7 +30,7 @@ spring:
         trace: true
 
 server:
-  port: 80
+  port: 8081
   context-path: /webase-front
 
 sdk:
