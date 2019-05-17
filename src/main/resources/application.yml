@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:./h2/db1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:~/.h2/db1;DB_CLOSE_ON_EXIT=FALSE
     databaseName: db
     driverClassName: org.h2.Driver
     serverName:
@@ -29,26 +29,26 @@ spring:
         web-allow-others: false
         trace: true
 
-server: 
-  port: 8081
+server:
+  port: 80
   context-path: /webase-front
 
-sdk: 
+sdk:
   orgName: orgTest
   corePoolSize: 50
   maxPoolSize: 100
   queueCapacity: 100
   timeout: 10000
   keepAlive: 60
-  ip: 192.168.36.128
+  ip: 127.0.0.1
   channelPort: 20200
 
 logging:
   config: classpath:log4j2.xml
 
 constant:
-  mgrIpPorts: 127.0.0.1:8080
+  mgrIpPorts: 10.0.0.1:8080
   transMaxWait: 30
-  monitorDisk: /temp
+  monitorDisk: /data
   aesKey: EfdsW23D23d3df43
 
