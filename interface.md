@@ -54,7 +54,7 @@ HTTP POST
 | **序号** | **中文** | **参数名**   | **类型**       | **最大长度** | **必填** | **说明**                           |
 | -------- | -------- | ------------ | -------------- | ------------ | -------- | ---------------------------------- |
 | 1        | 合约名称 | contractName | String         |              | 是       |                                    |
-| 2        | 合约版本 | version      | String         |              | 是       |                                    |
+| 2        | 合约地址 | address      | String         |              | 是       |                                    |
 | 3        | 合约abi  | abiInfo      | List\<Object\> |              | 是       | abi文件里面的内容，是一个JSONArray |
 
 **2）数据格式**
@@ -63,7 +63,7 @@ HTTP POST
 
 "contractName": "HelloWorld",
 
-"version": "1.0",
+"address": "0x31b26e43651e9371c88af3d36c14cfd938baf4fd",
 
 "abiInfo": [
 
