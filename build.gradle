@@ -107,6 +107,10 @@ jar {
             from file('src/main/resources/')
             into 'dist/conf'
         }
+		copy {
+			from file('src/main/resources/static')
+			into 'dist/static'
+		}
         copy {
             from file('report/')
             into 'dist/report'
