@@ -5,7 +5,7 @@
 
    答：chmod +x 给文件增加权限
    
-* 2: gradle build -x test 失败,不能编译Lombok注解
+* 2: eclipse环境编译源码失败，错误提示如下；
 ```
 ...
 /data/temp/webase-front/src/main/java/com/webank/webase/front/performance/PerformanceService.java:167: error: cannot find symbol
@@ -25,7 +25,7 @@ FAILURE: Build failed with an exception.
 ...
 ```
 
-  答： 修改 build.gradle文件，将以下代码的注释去掉
+  答：问题是不能编译Lombok注解 ，修改 build.gradle文件，将以下代码的注释加上
 ```
  //annotationProcessor 'org.projectlombok:lombok:1.18.6'
 ```
