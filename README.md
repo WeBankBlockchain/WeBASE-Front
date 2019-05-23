@@ -49,8 +49,8 @@ constant:
    
 在代码的根目录webase-front执行构建命令：
 ```
-gradle build -x test 
-（没有安装gradle  则使用 ./gradlew build -x test）
+  chmod +x ./gradlew.sh
+ ./gradlew build -x test
 ```
 构建完成后，会在根目录webase-front下生成已编译的代码目录dist。 安装碰到问题，请参考 [安装问题帮助](install_FAQ.md)
 
