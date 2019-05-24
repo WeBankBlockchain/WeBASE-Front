@@ -48,7 +48,7 @@ git clone -b dev-0.7 https://github.com/WeBankFinTech/webase-front.git
 constant:  
   transMaxWait: 30            //交易等待时间
   monitorDisk: /home          //要监控的硬盘目录 
-  mgrIpPorts: 10.0.0.1:8080   // 配置node-managerIP和端口（front独立使用可不配） 
+  keyServer: 10.0.0.1:8080   // 配置密钥服务的IP和端口（front独立使用可不配） 
 ```
  application.yml配置文件中sdk的配置采用默认配置，无需修改。如果想修改连接的节点和端口，设置如下：
 ``` 
