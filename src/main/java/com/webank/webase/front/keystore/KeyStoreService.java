@@ -142,7 +142,7 @@ public class KeyStoreService {
 
         //get privateKey by userId
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
-        String[] ipPortArr = constants.getMgrIpPorts().split(",");
+        String[] ipPortArr = constants.getKeyServer().split(",");
         for (String ipPort : ipPortArr) {
             try {
                 String url = String.format(Constants.MGR_PRIVATE_KEY_URI, ipPort, user);
