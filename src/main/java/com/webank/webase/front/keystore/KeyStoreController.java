@@ -2,6 +2,8 @@ package com.webank.webase.front.keystore;
 
 import com.webank.webase.front.base.BaseController;
 import com.webank.webase.front.base.BaseResponse;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +19,20 @@ public class KeyStoreController extends BaseController {
 
 
     @ApiOperation(value = "get PrivateKey", notes = "get PrivateKey")
+    @ApiImplicitParam(name = "useAes", value = "Is encrypting the private key", dataType = "Boolean")
     @RequestMapping(method = RequestMethod.GET)
-    public KeyStoreInfo getPrivateKey() {
-        return keyStoreService.createPrivateKey();
+    public KeyStoreInfo getPrivateKey(boolean useAes) {
+        return keyStoreService.createPrivateKey(useAes);
     }
 
     @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
-    @RequestMapping(method = RequestMethod.GET,value = "/import")
-    public KeyStoreInfo importPrivateKey(String privateKey) {
-        return keyStoreService.getKeyStoreFromPrivateKey(privateKey);
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "privateKey", value = "private key", required = true, dataType = "String"),
+        @ApiImplicitParam(name = "useAes", value = "Is encrypting the private key", dataType = "Boolean")
+    })
+    @RequestMapping(method = RequestMethod.GET, value = "/import")
+    public KeyStoreInfo importPrivateKey(String privateKey,
+        @RequestParam(required = false, defaultValue = "true") boolean useAes) {
+        return keyStoreService.getKeyStoreFromPrivateKey(privateKey, useAes);
     }
 }

@@ -46,5 +46,7 @@ public class ReqDeploy {
     private String contractSource;
     private  int groupId = 1;
     private  Long contractId;
+    @NotNull(message = ConstantCode.PARAM_FAIL_USEAES_IS_EMPTY)
+    private Boolean useAes;
     private List<Object> funcParam = new ArrayList<>();
 }

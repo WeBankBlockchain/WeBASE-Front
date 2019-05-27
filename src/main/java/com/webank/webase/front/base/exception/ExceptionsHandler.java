@@ -1,23 +1,4 @@
-package com.webank.webase.front.base.exception;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.RetCode;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-/*
+/**
  * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,14 +13,40 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webank.webase.front.base.exception;
+
+import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.webase.front.base.BaseResponse;
+import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.RetCode;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+
 
 /**
  * ExceptionsHandler.
- *
  */
 @ControllerAdvice
 @Slf4j
 public class ExceptionsHandler {
+
     @Autowired
     ObjectMapper mapper;
 
@@ -47,32 +54,61 @@ public class ExceptionsHandler {
      * myExceptionHandler.
      *
      * @param frontException e
-     * @return
      */
     @ResponseBody
     @ExceptionHandler(value = FrontException.class)
     public ResponseEntity myExceptionHandler(FrontException frontException) throws Exception {
-      //  log.warn("catch business exception", frontException);
+        //  log.warn("catch business exception", frontException);
 //        RetCode retCode = Optional.ofNullable(frontException).map(FrontException::getRetCode)
 //                .orElse(new RetCode(101001, frontException.getMessage()));
 //
 //        BaseResponse rep = new BaseResponse(retCode);
 
-     //   log.warn("business exception return:{}", mapper.writeValueAsString(rep));
+        //   log.warn("business exception return:{}", mapper.writeValueAsString(rep));
 
         Map<String, Object> map = new HashMap<>();
-      //  map.put("exception", frontException);
+        //  map.put("exception", frontException);
         map.put("errorMessage", frontException.getMessage());
-        map.put("statusCode",  frontException.getRetCode().getCode());
-       return  ResponseEntity.status(422).body(map);
+        map.put("code", frontException.getRetCode().getCode());
+        return ResponseEntity.status(422).body(map);
 
     }
+
+    /**
+     * parameter exception:TypeMismatchException
+     */
+    @ResponseBody
+    @ExceptionHandler(value = TypeMismatchException.class)
+    public ResponseEntity typeMismatchExceptionHandler(TypeMismatchException ex) {
+        log.warn("catch typeMismatchException", ex);
+
+        Map<String, Object> map = new HashMap<>();
+        //  map.put("exception", frontException);
+        map.put("errorMessage", ex.getMessage());
+        map.put("code", 400);
+        log.warn("typeMismatchException return:{}", JSON.toJSONString(map));
+        return ResponseEntity.status(400).body(map);
+    }
+
+    @ResponseBody
+    @ExceptionHandler(value = ServletRequestBindingException.class)
+    public ResponseEntity bindExceptionHandler(ServletRequestBindingException ex) {
+        log.warn("catch bindExceptionHandler", ex);
+
+        Map<String, Object> map = new HashMap<>();
+        //  map.put("exception", frontException);
+        map.put("errorMessage", ex.getMessage());
+        map.put("code", 400);
+        log.warn("bindExceptionHandler return:{}", JSON.toJSONString(map));
+        return ResponseEntity.status(400).body(map);
+    }
+
+
 
     /**
      * exceptionHandler.
      *
      * @param exc e
-     * @return
      */
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
@@ -81,7 +117,7 @@ public class ExceptionsHandler {
         Map<String, Object> map = new HashMap<>();
         //  map.put("exception", frontException);
         map.put("errorMessage", exc.getMessage());
-        map.put("statusCode",  500);
-        return  ResponseEntity.status(500).body(map);
+        map.put("code", 500);
+        return ResponseEntity.status(500).body(map);
     }
 }
