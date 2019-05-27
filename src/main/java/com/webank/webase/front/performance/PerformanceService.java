@@ -230,8 +230,9 @@ public class PerformanceService {
             throws UnknownHostException, SigarException, InterruptedException {
         Map<String, Long> map = new HashMap<String, Long>();
         InetAddress addr;
-        addr = InetAddress.getLocalHost();
-        String ip = addr.getHostAddress();
+//        addr = InetAddress.getLocalHost();
+//        String ip = addr.getHostAddress();
+        String ip = "127.0.0.1";
         Sigar sigar = new Sigar();
         String[] ifNames = sigar.getNetInterfaceList();
         long rxbps = 0;
