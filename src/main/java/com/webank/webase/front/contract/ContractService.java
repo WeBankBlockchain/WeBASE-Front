@@ -194,7 +194,7 @@ public class ContractService {
         String encodedConstructor = constructorEncoded(contractName, version, params);
 
         // get privateKey
-        Credentials credentials = keyStoreService.getCredentials(req.getUser());
+        Credentials credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
         // contract deploy
         String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor,
             credentials);
@@ -287,10 +287,10 @@ public class ContractService {
         String contractBin, String packageName) throws IOException {
 
         File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
-        FrontUtils.createFileIfNotExist(abiFile,true);
+        FrontUtils.createFileIfNotExist(abiFile, true);
         FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
         File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
-        FrontUtils.createFileIfNotExist(binFile,true);
+        FrontUtils.createFileIfNotExist(binFile, true);
         FileUtils.writeStringToFile(binFile, contractBin);
 
         SolidityFunctionWrapperGenerator.main(
@@ -305,13 +305,13 @@ public class ContractService {
         if (!packageName.isEmpty()) {
             outputDirectory = packageName.replace(".", File.separator);
         }
-        if(contractName.length()>1) {
+        if (contractName.length() > 1) {
             contractName = contractName.substring(0, 1).toUpperCase() + contractName.substring(1);
         }
         File file = new File(
             Constants.JAVA_DIR + File.separator + outputDirectory + File.separator + contractName
                 + ".java");
-        FrontUtils.createFileIfNotExist(file,true);
+        FrontUtils.createFileIfNotExist(file, true);
         InputStream targetStream = new FileInputStream(file);
         return new FileContent(contractName + ".java", targetStream);
     }

@@ -15,27 +15,19 @@ package com.webank.webase.front.transaction;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
-import com.webank.webase.front.keystore.KeyStoreInfo;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.AbiTypes;
-import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.ContractTypeUtil;
-
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.TypeReference;
@@ -47,13 +39,12 @@ import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
+import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 
 /**
@@ -163,7 +154,7 @@ public class TransService {
         List<TypeReference<?>> finalOutputs = outputFormat(funOutputTypes);
 
         // get privateKey
-        Credentials credentials = keyStoreService.getCredentials(req.getUser());
+        Credentials credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
 
         // contract load
         CommonContract commonContract;
@@ -219,9 +210,9 @@ public class TransService {
         TransactionReceipt transactionReceipt = null;
         try {
             transactionReceipt = commonContract.execTransaction(function);
-        } catch (IOException | TransactionException e) {
+        } catch (IOException | TransactionException | ContractCallException e) {
             log.error("execTransaction failed.");
-            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
+            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),e.getMessage());
         }
         return transactionReceipt;
     }

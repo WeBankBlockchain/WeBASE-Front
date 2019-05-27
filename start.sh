@@ -7,9 +7,10 @@ LOG_DIR=${CURRENT_DIR}/log
 CONF_DIR=${CURRENT_DIR}/conf
 
 sigarFile="/usr/lib/libsigar-amd64-linux.so"
+sigarFile1="/usr/lib/libsigar-x86-linux.so"
 
  if [ ! -f "sigarFile" ]; then
-  sudo cp $CONF_DIR/libsigar-amd64-linux.so /usr/lib
+  sudo cp $CONF_DIR/libsigar-amd64-linux.so $CONF_DIR/libsigar-x86-linux.so  /usr/lib
  fi
 
 mkdir -p log

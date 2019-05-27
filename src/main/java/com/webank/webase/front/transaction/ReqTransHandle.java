@@ -25,19 +25,21 @@ import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * transHandler interface parameter.
- * 
  */
 @Data
 public class ReqTransHandle {
+
     @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
     private String user;
- //   @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
+    //   @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
     private String contractName;
-  //  @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
+    //  @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
     private String version;
     private String contractAddress;
     @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
     private String funcName;
-    private int groupId=1;
+    private int groupId = 1;
+    @NotNull(message = ConstantCode.PARAM_FAIL_USEAES_IS_EMPTY)
+    private Boolean useAes;
     private List<Object> funcParam = new ArrayList<>();
 }
