@@ -84,9 +84,8 @@ public class Web3ApiService {
 
         BigInteger blockNumber;
         try {
-            JsonRpc2_0Web3j jsonRpc2_0Web3j = (JsonRpc2_0Web3j) web3jMap.get(groupId);
-            blockNumber = jsonRpc2_0Web3j.getLocalBlockNumber();
-        } catch (Exception e) {
+            blockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
+        } catch (IOException e) {
             log.error("getBlockNumber fail.", e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }

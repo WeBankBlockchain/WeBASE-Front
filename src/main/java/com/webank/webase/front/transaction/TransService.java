@@ -193,9 +193,10 @@ public class TransService {
                 result = ethCallResultParse(funOutputTypes, typeList);
             }
             return result;
-        } catch (IOException e) {
-            log.error("execCall failed.");
-            throw new FrontException(ConstantCode.TRANSACTION_QUERY_FAILED);
+        } catch (IOException | ContractCallException e) {
+            log.error("execCall failed.", e);
+            throw new FrontException(ConstantCode.TRANSACTION_QUERY_FAILED.getCode(),
+                e.getMessage());
         }
     }
 
@@ -211,8 +212,9 @@ public class TransService {
         try {
             transactionReceipt = commonContract.execTransaction(function);
         } catch (IOException | TransactionException | ContractCallException e) {
-            log.error("execTransaction failed.");
-            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),e.getMessage());
+            log.error("execTransaction failed.", e);
+            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
+                e.getMessage());
         }
         return transactionReceipt;
     }
