@@ -303,7 +303,7 @@ export default {
         },
         saveCode: function () {
             this.data.contractSource = Base64.encode(this.content);
-            Bus.$emit("compile", this.data);
+            Bus.$emit("save", this.data);
         },
         resizeCode: function () {
             this.aceEditor.setOptions({
