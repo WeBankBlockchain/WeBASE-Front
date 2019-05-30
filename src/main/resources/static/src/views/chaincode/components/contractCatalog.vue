@@ -114,6 +114,7 @@ export default {
         Bus.$off("compile");
         Bus.$off("deploy");
         Bus.$off("open");
+        Bus.$off("save");
     },
     mounted: function () {
         this.$nextTick(function () {
@@ -121,6 +122,9 @@ export default {
         });
         Bus.$on("compile", data => {
             this.saveContract(data,'合约编译成功');
+        });
+        Bus.$on("save", data => {
+            this.saveContract(data);
         });
         Bus.$on("deploy", data => {
             this.getContracts(data);
@@ -649,7 +653,14 @@ export default {
                     });
                 });
         },
-        deleteFolder: function (val) {
+        deleteFolder: function(val){
+            this.$confirm("确认删除？")
+                .then(_ => {
+                    this.deleteFolderData(val);
+                })
+                .catch(_ => { });
+        },
+        deleteFolderData: function (val) {
             let list = val.child;
             let num = 0;
             for (let i = 0; i < list.length; i++) {
