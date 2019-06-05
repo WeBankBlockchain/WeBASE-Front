@@ -47,7 +47,8 @@ logging:
   config: classpath:log4j2.xml
 
 constant:
-  keyServer: 10.0.0.1:8080
+  keyServerUrl: http://%1s/webase-sign/%2s
+  keyServerIpPort: 127.0.0.1:8080
   transMaxWait: 30
   monitorDisk: /data
   aesKey: EfdsW23D23d3df43
