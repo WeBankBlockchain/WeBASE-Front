@@ -17,7 +17,6 @@ public class KeyStoreController extends BaseController {
     @Autowired
     private KeyStoreService keyStoreService;
 
-
     @ApiOperation(value = "get PrivateKey", notes = "get PrivateKey")
     @ApiImplicitParam(name = "useAes", value = "Is encrypting the private key", dataType = "Boolean")
     @RequestMapping(method = RequestMethod.GET)
