@@ -73,15 +73,15 @@ export default {
             this.$refs[formName].validate(valid => {
                 if (valid) {
                     let num = 0
-                    this.folderList.forEach(value => {
-                        if(value.folderName == this.folderFrom.folderName && value.groupId == localStorage.getItem("groupId")){
+                    for (let i = 0; i < this.folderList.length; i++){
+                        if(this.folderList[i].folderName == this.folderFrom.folderName && this.folderList[i].groupId == localStorage.getItem("groupId")){
                             num ++
                             this.$message({
                                 message: '新建文件夹与已存在的文件夹名称相同',
                                 type: "error"
                             });
-                        }
-                    })
+                        };
+                    }
                     if (num == 0) {
                         let data = {
                             folderName: this.folderFrom.folderName,
