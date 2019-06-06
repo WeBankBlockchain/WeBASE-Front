@@ -33,10 +33,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class ReqDeploy {
     @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
     private String  user;
-//    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTNAME_IS_EMPTY)
     private String contractName;
-    private String contractPath;
- //   @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
@@ -44,6 +41,7 @@ public class ReqDeploy {
     private String bytecodeBin;
     private String contractBin;
     private String contractSource;
+    private String contractPath;
     private  int groupId = 1;
     private  Long contractId;
     @NotNull(message = ConstantCode.PARAM_FAIL_USEAES_IS_EMPTY)
