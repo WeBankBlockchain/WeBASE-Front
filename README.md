@@ -32,7 +32,7 @@ webase-front是和fisco-bcos节点配合使用的一个子系统，此分支支�
 
 执行命令：
 ```
-git clone -b dev-0.7 https://github.com/WeBankFinTech/webase-front.git
+git clone -b dev-0.8 https://github.com/WeBankFinTech/webase-front.git
 ```
 
 ## 4.2 拷贝证书
