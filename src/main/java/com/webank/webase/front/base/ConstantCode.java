@@ -63,6 +63,7 @@ public interface ConstantCode {
     RetCode NO_CONFIG_KEY_SERVER = RetCode.mark(201032, "not found config of keyServer");
     RetCode SIGN_FAIL = RetCode.mark(201033, "cloud sign fail");
     RetCode GROUPID_NOT_EXIST = RetCode.mark(201034, "groupId not exist");
+    RetCode VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL = RetCode.mark(201035, "version and address cannot all be  null");
 
 
 
