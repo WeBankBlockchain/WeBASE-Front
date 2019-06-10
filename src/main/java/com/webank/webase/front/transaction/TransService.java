@@ -160,6 +160,9 @@ public class TransService {
         // contract load
         CommonContract commonContract;
         Web3j web3j = web3jMap.get(groupId);
+        if(web3j == null ) {
+            new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+        }
         if (req.getContractAddress() == null) {
             commonContract = CommonContract
                 .loadByName(contractName + Constants.SYMPOL + version, web3j,
