@@ -75,6 +75,8 @@ public class ContractService {
     @Autowired
     private Map<Integer, Web3j> web3jMap;
     @Autowired
+    private Map<String, String> cnsMap;
+    @Autowired
     private HashMap<Integer, CnsService> cnsServiceMap;
     @Autowired
     private ContractRepository contractRepository;
@@ -192,12 +194,15 @@ public class ContractService {
         // contract deployByManager
         String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
+
         if (version != null) {
             checkContractAbiExistedAndSave(contractName, version, abiInfos);
             cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
+            cnsMap.put(contractName+":"+version, contractAddress);
         } else {
             checkContractAbiExistedAndSave(contractName, contractAddress, abiInfos);
             cnsServiceMap.get(groupId).registerCns(contractName, contractAddress, contractAddress, JSON.toJSONString(abiInfos));
+            cnsMap.put(contractName+":"+contractAddress, contractAddress);
         }
         log.info("success deployByManager. contractAddress:{}", contractAddress);
         return contractAddress;
