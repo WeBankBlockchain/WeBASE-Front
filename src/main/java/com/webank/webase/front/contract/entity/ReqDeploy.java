@@ -26,7 +26,7 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 
 /**
- * deploy interface parameter.
+ * deployByManager interface parameter.
  * 
  */
 @Data
