@@ -69,20 +69,20 @@ public class ContractController extends BaseController {
     ContractService contractService;
 
     /**
-     * deployByManager.
+     * deploy.
      *
      * @param reqDeploy request data
      * @param result checkResult
      */
-    @ApiOperation(value = "contract deployByManager", notes = "contract deployByManager")
+    @ApiOperation(value = "contract deploy", notes = "contract deploy")
     @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
-    @PostMapping("/deployByManager")
+    @PostMapping("/deploy")
     public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
         throws Exception {
-        log.info("contract deployByManager start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
+        log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
         String contractAddress = contractService.caseDeploy(reqDeploy);
-        log.info("success deployByManager. result:{}", contractAddress);
+        log.info("success deploy. result:{}", contractAddress);
         return contractAddress;
     }
 
