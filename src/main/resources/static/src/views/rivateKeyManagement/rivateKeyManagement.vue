@@ -50,7 +50,7 @@
                 </el-pagination> -->
             </div>
         </div>
-        <el-dialog :visible.sync="creatUserNameVisible" title="添加用户名"  width="400px" class="dialog-wrapper" center v-if="creatUserNameVisible" @close="closeCallback">
+        <el-dialog :visible.sync="creatUserNameVisible" title="添加用户名" width="400px" class="dialog-wrapper" center v-if="creatUserNameVisible" @close="closeCallback">
             <el-form ref="userForm" :rules="rules" :model="userForm">
                 <el-form-item label="" prop="userName">
                     <el-input v-model="userForm.userName" placeholder="请输入用户名"></el-input>
@@ -61,8 +61,8 @@
                 <el-button type="primary" @click="sureUserName('userForm')">确 定</el-button>
             </div>
         </el-dialog>
-        <el-dialog :visible.sync="creatUserVisible" title="新建成功" width="400px" :append-to-body="true" class="dialog-wrapper" v-if='creatUserVisible' center>
-            <v-creatUser @creatUserSuccess="creatUserSuccess" ref="creatUser" :userForm="userForm"></v-creatUser>
+        <el-dialog :visible.sync="creatUserVisible" :title="titleText" width="400px" :append-to-body="true" class="dialog-wrapper" v-if='creatUserVisible' center>
+            <v-creatUser @creatUserSuccess="creatUserSuccess" @creatUserFailed="creatUserFailed" ref="creatUser" :userForm="userForm"></v-creatUser>
         </el-dialog>
     </div>
 </template>
@@ -128,16 +128,18 @@ export default {
                         trigger: "blur"
                     }
                 ]
-            }
+            },
+            titleText: ''
         };
     },
-    mounted() { 
+    mounted() {
     },
     methods: {
         creatUserBtn() {
+            this.titleText = '';
             this.creatUserNameVisible = true;
         },
-        initUserName () {
+        initUserName() {
             this.userForm = { userName: "" }
         },
         closeCallback() {
@@ -178,8 +180,12 @@ export default {
             }
         },
         creatUserSuccess(val) {
+            this.titleText = '新建成功';
             this.privateKeyList = val;
             this.initUserName();
+        },
+        creatUserFailed() {
+            this.titleText = '新建失败';
         },
         exportFile(params) {
             let str = JSON.stringify(params);
@@ -212,7 +218,7 @@ export default {
                                 _this.privateKeyList.unshift(_this.uploadMap);
                                 _this.privateKeyList = unique(_this.privateKeyList, 'privateKey')
                                 localStorage.setItem("privateKeyList", JSON.stringify(_this.privateKeyList));
-                                
+
                                 _this.$message({
                                     type: 'success',
                                     message: '导入成功'

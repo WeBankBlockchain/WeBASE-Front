@@ -16,7 +16,7 @@
 <template>
     <div class="key-dialog">
         <!-- <div class="divide-line"></div> -->
-        <div>
+        <div v-if="creatSuccess">
             <table class="rivate-key-dialog">
                 <tr v-for=" (val , key) in privateKeyMap">
                     <td v-if="key!='userName'">
@@ -48,7 +48,8 @@ export default {
     data: function () {
         return {
             privateKeyMap: {},
-            privateKeyList: localStorage.getItem('privateKeyList') ? JSON.parse(localStorage.getItem('privateKeyList')) : []
+            privateKeyList: localStorage.getItem('privateKeyList') ? JSON.parse(localStorage.getItem('privateKeyList')) : [],
+            creatSuccess: false
         };
     },
     mounted() {
@@ -56,10 +57,11 @@ export default {
     },
     methods: {
         addUser: function () {
-            queryCreatePrivateKey({}, { useAes: false })
+            queryCreatePrivateKey({}, { useAes: false, userName: this.userForm.userName })
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
+                        this.creatSuccess = true;
                         this.privateKeyMap = data;
                         Object.assign(data, this.userForm);
                         this.privateKeyList.unshift(data)
@@ -67,6 +69,8 @@ export default {
                         this.$emit('creatUserSuccess', this.privateKeyList)
                         localStorage.setItem("privateKeyList", JSON.stringify(this.privateKeyList));
                     } else {
+                        this.creatSuccess = false;
+                        this.$emit('creatUserFailed');
                         this.$message({
                             type: "error",
                             message: data.errorMessage || "系统错误"
@@ -74,6 +78,7 @@ export default {
                     }
                 })
                 .catch(err => {
+                    this.$emit('creatUserFailed');
                     this.$message({
                         type: "error",
                         message: "系统错误"
@@ -122,6 +127,7 @@ export default {
 <style scoped>
 .key-dialog {
     margin-top: 10px;
+    padding-bottom: 10px;
 }
 .dialog-footer {
     text-align: right;
