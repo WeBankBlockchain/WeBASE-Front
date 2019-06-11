@@ -1,4 +1,4 @@
-package com.webank.webase.front.transaction.entity;
+package com.webank.webase.front.transaction;
 
 import com.webank.webase.front.base.ConstantCode;
 import java.util.ArrayList;
