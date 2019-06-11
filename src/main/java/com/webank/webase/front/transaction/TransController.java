@@ -3,7 +3,6 @@ package com.webank.webase.front.transaction;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
