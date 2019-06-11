@@ -1,8 +1,4 @@
-package com.webank.webase.front.keystore;
-
-import lombok.Data;
-
-/*
+/**
  * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +13,11 @@ import lombok.Data;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webank.webase.front.keystore;
+
+import lombok.Data;
+
+
 @Data
 public class KeyStoreInfo {
     private String publicKey;

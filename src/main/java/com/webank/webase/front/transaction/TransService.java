@@ -20,6 +20,7 @@ import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.util.AbiTypes;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.ContractTypeUtil;
@@ -46,6 +47,8 @@ import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.webank.webase.front.base.ConstantCode.GROUPID_NOT_EXIST;
+
 
 /**
  * TransService.
@@ -60,6 +63,8 @@ public class TransService {
     private Map<Integer, CnsService> cnsServiceMap;
     @Autowired
     private KeyStoreService keyStoreService;
+    @Autowired
+    private Map<String, String> cnsMap;
 
 
     /**
@@ -71,7 +76,7 @@ public class TransService {
 
         boolean ifExisted;
         // Check if contractAbi existed
-        if (req.getContractAddress() == null) {
+        if (req.getVersion() != null) {
             ifExisted = ContractAbiUtil
                 .ifContractAbiExisted(req.getContractName(), req.getVersion());
         } else {
@@ -96,8 +101,18 @@ public class TransService {
      * @param req request
      */
     public void checkAndSaveAbiFromCns(ReqTransHandle req) throws Exception {
-        List<CnsInfo> cnsInfoList = cnsServiceMap.get(req.getGroupId())
-            .queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
+        List<CnsInfo> cnsInfoList = null;
+         CnsService cnsService = cnsServiceMap.get(req.getGroupId());
+         if(cnsService==null) {
+             throw new FrontException(GROUPID_NOT_EXIST);
+         }
+        if(req.getVersion()!=null) {
+             cnsInfoList = cnsService
+                    .queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
+        }
+        else {
+            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),req.getContractAddress());
+        }
         // transaction request
         log.info("cnsinfo" + cnsInfoList.get(0).getAddress());
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
@@ -159,13 +174,21 @@ public class TransService {
         // contract load
         CommonContract commonContract;
         Web3j web3j = web3jMap.get(groupId);
-        if (req.getContractAddress() == null) {
-            commonContract = CommonContract
-                .loadByName(contractName + Constants.SYMPOL + version, web3j,
+        if(web3j == null ) {
+            new FrontException(GROUPID_NOT_EXIST);
+        }
+        if(address == null ) {
+            address = cnsMap.get(contractName+":"+version);
+        }
+
+        if (address != null) {
+            commonContract = CommonContract.load(address, web3j,
                     credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+
         } else {
-            commonContract = CommonContract.load(req.getContractAddress(), web3j,
-                credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+            commonContract = CommonContract
+                    .loadByName(contractName + Constants.SYMPOL + version, web3j,
+                            credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
         }
         // request
         Function function = new Function(funcName, finalInputs, finalOutputs);
@@ -193,9 +216,10 @@ public class TransService {
                 result = ethCallResultParse(funOutputTypes, typeList);
             }
             return result;
-        } catch (IOException e) {
-            log.error("execCall failed.");
-            throw new FrontException(ConstantCode.TRANSACTION_QUERY_FAILED);
+        } catch (IOException | ContractCallException e) {
+            log.error("execCall failed.", e);
+            throw new FrontException(ConstantCode.TRANSACTION_QUERY_FAILED.getCode(),
+                e.getMessage());
         }
     }
 
@@ -211,8 +235,9 @@ public class TransService {
         try {
             transactionReceipt = commonContract.execTransaction(function);
         } catch (IOException | TransactionException | ContractCallException e) {
-            log.error("execTransaction failed.");
-            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),e.getMessage());
+            log.error("execTransaction failed.", e);
+            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
+                e.getMessage());
         }
         return transactionReceipt;
     }
