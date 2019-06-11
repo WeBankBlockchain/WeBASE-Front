@@ -123,9 +123,15 @@ export default {
                         trigger: "blur"
                     },
                     {
-                        pattern: /^\S.*\S*$/g,
-                        message: "开头不能是空格",
+                        pattern: /^[A-za-z0-9]+$/,
+                        message: "只能是数字或者字母组成",
                         trigger: "blur"
+                    },
+                    {
+                        message: "长度在 3 到 32 个字符",
+                        trigger: "blur",
+                        min: 3,
+                        max:32
                     }
                 ]
             },
