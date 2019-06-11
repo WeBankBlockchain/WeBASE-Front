@@ -41,7 +41,7 @@ public interface ConstantCode {
     RetCode IN_FUNCPARAM_ERROR = RetCode.mark(201011, "contract funcParam is error");
     RetCode BLOCK_NUMBER_ERROR = RetCode.mark(201012, "requst blockNumber is greater than latest");
     RetCode ABI_GET_ERROR = RetCode.mark(201013, "get abi from chain error");
-    RetCode CONTRACT_DEPLOY_ERROR = RetCode.mark(201014, "contract deployByManager error");
+    RetCode CONTRACT_DEPLOY_ERROR = RetCode.mark(201014, "contract deploy error");
     RetCode PRIVATEKEY_IS_NULL = RetCode.mark(201015, "user's privateKey is null");
     RetCode FILE_IS_NOT_EXIST = RetCode.mark(201016, "file is not exist");
     RetCode GET_NODE_CONFIG_FAILE = RetCode.mark(201017, "failed to get node config");

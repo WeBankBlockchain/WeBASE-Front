@@ -147,13 +147,13 @@ public class ContractService {
     }
 
     /**
-     * case deployByManager type.
+     * case deploy type.
      */
     public String caseDeploy(ReqDeploy req) throws Exception {
         if (Objects.nonNull(req.getContractId())) {
             return deployLocalContract(req);
         } else {
-            return deployByManager(req);
+            return deploy(req);
         }
     }
 
@@ -161,8 +161,8 @@ public class ContractService {
         //check contract status
         Contract contract = verifyContractNotDeploy(req.getContractId(), req.getGroupId());
 
-        //deployByManager
-        String contractAddress = deployByManager(req);
+        //deploy
+        String contractAddress = deploy(req);
         if (StringUtils.isNotBlank(contractAddress)) {
             //save address
             BeanUtils.copyProperties(req, contract);
@@ -176,9 +176,9 @@ public class ContractService {
     }
 
     /**
-     * contract deployByManager.
+     * contract deploy.
      */
-    public String deployByManager(ReqDeploy req) throws Exception {
+    public String deploy(ReqDeploy req) throws Exception {
         String contractName = req.getContractName();
         String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
@@ -191,7 +191,7 @@ public class ContractService {
 
         // get privateKey
         Credentials credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
-        // contract deployByManager
+        // contract deploy
         String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
 
@@ -204,7 +204,7 @@ public class ContractService {
             cnsServiceMap.get(groupId).registerCns(contractName, contractAddress, contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName+":"+contractAddress, contractAddress);
         }
-        log.info("success deployByManager. contractAddress:{}", contractAddress);
+        log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }
 
@@ -221,9 +221,9 @@ public class ContractService {
             if (funcInputTypes.size() == params.size()) {
                 List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
                 encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deployByManager encodedConstructor:{}", encodedConstructor);
+                log.info("deploy encodedConstructor:{}", encodedConstructor);
             } else {
-                log.warn("deployByManager fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
                 throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
             }
         }
@@ -241,9 +241,9 @@ public class ContractService {
             if (funcInputTypes.size() == params.size()) {
                 List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
                 encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deployByManager encodedConstructor:{}", encodedConstructor);
+                log.info("deploy encodedConstructor:{}", encodedConstructor);
             } else {
-                log.warn("deployByManager fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
                 throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
             }
         }
@@ -269,10 +269,10 @@ public class ContractService {
             commonContract = CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
                     Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
         } catch (Exception e) {
-            log.error("commonContract deployByManager failed.", e);
+            log.error("commonContract deploy failed.", e);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
-        log.info("commonContract deployByManager success. contractAddress:{}", commonContract.getContractAddress());
+        log.info("commonContract deploy success. contractAddress:{}", commonContract.getContractAddress());
         return commonContract.getContractAddress();
 
     }
@@ -380,7 +380,7 @@ public class ContractService {
      * update contract.
      */
     private Contract updateContract(ReqContractSave contractReq) {
-        //check not deployByManager
+        //check not deploy
         Contract contract = verifyContractNotDeploy(contractReq.getContractId(),
             contractReq.getGroupId());
         //check contractName
