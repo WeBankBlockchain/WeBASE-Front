@@ -1,0 +1,88 @@
+/*
+ * Copyright 2014-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+.search-part{
+    
+}
+.search-part > span {
+    color: #36393d;
+}
+.dashed-line{
+    /* height: 1px; */
+    /* border: 1px dashed #9da2ab; */
+}
+.sure-btn{
+    width: 270px;
+	height: 40px;
+	border-width: 0px;
+	border-radius: 3px; 
+	background: #1E90FF;
+	cursor: pointer; 
+	outline: none;
+	color: white;
+	font-size: 17px;
+}
+.sure-btn:hover {
+	background: #5599FF;
+}
+.select-32 {
+
+}
+.copy-error-info {
+    color: #2956a3;
+    cursor: context-menu;
+}
+.search-part-label{
+    display: inline;
+}
+.search-part-label1{
+    display: inline;
+}
+.search-part-label-title{
+    margin-left:50px;
+    margin-right:5px
+}
+.search-part-label-title1{
+    margin-left:52px;
+}
+@media only screen and (max-width: 1200px){
+
+    .search-part-label1{
+        display: block;
+        padding: 5px 0;
+    } 
+    .search-part-label-title1{
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+@media only screen and (max-width: 1120px){
+    .search-part-label1{
+        display: block;
+        padding: 5px 0;
+    } 
+    .search-part-label-title1{
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .search-part-label{
+        display: block;
+        padding: 5px 0;
+    } 
+    .search-part-label-title{
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
