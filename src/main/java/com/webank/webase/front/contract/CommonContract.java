@@ -69,7 +69,7 @@ public final class CommonContract extends Contract {
                 contractBin, encodedConstructor, initialWeiValue);
     }
 
-    // public static Future<CommonContract> deployByManager(Web3j web3j, TransactionManager
+    // public static Future<CommonContract> deploy(Web3j web3j, TransactionManager
     // transactionManager, BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue) {
     // return deployAsync(CommonContract.class, web3j, transactionManager, gasPrice, gasLimit,
     // BINARY, "", initialWeiValue);
