@@ -51,8 +51,9 @@ public class KeyStoreService {
     @Autowired
     RestTemplate restTemplate;
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
+    @Autowired
+    KeystoreRepository keystoreRepository;
 
-    public static HashMap<String, String> keyMap = new HashMap();
 
     /**
      * createPrivateKey.
@@ -103,14 +104,13 @@ public class KeyStoreService {
         keyStoreInfo.setPrivateKey(privateKey);
         keyStoreInfo.setAddress(address);
 
-        keyMap.put(address, privateKey);
+        String realPrivateKey = privateKey;
+        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
+        keystoreRepository.save(keyStoreInfo);
 
-        if (useAes) {
-            keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(keyStoreInfo.getPrivateKey()));
-        } else {
-            keyStoreInfo.setPrivateKey(privateKey);
+        if (!useAes) {
+            keyStoreInfo.setPrivateKey(realPrivateKey);
         }
-        log.info("keyPair2KeyStoreInfo=======================keyMap:{}", JSON.toJSONString(keyMap));
         return keyStoreInfo;
     }
 
@@ -134,10 +134,11 @@ public class KeyStoreService {
      * @param user userId or userAddress.
      */
     public String getPrivateKey(String user, boolean useAes) {
-        log.info("getPrivateKey=======================keyMap:{}", JSON.toJSONString(keyMap));
-        if (KeyStoreService.keyMap != null && KeyStoreService.keyMap.get(user) != null) {
+        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByAddress(user);
+
+        if (keyStoreInfoLocal != null) {
             //get privateKey by address
-            return KeyStoreService.keyMap.get(user);
+            return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
         }
 
         //get privateKey by userId
@@ -165,5 +166,8 @@ public class KeyStoreService {
 
         return keyStoreInfo.getPrivateKey();
     }
+
+
+
 }
 
