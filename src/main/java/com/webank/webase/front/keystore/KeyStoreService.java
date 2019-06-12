@@ -104,12 +104,12 @@ public class KeyStoreService {
         keyStoreInfo.setPrivateKey(privateKey);
         keyStoreInfo.setAddress(address);
 
+        String realPrivateKey = privateKey;
+        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
         keystoreRepository.save(keyStoreInfo);
 
-        if (useAes) {
-            keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(keyStoreInfo.getPrivateKey()));
-        } else {
-            keyStoreInfo.setPrivateKey(privateKey);
+        if (!useAes) {
+            keyStoreInfo.setPrivateKey(realPrivateKey);
         }
         return keyStoreInfo;
     }
@@ -138,7 +138,7 @@ public class KeyStoreService {
 
         if (keyStoreInfoLocal != null) {
             //get privateKey by address
-            return keyStoreInfoLocal.getPrivateKey();
+            return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
         }
 
         //get privateKey by userId
