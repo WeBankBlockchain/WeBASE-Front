@@ -23,12 +23,13 @@ public class KeyStoreController extends BaseController {
     @ApiOperation(value = "get PrivateKey", notes = "get PrivateKey")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "useAes", value = "Is encrypting the private key", dataType = "Boolean"),
-        @ApiImplicitParam(name = "userName", value = "new userName", dataType = "String")
+        @ApiImplicitParam(name = "groupId", value = "user groupId", required = true, dataType = "Long"),
+        @ApiImplicitParam(name = "userName", value = "new userName", required = true, dataType = "String")
     })
     @RequestMapping(method = RequestMethod.GET)
-    public KeyStoreInfo getPrivateKey(boolean useAes, String userName) {
-      //  return keyStoreService.createPrivateKey(useAes);
-        return keyStoreService.newUser(useAes,userName);
+    public KeyStoreInfo getPrivateKey(boolean useAes, Integer groupId, String userName) {
+        //  return keyStoreService.createPrivateKey(useAes);
+        return keyStoreService.newUser(useAes, groupId, userName);
     }
 
   /*  @ApiOperation(value = "new user", notes = "new user")

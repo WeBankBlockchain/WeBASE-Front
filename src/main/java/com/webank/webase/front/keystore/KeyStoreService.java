@@ -54,8 +54,8 @@ public class KeyStoreService {
     @Autowired
     private KeyServerService keyServerService;
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
-
-    public static HashMap<String, String> keyMap = new HashMap();
+    @Autowired
+    KeystoreRepository keystoreRepository;
     private static final String KEY_SERVER_NAME = "webase-sign";
 
     /**
@@ -74,9 +74,9 @@ public class KeyStoreService {
     /**
      * new user.
      */
-    public KeyStoreInfo newUser(boolean useAes, String userName) {
+    public KeyStoreInfo newUser(boolean useAes, int groupId, String userName) {
         if (constants.getKeyServerUrl().contains(KEY_SERVER_NAME)) {
-            ReqNewUserDto param = new ReqNewUserDto(userName);
+            ReqNewUserDto param = new ReqNewUserDto(groupId, userName);
             final KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
             RspUserInfoDto rspUser = keyServerService.newUser(param);
             Optional.ofNullable(rspUser).ifPresent(u -> BeanUtils.copyProperties(u, keyStoreInfo));
@@ -125,14 +125,13 @@ public class KeyStoreService {
         keyStoreInfo.setPrivateKey(privateKey);
         keyStoreInfo.setAddress(address);
 
-        keyMap.put(address, privateKey);
+        String realPrivateKey = privateKey;
+        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
+        keystoreRepository.save(keyStoreInfo);
 
-        if (useAes) {
-            keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(keyStoreInfo.getPrivateKey()));
-        } else {
-            keyStoreInfo.setPrivateKey(privateKey);
+        if (!useAes) {
+            keyStoreInfo.setPrivateKey(realPrivateKey);
         }
-        log.info("keyPair2KeyStoreInfo=======================keyMap:{}", JSON.toJSONString(keyMap));
         return keyStoreInfo;
     }
 
@@ -140,10 +139,13 @@ public class KeyStoreService {
     /**
      * get credential.
      */
-    public Credentials getCredentials(String user, boolean useAes) throws FrontException {
-        String privateKey = Optional.ofNullable(getPrivateKey(user, useAes)).orElse(null);
+    public Credentials getCredentials(int groupId, String userAddress, boolean useAes)
+        throws FrontException {
+        String privateKey = Optional.ofNullable(getPrivateKey(groupId, userAddress, useAes))
+            .orElse(null);
         if (StringUtils.isBlank(privateKey)) {
-            log.warn("fail getCredentials. user:{} privateKey is null", user);
+            log.warn("fail getCredentials. groupId:{} userAddress:{} privateKey is null", groupId,
+                userAddress);
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
         }
         return Credentials.create(privateKey);
@@ -152,24 +154,22 @@ public class KeyStoreService {
 
     /**
      * get PrivateKey.
-     *
-     * @param user userId or userAddress.
      */
-    public String getPrivateKey(String user, boolean useAes) {
-        log.info("getPrivateKey=======================keyMap:{}", JSON.toJSONString(keyMap));
-        if (KeyStoreService.keyMap != null && KeyStoreService.keyMap.get(user) != null) {
+    public String getPrivateKey(int groupId, String userAddress, boolean useAes) {
+        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByAddress(userAddress);
+
+        if (keyStoreInfoLocal != null) {
             //get privateKey by address
-            return keyMap.get(user);
+            return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
         }
 
         //get privateKey by user
-        RspUserInfoDto rspUser = keyServerService.getUser(user);
+        RspUserInfoDto rspUser = keyServerService.getUser(groupId,userAddress);
         String privateKey = Optional.ofNullable(rspUser).map(u -> u.getPrivateKey())
             .orElseThrow(() -> new FrontException(ConstantCode.PRIVATEKEY_IS_NULL));
 
-        keyMap.put(user, privateKey);
-
-        if (useAes && StringUtils.isNotBlank(privateKey)&& !constants.getKeyServerUrl().contains(KEY_SERVER_NAME)) {
+        if (useAes && StringUtils.isNotBlank(privateKey) && !constants.getKeyServerUrl()
+            .contains(KEY_SERVER_NAME)) {
             return aesUtils.aesDecrypt(privateKey);
         }
 

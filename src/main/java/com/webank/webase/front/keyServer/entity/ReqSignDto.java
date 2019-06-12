@@ -23,6 +23,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class ReqSignDto {
 
-    private String userName;
+    private Integer groupId;
+    private String address;
     private String encodedDataStr;
 }

@@ -47,8 +47,8 @@ public class KeyServerService {
     /**
      * get userInfo.
      */
-    public RspUserInfoDto getUser(String userName) {
-        String uri = String.format(KeyServerRestTools.URI_GET_USER, userName);
+    public RspUserInfoDto getUser(int groupId, String userAddress) {
+        String uri = String.format(KeyServerRestTools.URI_GET_USER, groupId, userAddress);
         return restTools.getForJaveBean(uri, RspUserInfoDto.class);
     }
 
@@ -69,9 +69,9 @@ public class KeyServerService {
     /**
      * sign by cloud.
      */
-    private String cloudSign(byte[] encodedTransaction, String userName) {
+    private String cloudSign(byte[] encodedTransaction, int groupId, String address) {
         String encodedDataStr = new String(encodedTransaction);
-        ReqSignDto reqSignDto = new ReqSignDto(userName, encodedDataStr);
+        ReqSignDto reqSignDto = new ReqSignDto(groupId, address, encodedDataStr);
         String uri = KeyServerRestTools.URI_SIGN;
         //sign by key server
         RspSignDto signRsp = restTools.postForJaveBean(uri, reqSignDto, RspSignDto.class);
