@@ -1,9 +1,13 @@
 package com.webank.webase.front.keystore;
 
-import lombok.Data;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.performance.Performance;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.transaction.Transactional;
+import java.util.List;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -20,11 +24,7 @@ import javax.persistence.Id;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Data
-@Entity
-public class KeyStoreInfo {
-    private String publicKey;
-    private String privateKey;
-    @Id
-    private String address;
+public interface KeystoreRepository extends CrudRepository<KeyStoreInfo, String> {
+
+    public KeyStoreInfo findByAddress(String address);
 }
