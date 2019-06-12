@@ -28,12 +28,16 @@
                 </div>
             </div>
             <div class="search-table">
-                <el-table :data="privateKeyList" tooltip-effect="light" v-loading="loading">
+                <el-table :data="privateKeyList" tooltip-effect="dark" v-loading="loading">
                     <el-table-column v-for="head in privateKeyHead" :label="head.name" :key="head.enName" show-overflow-tooltip :width="head.tdWidth" align="center">
                         <template slot-scope="scope">
                             <template v-if="head.enName!='operate'">
                                 <span v-if="head.enName ==='address'">
                                     <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row[head.enName])" title="复制地址"></i>
+                                    {{scope.row[head.enName]}}
+                                </span>
+                                <span v-if="head.enName ==='publicKey'">
+                                    <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row[head.enName])" title="复制公钥"></i>
                                     {{scope.row[head.enName]}}
                                 </span>
                                 <span v-else>{{scope.row[head.enName]}}</span>
@@ -50,7 +54,7 @@
                 </el-pagination> -->
             </div>
         </div>
-        <el-dialog :visible.sync="creatUserNameVisible" title="添加用户名" width="400px" class="dialog-wrapper" center v-if="creatUserNameVisible" @close="closeCallback">
+        <el-dialog :visible.sync="creatUserNameVisible" title="添加用户名"  width="400px" class="dialog-wrapper" center v-if="creatUserNameVisible" @close="closeCallback">
             <el-form ref="userForm" :rules="rules" :model="userForm">
                 <el-form-item label="" prop="userName">
                     <el-input v-model="userForm.userName" placeholder="请输入用户名"></el-input>
@@ -61,16 +65,13 @@
                 <el-button type="primary" @click="sureUserName('userForm')">确 定</el-button>
             </div>
         </el-dialog>
-        <el-dialog :visible.sync="creatUserVisible" :title="titleText" width="400px" :append-to-body="true" class="dialog-wrapper" v-if='creatUserVisible' center>
-            <v-creatUser @creatUserSuccess="creatUserSuccess" @creatUserFailed="creatUserFailed" ref="creatUser" :userForm="userForm"></v-creatUser>
-        </el-dialog>
+        
     </div>
 </template>
 
 
 <script>
 import contentHead from "@/components/contentHead";
-import creatUser from "./components/creatUser";
 import { queryCreatePrivateKey, queryImportPrivateKey } from "@/util/api";
 import { unique } from "@/util/util";
 import errcode from "@/util/errcode";
@@ -79,8 +80,7 @@ const FileSaver = require("file-saver");
 export default {
     name: "RivateKeyManagement",
     components: {
-        "v-contentHead": contentHead,
-        "v-creatUser": creatUser
+        "v-contentHead": contentHead
     },
     data() {
         return {
@@ -88,7 +88,6 @@ export default {
                 userName: "",
             },
             loading: false,
-            creatUserVisible: false,
             creatUserNameVisible: false,
             privateKeyList: localStorage.getItem("privateKeyList") ? JSON.parse(localStorage.getItem("privateKeyList")) : [],
             privateKeyHead: [
@@ -123,29 +122,31 @@ export default {
                         trigger: "blur"
                     },
                     {
+                        // pattern: /^\S.*\S*$/g,
                         pattern: /^[A-za-z0-9]+$/,
                         message: "只能是数字或者字母组成",
-                        trigger: "blur"
+                        trigger: "blur",
+                        
                     },
                     {
-                        message: "长度在 3 到 32 个字符",
                         trigger: "blur",
                         min: 3,
-                        max:32
+                        max: 32,
+                        message: "长度在 3 到 32 个字符",
                     }
                 ]
             },
             titleText: ''
         };
     },
-    mounted() {
+    mounted() { 
     },
     methods: {
         creatUserBtn() {
             this.titleText = '';
             this.creatUserNameVisible = true;
         },
-        initUserName() {
+        initUserName () {
             this.userForm = { userName: "" }
         },
         closeCallback() {
@@ -159,12 +160,35 @@ export default {
             this.$refs[formName].validate(valid => {
                 if (valid) {
                     this.creatUserNameVisible = false;
-                    this.creatUserVisible = true;
+                    this.addUser()
                 } else {
                     return false;
                 }
             });
 
+        },
+        addUser: function () {
+            queryCreatePrivateKey({}, { useAes: false, userName: this.userForm.userName })
+                .then(res => {
+                    const { data, status } = res;
+                    if (status === 200) {
+                        Object.assign(data, this.userForm);
+                        this.privateKeyList.unshift(data);
+                        this.privateKeyList = unique(this.privateKeyList, 'privateKey');
+                        localStorage.setItem("privateKeyList", JSON.stringify(this.privateKeyList));
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: data.errorMessage || "系统错误"
+                        });
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: "系统错误"
+                    });
+                });
         },
         copyPubilcKey(val) {
             if (!val) {
@@ -184,14 +208,6 @@ export default {
                     });
                 });
             }
-        },
-        creatUserSuccess(val) {
-            this.titleText = '新建成功';
-            this.privateKeyList = val;
-            this.initUserName();
-        },
-        creatUserFailed() {
-            this.titleText = '新建失败';
         },
         exportFile(params) {
             let str = JSON.stringify(params);
@@ -224,7 +240,7 @@ export default {
                                 _this.privateKeyList.unshift(_this.uploadMap);
                                 _this.privateKeyList = unique(_this.privateKeyList, 'privateKey')
                                 localStorage.setItem("privateKeyList", JSON.stringify(_this.privateKeyList));
-
+                                
                                 _this.$message({
                                     type: 'success',
                                     message: '导入成功'

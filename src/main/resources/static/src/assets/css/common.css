@@ -385,6 +385,16 @@ td {
 .el-table__fixed-right::before, .el-table__fixed::before{
     background-color: #20293c !important;
 }
+.el-table, .el-table__expanded-cell {
+    background-color:#2f3b52 !important;
+}
+.el-table__body tr:hover>td{
+    background-color: #20293c !important;
+}
+ 
+.el-table__body tr.current-row>td{
+    background-color: #20293c !important;
+}
 /** el-menu*/
 .el-submenu__title {
     text-align: left;
