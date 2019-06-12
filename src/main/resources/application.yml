@@ -10,7 +10,7 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     database: H2
     openInView: false
-    show_sql: true
+    show_sql: false
     generate-ddl: true
     hibernate:
       ddl-auto: update
