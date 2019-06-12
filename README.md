@@ -45,6 +45,9 @@ git clone -b dev-0.8 https://github.com/WeBankFinTech/webase-front.git
 ## 4.3 修改配置文件
  然后修改application.yml配置文件。
 ```
+spring:
+  datasource:
+    url: jdbc:h2:file:~/.h2/front_db;DB_CLOSE_ON_EXIT=FALSE   //默认H2库为~/.h2/front_db,可按需更改
 constant:  
   transMaxWait: 30            //交易等待时间
   monitorDisk: /home          //要监控的硬盘目录 
