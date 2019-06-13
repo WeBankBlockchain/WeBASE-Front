@@ -15,7 +15,7 @@
  */
 <template>
     <div class="rivate-key-management-wrapper">
-        <v-contentHead :headTitle="'私钥管理'"></v-contentHead>
+        <v-contentHead :headTitle="'私钥管理'" @changeGroup="changeGroup"></v-contentHead>
         <div class="module-wrapper" style="padding-bottom: 20px;">
             <div class="search-part">
                 <div style="display: flex;">
@@ -77,6 +77,7 @@ import { unique } from "@/util/util";
 import errcode from "@/util/errcode";
 let Base64 = require("js-base64").Base64;
 const FileSaver = require("file-saver");
+import Bus from "@/bus";
 export default {
     name: "RivateKeyManagement",
     components: {
@@ -136,14 +137,22 @@ export default {
                     }
                 ]
             },
-            titleText: ''
+            groupId: localStorage.getItem("groupId") || null,
         };
     },
+    beforeDestroy: function(){
+        Bus.$off("changeGroup")
+    },
     mounted() { 
+        Bus.$on("changeGroup",data => {
+            this.changeGroup(data)
+        })
     },
     methods: {
+        changeGroup(val) {
+            this.groupId = val;
+        },
         creatUserBtn() {
-            this.titleText = '';
             this.creatUserNameVisible = true;
         },
         initUserName () {
@@ -168,7 +177,7 @@ export default {
 
         },
         addUser: function () {
-            queryCreatePrivateKey({}, { useAes: false, userName: this.userForm.userName })
+            queryCreatePrivateKey({}, { useAes: false, userName: this.userForm.userName, groupId: this.groupId })
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
@@ -176,6 +185,10 @@ export default {
                         this.privateKeyList.unshift(data);
                         this.privateKeyList = unique(this.privateKeyList, 'privateKey');
                         localStorage.setItem("privateKeyList", JSON.stringify(this.privateKeyList));
+                        this.$message({
+                            type: "success",
+                            message: "新增成功"
+                        });
                     } else {
                         this.$message({
                             type: "error",
