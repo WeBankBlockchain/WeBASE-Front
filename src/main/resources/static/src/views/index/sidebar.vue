@@ -28,11 +28,11 @@
             <div class="mini-sidebar-contract-icon" v-if="!menuShowC" style="padding-bottom:40px">
                 <i class="el-icon-caret-right font-color-aeb1b5" @click="hideMune(false)" style="font-size: 18px;"></i>
             </div>
-            <div class='sidebar-check-group'>
+            <div class='sidebar-check-group' :style="{'padding-left': menuShowC ? '': '4px','font-size': menuShowC?'':'9px'}">
                 <span class="group-content" @click="groupVisible = !groupVisible">
-                    群组：{{groupName}}
-                    <ul v-show="groupVisible">
-                        <li v-for=" item in groupList" :key="item.group" @click="changeGroup(item)">{{item.groupName}}</li>
+                    {{groupName}}
+                    <ul v-show="groupVisible" :style="{'left': menuShowC ? '': '0'}">
+                        <li v-for=" item in groupList" :key="item.group" @click="changeGroup(item)" :style="{'padding': menuShowC ? '': '0 5px'}">{{item.groupName}}</li>
                     </ul>
                 </span>
                 <i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom','select-network']"></i>
@@ -61,7 +61,7 @@
                     </el-menu-item>
                 </template>
             </el-menu>
-            <div class="sidebar-version" :class="{'buttom-none':buttomNone}">
+            <div :class="['sidebar-version',{'buttom-none':buttomNone,'font-12': !menuShowC, 'font-16': menuShowC}]">
                 {{version}}
             </div>
         </div>
@@ -255,7 +255,7 @@ export default {
     padding: 20px 0;
     text-align: center;
     color: #92a1b3;
-    font-size: 16px;
+    /* font-size: 16px; */
     border-top: 2px solid #20293c;
     background-color: #242e42;
     z-index: 999;
@@ -290,9 +290,10 @@ export default {
 }
 .sidebar-check-group{
     color: #92a1b3;
-    padding: 20px 0 20px 33px;
+    padding: 20px 0 20px 0px;
     border-top: 2px solid #20293c;
     border-bottom: 2px solid #20293c;
+    text-align: center;
 }
 .select-network {
     cursor: default;
