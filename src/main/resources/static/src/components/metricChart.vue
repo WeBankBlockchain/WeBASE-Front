@@ -13,12 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- <style>
- p{
-     color: #505765
- }
- </style>
- 
+
 <template>
     <div style="position: relative">
         <div :id="chartId" style="height: 350px; margin: 0 auto;"></div>
@@ -137,19 +132,19 @@ export default {
                             }else if(data[0]['data']===0&&data[1]['data']!=0){
                                 str = `
                                 <span>${data[0]['name']}</span><br/>
-                                <span>${data[0]['seriesName']}:未采集到数据</span><br/>
+                                <span>${data[0]['seriesName']}:未采集到数据或者数据为0</span><br/>
                                 <span>${data[1]['seriesName']}:${data[1]['data']}</span><br/>
                                 `
                             }else if(data[0]['data']!=0&&data[1]['data']===0){
                                 str = `
                                 <span>${data[0]['name']}</span><br/>
                                 <span>${data[0]['seriesName']}:${data[0]['data']}</span><br/>
-                                <span>${data[1]['seriesName']}:未采集到数据</span><br/>
+                                <span>${data[1]['seriesName']}:未采集到数据或者数据为0</span><br/>
                                 `
                             }else {
                                 str = `
                                 <span>${data[0]['name']}</span><br/>
-                                <span>未采集到数据</span><br/>
+                                <span>未采集到数据或者数据为0</span><br/>
                                 `
                             }
                         }else if(data.length === 1) {
@@ -162,7 +157,7 @@ export default {
                             }else {
                                 str = `
                                 <span>${data[0]['name']}</span><br/>
-                                <span>${data[0]['seriesName']}:未采集到数据</span><br/>
+                                <span>${data[0]['seriesName']}:未采集到数据或数据为0</span><br/>
                                 `
                             }
                         }
