@@ -51,7 +51,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="createTime" label="创建时间" show-overflow-tooltip width="150" align="center"></el-table-column>
-                    <el-table-column fixed="right" label="操作" width="100">
+                    <el-table-column label="操作" width="100">
                         <template slot-scope="scope">
                             <el-button :disabled="!scope.row.contractAddress" :class="{'grayColor': !scope.row.contractAddress}" @click="send(scope.row)" type="text" size="small">发送交易</el-button>
                         </template>
