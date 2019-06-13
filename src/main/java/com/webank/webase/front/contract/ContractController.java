@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -51,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.webank.webase.front.base.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
 
 
 /**
