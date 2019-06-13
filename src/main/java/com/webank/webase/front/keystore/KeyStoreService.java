@@ -19,10 +19,7 @@ import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.keyServer.KeyServerRestTools;
-import com.webank.webase.front.keyServer.KeyServerService;
-import com.webank.webase.front.keyServer.entity.ReqNewUserDto;
-import com.webank.webase.front.keyServer.entity.RspUserInfoDto;
+import com.webank.webase.front.keystore.KeyStoreInfo;
 import com.webank.webase.front.util.CommonUtils;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -33,11 +30,11 @@ import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import org.springframework.web.client.RestTemplate;
 
 
 /**
@@ -52,11 +49,11 @@ public class KeyStoreService {
     @Autowired
     Constants constants;
     @Autowired
-    private KeyServerService keyServerService;
+    RestTemplate restTemplate;
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
+    @Autowired
+    KeystoreRepository keystoreRepository;
 
-    public static HashMap<String, String> keyMap = new HashMap();
-    private static final String KEY_SERVER_NAME = "webase-sign";
 
     /**
      * createPrivateKey.
@@ -69,25 +66,6 @@ public class KeyStoreService {
             log.error("fail createPrivateKey.", e);
             throw new FrontException("create keyInfo failed");
         }
-    }
-
-    /**
-     * new user.
-     */
-    public KeyStoreInfo newUser(boolean useAes, String userName) {
-        if (constants.getKeyServerUrl().contains(KEY_SERVER_NAME)) {
-            ReqNewUserDto param = new ReqNewUserDto(userName);
-            final KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
-            RspUserInfoDto rspUser = keyServerService.newUser(param);
-            Optional.ofNullable(rspUser).ifPresent(u -> BeanUtils.copyProperties(u, keyStoreInfo));
-            if (useAes) {
-                keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(rspUser.getPrivateKey()));
-            }
-            return keyStoreInfo;
-        } else {
-            return createPrivateKey(useAes);
-        }
-
     }
 
     /**
@@ -115,6 +93,7 @@ public class KeyStoreService {
      * convert ECKeyPair to KeyStoreInfo.
      */
     private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, boolean useAes) {
+
         String publicKey = Numeric
             .toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
         String privateKey = Numeric.toHexStringNoPrefix(keyPair.getPrivateKey());
@@ -125,14 +104,13 @@ public class KeyStoreService {
         keyStoreInfo.setPrivateKey(privateKey);
         keyStoreInfo.setAddress(address);
 
-        keyMap.put(address, privateKey);
+        String realPrivateKey = privateKey;
+        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
+        keystoreRepository.save(keyStoreInfo);
 
-        if (useAes) {
-            keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(keyStoreInfo.getPrivateKey()));
-        } else {
-            keyStoreInfo.setPrivateKey(privateKey);
+        if (!useAes) {
+            keyStoreInfo.setPrivateKey(realPrivateKey);
         }
-        log.info("keyPair2KeyStoreInfo=======================keyMap:{}", JSON.toJSONString(keyMap));
         return keyStoreInfo;
     }
 
@@ -156,24 +134,40 @@ public class KeyStoreService {
      * @param user userId or userAddress.
      */
     public String getPrivateKey(String user, boolean useAes) {
-        log.info("getPrivateKey=======================keyMap:{}", JSON.toJSONString(keyMap));
-        if (KeyStoreService.keyMap != null && KeyStoreService.keyMap.get(user) != null) {
+        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByAddress(user);
+
+        if (keyStoreInfoLocal != null) {
             //get privateKey by address
-            return keyMap.get(user);
+            return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
         }
 
-        //get privateKey by user
-        RspUserInfoDto rspUser = keyServerService.getUser(user);
-        String privateKey = Optional.ofNullable(rspUser).map(u -> u.getPrivateKey())
-            .orElseThrow(() -> new FrontException(ConstantCode.PRIVATEKEY_IS_NULL));
-
-        keyMap.put(user, privateKey);
-
-        if (useAes && StringUtils.isNotBlank(privateKey)&& !constants.getKeyServerUrl().contains(KEY_SERVER_NAME)) {
-            return aesUtils.aesDecrypt(privateKey);
+        //get privateKey by userId
+        KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
+        String[] ipPortArr = constants.getKeyServer().split(",");
+        for (String ipPort : ipPortArr) {
+            try {
+                String url = String.format(Constants.MGR_PRIVATE_KEY_URI, ipPort, user);
+                log.info("getPrivateKey url:{}", url);
+                BaseResponse response = restTemplate.getForObject(url, BaseResponse.class);
+                log.info("getPrivateKey response:{}", JSON.toJSONString(response));
+                if (response.getCode() == 0) {
+                    keyStoreInfo =
+                        CommonUtils.object2JavaBean(response.getData(), KeyStoreInfo.class);
+                    break;
+                }
+            } catch (Exception e) {
+                log.warn("user:{} getPrivateKey from ipPort:{} exception", user, ipPort, e);
+                continue;
+            }
+        }
+        if (useAes) {
+            return aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
         }
 
-        return privateKey;
+        return keyStoreInfo.getPrivateKey();
     }
+
+
+
 }
 

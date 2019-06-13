@@ -2,18 +2,21 @@ package com.webank.webase.front.transaction;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.BaseController;
-import com.webank.webase.front.transaction.entity.ReqTransHandle;
+import com.webank.webase.front.base.exception.FrontException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.webank.webase.front.base.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -57,6 +60,10 @@ public class TransController extends BaseController {
     public Object transHandle(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
         checkParamResult(result);
+        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(reqTransHandle.getContractAddress())) {
+            throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
+        }
+
         return transServiceImpl.transHandle(reqTransHandle);
     }
 }

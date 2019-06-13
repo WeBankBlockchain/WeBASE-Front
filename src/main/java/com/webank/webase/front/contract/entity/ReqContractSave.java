@@ -26,6 +26,7 @@ public class ReqContractSave {
     private Long contractId;
     @NotBlank
     private String contractName;
+    private String version;
     @NotBlank
     private String contractPath;
     private String contractSource;
