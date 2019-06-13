@@ -24,9 +24,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -47,10 +49,9 @@ public class KeyServerRestTools {
 
     private static final int REST_RSP_SUCCESS = 0;
     public static final String URI_NEW_USER = "user/newUser";
-    public static final String URI_GET_USER = "user/userInfo/%1s";
+    public static final String URI_GET_USER = "user/%1d/%2s/userInfo";
     public static final String URI_IMPORT_USER = "user/import";
     public static final String URI_SIGN = "sign";
-
 
     @Autowired
     private RestTemplate restTemplate;
@@ -88,6 +89,7 @@ public class KeyServerRestTools {
         BaseResponse rsp = restTemplateExchange(uri, HttpMethod.POST, param, BaseResponse.class);
         return getResponseData(rsp, clazz);
     }
+
 
     /**
      * build  url of front service.
@@ -140,12 +142,12 @@ public class KeyServerRestTools {
                 ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
                 return response.getBody();
             } catch (ResourceAccessException ex) {
-                log.warn("fail request", ex);
+                log.warn("fail request,url:{}", url, ex);
                 log.info("continue next front");
                 continue;
             } catch (HttpStatusCodeException e) {
                 JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-                log.error("http request fail. error:{}", JSON.toJSONString(error));
+                log.error("http request fail.url:{} error:{}", url, JSON.toJSONString(error));
                 throw new FrontException(error.getInteger("code"), error.getString("errorMessage"));
             }
         }

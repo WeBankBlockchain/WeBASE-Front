@@ -121,7 +121,7 @@ HTTP POST
 | **序号** | **中文**     | **参数名**   | **类型**       | **最大长度** | **必填** | **说明** |
 | -------- | ------------ | ------------ | -------------- | ------------ | -------- | -------- |
 | 1        | 所属群组     | groupId       | int            |            | 是       |          |
-| 2        | 用户编号     | user         | String          |            | 是       | 用户编号或者用户地址 |
+| 2        | 用户地址     | user         | String          |            | 是       | 用户地址address |
 | 3        | 合约名称     | contractName | String         |              | 是       |          |
 | 4        | 合约abi      | abiInfo      | List |              | 是       |          |
 | 5        | 合约bin      | bytecodeBin  | String         |              | 是       |          |
@@ -129,7 +129,7 @@ HTTP POST
 **2）数据格式**
 ```
 {
-"user":700001,
+"user":"0Xdfasdasdf4e234f5sd36234f23",
 "contractName":"HelloWorld",
 "abiInfo": [],
 "bytecodeBin":"",
@@ -469,7 +469,7 @@ HTTP POST
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/privateKey?useAes={useAes}&userName={userName}**
+**http://localhost:8081/webase-front/privateKey?useAes={useAes}&userName={userName}&groupId={groupId}**
 
 ### 调用方法
 
@@ -483,9 +483,10 @@ HTTP GET
 | -------- | ------------ | ------------ | -------------- | ------------ | -------- | -------- |
 | 1        | 是否需要加密私钥 | useAes | boolean      |             | 是        |                      |
 | 2        | 用户名 | userName | String        |             | 是        |   |
+| 3        | 所属机构 | groupId | Integer        |             | 是        |   |
 
 **2）数据格式**
-`http://localhost:8081/webase-front/privateKey?useAes=false&userName=test`
+`http://localhost:8081/webase-front/privateKey?useAes=false&userName=test&groupId=1`
 ### 响应参数
 
 **1）数据格式**
@@ -2042,7 +2043,7 @@ HTTP POST
 
 | **序号** | **中文** | **参数名**   | **类型**       | **最大长度** | **必填** | **说明** |
 | -------- | -------- | ------------ | -------------- | ------------ | -------- | -------- |
-| 1        | 用户编号 | user       | Integer        |            | 是       |   用户编号或者用户名    |
+| 1        | 用户地址 | user       | String        |            | 是       |   用户地址address    |
 | 2        | 合约名称 | contractName | String         |              | 是       |          |
 | 3        | 合约地址 | contractAddress | String         |              | 是       |          |
 | 4        | 方法名   | funcName     | String         |              | 是       |          |
@@ -2054,7 +2055,7 @@ HTTP POST
 ```
 {
 "useAes ":false,
-"user ":700001,
+"user ":"0Xsdfadasdfav23rf21f23adf3bcdf434c2323de",
 "contractName":"HelloWorld",
 "contractAddress":"dasdfav23rf213vbcdvadf3bcdf2fc23rqde",
 "funcName":"set",
@@ -2063,7 +2064,7 @@ HTTP POST
 }
 ```
 示例：curl -l -H "Content-type: application/json" -X POST -d '{"contractName":
-"HelloWorld", "funcName": "set", "funcParam": ["Hi,Welcome!"], "userId": 700001, "useAes": false, "contractAddress":"dasdfav23rf213vbcdvadf3bcdf2fc23rqde","groupId": 1}' http://10.0.0.1:8081/webase-front/trans/handle
+"HelloWorld", "funcName": "set", "funcParam": ["Hi,Welcome!"], "user": "fsdfwesds, "useAes": false, "contractAddress":"dasdfav23rf213vbcdvadf3bcdf2fc23rqde","groupId": 1}' http://10.0.0.1:8081/webase-front/trans/handle
 
 ### 响应参数
 
