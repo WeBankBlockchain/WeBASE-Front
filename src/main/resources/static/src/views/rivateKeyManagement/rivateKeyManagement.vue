@@ -177,7 +177,7 @@ export default {
 
         },
         addUser: function () {
-            queryCreatePrivateKey({}, { useAes: false, userName: this.userForm.userName, groupId: this.groupId })
+            queryCreatePrivateKey({}, { useAes: false, userName: this.userForm.userName })
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
