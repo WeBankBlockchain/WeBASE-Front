@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:~/.h2/db1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:~/.h2/front_db;DB_CLOSE_ON_EXIT=FALSE
     databaseName: db
     driverClassName: org.h2.Driver
     serverName:
@@ -10,7 +10,7 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     database: H2
     openInView: false
-    show_sql: true
+    show_sql: false
     generate-ddl: true
     hibernate:
       ddl-auto: update
@@ -47,8 +47,7 @@ logging:
   config: classpath:log4j2.xml
 
 constant:
-  keyServerUrl: http://%1s/webase-sign/%2s
-  keyServerIpPort: 127.0.0.1:8080
+  keyServer: 10.0.0.1:8080
   transMaxWait: 30
   monitorDisk: /data
   aesKey: EfdsW23D23d3df43

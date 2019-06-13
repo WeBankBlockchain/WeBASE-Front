@@ -24,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -75,6 +74,8 @@ public class ContractService {
 
     @Autowired
     private Map<Integer, Web3j> web3jMap;
+    @Autowired
+    private Map<String, String> cnsMap;
     @Autowired
     private HashMap<Integer, CnsService> cnsServiceMap;
     @Autowired
@@ -184,44 +185,58 @@ public class ContractService {
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
         int groupId = req.getGroupId();
-        // Check if contractAbi existed
-        String uuid = null;
-        if (version == null) {
-            uuid = UUID.randomUUID() + "";
-            version = uuid;
-        }
-        ContractAbiUtil.setContractWithAbi(contractName, version, abiInfos, false);
-        String encodedConstructor = constructorEncoded(contractName, version, params);
+
+        ContractAbiUtil.VersionEvent versionEvent = ContractAbiUtil.getVersionEventFromAbi(contractName,abiInfos);
+        String encodedConstructor = constructorEncoded(contractName, versionEvent,params);
 
         // get privateKey
         Credentials credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
         // contract deploy
-        String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor,
-            credentials);
+        String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
-        if (uuid == null) {
+
+        if (version != null) {
             checkContractAbiExistedAndSave(contractName, version, abiInfos);
-            cnsServiceMap.get(groupId)
-                .registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
+            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
+            cnsMap.put(contractName+":"+version, contractAddress);
         } else {
             checkContractAbiExistedAndSave(contractName, contractAddress, abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress, contractAddress,
-                JSON.toJSONString(abiInfos));
+            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress, contractAddress, JSON.toJSONString(abiInfos));
+            cnsMap.put(contractName+":"+contractAddress, contractAddress);
         }
-
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }
 
 
-    public static String constructorEncoded(String contractName, String version,
-        List<Object> params) throws FrontException {
+    public static String constructorEncodedByContractNameAndVersion(String contractName, String version,
+                                                                    List<Object> params) throws FrontException {
         // Constructor encoded
         String encodedConstructor = "";
         String functionName = contractName;
         // input handle
         List<String> funcInputTypes = ContractAbiUtil
-            .getFuncInputType(contractName, functionName, version);
+                .getFuncInputType(contractName, functionName, version);
+        if (funcInputTypes != null && funcInputTypes.size() > 0) {
+            if (funcInputTypes.size() == params.size()) {
+                List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
+                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
+                log.info("deploy encodedConstructor:{}", encodedConstructor);
+            } else {
+                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+            }
+        }
+        return encodedConstructor;
+    }
+
+    public static String constructorEncoded(String contractName,ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
+        // Constructor encoded
+        String encodedConstructor = "";
+        String functionName = contractName;
+        // input handle
+        List<String> funcInputTypes = versionEvent.getFuncInputs().get(functionName);
+
         if (funcInputTypes != null && funcInputTypes.size() > 0) {
             if (funcInputTypes.size() == params.size()) {
                 List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
@@ -244,20 +259,20 @@ public class ContractService {
         }
     }
 
-    private String deployContract(int groupId, String bytecodeBin, String encodedConstructor,
-        Credentials credentials) throws FrontException {
+    private String deployContract(int groupId, String bytecodeBin, String encodedConstructor, Credentials credentials) throws FrontException {
         CommonContract commonContract = null;
-        try {
             Web3j web3j = web3jMap.get(groupId);
-            commonContract = CommonContract
-                .deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
+            if(web3j == null ) {
+                new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+            }
+         try {
+            commonContract = CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
                     Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
         } catch (Exception e) {
             log.error("commonContract deploy failed.", e);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
-        log.info("commonContract deploy success. contractAddress:{}",
-            commonContract.getContractAddress());
+        log.info("commonContract deploy success. contractAddress:{}", commonContract.getContractAddress());
         return commonContract.getContractAddress();
 
     }

@@ -18,8 +18,6 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -246,49 +244,5 @@ public class CommonUtils {
             log.error("getCurrentIp error.");
         }
         return null;
-    }
-
-
-
-    /**
-     * convert list to url param.
-     */
-    public static String convertUrlParam(List<String> nameList, List<Object> valueList) {
-        if (nameList == null || valueList == null || nameList.size() != valueList.size()) {
-            log.error("fail convertUrlParm. nameList or valuesList is error");
-            return "";
-        }
-        StringBuilder urlParamB = new StringBuilder("");
-        for (int i = 0; i < valueList.size(); i++) {
-            Object value = valueList.get(i);
-            if (value != null) {
-                urlParamB.append("&").append(nameList.get(i)).append("=").append(value);
-            }
-        }
-
-        if (urlParamB.length() == 0) {
-            log.info("fail convertUrlParam. urlParamB length is 0");
-            return "";
-        }
-
-        String urlParam = urlParamB.toString();
-        return urlParam.substring(1);
-
-    }
-
-
-    /**
-     * stringToSignatureData.
-     *
-     * @param signatureData signatureData
-     * @return
-     */
-    public static SignatureData stringToSignatureData(String signatureData) {
-        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
-        byte[] signR = new byte[32];
-        System.arraycopy(byteArr, 1, signR, 0, signR.length);
-        byte[] signS = new byte[32];
-        System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
-        return new SignatureData(byteArr[0], signR, signS);
     }
 }

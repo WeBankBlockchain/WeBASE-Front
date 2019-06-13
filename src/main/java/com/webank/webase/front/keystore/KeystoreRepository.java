@@ -1,8 +1,13 @@
-package com.webank.webase.front.performance.memory;
+package com.webank.webase.front.keystore;
 
-import java.util.List;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.performance.Performance;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+
+import javax.transaction.Transactional;
+import java.util.List;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -19,9 +24,7 @@ import org.springframework.data.repository.CrudRepository;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public interface MemoryRepository extends CrudRepository<Memory, Long> {
+public interface KeystoreRepository extends CrudRepository<KeyStoreInfo, String> {
 
-    @Query(value = "select m from Memory m where m.timestamp between ?1 and ?2")
-    List<Memory> findByTimeBetween(Long startTime, Long endTime);
-
+    public KeyStoreInfo findByAddress(String address);
 }

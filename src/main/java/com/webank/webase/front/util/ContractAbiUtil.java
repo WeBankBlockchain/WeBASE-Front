@@ -134,8 +134,7 @@ public class ContractAbiUtil {
      * @param abiDefinitionList abi info
      */
     public static void setContractWithAbi(String contractName, String version,
-        List<AbiDefinition> abiDefinitionList,
-        boolean ifSaveFile) throws FrontException {
+        List<AbiDefinition> abiDefinitionList, boolean ifSaveFile) throws FrontException {
 
         List<VersionEvent> versionEventList = getAbiVersionList(contractName, version);
         setFunctionFromAbi(contractName, version, abiDefinitionList, versionEventList);
@@ -188,8 +187,49 @@ public class ContractAbiUtil {
 
     }
 
-    private static List<VersionEvent> getAbiVersionList(String contractName, String version)
-        throws FrontException {
+
+    public static VersionEvent getVersionEventFromAbi(String contractName, List<AbiDefinition> AbiDefinitionList) {
+        HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
+        HashMap<String, Boolean> functions = new HashMap<>();
+        HashMap<String, List<String>> funcInputs = new HashMap<>();
+        HashMap<String, List<String>> funcOutputs = new HashMap<>();
+
+        // todo fill with solidity type  only need the type
+        for (AbiDefinition abiDefinition : AbiDefinitionList) {
+
+            if (Constants.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {
+                List<NamedType> inputs = abiDefinition.getInputs();
+                List<String> inputList = new ArrayList<>();
+
+                for (NamedType input : inputs) {
+                    inputList.add(input.getType());
+                }
+                functions.put(contractName, false);
+                funcInputs.put(contractName, inputList);
+            } else if (Constants.TYPE_FUNCTION.equals(abiDefinition.getType())) {
+                List<NamedType> inputs = abiDefinition.getInputs();
+                List<String> inputList = new ArrayList<>();
+                List<NamedType> outputs = abiDefinition.getOutputs();
+                List<String> outputList = new ArrayList<>();
+
+                for (NamedType input : inputs) {
+                    inputList.add(input.getType());
+                }
+                for (NamedType output : outputs) {
+                    outputList.add(output.getType());
+                }
+
+                functions.put(abiDefinition.getName(), abiDefinition.isConstant());
+                funcInputs.put(abiDefinition.getName(), inputList);
+                funcOutputs.put(abiDefinition.getName(), outputList);
+            }
+        }
+
+        return new VersionEvent(null, events, functions, funcInputs, funcOutputs);
+
+    }
+
+    private static List<VersionEvent> getAbiVersionList(String contractName, String version) throws FrontException {
         List<VersionEvent> versionEventList = null;
         if (contractEventMap.containsKey(contractName)) {
             versionEventList = contractEventMap.get(contractName);
@@ -225,6 +265,7 @@ public class ContractAbiUtil {
             //todo
             outputStream.write(JSON.toJSONString(abiDefinitionList).getBytes());
             outputStream.flush();
+            log.info(file.getName()+"file create successfully");
         } catch (IOException e) {
             log.error("saveAbiFile failed.", e);
             throw new FrontException(ConstantCode.ABI_SAVE_ERROR);
