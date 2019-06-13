@@ -113,6 +113,9 @@ public class TransService {
             cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),req.getContractAddress());
         }
         // transaction request
+        if(cnsInfoList==null) {
+            throw new FrontException("can not get cns information from chain!");
+        }
         log.info("cnsinfo" + cnsInfoList.get(0).getAddress());
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
         List abiDefinitionList = objectMapper.readValue(cnsInfoList.get(0).getAbi(),
