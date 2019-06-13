@@ -27,7 +27,8 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "userName", value = "new userName", required = true, dataType = "String")
     })
     @RequestMapping(method = RequestMethod.GET)
-    public KeyStoreInfo getPrivateKey(boolean useAes, Integer groupId, String userName) {
+    public KeyStoreInfo getPrivateKey(@RequestParam boolean useAes, @RequestParam Integer groupId,
+        @RequestParam String userName) {
         //  return keyStoreService.createPrivateKey(useAes);
         return keyStoreService.newUser(useAes, groupId, userName);
     }
