@@ -25,7 +25,7 @@
                 </div>
             </div>
             <div class="search-table">
-                <el-table :data="contractList" tooltip-effect="light" v-loading="loading">
+                <el-table :data="contractList" tooltip-effect="dark" v-loading="loading">
                     <el-table-column prop="contractName" label="合约名称" show-overflow-tooltip width="120" align="center">
                         <template slot-scope="scope">
                             <span style="color: #194ea0;cursor:pointer" @click='open(scope.row)'>{{scope.row.contractName}}</span>
@@ -51,7 +51,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="createTime" label="创建时间" show-overflow-tooltip width="150" align="center"></el-table-column>
-                    <el-table-column fixed="right" label="操作" width="100">
+                    <el-table-column label="操作" width="100">
                         <template slot-scope="scope">
                             <el-button :disabled="!scope.row.contractAddress" :class="{'grayColor': !scope.row.contractAddress}" @click="send(scope.row)" type="text" size="small">发送交易</el-button>
                         </template>
@@ -105,14 +105,14 @@ export default {
             total: 0,
         }
     },
-    beforeDestroy: function(){
+    beforeDestroy: function () {
         Bus.$off("changeGroup")
     },
     mounted: function () {
-        Bus.$on("changeGroup",data => {
+        Bus.$on("changeGroup", data => {
             this.changeGroup()
         })
-        if(localStorage.getItem("groupId")){
+        if (localStorage.getItem("groupId")) {
             this.getContracts()
         }
     },
@@ -133,14 +133,14 @@ export default {
                 if (res.data.code == 0) {
                     this.contractList = res.data.data || [];
                     this.total = res.data.totalCount || 0;
-                }else {
-                        this.$message({
-                            message: errcode.errCode[res.data.code].cn || "系统错误",
-                            type: "error",
-                            duration: 2000
-                        });
-                    }
-                })
+                } else {
+                    this.$message({
+                        message: errcode.errCode[res.data.code].cn || "系统错误",
+                        type: "error",
+                        duration: 2000
+                    });
+                }
+            })
                 .catch(err => {
                     this.$message.error("系统错误");
                 });
@@ -186,6 +186,7 @@ export default {
             this.abiData = null
         },
         search: function () {
+            this.currentPage = 1;
             if (this.contractData && this.contractData.length && this.contractData.length < 20) {
                 this.contractName = this.contractData;
                 this.contractAddress = ""
@@ -228,18 +229,18 @@ export default {
 }
 </script>
 <style scoped>
-.input-with-select>>>.el-input__inner {
+.input-with-select >>> .el-input__inner {
     border-top-left-radius: 20px;
     border-bottom-left-radius: 20px;
     border: 1px solid #eaedf3;
     box-shadow: 0 3px 11px 0 rgba(159, 166, 189, 0.11);
 }
-.input-with-select>>>.el-input-group__append {
+.input-with-select >>> .el-input-group__append {
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
     box-shadow: 0 3px 11px 0 rgba(159, 166, 189, 0.11);
 }
-.input-with-select>>>.el-button {
+.input-with-select >>> .el-button {
     border: 1px solid #1f83e7;
     border-radius: inherit;
     background: #1f83e7;
