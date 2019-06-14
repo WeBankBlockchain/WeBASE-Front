@@ -105,7 +105,7 @@ public class ContractController extends BaseController {
             .body(new InputStreamResource(fileContent.getInputStream()));
     }
 
-
+/*
     @ApiOperation(value = "delete contract abi", notes = "delete contract abi")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "contractName", value = "contractName", required = true, dataType = "String"),
@@ -115,7 +115,7 @@ public class ContractController extends BaseController {
         throws FrontException {
         log.info("deleteAbi start. contractName:{} version:{}", contractName, version);
         return contractService.deleteAbi(contractName, version);
-    }
+    }*/
 
     /**
      * sendAbi.

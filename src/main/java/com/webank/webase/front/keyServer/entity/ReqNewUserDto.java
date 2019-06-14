@@ -22,10 +22,12 @@ import lombok.Data;
 @Data
 public class ReqNewUserDto {
 
+    private Integer groupId;
     private String userName;
     private String description;
 
-    public ReqNewUserDto(String userName) {
+    public ReqNewUserDto(int groupId, String userName) {
+        this.groupId = groupId;
         this.userName = userName;
     }
 }
