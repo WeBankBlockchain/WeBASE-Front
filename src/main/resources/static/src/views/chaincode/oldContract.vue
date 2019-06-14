@@ -25,7 +25,7 @@
                 </div>
             </div>
             <div class="search-table">
-                <el-table :data="contractList" tooltip-effect="light" v-loading="loading">
+                <el-table :data="contractList" tooltip-effect="dark" v-loading="loading">
                     <el-table-column prop="contractName" label="合约名称" show-overflow-tooltip width="120" align="center">
                         <template slot-scope="scope">
                             <span style="color: #194ea0;cursor:pointer" @click='open(scope.row)'>{{scope.row.contractName}}</span>
@@ -186,6 +186,7 @@ export default {
             this.abiData = null
         },
         search: function () {
+            this.currentPage = 1;
             if (this.contractData && this.contractData.length && this.contractData.length < 20) {
                 this.contractName = this.contractData;
                 this.contractAddress = ""
