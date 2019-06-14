@@ -321,9 +321,9 @@ export default {
     height: 46px;
     line-height: 46px;
 }
-.el-menu-vertical-demo>>> .el-icon-arrow-down:before {
+/* .el-menu-vertical-demo>>> .el-icon-arrow-down:before {
     content: "\e60b"
-}
+} */
 .sidebar-content>>>.el-menu--collapse {
     width: 56px;
 }
