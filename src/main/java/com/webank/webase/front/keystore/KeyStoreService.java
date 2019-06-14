@@ -13,17 +13,12 @@
  */
 package com.webank.webase.front.keystore;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.AesUtils;
-import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.keyServer.KeyServerRestTools;
 import com.webank.webase.front.keyServer.KeyServerService;
-import com.webank.webase.front.keyServer.entity.ReqNewUserDto;
 import com.webank.webase.front.keyServer.entity.RspUserInfoDto;
-import com.webank.webase.front.util.CommonUtils;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Optional;
@@ -36,8 +31,6 @@ import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
 
 
 /**
@@ -74,11 +67,10 @@ public class KeyStoreService {
     /**
      * new user.
      */
-    public KeyStoreInfo newUser(boolean useAes, int groupId, String userName) {
+    public KeyStoreInfo newUser(boolean useAes) {
         if (constants.getKeyServerUrl().contains(KEY_SERVER_NAME)) {
-            ReqNewUserDto param = new ReqNewUserDto(groupId, userName);
             final KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
-            RspUserInfoDto rspUser = keyServerService.newUser(param);
+            RspUserInfoDto rspUser = keyServerService.newUser();
             Optional.ofNullable(rspUser).ifPresent(u -> BeanUtils.copyProperties(u, keyStoreInfo));
             if (useAes) {
                 keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(rspUser.getPrivateKey()));
@@ -139,13 +131,12 @@ public class KeyStoreService {
     /**
      * get credential.
      */
-    public Credentials getCredentials(int groupId, String userAddress, boolean useAes)
+    public Credentials getCredentials(String userAddress, boolean useAes)
         throws FrontException {
-        String privateKey = Optional.ofNullable(getPrivateKey(groupId, userAddress, useAes))
+        String privateKey = Optional.ofNullable(getPrivateKey( userAddress, useAes))
             .orElse(null);
         if (StringUtils.isBlank(privateKey)) {
-            log.warn("fail getCredentials. groupId:{} userAddress:{} privateKey is null", groupId,
-                userAddress);
+            log.warn("fail getCredentials. userAddress:{} privateKey is null",userAddress);
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
         }
         return Credentials.create(privateKey);
@@ -155,7 +146,7 @@ public class KeyStoreService {
     /**
      * get PrivateKey.
      */
-    public String getPrivateKey(int groupId, String userAddress, boolean useAes) {
+    public String getPrivateKey(String userAddress, boolean useAes) {
         KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByAddress(userAddress);
 
         if (keyStoreInfoLocal != null) {
@@ -164,7 +155,7 @@ public class KeyStoreService {
         }
 
         //get privateKey by user
-        RspUserInfoDto rspUser = keyServerService.getUser(groupId,userAddress);
+        RspUserInfoDto rspUser = keyServerService.getUser(userAddress);
         String privateKey = Optional.ofNullable(rspUser).map(u -> u.getPrivateKey())
             .orElseThrow(() -> new FrontException(ConstantCode.PRIVATEKEY_IS_NULL));
 
