@@ -152,7 +152,22 @@ let errCode = {
         en: "privateKey decode fail",
         cn: '私钥解码失败'
     },
-
+    "201032": {
+        en: "not found config of keyServer",
+        cn: '找不到keyServer的配置'
+    },
+    "201033": {
+        en: "cloud sign fail",
+        cn: '云标志失败'
+    },
+    "201034": {
+        en: "groupId not exist",
+        cn: 'groupId不存在'
+    },
+    "201035": {
+        en: "version and address cannot all be  null",
+        cn: '版本和地址不能都是null'
+    },
 
     "202000": {
         en: "invalid node info",
