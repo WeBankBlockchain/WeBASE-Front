@@ -155,8 +155,7 @@ public class TransService {
         List<TypeReference<?>> finalOutputs = outputFormat(funOutputTypes);
 
         // get privateKey
-        Credentials credentials = keyStoreService
-            .getCredentials(req.getGroupId(), req.getUser(), req.getUseAes());
+        Credentials credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
 
         // contract load
         CommonContract commonContract;

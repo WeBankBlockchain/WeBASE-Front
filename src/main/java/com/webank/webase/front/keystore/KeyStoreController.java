@@ -1,16 +1,14 @@
 package com.webank.webase.front.keystore;
 
 import com.webank.webase.front.base.BaseController;
-import com.webank.webase.front.base.BaseResponse;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.Optional;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.lang.reflect.Method;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/privateKey")
@@ -22,27 +20,13 @@ public class KeyStoreController extends BaseController {
 
     @ApiOperation(value = "get PrivateKey", notes = "get PrivateKey")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "useAes", value = "Is encrypting the private key", dataType = "Boolean"),
-        @ApiImplicitParam(name = "groupId", value = "user groupId", required = true, dataType = "Long"),
-        @ApiImplicitParam(name = "userName", value = "new userName", required = true, dataType = "String")
+        @ApiImplicitParam(name = "useAes", value = "Is encrypting the private key", dataType = "Boolean")
     })
     @RequestMapping(method = RequestMethod.GET)
-    public KeyStoreInfo getPrivateKey(@RequestParam boolean useAes, @RequestParam Integer groupId,
-        @RequestParam String userName) {
+    public KeyStoreInfo getPrivateKey(@RequestParam boolean useAes) {
         //  return keyStoreService.createPrivateKey(useAes);
-        return keyStoreService.newUser(useAes, groupId, userName);
+        return keyStoreService.newUser(useAes);
     }
-
-  /*  @ApiOperation(value = "new user", notes = "new user")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "useAes", value = "Is encrypting the private key", dataType = "Boolean"),
-        @ApiImplicitParam(name = "userName", value = "new userName", dataType = "String")
-    })
-    @RequestMapping(method = RequestMethod.GET)
-    @GetMapping("/newUser/{userName:[a-zA-Z0-9_]{3,32}}")
-    public KeyStoreInfo getUserInfo(@PathVariable("userName") String userName) {
-        return keyStoreService.newUser(userName);
-    }*/
 
     @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
     @ApiImplicitParams({

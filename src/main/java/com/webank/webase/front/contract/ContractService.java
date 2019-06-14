@@ -195,7 +195,7 @@ public class ContractService {
 
         // get privateKey
         Credentials credentials = keyStoreService
-            .getCredentials(req.getGroupId(), req.getUser(), req.getUseAes());
+            .getCredentials(req.getUser(), req.getUseAes());
         // contract deploy
         String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor,
             credentials);

@@ -49,7 +49,7 @@ public class KeyServerRestTools {
 
     private static final int REST_RSP_SUCCESS = 0;
     public static final String URI_NEW_USER = "user/newUser";
-    public static final String URI_GET_USER = "user/%1d/%2s/userInfo";
+    public static final String URI_GET_USER = "user/%1s/userInfo";
     public static final String URI_IMPORT_USER = "user/import";
     public static final String URI_SIGN = "sign";
 

@@ -15,7 +15,6 @@ package com.webank.webase.front.keyServer;
 
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.keyServer.entity.ReqNewUserDto;
 import com.webank.webase.front.keyServer.entity.ReqSignDto;
 import com.webank.webase.front.keyServer.entity.RspSignDto;
 import com.webank.webase.front.keyServer.entity.RspUserInfoDto;
@@ -39,31 +38,18 @@ public class KeyServerService {
     /**
      * new user.
      */
-    public RspUserInfoDto newUser(ReqNewUserDto param) {
-        String uri = KeyServerRestTools.URI_NEW_USER;
-        return restTools.postForJaveBean(uri, param, RspUserInfoDto.class);
+    public RspUserInfoDto newUser() {
+        return restTools.getForJaveBean(KeyServerRestTools.URI_NEW_USER, RspUserInfoDto.class);
     }
 
     /**
      * get userInfo.
      */
-    public RspUserInfoDto getUser(int groupId, String userAddress) {
-        String uri = String.format(KeyServerRestTools.URI_GET_USER, groupId, userAddress);
+    public RspUserInfoDto getUser(String userAddress) {
+        String uri = String.format(KeyServerRestTools.URI_GET_USER, userAddress);
         return restTools.getForJaveBean(uri, RspUserInfoDto.class);
     }
 
-    /**
-     * get KeyStoreInfo by privateKey.
-     */
-    public KeyStoreInfo importUser(String privateKey, String userName) {
-        List<String> nameList = Arrays.asList("privateKey", "userName");
-        List<Object> valueList = Arrays.asList(privateKey, userName);
-        // request param to str
-        String urlParam = CommonUtils.convertUrlParam(nameList, valueList);
-
-        String uri = KeyServerRestTools.URI_IMPORT_USER + "?" + urlParam;
-        return restTools.getForJaveBean(uri, KeyStoreInfo.class);
-    }
 
 
     /**
