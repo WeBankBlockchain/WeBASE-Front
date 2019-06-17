@@ -110,9 +110,12 @@ public class TransService {
                     .queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
         }
         else {
-            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),req.getContractAddress());
+            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),req.getContractAddress().substring(2));
         }
         // transaction request
+        if(cnsInfoList==null) {
+            throw new FrontException("can not get cns information from chain!");
+        }
         log.info("cnsinfo" + cnsInfoList.get(0).getAddress());
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
         List abiDefinitionList = objectMapper.readValue(cnsInfoList.get(0).getAbi(),
@@ -142,7 +145,7 @@ public class TransService {
         List<Object> params = req.getFuncParam();
         int groupId = req.getGroupId();
         if (StringUtils.isBlank(version) && StringUtils.isNotBlank(address)) {
-            version = address;
+            version = address.substring(2);
         }
 
         // if function is constant
