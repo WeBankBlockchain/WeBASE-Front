@@ -15,7 +15,7 @@
  */
 <template>
     <div class="rivate-key-management-wrapper">
-        <v-contentHead :headTitle="'私钥管理'"></v-contentHead>
+        <v-contentHead :headTitle="'私钥管理'" @changeGroup="changeGroup"></v-contentHead>
         <div class="module-wrapper" style="padding-bottom: 20px;">
             <div class="search-part">
                 <div style="display: flex;">
@@ -28,12 +28,16 @@
                 </div>
             </div>
             <div class="search-table">
-                <el-table :data="privateKeyList" tooltip-effect="light" v-loading="loading">
+                <el-table :data="privateKeyList" tooltip-effect="dark" v-loading="loading">
                     <el-table-column v-for="head in privateKeyHead" :label="head.name" :key="head.enName" show-overflow-tooltip :width="head.tdWidth" align="center">
                         <template slot-scope="scope">
                             <template v-if="head.enName!='operate'">
                                 <span v-if="head.enName ==='address'">
                                     <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row[head.enName])" title="复制地址"></i>
+                                    {{scope.row[head.enName]}}
+                                </span>
+                                <span v-if="head.enName ==='publicKey'">
+                                    <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row[head.enName])" title="复制公钥"></i>
                                     {{scope.row[head.enName]}}
                                 </span>
                                 <span v-else>{{scope.row[head.enName]}}</span>
@@ -61,26 +65,23 @@
                 <el-button type="primary" @click="sureUserName('userForm')">确 定</el-button>
             </div>
         </el-dialog>
-        <el-dialog :visible.sync="creatUserVisible" title="新建成功" width="400px" :append-to-body="true" class="dialog-wrapper" v-if='creatUserVisible' center>
-            <v-creatUser @creatUserSuccess="creatUserSuccess" ref="creatUser" :userForm="userForm"></v-creatUser>
-        </el-dialog>
+        
     </div>
 </template>
 
 
 <script>
 import contentHead from "@/components/contentHead";
-import creatUser from "./components/creatUser";
 import { queryCreatePrivateKey, queryImportPrivateKey } from "@/util/api";
 import { unique } from "@/util/util";
 import errcode from "@/util/errcode";
 let Base64 = require("js-base64").Base64;
 const FileSaver = require("file-saver");
+import Bus from "@/bus";
 export default {
     name: "RivateKeyManagement",
     components: {
-        "v-contentHead": contentHead,
-        "v-creatUser": creatUser
+        "v-contentHead": contentHead
     },
     data() {
         return {
@@ -88,7 +89,6 @@ export default {
                 userName: "",
             },
             loading: false,
-            creatUserVisible: false,
             creatUserNameVisible: false,
             privateKeyList: localStorage.getItem("privateKeyList") ? JSON.parse(localStorage.getItem("privateKeyList")) : [],
             privateKeyHead: [
@@ -123,17 +123,35 @@ export default {
                         trigger: "blur"
                     },
                     {
-                        pattern: /^\S.*\S*$/g,
-                        message: "开头不能是空格",
-                        trigger: "blur"
+                        // pattern: /^\S.*\S*$/g,
+                        pattern: /^[A-za-z0-9]+$/,
+                        message: "只能是数字或者字母组成",
+                        trigger: "blur",
+                        
+                    },
+                    {
+                        trigger: "blur",
+                        min: 3,
+                        max: 32,
+                        message: "长度在 3 到 32 个字符",
                     }
                 ]
-            }
+            },
+            groupId: localStorage.getItem("groupId") || null,
         };
     },
+    beforeDestroy: function(){
+        Bus.$off("changeGroup")
+    },
     mounted() { 
+        Bus.$on("changeGroup",data => {
+            this.changeGroup(data)
+        })
     },
     methods: {
+        changeGroup(val) {
+            this.groupId = val;
+        },
         creatUserBtn() {
             this.creatUserNameVisible = true;
         },
@@ -151,12 +169,39 @@ export default {
             this.$refs[formName].validate(valid => {
                 if (valid) {
                     this.creatUserNameVisible = false;
-                    this.creatUserVisible = true;
+                    this.addUser()
                 } else {
                     return false;
                 }
             });
 
+        },
+        addUser: function () {
+            queryCreatePrivateKey({}, { useAes: false })
+                .then(res => {
+                    const { data, status } = res;
+                    if (status === 200) {
+                        Object.assign(data, this.userForm);
+                        this.privateKeyList.unshift(data);
+                        this.privateKeyList = unique(this.privateKeyList, 'privateKey');
+                        localStorage.setItem("privateKeyList", JSON.stringify(this.privateKeyList));
+                        this.$message({
+                            type: "success",
+                            message: "新增成功"
+                        });
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: data.errorMessage || "系统错误"
+                        });
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: "系统错误"
+                    });
+                });
         },
         copyPubilcKey(val) {
             if (!val) {
@@ -176,10 +221,6 @@ export default {
                     });
                 });
             }
-        },
-        creatUserSuccess(val) {
-            this.privateKeyList = val;
-            this.initUserName();
         },
         exportFile(params) {
             let str = JSON.stringify(params);
