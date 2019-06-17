@@ -110,7 +110,7 @@ public class TransService {
                     .queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
         }
         else {
-            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),req.getContractAddress());
+            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),req.getContractAddress().substring(2));
         }
         // transaction request
         if(cnsInfoList==null) {
@@ -145,7 +145,7 @@ public class TransService {
         List<Object> params = req.getFuncParam();
         int groupId = req.getGroupId();
         if (StringUtils.isBlank(version) && StringUtils.isNotBlank(address)) {
-            version = address;
+            version = address.substring(2);
         }
 
         // if function is constant

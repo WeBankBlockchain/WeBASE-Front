@@ -93,7 +93,7 @@ public class ContractService {
     public void sendAbi(ReqSendAbi req) {
 
         String contractName = req.getContractName();
-        String address = req.getAddress();
+        String address = req.getAddress().substring(2);
         List<AbiDefinition> abiInfos = req.getAbiInfo();
 
         //check address is valid
@@ -201,8 +201,8 @@ public class ContractService {
             cnsMap.put(contractName+":"+version, contractAddress);
         } else {
             checkContractAbiExistedAndSave(contractName, contractAddress, abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress, contractAddress, JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName+":"+contractAddress, contractAddress);
+            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2), contractAddress, JSON.toJSONString(abiInfos));
+            cnsMap.put(contractName+":"+contractAddress.substring(2), contractAddress);
         }
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
