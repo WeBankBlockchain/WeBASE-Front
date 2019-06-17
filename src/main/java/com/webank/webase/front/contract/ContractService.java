@@ -200,7 +200,7 @@ public class ContractService {
             cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName+":"+version, contractAddress);
         } else {
-            checkContractAbiExistedAndSave(contractName, contractAddress, abiInfos);
+            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
             cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2), contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName+":"+contractAddress.substring(2), contractAddress);
         }
