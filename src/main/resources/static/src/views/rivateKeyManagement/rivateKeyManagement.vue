@@ -153,6 +153,7 @@ export default {
             this.groupId = val;
         },
         creatUserBtn() {
+            this.userForm.userName = "";
             this.creatUserNameVisible = true;
         },
         initUserName() {
