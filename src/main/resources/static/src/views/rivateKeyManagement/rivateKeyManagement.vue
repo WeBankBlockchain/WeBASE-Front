@@ -54,7 +54,7 @@
                 </el-pagination> -->
             </div>
         </div>
-        <el-dialog :visible.sync="creatUserNameVisible" title="添加用户名"  width="400px" class="dialog-wrapper" center v-if="creatUserNameVisible" @close="closeCallback">
+        <el-dialog :visible.sync="creatUserNameVisible" title="添加用户名" width="400px" class="dialog-wrapper" center v-if="creatUserNameVisible" @close="closeCallback">
             <el-form ref="userForm" :rules="rules" :model="userForm">
                 <el-form-item label="" prop="userName">
                     <el-input v-model="userForm.userName" placeholder="请输入用户名"></el-input>
@@ -65,7 +65,7 @@
                 <el-button type="primary" @click="sureUserName('userForm')">确 定</el-button>
             </div>
         </el-dialog>
-        
+
     </div>
 </template>
 
@@ -127,7 +127,7 @@ export default {
                         pattern: /^[A-za-z0-9]+$/,
                         message: "只能是数字或者字母组成",
                         trigger: "blur",
-                        
+
                     },
                     {
                         trigger: "blur",
@@ -140,11 +140,11 @@ export default {
             groupId: localStorage.getItem("groupId") || null,
         };
     },
-    beforeDestroy: function(){
+    beforeDestroy: function () {
         Bus.$off("changeGroup")
     },
-    mounted() { 
-        Bus.$on("changeGroup",data => {
+    mounted() {
+        Bus.$on("changeGroup", data => {
             this.changeGroup(data)
         })
     },
@@ -155,7 +155,7 @@ export default {
         creatUserBtn() {
             this.creatUserNameVisible = true;
         },
-        initUserName () {
+        initUserName() {
             this.userForm = { userName: "" }
         },
         closeCallback() {
@@ -168,8 +168,18 @@ export default {
         sureUserName(formName) {
             this.$refs[formName].validate(valid => {
                 if (valid) {
-                    this.creatUserNameVisible = false;
-                    this.addUser()
+                    let userArr = this.privateKeyList.map(item => {
+                        return item.userName
+                    })
+                    if (userArr.includes(this.userForm.userName)) {
+                        this.$message({
+                            type: "error",
+                            message: "用户名不能相同!"
+                        });
+                    } else {
+                        this.creatUserNameVisible = false;
+                        this.addUser()
+                    }
                 } else {
                     return false;
                 }
@@ -253,7 +263,7 @@ export default {
                                 _this.privateKeyList.unshift(_this.uploadMap);
                                 _this.privateKeyList = unique(_this.privateKeyList, 'privateKey')
                                 localStorage.setItem("privateKeyList", JSON.stringify(_this.privateKeyList));
-                                
+
                                 _this.$message({
                                     type: 'success',
                                     message: '导入成功'
