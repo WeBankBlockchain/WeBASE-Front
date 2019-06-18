@@ -89,7 +89,6 @@ export default {
             let reqData = {
                 networkId: networkId,
                 orgName: this.groupForm.name,
-                networkId: networkId,
                 orgType: this.groupForm.isCurrent,
                 description: this.groupForm.explain || ""
             };
