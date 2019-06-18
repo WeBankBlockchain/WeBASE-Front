@@ -36,7 +36,7 @@
                                     <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row[head.enName])" title="复制地址"></i>
                                     {{scope.row[head.enName]}}
                                 </span>
-                                <span v-if="head.enName ==='publicKey'">
+                                <span v-else-if="head.enName ==='publicKey'">
                                     <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row[head.enName])" title="复制公钥"></i>
                                     {{scope.row[head.enName]}}
                                 </span>
