@@ -21,7 +21,7 @@
         <div style="margin: 0 20px 20px 0;">
             <el-row class="module-box-shadow">
                 <el-col :xs='12' :sm="12" :md="6" :lg="6" :xl="6">
-                    <div class="overview-number block-bg" @click="goDetailRouter()">
+                    <div class="overview-number block-bg">
                         <div class="part1-content-amount">
                             <img :src="blockImg" alt="">
                         </div>
@@ -32,7 +32,7 @@
                     </div>
                 </el-col>
                 <el-col :xs='12' :sm="12" :md="6" :lg="6" :xl="6">
-                    <div class="overview-number node-bg" @click="goDetailRouter()">
+                    <div class="overview-number node-bg">
                         <div class="part1-content-amount">
                             <img :src="nodesImg" alt="">
                         </div>
@@ -43,7 +43,7 @@
                     </div>
                 </el-col>
                 <el-col :xs='12' :sm="12" :md="6" :lg="6" :xl="6">
-                    <div class="overview-number transation-bg" @click="goDetailRouter()">
+                    <div class="overview-number transation-bg">
                         <div class="part1-content-amount">
                             <img :src="transationImg" alt="">
                         </div>
@@ -54,7 +54,7 @@
                     </div>
                 </el-col>
                 <el-col :xs='12' :sm="12" :md="6" :lg="6" :xl="6">
-                    <div class="overview-number transationPendding-bg" @click="goDetailRouter()">
+                    <div class="overview-number transationPendding-bg">
                         <div class="part1-content-amount">
                             <img :src="transationPeddingImg" alt="">
                         </div>
@@ -311,11 +311,11 @@ export default {
             searchMap: {}
         };
     },
-    beforeDestroy: function(){
+    beforeDestroy: function () {
         Bus.$off("changeGroup")
     },
     mounted: function () {
-        Bus.$on("changeGroup",data => {
+        Bus.$on("changeGroup", data => {
             this.changeGroup(data)
         })
         this.networkId = localStorage.getItem("networkId");
@@ -323,13 +323,13 @@ export default {
         // this.getNodeTable();
         // this.getBlockList();
         // this.getTransaction();
-        if(this.group){
+        if (this.group) {
             this.getBlockNumber();
             this.getNodesNumber();
             this.getTxNumber();
             this.getPendingTxNumber();
         }
-        
+
         this.$nextTick(function () {
             // this.chartStatistics.chartSize.width = this.$refs.chart.offsetWidth;
             // this.chartStatistics.chartSize.height = this.$refs.chart.offsetHeight;
@@ -351,13 +351,13 @@ export default {
         getBlockNumber: function () {
             queryBlockNumber(this.group)
                 .then(res => {
-                    const { data, status, statusText } = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         this.overviewBlockNumber = data;
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn|| "系统错误"
+                            message: errcode.errCode[res.data.code].cn || "系统错误"
                         });
                     }
                 })
@@ -371,7 +371,7 @@ export default {
         getNodesNumber: function () {
             queryNodesNumber(this.group)
                 .then(res => {
-                    const { data, status, statusText } = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         this.overviewNodesNumber = data.length;
                     } else {
@@ -391,7 +391,7 @@ export default {
         getTxNumber: function () {
             queryTxNumber(this.group)
                 .then(res => {
-                    const { data, status, statusText } = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         this.overviewTxNumber = data.txSum;
                     } else {
@@ -411,7 +411,7 @@ export default {
         getPendingTxNumber: function () {
             queryPendingTxNumber(this.group)
                 .then(res => {
-                    const { data, status, statusText } = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         this.overviewPendingTxNumber = data;
                     } else {
@@ -435,7 +435,7 @@ export default {
             queryHomeSearch(this.group, reqQuery)
                 .then(res => {
                     console.log(res)
-                    const { data, status, statusText } = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         if (!data) {
                             this.blockData = []
@@ -639,24 +639,6 @@ export default {
                     this.$message.error("系统错误");
                 });
         },
-        goDetailRouter(item) {
-            return;
-            let name = item.name;
-            switch (name) {
-                case "latestBlock":
-                    router.push("blockInfo");
-                    break;
-                case "transactionCount":
-                    router.push("transactionInfo");
-                    break;
-                case "nodeCount":
-                    router.push({ path: "group", query: { from: "home" } });
-                    break;
-                case "contractCount":
-                    router.push({ path: "contract", query: { from: "home" } });
-                    break;
-            }
-        },
         bindSvg(item) {
             var str = "";
             switch (item.name) {
@@ -729,13 +711,13 @@ export default {
             // }
         },
         link: function (val) {
-            return;
-            router.push({
-                path: "/blockInfo",
-                query: {
-                    blockNumber: val
-                }
-            });
+            // return;
+            // router.push({
+            //     path: "/blockInfo",
+            //     query: {
+            //         blockNumber: val
+            //     }
+            // });
         },
         clickTable: function (row, $event, column) {
             let nodeName = $event.target.nodeName;
@@ -745,7 +727,7 @@ export default {
             if (this.keyword.length == 66) {
                 this.$refs.refTable.toggleRowExpansion(row);
             } else {
-                this.link(row.blockNumber);
+                // this.link(row.blockNumber);
             }
         },
         copyPubilcKey(val) {
@@ -771,16 +753,16 @@ export default {
 };
 </script>
 <style scoped>
-.block-bg{
+.block-bg {
     background: linear-gradient(to top right, #47befa, #37eef2);
 }
-.node-bg{
-    background: linear-gradient(to top right,#466dff, #30a7ff);
+.node-bg {
+    background: linear-gradient(to top right, #466dff, #30a7ff);
 }
-.transation-bg{
+.transation-bg {
     background: linear-gradient(to top right, #736aff, #b287ff);
 }
-.transationPendding-bg{
+.transationPendding-bg {
     background: linear-gradient(to top right, #ff6e9a, #ffa895);
 }
 .over-view-wrapper {
@@ -807,7 +789,7 @@ export default {
     margin-left: 20px;
     padding: 16px 6px;
     font-size: 0;
-    color: #fff
+    color: #fff;
 }
 .part1-content-amount {
     display: inline-block;
@@ -815,18 +797,18 @@ export default {
     max-width: 114px;
     vertical-align: middle;
 }
-.part1-content-amount img{
+.part1-content-amount img {
     width: 100%;
     max-width: 114px;
 }
-.part2-content-amount{
+.part2-content-amount {
     font-size: 14px;
     display: inline-block;
     width: 59%;
     max-width: 90px;
     vertical-align: middle;
 }
-.part2-content-amount-number{
+.part2-content-amount-number {
     display: inline-block;
     width: 100%;
 }
@@ -870,8 +852,8 @@ export default {
     padding: 0 39px 48px 40px;
     font-size: 12px;
 }
-.part3-table-content>>>th,
-.part3-table-content>>>td {
+.part3-table-content >>> th,
+.part3-table-content >>> td {
     padding: 8px 0;
 }
 .part1-details-bottom {
@@ -887,12 +869,12 @@ export default {
 .search-table-content {
     width: 100%;
 }
-.search-table-content>>>th {
+.search-table-content >>> th {
     background: #fafafa;
     color: #00122c;
 }
-.search-table-content>>>th,
-.search-table-content>>>td {
+.search-table-content >>> th,
+.search-table-content >>> td {
     font-size: 14px;
 }
 .overview-wrapper {
@@ -949,10 +931,10 @@ export default {
     color: #2d5f9e;
 }
 
-.block-table-content>>>.el-icon-arrow-right:before {
+.block-table-content >>> .el-icon-arrow-right:before {
     content: "\e60e";
 }
-.block-table-content>>>.el-table__row {
+.block-table-content >>> .el-table__row {
     cursor: pointer;
 }
 </style>
