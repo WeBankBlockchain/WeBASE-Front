@@ -16,6 +16,7 @@ import java.util.Base64;
 import java.util.Enumeration;
 import java.util.List;
 
+import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +45,10 @@ import org.springframework.http.MediaType;
 @Slf4j
 public class CommonUtils {
 
+
+    private CommonUtils() {
+        throw new IllegalStateException("Utility class");
+    }
     /**
      * parse Byte to HexStr.
      * 
@@ -52,7 +57,7 @@ public class CommonUtils {
      */
     public static String parseByte2HexStr(byte[] buf) {
         log.info("parseByte2HexStr start...");
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < buf.length; i++) {
             String hex = Integer.toHexString(buf[i] & 0xFF);
             if (hex.length() == 1) {
@@ -74,8 +79,8 @@ public class CommonUtils {
         if (StringUtils.isBlank(str)) {
             return "0x0";
         }
-        String result = "0x" + Integer.toHexString(Integer.valueOf(str));
-        return result;
+        return  "0x" + Integer.toHexString(Integer.valueOf(str));
+
     }
 
     /**
@@ -86,7 +91,7 @@ public class CommonUtils {
      */
     public static byte[] base64Decode(String str) {
         if (str == null) {
-            return null;
+          return  new byte[0];
         }
         return Base64.getDecoder().decode(str);
     }
@@ -104,13 +109,17 @@ public class CommonUtils {
             return null;
         }
         StringBuilder result = new StringBuilder();
-        InputStream inputStream = new FileInputStream(dirFile);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            result.append(line);
+        try(
+                InputStream inputStream = new FileInputStream(dirFile);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+        } catch (IOException e) {
+            throw new FrontException(e.getMessage());
         }
-        inputStream.close();
         return result.toString();
     }
     
@@ -127,13 +136,18 @@ public class CommonUtils {
     		return null;
     	}
     	List<String> result = new ArrayList<String>();
-    	InputStream inputStream = new FileInputStream(dirFile);
-    	BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-    	String line = null;
-    	while ((line = reader.readLine()) != null) {
-    		result.add(line);
-    	}
-    	inputStream.close();
+        try (
+                InputStream inputStream = new FileInputStream(dirFile);
+                BufferedReader  reader = new BufferedReader(new InputStreamReader(inputStream));
+        )
+        {
+            String line ;
+            while ((line = reader.readLine()) != null) {
+                result.add(line);
+            }
+        } catch (Exception e) {
+            throw new FrontException(e.getMessage());
+        }
     	return result;
     }
 
@@ -185,10 +199,7 @@ public class CommonUtils {
                 }
             }
         }
-        if (!flag) {
-            return false;
-        }
-        return true;
+     return flag;
     }
 
     /**
@@ -230,10 +241,10 @@ public class CommonUtils {
             Enumeration<NetworkInterface> networkInterfaces =
                     NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
-                NetworkInterface ni = (NetworkInterface) networkInterfaces.nextElement();
+                NetworkInterface ni =  networkInterfaces.nextElement();
                 Enumeration<InetAddress> nias = ni.getInetAddresses();
                 while (nias.hasMoreElements()) {
-                    InetAddress ia = (InetAddress) nias.nextElement();
+                    InetAddress ia =  nias.nextElement();
                     if (!ia.isLinkLocalAddress() && !ia.isLoopbackAddress()
                             && ia instanceof Inet4Address) {
                         return ia.getHostAddress();
