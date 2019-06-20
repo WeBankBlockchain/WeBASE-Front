@@ -48,7 +48,7 @@ public class MonitorService {
     public List<PerformanceData> findContrastDataByTime(int groupId, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap)  {
 
         List<Monitor> monitorList;
-        if (startTime == null && endTime == null) {
+        if (startTime == null || endTime == null) {
             monitorList = new ArrayList<>();
         } else {
             monitorList = monitorRepository.findByTimeBetween(groupId,startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(), endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
@@ -132,17 +132,17 @@ public class MonitorService {
 
         Long currentTime = System.currentTimeMillis();
         //to do  add  more group
-        for(int i : web3jMap.keySet()) {
+        for(Map.Entry<Integer,Web3j> entry : web3jMap.entrySet()) {
             Monitor monitor = new Monitor();
-            CompletableFuture<BlockNumber> blockHeightFuture = web3jMap.get(i).getBlockNumber().sendAsync();
-            CompletableFuture<PbftView> pbftViewFuture = web3jMap.get(i).getPbftView().sendAsync();
-            CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3jMap.get(i).getPendingTxSize().sendAsync();
+            CompletableFuture<BlockNumber> blockHeightFuture = entry.getValue().getBlockNumber().sendAsync();
+            CompletableFuture<PbftView> pbftViewFuture = entry.getValue().getPbftView().sendAsync();
+            CompletableFuture<PendingTxSize> pendingTxSizeFuture = entry.getValue().getPendingTxSize().sendAsync();
 
             monitor.setBlockHeight(blockHeightFuture.get().getBlockNumber());
             monitor.setPbftView(pbftViewFuture.get().getPbftView());
             monitor.setPendingTransactionCount(pendingTxSizeFuture.get().getPendingTxSize());
             monitor.setTimestamp(currentTime);
-            monitor.setGroupId(i);
+            monitor.setGroupId(entry.getKey());
             monitorRepository.save(monitor);
             log.debug("insert success =  " + monitor.getId());
         }
