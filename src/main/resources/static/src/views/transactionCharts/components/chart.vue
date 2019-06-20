@@ -82,7 +82,7 @@ export default {
             //     this.chart.hideLoading();
             // }, 600);
             let dayNum = this.chartStatistics.data.length;
-            let showInterval = 0;
+            var showInterval = 0;
             if(0 <= dayNum && dayNum<28){
                 showInterval = 0
             }else if(28 <= dayNum && dayNum < 60) {
@@ -149,7 +149,6 @@ export default {
                                 }
                             }
                         },
-                        symbolSize: 5,
                         data: this.chartStatistics.transactionDataArr
                     }
                 ],
