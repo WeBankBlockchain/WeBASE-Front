@@ -120,7 +120,7 @@ export function delCookie(name) {
  * @returns {string}
  */
 export function format(d, fmt) {
-    let date = null;
+    let date = {};
     if (!(d instanceof Date)) {
         date = new Date(parseInt(d));
     }
