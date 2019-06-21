@@ -55,7 +55,8 @@ public class PerformanceService {
     private PerformanceRepository performanceRepository;
     @Autowired
     private Constants constants;
-
+    private static  final String TXBPS = "txbps";
+    private static final String RXBPS = "rxbps";
 
     private static Sigar sigar = new Sigar();
 
@@ -87,9 +88,7 @@ public class PerformanceService {
             int gap)  {
 
         List<Performance> performanceList;
-        if (startTime == null && endTime == null) {
-            // startTime= LocalDate.now().atTime(0,0,0);
-            // endTime = LocalDateTime.now();
+        if (startTime == null || endTime == null) {
             performanceList = new ArrayList<>();
         } else {
             performanceList = performanceRepository.findByTimeBetween(
@@ -151,10 +150,10 @@ public class PerformanceService {
                 .add(new PerformanceData("disk", new Data(new LineDataList(null, diskValueList),
                         new LineDataList(null, contrastDiskValueList))));
         performanceDataList
-                .add(new PerformanceData("txbps", new Data(new LineDataList(null, txbpsValueList),
+                .add(new PerformanceData(TXBPS, new Data(new LineDataList(null, txbpsValueList),
                         new LineDataList(null, contrastTxbpsValueList))));
         performanceDataList
-                .add(new PerformanceData("rxbps", new Data(new LineDataList(null, rxbpsValueList),
+                .add(new PerformanceData(RXBPS, new Data(new LineDataList(null, rxbpsValueList),
                         new LineDataList(null, contrastRxbpsValueList))));
         return performanceDataList;
     }
@@ -174,8 +173,8 @@ public class PerformanceService {
 
         try {
             Map<String, Long> map = getNetSpeed();
-            performance.setTxbps(new BigDecimal(map.get("txbps")));
-            performance.setRxbps(new BigDecimal(map.get("rxbps")));
+            performance.setTxbps(new BigDecimal(map.get(TXBPS)));
+            performance.setRxbps(new BigDecimal(map.get(RXBPS)));
         } catch (Exception e) {
             log.error("get net speed failed.",e);
         }
@@ -199,15 +198,15 @@ public class PerformanceService {
 
     private BigDecimal getCpuRatio() throws SigarException {
         CpuPerc cpuPerc = sigar.getCpuPerc();
-        return new BigDecimal(cpuPerc.getCombined() * 100);
+        return  BigDecimal.valueOf(cpuPerc.getCombined() * 100);
 
     }
 
     private BigDecimal getMemoryRatio() throws SigarException {
         ;
         Mem mem = sigar.getMem();
-        // System.out.println("内存总量: " + mem.getTotal() / 1024L + "K av");
-        return new BigDecimal(mem.getUsedPercent());
+        // log.info("内存总量: " + mem.getTotal() / 1024L + "K av");
+        return  BigDecimal.valueOf(mem.getUsedPercent());
     }
 
     /**
@@ -218,7 +217,7 @@ public class PerformanceService {
     public BigDecimal getDiskRatio() throws SigarException {
         double use;
         use = sigar.getFileSystemUsage(constants.getMonitorDisk()).getUsePercent();
-        return new BigDecimal(use * 100); // 硬盘使用百分率%
+        return  BigDecimal.valueOf(use * 100); // 硬盘使用百分率%
     }
 
     /**
@@ -232,7 +231,6 @@ public class PerformanceService {
         InetAddress addr;
         addr = InetAddress.getLocalHost();
         String ip = addr.getHostAddress();
-        Sigar sigar = new Sigar();
         String[] ifNames = sigar.getNetInterfaceList();
         long rxbps = 0;
         long txbps = 0;
@@ -255,8 +253,8 @@ public class PerformanceService {
                 break;
             }
         }
-        map.put("rxbps", rxbps);
-        map.put("txbps", txbps);
+        map.put(RXBPS, rxbps);
+        map.put(TXBPS, txbps);
         return map;
     }
 
@@ -270,17 +268,17 @@ public class PerformanceService {
         InetAddress addr;
         addr = InetAddress.getLocalHost();
         String ip = addr.getHostAddress();
-        System.out.println("本地ip地址:    " + ip);
+        log.info("本地ip地址:    " + ip);
         configMap.put("ip", ip);
         Mem mem = sigar.getMem();
-        System.out.println("内存总量:    " + mem.getTotal() / 1024L + "K av");
-        System.out.println("当前内存使用量:    " + mem.getUsed() / 1024L + "K used");
+        log.info("内存总量:    " + mem.getTotal() / 1024L + "K av");
+        log.info("当前内存使用量:    " + mem.getUsed() / 1024L + "K used");
         configMap.put("memoryTotalSize", Long.toString(mem.getTotal() / 1024L));
         configMap.put("memoryUsedSize", Long.toString(mem.getUsed() / 1024L));
         CpuPerc cpu = sigar.getCpuPerc();
         CpuInfo[] infos = sigar.getCpuInfoList();
-        System.out.println("CPU的大小:    " + infos[0].getMhz());
-        System.out.println("CPU的核数:    " + infos.length);
+        log.info("CPU的大小:    " + infos[0].getMhz());
+        log.info("CPU的核数:    " + infos.length);
         configMap.put("cpuSize", Integer.toString(infos[0].getMhz()));
         configMap.put("cpuAmount", Integer.toString(infos.length));
         long total;
@@ -289,8 +287,8 @@ public class PerformanceService {
         log.info("****fs " + fslist.length);
         use = sigar.getFileSystemUsage(constants.getMonitorDisk()).getUsed();
         total = sigar.getFileSystemUsage(constants.getMonitorDisk()).getTotal();
-        System.out.println("文件系统总量:    " + total);
-        System.out.println("文件系统已使用量:    " + use);
+        log.info("文件系统总量:    " + total);
+        log.info("文件系统已使用量:    " + use);
         configMap.put("diskTotalSize", Long.toString(total));
         configMap.put("diskUsedSize", Long.toString(use));
         return configMap;

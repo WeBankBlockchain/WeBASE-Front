@@ -25,18 +25,6 @@ import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.PeerOfConsensusStatus;
 import com.webank.webase.front.web3api.entity.PeerOfSyncStatus;
 import com.webank.webase.front.web3api.entity.SyncStatus;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
@@ -44,17 +32,18 @@ import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
-import org.fisco.bcos.web3j.protocol.core.JsonRpc2_0Web3j;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
-import org.fisco.bcos.web3j.protocol.core.methods.response.GroupPeers;
+import org.fisco.bcos.web3j.protocol.core.methods.response.*;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -137,7 +126,7 @@ public class Web3ApiService {
         int transCnt;
         try {
             if (blockNumberCheck(groupId, blockNumber)) {
-                throw new FrontException("requst blockNumber is greater than latest");
+                throw new FrontException("ConstantCode.NODE_REQUEST_FAILED");
             }
             BcosBlock.Block block = web3jMap.get(groupId)
                 .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
@@ -294,7 +283,7 @@ public class Web3ApiService {
         Transaction transaction = null;
         try {
             if (blockNumberCheck(groupId, blockNumber)) {
-                throw new FrontException("requst blockNumber is greater than latest");
+                throw new FrontException("ConstantCode.NODE_REQUEST_FAILED");
             }
             Optional<Transaction> opt = web3jMap.get(groupId)
                 .getTransactionByBlockNumberAndIndex(DefaultBlockParameter.valueOf(blockNumber),
@@ -317,10 +306,8 @@ public class Web3ApiService {
             e.printStackTrace();
         }
         System.out.println("****" + currentNumber);
-        if (blockNumber.compareTo(currentNumber) == 1) {
-            return true;
-        }
-        return false;
+        return  (blockNumber.compareTo(currentNumber) > 0) ;
+
     }
 
 
@@ -334,9 +321,9 @@ public class Web3ApiService {
             List<String> peerStrList = getGroupPeers(groupId);//get peers
             SyncStatus syncStatus = JSON.parseObject(getSyncStatus(groupId), SyncStatus.class);
             List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
-            if (Objects.isNull(peerStrList) || peerStrList.isEmpty()) {
+            if (Objects.isNull(peerStrList) || peerStrList.isEmpty()|| consensusList == null) {
                 log.info("end getNodeStatusList. peerStrList is empty");
-                return null;
+               return Collections.emptyList();
             }
             for (String peer : peerStrList) {
                 BigInteger blockNumberOnChain = getBlockNumberOfNodeOnChain(syncStatus, peer);
@@ -432,7 +419,7 @@ public class Web3ApiService {
     private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
         String consensusStatusJson = getConsensusStatus(groupId);
         if (StringUtils.isBlank(consensusStatusJson)) {
-            return null;
+            return Collections.emptyList();
         }
         JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
         List<Object> dataIsList = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List)
