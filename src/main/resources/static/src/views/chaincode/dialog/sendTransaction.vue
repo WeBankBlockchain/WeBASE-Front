@@ -82,7 +82,8 @@ export default {
             pramasData: [],
             funcList: [],
             buttonClick: false,
-            contractVersion: this.version
+            contractVersion: this.version,
+            constant: false
         };
     },
     mounted: function () {
@@ -90,7 +91,7 @@ export default {
             this.transation.userName = this.userList[0]['address']
         }
         this.formatAbi();
-
+        this.changeFunc();
     },
     methods: {
         submit: function (formName) {
@@ -135,9 +136,11 @@ export default {
             }
         },
         changeFunc: function () {
+            this.constant = false;
             this.funcList.forEach(value => {
                 if (value.funcId === this.transation.funcName) {
                     this.pramasData = value.inputs;
+                    this.constant = value.constant;
                 }
             });
         },
@@ -177,10 +180,18 @@ export default {
                     if (status === 200) {
                         let resData = data;
                         this.$emit("success", resData);
-                        this.$message({
-                            type: "success",
-                            message: "发送交易成功!"
-                        });
+                        if (this.constant) {
+                            this.$message({
+                                type: "success",
+                                message: "查询成功!"
+                            });
+                        } else {
+                            this.$message({
+                                type: "success",
+                                message: "发送交易成功!"
+                            });
+                        }
+
                     } else {
                         this.$message({
                             type: "error",
@@ -217,13 +228,13 @@ export default {
 .send-item-params {
     display: inline-block;
 }
-.send-item>>>.el-input__inner {
+.send-item >>> .el-input__inner {
     height: 32px;
     line-height: 32px;
 }
 .send-btn {
 }
-.send-btn>>>.el-button {
+.send-btn >>> .el-button {
     padding: 9px 16px;
 }
 .java-class {

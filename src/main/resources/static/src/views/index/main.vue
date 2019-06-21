@@ -40,7 +40,7 @@
             <v-menu @sidebarChange="change($event)" :minMenu="show"></v-menu>
         </div>
         <div class="view-wrapper" :class="{'view-show': menuShow,'view-hide': menuHide}">
-            <router-view ></router-view>
+            <router-view></router-view>
         </div>
     </div>
 </template>
@@ -56,7 +56,7 @@ export default {
     components: {
         "v-menu": sidebar
     },
-    data: function() {
+    data: function () {
         // if (sessionStorage.getItem("reload") == 1) {
         //     sessionStorage.setItem("reload", 2);
         //     router.go(0);
@@ -140,15 +140,15 @@ export default {
         };
     },
     computed: {
-        show: function() {
+        show: function () {
             return this.menuShow;
         }
     },
-    mounted(){
+    mounted() {
         this.accountStatus = sessionStorage.getItem("accountStatus");
     },
     methods: {
-        change: function(val) {
+        change: function (val) {
             this.menuShow = !val;
             this.menuHide = val;
         },
@@ -243,7 +243,7 @@ export default {
     -o-transition: width 2s;
 }
 .view-show {
-    /* padding-left: 200px; */
+    overflow-y: auto;
     width: calc(100% - 200px);
     transition: width 0.5s;
     -moz-transition: width 0.5s;
@@ -252,7 +252,7 @@ export default {
 }
 .view-hide {
     padding-left: 56px;
-    /* width: calc(100% - 56px); */
+    overflow-y: auto;
     transition: width 0.5s;
     -moz-transition: width 0.5s;
     -webkit-transition: width 0.5s;
