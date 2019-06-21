@@ -839,7 +839,7 @@ HTTP GET
 
 
 **2）数据格式**
-`http://10.107.105.18:8081/webase-front/1/web3/pbftView`
+`http://localhost:8081/webase-front/1/web3/pbftView`
 
 
 ### 响应参数
