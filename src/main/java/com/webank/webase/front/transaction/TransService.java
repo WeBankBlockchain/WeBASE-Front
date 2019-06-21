@@ -80,7 +80,7 @@ public class TransService {
                 .ifContractAbiExisted(req.getContractName(), req.getVersion());
         } else {
             ifExisted = ContractAbiUtil
-                .ifContractAbiExisted(req.getContractName(), req.getContractAddress());
+                .ifContractAbiExisted(req.getContractName(), req.getContractAddress().substring(2));
         }
 
         if (!ifExisted) {
@@ -110,7 +110,7 @@ public class TransService {
                     .queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
         }
         else {
-            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),req.getContractAddress());
+            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),req.getContractAddress().substring(2));
         }
         // transaction request
         if(cnsInfoList==null) {
@@ -145,14 +145,14 @@ public class TransService {
         List<Object> params = req.getFuncParam();
         int groupId = req.getGroupId();
         if (StringUtils.isBlank(version) && StringUtils.isNotBlank(address)) {
-            version = address;
+            version = address.substring(2);
         }
 
         // if function is constant
         String constant = ContractAbiUtil.ifConstantFunc(contractName, funcName, version);
         if (constant == null) {
-            log.warn("dealWithtrans fail. contract name:{} func:{} is not existed", contractName,
-                funcName);
+            log.warn("dealWithtrans fail. contract name:{} func:{} version:{} is not existed", contractName,
+                funcName,version);
             throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
 
