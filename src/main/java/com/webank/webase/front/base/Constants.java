@@ -53,7 +53,7 @@ public class Constants {
     public static final String JAVA_DIR = "./conf/files/java";
     public static final String FILE_SOL = ".sol";
     public static final String FILE_ADDRESS = ".address";
- //   public static final String MGR_PRIVATE_KEY_URI = "http://%s/webase-node-mgr/user/privateKey/%s";
+ //   public static final String MGR_PRIVATE_KEY_URI = "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
 
     public static final String CONSTANT_PREFIX = "constant";
     private String keyServerUrl;
