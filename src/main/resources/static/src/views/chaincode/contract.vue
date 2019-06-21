@@ -42,6 +42,13 @@ export default {
     watch: {
         $route: function () {
             this.urlQuery = this.$root.$route.query;
+        },
+        menuHide: function (val) {
+            if (val) {
+                this.menuWidth = 180;
+            } else {
+                this.menuWidth = 0;
+            }
         }
     },
     data: function () {
@@ -61,15 +68,6 @@ export default {
                 return `calc(100% - ${this.menuWidth}px)`;
             } else {
                 return `100%`;
-            }
-        }
-    },
-    watch: {
-        menuHide: function (val) {
-            if (val) {
-                this.menuWidth = 180;
-            } else {
-                this.menuWidth = 0;
             }
         }
     },

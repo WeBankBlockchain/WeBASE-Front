@@ -101,7 +101,6 @@ export default {
                                 }
                             }
                         },
-                        symbolSize: 5,
                         data: this.chartTransactionDataArr
                     }
                 ],

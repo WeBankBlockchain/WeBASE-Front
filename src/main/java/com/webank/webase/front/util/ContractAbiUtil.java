@@ -13,11 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,6 +49,10 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedTy
 @Slf4j
 public class ContractAbiUtil {
 
+    private ContractAbiUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static HashMap<String, List<VersionEvent>> contractEventMap = new HashMap<>();
     private static final String regex = "(\\w+)(?:\\[(.*?)\\])(?:\\[(.*?)\\])?";
     private static final Pattern pattern = Pattern.compile(regex);
@@ -60,11 +60,11 @@ public class ContractAbiUtil {
     @Data
     public static class VersionEvent {
 
-        private String version;
-        private HashMap<String, List<Class<? extends Type>>> events;
-        private HashMap<String, Boolean> functions;// constant or not
-        private HashMap<String, List<String>> funcInputs;
-        private HashMap<String, List<String>> funcOutputs;
+        String version;
+        HashMap<String, List<Class<? extends Type>>> events;
+        HashMap<String, Boolean> functions;// constant or not
+        HashMap<String, List<String>> funcInputs;
+        HashMap<String, List<String>> funcOutputs;
 
         /**
          * VersionEvent.
@@ -145,14 +145,14 @@ public class ContractAbiUtil {
     }
 
     private static void setFunctionFromAbi(String contractName, String version,
-        List<AbiDefinition> AbiDefinitionList, List<VersionEvent> versionEventList) {
+        List<AbiDefinition> abiDefinitionList, List<VersionEvent> versionEventList) {
         HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
         HashMap<String, Boolean> functions = new HashMap<>();
         HashMap<String, List<String>> funcInputs = new HashMap<>();
         HashMap<String, List<String>> funcOutputs = new HashMap<>();
 
         // todo fill with solidity type  only need the type
-        for (AbiDefinition abiDefinition : AbiDefinitionList) {
+        for (AbiDefinition abiDefinition : abiDefinitionList) {
 
             if (Constants.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {
                 List<NamedType> inputs = abiDefinition.getInputs();
@@ -188,14 +188,14 @@ public class ContractAbiUtil {
     }
 
 
-    public static VersionEvent getVersionEventFromAbi(String contractName, List<AbiDefinition> AbiDefinitionList) {
+    public static VersionEvent getVersionEventFromAbi(String contractName, List<AbiDefinition> abiDefinitionList) {
         HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
         HashMap<String, Boolean> functions = new HashMap<>();
         HashMap<String, List<String>> funcInputs = new HashMap<>();
         HashMap<String, List<String>> funcOutputs = new HashMap<>();
 
         // todo fill with solidity type  only need the type
-        for (AbiDefinition abiDefinition : AbiDefinitionList) {
+        for (AbiDefinition abiDefinition : abiDefinitionList) {
 
             if (Constants.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {
                 List<NamedType> inputs = abiDefinition.getInputs();
@@ -363,7 +363,7 @@ public class ContractAbiUtil {
     public static List<String> getFuncOutputType(String contractName, String funcName,
         String version) {
         if (!contractEventMap.containsKey(contractName)) {
-            return null;
+            return   Collections.emptyList();
         }
 
         List<VersionEvent> versionEventList = contractEventMap.get(contractName);
@@ -375,7 +375,7 @@ public class ContractAbiUtil {
             }
         }
         if (target == null) {
-            return null;
+            return   Collections.emptyList();
         }
         return target.getFuncOutputs().get(funcName);
     }
@@ -385,13 +385,13 @@ public class ContractAbiUtil {
      */
     private static Map<String, List<String>> getAllContract() {
         Map<String, List<String>> contracts = new HashMap<>();
-        for (String contract : contractEventMap.keySet()) {
-            List<VersionEvent> versionEventList = contractEventMap.get(contract);
+        for (Map.Entry<String, List<VersionEvent>> entry : contractEventMap.entrySet()) {
+            List<VersionEvent> versionEventList = entry.getValue();
             List<String> versions = new ArrayList<>();
             for (VersionEvent versionEvent : versionEventList) {
                 versions.add(versionEvent.getVersion());
             }
-            contracts.put(contract, versions);
+            contracts.put(entry.getKey(), versions);
         }
         return contracts;
     }
