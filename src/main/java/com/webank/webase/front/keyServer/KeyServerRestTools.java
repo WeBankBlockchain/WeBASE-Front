@@ -41,7 +41,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * about http request for webase-front.
+ * about http request for WeBASE-Front.
  */
 @Log4j2
 @Service

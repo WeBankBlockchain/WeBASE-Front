@@ -49,7 +49,7 @@ public class KeyStoreService {
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
     @Autowired
     KeystoreRepository keystoreRepository;
-    private static final String KEY_SERVER_NAME = "webase-sign";
+    private static final String KEY_SERVER_NAME = "WeBASE-Sign";
 
     /**
      * createPrivateKey.
