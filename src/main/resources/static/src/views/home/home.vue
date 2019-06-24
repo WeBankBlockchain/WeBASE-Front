@@ -719,7 +719,7 @@ export default {
             //     }
             // });
         },
-        clickTable: function (row, $event, column) {
+        clickTable: function (row, column, $event) {
             let nodeName = $event.target.nodeName;
             if (nodeName === "I") {
                 return;
@@ -929,10 +929,6 @@ export default {
 }
 .node-ip {
     color: #2d5f9e;
-}
-
-.block-table-content >>> .el-icon-arrow-right:before {
-    content: "\e60e";
 }
 .block-table-content >>> .el-table__row {
     cursor: pointer;
