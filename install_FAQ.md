@@ -8,12 +8,12 @@
 * 2: eclipse环境编译源码失败，错误提示如下；
 ```
 ...
-/data/temp/webase-front/src/main/java/com/webank/webase/front/performance/PerformanceService.java:167: error: cannot find symbol
+/data/temp/WeBASE-Front/src/main/java/com/webank/webase/front/performance/PerformanceService.java:167: error: cannot find symbol
         log.info("begin sync performance");
         ^
   symbol:   variable log
   location: class PerformanceService
-Note: /data/temp/webase-front/src/main/java/com/webank/webase/front/contract/CommonContract.java uses or overrides a deprecated API.
+Note: /data/temp/WeBASE-Front/src/main/java/com/webank/webase/front/contract/CommonContract.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 Note: Some input files use unchecked or unsafe operations.
 Note: Recompile with -Xlint:unchecked for details.
@@ -33,4 +33,4 @@ FAILURE: Build failed with an exception.
    
 * 3: 节点运行一段时间后新增了一个群组，front查不到新群组信息。 
  
-   答： 调用 http://{ip}:{port}/webase-front/8081/1/web3/refresh 方法，即可手动更新。
+   答： 调用 http://{ip}:{port}/WeBASE-Front/8081/1/web3/refresh 方法，即可手动更新。
