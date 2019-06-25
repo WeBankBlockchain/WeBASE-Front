@@ -140,7 +140,6 @@ HTTP POST
 **1）数据格式**
 ```
 {
-
 "0x60aac015d5d41adc74217419ea77815ecb9a2192"
 }
 ```
@@ -178,7 +177,6 @@ http://localhost:8081/webase-front/contract/cns?groupId=1&name=HelloWorld&versio
 **1）数据格式**
 ```
 {
-
 "0x31b26e43651e9371c88af3d36c14cfd938baf4fd"
 }
 ```
@@ -318,7 +316,7 @@ HTTP POST
 ```
 
 
-## 1.5. 删除合约接口
+## 1.6. 删除合约接口
 [top](#目录)
 
 ### 接口描述
@@ -599,8 +597,7 @@ HTTP GET
 
 | **序号** | **中文** | **参数名**  | **类型**   | **最大长度** | **必填** | **说明** |
 | -------- | -------- | ----------- | ---------- | ------------ | -------- | -------- |
-| 1        | 群组编号 | groupId | int      |             | 是        |                      |
-| 2        | 块高     | blockNumber | BigInteger |       | 是       |          |
+| 1       | 块高     | blockNumber | BigInteger |       | 是       |          |
 
 **2）数据格式**
 
@@ -1013,7 +1010,7 @@ http://localhost:8081/webase-front/1/web3/clientVersion
 无
 
 **2）数据格式**
-···
+```
 {
     "Build Time": "20190318 10:56:37",
     "Build Type": "Linux/g++/RelWithDebInfo",
@@ -1021,7 +1018,7 @@ http://localhost:8081/webase-front/1/web3/clientVersion
     "Git Branch": "master",
     "Git Commit Hash": "2467ddf73b091bc8e0ee611ccee85db7989ad389"
 }
-···
+```
 
 ## 3.9. 获取合约二进制代码接口
 [top](#目录)
@@ -1068,7 +1065,7 @@ http://localhost:8081/webase-front/1/web3/code/0x0000000000000000000000000000000
 
 ### 接口URL
 
-**http://localhost:8081/webase-front/1/transaction-total**
+**http://localhost:8081/webase-front/{groupId}/transaction-total**
 
 ### 调用方法
 
