@@ -19,5 +19,5 @@
 let handle = process.env.HANDLE_PATH;
 export default {
     // ORG_LIST: `${mgr}/webase-node-mgr`,
-    FRONT_PROXY: `${handle}/webase-front`
+    FRONT_PROXY: `${handle}/WeBASE-Front`
 }
