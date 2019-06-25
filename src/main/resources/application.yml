@@ -31,7 +31,7 @@ spring:
 
 server:
   port: 8081
-  context-path: /webase-front
+  context-path: /WeBASE-Front
 
 sdk:
   orgName: orgTest
