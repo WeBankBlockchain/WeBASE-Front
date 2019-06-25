@@ -8,8 +8,8 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%F:%L) - %m%n" />
         </Console>
 
-        <RollingFile name="front" fileName="${logPath}/webase-front.log"
-                     filePattern="${logPath}/webase-front.log.%d{yyyy-MM-dd}.%i.log.gz">
+        <RollingFile name="front" fileName="${logPath}/WeBASE-Front.log"
+                     filePattern="${logPath}/WeBASE-Front.log.%d{yyyy-MM-dd}.%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
             <Policies>
                 <TimeBasedTriggeringPolicy />
@@ -17,14 +17,14 @@
             </Policies>
             <DefaultRolloverStrategy max="24" >
                 <Delete basePath="${logPath}/" >
-                    <IfFileName glob="webase-front.log.*.log.gz" />
+                    <IfFileName glob="WeBASE-Front.log.*.log.gz" />
                     <IfLastModified age="15d" />
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
 
-        <RollingFile name="error" fileName="${logPath}/webase-front-error.log"
-                     filePattern="${logPath}/webase-front-error.log.%d{yyyy-MM-dd}.%i.log.gz">
+        <RollingFile name="error" fileName="${logPath}/WeBASE-Front-error.log"
+                     filePattern="${logPath}/WeBASE-Front-error.log.%d{yyyy-MM-dd}.%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
             <Filters>
                 <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -35,7 +35,7 @@
             </Policies>
             <DefaultRolloverStrategy max="24" >
                 <Delete basePath="${logPath}/" >
-                    <IfFileName glob="webase-front-error.log.*.log.gz" />
+                    <IfFileName glob="WeBASE-Front-error.log.*.log.gz" />
                     <IfLastModified age="15d" />
                 </Delete>
             </DefaultRolloverStrategy>

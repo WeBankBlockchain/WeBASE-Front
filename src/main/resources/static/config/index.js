@@ -15,7 +15,7 @@ module.exports = {
                 target:'http://10.0.0.1/',
                 changeOrigin:true,
                 pathRewrite:{
-                    '^/handle':'webase-front/'
+                    '^/handle':'WeBASE-Front/'
                 }
             },
         },
