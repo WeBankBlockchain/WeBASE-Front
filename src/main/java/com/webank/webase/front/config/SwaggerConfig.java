@@ -43,7 +43,7 @@ public class SwaggerConfig {
     }
 
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("API document").description("webase-front api")
+        return new ApiInfoBuilder().title("API document").description("WeBASE-Front api")
                 .version("1.0").build();
     }
 }
