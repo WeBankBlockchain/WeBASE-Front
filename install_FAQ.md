@@ -34,3 +34,13 @@ FAILURE: Build failed with an exception.
 * 3: 节点运行一段时间后新增了一个群组，front查不到新群组信息。 
  
    答： 调用 http://{ip}:{port}/WeBASE-Front/8081/1/web3/refresh 方法，即可手动更新。
+   
+   
+* 4: 觉得url中WeBASE-Front输入比较麻烦,怎么修改？
+ 
+   答：修改application.yml 文件中的context-path即可：
+    ```
+    server:
+        port: 8081
+        context-path: /WeBASE-Front   //修改此处即可如 webase-front;
+    ```    
