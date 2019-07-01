@@ -307,7 +307,7 @@ export default {
             overviewNodesNumber: "",
             overviewTxNumber: "",
             overviewPendingTxNumber: "",
-            group: localStorage.getItem("groupId") || null,
+            group: localStorage.getItem("groupId") || 1,
             searchMap: {}
         };
     },
