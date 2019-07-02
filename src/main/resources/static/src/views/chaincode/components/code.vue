@@ -514,6 +514,7 @@ export default {
             this.compileinfo = "";
             this.abiFile = "";
             this.contractAddress = "";
+            this.bin = "";
         },
         deploying: function () {
             this.dialogUser = true;
