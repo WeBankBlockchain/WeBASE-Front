@@ -169,7 +169,9 @@ export default {
                 .then(res => {
                     const { data, status, statusText } = res;
                     if (status === 200) {
-                        let arr = data.sort(),
+                        let arr = data.sort((a, b) => {
+                            return a - b
+                        }),
                             list = [];
                         for (let i = 0; i < arr.length; i++) {
                             list.push({
