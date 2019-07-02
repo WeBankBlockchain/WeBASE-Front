@@ -205,9 +205,6 @@ export default {
 .block-table-content>>>.el-table__expanded-cell {
     padding: 12px 6px;
 }
-.block-table-content>>>.el-icon-arrow-right:before {
-    content: "\e60e";
-}
 .block-table-content>>>.el-table__expand-icon > .el-icon {
     font-size: 14px;
 }
