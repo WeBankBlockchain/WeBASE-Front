@@ -58,7 +58,7 @@
             <div class="contract-info" v-show="successHide" :style="{height:infoHeight + 'px'}">
                 <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
                 <div class="contract-info-title">
-                    <i class="wbs-icon-clear float-right" @click="refreshMessage" title="清除"></i>
+                    <!-- <i class="wbs-icon-clear float-right" @click="refreshMessage" title="清除"></i> -->
                 </div>
                 <div>
                     <div class="contract-info-list1" v-html="compileinfo">

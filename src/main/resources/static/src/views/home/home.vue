@@ -191,7 +191,8 @@ import {
     queryNodesNumber,
     queryTxNumber,
     queryPendingTxNumber,
-    queryHomeSearch
+    queryHomeSearch,
+    queryGroup
 } from "@/util/api";
 import { changWeek, numberFormat, format } from "@/util/util";
 import router from "@/router";
@@ -307,7 +308,7 @@ export default {
             overviewNodesNumber: "",
             overviewTxNumber: "",
             overviewPendingTxNumber: "",
-            group: localStorage.getItem("groupId") || null,
+            group: localStorage.getItem("groupId"),
             searchMap: {}
         };
     },
@@ -324,12 +325,10 @@ export default {
         // this.getBlockList();
         // this.getTransaction();
         if (this.group) {
-            this.getBlockNumber();
-            this.getNodesNumber();
-            this.getTxNumber();
-            this.getPendingTxNumber();
+            this.getAllOverview()
+        } else {
+            this.getGroup()
         }
-
         this.$nextTick(function () {
             // this.chartStatistics.chartSize.width = this.$refs.chart.offsetWidth;
             // this.chartStatistics.chartSize.height = this.$refs.chart.offsetHeight;
@@ -338,6 +337,31 @@ export default {
     },
     destroyed() { },
     methods: {
+        getGroup() {
+            queryGroup()
+                .then(res => {
+                    const { data, status } = res;
+                    if (status === 200) {
+                        let arr = data.sort((a, b) => {
+                            return a - b
+                        })
+                        this.group = arr[0]
+                        this.getAllOverview()
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: "系统错误"
+                    });
+                })
+        },
+        getAllOverview() {
+            this.getBlockNumber();
+            this.getNodesNumber();
+            this.getTxNumber();
+            this.getPendingTxNumber();
+        },
         changeGroup(val) {
             this.group = val;
             this.blockData = [];
@@ -719,7 +743,7 @@ export default {
             //     }
             // });
         },
-        clickTable: function (row, $event, column) {
+        clickTable: function (row, column, $event) {
             let nodeName = $event.target.nodeName;
             if (nodeName === "I") {
                 return;
@@ -929,10 +953,6 @@ export default {
 }
 .node-ip {
     color: #2d5f9e;
-}
-
-.block-table-content >>> .el-icon-arrow-right:before {
-    content: "\e60e";
 }
 .block-table-content >>> .el-table__row {
     cursor: pointer;
