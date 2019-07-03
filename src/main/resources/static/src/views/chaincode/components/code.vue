@@ -742,7 +742,7 @@ export default {
             let reqData = {
                 contractName: this.contractName,
                 abiInfo: JSON.parse(this.abiFile),
-                contractBin: this.data.contractBin,
+                contractBin: this.bytecodeBin,
                 packageName: this.javaClassName
             };
             queryJavaClass(reqData)
