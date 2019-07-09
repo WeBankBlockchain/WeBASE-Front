@@ -127,7 +127,7 @@ public class TransService {
 
         // save abi
         ContractAbiUtil
-            .setContractWithAbi(req.getContractName(), req.getVersion(), abiDefinitionList, true);
+            .setContractWithAbi(req.getContractName(), req.getVersion() == null ? req.getContractAddress().substring(2):req.getVersion() , abiDefinitionList, true);
     }
 
     /**
