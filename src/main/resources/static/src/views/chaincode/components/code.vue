@@ -505,6 +505,7 @@ export default {
                     this.$set(this.data, "bytecodeBin", this.bytecodeBin);
                     this.loading = false;
                     Bus.$emit("compile", this.data);
+                    this.setMethod()
                 } else {
                     this.$message({
                         type: "error",
@@ -607,7 +608,6 @@ export default {
             if (val.params.length) {
                 reqData.funcParam = val.params;
             }
-            this.setMethod();
             getDeployStatus(reqData)
                 .then(res => {
                     this.loading = false;
