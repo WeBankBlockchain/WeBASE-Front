@@ -183,9 +183,12 @@ export default {
     },
     beforeMount() {
         var head = document.head;
-        var script = document.createElement("script")
-        script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js"
-        head.append(script)
+        var script = document.createElement("script");
+        script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+        script.setAttribute('id', 'soljson');
+        if (!document.getElementById('soljson')) {
+            head.append(script)
+        }
     },
     mounted: function () {
         this.initEditor();
