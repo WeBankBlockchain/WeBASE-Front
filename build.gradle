@@ -72,7 +72,7 @@ dependencies {
 
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.11'
     compile 'org.apache.commons:commons-lang3:3.6'
-    compile 'com.alibaba:fastjson:1.2.29'
+    compile 'com.alibaba:fastjson:1.2.58'
     compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
     compile 'org.projectlombok:lombok:1.18.2'
