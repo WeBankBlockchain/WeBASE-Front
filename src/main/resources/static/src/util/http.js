@@ -15,6 +15,36 @@
  */
 import Axios from 'axios'
 import router from '../router'
+import { Message, Loading } from 'element-ui'
+let loading
+function startLoading() {
+    loading = Loading.service({
+        lock: true,
+        text: '加载中...',
+        background: 'rgba(0,0,0,0.7)'
+    })
+}
+function endLoading() {
+    loading.close()
+}
+let needLoadingRequestCount = 0
+
+export function showFullScreenLoading() {
+    if (needLoadingRequestCount === 0) {
+        startLoading()
+    }
+    needLoadingRequestCount++
+}
+
+export function tryHideFullScreenLoading() {
+    if (needLoadingRequestCount <= 0) return
+        needLoadingRequestCount--
+    if (needLoadingRequestCount === 0) {
+        endLoading()
+    }
+}
+
+
 let axiosIns = Axios.create({
     timeout: 30 * 1000
 });
@@ -26,15 +56,27 @@ axiosIns.defaults.responseType = 'json';
 axiosIns.defaults.validateStatus = function () {
     return true
 };
+//http request 拦截器
+axiosIns.interceptors.request.use(
+    config => {
+
+        showFullScreenLoading()
+        return config;
+    },
+    error => {
+        return Promise.reject(err);
+    }
+);
 // http response interceptor
 axiosIns.interceptors.response.use(
     response => {
-        if(response.data && response.data.code === 302000) {
+        if (response.data && response.data.code === 302000) {
             router.push({
                 path: '/',
-                query: {redirect: router.currentRoute.fullPath}
+                query: { redirect: router.currentRoute.fullPath }
             })
         }
+        tryHideFullScreenLoading()
         return response;
     },
     error => {

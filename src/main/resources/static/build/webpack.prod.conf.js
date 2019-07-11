@@ -26,6 +26,11 @@ const webpackConfig = merge(baseWebpackConfig, {
     optimization: {
         splitChunks: {
             cacheGroups: {
+                common: {
+                    name: 'common',
+                    chunks: 'all',
+                    test: /vue/
+                },
                 vendors: {
                     test: /[\\/]node_modules[\\/]/,
                     chunks: 'initial',

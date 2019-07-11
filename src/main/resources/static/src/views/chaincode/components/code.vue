@@ -106,7 +106,6 @@
         </el-dialog>
     </div>
 </template>
-
 <script>
 import ace from "ace-builds";
 // import "ace-builds/webpack-resolver";
@@ -117,8 +116,6 @@ require("ace-mode-solidity/build/remix-ide/mode-solidity");
 let Mode = require("ace-mode-solidity/build/remix-ide/mode-solidity").Mode;
 import errcode from "@/util/errcode";
 let Base64 = require("js-base64").Base64;
-let wrapper = require("solc/wrapper");
-let solc = wrapper(window.Module);
 import constant from "@/util/constant";
 import editor from "../dialog/editor";
 import Bus from "@/bus";
@@ -181,8 +178,21 @@ export default {
         Bus.$off("select");
         Bus.$off("noData");
     },
+    created() {
+
+    },
+    beforeMount() {
+        var head = document.head;
+        var script = document.createElement("script");
+        script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+        script.setAttribute('id', 'soljson');
+        if (!document.getElementById('soljson')) {
+            head.append(script)
+        }
+    },
     mounted: function () {
         this.initEditor();
+
         Bus.$on("select", data => {
             this.codeShow = true;
             this.refreshMessage();
@@ -308,7 +318,7 @@ export default {
         resizeCode: function () {
             this.aceEditor.setOptions({
                 maxLines:
-                Math.ceil(this.$refs.codeContent.offsetHeight / 17) - 1
+                    Math.ceil(this.$refs.codeContent.offsetHeight / 17) - 1
             });
             this.aceEditor.resize();
         },
@@ -325,7 +335,7 @@ export default {
             };
             this.aceEditor.setOptions({
                 maxLines:
-                Math.ceil(this.$refs.codeContent.offsetHeight / 17) - 1,
+                    Math.ceil(this.$refs.codeContent.offsetHeight / 17) - 1,
                 minLines: 9
             });
         },
@@ -423,6 +433,8 @@ export default {
             }
         },
         compile: function () {
+            let wrapper = require("solc/wrapper");
+            let solc = wrapper(window.Module);
             this.loading = true;
             this.refreshMessage();
             for (let i = 0; i < constant.COMPILE_INFO.length; i++) {
@@ -478,26 +490,27 @@ export default {
             }, 500);
         },
         changeOutput: function (obj) {
-            let arry = [];
-            let data = null;
             if (JSON.stringify(obj) !== "{}") {
-                for (const key in obj) {
-                    arry.push(obj[key]);
-                }
-                if (arry.length) {
+                if (obj.hasOwnProperty(this.contractName)) {
+                    let compiledMap = obj[this.contractName]
                     this.abiFileShow = true;
                     this.successInfo = "< 编译成功！";
-                    this.abiFile = arry[0].abi;
+                    this.abiFile = compiledMap.abi;
                     this.abiFile = JSON.stringify(this.abiFile);
-                    this.bin = arry[0].evm.deployedBytecode.object;
-                    this.bytecodeBin = arry[0].evm.bytecode.object;
+                    this.bin = compiledMap.evm.deployedBytecode.object;
+                    this.bytecodeBin = compiledMap.evm.bytecode.object;
                     this.data.contractAbi = this.abiFile;
                     this.data.contractBin = this.bin;
                     this.data.contractSource = Base64.encode(this.content);
                     this.$set(this.data, "bytecodeBin", this.bytecodeBin);
                     this.loading = false;
                     Bus.$emit("compile", this.data);
+                    this.setMethod()
                 } else {
+                    this.$message({
+                        type: "error",
+                        message: '合约名和文件名要保持一致'
+                    })
                     this.errorInfo = "合约编译失败！";
                     this.compileShow = true;
                     this.loading = false;
@@ -514,6 +527,7 @@ export default {
             this.compileinfo = "";
             this.abiFile = "";
             this.contractAddress = "";
+            this.bin = "";
         },
         deploying: function () {
             this.dialogUser = true;
@@ -594,7 +608,6 @@ export default {
             if (val.params.length) {
                 reqData.funcParam = val.params;
             }
-            this.setMethod();
             getDeployStatus(reqData)
                 .then(res => {
                     this.loading = false;
@@ -718,11 +731,11 @@ export default {
         downloadJavaClass: function (formName) {
             this.javaClassDialogVisible = true;
         },
-        closeJavaClass: function() {
+        closeJavaClass: function () {
             this.javaClassDialogVisible = false;
             this.initJavaClass()
         },
-        initJavaClass: function() {
+        initJavaClass: function () {
             this.javaClassName = ""
         },
         sureJavaClass: function () {
@@ -742,8 +755,7 @@ export default {
                 contractName: this.contractName,
                 abiInfo: JSON.parse(this.abiFile),
                 contractBin: this.bytecodeBin,
-                packageName: this.javaClassName,
-
+                packageName: this.javaClassName
             };
             queryJavaClass(reqData)
                 .then(res => {
@@ -896,10 +908,10 @@ export default {
     text-rendering: geometricPrecision;
     font-feature-settings: "liga" 0;
     font-variant-ligatures: none;
-    font: 14px/normal "Monaco", "Menlo", "Ubuntu Mono", "Consolas",
+    font: 14px / normal "Monaco", "Menlo", "Ubuntu Mono", "Consolas",
         "source-code-pro", monospace !important;
 }
-.ace-editor>>>.ace_print-margin {
+.ace-editor >>> .ace_print-margin {
     display: none;
     text-rendering: geometricPrecision;
 }
@@ -930,14 +942,14 @@ export default {
 .titleActive {
     padding-left: 40px;
 }
-.send-dialog>>>.el-dialog--center .el-dialog__body {
+.send-dialog >>> .el-dialog--center .el-dialog__body {
     padding: 5px 25px 20px;
 }
 
-.send-btn>>>.el-button {
+.send-btn >>> .el-button {
     padding: 9px 16px;
 }
-.send-dialog>>>.el-input__inner {
+.send-dialog >>> .el-input__inner {
     height: 32px;
     line-height: 32px;
 }
