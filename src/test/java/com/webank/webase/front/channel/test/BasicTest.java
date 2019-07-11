@@ -35,7 +35,6 @@ public class BasicTest extends TestBase {
     BcosBlock bcosBlock = web3j.getBlockByNumber(DefaultBlockParameter.valueOf("latest"),true).send();
     System.out.println(bcosBlock.getBlock());
     Block block = bcosBlock.getBlock();
-    block.setDifficulty("0");
     System.out.println(bcosBlock.getBlock().getNonce());
     System.out.println(web3j.getBlockByNumber(DefaultBlockParameter.valueOf("latest"),true).send());
     assertNotNull(web3j.getConsensusStatus().sendForReturnString());
