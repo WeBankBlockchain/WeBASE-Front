@@ -25,7 +25,7 @@
                 </div>
             </div>
             <div class="search-table" style="height: 76%">
-                <el-table :data="hashData" tooltip-effect="light" height="100%" v-loading="loading">
+                <el-table :data="hashData" tooltip-effect="light" style="overflow-y: auto; height:100%" v-loading="loading">
                     <el-table-column type="expand">
                         <template slot-scope="props">
                             <ul class="expand-item-ul">
