@@ -143,6 +143,9 @@ export default {
                     this.constant = value.constant;
                 }
             });
+            this.funcList.sort(function (a, b) {
+                return (a.name + '').localeCompare(b.name + '')
+            })
         },
         send: function () {
             this.buttonClick = true;
