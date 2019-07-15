@@ -214,7 +214,7 @@ export function unique(array, onlyKey) {
         result[array[i][oneKey]] = array[i];
         
     }
-    for(key in result){
+    for(let key in result){
         finalResult.push(result[key]);
     }
     return finalResult;
