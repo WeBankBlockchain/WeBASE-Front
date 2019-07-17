@@ -56,6 +56,7 @@ public class Constants {
 
     public static final String CONSTANT_PREFIX = "constant";
     private String nodeDir = "";
+    private String signServiceUrl = "http://127.0.0.1:8085/WeBASE-Sign/sign";
     private String keyServer = "127.0.0.1:8080";
     private int transMaxWait = 30;
     private String monitorDisk = "/data";
