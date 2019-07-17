@@ -47,6 +47,7 @@ logging:
   config: classpath:log4j2.xml
 
 constant:
+  signServiceUrl: http://127.0.0.1:8085/WeBASE-Sign/sign
   keyServer: 127.0.0.1:8080
   transMaxWait: 30
   monitorDisk: /data
