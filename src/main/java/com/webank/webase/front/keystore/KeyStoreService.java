@@ -20,8 +20,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.tx.txdecode.ConstantProperties;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
@@ -164,7 +167,32 @@ public class KeyStoreService {
         return keyStoreInfo.getPrivateKey();
     }
 
-
+    /**
+     * getSignDate from sign service.
+     * 
+     * @param params params
+     * @return
+     */
+    public String getSignDate(EncodeInfo params) {
+        try {
+            SignInfo signInfo = new SignInfo();
+            String url = constants.getSignServiceUrl();
+            log.info("getSignDate url:{}", url);
+            HttpHeaders headers = CommonUtils.buildHeaders();
+            HttpEntity<String> formEntity =
+                    new HttpEntity<String>(JSON.toJSONString(params), headers);
+            BaseResponse response =
+                    restTemplate.postForObject(url, formEntity, BaseResponse.class);
+            log.info("getSignDate response:{}", JSON.toJSONString(response));
+            if (response.getCode() == 0) {
+                signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
+            }
+            return signInfo.getSignDataStr();
+        } catch (Exception e) {
+            log.error("getSignDate exception", e);
+        }
+        return null;
+    }
 
 }
 
