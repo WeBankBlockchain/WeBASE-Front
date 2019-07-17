@@ -19,6 +19,7 @@ import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
+import com.webank.webase.front.keystore.KeyStoreInfo;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.AbiTypes;
 import com.webank.webase.front.util.ContractAbiUtil;
@@ -171,22 +172,27 @@ public class TransService {
         List<TypeReference<?>> finalOutputs = outputFormat(funOutputTypes);
 
         // get privateKey
-        Credentials credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
+        Credentials credentials = null;
+        if ("true".equals(constant)) {
+            KeyStoreInfo keyStoreInfo = keyStoreService.createPrivateKey(false);
+            credentials = Credentials.create(keyStoreInfo.getPrivateKey());
+        } else {
+            credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
+        }
 
         // contract load
         CommonContract commonContract;
         Web3j web3j = web3jMap.get(groupId);
-        if(web3j == null ) {
+        if (web3j == null ) {
             new FrontException(GROUPID_NOT_EXIST);
         }
-        if(address == null ) {
+        if (address == null ) {
             address = cnsMap.get(contractName+":"+version);
         }
 
         if (address != null) {
             commonContract = CommonContract.load(address, web3j,
                     credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
-
         } else {
             commonContract = CommonContract
                     .loadByName(contractName + Constants.SYMPOL + version, web3j,
