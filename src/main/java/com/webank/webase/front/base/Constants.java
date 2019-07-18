@@ -53,11 +53,12 @@ public class Constants {
     public static final String FILE_SOL = ".sol";
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI = "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
+    public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
 
     public static final String CONSTANT_PREFIX = "constant";
     private String nodeDir = "";
-    private String signServiceUrl = "http://127.0.0.1:8085/WeBASE-Sign/sign";
     private String keyServer = "127.0.0.1:8080";
+    private String signServer = "127.0.0.1:8085";
     private int transMaxWait = 30;
     private String monitorDisk = "/data";
     private String aesKey = "4d5dFr4fG446GBde";
