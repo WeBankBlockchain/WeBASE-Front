@@ -30,12 +30,10 @@ public interface ConstantCode {
     String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"msg\":\"version cannot be empty\"}";
     String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"msg\":\"funcName cannot be empty\"}";
     String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"msg\":\"abiInfo cannot be empty\"}";
-    String PARAM_FAIL_CONTRACTBIN_IS_EMPTY =
-        "{\"code\":201007,\"msg\":\"contractBin cannot be empty\"}";
+    String PARAM_FAIL_CONTRACTBIN_IS_EMPTY = "{\"code\":201007,\"msg\":\"contractBin cannot be empty\"}";
 
     /* general error */
-    RetCode CONTRACT_DEPLOYED_ERROR =
-        RetCode.mark(201008, "contract's current version has been deployed");
+    RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");
     RetCode CONTRACT_NOT_DEPLOY_ERROR = RetCode.mark(201009, "contract is not deployed");
     RetCode ABI_SAVE_ERROR = RetCode.mark(201010, "save abi error");
     RetCode IN_FUNCPARAM_ERROR = RetCode.mark(201011, "contract funcParam is error");
@@ -45,8 +43,7 @@ public interface ConstantCode {
     RetCode PRIVATEKEY_IS_NULL = RetCode.mark(201015, "user's privateKey is null");
     RetCode FILE_IS_NOT_EXIST = RetCode.mark(201016, "file is not exist");
     RetCode GET_NODE_CONFIG_FAILE = RetCode.mark(201017, "failed to get node config");
-    RetCode BLOCKNUMBER_AND_PBFTVIEW_UNCHANGED =
-        RetCode.mark(201018, "blockNumber and pbftView unchanged");
+    RetCode BLOCKNUMBER_AND_PBFTVIEW_UNCHANGED = RetCode.mark(201018, "blockNumber and pbftView unchanged");
     RetCode IN_FUNCTION_ERROR = RetCode.mark(201019, "request function is error");
     RetCode TRANSACTION_QUERY_FAILED = RetCode.mark(201020, "transaction query from chain failed");
     RetCode TRANSACTION_SEND_FAILED = RetCode.mark(201021, "transaction send to chain failed");
@@ -64,8 +61,8 @@ public interface ConstantCode {
     RetCode SIGN_FAIL = RetCode.mark(201033, "cloud sign fail");
     RetCode GROUPID_NOT_EXIST = RetCode.mark(201034, "groupId not exist");
     RetCode VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL = RetCode.mark(201035, "version and address cannot all be  null");
-
-
+    String CONTRACTADDRESS_IS_EMPTY = "{\"code\":201036,\"msg\":\"contractAddress cannot be empty\"}";
+    RetCode DATA_SIGN_ERROR = RetCode.mark(201037, "data request sign error");
 
     /* system error */
     RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");

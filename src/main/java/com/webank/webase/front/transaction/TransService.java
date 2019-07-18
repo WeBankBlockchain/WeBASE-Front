@@ -20,8 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
+import org.fisco.bcos.web3j.abi.FunctionEncoder;
+import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
@@ -35,7 +38,9 @@ import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterName;
 import org.fisco.bcos.web3j.protocol.core.Request;
+import org.fisco.bcos.web3j.protocol.core.methods.request.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -104,6 +109,80 @@ public class TransService {
         log.info("transHandle end. name:{} func:{} baseRsp:{}", req.getContractName(),
                 req.getFuncName(), JSON.toJSONString(baseRsp));
         return baseRsp;
+    }
+
+    /**
+     * transHandleWithSign.
+     *
+     * @param req request
+     */
+    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
+        int groupId = req.getGroupId();
+        int signUserId = req.getSignUserId();
+        String contractAddress = req.getContractAddress();
+        String contractAbi = JSON.toJSONString(req.getContractAbi());
+        String funcName = req.getFuncName();
+        List<Object> params = req.getFuncParam();
+
+        // check function name
+        AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(funcName, contractAbi);
+        if (abiDefinition == null) {
+            log.warn("transHandleWithSign fail. func:{} is not existed", funcName);
+            throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
+        }
+        // check function parameter
+        List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
+        if (funcInputTypes.size() != params.size()) {
+            log.warn("save fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+        }
+        // check groupId
+        Web3j web3j = web3jMap.get(groupId);
+        if (web3j == null) {
+            new FrontException(GROUPID_NOT_EXIST);
+        }
+        // input format
+        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
+        // output format
+        List<String> funOutputTypes = AbiUtil.getFuncOutputType(abiDefinition);
+        List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
+        // encode function
+        Function function = new Function(funcName, finalInputs, finalOutputs);
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        // trans handle
+        Object response = "";
+        if (abiDefinition.isConstant()) {
+            KeyStoreInfo keyStoreInfo = keyStoreService.createPrivateKey(false);
+            String callOutput = web3j
+                    .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
+                            contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
+                    .send().getValue().getOutput();
+            List<Type> typeList =
+                    FunctionReturnDecoder.decode(callOutput, function.getOutputParameters());
+            if (typeList.size() > 0) {
+                response = AbiUtil.callResultParse(funOutputTypes, typeList);
+            } else {
+                response = typeList;
+            }
+        } else {
+            // data sign
+            String signMsg =
+                    signMessage(groupId, web3j, signUserId, contractAddress, encodedFunction);
+            if (StringUtils.isBlank(signMsg)) {
+                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            }
+            // send transaction
+            final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+            sendMessage(web3j, signMsg, transFuture);
+            TransactionReceipt receipt =
+                    transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+            response = receipt;
+        }
+
+        log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(),
+                JSON.toJSONString(response));
+        return response;
     }
 
     /**
@@ -269,12 +348,12 @@ public class TransService {
      * @param data info
      * @return
      */
-    public String signMessage(int groupId, int userId, String contractAddress, String data)
-            throws IOException, FrontException {
+    public String signMessage(int groupId, Web3j web3j, int userId, String contractAddress,
+            String data) throws IOException, FrontException {
         Random r = new Random();
         BigInteger randomid = new BigInteger(250, r);
-        BigInteger blockLimit = web3jMap.get(groupId).getBlockNumberCache();
-        String versionContent = web3jMap.get(groupId).getNodeVersion().sendForReturnString();
+        BigInteger blockLimit = web3j.getBlockNumberCache();
+        String versionContent = web3j.getNodeVersion().sendForReturnString();
         String signMsg = "";
         if (versionContent.contains("2.0.0-rc1") || versionContent.contains("release-2.0.1")) {
             RawTransaction rawTransaction = RawTransaction.createTransaction(randomid,
@@ -327,9 +406,9 @@ public class TransService {
      * @param signMsg signMsg
      * @param future future
      */
-    public void sendMessage(int groupId, String signMsg,
+    public void sendMessage(Web3j web3j, String signMsg,
             final CompletableFuture<TransactionReceipt> future) throws IOException {
-        Request<?, SendTransaction> request = web3jMap.get(groupId).sendRawTransaction(signMsg);
+        Request<?, SendTransaction> request = web3j.sendRawTransaction(signMsg);
         request.setNeedTransCallback(true);
         request.setTransactionSucCallback(new TransactionSucCallback() {
             @Override

@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.contract;
 
+import static com.webank.webase.front.base.ConstantCode.GROUPID_NOT_EXIST;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -219,7 +220,7 @@ public class ContractService {
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }
-    
+
     /**
      * contract deploy.
      */
@@ -228,7 +229,13 @@ public class ContractService {
         String contractAbi = JSON.toJSONString(req.getContractAbi());
         String contractBin = req.getContractBin();
         List<Object> params = req.getFuncParam();
-        
+
+        // check groupId
+        Web3j web3j = web3jMap.get(groupId);
+        if (web3j == null) {
+            new FrontException(GROUPID_NOT_EXIST);
+        }
+
         // check parameters
         AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(contractAbi);
         List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
@@ -236,27 +243,26 @@ public class ContractService {
             log.warn("deployWithSign fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
             throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
         }
-        
+
         // Constructor encode
         String encodedConstructor = "";
         if (funcInputTypes.size() > 0) {
             List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
             encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
         }
-        
+
         // data sign
         String data = contractBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, req.getSignUserId(), "", data);
+        String signMsg = transService.signMessage(groupId, web3j, req.getSignUserId(), "", data);
         if (StringUtils.isBlank(signMsg)) {
             throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
         }
         // send transaction
         final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-        transService.sendMessage(groupId, signMsg, transFuture);
-        TransactionReceipt receipt =
-                transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+        transService.sendMessage(web3j, signMsg, transFuture);
+        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
         String contractAddress = receipt.getContractAddress();
-        
+
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }

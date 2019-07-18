@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.tx.txdecode.ConstantProperties;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -176,7 +175,7 @@ public class KeyStoreService {
     public String getSignDate(EncodeInfo params) {
         try {
             SignInfo signInfo = new SignInfo();
-            String url = constants.getSignServiceUrl();
+            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getSignServer());
             log.info("getSignDate url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
             HttpEntity<String> formEntity =

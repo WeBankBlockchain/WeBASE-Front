@@ -66,4 +66,20 @@ public class TransController extends BaseController {
 
         return transServiceImpl.transHandle(reqTransHandle);
     }
+    
+    /**
+     * transHandleWithSign.
+     * 
+     * @param req request
+     * @param result checkResult
+     * @return
+     */
+    @ApiOperation(value = "transaction handing", notes = "transaction handing with sign")
+    @ApiImplicitParam(name = "req", value = "transaction info", required = true, dataType = "ReqTransHandleWithSign")
+    @PostMapping("/handleWithSign")
+    public Object transHandleWithSign(@Valid @RequestBody ReqTransHandleWithSign req, BindingResult result) throws Exception {
+        log.info("transHandleWithSign start. req:[{}]", JSON.toJSONString(req));
+        checkParamResult(result);
+        return transServiceImpl.transHandleWithSign(req);
+    }
 }
