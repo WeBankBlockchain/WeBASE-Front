@@ -19,11 +19,7 @@
             <span class="send-item-title">合约名称:</span>
             <span>{{data.contractName}}</span>
         </div>
-        <!-- <div class="send-item">
-            <span class="send-item-title">合约版本:</span>
-            <span>{{contractVersion}}</span>
-        </div> -->
-        <div class="send-item">
+        <div class="send-item" v-show="!constant">
             <span class="send-item-title">用户地址:</span>
             <el-select v-model="transation.userName" placeholder="请选择用户地址" style="width:240px">
                 <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'></el-option>
@@ -34,7 +30,7 @@
             <el-select v-model="transation.funcType" placeholder="方法类型" @change="changeType($event)" style="width:110px">
                 <el-option label="function" :value="'function'"></el-option>
             </el-select>
-            <el-select v-model="transation.funcName" placeholder="方法名" v-show="funcList.length > 0" @change="changeFunc" style="width:125px">
+            <el-select v-model="transation.funcName" filterable placeholder="方法名" v-show="funcList.length > 0" @change="changeFunc" style="width:125px">
                 <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList"></el-option>
             </el-select>
         </div>
@@ -47,9 +43,6 @@
                             <span class="">{{item.name}}</span>
                         </template>
                     </el-input>
-                    <!-- <el-tooltip class="item" effect="dark" content="如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号" placement="top-start">
-                        <i class="el-icon-info" style="position: relative;top: 8px;"></i>
-                    </el-tooltip> -->
                 </li>
                 <p style="padding: 5px 0 0 28px;">
                     <i class="el-icon-info" style="padding-right: 4px;"></i>如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号。</p>
@@ -167,7 +160,7 @@ export default {
             })
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                user: this.transation.userName,
+                user: this.constant ? ' ' : this.transation.userName,
                 contractName: this.data.contractName,
                 version: this.contractVersion,
                 funcName: functionName || "",
@@ -189,16 +182,23 @@ export default {
                                 message: "查询成功!"
                             });
                         } else {
-                            this.$message({
-                                type: "success",
-                                message: "发送交易成功!"
-                            });
+                            if(resData.statusOK){
+                                this.$message({
+                                    type: "success",
+                                    message: "交易成功!"
+                                });
+                            }else {
+                                this.$message({
+                                    type: "success",
+                                    message: "交易失败!"
+                                });
+                            }
                         }
 
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || '交易失败！'
+                            message: errcode.errCode[res.data.code].cn || '发送交易失败！'
                         });
                         this.close();
                     }

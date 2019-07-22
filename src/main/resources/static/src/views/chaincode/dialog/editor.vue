@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 <template>
-    <div>
-        <el-dialog :title="'交易内容'" :visible.sync="editorDialog" @close="modelClose" width="600px">
-            <div>
-                <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>
-            </div>
-        </el-dialog>
-    </div>
+    <el-dialog :title="'交易内容'" :visible.sync="editorDialog" @close="modelClose" width="600px" top="10vh">
+        <div slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
+            <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>
+        </div>
+    </el-dialog>
 </template>
 <script>
 export default {
@@ -33,7 +31,11 @@ export default {
             transationData: this.data || null,
             modePath: 'ace/mode/solidity',
             editorDialog: this.show || false,
+            editorHeight: ''
         }
+    },
+    mounted() {
+        this.editorHeight = document.body.offsetHeight * 0.75
     },
     methods: {
         modelClose: function () {
