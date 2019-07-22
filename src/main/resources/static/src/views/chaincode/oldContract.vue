@@ -249,6 +249,9 @@ export default {
 .grayColor {
     color: #666 !important;
 }
+.copy-public-key {
+    margin-right: 5px;
+}
 </style>
 
 
