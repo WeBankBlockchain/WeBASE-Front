@@ -175,7 +175,7 @@ public class KeyStoreService {
     public String getSignDate(EncodeInfo params) {
         try {
             SignInfo signInfo = new SignInfo();
-            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getSignServer());
+            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             log.info("getSignDate url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
             HttpEntity<String> formEntity =
