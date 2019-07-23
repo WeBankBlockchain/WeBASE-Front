@@ -107,6 +107,7 @@ export default {
                     duration: 2000
                 });
             } else {
+                this.currentPage = 1
                 this.getBlockList();
             }
         },
