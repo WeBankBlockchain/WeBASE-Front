@@ -447,7 +447,7 @@ td {
 
 /* el-tooltip*/
 .el-tooltip__popper{ 
-    max-width:50% !important;
+    /* max-width:90% !important; */
 }
 
 .el-range-input{
