@@ -1,13 +1,6 @@
 package com.webank.webase.front.keystore;
 
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.performance.Performance;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-
-import javax.transaction.Transactional;
-import java.util.List;
 
 /*
  * Copyright 2012-2019 the original author or authors.
