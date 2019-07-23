@@ -197,6 +197,7 @@ export default {
                 this.contractName = "";
                 this.contractAddress = ""
             }
+            this.currentPage = 1
             this.getContracts();
         },
         send: function (val) {
