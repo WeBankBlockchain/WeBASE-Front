@@ -58,7 +58,6 @@ public class Constants {
     public static final String CONSTANT_PREFIX = "constant";
     private String nodeDir = "";
     private String keyServer = "127.0.0.1:8080";
-    private String signServer = "127.0.0.1:8085";
     private int transMaxWait = 30;
     private String monitorDisk = "/data";
     private String aesKey = "4d5dFr4fG446GBde";

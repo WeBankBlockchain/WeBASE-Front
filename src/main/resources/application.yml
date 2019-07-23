@@ -48,7 +48,6 @@ logging:
 
 constant:
   keyServer: 127.0.0.1:5001
-  signServer: 127.0.0.1:5004
   transMaxWait: 30
   monitorDisk: /data
   aesKey: EfdsW23D23d3df43
