@@ -74,17 +74,23 @@
                         <span class="contract-info-list-title" style="color: #0B8AEE">contractAddress </span>
                         <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">{{contractAddress}}</span>
                     </div>
-                    <div class="contract-info-list" v-show="abiFile">
+                    <div class="contract-info-list" v-if="abiFile">
                         <span class="contract-info-list-title" style="color: #0B8AEE">contractName </span>
                         <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">{{contractName}}</span>
                     </div>
                     <div class="contract-info-list" v-show="abiFile">
                         <span class="contract-info-list-title" style="color: #0B8AEE">abi</span>
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">{{abiFile}}</span>
+                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" class="showText" ref="showAbiText">
+                            {{abiFile}}
+                        </span>
+                        <i :class="[ showAbi ? 'el-icon-arrow-down': 'el-icon-arrow-up'] " v-if="complieAbiTextHeight" @click="showAbiText"></i>
                     </div>
-                    <div class="contract-info-list" style="border-bottom: 1px solid #e8e8e8" v-show="bin">
+                    <div class="contract-info-list" style="border-bottom: 1px solid #e8e8e8" v-show="abiFile">
                         <span class="contract-info-list-title" style="color: #0B8AEE">bin</span>
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">{{bin}}</span>
+                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" class="showText" ref="showBinText">
+                            {{bin}}
+                        </span>
+                        <i :class="[ showBin ? 'el-icon-arrow-down': 'el-icon-arrow-up'] " v-if="complieBinTextHeight" @click="showBinText"></i>
                     </div>
                 </div>
             </div>
@@ -95,7 +101,7 @@
         <el-dialog title="选择用户地址" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
             <v-user @change="deployContract($event)" @close="userClose" :abi='abiFile'></v-user>
         </el-dialog>
-        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose'></v-editor>
+        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose'  ref="editor"></v-editor>
         <el-dialog title="填写java包名" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
             <el-input v-model="javaClassName"></el-input>
             <i style="color: #606266">如：com.webank</i>
@@ -171,66 +177,12 @@ export default {
             version: "",
             saveShow: false,
             editorShow: false,
-            editorData: null
+            editorData: null,
+            showAbi: true,
+            showBin: true,
+            complieAbiTextHeight: false,
+            complieBinTextHeight: false
         };
-    },
-    beforeDestroy: function () {
-        Bus.$off("select");
-        Bus.$off("noData");
-    },
-    created() {
-
-    },
-    beforeMount() {
-        var head = document.head;
-        var script = document.createElement("script");
-        script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
-        script.setAttribute('id', 'soljson');
-        if (!document.getElementById('soljson')) {
-            head.append(script)
-        }
-    },
-    mounted: function () {
-        this.initEditor();
-
-        Bus.$on("select", data => {
-            this.codeShow = true;
-            this.refreshMessage();
-            this.code = "";
-            this.version = "";
-            this.status = null;
-            this.abiFile = "";
-            this.contractAddress = "";
-            this.errorMessage = "";
-            this.contractName = "";
-            this.content = "";
-            this.bin = "";
-            this.data = data;
-            this.code = Base64.decode(data.contractSource);
-            this.content = this.code;
-            this.aceEditor.setValue(this.content);
-            this.status = data.contractStatus;
-            this.abiFile = data.contractAbi;
-            this.contractAddress = data.contractAddress;
-            this.errorMessage = data.description || "";
-            this.contractName = data.contractName;
-            this.bin = data.contractBin;
-            this.bytecodeBin = data.bytecodeBin || "";
-            this.version = data.version;
-        });
-        Bus.$on("noData", data => {
-            this.codeShow = false;
-            this.refreshMessage();
-            this.code = "";
-            this.version = "";
-            this.status = null;
-            this.abiFile = "";
-            this.contractAddress = "";
-            this.errorMessage = "";
-            this.contractName = "";
-            this.content = "";
-            this.bin = "";
-        });
     },
     watch: {
         content: function (val) {
@@ -268,6 +220,76 @@ export default {
             return !this.show;
         }
     },
+
+    created() {
+
+    },
+    beforeMount() {
+        var head = document.head;
+        var script = document.createElement("script");
+        script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+        script.setAttribute('id', 'soljson');
+        if (!document.getElementById('soljson')) {
+            head.append(script)
+        }
+    },
+    mounted: function () {
+        this.initEditor();
+        Bus.$on("select", data => {
+            this.codeShow = true;
+            this.refreshMessage();
+            this.code = "";
+            this.version = "";
+            this.status = null;
+            this.abiFile = "";
+            this.contractAddress = "";
+            this.errorMessage = "";
+            this.contractName = "";
+            this.content = "";
+            this.bin = "";
+            this.data = data;
+            this.code = Base64.decode(data.contractSource);
+            this.content = this.code;
+            this.aceEditor.setValue(this.content);
+            this.status = data.contractStatus;
+            this.abiFile = data.contractAbi;
+            this.contractAddress = data.contractAddress;
+            this.errorMessage = data.description || "";
+            this.contractName = data.contractName;
+            this.bin = data.contractBin;
+            this.bytecodeBin = data.bytecodeBin || "";
+            this.version = data.version;
+            this.complieAbiTextHeight = false;
+            this.complieBinTextHeight = false;
+            this.$refs['showAbiText'].style.overflow = 'hidden'
+            this.$refs['showBinText'].style.overflow = 'hidden'
+            if (data.contractAbi) {
+                this.$nextTick(() => {
+                    if(this.$refs['showAbiText'].offsetHeight >= 72){
+                        this.complieAbiTextHeight = true
+                    }
+                    if(this.$refs['showBinText'].offsetHeight >= 72){
+                        this.complieBinTextHeight = true
+                    }
+                    
+                })
+            }
+        });
+        Bus.$on("noData", data => {
+            this.codeShow = false;
+            this.refreshMessage();
+            this.code = "";
+            this.version = "";
+            this.status = null;
+            this.abiFile = "";
+            this.contractAddress = "";
+            this.errorMessage = "";
+            this.contractName = "";
+            this.content = "";
+            this.bin = "";
+        });
+    },
+
     methods: {
         initEditor: function () {
             let _this = this;
@@ -642,79 +664,6 @@ export default {
                     });
                 });
         },
-        // addContract: function() {
-        //     this.loading = true;
-        //     let reqData = {
-        //         groupId: localStorage.getItem("groupId"),
-        //         contractName: this.contractName,
-        //         contractBin: this.bin,
-        //         bytecodeBin: this.bytecodeBin,
-        //         contractVersion: this.data.contractVersion,
-        //         contractSource: Base64.encode(this.content)
-        //     };
-        //     if (this.abiFile) {
-        //         reqData.contractAbi = this.abiFile;
-        //     }
-        //     addChaincode(reqData)
-        //         .then(res => {
-        //             this.loading = false;
-        //             if (res.data.code === 0) {
-        //                 this.status = res.data.data.contractStatus;
-        //                 this.abiFile = res.data.data.contractAbi || "";
-        //                 this.contractAddress = res.data.data.contractAddress || "";
-        //                 this.$message({
-        //                     message: "合约保存成功！",
-        //                     type: "success"
-        //                 });
-        //                 this.$emit("add", res.data.data);
-        //             } else {
-        //                 this.$message({
-        //                     message: errcode.errCode[res.data.code].cn,
-        //                     type: "error"
-        //                 });
-        //             }
-        //         })
-        //         .catch(err => {
-        //             this.loading = false;
-        //             this.$message({
-        //                 message: "系统错误",
-        //                 type: "error"
-        //             });
-        //         });
-        // },
-        // editContract: function() {
-        //     let reqData = {
-        //         groupId: localStorage.getItem("groupId"),
-        //         contractId: this.data.contractId,
-        //         contractBin: this.bin,
-        //         bytecodeBin: this.bytecodeBin,
-        //         contractSource: Base64.encode(this.content)
-        //     };
-        //     if (this.abiFile) {
-        //         reqData.contractAbi = this.abiFile;
-        //     }
-        //     editChain(reqData)
-        //         .then(res => {
-        //             if (res.data.code === 0) {
-        //                 this.$message({
-        //                     message: "合约保存成功！",
-        //                     type: "success"
-        //                 });
-        //                 this.$emit("add", res.data.data);
-        //             } else {
-        //                 this.$message({
-        //                     message: errcode.errCode[res.data.code].cn,
-        //                     type: "error"
-        //                 });
-        //             }
-        //         })
-        //         .catch(err => {
-        //             this.$message({
-        //                 message: "系统错误",
-        //                 type: "error"
-        //             });
-        //         });
-        // },
         foldInfo: function (val) {
             this.successHide = val;
         },
@@ -792,6 +741,22 @@ export default {
                         type: "error"
                     });
                 });
+        },
+        showAbiText(){
+            this.showAbi = !this.showAbi
+            if(this.$refs['showAbiText'].style.overflow ==='visible') {
+                this.$refs['showAbiText'].style.overflow = 'hidden'
+            }else if(this.$refs['showAbiText'].style.overflow === '' || this.$refs['showAbiText'].style.overflow === 'hidden'){
+                this.$refs['showAbiText'].style.overflow = 'visible'
+            }
+        },
+        showBinText(){
+            this.showBin = !this.showBin
+            if(this.$refs['showBinText'].style.overflow ==='visible') {
+                this.$refs['showBinText'].style.overflow = 'hidden'
+            }else if(this.$refs['showBinText'].style.overflow === '' || this.$refs['showBinText'].style.overflow === 'hidden'){
+                this.$refs['showBinText'].style.overflow = 'visible'
+            }
         }
     }
 };
@@ -952,5 +917,12 @@ export default {
 .send-dialog >>> .el-input__inner {
     height: 32px;
     line-height: 32px;
+}
+.showText {
+    display: inline-block;
+    width: calc(100% - 120px);
+    word-wrap: break-word;
+    max-height: 73px;
+    overflow: hidden;
 }
 </style>

@@ -35,9 +35,9 @@
                 <td style="vertical-align: top;width: 70px">参数：</td>
                 <td>
                     <div v-for='(item,index) in inputs' :key='item.name'>
-                        <el-input v-model="parameter[index]" style="width: 240px;margin-bottom:10px;">
+                        <el-input v-model="parameter[index]" style="width: 240px;margin-bottom:10px;" :placeholder="item.type">
                             <template slot="prepend">
-                                <span>{{item.type}}</span>
+                                <span>{{item.name}}</span>
                             </template>
                         </el-input>
                         <!-- <el-tooltip class="item" effect="dark" content="如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号" placement="top-start">
