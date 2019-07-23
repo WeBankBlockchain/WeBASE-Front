@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:~/.h2/front_db;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:~/.h2/webase_front_db;DB_CLOSE_ON_EXIT=FALSE
     databaseName: db
     driverClassName: org.h2.Driver
     serverName:
@@ -30,7 +30,7 @@ spring:
         trace: true
 
 server:
-  port: 8081
+  port: 5002
   context-path: /WeBASE-Front
 
 sdk:
@@ -47,8 +47,8 @@ logging:
   config: classpath:log4j2.xml
 
 constant:
-  keyServer: 127.0.0.1:8080
-  signServer: 127.0.0.1:8085
+  keyServer: 127.0.0.1:5001
+  signServer: 127.0.0.1:5004
   transMaxWait: 30
   monitorDisk: /data
   aesKey: EfdsW23D23d3df43
