@@ -129,8 +129,8 @@ export default {
             let networkId = localStorage.getItem("networkId");
             let reqData = {
                     networkId: networkId,
-                    pageNumber: 1,
-                    pageSize: 10
+                    pageNumber: this.currentPage,
+                    pageSize: this.pageSize
                 },
                 reqQuery = {};
             reqQuery = {
@@ -169,6 +169,7 @@ export default {
             this.$set(val, "show", !val.show);
         },
         search() {
+            this.currentPage = 1
             this.getUnusualUserList();
         },
         handleSizeChange: function(val) {

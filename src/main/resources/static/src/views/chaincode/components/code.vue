@@ -57,8 +57,10 @@
             </div>
             <div class="contract-info" v-show="successHide" :style="{height:infoHeight + 'px'}">
                 <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
-                <div class="contract-info-title">
-                    <!-- <i class="wbs-icon-clear float-right" @click="refreshMessage" title="清除"></i> -->
+                <div class="contract-info-title" @mouseover="mouseHover=!mouseHover" @mouseout="mouseHover=!mouseHover" v-show="abiFile||contractAddress">
+                    <i :class="[showCompileText?'el-icon-caret-bottom':'el-icon-caret-top']" @click="collapse">
+
+                    </i>
                 </div>
                 <div>
                     <div class="contract-info-list1" v-html="compileinfo">
@@ -101,7 +103,7 @@
         <el-dialog title="选择用户地址" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
             <v-user @change="deployContract($event)" @close="userClose" :abi='abiFile'></v-user>
         </el-dialog>
-        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose'  ref="editor"></v-editor>
+        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' ref="editor"></v-editor>
         <el-dialog title="填写java包名" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
             <el-input v-model="javaClassName"></el-input>
             <i style="color: #606266">如：com.webank</i>
@@ -181,7 +183,9 @@ export default {
             showAbi: true,
             showBin: true,
             complieAbiTextHeight: false,
-            complieBinTextHeight: false
+            complieBinTextHeight: false,
+            mouseHover: false,
+            showCompileText: true
         };
     },
     watch: {
@@ -265,13 +269,13 @@ export default {
             this.$refs['showBinText'].style.overflow = 'hidden'
             if (data.contractAbi) {
                 this.$nextTick(() => {
-                    if(this.$refs['showAbiText'].offsetHeight >= 72){
+                    if (this.$refs['showAbiText'].offsetHeight >= 72) {
                         this.complieAbiTextHeight = true
                     }
-                    if(this.$refs['showBinText'].offsetHeight >= 72){
+                    if (this.$refs['showBinText'].offsetHeight >= 72) {
                         this.complieBinTextHeight = true
                     }
-                    
+
                 })
             }
         });
@@ -742,21 +746,34 @@ export default {
                     });
                 });
         },
-        showAbiText(){
+        showAbiText() {
             this.showAbi = !this.showAbi
-            if(this.$refs['showAbiText'].style.overflow ==='visible') {
+            if (this.$refs['showAbiText'].style.overflow === 'visible') {
                 this.$refs['showAbiText'].style.overflow = 'hidden'
-            }else if(this.$refs['showAbiText'].style.overflow === '' || this.$refs['showAbiText'].style.overflow === 'hidden'){
+            } else if (this.$refs['showAbiText'].style.overflow === '' || this.$refs['showAbiText'].style.overflow === 'hidden') {
                 this.$refs['showAbiText'].style.overflow = 'visible'
             }
         },
-        showBinText(){
+        showBinText() {
             this.showBin = !this.showBin
-            if(this.$refs['showBinText'].style.overflow ==='visible') {
+            if (this.$refs['showBinText'].style.overflow === 'visible') {
                 this.$refs['showBinText'].style.overflow = 'hidden'
-            }else if(this.$refs['showBinText'].style.overflow === '' || this.$refs['showBinText'].style.overflow === 'hidden'){
+            } else if (this.$refs['showBinText'].style.overflow === '' || this.$refs['showBinText'].style.overflow === 'hidden') {
                 this.$refs['showBinText'].style.overflow = 'visible'
             }
+        },
+        collapse() {
+            this.showCompileText = !this.showCompileText
+            if (this.showCompileText) {
+                this.infoHeight = 250
+
+            } else if (!this.showCompileText) {
+                this.infoHeight = 50
+            }
+            this.$nextTick(() => {
+                this.resizeCode()
+            })
+
         }
     }
 };
@@ -831,7 +848,7 @@ export default {
     padding-right: 20px;
 }
 .contract-info-title {
-    padding-right: 20px;
+    text-align: center;
 }
 .move {
     position: absolute;
