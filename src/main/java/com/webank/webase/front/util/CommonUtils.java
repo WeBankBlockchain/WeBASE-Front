@@ -1,27 +1,3 @@
-package com.webank.webase.front.util;
-
-import com.alibaba.fastjson.JSON;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Enumeration;
-import java.util.List;
-
-import com.webank.webase.front.base.exception.FrontException;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -37,6 +13,30 @@ import org.springframework.http.MediaType;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webank.webase.front.util;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Enumeration;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.utils.Numeric;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.exception.FrontException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * CommonUtils.
@@ -45,10 +45,40 @@ import org.springframework.http.MediaType;
 @Slf4j
 public class CommonUtils {
 
-
     private CommonUtils() {
         throw new IllegalStateException("Utility class");
     }
+    
+    /**
+     * stringToSignatureData.
+     * 
+     * @param signatureData signatureData
+     * @return
+     */
+    public static SignatureData stringToSignatureData(String signatureData) {
+        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+        byte[] signR = new byte[32];
+        System.arraycopy(byteArr, 1, signR, 0, signR.length);
+        byte[] signS = new byte[32];
+        System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
+        return new SignatureData(byteArr[0], signR, signS);
+    }
+
+    /**
+     * signatureDataToString.
+     * 
+     * @param signatureData signatureData
+     * @return
+     */
+    public static String signatureDataToString(SignatureData signatureData) {
+        byte[] byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length];
+        byteArr[0] = signatureData.getV();
+        System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
+        System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
+                signatureData.getS().length);
+        return Numeric.toHexString(byteArr, 0, byteArr.length, false);
+    }
+    
     /**
      * parse Byte to HexStr.
      * 
@@ -80,7 +110,6 @@ public class CommonUtils {
             return "0x0";
         }
         return  "0x" + Integer.toHexString(Integer.valueOf(str));
-
     }
 
     /**

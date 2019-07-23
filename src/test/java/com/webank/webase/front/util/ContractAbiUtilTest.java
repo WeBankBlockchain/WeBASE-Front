@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.webank.webase.front.transaction.TransService.outputFormat;
+import static com.webank.webase.front.util.AbiUtil.outputFormat;
 import static com.webank.webase.front.util.ContractAbiUtil.contractEventMap;
 import static org.junit.Assert.assertEquals;
 
@@ -89,7 +89,7 @@ public class ContractAbiUtilTest extends TestBase {
         ArrayList a = new ArrayList();
         a.add("123");
         List<Object> params = a;
-        List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
+        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
         List<String> funOutputTypes = ContractAbiUtil.getFuncOutputType(contractName, "trans", version);
         List<TypeReference<?>> finalOutputs = outputFormat(funOutputTypes);
         Function function = new Function(funcName, finalInputs, finalOutputs);
@@ -106,7 +106,7 @@ public class ContractAbiUtilTest extends TestBase {
         List<String> funcInputTypes1 = versionEvents.get(0).getFuncInputs().get(funcName1);
         ArrayList a1 = new ArrayList();
         List<Object> params1 = a1;
-        List<Type> finalInputs1 = TransService.inputFormat(funcInputTypes1, params1);
+        List<Type> finalInputs1 = AbiUtil.inputFormat(funcInputTypes1, params1);
 
         List<String> funOutputTypes1 = ContractAbiUtil.getFuncOutputType(contractName, funcName1, version);
         List<TypeReference<?>> finalOutputs1 = outputFormat(funOutputTypes1);
@@ -127,7 +127,7 @@ public class ContractAbiUtilTest extends TestBase {
 //        a.add("12345");
         a.add("12,23,34,45");
         List<Object> params = a;
-        List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
+        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
         List<String> funOutputTypes = ContractAbiUtil.getFuncOutputType(contractName, "set", version);
         List<TypeReference<?>> finalOutputs = outputFormat(funOutputTypes);
         Function function = new Function(funcName, finalInputs, finalOutputs);
@@ -145,7 +145,7 @@ public class ContractAbiUtilTest extends TestBase {
         List<String> funcInputTypes1 = versionEvents.get(0).getFuncInputs().get(funcName1);
         ArrayList a1 = new ArrayList();
         List<Object> params1 = a1;
-        List<Type> finalInputs1 = TransService.inputFormat(funcInputTypes1, params1);
+        List<Type> finalInputs1 = AbiUtil.inputFormat(funcInputTypes1, params1);
 
         List<String> funOutputTypes1 = ContractAbiUtil.getFuncOutputType(contractName, funcName1, version);
         List<TypeReference<?>> finalOutputs1 = outputFormat(funOutputTypes1);

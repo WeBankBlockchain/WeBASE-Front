@@ -1,37 +1,36 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.webank.webase.front.contract;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.Constants;
-import com.webank.webase.front.base.FrontUtils;
-import com.webank.webase.front.base.enums.ContractStatus;
-import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
-import com.webank.webase.front.file.FileContent;
-import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.transaction.TransService;
-import com.webank.webase.front.util.CommonUtils;
-import com.webank.webase.front.util.ContractAbiUtil;
-
-import com.webank.webase.front.web3api.Web3ApiService;
+import static com.webank.webase.front.base.ConstantCode.GROUPID_NOT_EXIST;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
@@ -41,6 +40,7 @@ import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -48,22 +48,27 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
-
-/*
- * Copyright 2012-2019 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.BaseResponse;
+import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.FrontUtils;
+import com.webank.webase.front.base.enums.ContractStatus;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqDeployWithSign;
+import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqSendAbi;
+import com.webank.webase.front.file.FileContent;
+import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.transaction.TransService;
+import com.webank.webase.front.util.AbiUtil;
+import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.web3api.Web3ApiService;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * contract management.
@@ -81,9 +86,13 @@ public class ContractService {
     @Autowired
     private ContractRepository contractRepository;
     @Autowired
+    private TransService transService;
+    @Autowired
     private KeyStoreService keyStoreService;
     @Autowired
     private Web3ApiService web3ApiService;
+    @Autowired
+    private Constants constants;
 
     /**
      * sendAbi.
@@ -96,13 +105,13 @@ public class ContractService {
         String address = req.getAddress();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
 
-        //check address is valid
+        // check address is valid
         addressIsValid(req.getGroupId(), req.getAddress(), req.getContractBin());
         // Check if it has been deployed based on the contract name and version number
         checkContractAbiExistedAndSave(contractName, address.substring(2), abiInfos);
         try {
-            cnsServiceMap.get(req.getGroupId())
-                .registerCns(contractName, address.substring(2), address, JSON.toJSONString(abiInfos));
+            cnsServiceMap.get(req.getGroupId()).registerCns(contractName, address.substring(2),
+                    address, JSON.toJSONString(abiInfos));
         } catch (Exception ex) {
             log.error("fail sendAbi.", ex);
             throw new FrontException(ConstantCode.SEND_ABI_INFO_FAIL);
@@ -139,7 +148,7 @@ public class ContractService {
         String subChainAddress = FrontUtils.removeBinFirstAndLast(binOnChain, 68);
         String subInputBin = FrontUtils.removeFirstStr(contractBin, "0x");
         log.info("address:{} subBinOnChain:{} subInputBin:{}", contractAddress, subChainAddress,
-            subInputBin);
+                subInputBin);
         if (!subInputBin.contains(subChainAddress)) {
             log.error("fail addressIsValid contractAddress:{}", contractAddress);
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
@@ -158,13 +167,13 @@ public class ContractService {
     }
 
     private String deployLocalContract(ReqDeploy req) throws Exception {
-        //check contract status
+        // check contract status
         Contract contract = verifyContractNotDeploy(req.getContractId(), req.getGroupId());
 
-        //deploy
+        // deploy
         String contractAddress = deploy(req);
         if (StringUtils.isNotBlank(contractAddress)) {
-            //save address
+            // save address
             BeanUtils.copyProperties(req, contract);
             contract.setContractAddress(contractAddress);
             contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
@@ -186,40 +195,90 @@ public class ContractService {
         List<Object> params = req.getFuncParam();
         int groupId = req.getGroupId();
 
-        ContractAbiUtil.VersionEvent versionEvent = ContractAbiUtil.getVersionEventFromAbi(contractName,abiInfos);
-        String encodedConstructor = constructorEncoded(contractName, versionEvent,params);
+        ContractAbiUtil.VersionEvent versionEvent =
+                ContractAbiUtil.getVersionEventFromAbi(contractName, abiInfos);
+        String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
 
         // get privateKey
         Credentials credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
         // contract deploy
-        String contractAddress = deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
+        String contractAddress =
+                deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
 
         if (version != null) {
             checkContractAbiExistedAndSave(contractName, version, abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress, JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName+":"+version, contractAddress);
+            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
+                    JSON.toJSONString(abiInfos));
+            cnsMap.put(contractName + ":" + version, contractAddress);
         } else {
             checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2), contractAddress, JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName+":"+contractAddress.substring(2), contractAddress);
+            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
+                    contractAddress, JSON.toJSONString(abiInfos));
+            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
         }
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }
 
+    /**
+     * contract deploy.
+     */
+    public String deployWithSign(ReqDeployWithSign req) throws Exception {
+        int groupId = req.getGroupId();
+        String contractAbi = JSON.toJSONString(req.getContractAbi());
+        String contractBin = req.getContractBin();
+        List<Object> params = req.getFuncParam();
 
-    public static String constructorEncodedByContractNameAndVersion(String contractName, String version,
-                                                                    List<Object> params) throws FrontException {
+        // check groupId
+        Web3j web3j = web3jMap.get(groupId);
+        if (web3j == null) {
+            new FrontException(GROUPID_NOT_EXIST);
+        }
+
+        // check parameters
+        AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(contractAbi);
+        List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
+        if (funcInputTypes.size() != params.size()) {
+            log.warn("deployWithSign fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+        }
+
+        // Constructor encode
+        String encodedConstructor = "";
+        if (funcInputTypes.size() > 0) {
+            List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
+            encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
+        }
+
+        // data sign
+        String data = contractBin + encodedConstructor;
+        String signMsg = transService.signMessage(groupId, web3j, req.getSignUserId(), "", data);
+        if (StringUtils.isBlank(signMsg)) {
+            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+        }
+        // send transaction
+        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+        transService.sendMessage(web3j, signMsg, transFuture);
+        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+        String contractAddress = receipt.getContractAddress();
+
+        log.info("success deploy. contractAddress:{}", contractAddress);
+        return contractAddress;
+    }
+
+
+    public static String constructorEncodedByContractNameAndVersion(String contractName,
+            String version, List<Object> params) throws FrontException {
         // Constructor encoded
         String encodedConstructor = "";
         String functionName = contractName;
         // input handle
-        List<String> funcInputTypes = ContractAbiUtil
-                .getFuncInputType(contractName, functionName, version);
+        List<String> funcInputTypes =
+                ContractAbiUtil.getFuncInputType(contractName, functionName, version);
         if (funcInputTypes != null && funcInputTypes.size() > 0) {
             if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
+                List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
                 encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
                 log.info("deploy encodedConstructor:{}", encodedConstructor);
             } else {
@@ -230,7 +289,8 @@ public class ContractService {
         return encodedConstructor;
     }
 
-    public static String constructorEncoded(String contractName,ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
+    public static String constructorEncoded(String contractName,
+            ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
         // Constructor encoded
         String encodedConstructor = "";
         String functionName = contractName;
@@ -239,7 +299,7 @@ public class ContractService {
 
         if (funcInputTypes != null && funcInputTypes.size() > 0) {
             if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = TransService.inputFormat(funcInputTypes, params);
+                List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
                 encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
                 log.info("deploy encodedConstructor:{}", encodedConstructor);
             } else {
@@ -252,27 +312,32 @@ public class ContractService {
 
 
     private void checkContractAbiExistedAndSave(String contractName, String version,
-        List<AbiDefinition> abiInfos) throws FrontException {
+            List<AbiDefinition> abiInfos) throws FrontException {
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
         if (!ifExisted) {
             ContractAbiUtil.setContractWithAbi(contractName, version, abiInfos, true);
         }
     }
 
-    private String deployContract(int groupId, String bytecodeBin, String encodedConstructor, Credentials credentials) throws FrontException {
+    private String deployContract(int groupId, String bytecodeBin, String encodedConstructor,
+            Credentials credentials) throws FrontException {
         CommonContract commonContract = null;
-            Web3j web3j = web3jMap.get(groupId);
-            if(web3j == null ) {
-                new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-            }
-         try {
-            commonContract = CommonContract.deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
-                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor).send();
+        Web3j web3j = web3jMap.get(groupId);
+        if (web3j == null) {
+            new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+        }
+        try {
+            commonContract =
+                    CommonContract
+                            .deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
+                                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor)
+                            .send();
         } catch (Exception e) {
             log.error("commonContract deploy failed.", e);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
-        log.info("commonContract deploy success. contractAddress:{}", commonContract.getContractAddress());
+        log.info("commonContract deploy success. contractAddress:{}",
+                commonContract.getContractAddress());
         return commonContract.getContractAddress();
 
     }
@@ -286,7 +351,7 @@ public class ContractService {
     public BaseResponse deleteAbi(String contractName, String version) throws FrontException {
         BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
         boolean result = CommonUtils.deleteFile(
-            Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
+                Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
         if (!result) {
             log.warn("deleteAbi fail. contractname:{} ,version:{}", contractName, version);
             throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
@@ -299,7 +364,7 @@ public class ContractService {
     }
 
     public static FileContent compileToJavaFile(String contractName, List<AbiDefinition> abiInfo,
-        String contractBin, String packageName) throws IOException {
+            String contractBin, String packageName) throws IOException {
 
         File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
         FrontUtils.createFileIfNotExist(abiFile, true);
@@ -308,13 +373,9 @@ public class ContractService {
         FrontUtils.createFileIfNotExist(binFile, true);
         FileUtils.writeStringToFile(binFile, contractBin);
 
-        SolidityFunctionWrapperGenerator.main(
-            Arrays.asList(
-                "-a", abiFile.getPath(),
-                "-b", binFile.getPath(),
-                "-p", packageName,
-                "-o", Constants.JAVA_DIR)
-                .toArray(new String[0]));
+        SolidityFunctionWrapperGenerator
+                .main(Arrays.asList("-a", abiFile.getPath(), "-b", binFile.getPath(), "-p",
+                        packageName, "-o", Constants.JAVA_DIR).toArray(new String[0]));
 
         String outputDirectory = "";
         if (!packageName.isEmpty()) {
@@ -323,9 +384,8 @@ public class ContractService {
         if (contractName.length() > 1) {
             contractName = contractName.substring(0, 1).toUpperCase() + contractName.substring(1);
         }
-        File file = new File(
-            Constants.JAVA_DIR + File.separator + outputDirectory + File.separator + contractName
-                + ".java");
+        File file = new File(Constants.JAVA_DIR + File.separator + outputDirectory + File.separator
+                + contractName + ".java");
         FrontUtils.createFileIfNotExist(file, true);
         InputStream targetStream = new FileInputStream(file);
         return new FileContent(contractName + ".java", targetStream);
@@ -339,7 +399,7 @@ public class ContractService {
         log.debug("start deleteContract contractId:{} groupId:{}", contractId, groupId);
         // check contract id
         verifyContractNotDeploy(contractId, groupId);
-        //remove
+        // remove
         contractRepository.delete(contractId);
         log.debug("end deleteContract");
     }
@@ -350,9 +410,9 @@ public class ContractService {
     public Contract saveContract(ReqContractSave contractReq) {
         log.debug("start saveContract contractReq:{}", JSON.toJSONString(contractReq));
         if (contractReq.getContractId() == null) {
-            return newContract(contractReq);//new
+            return newContract(contractReq);// new
         } else {
-            return updateContract(contractReq);//update
+            return updateContract(contractReq);// update
         }
     }
 
@@ -361,11 +421,11 @@ public class ContractService {
      * save new contract.
      */
     private Contract newContract(ReqContractSave contractReq) {
-        //check contract not exist.
+        // check contract not exist.
         verifyContractNotExist(contractReq.getGroupId(), contractReq.getContractPath(),
-            contractReq.getContractName());
+                contractReq.getContractName());
 
-        //add to database.
+        // add to database.
         Contract contract = new Contract();
         BeanUtils.copyProperties(contractReq, contract);
         contract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
@@ -380,12 +440,12 @@ public class ContractService {
      * update contract.
      */
     private Contract updateContract(ReqContractSave contractReq) {
-        //check not deploy
-        Contract contract = verifyContractNotDeploy(contractReq.getContractId(),
-            contractReq.getGroupId());
-        //check contractName
+        // check not deploy
+        Contract contract =
+                verifyContractNotDeploy(contractReq.getContractId(), contractReq.getGroupId());
+        // check contractName
         verifyContractNameNotExist(contractReq.getGroupId(), contractReq.getContractPath(),
-            contractReq.getContractName(), contractReq.getContractId());
+                contractReq.getContractName(), contractReq.getContractId());
         BeanUtils.copyProperties(contractReq, contract);
         contract.setModifyTime(LocalDateTime.now());
         contractRepository.save(contract);
@@ -397,13 +457,13 @@ public class ContractService {
      */
     public Page<Contract> findContractByPage(ReqPageContract param) {
         Pageable pageable = new PageRequest(param.getPageNumber(), param.getPageSize(),
-            Direction.DESC, "modifyTime");
+                Direction.DESC, "modifyTime");
         Page<Contract> contractPage = contractRepository.findAll(
-            (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
-                Predicate predicate = FrontUtils.buildPredicate(root, criteriaBuilder, param);
-                query.where(predicate);
-                return query.getRestriction();
-            }, pageable);
+                (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                    Predicate predicate = FrontUtils.buildPredicate(root, criteriaBuilder, param);
+                    query.where(predicate);
+                    return query.getRestriction();
+                }, pageable);
         return contractPage;
 
     }
@@ -413,8 +473,8 @@ public class ContractService {
      * verify contract not exist.
      */
     private void verifyContractNotExist(int groupId, String path, String name) {
-        Contract contract = contractRepository
-            .findByGroupIdAndContractPathAndContractName(groupId, path, name);
+        Contract contract =
+                contractRepository.findByGroupIdAndContractPathAndContractName(groupId, path, name);
         if (Objects.nonNull(contract)) {
             log.warn("contract is exist. groupId:{} name:{} path:{}", groupId, name, path);
             throw new FrontException(ConstantCode.CONTRACT_EXISTS);
@@ -449,9 +509,9 @@ public class ContractService {
      * contract name can not be repeated.
      */
     private void verifyContractNameNotExist(int groupId, String path, String name,
-        Long contractId) {
-        Contract localContract = contractRepository
-            .findByGroupIdAndContractPathAndContractName(groupId, path, name);
+            Long contractId) {
+        Contract localContract =
+                contractRepository.findByGroupIdAndContractPathAndContractName(groupId, path, name);
         if (Objects.isNull(localContract)) {
             return;
         }
@@ -462,7 +522,7 @@ public class ContractService {
         Long localId = localContract.getId();
         if (contractId.longValue() != localId.longValue()) {
             log.info("contract name repeat. groupId:{} path:{} name:{} contractId:{} localId:{}",
-                groupId, path, name, contractId, localId);
+                    groupId, path, name, contractId, localId);
             throw new FrontException(ConstantCode.CONTRACT_NAME_REPEAT);
         }
     }
