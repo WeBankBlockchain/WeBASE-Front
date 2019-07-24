@@ -94,6 +94,7 @@ configurations.all {
 clean {
     delete 'dist'
     delete 'build'
+    delete 'log'
 }
 
 jar {
@@ -105,7 +106,7 @@ jar {
     doLast {
         copy {
             from file('src/main/resources/')
-            into 'dist/conf'
+            into 'dist/conf_template'
 			exclude '**/static'
         }
 		copy {
@@ -121,7 +122,7 @@ jar {
 			into 'dist/lib'
 		}
 		copy {
-			from file('.').listFiles().findAll{File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env'))}
+			from file('.').listFiles().findAll{File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env'))}
 			into 'dist'
 		}
 	}
