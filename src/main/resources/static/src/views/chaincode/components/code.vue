@@ -24,21 +24,21 @@
                 </el-tooltip> -->
             </span>
             <span class="contract-code-handle" v-show="codeShow">
-                <span class="contract-code-done" @click="saveCode" v-if="!contractAddress">
+                <span class="contract-code-done" @click="saveCode">
                     <el-tooltip class="item" effect="dark" content="按Ctrl+s保存合约内容" placement="top-start">
                         <i class="wbs-icon-baocun contract-icon-style font-16"></i>
                     </el-tooltip>
                     <span>保存</span>
                 </span>
-                <span class="contract-code-done" @click="compile" v-if="!contractAddress">
+                <span class="contract-code-done" @click="compile">
                     <i class="wbs-icon-bianyi contract-icon-style font-16"></i>
                     <span>编译</span>
                 </span>
-                <span class="contract-code-done" @click="deploying" v-if="!contractAddress && abiFile && bin">
+                <span class="contract-code-done" @click="deploying">
                     <i class="wbs-icon-deploy contract-icon-style font-16"></i>
                     <span>部署</span>
                 </span>
-                <span class="contract-code-done" v-if="contractAddress" @click="send">
+                <span class="contract-code-done" @click="send">
                     <i class="wbs-icon-send contract-icon-style font-16"></i>
                     <span>发交易</span>
                 </span>
@@ -426,14 +426,9 @@ export default {
                         }
                     }
                     for (let i = 0; i < this.contractList.length; i++) {
-                        if (
-                            newpath ==
-                            this.contractList[i].contractName + ".sol"
-                        ) {
+                        if (newpath == this.contractList[i].contractName + ".sol") {
                             return {
-                                contents: Base64.decode(
-                                    this.contractList[i].contractSource
-                                )
+                                contents: Base64.decode(this.contractList[i].contractSource)
                             };
                         } else {
                             num++;
@@ -556,7 +551,12 @@ export default {
             this.bin = "";
         },
         deploying: function () {
-            this.dialogUser = true;
+            if (this.abiFile) {
+                this.dialogUser = true;
+            } else {
+                this.$message.error('合约未编译')
+            }
+
         },
         userClose: function () {
             this.dialogUser = false;
