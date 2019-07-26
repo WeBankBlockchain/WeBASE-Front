@@ -168,7 +168,7 @@ public class ContractService {
 
     private String deployLocalContract(ReqDeploy req) throws Exception {
         // check contract status
-        Contract contract = verifyContractNotDeploy(req.getContractId(), req.getGroupId());
+        Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
 
         // deploy
         String contractAddress = deploy(req);
@@ -398,7 +398,7 @@ public class ContractService {
     public void deleteContract(Long contractId, int groupId) {
         log.debug("start deleteContract contractId:{} groupId:{}", contractId, groupId);
         // check contract id
-        verifyContractNotDeploy(contractId, groupId);
+        verifyContractIdExist(contractId, groupId);
         // remove
         contractRepository.delete(contractId);
         log.debug("end deleteContract");
@@ -440,9 +440,9 @@ public class ContractService {
      * update contract.
      */
     private Contract updateContract(ReqContractSave contractReq) {
-        // check not deploy
+        // check contract exist
         Contract contract =
-                verifyContractNotDeploy(contractReq.getContractId(), contractReq.getGroupId());
+                verifyContractIdExist(contractReq.getContractId(), contractReq.getGroupId());
         // check contractName
         verifyContractNameNotExist(contractReq.getGroupId(), contractReq.getContractPath(),
                 contractReq.getContractName(), contractReq.getContractId());
