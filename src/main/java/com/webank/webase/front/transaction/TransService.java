@@ -124,6 +124,11 @@ public class TransService {
         String funcName = req.getFuncName();
         List<Object> params = req.getFuncParam();
 
+        // check contractAddress
+        if (StringUtils.isBlank(contractAddress)) {
+            log.error("transHandleWithSign. contractAddress is empty");
+            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
+        }
         // check function name
         AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(funcName, contractAbi);
         if (abiDefinition == null) {
