@@ -16,11 +16,11 @@
 <template>
     <div class="contract-menu" style="position: relative;height: 100% ;">
         <div class="contract-menu-header">
-            <el-tooltip class="item" effect="dark" content="新建文件夹" placement="top-start">
-                <i class="wbs-icon-Addfolder icon contract-icon" @click='addFolder'></i>
-            </el-tooltip>
             <el-tooltip class="item" effect="dark" content="新建文件" placement="top-start">
                 <i class="wbs-icon-Addfile icon contract-icon" @click='addFile'></i>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="新建文件夹" placement="top-start">
+                <i class="wbs-icon-Addfolder icon contract-icon" @click='addFolder'></i>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="上传文件" placement="top-start">
                 <i class="wbs-icon-shangchuan contract-icon" style="position:relative;">
@@ -34,25 +34,25 @@
             <ul>
                 <li v-for='item in contractArry' :key="item.id">
                     <div v-if='item.contractType == "file"' class="contract-file" :id='item.id'>
-                        <i class="wbs-icon-file" @click='select(item)' v-if='!item.renameShow' :id='item.id'></i>
+                        <i class="wbs-icon-file" @contextmenu.prevent="handle($event,item)" @click='select(item)' v-if='!item.renameShow' :id='item.id'></i>
                         <span @contextmenu.prevent="handle($event,item)" @click='select(item)' :id='item.id' v-if='!item.renameShow' :class="{'colorActive': item.contractActive}">{{item.contractName}}</span>
                         <el-input v-model="contractName" v-focus="true" autofocus='autofocus' maxlength="32" @blur="changeName(item)" v-if="item.renameShow"></el-input>
-                        <div class="contract-menu-handle" v-if='item.handleModel' :style="{'top': clentY,'left': clentX}" v-Clickoutside="checkNull">
+                        <div class="contract-menu-handle" v-if='item.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX}px`}" v-Clickoutside="checkNull">
 
                             <ul v-if="contractFile">
                                 <li class="contract-menu-handle-list" @click="rename">重命名</li>
-                                <li class="contract-menu-handle-list" v-if='!item.renameShow && !item.contractAddress' @click="deleteFile(item)">删除</li>
+                                <li class="contract-menu-handle-list" @click="deleteFile(item)">删除</li>
                             </ul>
                         </div>
                     </div>
                     <div v-if='item.contractType == "folder"' class="contract-folder" :id='item.folderId'>
                         <i :class="item.folderIcon" @click='open(item)' v-if="!item.renameShow" :id='item.folderId'></i>
-                        <i class="wbs-icon-folder" @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
-                        <span @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}">{{item.contractName}}</span>
-                        <div class="contract-menu-handle" v-if=' item.handleModel' :style="{'top': clentY,'left': clentX}" v-Clickoutside="checkNull">
+                        <i class="wbs-icon-folder cursor-context-menu" @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
+                        <span @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="cursor-context-menu">{{item.contractName}}</span>
+                        <div class="contract-menu-handle" v-if=' item.handleModel' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
                                 <li class="contract-menu-handle-list" @click="addFiles">新建文件</li>
-                                <li class="contract-menu-handle-list" v-if="!item.renameShow" @click='deleteFolder(item)'>删除</li>
+                                <li class="contract-menu-handle-list" @click='deleteFolder(item)'>删除</li>
                             </ul>
                         </div>
                         <br>
@@ -61,10 +61,10 @@
                                 <i class="wbs-icon-file" v-if='!list.renameShow' @click='select(list)'></i>
                                 <span @click='select(list)' @contextmenu.prevent="handle($event,list)" :id='list.id' v-if='!list.renameShow' :class="{'colorActive': list.contractActive}">{{list.contractName}}</span>
                                 <el-input v-model="contractName" autofocus='autofocus' maxlength="32" @blur="changeName(list)" v-if="list.renameShow"></el-input>
-                                <div class="contract-menu-handle" v-if='list.handleModel' :style="{'top': clentY,'left': clentX}" v-Clickoutside="checkNull">
+                                <div class="contract-menu-handle" v-if='list.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX - 35}px`}" v-Clickoutside="checkNull">
                                     <ul v-if="contractFile">
                                         <li class="contract-menu-handle-list" @click="rename">重命名</li>
-                                        <li class="contract-menu-handle-list" v-if='!list.renameShow && !list.contractAddress' @click="deleteFile(list)">删除</li>
+                                        <li class="contract-menu-handle-list" @click="deleteFile(list)">删除</li>
                                     </ul>
                                 </div>
                             </li>
@@ -173,11 +173,11 @@ export default {
             this.checkNull()
             list.handleModel = true
             if (e.clientX > 201) {
-                this.clentX = e.clientX - 200 + "px";
+                this.clentX = e.clientX - 200;
             } else {
-                this.clentX = e.clientX + "px";
+                this.clentX = e.clientX;
             }
-            this.clentY = 20 + "px";
+            this.clentY = 20;
             this.ID = e.target.id;
             let item = {};
             if (this.ID) {
@@ -218,44 +218,28 @@ export default {
                 }
             })
             this.contractArry.forEach(value => {
-                if (value.id == this.ID && value.contractStatus != 2) {
+                if (value.id == this.ID) {
                     this.$set(value, "renameShow", true);
                     this.contractName = value.contractName;
-                } else if (
-                    value.contractType == "folder" &&
-                    value.folderId !== this.ID
-                ) {
+                } else if (value.contractType == "folder" && value.folderId !== this.ID) {
                     value.child.forEach(item => {
-                        if (item.id == this.ID && item.contractStatus != 2) {
+                        if (item.id == this.ID) {
                             this.$set(item, "renameShow", true);
                             this.contractName = item.contractName;
-                        } else if (item.id == this.ID && item.contractStatus == 2) {
+                        } else if (item.id == this.ID) {
                             this.$set(item, "renameShow", false);
-                            this.$message({
-                                message: "已部署的合约不能重新命名！",
-                                type: "error"
-                            });
                         } else {
                             this.$set(item, "renameShow", false);
                         }
                     });
                 } else if (value.contractType == "folder" && value.folderId == this.ID) {
                     let num = 0;
-                    value.child.forEach(item => {
-                        if (item.contractStatus == 2) {
-                            num++;
-                        }
-                    });
                     if (num == 0) {
                         this.$set(value, "renameShow", true);
                         this.contractName = value.contractName;
                     }
-                } else if (value.id == this.ID && value.contractStatus == 2) {
+                } else if (value.id == this.ID) {
                     this.$set(value, "renameShow", false);
-                    this.$message({
-                        message: "已部署的合约不能重新命名！",
-                        type: "error"
-                    });
                 } else {
                     this.$set(value, "renameShow", false);
                 }
@@ -680,37 +664,29 @@ export default {
                 });
         },
         deleteFolder: function (val) {
-            let list = val.child;
-            let num = 0;
-            for (let i = 0; i < list.length; i++) {
-                if (list[i].contractStatus == 2) {
-                    this.$message({
-                        type: "error",
-                        message: "文件夹内存在已部署的合约，无法删除文件夹"
-                    });
-                    return;
-                } else {
-                    num++;
-                }
-            }
-            if (num) {
-                while (list.length > 0) {
-                    this.deleteData(list[0]);
-                    list.splice(0, 1);
-                }
-            }
-            if (val.child.length == 0) {
-                this.folderList = JSON.parse(
-                    localStorage.getItem("folderList")
-                );
-                this.folderList.forEach((value, index) => {
-                    if (val.folderId == value.folderId) {
-                        this.folderList.splice(index, 1);
+            this.$confirm("确认删除？")
+                .then(_ => {
+                    let list = val.child;
+                    while (list.length > 0) {
+                        this.deleteData(list[0]);
+                        list.splice(0, 1);
                     }
-                });
-                localStorage.setItem("folderList", JSON.stringify(this.folderList));
-                this.getContracts();
-            }
+                    this.$nextTick(() => {
+                        this.folderList = JSON.parse(
+                            localStorage.getItem("folderList")
+                        );
+                        this.folderList.forEach((value, index) => {
+                            if (val.folderId == value.folderId) {
+                                this.folderList.splice(index, 1);
+                            }
+                        });
+                        localStorage.setItem("folderList", JSON.stringify(this.folderList));
+                    })
+
+
+
+                })
+                .catch(_ => { });
         }
     }
 };
@@ -755,9 +731,6 @@ export default {
 .contract-folder {
     padding-left: 5px;
 }
-.contract-folder i {
-    cursor: pointer;
-}
 .contract-file span {
     cursor: pointer;
 }
@@ -795,7 +768,7 @@ export default {
     overflow: auto;
     height: calc(100% - 50px);
 }
-.contract-menu-content>>>.el-input__inner {
+.contract-menu-content >>> .el-input__inner {
     width: 100px;
     height: 24px;
     line-height: 24px;
@@ -809,10 +782,9 @@ export default {
     cursor: pointer;
     font-size: 12px;
     text-align: center;
-    vertical-align: middle;
     background-color: #fff;
     box-shadow: 1px 4px 4px 1px;
-    z-index: 9999;
+    z-index: 100;
 }
 .contract-menu-handle li {
     font-size: 12px;
