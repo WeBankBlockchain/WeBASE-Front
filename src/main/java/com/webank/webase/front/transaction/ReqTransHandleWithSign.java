@@ -31,7 +31,6 @@ public class ReqTransHandleWithSign {
     private int signUserId = 100001;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<Object> contractAbi;
-    @NotBlank(message = ConstantCode.CONTRACTADDRESS_IS_EMPTY)
     private String contractAddress;
     @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
     private String funcName;
