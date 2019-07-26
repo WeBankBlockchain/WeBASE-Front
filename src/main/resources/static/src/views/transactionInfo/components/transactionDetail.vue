@@ -302,7 +302,7 @@ export default {
                                 let eventData = web3.eth.abi.decodeLog(
                                     value.inputs,
                                     val.data,
-                                    val.topics
+                                    val.topics.slice(1)
                                 );
                             }
                         });
