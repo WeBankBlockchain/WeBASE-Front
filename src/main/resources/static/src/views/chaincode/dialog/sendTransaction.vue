@@ -22,7 +22,10 @@
         <div class="send-item" v-show="!constant">
             <span class="send-item-title">用户地址:</span>
             <el-select v-model="transation.userName" placeholder="请选择用户地址" style="width:240px">
-                <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'></el-option>
+                <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'>
+                    <span class="font-12">{{item.userName}}/</span>
+                    <span>{{item.address}}</span>
+                </el-option>
             </el-select>
         </div>
         <div class="send-item">
@@ -182,12 +185,12 @@ export default {
                                 message: "查询成功!"
                             });
                         } else {
-                            if(resData.statusOK){
+                            if (resData.statusOK) {
                                 this.$message({
                                     type: "success",
                                     message: "交易成功!"
                                 });
-                            }else {
+                            } else {
                                 this.$message({
                                     type: "success",
                                     message: "交易失败!"

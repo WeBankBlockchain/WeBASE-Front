@@ -27,7 +27,10 @@
                 <td style="width: 70px">用户地址：</td>
                 <td>
                     <el-select v-model="userId" placeholder="请选择用户地址" @change="changeId" style="width: 340px">
-                        <el-option :label="item.address" :value="item.address" :key="item.address" v-for='item in userList'></el-option>
+                        <el-option :label="item.address" :value="item.address" :key="item.address" v-for='item in userList'>
+                            <span class="font-12">{{item.userName}}/</span>
+                            <span>{{item.address}}</span>
+                        </el-option>
                     </el-select>
                 </td>
             </tr>
@@ -83,7 +86,7 @@ export default {
         };
     },
     mounted: function () {
-        this.userId = this.userList[0].address;
+        if (this.userList.length > 0) this.userId = this.userList[0].address;
         this.changeConstructor();
     },
     methods: {
@@ -127,11 +130,11 @@ export default {
     margin-top: 15px;
 }
 
-.chang-wrapper>>>.el-input__inner {
+.chang-wrapper >>> .el-input__inner {
     height: 32px;
     line-height: 32px;
 }
-.chang-wrapper>>>.el-input__icon {
+.chang-wrapper >>> .el-input__icon {
     line-height: 32px;
 }
 .opt-wrapper tr td {
@@ -140,7 +143,7 @@ export default {
 }
 .send-btn {
 }
-.send-btn>>>.el-button {
+.send-btn >>> .el-button {
     padding: 9px 16px;
 }
 </style>
