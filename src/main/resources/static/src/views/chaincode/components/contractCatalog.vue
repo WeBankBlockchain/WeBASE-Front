@@ -34,8 +34,10 @@
             <ul>
                 <li v-for='item in contractArry' :key="item.id">
                     <div v-if='item.contractType == "file"' class="contract-file" :id='item.id'>
-                        <i class="wbs-icon-file" @contextmenu.prevent="handle($event,item)" @click='select(item)' v-if='!item.renameShow' :id='item.id'></i>
-                        <span @contextmenu.prevent="handle($event,item)" @click='select(item)' :id='item.id' v-if='!item.renameShow' :class="{'colorActive': item.contractActive}">{{item.contractName}}</span>
+                        <div class="ellipsis-info" :class="{'colorActive': item.contractActive}">
+                            <i class="wbs-icon-file" @contextmenu.prevent="handle($event,item)" @click='select(item)' v-if='!item.renameShow' :id='item.id'></i>
+                            <span @contextmenu.prevent="handle($event,item)" @click='select(item)' :id='item.id' v-if='!item.renameShow' >{{item.contractName}}</span>
+                        </div>
                         <el-input v-model="contractName" v-focus="true" autofocus='autofocus' maxlength="32" @blur="changeName(item)" v-if="item.renameShow"></el-input>
                         <div class="contract-menu-handle" v-if='item.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX}px`}" v-Clickoutside="checkNull">
 
@@ -46,9 +48,9 @@
                         </div>
                     </div>
                     <div v-if='item.contractType == "folder"' class="contract-folder" :id='item.folderId'>
-                        <i :class="item.folderIcon" @click='open(item)' v-if="!item.renameShow" :id='item.folderId'></i>
-                        <i class="wbs-icon-folder cursor-context-menu" @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
-                        <span @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="cursor-context-menu">{{item.contractName}}</span>
+                        <i :class="item.folderIcon" @click='open(item)' v-if="!item.renameShow" :id='item.folderId' class="cursor-pointer font-16 no-chase"></i>
+                        <i class="wbs-icon-folder cursor-context-menu no-chase" @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
+                        <span @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-context-menu">{{item.contractName}}</span>
                         <div class="contract-menu-handle" v-if=' item.handleModel' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
                                 <li class="contract-menu-handle-list" @click="addFiles">新建文件</li>
@@ -57,9 +59,12 @@
                         </div>
                         <br>
                         <ul v-if="item.folderActive" style="padding-left: 20px;">
-                            <li class="contract-file" v-for='list in item.child' :key="list.id">
-                                <i class="wbs-icon-file" v-if='!list.renameShow' @click='select(list)'></i>
-                                <span @click='select(list)' @contextmenu.prevent="handle($event,list)" :id='list.id' v-if='!list.renameShow' :class="{'colorActive': list.contractActive}">{{list.contractName}}</span>
+                            <li class="contract-file"  v-for='list in item.child' :key="list.id">
+                                <div class="ellipsis-info"  :class="{'colorActive': list.contractActive}">
+                                    <i class="wbs-icon-file" v-if='!list.renameShow' @click='select(list)'></i>
+                                    <span @click='select(list)' @contextmenu.prevent="handle($event,list)" :id='list.id' v-if='!list.renameShow'>{{list.contractName}}</span>
+                                </div>
+
                                 <el-input v-model="contractName" autofocus='autofocus' maxlength="32" @blur="changeName(list)" v-if="list.renameShow"></el-input>
                                 <div class="contract-menu-handle" v-if='list.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX - 35}px`}" v-Clickoutside="checkNull">
                                     <ul v-if="contractFile">
