@@ -19,6 +19,13 @@
             <span class="send-item-title">合约名称:</span>
             <span>{{data.contractName}}</span>
         </div>
+        <div class="send-item">
+            <span class="send-item-title">合约地址:</span>
+            <el-input v-model.trim="contractAddress" style="width: 240px;" placeholder="请输入合约地址"></el-input>
+            <el-tooltip class="item" effect="dark" content="选填项，导入已部署的合约地址。" placement="top-start">
+                <i class="el-icon-info"></i>
+            </el-tooltip>
+        </div>
         <div class="send-item" v-show="!constant">
             <span class="send-item-title">用户地址:</span>
             <el-select v-model="transation.userName" placeholder="请选择用户地址" style="width:240px">
@@ -30,9 +37,9 @@
         </div>
         <div class="send-item">
             <span class="send-item-title">方法:</span>
-            <el-select v-model="transation.funcType" placeholder="方法类型" @change="changeType($event)" style="width:110px">
+            <!-- <el-select v-model="transation.funcType" placeholder="方法类型" @change="changeType($event)" style="width:110px">
                 <el-option label="function" :value="'function'"></el-option>
-            </el-select>
+            </el-select> -->
             <el-select v-model="transation.funcName" filterable placeholder="方法名" v-show="funcList.length > 0" @change="changeFunc" style="width:125px">
                 <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList"></el-option>
             </el-select>
@@ -79,7 +86,8 @@ export default {
             funcList: [],
             buttonClick: false,
             contractVersion: this.version,
-            constant: false
+            constant: false,
+            contractAddress: this.data.contractAddress || ""
         };
     },
     mounted: function () {
