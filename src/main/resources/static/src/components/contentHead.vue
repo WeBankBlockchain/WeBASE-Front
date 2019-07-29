@@ -23,23 +23,6 @@
             <span v-show="headSubTitle" class="font-color-9da2ab">/</span>
             <span>{{headSubTitle}}</span>
         </div>
-        <div class="content-head-network">
-            <!-- <div class="content-head-item font-color-8798ad" v-if="version">
-                <span>当前版本:{{version}}</span>
-            </div> -->
-           
-            <!-- <div class="content-head-item">
-                <span style="padding: 1px 5px;border-left:1px solid #657d95;"></span>
-                <span class="font-color-fff group-content" @click="groupVisible = !groupVisible">
-                    群组：{{groupName}}
-                    <ul v-show="groupVisible">
-                        <li v-for=" item in groupList" :key="item.group" @click="changeGroup(item)">{{item.groupName}}</li>
-                    </ul>
-                </span>
-                <i :class="[groupVisible?'el-icon-arrow-up':'el-icon-arrow-down','select-network']"></i>
-            </div> -->
-
-        </div>
     </div>
 </template>
 
