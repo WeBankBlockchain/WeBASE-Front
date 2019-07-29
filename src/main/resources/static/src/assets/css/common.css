@@ -96,6 +96,9 @@
 .font-color-8798ad {
     color: #8798ad;
 }
+.font-color-58cb7d {
+    color: #58cb7d
+}
 .font-46 {
     font-size: 46px;
 }
@@ -110,6 +113,9 @@
 }
 .font-15 {
     font-size: 15px;
+}
+.font-13 {
+    font-size: 13px;
 }
 .font-12{
     font-size: 12px;
@@ -497,4 +503,17 @@ td {
 }
 .jv-container.jv-light .jv-key{
     color: #909399 !important;
+}
+.no-chase {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.ellipsis-info {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-all;
 }
