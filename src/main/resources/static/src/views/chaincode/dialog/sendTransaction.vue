@@ -30,9 +30,9 @@
         </div>
         <div class="send-item">
             <span class="send-item-title">方法:</span>
-            <el-select v-model="transation.funcType" placeholder="方法类型" @change="changeType($event)" style="width:110px">
+            <!-- <el-select v-model="transation.funcType" placeholder="方法类型" @change="changeType($event)" style="width:110px">
                 <el-option label="function" :value="'function'"></el-option>
-            </el-select>
+            </el-select> -->
             <el-select v-model="transation.funcName" filterable placeholder="方法名" v-show="funcList.length > 0" @change="changeFunc" style="width:125px">
                 <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList"></el-option>
             </el-select>
