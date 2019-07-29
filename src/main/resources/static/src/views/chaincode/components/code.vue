@@ -42,11 +42,29 @@
                     <i class="wbs-icon-send contract-icon-style font-16"></i>
                     <span>发交易</span>
                 </span>
+                <span class="contract-code-done" @click="searchKeyword">
+                    <i class="el-icon-search contract-icon-style font-16"></i>
+                    <span>搜索</span>
+                </span>
                 <span class="contract-code-done" v-if="!contractAddress && abiFile && bin || contractAddress " @click="downloadJavaClass">
                     <i class="el-icon-download contract-icon-style font-16"></i>
                     <span>导出java文件</span>
                 </span>
             </span>
+            <div class="search-model" v-show="searchVisibility">
+                <el-input v-model="keyword" placeholder="搜索" style="width:266px;margin-left:10px;"></el-input>
+                <span class="search-btn bf-58cb7d cursor-pointer no-chase" @click="searchBtn">查找</span>
+                <span class="search-span-info" @click="previousBtn">
+                    <i class="el-icon-back iconfont-info font-color-58cb7d font-15 cursor-pointer no-chase"></i>
+                </span>
+                <span class="search-span-info" @click="nextBtn">
+                    <i class="el-icon-right iconfont-info font-color-58cb7d font-15 cursor-pointer no-chase"></i>
+                </span>
+                <span class="close-search cursor-pointer search-span-info" @click="closeBtn">
+                    <i class="el-icon-close font-15"></i>
+                </span>
+            </div>
+
         </div>
         <div class="contract-code-content" :class="{infoHide: !successHide}">
             <div class="contract-code-mirror" :style="{height:codeHight}" ref="codeContent">
@@ -57,10 +75,16 @@
             </div>
             <div class="contract-info" v-show="successHide" :style="{height:infoHeight + 'px'}">
                 <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
-                <div class="contract-info-title" @mouseover="mouseHover=!mouseHover" @mouseout="mouseHover=!mouseHover" v-show="abiFile||contractAddress">
-                    <i :class="[showCompileText?'el-icon-caret-bottom':'el-icon-caret-top']" @click="collapse">
+                <div class="contract-info-title" @mouseover="mouseHover=true" @mouseleave="mouseHover=false" v-show="abiFile||contractAddress" @click="collapse">
+                    <i :class="[showCompileText?'el-icon-caret-bottom':'el-icon-caret-top']">
 
                     </i>
+                    <template v-if="showCompileText&&mouseHover">
+                        隐藏
+                    </template>
+                    <template v-else-if="!showCompileText&&mouseHover">
+                        显示
+                    </template>
                 </div>
                 <div>
                     <div class="contract-info-list1" v-html="compileinfo">
@@ -85,14 +109,14 @@
                         <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" class="showText" ref="showAbiText">
                             {{abiFile}}
                         </span>
-                        <i :class="[ showAbi ? 'el-icon-arrow-down': 'el-icon-arrow-up'] " v-if="complieAbiTextHeight" @click="showAbiText"></i>
+                        <i :class="[ showAbi ? 'el-icon-arrow-down': 'el-icon-arrow-up', 'font-13','cursor-pointer'] " v-if="complieAbiTextHeight" @click="showAbiText"></i>
                     </div>
                     <div class="contract-info-list" style="border-bottom: 1px solid #e8e8e8" v-show="abiFile">
                         <span class="contract-info-list-title" style="color: #0B8AEE">bin</span>
                         <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" class="showText" ref="showBinText">
                             {{bin}}
                         </span>
-                        <i :class="[ showBin ? 'el-icon-arrow-down': 'el-icon-arrow-up'] " v-if="complieBinTextHeight" @click="showBinText"></i>
+                        <i :class="[ showBin ? 'el-icon-arrow-down': 'el-icon-arrow-up',, 'font-13','cursor-pointer'] " v-if="complieBinTextHeight" @click="showBinText"></i>
                     </div>
                 </div>
             </div>
@@ -185,7 +209,9 @@ export default {
             complieAbiTextHeight: false,
             complieBinTextHeight: false,
             mouseHover: false,
-            showCompileText: true
+            showCompileText: true,
+            keyword: "",
+            searchVisibility: false
         };
     },
     watch: {
@@ -203,6 +229,15 @@ export default {
             } else {
                 this.infoHeight = 0;
             }
+        },
+        keyword: function (val) {
+            this.aceEditor.find(`${val}`, {
+                backwards: false,
+                wrap: false,
+                caseSensitive: false,
+                regExp: false,
+            })
+            this.aceEditor.findPrevious();
         }
     },
     computed: {
@@ -300,7 +335,6 @@ export default {
             this.aceEditor = ace.edit(this.$refs.ace, {
                 fontSize: 14,
                 fontFamily: "Consolas,Monaco,monospace",
-
                 theme: this.themePath,
                 mode: this.modePath,
                 tabSize: 4,
@@ -314,7 +348,7 @@ export default {
                 copyWithEmptySelection: true
             });
             this.aceEditor.commands.addCommand({
-                name: "myCommand",
+                name: "save",
                 bindKey: { win: "Ctrl-S", mac: "Command-S" },
                 exec: function (editor) {
                     if (_this.data.contractStatus != 2) {
@@ -322,9 +356,38 @@ export default {
                     }
                 }
             });
+            this.aceEditor.commands.addCommand({
+                name: 'compile',
+                bindKey: { win: "Alt-C", mac: "Option-C" },
+                exec: function (editor) {
+                    _this.compile();
+                }
+            });
+            this.aceEditor.commands.addCommand({
+                name: 'deploying',
+                bindKey: { win: "Alt-D", mac: "Option-D" },
+                exec: function (editor) {
+                    _this.deploying();
+                }
+            });
+            this.aceEditor.commands.addCommand({
+                name: 'send',
+                bindKey: { win: "Alt-T", mac: "Option-T" },
+                exec: function (editor) {
+                    _this.send();
+                }
+            });
+            this.aceEditor.commands.addCommand({
+                name: 'search-keyword',
+                bindKey: { win: "Ctrl-F", mac: "Command-F" },
+                exec: function (editor) {
+                    _this.searchVisibility = true
+                }
+            });
             let editor = this.aceEditor.alignCursors();
             this.aceEditor.getSession().setUseWrapMode(true);
             this.aceEditor.getSession().on("change", this.changeAce);
+
             this.aceEditor.on("blur", this.blurAce);
             this.aceEditor.resize();
         },
@@ -774,6 +837,21 @@ export default {
                 this.resizeCode()
             })
 
+        },
+        searchKeyword() {
+            this.searchVisibility = true
+        },
+        searchBtn() {
+            this.aceEditor.findNext();
+        },
+        previousBtn() {
+            this.aceEditor.findPrevious();
+        },
+        nextBtn() {
+            this.aceEditor.findNext();
+        },
+        closeBtn() {
+            this.searchVisibility = false
         }
     }
 };
@@ -794,7 +872,42 @@ export default {
     color: #fff;
     border-bottom: 2px solid #242e42;
     background-color: #2b374d;
-    overflow: hidden;
+    position: relative;
+}
+.search-model {
+    position: absolute;
+    z-index: 1;
+    left: 75px;
+    top: 60px;
+    float: left;
+    width: 480px;
+    border: 1px solid #8798ad;
+    border-radius: 3px;
+    background: #555651;
+    height: 45px;
+    line-height: 45px;
+}
+.search-model span {
+    display: inline-block;
+}
+.search-span-info {
+    height: 45px;
+    line-height: 45px;
+}
+.search-btn {
+    height: 32px;
+    line-height: 32px;
+    margin: 0 10px;
+    text-align: center;
+    border-radius: 3px;
+    width: 60px;
+}
+.iconfont-info {
+    margin: 0 5px;
+}
+.close-search {
+    float: right;
+    margin-right: 11px;
 }
 .contract-code-done {
     display: inline-block;
@@ -825,7 +938,7 @@ export default {
 }
 .contract-info {
     position: relative;
-    padding-top: 20px;
+    padding-top: 10px;
     text-align: left;
     border-top: 1px solid #242e42;
     box-sizing: border-box;
@@ -840,7 +953,6 @@ export default {
     float: left;
     font-weight: bold;
     font-size: 18px;
-    /* color: #36393d; */
     padding-left: 20px;
 }
 .contract-code-handle {
@@ -849,6 +961,12 @@ export default {
 }
 .contract-info-title {
     text-align: center;
+    cursor: pointer;
+    padding: 5px 0px;
+}
+.contract-info-title:hover > i {
+    color: #fff;
+    font-size: 14px;
 }
 .move {
     position: absolute;
@@ -863,12 +981,6 @@ export default {
     padding-left: 8px;
     font-size: 10px;
     color: #aeb1b5;
-    cursor: pointer;
-}
-.contract-info-title span {
-    font-size: 16px;
-    font-weight: bold;
-    color: #36393d;
 }
 .contract-info-list {
     padding: 5px 20px;
