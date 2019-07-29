@@ -52,7 +52,7 @@
                 </span>
             </span>
             <div class="search-model" v-show="searchVisibility">
-                <el-input v-model="keyword" placeholder="搜索" style="width:266px;margin-left:10px;"></el-input>
+                <el-input v-model="keyword" placeholder="搜索" :autofocus="true" style="width:266px;margin-left:10px;"></el-input>
                 <span class="search-btn bf-58cb7d cursor-pointer no-chase" @click="searchBtn">查找</span>
                 <span class="search-span-info" @click="previousBtn">
                     <i class="el-icon-back iconfont-info font-color-58cb7d font-15 cursor-pointer no-chase"></i>
@@ -852,6 +852,7 @@ export default {
         },
         closeBtn() {
             this.searchVisibility = false
+            this.keyword = ''
         }
     }
 };
