@@ -51,8 +51,8 @@
                     <span>导出java文件</span>
                 </span>
             </span>
-            <div class="search-model" v-show="searchVisibility">
-                <el-input v-model="keyword" placeholder="搜索" :autofocus="true" style="width:266px;margin-left:10px;"></el-input>
+            <div class="search-model" v-if="searchVisibility">
+                <el-input v-model="keyword" placeholder="搜索" style="width:266px;margin-left:10px;" ref="searchInput"></el-input>
                 <span class="search-btn bf-58cb7d cursor-pointer no-chase" @click="searchBtn">查找</span>
                 <span class="search-span-info" @click="previousBtn">
                     <i class="el-icon-back iconfont-info font-color-58cb7d font-15 cursor-pointer no-chase"></i>
@@ -381,7 +381,7 @@ export default {
                 name: 'search-keyword',
                 bindKey: { win: "Ctrl-F", mac: "Command-F" },
                 exec: function (editor) {
-                    _this.searchVisibility = true
+                    _this.searchKeyword()
                 }
             });
             let editor = this.aceEditor.alignCursors();
@@ -840,6 +840,9 @@ export default {
         },
         searchKeyword() {
             this.searchVisibility = true
+            this.$nextTick(()=>{
+                this.$refs['searchInput'].$refs.input.focus()
+            })
         },
         searchBtn() {
             this.aceEditor.findNext();
