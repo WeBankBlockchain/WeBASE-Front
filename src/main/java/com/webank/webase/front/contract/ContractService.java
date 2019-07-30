@@ -504,6 +504,19 @@ public class ContractService {
         }
         return contract;
     }
+    
+    /**
+     * verify that if the contract changed.
+     */
+    public boolean verifyContractChange(Long contractId, int groupId) {
+        Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
+        log.info("verifyContractChange contract:{}", contract);
+        if (!Objects.isNull(contract) && contract.getContractStatus().intValue() == 2
+                && !contract.getDeployTime().isEqual(contract.getModifyTime())) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * contract name can not be repeated.
