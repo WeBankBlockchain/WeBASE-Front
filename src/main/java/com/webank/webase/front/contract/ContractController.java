@@ -199,7 +199,7 @@ public class ContractController extends BaseController {
      */
     @ApiOperation(value = "delete by contractId", notes = "delete by contractId")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "Integer"),
+        @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "int"),
         @ApiImplicitParam(name = "contractId", value = "contractId", required = true, dataType = "Long")})
     @DeleteMapping("/{groupId}/{contractId}")
     public BaseResponse deleteByContractId(@PathVariable Integer groupId,
@@ -224,5 +224,18 @@ public class ContractController extends BaseController {
         response.setTotalCount(page.getTotalElements());
         response.setData(page.getContent());
         return response;
+    }
+    
+    /**
+     * verify that if the contract changed.
+     */
+    @ApiOperation(value = "verify contract", notes = "verify that if the contract changed")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "int"),
+        @ApiImplicitParam(name = "contractId", value = "contractId", required = true, dataType = "Long")})
+    @GetMapping("/ifChanged/{groupId}/{contractId}")
+    public boolean ifChanged(@PathVariable Integer groupId, @PathVariable Long contractId) {
+        log.info("ifChanged start. groupId:{} contractId:{}", groupId, contractId);
+        return contractService.verifyContractChange(contractId, groupId);
     }
 }
