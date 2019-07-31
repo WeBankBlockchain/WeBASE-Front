@@ -184,5 +184,9 @@ public class Web3Config {
         }
         return consensusServiceMap;
     }
-
+    @Bean
+    public HashMap<String, String> getCnsMap() {
+        HashMap cnsMap = new HashMap<String, String>();
+        return cnsMap;
+    }
 }
