@@ -16,33 +16,33 @@
 import Axios from 'axios'
 import router from '../router'
 import { Message, Loading } from 'element-ui'
-let loading
-function startLoading() {
-    loading = Loading.service({
-        lock: true,
-        text: '加载中...',
-        background: 'rgba(0,0,0,0.7)'
-    })
-}
-function endLoading() {
-    loading.close()
-}
-let needLoadingRequestCount = 0
+// let loading
+// function startLoading() {
+//     loading = Loading.service({
+//         lock: true,
+//         text: '加载中...',
+//         background: 'rgba(0,0,0,0.7)'
+//     })
+// }
+// function endLoading() {
+//     loading.close()
+// }
+// let needLoadingRequestCount = 0
 
-export function showFullScreenLoading() {
-    if (needLoadingRequestCount === 0) {
-        startLoading()
-    }
-    needLoadingRequestCount++
-}
+// export function showFullScreenLoading() {
+//     if (needLoadingRequestCount === 0) {
+//         startLoading()
+//     }
+//     needLoadingRequestCount++
+// }
 
-export function tryHideFullScreenLoading() {
-    if (needLoadingRequestCount <= 0) return
-        needLoadingRequestCount--
-    if (needLoadingRequestCount === 0) {
-        endLoading()
-    }
-}
+// export function tryHideFullScreenLoading() {
+//     if (needLoadingRequestCount <= 0) return
+//         needLoadingRequestCount--
+//     if (needLoadingRequestCount === 0) {
+//         endLoading()
+//     }
+// }
 
 
 let axiosIns = Axios.create({
@@ -60,7 +60,7 @@ axiosIns.defaults.validateStatus = function () {
 axiosIns.interceptors.request.use(
     config => {
 
-        showFullScreenLoading()
+        // showFullScreenLoading()
         return config;
     },
     error => {
@@ -76,7 +76,7 @@ axiosIns.interceptors.response.use(
                 query: { redirect: router.currentRoute.fullPath }
             })
         }
-        tryHideFullScreenLoading()
+        // tryHideFullScreenLoading()
         return response;
     },
     error => {
