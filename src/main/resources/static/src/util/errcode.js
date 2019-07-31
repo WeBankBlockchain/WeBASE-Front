@@ -166,9 +166,12 @@ let errCode = {
     },
     "201035": {
         en: "version and address cannot all be  null",
-        cn: '版本和地址不能都是null'
+        cn: '合约地址不能为空'
     },
-
+    // "201036": {
+    //     en: "contract no change",
+    //     cn: '合约没有改变'
+    // },
     "202000": {
         en: "invalid node info",
         cn: '无效的节点信息'

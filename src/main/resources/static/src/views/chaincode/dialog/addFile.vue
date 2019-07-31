@@ -91,6 +91,7 @@ export default {
                 }
             }
             this.fileFrom.contractType = this.options[0].folderName
+             
             if (this.folderId) {
                 this.options.forEach(value => {
                     if (value.folderId == this.folderId) {
