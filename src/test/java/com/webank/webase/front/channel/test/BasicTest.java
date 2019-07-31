@@ -58,7 +58,7 @@ public class BasicTest extends TestBase {
   @Test
   public void peersTest() throws Exception {
     Peers ethPeers = web3j.getPeers().send();
-    System.out.println(ethPeers.getPeers().get(0).getNodeID());
+    System.out.println(ethPeers.getValue().get(0).getNodeID());
     assertNotNull(ethPeers);
   }
 

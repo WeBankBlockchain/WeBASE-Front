@@ -342,6 +342,7 @@ public class TransService {
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
                     e.getMessage());
         }
+        transactionReceipt.setCumulativeGasUsed("0");
         return transactionReceipt;
     }
 

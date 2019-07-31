@@ -106,7 +106,7 @@ jar {
     doLast {
         copy {
             from file('src/main/resources/')
-            into 'dist/conf_template'
+            into 'dist/conf'
 			exclude '**/static'
         }
 		copy {
