@@ -33,10 +33,11 @@
         <div class="contract-menu-content">
             <ul>
                 <li v-for='item in contractArry' :key="item.id">
-                    <div v-if='item.contractType == "file"' class="contract-file" :id='item.id'>
+                    <div v-if='item.contractType == "file"' class="contract-file" :id='item.id' :style="{'padding-left': item.modifyState ? `${10}px`:''}">
                         <div class="ellipsis-info" :class="{'colorActive': item.contractActive}">
+                            <i class="wbs-icon-radio font-6" v-if="item.modifyState"></i>
                             <i class="wbs-icon-file" @contextmenu.prevent="handle($event,item)" @click='select(item)' v-if='!item.renameShow' :id='item.id'></i>
-                            <span @contextmenu.prevent="handle($event,item)" @click='select(item)' :id='item.id' v-if='!item.renameShow' >{{item.contractName}}</span>
+                            <span @contextmenu.prevent="handle($event,item)" @click='select(item)' :id='item.id' v-if='!item.renameShow'>{{item.contractName}}</span>
                         </div>
                         <el-input v-model="contractName" v-focus="true" autofocus='autofocus' maxlength="32" @blur="changeName(item)" v-if="item.renameShow"></el-input>
                         <div class="contract-menu-handle" v-if='item.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX}px`}" v-Clickoutside="checkNull">
@@ -49,8 +50,8 @@
                     </div>
                     <div v-if='item.contractType == "folder"' class="contract-folder" :id='item.folderId'>
                         <i :class="item.folderIcon" @click='open(item)' v-if="!item.renameShow" :id='item.folderId' class="cursor-pointer font-16 no-chase"></i>
-                        <i class="wbs-icon-folder cursor-context-menu no-chase" @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
-                        <span @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-context-menu">{{item.contractName}}</span>
+                        <i class="wbs-icon-folder cursor-pointer no-chase" @click='open(item)' @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
+                        <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
                         <div class="contract-menu-handle" v-if=' item.handleModel' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
                                 <li class="contract-menu-handle-list" @click="addFiles">新建文件</li>
@@ -59,8 +60,9 @@
                         </div>
                         <br>
                         <ul v-if="item.folderActive" style="padding-left: 20px;">
-                            <li class="contract-file"  v-for='list in item.child' :key="list.id">
-                                <div class="ellipsis-info"  :class="{'colorActive': list.contractActive}">
+                            <li class="contract-file" v-for='list in item.child' :key="list.id" :style="{'padding-left': list.modifyState ? `${10}px`:''}">
+                                <div class="ellipsis-info" :class="{'colorActive': list.contractActive}">
+                                    <i class="wbs-icon-radio font-6" v-if="list.modifyState"></i>
                                     <i class="wbs-icon-file" v-if='!list.renameShow' @click='select(list)'></i>
                                     <span @click='select(list)' @contextmenu.prevent="handle($event,list)" :id='list.id' v-if='!list.renameShow'>{{list.contractName}}</span>
                                 </div>
@@ -117,7 +119,9 @@ export default {
             contractFolder: false,
             ID: "",
             handleModel: false,
-            folderId: null
+            folderId: null,
+            modifyState: false,
+            modifyParam: {}
         };
     },
     beforeDestroy: function () {
@@ -125,6 +129,7 @@ export default {
         Bus.$off("deploy");
         Bus.$off("open");
         Bus.$off("save");
+        Bus.$off("modifyState");
     },
     mounted: function () {
         this.$nextTick(function () {
@@ -148,6 +153,18 @@ export default {
             });
             this.select(data);
         });
+        Bus.$on('modifyState', data => {
+            this.contractList.forEach(value => {
+                if (value.id === data.id && data.modifyState) {
+                    this.modifyState = data.modifyState
+                    this.modifyParam = data;
+                    this.$set(value, "modifyState", true);
+                } else {
+                    this.$set(value, "modifyState", false);
+
+                }
+            })
+        })
     },
     directives: {
         Clickoutside,
@@ -412,7 +429,7 @@ export default {
                 Bus.$emit("noData", true);
             }
         },
-        saveContract: function (param, title) {
+        saveContract: function (param, title,callback) {
             let reqData = {
                 groupId: localStorage.getItem("groupId"),
                 contractName: param.contractName,
@@ -435,6 +452,7 @@ export default {
                                 message: title || "合约保存成功!"
                             })
                         }
+                        this.modifyState = false
                         this.getContracts(data);
                     } else {
                         this.$message({
@@ -480,7 +498,8 @@ export default {
                                         folderName: value.contractPath,
                                         folderId: new Date().getTime(),
                                         folderActive: false,
-                                        groupId: localStorage.getItem("groupId")
+                                        groupId: localStorage.getItem("groupId"),
+                                        modifyTime: value.modifyTime
                                     };
                                     this.folderList.push(item);
                                 }
@@ -507,6 +526,7 @@ export default {
                                 this.$set(value, "contractActive", false);
                                 this.$set(value, "renameShow", false);
                                 this.$set(value, "inputShow", false);
+                                this.$set(value, "modifyState", false);
                             });
                             if (list) {
                                 this.getContractArry(list);
@@ -616,7 +636,7 @@ export default {
             }
             this.$set(val, "contractActive", true);
         },
-        select: function (val) {
+        sureSelect: function (val) {
             let num = 0;
             this.contractArry.forEach(value => {
                 if (value.id == val.id) {
@@ -634,7 +654,24 @@ export default {
                     this.$set(value, "contractActive", false);
                 }
             });
+            this.modifyState = false;
             Bus.$emit("select", val);
+        },
+        select: function (val) {
+            if (this.modifyState) {
+                this.$confirm(`合约未保存是否保存？`, {
+                    center: true,
+                    dangerouslyUseHTMLString: true
+                })
+                    .then(() => {
+                        this.saveContract(this.modifyParam)
+                    })
+                    .catch(() => {
+                        this.sureSelect(val)
+                    })
+            } else {
+                this.sureSelect(val)
+            }
         },
         deleteFile: function (val) {
             this.$confirm("确认删除？")
@@ -716,6 +753,7 @@ export default {
     vertical-align: middle;
     padding-left: 10px;
     cursor: pointer;
+    color: #98a7b9;
 }
 .checkContract-upload {
     display: block;
@@ -783,19 +821,16 @@ export default {
     position: absolute;
     font-size: 0;
     width: 70px;
-    /* top: 0; */
     cursor: pointer;
     font-size: 12px;
     text-align: center;
     background-color: #fff;
-    box-shadow: 1px 4px 4px 1px;
     z-index: 100;
 }
 .contract-menu-handle li {
     font-size: 12px;
     height: 30px;
     line-height: 30px;
-    padding-left: 8px;
 }
 .contract-menu-handle-list {
     cursor: pointer;

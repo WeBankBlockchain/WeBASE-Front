@@ -247,13 +247,13 @@
 }
 
 .el-button--text {
-    color: #194ea0 !important;
+    color: #1f83e7 !important;
 }
 .el-button--text.is-active,
 .el-button--text:active,
 .el-button--text:focus,
 .el-button--text:hover {
-    color: #194ea0 !important;;
+    color: #1f83e7 !important;;
 }
 /* element-ui input*/
 .el-input__inner{
