@@ -1,4 +1,4 @@
-FROM fiscoorg/fiscobcos:v2.0.0-rc2
+FROM fiscoorg/fiscobcos:v2.0.0
 
 LABEL maintainer service@fisco.com.cn
 
@@ -15,4 +15,4 @@ ADD dist /dist
 ENTRYPOINT ["sh","/dist/start.sh"]
 
 
-EXPOSE 30300 20200 8545 8081
+EXPOSE 30300 20200 8545 5002
