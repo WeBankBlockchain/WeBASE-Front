@@ -28,7 +28,7 @@
                 <td>
                     <el-select v-model="userId" placeholder="请选择用户地址" @change="changeId" style="width: 340px">
                         <el-option :label="item.address" :value="item.address" :key="item.address" v-for='item in userList'>
-                            <span class="font-12">{{item.userName}}/</span>
+                            <span class="font-12">{{item.userName}}</span>
                             <span>{{item.address}}</span>
                         </el-option>
                     </el-select>

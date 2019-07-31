@@ -15,6 +15,7 @@
  */
 <template>
     <div class="send-wrapper">
+        <div class="font-color-ed5454 text-center" v-if="sendErrorMessage">{{sendErrorMessage}}</div>
         <div class="send-item">
             <span class="send-item-title">合约名称:</span>
             <span>{{data.contractName}}</span>
@@ -26,38 +27,42 @@
                 <i class="el-icon-info"></i>
             </el-tooltip>
         </div>
-        <div class="send-item" v-show="!constant">
-            <span class="send-item-title">用户地址:</span>
-            <el-select v-model="transation.userName" placeholder="请选择用户地址" style="width:240px">
-                <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'>
-                    <span class="font-12">{{item.userName}}/</span>
-                    <span>{{item.address}}</span>
-                </el-option>
-            </el-select>
-        </div>
         <div class="send-item">
             <span class="send-item-title">方法:</span>
             <!-- <el-select v-model="transation.funcType" placeholder="方法类型" @change="changeType($event)" style="width:110px">
                 <el-option label="function" :value="'function'"></el-option>
             </el-select> -->
-            <el-select v-model="transation.funcName" filterable placeholder="方法名" v-show="funcList.length > 0" @change="changeFunc" style="width:125px">
-                <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList"></el-option>
+            <el-select v-model="transation.funcName" filterable placeholder="方法名" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width:240px">
+                <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList">
+                    <span :class=" {'func-color': !item.constant}">{{item.name}}</span>
+                </el-option>
+            </el-select>
+        </div>
+        <div class="send-item" v-show="!constant">
+            <span class="send-item-title">用户地址:</span>
+            <el-select v-model="transation.userName" placeholder="请选择用户地址" style="width:240px">
+                <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'>
+                    <span class="font-12">{{item.userName}}</span>
+                    <span>{{item.address}}</span>
+                </el-option>
             </el-select>
         </div>
         <div class="send-item" v-show="pramasData.length" style="line-height: 25px;">
-            <span class="send-item-title" style="position: relative;top: 5px;">参数:</span>
+            <span class="send-item-title" style="position: relative;top: 5px; ">参数:</span>
             <ul style="position: relative;top: -25px;">
                 <li v-for="(item,index) in pramasData" style="margin-left:63px;">
                     <el-input v-model="transation.funcValue[index]" style="width: 240px;" :placeholder="item.type">
-                        <template slot="prepend">
-                            <span class="">{{item.name}}</span>
+                        <template slot="prepend" style="width: 51px;">
+                            <span>{{item.name}}</span>
                         </template>
                     </el-input>
                 </li>
                 <p style="padding: 5px 0 0 28px;">
-                    <i class="el-icon-info" style="padding-right: 4px;"></i>如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号。</p>
+                    <i class="el-icon-info" style="padding-right: 4px;"></i>如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号。
+                </p>
             </ul>
         </div>
+
         <div class="text-right send-btn java-class">
             <el-button @click="close">取消</el-button>
             <el-button type="primary" @click="submit('transation')" :disabled='buttonClick'>确定</el-button>
@@ -70,7 +75,7 @@ import errcode from "@/util/errcode";
 
 export default {
     name: "sendTransation",
-    props: ["data", "dialogClose", "abi", 'version'],
+    props: ["data", "dialogClose", "abi", 'version', 'sendErrorMessage'],
     data: function () {
         return {
             transation: {
@@ -87,7 +92,8 @@ export default {
             buttonClick: false,
             contractVersion: this.version,
             constant: false,
-            contractAddress: this.data.contractAddress || ""
+            contractAddress: this.data.contractAddress || "",
+            errorMessage: ''
         };
     },
     mounted: function () {
@@ -253,5 +259,21 @@ export default {
 }
 .java-class {
     margin-top: 10px;
+}
+.send-item > ul > .el-input-group__prepend > span {
+    width: 51px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-all;
+    display: inline-block;
+}
+.func-color{
+    color: #409EFF
+}
+.func-name .el-select-dropdown__list .el-select-dropdown__item.selected {
+    color: #606266;
+    font-weight: 700
 }
 </style>

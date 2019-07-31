@@ -29,14 +29,23 @@
                 <i class="el-icon-caret-right font-color-aeb1b5" @click="hideMune(false)" style="font-size: 18px;"></i>
             </div>
             <div class='sidebar-check-group' :style="{'padding-left': menuShowC ? '': '4px','font-size': menuShowC?'':'9px'}">
-                <span class="group-content" @click="groupVisible = !groupVisible">
+                <!-- <span class="group-content" @click="groupVisible = !groupVisible">
                     {{groupName}}
                     <ul v-show="groupVisible" :style="{'left': menuShowC ? '': '0'}" @mouseleave="toggleHover">
                         <li v-for=" item in groupList" :key="item.group" @click="changeGroup(item)" :style="{'padding': menuShowC ? '': '0 5px'}">{{item.groupName}}</li>
                     </ul>
                 </span>
-                <i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom','select-network']"></i>
+                <i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom','select-network']" @click="groupVisible = !groupVisible"></i> -->
+                <el-dropdown trigger="click"  @command="changeGroup">
+                    <span class="cursor-pointer" @click="groupVisible = !groupVisible">
+                        {{groupName}}<i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom']"></i>
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item v-for=" item in groupList" :key="item.group" :command="item">{{item.groupName}}</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
             </div>
+
             <el-menu default-active="999" router class="el-menu-vertical-demo" text-color="#9da2ab" active-text-color="#1f83e7" active-background-color="#20293c" background-color="#242e42" @select="select" :collapse="!menuShowC" @open="handleOpen" @close="handleClose">
                 <template v-for="(item,index) in routesList" v-if="item.menuShow">
                     <el-submenu v-if="!item.leaf" :index="`${index}`" ref="ele" class="">
@@ -135,6 +144,7 @@ export default {
     },
     methods: {
         changeGroup(val) {
+            console.log(val,'sfj;===============')
             this.group = val.group;
             this.groupName = val.groupName;
             // this.path = this.$route.path;
@@ -253,19 +263,12 @@ export default {
     overflow-x: hidden;
 }
 .sidebar-version {
-    position: absolute;
-    left: 0;
     width: 100%;
     padding: 20px 0;
     text-align: center;
     color: #92a1b3;
-    /* font-size: 16px; */
     border-top: 2px solid #20293c;
     background-color: #242e42;
-    z-index: 999;
-}
-.buttom-none {
-    bottom: 0;
 }
 .group-content {
     position: relative;
@@ -298,6 +301,9 @@ export default {
     border-top: 2px solid #20293c;
     border-bottom: 2px solid #20293c;
     text-align: center;
+}
+.sidebar-check-group >>>.el-dropdown {
+    color: #fff;
 }
 .select-network {
     cursor: default;
