@@ -29,6 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
+import org.fisco.bcos.web3j.precompile.consensus.ConsensusService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
@@ -55,6 +57,12 @@ public class Web3ApiService {
 
     @Autowired
     Map<Integer, Web3j> web3jMap;
+
+    @Autowired
+    private Map<Integer, CnsService> cnsServiceMap;
+
+    @Autowired
+    private Map<Integer, ConsensusService> consensusServiceMap;
     @Autowired
     NodeConfig nodeConfig;
     @Autowired
@@ -559,4 +567,20 @@ public class Web3ApiService {
 
         return null;
     }
+
+    public String addSealer(int groupId, String nodeId) throws Exception {
+
+       return  consensusServiceMap.get(groupId).addSealer(nodeId);
+    }
+
+
+    public String addObserver(int groupId, String nodeId) throws Exception {
+        return  consensusServiceMap.get(groupId).addObserver(nodeId);
+    }
+
+    public String removeNode(int groupId, String nodeId) throws Exception {
+        return  consensusServiceMap.get(groupId).removeNode(nodeId);
+    }
+
+
 }

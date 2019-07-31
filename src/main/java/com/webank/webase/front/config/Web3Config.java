@@ -11,6 +11,7 @@ import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
+import org.fisco.bcos.web3j.precompile.consensus.ConsensusService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,8 +169,20 @@ public class Web3Config {
     }
 
     @Bean
-    public HashMap<String, String> getCnsMap() {
-        HashMap cnsMap = new HashMap<String, String>();
-        return cnsMap;
+    public HashMap<Integer, ConsensusService> getConsensusService(HashMap<Integer,Web3j> web3jMap) {
+        Credentials credentials = Credentials.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+        HashMap consensusServiceMap = new HashMap<Integer, ConsensusService>();
+        Iterator entries = web3jMap.entrySet().iterator();
+
+        while (entries.hasNext()) {
+            Map.Entry entry = (Map.Entry) entries.next();
+            Integer key =  (Integer)entry.getKey();
+            Web3j value = (Web3j) entry.getValue();
+
+            consensusServiceMap.put(key, new ConsensusService(value, credentials));
+
+        }
+        return consensusServiceMap;
     }
+
 }

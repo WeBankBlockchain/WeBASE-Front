@@ -1,5 +1,6 @@
 package com.webank.webase.front.web3api;
 
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -14,11 +15,7 @@ import java.util.Map;
 import org.fisco.bcos.web3j.protocol.core.methods.response.*;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -230,5 +227,29 @@ public class Web3ApiController {
     @GetMapping("/search")
     public Object searchByCriteria(@PathVariable int groupId, @RequestParam String input) {
         return web3ApiService.searchByCriteria(groupId, input);
+    }
+
+    @PostMapping("/addSealer")
+    public Object addSealer(@PathVariable int groupId,@RequestBody String nodeId) throws Exception {
+        if (nodeId.length() != 128) {
+            throw new FrontException("nodeId is invalid");
+        }
+        return web3ApiService.addSealer(groupId, nodeId);
+    }
+
+    @PostMapping("/addObserver")
+    public Object addObserver(@PathVariable int groupId,@RequestBody String nodeId) throws Exception {
+        if (nodeId.length() != 128) {
+            throw new FrontException("nodeId is invalid");
+        }
+        return web3ApiService.addObserver(groupId, nodeId);
+    }
+
+    @PostMapping("/addObserver")
+    public String removeNode(@PathVariable int groupId,@RequestBody String nodeId) throws Exception {
+        if (nodeId.length() != 128) {
+            throw new FrontException("nodeId is invalid");
+        }
+        return web3ApiService.removeNode(groupId, nodeId);
     }
 }

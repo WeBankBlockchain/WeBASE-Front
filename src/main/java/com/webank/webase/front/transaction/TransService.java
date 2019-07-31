@@ -36,6 +36,7 @@ import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.crypto.TransactionEncoder;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
+import org.fisco.bcos.web3j.precompile.consensus.ConsensusService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterName;
@@ -342,7 +343,6 @@ public class TransService {
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
                     e.getMessage());
         }
-        transactionReceipt.setCumulativeGasUsed("0");
         return transactionReceipt;
     }
 
