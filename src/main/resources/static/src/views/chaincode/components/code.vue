@@ -43,10 +43,10 @@
                     <span>部署</span>
                 </span>
                 <span class="contract-code-done" @click="send">
-                    <el-tooltip class="item" effect="dark" content="按Alt+t 发交易" placement="top-start">
+                    <el-tooltip class="item" effect="dark" content="按Alt+t 合约调用" placement="top-start">
                         <i class="wbs-icon-send contract-icon-style font-16"></i>
                     </el-tooltip>
-                    <span>发交易</span>
+                    <span>合约调用</span>
                 </span>
                 <span class="contract-code-done" @click="downloadJavaClass">
                     <i class="el-icon-download contract-icon-style font-16"></i>
@@ -135,7 +135,7 @@
                 </div>
             </div>
         </div>
-        <el-dialog title="发送交易" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
+        <el-dialog title="合约调用" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
             <v-transaction @success="sendSuccess($event)" @close="handleClose" ref="send" :sendErrorMessage="sendErrorMessage" :data="data" :abi='abiFile' :version='version'></v-transaction>
         </el-dialog>
         <el-dialog title="选择用户地址" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
@@ -659,7 +659,7 @@ export default {
         },
         deploying: function () {
             if (this.abiFile) {
-                this.dialogUser = true;
+                this.compile(this.deploy)
             } else {
                 this.$message.error('合约未编译成功');
             }
