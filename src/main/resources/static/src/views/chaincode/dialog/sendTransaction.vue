@@ -189,7 +189,7 @@ export default {
                 version: this.contractVersion,
                 funcName: functionName || "",
                 funcParam: this.transation.funcValue,
-                contractAddress: this.data.contractAddress,
+                contractAddress: this.contractAddress,
                 useAes: false
             };
             sendTransation(data)
@@ -290,7 +290,8 @@ export default {
     display: inline-block;
     max-width: 45px;
     height: 25px;
+    line-height: 25px;
+    position: relative;
+    top: 9px;
 }
-
-
 </style>
