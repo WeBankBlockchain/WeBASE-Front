@@ -40,12 +40,15 @@
         </div>
         <div class="send-item" v-show="!constant">
             <span class="send-item-title">用户地址:</span>
-            <el-select v-model="transation.userName" placeholder="请选择用户地址" style="width:240px">
+            <el-select v-model="transation.userName" :placeholder="placeholderText" style="width:240px" class="plac-op">
                 <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'>
                     <span class="font-12">{{item.userName}}</span>
                     <span>{{item.address}}</span>
                 </el-option>
             </el-select>
+            <span class="user-explain" v-show="userId">
+                (<span class="ellipsis-info ">{{userId}}</span>)
+            </span>
         </div>
         <div class="send-item" v-show="pramasData.length" style="line-height: 25px;">
             <span class="send-item-title" style="position: relative;top: 5px; ">参数:</span>
@@ -93,12 +96,16 @@ export default {
             contractVersion: this.version,
             constant: false,
             contractAddress: this.data.contractAddress || "",
-            errorMessage: ''
+            errorMessage: '',
+            placeholderText: "请选择用户地址"
         };
     },
     mounted: function () {
         if (this.userList.length) {
             this.transation.userName = this.userList[0]['address']
+            this.userId = this.userList[0]['userName']
+        } else {
+            this.placeholderText = "没有用户，请去私钥管理新建用户"
         }
         this.formatAbi();
         this.changeFunc();
@@ -269,11 +276,21 @@ export default {
     word-break: break-all;
     display: inline-block;
 }
-.func-color{
-    color: #409EFF
+.func-color {
+    color: #409eff;
 }
 .func-name .el-select-dropdown__list .el-select-dropdown__item.selected {
     color: #606266;
-    font-weight: 700
+    font-weight: 700;
 }
+.user-explain {
+    margin-left: 4px;
+}
+.user-explain > span {
+    display: inline-block;
+    max-width: 45px;
+    height: 25px;
+}
+
+
 </style>
