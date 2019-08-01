@@ -19,6 +19,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import javax.validation.Valid;
+
+import com.webank.webase.front.contract.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -40,12 +42,6 @@ import com.webank.webase.front.base.BasePageResponse;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqDeployWithSign;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.file.FileContent;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -237,5 +233,20 @@ public class ContractController extends BaseController {
     public boolean ifChanged(@PathVariable Integer groupId, @PathVariable Long contractId) {
         log.info("ifChanged start. groupId:{} contractId:{}", groupId, contractId);
         return contractService.verifyContractChange(contractId, groupId);
+    }
+
+
+    /**
+     * query list of contract.
+     */
+    @ApiOperation(value = "compile contract", notes = "compile contract")
+    @ApiImplicitParam(name = "req", value = "param info", required = true, dataType = "ReqContractCompile")
+    @PostMapping(value = "/contractCompile")
+    public RspContractCompile contractCompile(@RequestBody @Valid ReqContractCompile req,
+                                              BindingResult result) throws FrontException {
+        log.info("contractCompile start. param:{}", JSON.toJSONString(req));
+        checkParamResult(result);
+
+        return contractService.contractCompile(req.getSolidityName(), req.getSolidityBase64());
     }
 }
