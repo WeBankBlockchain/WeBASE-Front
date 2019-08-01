@@ -282,6 +282,9 @@
     /* box-shadow:0 12px 27px 0 rgba(159,166,189,0.33); */
     border-radius:8px;
 }
+.el-dialog, .el-pager li {
+    background: none;
+}
 .el-dialog__header {
     padding-bottom: 0;
     background-color: #2f3b52;
@@ -479,6 +482,11 @@ td {
 .el-pagination li{
     background-color: #2f3b52 !important
 }
+/**/
+.el-loading-mask {
+    background-color: #2e384d;
+    opacity:0.6;
+}
 /* scrollbar */
 ::-webkit-scrollbar-track-piece {
     background-color:#20293c;
@@ -516,4 +524,21 @@ td {
     text-overflow: ellipsis;
     white-space: nowrap;
     word-break: break-all;
+}
+
+::-webkit-input-placeholder {
+    /*Webkit browsers*/
+    font-size: 13px;
+}
+:-moz-placeholder {
+    /*Mozilla Firefox 4 to 8*/
+    font-size: 13px;
+}
+::moz-placeholder {
+    /*Mozilla Firefox 19+*/
+    font-size: 13px;
+}
+:-ms-input-placeholder {
+    /*Internet Explorer 10+*/
+    font-size: 13px;
 }
