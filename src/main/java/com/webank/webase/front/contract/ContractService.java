@@ -14,23 +14,24 @@
 package com.webank.webase.front.contract;
 
 import static com.webank.webase.front.base.ConstantCode.GROUPID_NOT_EXIST;
+import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.*;
+import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.METADATA;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
+import com.webank.webase.front.contract.entity.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
@@ -41,6 +42,8 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.solidity.compiler.CompilationResult;
+import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -55,12 +58,6 @@ import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.FrontUtils;
 import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqDeployWithSign;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.file.FileContent;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.transaction.TransService;
@@ -76,6 +73,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class ContractService {
+    private static final String BASE_FILE_PATH = File.separator + "temp" + File.separator;
+    private static final String CONTRACT_FILE_TEMP = BASE_FILE_PATH + "%1s.sol";
 
     @Autowired
     private Map<Integer, Web3j> web3jMap;
@@ -538,5 +537,38 @@ public class ContractService {
                     groupId, path, name, contractId, localId);
             throw new FrontException(ConstantCode.CONTRACT_NAME_REPEAT);
         }
+    }
+
+
+
+    /**
+     * compile contract.
+     */
+    public RspContractCompile contractCompile(String contractName, String sourceBase64) {
+        File contractFile = null;
+        try {
+            // decode
+            byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
+            String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
+            // save contract to file
+            contractFile = new File(contractFilePath);
+            FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
+            //compile
+            SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, true, ABI, BIN, INTERFACE, METADATA);
+
+            // compile result
+            CompilationResult result = CompilationResult.parse(res.output);
+            CompilationResult.ContractMetadata meta = result.getContract(contractName);
+            RspContractCompile compileResult = new RspContractCompile(contractName, meta.abi, meta.bin);
+            return compileResult;
+        } catch (Exception ex) {
+            log.error("contractCompile error", ex);
+            throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL);
+        } finally {
+            if (contractFile != null) {
+                contractFile.deleteOnExit();
+            }
+        }
+
     }
 }
