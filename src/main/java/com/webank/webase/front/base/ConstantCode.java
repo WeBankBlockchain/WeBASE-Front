@@ -61,6 +61,7 @@ public interface ConstantCode {
     RetCode DATA_SIGN_ERROR = RetCode.mark(201033, "data request sign error");
     RetCode GROUPID_NOT_EXIST = RetCode.mark(201034, "groupId not exist");
     RetCode VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL = RetCode.mark(201035, "version and address cannot all be null");
+    RetCode CONTRACT_COMPILE_FAIL = RetCode.mark(201036, "compile fail");
 
     /* system error */
     RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
