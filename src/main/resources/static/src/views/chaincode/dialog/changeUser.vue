@@ -24,15 +24,20 @@
                 </td>
             </tr> -->
             <tr>
-                <td style="width: 70px">用户地址：</td>
+                <td style="width: 70px"><span class="font-color-fff">用户地址：</span></td>
                 <td>
-                    <el-select v-model="userId" placeholder="请选择用户地址" @change="changeId" style="width: 340px">
+                    <el-select v-model="userId" :placeholder="placeholderText" @change="changeId" style="width: 340px">
                         <el-option :label="item.address" :value="item.address" :key="item.address" v-for='item in userList'>
                             <span class="font-12">{{item.userName}}</span>
                             <span>{{item.address}}</span>
                         </el-option>
                     </el-select>
                 </td>
+                <td v-show="userName">
+                    <div class="user-explain font-color-fff">
+                        (<span class="ellipsis-info">{{userName}}</span>)
+                    </div>
+                    </td>
             </tr>
             <tr v-if='inputs.length'>
                 <td style="vertical-align: top;width: 70px">参数：</td>
@@ -82,11 +87,17 @@ export default {
             abifile: JSON.parse(this.abi),
             version: "",
             versionShow: false,
-            errorInfo: ""
+            errorInfo: "",
+            placeholderText: "请选择用户地址"
         };
     },
     mounted: function () {
-        if (this.userList.length > 0) this.userId = this.userList[0].address;
+        if (this.userList.length > 0) {
+            this.userId = this.userList[0].address
+            this.userName = this.userList[0].userName
+        }else {
+            this.placeholderText = "没有用户，请去私钥管理新建用户"
+        };
         this.changeConstructor();
     },
     methods: {
@@ -99,14 +110,12 @@ export default {
                 });
             }
         },
-        changeId: function () {
-            if (this.userName) {
-                this.userList.forEach(value => {
-                    if (this.userName === value.userName) {
-                        this.userId = value.userId;
-                    }
-                });
-            }
+        changeId: function (val) {
+            this.userList.forEach(value => {
+                if (val === value.address) {
+                    this.userName = value.userName;
+                }
+            });
         },
         close: function () {
             this.$emit("close");
@@ -141,10 +150,16 @@ export default {
     padding-top: 0;
     padding-bottom: 10px;
 }
-.send-btn {
-}
 .send-btn >>> .el-button {
     padding: 9px 16px;
+}
+.user-explain {
+    display: flex;
+    margin-left: 4px;
+}
+.user-explain > span {
+    display: inline-block;
+    max-width: 45px;
 }
 </style>
 
