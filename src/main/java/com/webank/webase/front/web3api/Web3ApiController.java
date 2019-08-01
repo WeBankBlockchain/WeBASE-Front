@@ -231,25 +231,25 @@ public class Web3ApiController {
 
     @PostMapping("/addSealer")
     public Object addSealer(@PathVariable int groupId,@RequestBody String nodeId) throws Exception {
-        if (nodeId.length() != 128) {
-            throw new FrontException("nodeId is invalid");
-        }
+//        if (nodeId.length() != 128) {
+//            throw new FrontException("nodeId is invalid");
+//        }
         return web3ApiService.addSealer(groupId, nodeId);
     }
 
     @PostMapping("/addObserver")
     public Object addObserver(@PathVariable int groupId,@RequestBody String nodeId) throws Exception {
-        if (nodeId.length() != 128) {
-            throw new FrontException("nodeId is invalid");
-        }
+//        if (nodeId.length() != 128) {
+//            throw new FrontException("nodeId is invalid");
+//        }
         return web3ApiService.addObserver(groupId, nodeId);
     }
 
     @PostMapping("/removeNode")
     public String removeNode(@PathVariable int groupId,@RequestBody String nodeId) throws Exception {
-        if (nodeId.length() != 128) {
-            throw new FrontException("nodeId is invalid");
-        }
+//        if (nodeId.length() != 128) {
+//            throw new FrontException("nodeId is invalid");
+//        }
         return web3ApiService.removeNode(groupId, nodeId);
     }
 }
