@@ -253,7 +253,7 @@ export default {
                                     } 
                                 }
                                 val.eventName =  val.eventName + ")"
-                                let eventData = web3.eth.abi.decodeLog(value.inputs,val.data,val.topics);
+                                let eventData = web3.eth.abi.decodeLog(value.inputs,val.data,val.topics.slice(1));
                             }
                         })
                     }

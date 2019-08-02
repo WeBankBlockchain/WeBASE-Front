@@ -29,14 +29,23 @@
                 <i class="el-icon-caret-right font-color-aeb1b5" @click="hideMune(false)" style="font-size: 18px;"></i>
             </div>
             <div class='sidebar-check-group' :style="{'padding-left': menuShowC ? '': '4px','font-size': menuShowC?'':'9px'}">
-                <span class="group-content" @click="groupVisible = !groupVisible">
+                <!-- <span class="group-content" @click="groupVisible = !groupVisible">
                     {{groupName}}
-                    <ul v-show="groupVisible" :style="{'left': menuShowC ? '': '0'}">
+                    <ul v-show="groupVisible" :style="{'left': menuShowC ? '': '0'}" @mouseleave="toggleHover">
                         <li v-for=" item in groupList" :key="item.group" @click="changeGroup(item)" :style="{'padding': menuShowC ? '': '0 5px'}">{{item.groupName}}</li>
                     </ul>
                 </span>
-                <i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom','select-network']"></i>
+                <i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom','select-network']" @click="groupVisible = !groupVisible"></i> -->
+                <el-dropdown trigger="click"  @command="changeGroup">
+                    <span class="cursor-pointer" @click="groupVisible = !groupVisible">
+                        {{groupName}}<i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom']"></i>
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item v-for=" item in groupList" :key="item.group" :command="item">{{item.groupName}}</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
             </div>
+
             <el-menu default-active="999" router class="el-menu-vertical-demo" text-color="#9da2ab" active-text-color="#1f83e7" active-background-color="#20293c" background-color="#242e42" @select="select" :collapse="!menuShowC" @open="handleOpen" @close="handleClose">
                 <template v-for="(item,index) in routesList" v-if="item.menuShow">
                     <el-submenu v-if="!item.leaf" :index="`${index}`" ref="ele" class="">
@@ -105,36 +114,37 @@ export default {
             }
         }
     },
-    mounted: function() {   
+    mounted() {
         if (localStorage.getItem("groupId")) {
             this.group = localStorage.getItem("groupId");
         }
-        if(localStorage.getItem("groupName")){
+        if (localStorage.getItem("groupName")) {
             this.groupName = localStorage.getItem("groupName");
         }
-        this.$nextTick(function() {
+        this.$nextTick(function () {
             this.getGroup(this.getClientVersion);
             localStorage.setItem("sidebarHide", false);
             this.changeRouter();
-            if(this.$refs.sidebarContent.offsetHeight > document.body.clientHeight){
+            if (this.$refs.sidebarContent.offsetHeight > document.body.clientHeight) {
                 this.buttomNone = false
-            }else{
+            } else {
                 this.buttomNone = true
             }
         });
-        let _this =this
+        let _this = this
         window.onresize = () => {
-          return (() => {
-            if( _this.$refs.sidebarContent.offsetHeight > document.body.clientHeight){
-                 _this.buttomNone = false
-            }else{
-                 _this.buttomNone = true
-            }
-          })()
+            return (() => {
+                if (_this.$refs.sidebarContent.offsetHeight > document.body.clientHeight) {
+                    _this.buttomNone = false
+                } else {
+                    _this.buttomNone = true
+                }
+            })()
         }
     },
     methods: {
-        changeGroup: function(val){
+        changeGroup(val) {
+            console.log(val,'sfj;===============')
             this.group = val.group;
             this.groupName = val.groupName;
             // this.path = this.$route.path;
@@ -143,7 +153,7 @@ export default {
             Bus.$emit("changeGroup", this.group);
             this.getClientVersion();
         },
-        getClientVersion: function() {
+        getClientVersion() {
             queryClientVersion(this.group)
                 .then(res => {
                     const { data, status, statusText } = res;
@@ -153,7 +163,7 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message:  errcode.errCode[res.data.code].cn || "系统错误"
+                            message: errcode.errCode[res.data.code].cn || "系统错误"
                         });
                     }
                 })
@@ -164,7 +174,7 @@ export default {
                     });
                 });
         },
-        getGroup: function(callback) {
+        getGroup(callback) {
             queryGroup()
                 .then(res => {
                     const { data, status, statusText } = res;
@@ -180,20 +190,20 @@ export default {
                             });
                         }
                         this.groupList = list;
-                        if(!this.group){
+                        if (!this.group) {
                             this.group = this.groupList[0].group;
                             this.groupName = this.groupList[0].groupName;
-                        }else{
+                        } else {
 
                         }
-                        localStorage.setItem("groupName",this.groupName)
+                        localStorage.setItem("groupName", this.groupName)
                         localStorage.setItem('groupId', this.group);
                         localStorage.setItem("cluster", JSON.stringify(list));
                         callback()
                     } else {
                         this.$message({
                             type: "error",
-                            message:  errcode.errCode[res.data.code].cn || "系统错误"
+                            message: errcode.errCode[res.data.code].cn || "系统错误"
                         });
                     }
                 })
@@ -204,7 +214,7 @@ export default {
                     });
                 });
         },
-        changeRouter: function() {
+        changeRouter() {
             let list = this.$router.options.routes;
             list.forEach(item => {
                 if (item.name === "帐号管理") {
@@ -218,7 +228,7 @@ export default {
             });
             this.routesList = list;
         },
-        select: function(index, indexPath) {
+        select(index, indexPath) {
             this.activeIndex = indexPath[0];
             this.activeRoute = index;
         },
@@ -226,7 +236,7 @@ export default {
         },
         handleClose(key, keyPath) {
         },
-        hideMune: function(val) {
+        hideMune(val) {
             this.$emit("sidebarChange", val);
             if (this.menuShow) {
                 this.menuShow = false;
@@ -239,31 +249,26 @@ export default {
                 localStorage.setItem("sidebarHide", false);
             }
         },
-        getAdmin: function() {}
+        toggleHover() {
+            this.groupVisible = false
+        }
     }
 };
 </script>
 
 <style scoped>
-.sidebar-content{
+.sidebar-content {
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
 }
-.sidebar-version{
-    position: absolute;
-    left:0;
+.sidebar-version {
     width: 100%;
     padding: 20px 0;
     text-align: center;
     color: #92a1b3;
-    /* font-size: 16px; */
     border-top: 2px solid #20293c;
     background-color: #242e42;
-    z-index: 999;
-}
-.buttom-none{
-   bottom: 0; 
 }
 .group-content {
     position: relative;
@@ -278,7 +283,7 @@ export default {
     background-color: #fff;
     border: 1px solid #ebeef5;
     border-radius: 4px;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 .group-content ul li {
     height: 32px;
@@ -290,29 +295,32 @@ export default {
     background-color: #ecf5ff;
     color: #66b1ff;
 }
-.sidebar-check-group{
+.sidebar-check-group {
     color: #92a1b3;
     padding: 20px 0 20px 0px;
     border-top: 2px solid #20293c;
     border-bottom: 2px solid #20293c;
     text-align: center;
 }
+.sidebar-check-group >>>.el-dropdown {
+    color: #fff;
+}
 .select-network {
     cursor: default;
 }
-.el-menu-vertical-demo>>>.is-active{
+.el-menu-vertical-demo >>> .is-active {
     background-color: #20293c !important;
 }
 .el-menu-vertical-demo {
     padding-top: 14px;
     border: none;
 }
-.el-menu-vertical-demo>>>.el-menu-item {
+.el-menu-vertical-demo >>> .el-menu-item {
     font-size: 14px;
     color: #9da2ab;
     text-align: left;
 }
-.el-menu-vertical-demo>>>.el-submenu__title {
+.el-menu-vertical-demo >>> .el-submenu__title {
     padding-left: 33px;
 }
 .el-menu-item-group > ul > .el-menu-item {
@@ -326,10 +334,10 @@ export default {
 /* .el-menu-vertical-demo>>> .el-icon-arrow-down:before {
     content: "\e60b"
 } */
-.sidebar-content>>>.el-menu--collapse {
+.sidebar-content >>> .el-menu--collapse {
     width: 56px;
 }
-.sidebar-content>>>.el-menu--collapse .is-active .el-tooltip {
+.sidebar-content >>> .el-menu--collapse .is-active .el-tooltip {
     padding-left: 17px !important;
     background-color: #20293c;
 }
