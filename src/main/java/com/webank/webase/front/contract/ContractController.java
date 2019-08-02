@@ -13,30 +13,14 @@
  */
 package com.webank.webase.front.contract;
 
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.BaseController;
-import com.webank.webase.front.base.BasePageResponse;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
-import com.webank.webase.front.file.FileContent;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import javax.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+
+import com.webank.webase.front.contract.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -52,8 +36,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import static com.webank.webase.front.base.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.BaseController;
+import com.webank.webase.front.base.BasePageResponse;
+import com.webank.webase.front.base.BaseResponse;
+import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.file.FileContent;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -83,6 +77,24 @@ public class ContractController extends BaseController {
         checkParamResult(result);
         String contractAddress = contractService.caseDeploy(reqDeploy);
         log.info("success deploy. result:{}", contractAddress);
+        return contractAddress;
+    }
+    
+    /**
+     * deployWithSign.
+     *
+     * @param reqDeploy request data
+     * @param result checkResult
+     */
+    @ApiOperation(value = "contract deploy", notes = "contract deploy with WeBASE-Sign")
+    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeployWithSign")
+    @PostMapping("/deployWithSign")
+    public String deployWithSign(@Valid @RequestBody ReqDeployWithSign reqDeploy, BindingResult result)
+            throws Exception {
+        log.info("contract deployWithSign start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
+        checkParamResult(result);
+        String contractAddress = contractService.deployWithSign(reqDeploy);
+        log.info("success deployWithSign. result:{}", contractAddress);
         return contractAddress;
     }
 
@@ -183,7 +195,7 @@ public class ContractController extends BaseController {
      */
     @ApiOperation(value = "delete by contractId", notes = "delete by contractId")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "Integer"),
+        @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "int"),
         @ApiImplicitParam(name = "contractId", value = "contractId", required = true, dataType = "Long")})
     @DeleteMapping("/{groupId}/{contractId}")
     public BaseResponse deleteByContractId(@PathVariable Integer groupId,
@@ -208,5 +220,33 @@ public class ContractController extends BaseController {
         response.setTotalCount(page.getTotalElements());
         response.setData(page.getContent());
         return response;
+    }
+    
+    /**
+     * verify that if the contract changed.
+     */
+    @ApiOperation(value = "verify contract", notes = "verify that if the contract changed")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "int"),
+        @ApiImplicitParam(name = "contractId", value = "contractId", required = true, dataType = "Long")})
+    @GetMapping("/ifChanged/{groupId}/{contractId}")
+    public boolean ifChanged(@PathVariable Integer groupId, @PathVariable Long contractId) {
+        log.info("ifChanged start. groupId:{} contractId:{}", groupId, contractId);
+        return contractService.verifyContractChange(contractId, groupId);
+    }
+
+
+    /**
+     * query list of contract.
+     */
+    @ApiOperation(value = "compile contract", notes = "compile contract")
+    @ApiImplicitParam(name = "req", value = "param info", required = true, dataType = "ReqContractCompile")
+    @PostMapping(value = "/contractCompile")
+    public RspContractCompile contractCompile(@RequestBody @Valid ReqContractCompile req,
+                                              BindingResult result) throws FrontException {
+        log.info("contractCompile start. param:{}", JSON.toJSONString(req));
+        checkParamResult(result);
+
+        return contractService.contractCompile(req.getSolidityName(), req.getSolidityBase64());
     }
 }

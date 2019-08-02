@@ -15,46 +15,57 @@
  */
 <template>
     <div class="send-wrapper">
+        <div class="font-color-ed5454 text-center" v-if="sendErrorMessage">{{sendErrorMessage}}</div>
         <div class="send-item">
             <span class="send-item-title">合约名称:</span>
             <span>{{data.contractName}}</span>
         </div>
-        <!-- <div class="send-item">
-            <span class="send-item-title">合约版本:</span>
-            <span>{{contractVersion}}</span>
-        </div> -->
         <div class="send-item">
-            <span class="send-item-title">用户地址:</span>
-            <el-select v-model="transation.userName" placeholder="请选择用户地址" style="width:240px">
-                <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'></el-option>
-            </el-select>
+            <span class="send-item-title">合约地址:</span>
+            <el-input v-model.trim="contractAddress" style="width: 240px;" placeholder="请输入合约地址"></el-input>
+            <el-tooltip class="item" effect="dark" content="选填项，导入已部署的合约地址。" placement="top-start">
+                <i class="el-icon-info"></i>
+            </el-tooltip>
         </div>
         <div class="send-item">
             <span class="send-item-title">方法:</span>
-            <el-select v-model="transation.funcType" placeholder="方法类型" @change="changeType($event)" style="width:110px">
+            <!-- <el-select v-model="transation.funcType" placeholder="方法类型" @change="changeType($event)" style="width:110px">
                 <el-option label="function" :value="'function'"></el-option>
-            </el-select>
-            <el-select v-model="transation.funcName" placeholder="方法名" v-show="funcList.length > 0" @change="changeFunc" style="width:125px">
-                <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList"></el-option>
+            </el-select> -->
+            <el-select v-model="transation.funcName" filterable placeholder="方法名" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width:240px">
+                <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList">
+                    <span :class=" {'func-color': !item.constant}">{{item.name}}</span>
+                </el-option>
             </el-select>
         </div>
+        <div class="send-item" v-show="!constant">
+            <span class="send-item-title">用户地址:</span>
+            <el-select v-model="transation.userName" :placeholder="placeholderText" style="width:240px" class="plac-op">
+                <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'>
+                    <span class="font-12">{{item.userName}}</span>
+                    <span>{{item.address}}</span>
+                </el-option>
+            </el-select>
+            <span class="user-explain" v-show="userId">
+                (<span class="ellipsis-info ">{{userId}}</span>)
+            </span>
+        </div>
         <div class="send-item" v-show="pramasData.length" style="line-height: 25px;">
-            <span class="send-item-title" style="position: relative;top: 5px;">参数:</span>
+            <span class="send-item-title" style="position: relative;top: 5px; ">参数:</span>
             <ul style="position: relative;top: -25px;">
                 <li v-for="(item,index) in pramasData" style="margin-left:63px;">
                     <el-input v-model="transation.funcValue[index]" style="width: 240px;" :placeholder="item.type">
-                        <template slot="prepend">
-                            <span class="">{{item.name}}</span>
+                        <template slot="prepend" style="width: 51px;">
+                            <span>{{item.name}}</span>
                         </template>
                     </el-input>
-                    <!-- <el-tooltip class="item" effect="dark" content="如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号" placement="top-start">
-                        <i class="el-icon-info" style="position: relative;top: 8px;"></i>
-                    </el-tooltip> -->
                 </li>
                 <p style="padding: 5px 0 0 28px;">
-                    <i class="el-icon-info" style="padding-right: 4px;"></i>如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号。</p>
+                    <i class="el-icon-info" style="padding-right: 4px;"></i>如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号。
+                </p>
             </ul>
         </div>
+
         <div class="text-right send-btn java-class">
             <el-button @click="close">取消</el-button>
             <el-button type="primary" @click="submit('transation')" :disabled='buttonClick'>确定</el-button>
@@ -67,7 +78,7 @@ import errcode from "@/util/errcode";
 
 export default {
     name: "sendTransation",
-    props: ["data", "dialogClose", "abi", 'version'],
+    props: ["data", "dialogClose", "abi", 'version', 'sendErrorMessage'],
     data: function () {
         return {
             transation: {
@@ -83,12 +94,18 @@ export default {
             funcList: [],
             buttonClick: false,
             contractVersion: this.version,
-            constant: false
+            constant: false,
+            contractAddress: this.data.contractAddress || "",
+            errorMessage: '',
+            placeholderText: "请选择用户地址"
         };
     },
     mounted: function () {
         if (this.userList.length) {
             this.transation.userName = this.userList[0]['address']
+            this.userId = this.userList[0]['userName']
+        } else {
+            this.placeholderText = "没有用户，请去私钥管理新建用户"
         }
         this.formatAbi();
         this.changeFunc();
@@ -143,6 +160,9 @@ export default {
                     this.constant = value.constant;
                 }
             });
+            this.funcList.sort(function (a, b) {
+                return (a.name + '').localeCompare(b.name + '')
+            })
         },
         send: function () {
             this.buttonClick = true;
@@ -164,12 +184,12 @@ export default {
             })
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                user: this.transation.userName,
+                user: this.constant ? ' ' : this.transation.userName,
                 contractName: this.data.contractName,
                 version: this.contractVersion,
                 funcName: functionName || "",
                 funcParam: this.transation.funcValue,
-                contractAddress: this.data.contractAddress,
+                contractAddress: this.contractAddress,
                 useAes: false
             };
             sendTransation(data)
@@ -186,16 +206,23 @@ export default {
                                 message: "查询成功!"
                             });
                         } else {
-                            this.$message({
-                                type: "success",
-                                message: "发送交易成功!"
-                            });
+                            if (resData.statusOK) {
+                                this.$message({
+                                    type: "success",
+                                    message: "交易成功!"
+                                });
+                            } else {
+                                this.$message({
+                                    type: "success",
+                                    message: "交易失败!"
+                                });
+                            }
                         }
 
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || '交易失败！'
+                            message: errcode.errCode[res.data.code].cn || '发送交易失败！'
                         });
                         this.close();
                     }
@@ -239,5 +266,32 @@ export default {
 }
 .java-class {
     margin-top: 10px;
+}
+.send-item > ul > .el-input-group__prepend > span {
+    width: 51px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-all;
+    display: inline-block;
+}
+.func-color {
+    color: #409eff;
+}
+.func-name .el-select-dropdown__list .el-select-dropdown__item.selected {
+    color: #606266;
+    font-weight: 700;
+}
+.user-explain {
+    margin-left: 4px;
+}
+.user-explain > span {
+    display: inline-block;
+    max-width: 45px;
+    height: 25px;
+    line-height: 25px;
+    position: relative;
+    top: 9px;
 }
 </style>

@@ -521,7 +521,12 @@ export function sendTransation(data) {
         data: data
     })
 }
-
+export function ifChangedDepaloy(groupId, contractId) {
+    return post({
+        url: `${HANDLE}contract/ifChanged/${groupId}/${contractId}`,
+        method: 'get',
+    })
+}
 //download java class 
 export function queryJavaClass(data, str) {
     return post({

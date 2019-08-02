@@ -26,6 +26,10 @@
                             <span v-if="head.enName === 'status'">
                                 <i :style="{'color': textColor(scope.row[head.enName])}" class="wbs-icon-radio font-6"></i> {{nodesStatus(scope.row[head.enName])}}
                             </span>
+                            <span v-else-if="head.enName === 'nodeId'">
+                                <i class="wbs-icon-copy font-12" @click="copyNodeIdKey(scope.row[head.enName])" title="复制"></i>
+                                {{scope.row[head.enName]}}
+                            </span>
                             <span v-else>{{scope.row[head.enName]}}</span>
                         </template>
                     </el-table-column>
@@ -136,6 +140,25 @@ export default {
                     break;
             }
             return transString;
+        },
+        copyNodeIdKey: function(val) {
+            if (!val) {
+                this.$message({
+                    type: "fail",
+                    showClose: true,
+                    message: "key为空，不复制。",
+                    duration: 2000
+                });
+            } else {
+                this.$copyText(val).then(e => {
+                    this.$message({
+                        type: "success",
+                        showClose: true,
+                        message: "复制成功",
+                        duration: 2000
+                    });
+                });
+            }
         },
     }
 };
