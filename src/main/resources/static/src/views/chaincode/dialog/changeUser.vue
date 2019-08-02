@@ -24,20 +24,28 @@
                 </td>
             </tr> -->
             <tr>
-                <td style="width: 70px">用户地址：</td>
+                <td style="width: 70px"><span class="font-color-fff">用户地址：</span></td>
                 <td>
-                    <el-select v-model="userId" placeholder="请选择用户地址" @change="changeId" style="width: 340px">
-                        <el-option :label="item.address" :value="item.address" :key="item.address" v-for='item in userList'></el-option>
+                    <el-select v-model="userId" :placeholder="placeholderText" @change="changeId" style="width: 340px">
+                        <el-option :label="item.address" :value="item.address" :key="item.address" v-for='item in userList'>
+                            <span class="font-12">{{item.userName}}</span>
+                            <span>{{item.address}}</span>
+                        </el-option>
                     </el-select>
                 </td>
+                <td v-show="userName">
+                    <div class="user-explain font-color-fff">
+                        (<span class="ellipsis-info">{{userName}}</span>)
+                    </div>
+                    </td>
             </tr>
             <tr v-if='inputs.length'>
                 <td style="vertical-align: top;width: 70px">参数：</td>
                 <td>
                     <div v-for='(item,index) in inputs' :key='item.name'>
-                        <el-input v-model="parameter[index]" style="width: 240px;margin-bottom:10px;">
+                        <el-input v-model="parameter[index]" style="width: 240px;margin-bottom:10px;" :placeholder="item.type">
                             <template slot="prepend">
-                                <span>{{item.type}}</span>
+                                <span>{{item.name}}</span>
                             </template>
                         </el-input>
                         <!-- <el-tooltip class="item" effect="dark" content="如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号" placement="top-start">
@@ -79,11 +87,17 @@ export default {
             abifile: JSON.parse(this.abi),
             version: "",
             versionShow: false,
-            errorInfo: ""
+            errorInfo: "",
+            placeholderText: "请选择用户地址"
         };
     },
     mounted: function () {
-        this.userId = this.userList[0].address;
+        if (this.userList.length > 0) {
+            this.userId = this.userList[0].address
+            this.userName = this.userList[0].userName
+        }else {
+            this.placeholderText = "没有用户，请去私钥管理新建用户"
+        };
         this.changeConstructor();
     },
     methods: {
@@ -96,14 +110,12 @@ export default {
                 });
             }
         },
-        changeId: function () {
-            if (this.userName) {
-                this.userList.forEach(value => {
-                    if (this.userName === value.userName) {
-                        this.userId = value.userId;
-                    }
-                });
-            }
+        changeId: function (val) {
+            this.userList.forEach(value => {
+                if (val === value.address) {
+                    this.userName = value.userName;
+                }
+            });
         },
         close: function () {
             this.$emit("close");
@@ -127,21 +139,27 @@ export default {
     margin-top: 15px;
 }
 
-.chang-wrapper>>>.el-input__inner {
+.chang-wrapper >>> .el-input__inner {
     height: 32px;
     line-height: 32px;
 }
-.chang-wrapper>>>.el-input__icon {
+.chang-wrapper >>> .el-input__icon {
     line-height: 32px;
 }
 .opt-wrapper tr td {
     padding-top: 0;
     padding-bottom: 10px;
 }
-.send-btn {
-}
-.send-btn>>>.el-button {
+.send-btn >>> .el-button {
     padding: 9px 16px;
+}
+.user-explain {
+    display: flex;
+    margin-left: 4px;
+}
+.user-explain > span {
+    display: inline-block;
+    max-width: 45px;
 }
 </style>
 

@@ -24,29 +24,49 @@
                 </el-tooltip> -->
             </span>
             <span class="contract-code-handle" v-show="codeShow">
-                <span class="contract-code-done" @click="saveCode" v-if="!contractAddress">
+                <span class="contract-code-done" @click="saveCode">
                     <el-tooltip class="item" effect="dark" content="按Ctrl+s保存合约内容" placement="top-start">
                         <i class="wbs-icon-baocun contract-icon-style font-16"></i>
                     </el-tooltip>
                     <span>保存</span>
                 </span>
-                <span class="contract-code-done" @click="compile" v-if="!contractAddress">
-                    <i class="wbs-icon-bianyi contract-icon-style font-16"></i>
+                <span class="contract-code-done" @click="compile">
+                    <el-tooltip class="item" effect="dark" content="按Alt+c 编译合约" placement="top-start">
+                        <i class="wbs-icon-bianyi contract-icon-style font-16"></i>
+                    </el-tooltip>
                     <span>编译</span>
                 </span>
-                <span class="contract-code-done" @click="deploying" v-if="!contractAddress && abiFile && bin">
-                    <i class="wbs-icon-deploy contract-icon-style font-16"></i>
+                <span class="contract-code-done" @click="deploying">
+                    <el-tooltip class="item" effect="dark" content="按Alt+d 部署合约" placement="top-start">
+                        <i class="wbs-icon-deploy contract-icon-style font-16"></i>
+                    </el-tooltip>
                     <span>部署</span>
                 </span>
-                <span class="contract-code-done" v-if="contractAddress" @click="send">
-                    <i class="wbs-icon-send contract-icon-style font-16"></i>
-                    <span>发交易</span>
+                <span class="contract-code-done" @click="send">
+                    <el-tooltip class="item" effect="dark" content="按Alt+t 合约调用" placement="top-start">
+                        <i class="wbs-icon-send contract-icon-style font-16"></i>
+                    </el-tooltip>
+                    <span>合约调用</span>
                 </span>
-                <span class="contract-code-done" v-if="!contractAddress && abiFile && bin || contractAddress " @click="downloadJavaClass">
+                <span class="contract-code-done" @click="downloadJavaClass">
                     <i class="el-icon-download contract-icon-style font-16"></i>
                     <span>导出java文件</span>
                 </span>
             </span>
+            <div class="search-model" v-if="searchVisibility">
+                <el-input v-model="keyword" placeholder="搜索" style="width:266px;margin-left:10px;" ref="searchInput" @keyup.enter.native="searchBtn" @keyup.down.native="nextBtn" @keyup.up.native="previousBtn"></el-input>
+                <span class="search-btn bf-58cb7d cursor-pointer no-chase" @click="searchBtn">查找</span>
+                <span class="search-span-info" @click="previousBtn">
+                    <i class="el-icon-back iconfont-info font-color-58cb7d font-15 cursor-pointer no-chase"></i>
+                </span>
+                <span class="search-span-info" @click="nextBtn">
+                    <i class="el-icon-right iconfont-info font-color-58cb7d font-15 cursor-pointer no-chase"></i>
+                </span>
+                <span class="close-search cursor-pointer search-span-info" @click="closeBtn">
+                    <i class="el-icon-close font-15"></i>
+                </span>
+            </div>
+
         </div>
         <div class="contract-code-content" :class="{infoHide: !successHide}">
             <div class="contract-code-mirror" :style="{height:codeHight}" ref="codeContent">
@@ -57,8 +77,16 @@
             </div>
             <div class="contract-info" v-show="successHide" :style="{height:infoHeight + 'px'}">
                 <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
-                <div class="contract-info-title">
-                    <!-- <i class="wbs-icon-clear float-right" @click="refreshMessage" title="清除"></i> -->
+                <div class="contract-info-title" @mouseover="mouseHover=true" @mouseleave="mouseHover=false" v-show="abiFile||contractAddress" @click="collapse">
+                    <i :class="[showCompileText?'el-icon-caret-bottom':'el-icon-caret-top']">
+
+                    </i>
+                    <template v-if="showCompileText&&mouseHover">
+                        隐藏
+                    </template>
+                    <template v-else-if="!showCompileText&&mouseHover">
+                        显示
+                    </template>
                 </div>
                 <div>
                     <div class="contract-info-list1" v-html="compileinfo">
@@ -71,35 +99,54 @@
                     </div>
                     <div style="color: #68E600;padding-bottom: 15px;" v-show="abiFileShow">{{successInfo}}</div>
                     <div class="contract-info-list" v-show="contractAddress">
-                        <span class="contract-info-list-title" style="color: #0B8AEE">contractAddress </span>
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">{{contractAddress}}</span>
+                        <span class="contract-info-list-title" style="color: #0B8AEE">contractAddress
+                            <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(contractAddress)" title="复制合约地址"></i>
+                        </span>
+                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">
+                            {{contractAddress}}
+                        </span>
+                    </div>
+                    <div class="contract-info-list" v-if="abiFile">
+                        <span class="contract-info-list-title" style="color: #0B8AEE">contractName
+                            <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(contractName)" title="复制合约名"></i>
+                        </span>
+                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">
+                            {{contractName}}
+                        </span>
                     </div>
                     <div class="contract-info-list" v-show="abiFile">
-                        <span class="contract-info-list-title" style="color: #0B8AEE">contractName </span>
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">{{contractName}}</span>
+                        <span class="contract-info-list-title" style="color: #0B8AEE">abi
+                            <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(abiFile)" title="复制abi"></i>
+                        </span>
+                        <span class="showText" ref="showAbiText">
+                            {{abiFile}}
+                        </span>
+                        <i :class="[ showAbi ? 'el-icon-arrow-down': 'el-icon-arrow-up', 'font-13','cursor-pointer', 'visibility-wrapper']" v-if="complieAbiTextHeight" @click="showAbiText"></i>
                     </div>
-                    <div class="contract-info-list" v-show="abiFile">
-                        <span class="contract-info-list-title" style="color: #0B8AEE">abi</span>
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">{{abiFile}}</span>
-                    </div>
-                    <div class="contract-info-list" style="border-bottom: 1px solid #e8e8e8" v-show="bin">
-                        <span class="contract-info-list-title" style="color: #0B8AEE">bin</span>
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">{{bin}}</span>
+                    <div class="contract-info-list" style="border-bottom: 1px solid #242e42;" v-show="abiFile">
+                        <span class="contract-info-list-title" style="color: #0B8AEE">bin
+                            <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(bin)" title="复制abi"></i>
+                        </span>
+                        <span class="showText" ref="showBinText">
+                            {{bin}}
+                        </span>
+                        <i :class="[ showBin ? 'el-icon-arrow-down': 'el-icon-arrow-up', 'font-13','cursor-pointer','visibility-wrapper'] " v-if="complieBinTextHeight" @click="showBinText"></i>
                     </div>
                 </div>
             </div>
         </div>
-        <el-dialog title="发送交易" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
-            <v-transaction @success="sendSuccess($event)" @close="handleClose" ref="send" :data="data" :abi='abiFile' :version='version'></v-transaction>
+        <el-dialog title="合约调用" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
+            <v-transaction @success="sendSuccess($event)" @close="handleClose" ref="send" :sendErrorMessage="sendErrorMessage" :data="data" :abi='abiFile' :version='version'></v-transaction>
         </el-dialog>
         <el-dialog title="选择用户地址" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
             <v-user @change="deployContract($event)" @close="userClose" :abi='abiFile'></v-user>
         </el-dialog>
-        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose'></v-editor>
-        <el-dialog title="填写java包名" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
-            <el-input v-model="javaClassName"></el-input>
-            <i style="color: #606266">如：com.webank</i>
+        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' ref="editor"></v-editor>
+        <el-dialog title="请填写java包名" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
+            <el-input v-model="javaClassName" placeholder="如：com.webank"></el-input>
+            <!-- <i style="color: #606266"></i> -->
             <div slot="footer" class="text-right send-btn">
+                <span class="font-12 font-color-ed5454" style="display: inline-block;height: 34px;line-height: 34px;float: left; margin-left: 5px;">注意：合约名和文件名必须相同.</span>
                 <el-button @click="closeJavaClass">取 消</el-button>
                 <el-button type="primary" @click="sureJavaClass">确 定</el-button>
             </div>
@@ -110,6 +157,7 @@
 import ace from "ace-builds";
 // import "ace-builds/webpack-resolver";
 import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds/src-noconflict/theme-tomorrow";
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/ext-language_tools";
 require("ace-mode-solidity/build/remix-ide/mode-solidity");
@@ -124,7 +172,7 @@ import {
     getDeployStatus,
     setCompile,
     editChain,
-    // addFunctionAbi,
+    ifChangedDepaloy,
     queryJavaClass
 } from "@/util/api";
 import transaction from "../dialog/sendTransaction";
@@ -171,13 +219,65 @@ export default {
             version: "",
             saveShow: false,
             editorShow: false,
-            editorData: null
+            editorData: null,
+            showAbi: true,
+            showBin: true,
+            complieAbiTextHeight: false,
+            complieBinTextHeight: false,
+            mouseHover: false,
+            showCompileText: true,
+            keyword: "",
+            searchVisibility: false,
+            modifyState: false,
+            sendErrorMessage: ""
         };
     },
-    beforeDestroy: function () {
-        Bus.$off("select");
-        Bus.$off("noData");
+    watch: {
+        content: function (val) {
+            let data = Base64.decode(this.data.contractSource);
+            if (data != val) {
+                this.saveShow = true;
+            } else {
+                this.saveShow = false;
+            }
+        },
+        successHide: function (val) {
+            if (val) {
+                this.infoHeight = 250;
+            } else {
+                this.infoHeight = 0;
+            }
+        },
+        keyword: function (val) {
+            this.aceEditor.find(`${val}`, {
+                backwards: false,
+                wrap: true,
+                caseSensitive: false,
+                regExp: false,
+            })
+            this.aceEditor.findPrevious();
+        }
     },
+    computed: {
+        codeHight: function () {
+            if (this.infoHeight) {
+                return `calc(100% - ${this.infoHeight}px)`;
+            } else {
+                return `100%`;
+            }
+        },
+        changeWidth() {
+            if (this.changeStyle) {
+                return this.changeStyle;
+            } else {
+                return false;
+            }
+        },
+        tipShow() {
+            return !this.show;
+        }
+    },
+
     created() {
 
     },
@@ -192,7 +292,6 @@ export default {
     },
     mounted: function () {
         this.initEditor();
-
         Bus.$on("select", data => {
             this.codeShow = true;
             this.refreshMessage();
@@ -217,6 +316,21 @@ export default {
             this.bin = data.contractBin;
             this.bytecodeBin = data.bytecodeBin || "";
             this.version = data.version;
+            this.complieAbiTextHeight = false;
+            this.complieBinTextHeight = false;
+            this.$refs['showAbiText'].style.overflow = 'hidden'
+            this.$refs['showBinText'].style.overflow = 'hidden'
+            if (data.contractAbi) {
+                this.$nextTick(() => {
+                    if (this.$refs['showAbiText'].offsetHeight >= 72) {
+                        this.complieAbiTextHeight = true
+                    }
+                    if (this.$refs['showBinText'].offsetHeight >= 72) {
+                        this.complieBinTextHeight = true
+                    }
+
+                })
+            }
         });
         Bus.$on("noData", data => {
             this.codeShow = false;
@@ -232,49 +346,13 @@ export default {
             this.bin = "";
         });
     },
-    watch: {
-        content: function (val) {
-            let data = Base64.decode(this.data.contractSource);
-            if (data != val) {
-                this.saveShow = true;
-            } else {
-                this.saveShow = false;
-            }
-        },
-        successHide: function (val) {
-            if (val) {
-                this.infoHeight = 250;
-            } else {
-                this.infoHeight = 0;
-            }
-        }
-    },
-    computed: {
-        codeHight: function () {
-            if (this.infoHeight) {
-                return `calc(100% - ${this.infoHeight}px)`;
-            } else {
-                return `100%`;
-            }
-        },
-        changeWidth() {
-            if (this.changeStyle) {
-                return this.changeStyle;
-            } else {
-                return false;
-            }
-        },
-        tipShow() {
-            return !this.show;
-        }
-    },
+
     methods: {
         initEditor: function () {
             let _this = this;
             this.aceEditor = ace.edit(this.$refs.ace, {
                 fontSize: 14,
                 fontFamily: "Consolas,Monaco,monospace",
-
                 theme: this.themePath,
                 mode: this.modePath,
                 tabSize: 4,
@@ -288,32 +366,70 @@ export default {
                 copyWithEmptySelection: true
             });
             this.aceEditor.commands.addCommand({
-                name: "myCommand",
+                name: "save",
                 bindKey: { win: "Ctrl-S", mac: "Command-S" },
                 exec: function (editor) {
-                    if (_this.data.contractStatus != 2) {
-                        _this.saveCode();
-                    }
+                    _this.saveCode();
+                }
+            });
+            this.aceEditor.commands.addCommand({
+                name: 'compile',
+                bindKey: { win: "Alt-C", mac: "Option-C" },
+                exec: function (editor) {
+                    _this.compile();
+                }
+            });
+            this.aceEditor.commands.addCommand({
+                name: 'deploying',
+                bindKey: { win: "Alt-D", mac: "Option-D" },
+                exec: function (editor) {
+                    _this.deploying();
+                }
+            });
+            this.aceEditor.commands.addCommand({
+                name: 'send',
+                bindKey: { win: "Alt-T", mac: "Option-T" },
+                exec: function (editor) {
+                    _this.send();
+                }
+            });
+            this.aceEditor.commands.addCommand({
+                name: 'search-keyword',
+                bindKey: { win: "Ctrl-F", mac: "Command-F" },
+                exec: function (editor) {
+                    _this.searchKeyword()
                 }
             });
             let editor = this.aceEditor.alignCursors();
             this.aceEditor.getSession().setUseWrapMode(true);
             this.aceEditor.getSession().on("change", this.changeAce);
+            this.aceEditor.setHighlightActiveLine(true)
             this.aceEditor.on("blur", this.blurAce);
             this.aceEditor.resize();
         },
         blurAce: function () {
             let data = Base64.encode(this.content);
-            if (
-                this.data.contractSource != data &&
-                this.data.contractStatus != 2
-            ) {
-                this.saveCode();
+            if (this.data.contractSource != data) {
+                // console.log('sdf')
+                // Bus.$emit('',)
             }
+            // if (
+            //     this.data.contractSource != data &&
+            //     this.data.contractStatus != 2
+            // ) {
+            //     this.saveCode();
+            // }
         },
         saveCode: function () {
-            this.data.contractSource = Base64.encode(this.content);
-            Bus.$emit("save", this.data);
+            // if (Base64.decode(this.data.contractSource).length != this.content.length) {
+                this.data.contractSource = Base64.encode(this.content);
+                Bus.$emit("save", this.data);
+            // } else {
+            //     this.$message({
+            //         type: 'warning',
+            //         message: '已经保存过了并且没有新的修改'
+            //     })
+            // }
         },
         resizeCode: function () {
             this.aceEditor.setOptions({
@@ -350,6 +466,22 @@ export default {
         },
         changeAce: function () {
             this.content = this.aceEditor.getSession().getValue();
+            var id = this.data.id;
+            this.$nextTick(() => {
+                if (Base64.decode(this.data.contractSource).length === this.content.length) {
+                    Bus.$emit('modifyState', {
+                        id: id,
+                        modifyState: false
+                    })
+                } else {
+                    Bus.$emit('modifyState', Object.assign({}, this.data, {
+                        id: id,
+                        modifyState: true,
+                        contractSource: Base64.encode(this.content)
+                    }))
+                }
+            })
+
         },
 
         findImports: function (path) {
@@ -400,14 +532,9 @@ export default {
                         }
                     }
                     for (let i = 0; i < this.contractList.length; i++) {
-                        if (
-                            newpath ==
-                            this.contractList[i].contractName + ".sol"
-                        ) {
+                        if (newpath == this.contractList[i].contractName + ".sol") {
                             return {
-                                contents: Base64.decode(
-                                    this.contractList[i].contractSource
-                                )
+                                contents: Base64.decode(this.contractList[i].contractSource)
                             };
                         } else {
                             num++;
@@ -432,7 +559,7 @@ export default {
                 }
             }
         },
-        compile: function () {
+        compile: function (callback) {
             let wrapper = require("solc/wrapper");
             let solc = wrapper(window.Module);
             this.loading = true;
@@ -478,9 +605,7 @@ export default {
                 if (output && JSON.stringify(output.contracts) != "{}") {
                     this.status = 1;
                     if (output.contracts[this.contractName + ".sol"]) {
-                        this.changeOutput(
-                            output.contracts[this.contractName + ".sol"]
-                        );
+                        this.changeOutput(output.contracts[this.contractName + ".sol"], callback);
                     }
                 } else {
                     this.errorMessage = output.errors[0];
@@ -489,7 +614,7 @@ export default {
                 }
             }, 500);
         },
-        changeOutput: function (obj) {
+        changeOutput: function (obj, callback) {
             if (JSON.stringify(obj) !== "{}") {
                 if (obj.hasOwnProperty(this.contractName)) {
                     let compiledMap = obj[this.contractName]
@@ -504,6 +629,9 @@ export default {
                     this.data.contractSource = Base64.encode(this.content);
                     this.$set(this.data, "bytecodeBin", this.bytecodeBin);
                     this.loading = false;
+                    if (!callback.type) {
+                        callback()
+                    }
                     Bus.$emit("compile", this.data);
                     this.setMethod()
                 } else {
@@ -530,7 +658,25 @@ export default {
             this.bin = "";
         },
         deploying: function () {
-            this.dialogUser = true;
+            if (this.abiFile) {
+                this.compile(this.deploy)
+            } else {
+                this.$message.error('合约未编译成功');
+            }
+            // let data = Base64.encode(this.content);
+            // if (this.data.contractSource != data && this.abiFile) {
+            //     this.compile(this.deploy)
+            // } else {
+            //     this.deploy()
+            // }
+
+        },
+        deploy: function () {
+            if (this.abiFile) {
+                this.dialogUser = true;
+            } else {
+                this.$message.error('合约未编译成功');
+            }
         },
         userClose: function () {
             this.dialogUser = false;
@@ -642,84 +788,24 @@ export default {
                     });
                 });
         },
-        // addContract: function() {
-        //     this.loading = true;
-        //     let reqData = {
-        //         groupId: localStorage.getItem("groupId"),
-        //         contractName: this.contractName,
-        //         contractBin: this.bin,
-        //         bytecodeBin: this.bytecodeBin,
-        //         contractVersion: this.data.contractVersion,
-        //         contractSource: Base64.encode(this.content)
-        //     };
-        //     if (this.abiFile) {
-        //         reqData.contractAbi = this.abiFile;
-        //     }
-        //     addChaincode(reqData)
-        //         .then(res => {
-        //             this.loading = false;
-        //             if (res.data.code === 0) {
-        //                 this.status = res.data.data.contractStatus;
-        //                 this.abiFile = res.data.data.contractAbi || "";
-        //                 this.contractAddress = res.data.data.contractAddress || "";
-        //                 this.$message({
-        //                     message: "合约保存成功！",
-        //                     type: "success"
-        //                 });
-        //                 this.$emit("add", res.data.data);
-        //             } else {
-        //                 this.$message({
-        //                     message: errcode.errCode[res.data.code].cn,
-        //                     type: "error"
-        //                 });
-        //             }
-        //         })
-        //         .catch(err => {
-        //             this.loading = false;
-        //             this.$message({
-        //                 message: "系统错误",
-        //                 type: "error"
-        //             });
-        //         });
-        // },
-        // editContract: function() {
-        //     let reqData = {
-        //         groupId: localStorage.getItem("groupId"),
-        //         contractId: this.data.contractId,
-        //         contractBin: this.bin,
-        //         bytecodeBin: this.bytecodeBin,
-        //         contractSource: Base64.encode(this.content)
-        //     };
-        //     if (this.abiFile) {
-        //         reqData.contractAbi = this.abiFile;
-        //     }
-        //     editChain(reqData)
-        //         .then(res => {
-        //             if (res.data.code === 0) {
-        //                 this.$message({
-        //                     message: "合约保存成功！",
-        //                     type: "success"
-        //                 });
-        //                 this.$emit("add", res.data.data);
-        //             } else {
-        //                 this.$message({
-        //                     message: errcode.errCode[res.data.code].cn,
-        //                     type: "error"
-        //                 });
-        //             }
-        //         })
-        //         .catch(err => {
-        //             this.$message({
-        //                 message: "系统错误",
-        //                 type: "error"
-        //             });
-        //         });
-        // },
         foldInfo: function (val) {
             this.successHide = val;
         },
         send: function () {
-            this.dialogVisible = true;
+            ifChangedDepaloy(localStorage.getItem("groupId"), this.data.id).then(res => {
+
+                const { data, status } = res
+                if (status === 200) {
+                    if (data) {
+                        this.sendErrorMessage = '合约已被修改，请重新部署！'
+                        this.dialogVisible = true;
+                    } else {
+                        this.dialogVisible = true;
+                        this.sendErrorMessage = ''
+                    }
+                }
+            })
+
         },
         handleClose: function () {
             this.dialogVisible = false;
@@ -739,7 +825,7 @@ export default {
             this.javaClassName = ""
         },
         sureJavaClass: function () {
-            this.$confirm(`<span class="font-12 font-color-ed5454 el-icon-warning">请保证合约名和文件名一致</span><br>确认导出？`, {
+            this.$confirm(`确认导出？`, {
                 center: true,
                 dangerouslyUseHTMLString: true
             })
@@ -778,7 +864,7 @@ export default {
                         }
                         this.closeJavaClass()
                     } else {
-
+                        this.closeJavaClass()
                         this.$message({
                             message: errcode.errCode[res.data.code].cn || "下载失败！",
                             type: "error"
@@ -787,11 +873,79 @@ export default {
 
                 })
                 .catch(err => {
+                    this.closeJavaClass()
                     this.$message({
                         message: "系统错误",
                         type: "error"
                     });
                 });
+        },
+        showAbiText() {
+            this.showAbi = !this.showAbi
+            if (this.$refs['showAbiText'].style.overflow === 'visible') {
+                this.$refs['showAbiText'].style.overflow = 'hidden'
+            } else if (this.$refs['showAbiText'].style.overflow === '' || this.$refs['showAbiText'].style.overflow === 'hidden') {
+                this.$refs['showAbiText'].style.overflow = 'visible'
+            }
+        },
+        showBinText() {
+            this.showBin = !this.showBin
+            if (this.$refs['showBinText'].style.overflow === 'visible') {
+                this.$refs['showBinText'].style.overflow = 'hidden'
+            } else if (this.$refs['showBinText'].style.overflow === '' || this.$refs['showBinText'].style.overflow === 'hidden') {
+                this.$refs['showBinText'].style.overflow = 'visible'
+            }
+        },
+        collapse() {
+            this.showCompileText = !this.showCompileText
+            if (this.showCompileText) {
+                this.infoHeight = 250
+
+            } else if (!this.showCompileText) {
+                this.infoHeight = 50
+            }
+            this.$nextTick(() => {
+                this.resizeCode()
+            })
+
+        },
+        searchKeyword() {
+            this.searchVisibility = true
+            this.$nextTick(() => {
+                this.$refs['searchInput'].$refs.input.focus()
+            })
+        },
+        searchBtn() {
+            this.aceEditor.findNext();
+        },
+        previousBtn() {
+            this.aceEditor.findPrevious();
+        },
+        nextBtn() {
+            this.aceEditor.findNext();
+        },
+        closeBtn() {
+            this.searchVisibility = false
+            this.keyword = ''
+        },
+        copyKey(val) {
+            if (!val) {
+                this.$message({
+                    type: "fail",
+                    showClose: true,
+                    message: "值为空，不复制。",
+                    duration: 2000
+                });
+            } else {
+                this.$copyText(val).then(e => {
+                    this.$message({
+                        type: "success",
+                        showClose: true,
+                        message: "复制成功",
+                        duration: 2000
+                    });
+                });
+            }
         }
     }
 };
@@ -812,7 +966,46 @@ export default {
     color: #fff;
     border-bottom: 2px solid #242e42;
     background-color: #2b374d;
-    overflow: hidden;
+    position: relative;
+}
+.search-model {
+    position: absolute;
+    z-index: 100;
+    right: 10px;
+    top: 60px;
+    float: left;
+    width: 450px;
+    border: 1px solid #8798ad;
+    border-radius: 3px;
+    background: #555651;
+    height: 40px;
+    line-height: 40px;
+}
+.search-model >>> .el-input__inner {
+    height: 34px;
+    line-height: 34px;
+}
+.search-model span {
+    display: inline-block;
+}
+.search-span-info {
+    height: 45px;
+    line-height: 45px;
+}
+.search-btn {
+    height: 30px;
+    line-height: 30px;
+    margin: 0 10px;
+    text-align: center;
+    border-radius: 3px;
+    width: 60px;
+}
+.iconfont-info {
+    margin: 0 5px;
+}
+.close-search {
+    float: right;
+    margin-right: 11px;
 }
 .contract-code-done {
     display: inline-block;
@@ -843,7 +1036,7 @@ export default {
 }
 .contract-info {
     position: relative;
-    padding-top: 20px;
+    padding-top: 10px;
     text-align: left;
     border-top: 1px solid #242e42;
     box-sizing: border-box;
@@ -858,7 +1051,6 @@ export default {
     float: left;
     font-weight: bold;
     font-size: 18px;
-    /* color: #36393d; */
     padding-left: 20px;
 }
 .contract-code-handle {
@@ -866,7 +1058,13 @@ export default {
     padding-right: 20px;
 }
 .contract-info-title {
-    padding-right: 20px;
+    text-align: center;
+    cursor: pointer;
+    padding: 5px 0px;
+}
+.contract-info-title:hover > i {
+    color: #fff;
+    font-size: 14px;
 }
 .move {
     position: absolute;
@@ -881,12 +1079,6 @@ export default {
     padding-left: 8px;
     font-size: 10px;
     color: #aeb1b5;
-    cursor: pointer;
-}
-.contract-info-title span {
-    font-size: 16px;
-    font-weight: bold;
-    color: #36393d;
 }
 .contract-info-list {
     padding: 5px 20px;
@@ -894,11 +1086,17 @@ export default {
     margin: 0 auto;
     border: 1px solid #242e42;
     border-bottom: none;
+    position: relative;
 }
 .contract-info-list-title {
     display: inline-block;
-    width: 100px;
+    width: 105px;
     vertical-align: top;
+}
+.contract-info-list-title::after {
+    display: block;
+    content: "";
+    clear: both;
 }
 .ace-editor {
     height: 100% !important;
@@ -943,14 +1141,30 @@ export default {
     padding-left: 40px;
 }
 .send-dialog >>> .el-dialog--center .el-dialog__body {
-    padding: 5px 25px 20px;
+    padding: 10px 25px 15px;
 }
-
+.send-dialog >>> .el-dialog__footer {
+    padding-top: 0;
+}
 .send-btn >>> .el-button {
     padding: 9px 16px;
 }
 .send-dialog >>> .el-input__inner {
     height: 32px;
     line-height: 32px;
+}
+.showText {
+    display: inline-block;
+    width: calc(100% - 120px);
+    word-wrap: break-word;
+    max-height: 73px;
+    overflow: hidden;
+}
+.copy-public-key {
+    float: right;
+}
+.visibility-wrapper {
+    position: absolute;
+    bottom: 10px;
 }
 </style>
