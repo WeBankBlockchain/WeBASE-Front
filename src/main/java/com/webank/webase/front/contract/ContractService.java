@@ -509,7 +509,7 @@ public class ContractService {
      */
     public boolean verifyContractChange(Long contractId, int groupId) {
         Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
-        log.info("verifyContractChange contract:{}", contract);
+        log.debug("verifyContractChange contract:{}", contract);
         if (!Objects.isNull(contract) && contract.getContractStatus().intValue() == 2
                 && !contract.getDeployTime().isEqual(contract.getModifyTime())) {
             return true;
