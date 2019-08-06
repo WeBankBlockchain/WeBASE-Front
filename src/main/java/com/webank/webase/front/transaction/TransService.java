@@ -16,8 +16,10 @@ package com.webank.webase.front.transaction;
 import static com.webank.webase.front.base.ConstantCode.GROUPID_NOT_EXIST;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +58,8 @@ import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
+import com.webank.webase.front.contract.ContractRepository;
+import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.keystore.EncodeInfo;
 import com.webank.webase.front.keystore.KeyStoreInfo;
 import com.webank.webase.front.keystore.KeyStoreService;
@@ -82,6 +86,8 @@ public class TransService {
     private Map<String, String> cnsMap;
     @Autowired
     private Constants constants;
+    @Autowired
+    private ContractRepository contractRepository;
 
     /**
      * transHandle.
@@ -89,20 +95,27 @@ public class TransService {
      * @param req request
      */
     public Object transHandle(ReqTransHandle req) throws Exception {
-
         boolean ifExisted;
-        // Check if contractAbi existed
+        // check if contractAbi existed in cache
         if (req.getVersion() != null) {
-            ifExisted =
-                    ContractAbiUtil.ifContractAbiExisted(req.getContractName(), req.getVersion());
+            ifExisted = ContractAbiUtil.ifContractAbiExisted(req.getContractName(), req.getVersion());
         } else {
             ifExisted = ContractAbiUtil.ifContractAbiExisted(req.getContractName(),
                     req.getContractAddress().substring(2));
+            req.setVersion(req.getContractAddress().substring(2)) ;
         }
-
+        // check if contractAbi existed in cns
         if (!ifExisted) {
-            // check and save abi
-            checkAndSaveAbiFromCns(req);
+            ifExisted = checkAndSaveAbiFromCns(req);
+        }
+        // check if contractAbi existed in db
+        if (!ifExisted) {
+            ifExisted = checkAndSaveAbiFromDb(req);
+            req.setVersion(req.getContractPath()) ;
+        }
+        // check if contractAbi existed
+        if (!ifExisted) {
+            throw new FrontException(ConstantCode.ABI_GET_ERROR);
         }
 
         Object baseRsp = dealWithtrans(req);
@@ -195,11 +208,13 @@ public class TransService {
      *
      * @param req request
      */
-    public void checkAndSaveAbiFromCns(ReqTransHandle req) throws Exception {
+    public boolean checkAndSaveAbiFromCns(ReqTransHandle req) throws Exception {
+        log.info("checkAndSaveAbiFromCns start.");
         List<CnsInfo> cnsInfoList = null;
         CnsService cnsService = cnsServiceMap.get(req.getGroupId());
         if (cnsService == null) {
-            throw new FrontException(GROUPID_NOT_EXIST);
+            log.info("cnsService is null");
+            return false;
         }
         if (req.getVersion() != null) {
             cnsInfoList =
@@ -208,23 +223,42 @@ public class TransService {
             cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),
                     req.getContractAddress().substring(2));
         }
-        // transaction request
-        if (cnsInfoList == null) {
-            throw new FrontException("can not get cns information from chain!");
+        // check cns info
+        if (cnsInfoList == null || cnsInfoList.isEmpty() 
+                || StringUtils.isBlank(cnsInfoList.get(0).getAbi())) {
+            log.info("cnsInfoList is empty:{}", cnsInfoList);
+            return false;
         }
-        log.info("cnsinfo" + cnsInfoList.get(0).getAddress());
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-        List abiDefinitionList = objectMapper.readValue(cnsInfoList.get(0).getAbi(), objectMapper
+        List<AbiDefinition> abiDefinitionList = objectMapper.readValue(cnsInfoList.get(0).getAbi(), objectMapper
                 .getTypeFactory().constructCollectionType(List.class, AbiDefinition.class));
-        // check if contract has been deployed
-        if (StringUtils.isBlank(cnsInfoList.get(0).getAbi())) {
-            throw new FrontException(ConstantCode.CONTRACT_NOT_DEPLOY_ERROR);
-        }
 
         // save abi
         ContractAbiUtil.setContractWithAbi(req.getContractName(),
                 req.getVersion() == null ? req.getContractAddress().substring(2) : req.getVersion(),
                 abiDefinitionList, true);
+        return true;
+    }
+    
+    /**
+     * checkAndSaveAbiFromDb.
+     *
+     * @param req request
+     */
+    public boolean checkAndSaveAbiFromDb(ReqTransHandle req) throws Exception {
+        Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(
+                req.getGroupId(), req.getContractPath(), req.getContractName());
+        log.info("checkAndSaveAbiFromDb contract:{}", contract);
+        if (Objects.isNull(contract)) {
+            log.info("checkAndSaveAbiFromDb contract is null");
+            return false;
+        }
+        // save abi
+        ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+        List<AbiDefinition> abiDefinitionList = objectMapper.readValue(contract.getContractAbi(), 
+                objectMapper.getTypeFactory().constructCollectionType(List.class, AbiDefinition.class));
+        ContractAbiUtil.setFunctionFromAbi(req.getContractName(), req.getContractPath(), abiDefinitionList, new ArrayList<>());
+        return true;
     }
 
     /**
@@ -241,9 +275,6 @@ public class TransService {
         String funcName = req.getFuncName();
         List<Object> params = req.getFuncParam();
         int groupId = req.getGroupId();
-        if (StringUtils.isBlank(version) && StringUtils.isNotBlank(address)) {
-            version = address.substring(2);
-        }
 
         // if function is constant
         String constant = ContractAbiUtil.ifConstantFunc(contractName, funcName, version);
