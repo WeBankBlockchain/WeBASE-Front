@@ -2,11 +2,15 @@ package com.webank.webase.front.keystore;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.webank.webase.front.base.BaseController;
+import com.webank.webase.front.base.BaseResponse;
+import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -50,5 +54,14 @@ public class KeyStoreController extends BaseController {
     public List<KeyStoreInfo> getLocalKeyStores() {
         log.info("start getLocalKeyStores.");
         return keyStoreService.getLocalKeyStores();
+    }
+    
+    @ApiOperation(value = "delete", notes = "delete local KeyStore by address")
+    @ApiImplicitParam(name = "address", value = "user address", required = true, dataType = "String")
+    @DeleteMapping("/{address}")
+    public BaseResponse deleteKeyStore(@PathVariable String address) {
+        log.info("start deleteKeyStores. address:{}", address);
+        keyStoreService.deleteKeyStore(address);
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 }
