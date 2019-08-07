@@ -56,6 +56,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.ContractRepository;
@@ -171,7 +172,7 @@ public class TransService {
         // trans handle
         Object response = "";
         if (abiDefinition.isConstant()) {
-            KeyStoreInfo keyStoreInfo = keyStoreService.createPrivateKey(false);
+            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
             String callOutput = web3j
                     .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
                             contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
@@ -301,7 +302,7 @@ public class TransService {
         // get privateKey
         Credentials credentials = null;
         if ("true".equals(constant)) {
-            KeyStoreInfo keyStoreInfo = keyStoreService.createPrivateKey(false);
+            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
             credentials = Credentials.create(keyStoreInfo.getPrivateKey());
         } else {
             credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
