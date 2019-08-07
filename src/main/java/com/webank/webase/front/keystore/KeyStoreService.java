@@ -118,6 +118,13 @@ public class KeyStoreService {
         }
         return keyStores;
     }
+    
+    /**
+     * deleteKeyStore.
+     */
+    public void deleteKeyStore(String address) {
+        keystoreRepository.delete(address);;
+    }
 
     /**
      * convert ECKeyPair to KeyStoreInfo.
