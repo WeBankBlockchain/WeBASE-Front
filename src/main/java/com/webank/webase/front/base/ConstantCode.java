@@ -62,6 +62,9 @@ public interface ConstantCode {
     RetCode GROUPID_NOT_EXIST = RetCode.mark(201034, "groupId not exist");
     RetCode VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL = RetCode.mark(201035, "version and address cannot all be null");
     RetCode CONTRACT_COMPILE_FAIL = RetCode.mark(201036, "compile fail");
+    RetCode USER_NAME_NULL = RetCode.mark(201037, "user name is null");
+    RetCode USER_NAME_EXISTS = RetCode.mark(201038, "user name already exists");
+    RetCode PRIVATEKEY_EXISTS = RetCode.mark(201039, "private key already exists");
 
     /* system error */
     RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
