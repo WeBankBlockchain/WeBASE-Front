@@ -1,6 +1,7 @@
 package com.webank.webase.front.keystore;
 
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
 /*
@@ -18,7 +19,8 @@ import org.springframework.data.repository.CrudRepository;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public interface KeystoreRepository extends CrudRepository<KeyStoreInfo, String> {
+public interface KeystoreRepository extends CrudRepository<KeyStoreInfo, String>, 
+    JpaSpecificationExecutor<KeyStoreInfo> {
 
     public KeyStoreInfo findByAddress(String address);
     
