@@ -15,12 +15,17 @@ package com.webank.webase.front.keystore;
 
 import java.util.List;
 import java.util.Optional;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -112,7 +117,12 @@ public class KeyStoreService {
      * getLocalKeyStores.
      */
     public List<KeyStoreInfo> getLocalKeyStores() {
-        List<KeyStoreInfo> keyStores = keystoreRepository.findListByType(KeyTypes.LOCALUSER.getValue());
+        Sort sort = new Sort(Sort.Direction.ASC, "userName");
+        List<KeyStoreInfo> keyStores = keystoreRepository.findAll(
+                (Root<KeyStoreInfo> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                    Predicate predicate = criteriaBuilder.equal(root.get("type"), KeyTypes.LOCALUSER.getValue());
+                    return criteriaBuilder.and(predicate);
+                }, sort);
         for (KeyStoreInfo keyStoreInfo : keyStores) {
             keyStoreInfo.setPrivateKey(aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey()));
         }
