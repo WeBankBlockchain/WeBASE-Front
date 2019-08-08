@@ -16,66 +16,78 @@
 <template>
     <div class="send-wrapper">
         <div class="font-color-ed5454 text-center" v-if="sendErrorMessage">{{sendErrorMessage}}</div>
-        <div class="send-item">
-            <span class="send-item-title">合约名称:</span>
-            <span>{{data.contractName}}</span>
-        </div>
-        <div class="send-item">
-            <span class="send-item-title">合约地址:</span>
-            <el-input v-model.trim="contractAddress" style="width: 240px;" placeholder="请输入合约地址"></el-input>
-            <el-tooltip class="item" effect="dark" content="选填项，导入已部署的合约地址。" placement="top-start">
-                <i class="el-icon-info"></i>
-            </el-tooltip>
-        </div>
-        <div class="send-item">
-            <span class="send-item-title">方法:</span>
-            <!-- <el-select v-model="transation.funcType" placeholder="方法类型" @change="changeType($event)" style="width:110px">
-                <el-option label="function" :value="'function'"></el-option>
-            </el-select> -->
-            <el-select v-model="transation.funcName" filterable placeholder="方法名" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width:240px">
-                <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList">
-                    <span :class=" {'func-color': !item.constant}">{{item.name}}</span>
-                </el-option>
-            </el-select>
-        </div>
-        <div class="send-item" v-show="!constant">
-            <span class="send-item-title">用户地址:</span>
-            <el-select v-model="transation.userName" :placeholder="placeholderText" style="width:240px" class="plac-op">
-                <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'>
-                    <span class="font-12">{{item.userName}}</span>
-                    <span>{{item.address}}</span>
-                </el-option>
-            </el-select>
-            <span class="user-explain" v-show="userId">
-                (<span class="ellipsis-info ">{{userId}}</span>)
-            </span>
-        </div>
-        <div class="send-item" v-show="pramasData.length" style="line-height: 25px;">
-            <span class="send-item-title" style="position: relative;top: 5px; ">参数:</span>
-            <ul style="position: relative;top: -25px;">
-                <li v-for="(item,index) in pramasData" style="margin-left:63px;">
-                    <el-input v-model="transation.funcValue[index]" style="width: 240px;" :placeholder="item.type">
-                        <template slot="prepend" style="width: 51px;">
-                            <span>{{item.name}}</span>
-                        </template>
-                    </el-input>
-                </li>
-                <p style="padding: 5px 0 0 28px;">
-                    <i class="el-icon-info" style="padding-right: 4px;"></i>如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号。
-                </p>
-            </ul>
-        </div>
-
+        <table>
+            <tr>
+                <td class="text-right text-td"><span class="font-color-fff ">{{$t('text.contractName')}}：</span></td>
+                <td>
+                    <span class="font-color-fff">{{data.contractName}}</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-right text-td"><span class="font-color-fff">{{$t('text.contractAddress')}}：</span></td>
+                <td>
+                    <el-input v-model.trim="contractAddress" style="width: 240px;" :placeholder="$t('placeholder.selectedContractAddress')"></el-input>
+                    <el-tooltip class="font-color-fff" effect="dark" :content="$t('title.txnContractAddExp')" placement="top-start">
+                        <i class="el-icon-info"></i>
+                    </el-tooltip>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-right text-td">
+                    <span class="font-color-fff">{{$t('text.sendFunction')}}：</span>
+                </td>
+                <td>
+                    <el-select v-model="transation.funcName" filterable :placeholder="$t('placeholder.functionName')" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width:240px">
+                        <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList">
+                            <span :class=" {'func-color': !item.constant}">{{item.name}}</span>
+                        </el-option>
+                    </el-select>
+                </td>
+            </tr>
+            <tr v-show="!constant">
+                <td class="text-right text-td">
+                    <span class="font-color-fff">{{$t('text.acountAddress')}}：</span>
+                </td>
+                <td>
+                    <el-select v-model="transation.userName" :placeholder="placeholderText" style="width:240px" class="plac-op" @change="changeId">
+                        <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'>
+                            <span class="font-12">{{item.userName}}</span>
+                            <span>{{item.address}}</span>
+                        </el-option>
+                    </el-select>
+                    <span class="user-explain font-color-fff" v-show="userId">
+                        (<span class="ellipsis-info">{{userId}}</span>)
+                    </span>
+                </td>
+            </tr>
+            <tr v-show="pramasData.length">
+                <td style="vertical-align: top" class="text-right text-td">
+                    <span class="font-color-fff">{{$t('text.parame')}}：</span>
+                </td>
+                <td>
+                    <ul>
+                        <li v-for="(item,index) in pramasData">
+                            <el-input v-model="transation.funcValue[index]" style="width: 240px;" :placeholder="item.type">
+                                <template slot="prepend" style="width: 51px;">
+                                    <span>{{item.name}}</span>
+                                </template>
+                            </el-input>
+                        </li>
+                        <p class="font-color-ed5454" style="padding-top: 4px;">
+                            <i class="el-icon-info" style="padding-right: 4px;"></i>{{$t('text.deployParameVec')}}
+                        </p>
+                    </ul>
+                </td>
+            </tr>
+        </table>
         <div class="text-right send-btn java-class">
-            <el-button @click="close">取消</el-button>
-            <el-button type="primary" @click="submit('transation')" :disabled='buttonClick'>确定</el-button>
+            <el-button @click="close">{{$t('dialog.cancel')}}</el-button>
+            <el-button type="primary" @click="submit('transation')" :disabled='buttonClick'>{{$t('dialog.confirm')}}</el-button>
         </div>
     </div>
 </template>
 <script>
-import { sendTransation } from "@/util/api";
-import errcode from "@/util/errcode";
-
+import { sendTransation, queryLocalKeyStores } from "@/util/api";
 export default {
     name: "sendTransation",
     props: ["data", "dialogClose", "abi", 'version', 'sendErrorMessage'],
@@ -88,7 +100,7 @@ export default {
                 funcType: "function"
             },
             userId: "",
-            userList: localStorage.getItem('privateKeyList') ? JSON.parse(localStorage.getItem('privateKeyList')) : [],
+            userList: [],
             abiList: [],
             pramasData: [],
             funcList: [],
@@ -97,16 +109,12 @@ export default {
             constant: false,
             contractAddress: this.data.contractAddress || "",
             errorMessage: '',
-            placeholderText: "请选择用户地址"
+            placeholderText: this.$t('placeholder.selectedAccountAddress')
         };
     },
     mounted: function () {
-        if (this.userList.length) {
-            this.transation.userName = this.userList[0]['address']
-            this.userId = this.userList[0]['userName']
-        } else {
-            this.placeholderText = "没有用户，请去私钥管理新建用户"
-        }
+
+        this.getLocalKeyStores();
         this.formatAbi();
         this.changeFunc();
     },
@@ -116,6 +124,39 @@ export default {
         },
         close: function (formName) {
             this.$emit("close", false);
+        },
+        getLocalKeyStores() {
+            queryLocalKeyStores()
+                .then(res => {
+                    const { data, status } = res;
+                    if (status === 200) {
+                        this.userList = data
+                        if (this.userList.length) {
+                            this.transation.userName = this.userList[0]['address']
+                            this.userId = this.userList[0]['userName']
+                        } else {
+                            this.placeholderText = this.$t('placeholder.selectedNoUser')
+                        }
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                })
+        },
+        changeId: function (val) {
+            this.userList.forEach(value => {
+                if (val === value.address) {
+                    this.userId = value.userName;
+                }
+            });
         },
         changeType: function (val) {
             this.funcList = [];
@@ -186,6 +227,7 @@ export default {
                 groupId: localStorage.getItem("groupId"),
                 user: this.constant ? ' ' : this.transation.userName,
                 contractName: this.data.contractName,
+                contractPath: this.data.contractPath,
                 version: this.contractVersion,
                 funcName: functionName || "",
                 funcParam: this.transation.funcValue,
@@ -203,18 +245,18 @@ export default {
                         if (this.constant) {
                             this.$message({
                                 type: "success",
-                                message: "查询成功!"
+                                message: this.$t('text.searchSucceeded')
                             });
                         } else {
                             if (resData.statusOK) {
                                 this.$message({
                                     type: "success",
-                                    message: "交易成功!"
+                                    message: this.$t('text.txnSucceeded')
                                 });
                             } else {
                                 this.$message({
-                                    type: "success",
-                                    message: "交易失败!"
+                                    type: "error",
+                                    message: this.$t('text.txnFailed')
                                 });
                             }
                         }
@@ -222,7 +264,7 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || '发送交易失败！'
+                            message: this.$chooseLang(res.data.code)
                         });
                         this.close();
                     }
@@ -232,7 +274,7 @@ export default {
                     this.close();
                     this.$message({
                         type: "error",
-                        message: "发送交易失败！"
+                        message: this.$t('text.sendFailed')
                     });
                 });
         }
@@ -244,37 +286,11 @@ export default {
 .send-wrapper {
     padding-left: 30px;
 }
-.send-item {
-    line-height: 40px;
-}
-.send-item-title {
-    display: inline-block;
-    width: 60px;
-    text-align: right;
-}
-.send-item-params {
-    display: inline-block;
-}
-.send-item >>> .el-input__inner {
-    height: 32px;
-    line-height: 32px;
-}
-.send-btn {
-}
 .send-btn >>> .el-button {
     padding: 9px 16px;
 }
 .java-class {
     margin-top: 10px;
-}
-.send-item > ul > .el-input-group__prepend > span {
-    width: 51px;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    word-break: break-all;
-    display: inline-block;
 }
 .func-color {
     color: #409eff;
@@ -293,5 +309,8 @@ export default {
     line-height: 25px;
     position: relative;
     top: 9px;
+}
+.text-td {
+    white-space: nowrap;
 }
 </style>

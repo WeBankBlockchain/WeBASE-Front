@@ -16,13 +16,13 @@
 <template>
     <div class="contract-menu" style="position: relative;height: 100% ;">
         <div class="contract-menu-header">
-            <el-tooltip class="item" effect="dark" content="新建文件" placement="top-start">
+            <el-tooltip class="item" effect="dark" :content="$t('title.newFile')" placement="top-start">
                 <i class="wbs-icon-Addfile icon contract-icon" @click='addFile'></i>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="新建文件夹" placement="top-start">
+            <el-tooltip class="item" effect="dark" :content="$t('title.newFolder')" placement="top-start">
                 <i class="wbs-icon-Addfolder icon contract-icon" @click='addFolder'></i>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="上传文件" placement="top-start">
+            <el-tooltip class="item" effect="dark" :content="$t('title.upload')" placement="top-start">
                 <i class="wbs-icon-shangchuan contract-icon" style="position:relative;">
                     <input type="file" id="file" ref='file' name="chaincodes" class="uploads" @change="upload($event)" />
                 </i>
@@ -43,8 +43,8 @@
                         <div class="contract-menu-handle" v-if='item.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX}px`}" v-Clickoutside="checkNull">
 
                             <ul v-if="contractFile">
-                                <li class="contract-menu-handle-list" @click="rename">重命名</li>
-                                <li class="contract-menu-handle-list" @click="deleteFile(item)">删除</li>
+                                <li class="contract-menu-handle-list" @click="rename">{{$t('dialog.rename')}}</li>
+                                <li class="contract-menu-handle-list" @click="deleteFile(item)">{{$t('dialog.delete')}}</li>
                             </ul>
                         </div>
                     </div>
@@ -54,8 +54,8 @@
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
                         <div class="contract-menu-handle" v-if=' item.handleModel' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
-                                <li class="contract-menu-handle-list" @click="addFiles">新建文件</li>
-                                <li class="contract-menu-handle-list" @click='deleteFolder(item)'>删除</li>
+                                <li class="contract-menu-handle-list" @click="addFiles">{{$t('dialog.newFile')}}</li>
+                                <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
                             </ul>
                         </div>
                         <br>
@@ -91,7 +91,6 @@ import addFile from "../dialog/addFile";
 import selectCatalog from "../dialog/selectCatalog";
 import { getContractList, saveChaincode, deleteCode } from "@/util/api";
 import Bus from "@/bus";
-import errcode from "@/util/errcode";
 import Clickoutside from 'element-ui/src/utils/clickoutside'
 export default {
     name: "contractCatalog",
@@ -136,7 +135,7 @@ export default {
             this.getContracts();
         });
         Bus.$on("compile", data => {
-            this.saveContract(data, '合约编译成功');
+            this.saveContract(data, `${this.$t('text.compilationSucceeded')}`);
         });
         Bus.$on("save", data => {
             this.saveContract(data);
@@ -331,12 +330,12 @@ export default {
             let filetype = files.name.split(".")[1];
             if (filessize > 400) {
                 this.$message({
-                    message: "文件大小超过400k，请上传小于400k的文件",
+                    message: this.$t('text.fileExceeds'),
                     type: "error"
                 });
             } else if (filetype !== "sol") {
                 this.$message({
-                    message: "请上传.sol格式的文件",
+                    message: this.$t('text.uploadSol'),
                     type: "error"
                 });
             } else {
@@ -360,7 +359,7 @@ export default {
                 if (value.contractName == this.filename && value.contractPath == val) {
                     this.$message({
                         type: "error",
-                        message: "同一目录下不能存在同名合约！"
+                        message: this.$t('text.contractSameDirectory')
                     });
                     num++;
                 }
@@ -429,7 +428,7 @@ export default {
                 Bus.$emit("noData", true);
             }
         },
-        saveContract: function (param, title,callback) {
+        saveContract: function (param, title, callback) {
             let reqData = {
                 groupId: localStorage.getItem("groupId"),
                 contractName: param.contractName,
@@ -449,7 +448,7 @@ export default {
                         if (param.id) {
                             this.$message({
                                 type: "success",
-                                message: title || "合约保存成功!"
+                                message: title || this.$t('text.saveSucceeded')
                             })
                         }
                         this.modifyState = false
@@ -457,14 +456,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误！"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -558,14 +557,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误！"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -575,7 +574,7 @@ export default {
                 if (value.contractName == val.contractName && value.contractPath == val.contractPath) {
                     this.$message({
                         type: "error",
-                        message: "同一目录下不能存在同名合约！"
+                        message: this.$t('text.contractSameDirectory')
                     });
                     num++;
                 }
@@ -594,7 +593,7 @@ export default {
             } else {
                 this.folderList = [];
             }
-            this.folderList.forEach(value => {
+            this.folderList.forEach((value) => {
                 let num = 0;
                 if (!value.groupId || (value.groupId && localStorage.getItem("groupId") && value.groupId == localStorage.getItem("groupId"))) {
                     let data = {
@@ -607,7 +606,7 @@ export default {
                         renameShow: false,
                         inputShow: false
                     };
-                    this.contractArry.forEach(item => {
+                    this.contractArry.forEach((item,index) => {
                         if (item.contractType == "folder" && item.folderId == value.folderId) {
                             data.folderIcon = item.folderIcon;
                             data.folderActive = item.folderActive;
@@ -659,7 +658,7 @@ export default {
         },
         select: function (val) {
             if (this.modifyState) {
-                this.$confirm(`合约未保存是否保存？`, {
+                this.$confirm(`${this.$t('text.unsavedContract')}？`, {
                     center: true,
                     dangerouslyUseHTMLString: true
                 })
@@ -674,7 +673,7 @@ export default {
             }
         },
         deleteFile: function (val) {
-            this.$confirm("确认删除？")
+            this.$confirm(`${this.$t('dialog.sureDelete')}？`)
                 .then(_ => {
                     this.deleteData(val);
                 })
@@ -693,7 +692,7 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || '删除失败!'
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
@@ -701,12 +700,12 @@ export default {
                     this.loading = false;
                     this.$message({
                         type: "error",
-                        message: "系统错误！"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
         deleteFolder: function (val) {
-            this.$confirm("确认删除？")
+            this.$confirm(`${this.$t('dialog.sureDelete')}？`)
                 .then(_ => {
                     let list = val.child;
                     while (list.length > 0) {
@@ -723,10 +722,12 @@ export default {
                             }
                         });
                         localStorage.setItem("folderList", JSON.stringify(this.folderList));
+                        if (list.length === 0) {
+                            setTimeout(() => {
+                                this.getContracts()
+                            }, 0);
+                        }
                     })
-
-
-
                 })
                 .catch(_ => { });
         }

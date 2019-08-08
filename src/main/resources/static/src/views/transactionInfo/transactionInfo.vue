@@ -153,7 +153,7 @@ export default {
                 })
                 .catch(err => {
                     this.loading = false;
-                    this.$message.error("系统错误");
+                    this.$message.error(this.$t('text.systemError'));
                 });
         },
         handleSizeChange: function(val) {

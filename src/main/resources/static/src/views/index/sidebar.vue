@@ -17,9 +17,9 @@
     <div style="height: 100%;">
         <div style="height: 100%;background-color: #242e42" class="sidebar-content" ref='sidebarContent'>
             <div class="image-flex justify-center center" style="height: 54px;position:relative;" v-if="menuShowC">
-                <!-- <img :src="maxLog" alt=""> -->
                 <div style="color: #fff;">
-                    节点控制台
+                    {{$t('project.name')}}
+                    <span v-if="version" class="font-12 text-center">({{version}})</span>
                 </div>
                 <span class="sidebar-contract-icon">
                     <i class="el-icon-caret-left font-color-aeb1b5" @click="hideMune(true)" style="font-size: 18px;"></i>
@@ -36,7 +36,7 @@
                     </ul>
                 </span>
                 <i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom','select-network']" @click="groupVisible = !groupVisible"></i> -->
-                <el-dropdown trigger="click"  @command="changeGroup">
+                <el-dropdown trigger="click" @command="changeGroup">
                     <span class="cursor-pointer" @click="groupVisible = !groupVisible">
                         {{groupName}}<i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom']"></i>
                     </span>
@@ -47,7 +47,7 @@
             </div>
 
             <el-menu default-active="999" router class="el-menu-vertical-demo" text-color="#9da2ab" active-text-color="#1f83e7" active-background-color="#20293c" background-color="#242e42" @select="select" :collapse="!menuShowC" @open="handleOpen" @close="handleClose">
-                <template v-for="(item,index) in routesList" v-if="item.menuShow">
+                <template v-for="(item,index) in routesListC" v-if="item.menuShow">
                     <el-submenu v-if="!item.leaf" :index="`${index}`" ref="ele" class="">
                         <template slot="title">
                             <div :style="{'padding-left':  menuShowC ? '13px':''}">
@@ -70,9 +70,6 @@
                     </el-menu-item>
                 </template>
             </el-menu>
-            <div :class="['sidebar-version',{'buttom-none':buttomNone,'font-12': !menuShowC, 'font-16': menuShowC}]">
-                {{version}}
-            </div>
         </div>
     </div>
 </template>
@@ -84,7 +81,6 @@ import {
     queryGroup,
     queryClientVersion
 } from "@/util/api";
-import errcode from "@/util/errcode";
 import Bus from "@/bus"
 export default {
     name: "sidebar",
@@ -112,6 +108,49 @@ export default {
             } else {
                 return false;
             }
+        },
+        routesListC() {
+            var list = this.routesList
+            list.forEach((item => {
+                switch (item.enName) {
+                    case 'contractManagement':
+                        item.name = this.$t('route.contractManagement')
+                        break;
+                    case 'systemMonitoring':
+                        item.name = this.$t('route.systemMonitoring')
+                        break;
+
+                }
+                if (item.children) {
+                    item.children.forEach((it) => {
+                        switch (it.enName) {
+                            case 'statistics':
+                                it.name = this.$t('route.statistics')
+                                break;
+                            case 'nodeManagement':
+                                it.name = this.$t('route.nodeManagement')
+                                break;
+                            case 'contractIDE':
+                                it.name = this.$t('route.contractIDE')
+                                break;
+                            case 'contractList':
+                                it.name = this.$t('route.contractList')
+                                break;
+                            case 'hostMetrics':
+                                it.name = this.$t('route.hostMetrics')
+                                break;
+                            case 'nodeMetrics':
+                                it.name = this.$t('route.nodeMetrics')
+                                break;
+                            case 'privateKeyManagement':
+                                it.name = this.$t('route.privateKeyManagement')
+                                break;
+                        }
+                    })
+                }
+
+            }))
+            return list;
         }
     },
     mounted() {
@@ -144,10 +183,8 @@ export default {
     },
     methods: {
         changeGroup(val) {
-            console.log(val,'sfj;===============')
             this.group = val.group;
             this.groupName = val.groupName;
-            // this.path = this.$route.path;
             localStorage.setItem('groupId', this.group);
             localStorage.setItem("groupName", this.groupName);
             Bus.$emit("changeGroup", this.group);
@@ -163,14 +200,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -203,19 +240,20 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
         changeRouter() {
             let list = this.$router.options.routes;
+
             list.forEach(item => {
                 if (item.name === "帐号管理") {
                     item.menuShow = false;
@@ -302,7 +340,7 @@ export default {
     border-bottom: 2px solid #20293c;
     text-align: center;
 }
-.sidebar-check-group >>>.el-dropdown {
+.sidebar-check-group >>> .el-dropdown {
     color: #fff;
 }
 .select-network {

@@ -1,31 +1,31 @@
 <template>
     <div style="background-color: #20293c">
-        <v-content-head :headTitle="'系统监控'" :headSubTitle="'主机指标'" @changeGroup="changeGroup"></v-content-head>
+        <v-content-head :headTitle="$t('route.systemMonitoring')" :headSubTitle="$t('route.hostMetrics')" @changeGroup="changeGroup"></v-content-head>
         <div class="module-wrapper" >
             <div class="more-search-table">
                 <div class="search-item">
-                    <span>显示日期</span>
-                    <el-date-picker v-model="currentDate" type="date" placeholder="选择日期" :picker-options="pickerOption" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd" :default-value="`${Date()}`" class=" select-32" @change="changeCurrentDate">
+                    <span>{{$t('text.showDate')}}</span>
+                    <el-date-picker v-model="currentDate" type="date" :placeholder="$t('placeholder.selectedDay')" :picker-options="pickerOption" format="yyyy - MM - dd" value-format="yyyy-MM-dd" :default-value="`${Date()}`" class=" select-32" @change="changeCurrentDate">
                     </el-date-picker>
                 </div>
                 <div class="search-item">
-                    <span>对比日期</span>
-                    <el-date-picker v-model="contrastDate" type="date" placeholder="选择日期" :picker-options="pickerOption" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd" class=" select-32" @change="changeContrastDate">
+                    <span>{{$t('text.comparingDate')}}</span>
+                    <el-date-picker v-model="contrastDate" type="date" :placeholder="$t('placeholder.selectedDay')" :picker-options="pickerOption" format="yyyy - MM - dd" value-format="yyyy-MM-dd" class=" select-32" @change="changeContrastDate">
                     </el-date-picker>
                 </div>
                 <div class="search-item">
-                    <span>起止时间</span>
-                    <el-time-picker is-range v-model="startEndTime" range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间" placeholder="选择时间范围" class="time-select-32">
+                    <span>{{$t('text.fromTo')}}</span>
+                    <el-time-picker is-range v-model="startEndTime" :range-separator="$t('placeholder.to')" :start-placeholder="$t('placeholder.startTime')" :end-placeholder="$t('placeholder.endTime')" :placeholder="$t('placeholder.selectedTimeRange')" class="time-select-32">
                     </el-time-picker>
                 </div>
                 <div class="search-item">
-                    <span>数据粒度</span>
+                    <span>{{$t('text.dataGranularity')}}</span>
                     <el-radio-group v-model="timeGranularity">
-                        <el-radio :label="60">5分钟</el-radio>
-                        <el-radio :label="12">1分钟</el-radio>
-                        <el-radio :label="1">5秒钟</el-radio>
+                        <el-radio :label="60" class="font-color-fff">5{{$t('text.minutes')}}</el-radio>
+                        <el-radio :label="12" class="font-color-fff">1{{$t('text.minutes')}}</el-radio>
+                        <el-radio :label="1" class="font-color-fff">5{{$t('text.seconds')}}</el-radio>
                     </el-radio-group>
-                    <el-button type="primary" @click="confirmParam()" size="small" style="margin-left: 12px;" :loading="sureing">确认</el-button>
+                    <el-button type="primary" @click="confirmParam()" size="small" style="margin-left: 12px;" :loading="sureing">{{$t('text.confirm')}}</el-button>
                 </div>
             </div>
             <div class="metric-content">
@@ -45,9 +45,8 @@
 <script>
 import contentHead from "@/components/contentHead";
 import metricChart from "@/components/metricChart";
-import { metricInfo, nodesHealth } from "@/util/api";
+import { metricInfo } from "@/util/api";
 import { format, numberFormat } from "@/util/util.js";
-import errcode from "@/util/errcode";
 import Bus from "@/bus"
 export default {
     name: "hostMetric",
@@ -85,12 +84,20 @@ export default {
             metricData: []
         };
     },
+
     beforeDestroy: function(){
         Bus.$off("changeGroup")
+        Bus.$off("chooselanguage")
     },
+
     mounted() {
+        var group = localStorage.getItem('groupId');
         Bus.$on("changeGroup",data => {
             this.changeGroup(data)
+            group = data
+        })
+        Bus.$on("chooselanguage",data => {
+            this.changeGroup(group)
         })
         if(this.chartParam.group){
             this.getChartData();
@@ -126,42 +133,33 @@ export default {
                     this.sureing = false;
                     const {data,status,statusText} = res;
                     if (status === 200) {
-                        if (
-                            data[0]["data"]["lineDataList"]["timestampList"]
-                                .length > 0
-                        ) {
-                            var timestampList =
-                                data[0]["data"]["lineDataList"][
-                                    "timestampList"
-                                ] || [];
+                        if (data[0]["data"]["lineDataList"]["timestampList"].length > 0) {
+                            var timestampList =data[0]["data"]["lineDataList"]["timestampList"] || [];
                         } else {
-                            var timestampList =
-                                data[0]["data"]["contrastDataList"][
-                                    "timestampList"
-                                ] || [];
+                            var timestampList =data[0]["data"]["contrastDataList"]["timestampList"] || [];
                         }
                         this.metricData = data;
                         this.metricData.forEach(item => {
                             item.gap = this.timeGranularity;
                             if (item.metricType === "cpu") {
-                                item.metricName = "cpu";
-                                item.metricUint = "利用率";
+                                item.metricName = "CPU";
+                                item.metricUint = this.$t('text.usage');
                                 item.metricU = "%";
                             } else if (item.metricType === "memory") {
-                                item.metricName = "内存";
-                                item.metricUint = "利用率";
+                                item.metricName = this.$t('text.memory');
+                                item.metricUint = this.$t('text.usage');
                                 item.metricU = "%";
                             } else if (item.metricType === "disk") {
-                                item.metricName = "硬盘";
-                                item.metricUint = "利用率";
+                                item.metricName = this.$t('text.hardDisk');;
+                                item.metricUint = this.$t('text.usage');
                                 item.metricU = "%";
                             } else if (item.metricType === "txbps") {
-                                item.metricName = "上行";
-                                item.metricUint = "带宽";
+                                item.metricName = this.$t('text.uplink');
+                                item.metricUint = this.$t('text.bandwidth');
                                 item.metricU = "KB/s";
                             } else if (item.metricType === "rxbps") {
-                                item.metricName = "下行";
-                                item.metricUint = "带宽";
+                                item.metricName = this.$t('text.uplink');;
+                                item.metricUint = this.$t('text.bandwidth');;
                                 item.metricU = "KB/s";
                             }
                             if(this.chartParam.contrastBeginDate){
@@ -176,14 +174,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || '系统错误'
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -229,6 +227,7 @@ export default {
 }
 .search-item > span {
     margin-right: 5px;
+    color: #f6f6f6;
 }
 .metric-content {
     min-height: 700px;

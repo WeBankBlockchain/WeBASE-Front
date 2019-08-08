@@ -135,7 +135,7 @@ export default {
                         this.total = res.data.totalCount;
                     } else {
                         this.$message({
-                            message: errcode.errCode[res.data.code].cn || "查询失败",
+                            message: errcode.errCode[res.data.code].cn,
                             type: "error",
                             duration: 2000
                         });
@@ -144,7 +144,7 @@ export default {
                 .catch(err => {
                     this.loading = false;
                     this.$message({
-                        message: "系统错误！",
+                        message: this.$t('text.systemError'),
                         type: "error",
                         duration: 2000
                     });

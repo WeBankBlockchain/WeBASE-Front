@@ -15,17 +15,17 @@
  */
 <template>
     <div>
-        <el-dialog title="新建文件夹" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="433px" :center="true">
+        <el-dialog :title="$t('title.newFolder')" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="433px" :center="true">
             <div>
                 <el-form :model="folderFrom" :rules="rules" ref="folderFrom" label-width="100px" class="demo-ruleForm">
-                    <el-form-item label="文件夹名称" prop="folderName" style="width:330px">
+                    <el-form-item :label="$t('dialog.folderName')" prop="folderName" style="width:330px">
                         <el-input v-model="folderFrom.folderName"></el-input>
                     </el-form-item>
                 </el-form>
             </div>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="modelClose">取 消</el-button>
-                <el-button type="primary" @click="submit('folderFrom')">确 定</el-button>
+                <el-button @click="modelClose">{{$t('dialog.cancel')}}</el-button>
+                <el-button type="primary" @click="submit('folderFrom')">{{$t('dialog.confirm')}}</el-button>
             </div>
         </el-dialog>
     </div>
@@ -34,30 +34,35 @@
 export default {
     name: "addFolder",
     props: ['foldershow'],
-    data: function () {
-        return {
-            folderFrom: {
-                folderName: ""
-            },
-            rules: {
+    computed: {
+        rules() {
+            var obj = {
                 folderName: [
                     {
                         required: true,
-                        message: "请输入文件夹名称",
+                        message: `${this.$t('dialog.pleaseType')} ${this.$t('dialog.folderName')}`,
                         trigger: "blur"
                     },
                     {
                         min: 1,
                         max: 12,
-                        message: "长度在 1 到 12 个字符",
+                        message: this.$t('dialog.rivateKeyVerifyLength1_32'),
                         trigger: "blur"
                     },
                     {
                         pattern: /^[A-Za-z0-9_]+$/,
-                        message: "文件夹名不符合规则",
+                        message: this.$t('dialog.folderNameIllegal'),
                         trigger: "blur"
                     }
                 ]
+            }
+            return obj
+        }
+    },
+    data: function () {
+        return {
+            folderFrom: {
+                folderName: ""
             },
             dialogVisible: this.foldershow,
             folderList: []
@@ -73,11 +78,11 @@ export default {
             this.$refs[formName].validate(valid => {
                 if (valid) {
                     let num = 0
-                    for (let i = 0; i < this.folderList.length; i++){
-                        if(this.folderList[i].folderName == this.folderFrom.folderName && this.folderList[i].groupId == localStorage.getItem("groupId")){
-                            num ++
+                    for (let i = 0; i < this.folderList.length; i++) {
+                        if (this.folderList[i].folderName == this.folderFrom.folderName && this.folderList[i].groupId == localStorage.getItem("groupId")) {
+                            num++
                             this.$message({
-                                message: '新建文件夹与已存在的文件夹名称相同',
+                                message: this.$t('text.errorNewFolderName'),
                                 type: "error"
                             });
                         };
@@ -105,3 +110,8 @@ export default {
 }
 </script>
 
+<style scoped>
+.demo-ruleForm >>> .el-form-item__label {
+    padding: 0 8px 0 0;
+}
+</style>

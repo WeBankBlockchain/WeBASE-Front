@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 <template>
-    <el-dialog :title="'交易内容'" :visible.sync="editorDialog" @close="modelClose" width="600px" top="10vh">
+    <el-dialog :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="600px" top="10vh">
         <div slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
             <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>
         </div>

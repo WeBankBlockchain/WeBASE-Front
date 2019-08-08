@@ -370,24 +370,35 @@ export function queryGroup(){
     })
 }
 //create privateKey 
-export function queryCreatePrivateKey(data, list){
-    const params = reviseParam(data, list);
+export function queryCreatePrivateKey(data){
     return get({
         url: `${HANDLE}privateKey`,
         method: 'get',
-        params: params.querys
+        params: data
     })
 }
 //import privateKey 
-export function queryImportPrivateKey(data,list){
-    const params = reviseParam(data, list);
+export function queryImportPrivateKey(data){
     return get({
         url: `${HANDLE}privateKey/import`,
         method: 'get',
-        params: params.querys
+        params: data
     })
 }
-
+// localKeyStores
+export function queryLocalKeyStores() {
+    return get({
+        url: `${HANDLE}privateKey/localKeyStores`,
+        method: 'get'
+    })
+}
+//delete privateKey 
+export function queryDeletePrivateKey(data) {
+    return deleted({
+        url: `${HANDLE}privateKey/${data}`,
+        method: 'delete'
+    })
+}
 //overview block number
 export function queryBlockNumber(data){
     return get({

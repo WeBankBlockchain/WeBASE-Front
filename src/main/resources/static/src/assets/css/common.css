@@ -228,7 +228,7 @@
 }
 .el-button--default {
     border-color: #9da2ab ;
-    color:#9da2ab;
+    /* color:#9da2ab; */
 }
 .el-message-box .el-button--small{
   padding: 11px 20px;
@@ -486,6 +486,9 @@ td {
 .el-loading-mask {
     background-color: #2e384d;
     opacity:0.6;
+}
+.el-tabs__item {
+    color: #909399
 }
 /* scrollbar */
 ::-webkit-scrollbar-track-piece {

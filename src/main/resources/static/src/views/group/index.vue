@@ -15,10 +15,8 @@
  */
 <template>
     <div>
-        <v-content-head :headTitle="'节点管理'" @changeGroup="changeGroup"></v-content-head>
+        <v-content-head :headTitle="$t('route.nodeManagementQ')" @changeGroup="changeGroup"></v-content-head>
         <div class="module-wrapper">
-            <!-- <div class="search-part">
-            </div> -->
             <div class="search-table">
                 <el-table :data="nodeData" class="search-table-content" v-loading="loading">
                     <el-table-column v-for="head in nodeHead" :label="head.name" :key="head.enName" :width="head.width" show-overflow-tooltip align="center">
@@ -27,7 +25,7 @@
                                 <i :style="{'color': textColor(scope.row[head.enName])}" class="wbs-icon-radio font-6"></i> {{nodesStatus(scope.row[head.enName])}}
                             </span>
                             <span v-else-if="head.enName === 'nodeId'">
-                                <i class="wbs-icon-copy font-12" @click="copyNodeIdKey(scope.row[head.enName])" title="复制"></i>
+                                <i class="wbs-icon-copy font-12" @click="copyNodeIdKey(scope.row[head.enName])" :title="$t('title.copy')"></i>
                                 {{scope.row[head.enName]}}
                             </span>
                             <span v-else>{{scope.row[head.enName]}}</span>
@@ -43,67 +41,71 @@
 <script>
 import contentHead from "@/components/contentHead";
 import { queryNodesStatusInfo } from "@/util/api";
-import errcode from "@/util/errcode";
 import Bus from "@/bus"
 export default {
     name: "group",
     components: {
         "v-content-head": contentHead,
     },
-    data: function() {
-        return {
-            nodeData: [],
-            loading: false,
-            nodeHead: [
+    computed: {
+        nodeHead() {
+            var arr =  [
                 {
                     enName: "nodeId",
-                    name: "节点Id",
+                    name: this.$t('table.nodeId'),
                     width: ""
                 },
                 {
                     enName: "blockNumber",
-                    name: "块高",
+                    name: this.$t('table.blockHeight'),
                     width: 180
                 },
                 {
                     enName: "pbftView",
-                    name: "pbftView",
+                    name: this.$t('table.pbftView'),
                     width: 180
                 },
                 {
                     enName: "status",
-                    name: "状态",
+                    name: this.$t('table.status'),
                     width: 150
                 }
-            ],
+            ]
+            return arr 
+        }
+    },
+    data() {
+        return {
+            nodeData: [],
+            loading: false,
             group: localStorage.getItem('groupId') || null
         };
     },
-    beforeDestroy: function(){
+    beforeDestroy() {
         Bus.$off("changeGroup")
     },
-    mounted: function() {
-        Bus.$on("changeGroup",data => {
+    mounted() {
+        Bus.$on("changeGroup", data => {
             this.changeGroup(data)
         })
-        if(this.group){
+        if (this.group) {
             this.getNodeTable();
         }
     },
     methods: {
-        changeGroup(val){
+        changeGroup(val) {
             this.group = val
             this.getNodeTable();
         },
-        getNodeTable: function() {
+        getNodeTable() {
             queryNodesStatusInfo(this.group)
                 .then(res => {
-                    const { data, status} = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         this.nodeData = data
                     } else {
                         this.$message({
-                            message: errcode.errCode[res.data.code].cn || "查询失败",
+                            message: this.$chooseLang(res.data.code),
                             type: "error",
                             duration: 2000
                         });
@@ -111,13 +113,13 @@ export default {
                 })
                 .catch(err => {
                     this.$message({
-                        message: "查询失败！",
+                        message: this.$t('text.systemError'),
                         type: "error",
                         duration: 2000
                     });
                 });
         },
-        textColor: function(val) {
+        textColor(val) {
             let colorString = "";
             switch (val) {
                 case 1:
@@ -129,24 +131,24 @@ export default {
             }
             return colorString;
         },
-        nodesStatus: function(val) {
+        nodesStatus(val) {
             let transString = "";
             switch (val) {
                 case 1:
-                    transString = "运行";
+                    transString = this.$t('table.run');
                     break;
                 case 2:
-                    transString = "异常";
+                    transString = this.$t('table.abnormal');
                     break;
             }
             return transString;
         },
-        copyNodeIdKey: function(val) {
+        copyNodeIdKey(val) {
             if (!val) {
                 this.$message({
                     type: "fail",
                     showClose: true,
-                    message: "key为空，不复制。",
+                    message: this.$t('notice.copyFailure'),
                     duration: 2000
                 });
             } else {
@@ -154,19 +156,19 @@ export default {
                     this.$message({
                         type: "success",
                         showClose: true,
-                        message: "复制成功",
+                        message: this.$t('notice.copySuccessfully'),
                         duration: 2000
                     });
                 });
             }
-        },
+        }
     }
 };
 </script>
 <style scoped>
 .module-wrapper {
     height: 100%;
-    background-color: #20293c
+    background-color: #20293c;
 }
 .search-part {
     padding: 30px 41px 18px 42px;
@@ -188,43 +190,43 @@ export default {
 }
 .search-table {
     /* padding: 0 40px 0 41px; */
-    background-color: #2f3b52
+    background-color: #2f3b52;
 }
 .search-table-content {
     width: 100%;
-    background-color: #20293c
+    background-color: #20293c;
 }
-.search-table-content>>>td,
-.search-table-content>>>th {
+.search-table-content >>> td,
+.search-table-content >>> th {
     padding: 8px 0;
     font-size: 12px;
 }
-.search-table-content>>>th {
+.search-table-content >>> th {
     color: #8598b0;
 }
-.search-table-content>>>td {
+.search-table-content >>> td {
     color: #737a86;
 }
 .search-table-detail {
     width: 91%;
     float: right;
 }
-.search-table-detail>>>td,
-.search-table-detail>>>th {
+.search-table-detail >>> td,
+.search-table-detail >>> th {
     color: #737a86;
 }
-.input-with-select>>>.el-input__inner {
+.input-with-select >>> .el-input__inner {
     border-top-left-radius: 20px;
     border-bottom-left-radius: 20px;
     border: 1px solid #eaedf3;
     box-shadow: 0 3px 11px 0 rgba(159, 166, 189, 0.11);
 }
-.input-with-select>>>.el-input-group__append {
+.input-with-select >>> .el-input-group__append {
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
     box-shadow: 0 3px 11px 0 rgba(159, 166, 189, 0.11);
 }
-.input-with-select>>>.el-button {
+.input-with-select >>> .el-button {
     border: 1px solid #1f83e7;
     border-radius: inherit;
     background: #1f83e7;

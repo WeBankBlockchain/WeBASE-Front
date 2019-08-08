@@ -1,7 +1,7 @@
 <template>
     <div>
         <el-tabs v-model="activeName"  @tab-click="handleClick">
-            <el-tab-pane label="交易信息" name="txInfo">
+            <el-tab-pane :label="$t('table.transactionInfo')" name="txInfo">
                 <el-row v-for="item in txInfoList" :key="item">
                     <el-col :xs='24' :sm="24" :md="6" :lg="4" :xl="2">
                         <span>{{item}}：</span>
@@ -41,7 +41,7 @@
                     </el-col>
                 </el-row>
             </el-tab-pane>
-            <el-tab-pane label="交易回执" name="txReceiptInfo">
+            <el-tab-pane :label="$t('table.transactionReceipt')" name="txReceiptInfo">
                 <el-row v-for="item in txReceiptInfoList" :key="item">
                     <el-col :xs='24' :sm="24" :md="6" :lg="4" :xl="2">
                         <span>{{item}}：</span>
@@ -127,20 +127,20 @@ export default {
         getTxInfo() {
             queryTxInfo(this.group, this.transHash)
                 .then(res => {
-                    const { data, status, statusText } = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         this.txInfoMap = data;
                     } else {
                         this.$message({
                             type: "error",
-                            message: statusText || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -170,20 +170,20 @@ export default {
         getTxReceiptInfo() {
             queryTxReceiptInfo(this.group, this.transHash)
                 .then(res => {
-                    const { data, status, statusText } = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         this.txInfoReceiptMap = data;
                     } else {
                         this.$message({
                             type: "error",
-                            message: statusText || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         }

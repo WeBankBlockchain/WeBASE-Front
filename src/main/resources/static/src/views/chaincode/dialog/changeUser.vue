@@ -16,17 +16,10 @@
 <template>
     <div class="chang-wrapper">
         <table class="opt-wrapper">
-            <!-- <tr>
-                <td>合约版本号：</td>
-                <td>
-                    <el-input v-model="version" placeholder="请输入数字或字母" @blur='versionBlur' maxlength='18' style="width: 240px"></el-input>
-                    <span style="color: #f00" v-show="versionShow">{{errorInfo}}</span>
-                </td>
-            </tr> -->
             <tr>
-                <td style="width: 70px"><span class="font-color-fff">用户地址：</span></td>
+                <td style="width: 100px;text-align: right" class="text-td"><span class="font-color-fff">{{$t('text.acountAddress')}}：</span></td>
                 <td>
-                    <el-select v-model="userId" :placeholder="placeholderText" @change="changeId" style="width: 340px">
+                    <el-select v-model="userId" :placeholder="placeholderText" @change="changeId" style="width: 310px">
                         <el-option :label="item.address" :value="item.address" :key="item.address" v-for='item in userList'>
                             <span class="font-12">{{item.userName}}</span>
                             <span>{{item.address}}</span>
@@ -37,50 +30,48 @@
                     <div class="user-explain font-color-fff">
                         (<span class="ellipsis-info">{{userName}}</span>)
                     </div>
-                    </td>
+                </td>
             </tr>
             <tr v-if='inputs.length'>
-                <td style="vertical-align: top;width: 70px">参数：</td>
+                <td style="vertical-align: top;width: 100px;text-align: right" class="text-td">
+                    <span class="font-color-fff">
+                        {{$t('text.parame')}}：
+                    </span>
+                </td>
                 <td>
                     <div v-for='(item,index) in inputs' :key='item.name'>
-                        <el-input v-model="parameter[index]" style="width: 240px;margin-bottom:10px;" :placeholder="item.type">
+                        <el-input v-model="parameter[index]" style="width: 310px;margin-bottom:10px;" :placeholder="item.type">
                             <template slot="prepend">
                                 <span>{{item.name}}</span>
                             </template>
                         </el-input>
-                        <!-- <el-tooltip class="item" effect="dark" content="如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号" placement="top-start">
-                            <i class="el-icon-info" style="position: relative;top: 8px;"></i>
-                        </el-tooltip> -->
                     </div>
                 </td>
             </tr>
             <tr v-if='inputs.length'>
                 <td></td>
                 <td>
-                    <p style="padding: 0px 0 0 0px;">
-                        <i class="el-icon-info" style="padding-right: 4px;"></i>如果参数类型是数组，请用逗号分隔，不需要加上引号，例如：arry1,arry2。string等其他类型也不用加上引号。
+                    <p class="font-color-ed5454">
+                        <i class="el-icon-info" style="padding-right: 4px;"></i>{{$t('text.deployParameVec')}}
                     </p>
                 </td>
             </tr>
         </table>
         <div class="text-right send-btn">
-            <el-button @click="close">取消</el-button>
-            <el-button type="primary" @click="submit">确定</el-button>
+            <el-button @click="close">{{$t('dialog.cancel')}}</el-button>
+            <el-button type="primary" @click="submit">{{$t('dialog.confirm')}}</el-button>
         </div>
     </div>
 </template>
 <script>
-import { } from "@/util/api";
-import errcode from "@/util/errcode";
+import { queryLocalKeyStores } from "@/util/api";
 export default {
     name: "changeUser",
     props: ["abi"],
     data: function () {
         return {
             userName: "",
-            userList: localStorage.getItem("privateKeyList")
-                ? JSON.parse(localStorage.getItem("privateKeyList"))
-                : [],
+            userList: [],
             userId: null,
             inputs: [],
             parameter: [],
@@ -88,19 +79,40 @@ export default {
             version: "",
             versionShow: false,
             errorInfo: "",
-            placeholderText: "请选择用户地址"
+            placeholderText: this.$t('placeholder.selectedAccountAddress')
         };
     },
     mounted: function () {
-        if (this.userList.length > 0) {
-            this.userId = this.userList[0].address
-            this.userName = this.userList[0].userName
-        }else {
-            this.placeholderText = "没有用户，请去私钥管理新建用户"
-        };
         this.changeConstructor();
+        this.getLocalKeyStores();
     },
     methods: {
+        getLocalKeyStores() {
+            queryLocalKeyStores()
+                .then(res => {
+                    const { data, status } = res;
+                    if (status === 200) {
+                        this.userList = data
+                        if (this.userList.length) {
+                            this.userId = this.userList[0].address
+                            this.userName = this.userList[0].userName
+                        } else {
+                            this.placeholderText = this.$t('placeholder.selectedNoUser')
+                        }
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                })
+        },
         changeConstructor: function () {
             if (this.abifile.length) {
                 this.abifile.forEach(value => {
@@ -160,6 +172,9 @@ export default {
 .user-explain > span {
     display: inline-block;
     max-width: 45px;
+}
+.text-td {
+    white-space: nowrap;
 }
 </style>
 
