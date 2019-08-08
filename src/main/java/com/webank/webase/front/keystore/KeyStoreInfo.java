@@ -23,8 +23,10 @@ import javax.persistence.Id;
 @Data
 @Entity
 public class KeyStoreInfo {
-    private String publicKey;
-    private String privateKey;
     @Id
     private String address;
+    private String publicKey;
+    private String privateKey;
+    private String userName;
+    private int type;
 }

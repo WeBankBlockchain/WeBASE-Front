@@ -38,7 +38,7 @@ public interface ConstantCode {
     RetCode ABI_SAVE_ERROR = RetCode.mark(201010, "save abi error");
     RetCode IN_FUNCPARAM_ERROR = RetCode.mark(201011, "contract funcParam is error");
     RetCode BLOCK_NUMBER_ERROR = RetCode.mark(201012, "requst blockNumber is greater than latest");
-    RetCode ABI_GET_ERROR = RetCode.mark(201013, "get abi from chain error");
+    RetCode ABI_GET_ERROR = RetCode.mark(201013, "get abi error");
     RetCode CONTRACT_DEPLOY_ERROR = RetCode.mark(201014, "contract deploy error");
     RetCode PRIVATEKEY_IS_NULL = RetCode.mark(201015, "user's privateKey is null");
     RetCode FILE_IS_NOT_EXIST = RetCode.mark(201016, "file is not exist");
@@ -62,6 +62,9 @@ public interface ConstantCode {
     RetCode GROUPID_NOT_EXIST = RetCode.mark(201034, "groupId not exist");
     RetCode VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL = RetCode.mark(201035, "version and address cannot all be null");
     RetCode CONTRACT_COMPILE_FAIL = RetCode.mark(201036, "compile fail");
+    RetCode USER_NAME_NULL = RetCode.mark(201037, "user name is null");
+    RetCode USER_NAME_EXISTS = RetCode.mark(201038, "user name already exists");
+    RetCode PRIVATEKEY_EXISTS = RetCode.mark(201039, "private key already exists");
 
     /* system error */
     RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
