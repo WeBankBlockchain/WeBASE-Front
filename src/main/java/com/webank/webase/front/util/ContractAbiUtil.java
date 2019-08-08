@@ -1,5 +1,23 @@
 package com.webank.webase.front.util;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
+import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes;
+import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.javapoet.ClassName;
@@ -9,23 +27,8 @@ import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.FrontUtils;
 import com.webank.webase.front.base.exception.FrontException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
-import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -144,7 +147,7 @@ public class ContractAbiUtil {
         }
     }
 
-    private static void setFunctionFromAbi(String contractName, String version,
+    public static void setFunctionFromAbi(String contractName, String version,
         List<AbiDefinition> abiDefinitionList, List<VersionEvent> versionEventList) {
         HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
         HashMap<String, Boolean> functions = new HashMap<>();
@@ -184,7 +187,6 @@ public class ContractAbiUtil {
 
         versionEventList.add(new VersionEvent(version, events, functions, funcInputs, funcOutputs));
         contractEventMap.put(contractName, versionEventList);
-
     }
 
 
