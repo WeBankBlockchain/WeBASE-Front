@@ -177,7 +177,7 @@ export default {
         noContract: 'Please create a new contract',
         hide: 'Hide',
         expand: 'Expand',
-        compilationFailed: 'Contract compilation failed',
+        compilationFailed: 'Contract was not compiled or failed to compile',
         compilationSucceeded: 'Contract compilation succeeded',
         compilationBegin: 'Contract starts to compile.',
         compiling: 'Contract compiling ...',
