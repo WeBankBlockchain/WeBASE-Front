@@ -13,15 +13,19 @@
  */
 package com.webank.webase.front.keystore;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,7 @@ import com.webank.webase.front.base.AesUtils;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -49,20 +54,34 @@ public class KeyStoreService {
     Constants constants;
     @Autowired
     RestTemplate restTemplate;
-    static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
     @Autowired
     KeystoreRepository keystoreRepository;
+    static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
 
 
     /**
-     * createPrivateKey.
+     * createKeyStore.
      */
-    public KeyStoreInfo createPrivateKey(boolean useAes) {
+    public KeyStoreInfo createKeyStore(boolean useAes, int type, String userName) {
+        log.info("start createKeyStore. useAes:{} type:{} userName:{}", useAes, type, userName);
+        // check keyStoreInfoLocal
+        if (type == KeyTypes.LOCALUSER.getValue()) {
+            if (StringUtils.isBlank(userName)) {
+                log.error("fail createKeyStore. user name is null.");
+                throw new FrontException(ConstantCode.USER_NAME_NULL);
+            }
+            KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByUserNameAndType(userName, type);
+            if (keyStoreInfoLocal != null) {
+                log.error("fail createKeyStore. user name already exists.");
+                throw new FrontException(ConstantCode.USER_NAME_EXISTS);
+            }
+        }
+        // create
         try {
             ECKeyPair keyPair = Keys.createEcKeyPair();
-            return keyPair2KeyStoreInfo(keyPair, useAes);
+            return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
         } catch (Exception e) {
-            log.error("fail createPrivateKey.", e);
+            log.error("fail createKeyStore.", e);
             throw new FrontException("create keyInfo failed");
         }
     }
@@ -70,42 +89,73 @@ public class KeyStoreService {
     /**
      * get KeyStoreInfo by privateKey.
      */
-    public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey, boolean useAes) {
-        log.debug("start getKeyStoreFromPrivateKey. privateKey:{} useAes", privateKey, useAes);
+    public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey, boolean useAes, int type, String userName) {
+        log.info("start getKeyStoreFromPrivateKey. privateKey:{} userName:{}", privateKey, userName);
         if (StringUtils.isBlank(privateKey)) {
             log.error("fail getKeyStoreFromPrivateKey. private key is null");
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
         }
-        byte[] base64decodedBytes = Base64.getDecoder().decode(privateKey);
-        String decodeKey = null;
-        try {
-            decodeKey = new String(base64decodedBytes, "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            log.error("fail getKeyStoreFromPrivateKey", e);
-            throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
+        if (StringUtils.isBlank(userName)) {
+            log.error("fail createKeyStore. user name is null.");
+            throw new FrontException(ConstantCode.USER_NAME_NULL);
         }
-        ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(decodeKey));
-        return keyPair2KeyStoreInfo(keyPair, useAes);
+        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByPrivateKey(privateKey);
+        if (keyStoreInfoLocal != null) {
+            log.error("fail getKeyStoreFromPrivateKey. private key already exists");
+            throw new FrontException(ConstantCode.PRIVATEKEY_EXISTS);
+        }
+        KeyStoreInfo userInfo = keystoreRepository.findByUserNameAndType(userName, type);
+        if (userInfo != null) {
+            log.error("fail getKeyStoreFromPrivateKey. user name already exists.");
+            throw new FrontException(ConstantCode.USER_NAME_EXISTS);
+        }
+        ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
+        return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
+    }
+    
+    /**
+     * getLocalKeyStores.
+     */
+    public List<KeyStoreInfo> getLocalKeyStores() {
+        Sort sort = new Sort(Sort.Direction.ASC, "userName");
+        List<KeyStoreInfo> keyStores = keystoreRepository.findAll(
+                (Root<KeyStoreInfo> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                    Predicate predicate = criteriaBuilder.equal(root.get("type"), KeyTypes.LOCALUSER.getValue());
+                    return criteriaBuilder.and(predicate);
+                }, sort);
+        for (KeyStoreInfo keyStoreInfo : keyStores) {
+            keyStoreInfo.setPrivateKey(aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey()));
+        }
+        return keyStores;
+    }
+    
+    /**
+     * deleteKeyStore.
+     */
+    public void deleteKeyStore(String address) {
+        keystoreRepository.delete(address);;
     }
 
     /**
      * convert ECKeyPair to KeyStoreInfo.
      */
-    private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, boolean useAes) {
-
+    private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, boolean useAes, int type, String userName) {
         String publicKey = Numeric
             .toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
         String privateKey = Numeric.toHexStringNoPrefix(keyPair.getPrivateKey());
         String address = "0x" + Keys.getAddress(keyPair.getPublicKey());
         log.debug("publicKey:{} privateKey:{} address:{}", publicKey, privateKey, address);
+        
+        String realPrivateKey = privateKey;
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setPublicKey(publicKey);
-        keyStoreInfo.setPrivateKey(privateKey);
         keyStoreInfo.setAddress(address);
-
-        String realPrivateKey = privateKey;
         keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
-        keystoreRepository.save(keyStoreInfo);
+        keyStoreInfo.setUserName(userName);
+        keyStoreInfo.setType(type);
+        if (type != KeyTypes.LOCALRANDOM.getValue()) {
+            keystoreRepository.save(keyStoreInfo);
+        }
 
         if (!useAes) {
             keyStoreInfo.setPrivateKey(realPrivateKey);

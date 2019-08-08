@@ -563,7 +563,7 @@ public class ContractService {
             return compileResult;
         } catch (Exception ex) {
             log.error("contractCompile error", ex);
-            throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL);
+            throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), ex.getMessage());
         } finally {
             if (contractFile != null) {
                 contractFile.deleteOnExit();
