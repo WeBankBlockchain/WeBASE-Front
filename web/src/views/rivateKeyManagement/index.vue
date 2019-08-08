@@ -234,12 +234,12 @@ export default {
                 center: true,
                 dangerouslyUseHTMLString: true
             })
-            .then(() => {
-                this.getDeleteFile(params);
-            })
-            .catch(() => {
-                console.log('')
-            });
+                .then(() => {
+                    this.getDeleteFile(params);
+                })
+                .catch(() => {
+                    console.log('')
+                });
         },
         getDeleteFile(params) {
             queryDeletePrivateKey(params.address)
@@ -310,13 +310,14 @@ export default {
                         .then(res => {
                             const { data, status } = res;
                             if (status === 200) {
+                                e.target.value = '';
                                 _this.getLocalKeyStores()
                                 _this.$message({
                                     type: 'success',
                                     message: _this.$t('text.importSuccessed')
                                 })
                             } else {
-
+                                e.target.value = '';
                                 _this.$message({
                                     type: "error",
                                     message: _this.$chooseLang(res.data.code)
@@ -324,6 +325,7 @@ export default {
                             }
                         })
                         .catch(err => {
+                            e.target.value = '';
                             _this.$message({
                                 type: "error",
                                 message: _this.$t('text.systemError')
@@ -331,6 +333,7 @@ export default {
                         });
 
                 } catch (error) {
+                    e.target.value = '';
                     _this.$message({
                         type: 'error',
                         message: _this.$t('text.importFailed')
