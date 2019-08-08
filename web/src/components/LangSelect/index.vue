@@ -1,6 +1,6 @@
 <template>
     <el-radio-group v-model="currentLang" @change="handleSetLanguage" size="mini">
-        <el-radio-button label="zh">&emsp;中&emsp;文&emsp;</el-radio-button>
+        <el-radio-button label="zh">&ensp;中 &ensp;文&ensp;</el-radio-button>
         <el-radio-button label="en">English</el-radio-button>
     </el-radio-group>
 </template>
