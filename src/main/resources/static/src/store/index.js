@@ -15,20 +15,23 @@
  */
 import Vue from 'vue'
 import Vuex from 'vuex'
-
+import { getLanguage } from '@/lang/index'
+import Cookies from 'js-cookie'
 Vue.use(Vuex)
 
 const state = {
     creatUserVisible: false, //creat account
     isLogin: 0,
-    loading: false
+    loading: false,
+    language: getLanguage(),
 }
 export default new Vuex.Store({
     state,
     getters: {
         not_show(state) {
             return !state.creatUserVisible
-        }
+        },
+        language: state => state.language,
     },
     mutations: {
         switch_creat_user_dialog(state) {
@@ -42,7 +45,11 @@ export default new Vuex.Store({
         },
         hideLoading(state) {
             state.loading = false
-        }
+        },
+        SET_LANGUAGE: (state, language) => {
+            state.language = language
+            Cookies.set('language', language)
+        },
     },
     actions: {
         switch_creat_user_dialog(context) {
@@ -50,6 +57,9 @@ export default new Vuex.Store({
         },
         loginAction({ commit }) {
             commit('changeLogin', 1)
-        }
+        },
+        setLanguage({ commit }, language) {
+            commit('SET_LANGUAGE', language)
+        },
     }
 })

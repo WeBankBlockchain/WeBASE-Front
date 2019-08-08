@@ -48,7 +48,6 @@ export default {
     },
     watch: {
         reload: function() {
-            console.log('metric')
             this.getChartData();
         }
     },
@@ -69,6 +68,7 @@ export default {
     },
     methods: {
         getChartData() {
+            var _this = this;
             this.chart = echarts.init(document.getElementById(this.chartId));
             let xList = [],
                 yList = [],
@@ -94,7 +94,7 @@ export default {
                 }
             }
             if(this.chartOption.data.contrastDataList.valueList.length > 0){
-                yContrastTitle = "对比日数据";
+                yContrastTitle = this.$t('text.comparingByDay');
                 this.showContrast = true;
             }else {
                 this.showContrast = false;
@@ -132,19 +132,19 @@ export default {
                             }else if(data[0]['data']===0&&data[1]['data']!=0){
                                 str = `
                                 <span>${data[0]['name']}</span><br/>
-                                <span>${data[0]['seriesName']}:未采集到数据或者数据为0</span><br/>
+                                <span>${data[0]['seriesName']}:${_this.$t('text.noMetrics')}</span><br/>
                                 <span>${data[1]['seriesName']}:${data[1]['data']}</span><br/>
                                 `
                             }else if(data[0]['data']!=0&&data[1]['data']===0){
                                 str = `
                                 <span>${data[0]['name']}</span><br/>
                                 <span>${data[0]['seriesName']}:${data[0]['data']}</span><br/>
-                                <span>${data[1]['seriesName']}:未采集到数据或者数据为0</span><br/>
+                                <span>${data[1]['seriesName']}:${_this.$t('text.noMetrics')}</span><br/>
                                 `
                             }else {
                                 str = `
                                 <span>${data[0]['name']}</span><br/>
-                                <span>未采集到数据或者数据为0</span><br/>
+                                <span>${_this.$t('text.noMetrics')}</span><br/>
                                 `
                             }
                         }else if(data.length === 1) {
@@ -157,7 +157,7 @@ export default {
                             }else {
                                 str = `
                                 <span>${data[0]['name']}</span><br/>
-                                <span>${data[0]['seriesName']}:未采集到数据或数据为0</span><br/>
+                                <span>${data[0]['seriesName']}:${_this.$t('text.noMetrics')}</span><br/>
                                 `
                             }
                         }
@@ -168,7 +168,7 @@ export default {
                     // data: ["显示日数据", yContrastTitle],
                     data: [
                         {
-                            name: "显示日数据",
+                            name: this.$t('text.showByDay'),
                             textStyle: {
                                 color: '#1f8efa',
                             }
@@ -199,12 +199,31 @@ export default {
                     top: '16',
                     feature: {
                         dataZoom: {
-                            yAxisIndex: 'none'
+                            yAxisIndex: 'none',
+                            title: {
+                                zoom: this.$t('title.zoom'),
+                                back: this.$t('title.back')
+                            },
+                            iconStyle: {
+                                borderColor: '#fff'
+                            }
                         },
-                        restore: {},
+                        restore: {
+                            title: this.$t('title.restore'),
+                            iconStyle: {
+                                borderColor: '#fff'
+                            }
+                        },
                         magicType: {
                             show: this.showContrast ? true : false, 
-                            type: ['stack', 'tiled']
+                            type: ['stack', 'tiled'],
+                            title: {
+                                stack: this.$t('title.stack'),
+                                tiled: this.$t('title.tiled'),
+                            },
+                            iconStyle: {
+                                borderColor: '#fff'
+                            }
                         }
                     }
                 },
@@ -249,7 +268,7 @@ export default {
                 },
                 series: [
                     {
-                        name: "显示日数据",
+                        name: this.$t('text.showByDay'),
                         type: "line",
                         data: yList,
                         smooth: true,

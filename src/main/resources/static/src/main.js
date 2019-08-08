@@ -21,10 +21,10 @@ import router from './router'
 import store from './store'
 import ElementUI from 'element-ui'
 import axios from 'axios'
-import {getCookie,setCookie,delCookie} from './util/util'
-import errcode from './util/errcode'
+import { getCookie, setCookie, delCookie } from './util/util'
 import VueClipboard from 'vue-clipboard2'
 import JsonViewer from 'vue-json-viewer'
+import Cookies from 'js-cookie'
 import 'element-ui/lib/theme-chalk/index.css'
 /*iconfont*/
 import '@/assets/icon/iconfont.css'
@@ -32,6 +32,8 @@ import '@/assets/icon/iconfont.js'
 import '@/assets/icon/iconfont_webaas.css'
 /*public css moudle */
 import '@/assets/css/common.css'
+import i18n from './lang' // internationalization
+import { chooseLang } from "./util/errcode.js";
 Vue.config.productionTip = false;
 axios.defaults.headers.post['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.headers.get['X-Requested-With'] = 'XMLHttpRequest';
@@ -42,7 +44,10 @@ Vue.use(VueClipboard)
 Vue.use(JsonViewer)
 Vue.prototype.$axios = axios;
 Vue.config.productionTip = false;
-Vue.use(ElementUI);
+Vue.use(ElementUI, {
+    size: Cookies.get('size') || 'medium', // set element-ui default size
+    i18n: (key, value) => i18n.t(key, value)
+});
 import promise from 'es6-promise';
 //compatible Promise
 promise.polyfill();
@@ -51,13 +56,14 @@ Vue.prototype.getCookie = getCookie;
 Vue.prototype.setCookie = setCookie;
 Vue.prototype.delCookie = delCookie;
 //error code
-Vue.prototype.errcode = errcode;
+Vue.prototype.$chooseLang = chooseLang;
 // require('./mock')
 /* eslint-disable no-new */
 new Vue({
     el: '#app',
     router,
     store,
+    i18n,
     components: { App },
     template: '<App/>'
 });

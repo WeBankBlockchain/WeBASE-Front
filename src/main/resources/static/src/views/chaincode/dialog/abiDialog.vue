@@ -15,7 +15,7 @@
  */
 <template>
     <div>
-        <el-dialog title="abi详情" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="600px">
+        <el-dialog :title="$t('title.detailsAbi')" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="600px">
             <div >
                 <json-viewer
                     :value="blcokContent"
@@ -23,7 +23,7 @@
                     copyable
                     sort
                     boxed></json-viewer>
-                    <div style="text-align: center" v-if="noData">暂无数据</div>
+                    <div style="text-align: center" v-if="noData">{{$t('text.noData')}}</div>
                 </div>
         </el-dialog>
     </div>

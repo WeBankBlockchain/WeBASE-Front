@@ -193,7 +193,7 @@ export default {
                     this.$message({
                         type: "error",
                         message:
-                            this.errcode.errCode[err.data.code].cn || "系统错误"
+                            this.errcode.errCode[err.data.code].cn
                     });
                 });
         },
@@ -240,7 +240,7 @@ export default {
                     this.$message({
                         type: "error",
                         message:
-                            this.errcode.errCode[err.data.code].cn || "系统错误"
+                            this.errcode.errCode[err.data.code].cn
                     });
                 });
         },
@@ -273,7 +273,7 @@ export default {
                     this.$message({
                         type: "error",
                         message:
-                            this.errcode.errCode[err.data.code].cn || "系统错误"
+                            this.errcode.errCode[err.data.code].cn
                     });
                 });
         },
@@ -301,7 +301,7 @@ export default {
                     this.$message({
                         type: "error",
                         message:
-                            this.errcode.errCode[err.data.code].cn || "系统错误"
+                            this.errcode.errCode[err.data.code].cn
                     });
                 });
         },

@@ -186,7 +186,7 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "密码修改失败"
+                            message: errcode.errCode[res.data.code].en || "密码修改失败"
                         });
                     }
                 })

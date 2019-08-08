@@ -23,11 +23,15 @@
             <span v-show="headSubTitle" class="font-color-9da2ab">/</span>
             <span>{{headSubTitle}}</span>
         </div>
+        <div class="content-head-lang">
+            <lang-select class="right-menu-item hover-effect" />
+        </div>
     </div>
 </template>
 
 <script>
 import router from "@/router";
+import LangSelect from './LangSelect'
 import {
     queryGroup,
     queryClientVersion
@@ -36,20 +40,22 @@ import { delCookie } from "@/util/util";
 export default {
     name: "conetnt-head",
     props: ["headTitle", "icon", "route", "headSubTitle"],
-    components: {},
+    components: {
+        LangSelect
+    },
     watch: {
-        headTitle: function(val) {
+        headTitle: function (val) {
             this.title = val;
         }
     },
-    data: function() {
+    data: function () {
         return {
             title: this.headTitle,
             headIcon: this.icon || false,
             way: this.route || "",
             path: "",
             group: localStorage.getItem('groupId') ? localStorage.getItem('groupId') : "1",
-            groupName: localStorage.getItem('groupName') ? localStorage.getItem('groupName'): "group1",
+            groupName: localStorage.getItem('groupName') ? localStorage.getItem('groupName') : "group1",
             groupVisible: false,
             groupList: localStorage.getItem("cluster")
                 ? JSON.parse(localStorage.getItem("cluster"))
@@ -57,7 +63,7 @@ export default {
             version: localStorage.getItem('fisco-bcos-version') ? localStorage.getItem('fisco-bcos-version') : ""
         };
     },
-    mounted: function() {
+    mounted: function () {
         if (localStorage.getItem("groupId")) {
             this.group = localStorage.getItem("groupId");
         }
@@ -67,31 +73,31 @@ export default {
         }
     },
     methods: {
-        getClientVersion: function() {
+        getClientVersion: function () {
             queryClientVersion(this.group)
                 .then(res => {
-                    const { data, status, statusText } = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         this.version = data['FISCO-BCOS Version'];
                         localStorage.setItem('fisco-bcos-version', this.version)
                     } else {
                         this.$message({
                             type: "error",
-                            message: data.errorMessage || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
-        getGroup: function(callback) {
+        getGroup: function (callback) {
             queryGroup()
                 .then(res => {
-                    const { data, status, statusText } = res;
+                    const { data, status } = res;
                     if (status === 200) {
                         let arr = data.sort(),
                             list = [];
@@ -101,32 +107,32 @@ export default {
                                 groupName: `group${arr[i]}`
                             });
                         }
-                        this.groupList = list;                
+                        this.groupList = list;
                         localStorage.setItem('groupId', this.group);
                         localStorage.setItem("cluster", JSON.stringify(list));
                         callback()
                     } else {
                         this.$message({
                             type: "error",
-                            message: data.errorMessage || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
-        skip: function() {
+        skip: function () {
             if (this.route) {
                 router.push(this.way);
             } else {
                 this.$router.go(-1);
             }
         },
-        changeGroup: function(val) {
+        changeGroup: function (val) {
             this.group = val.group;
             this.groupName = val.groupName;
             this.path = this.$route.path;
@@ -141,9 +147,6 @@ export default {
 <style scoped>
 .content-head-wrapper {
     width: calc(100%);
-    background-color: #20293c;
-    height: 54px;
-    position: relative;
 }
 .content-head-wrapper::after {
     display: block;
@@ -184,7 +187,7 @@ export default {
     background-color: #fff;
     border: 1px solid #ebeef5;
     border-radius: 4px;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 .group-content ul li {
     height: 32px;
@@ -243,4 +246,18 @@ a {
 .dialog-text {
     word-break: break-all;
 }
+.content-head-lang {
+    line-height: 54px;
+    float: right;
+}
+.right-menu-item {
+   padding: 0 20px;
+}
+.hover-effect {
+    cursor: pointer;
+    /* transition: background 0.3s; */
+}
+/* .hover-effect:hover {
+    background: rgba(0, 0, 0, 0.025);
+} */
 </style>

@@ -123,7 +123,7 @@ export default {
                     this.loading = false;
                     this.$message({
                         type: "error",
-                        message: this.errcode.errCode[err.data.code].cn || "系统错误！"
+                        message: this.$chooseLang(res.data.code)
                     });
                 });
         },

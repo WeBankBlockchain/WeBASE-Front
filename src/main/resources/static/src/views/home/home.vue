@@ -15,7 +15,7 @@
  */
 <template>
     <div class="over-view-wrapper">
-        <v-content-head :headTitle="'数据概览'" @changeGroup="changeGroup">
+        <v-content-head :headTitle="$t('route.statistics')" @changeGroup="changeGroup">
             <!-- <solt name="group" ref="global-group"></solt> -->
         </v-content-head>
         <div style="margin: 0 20px 20px 0;">
@@ -27,7 +27,7 @@
                         </div>
                         <div class="part2-content-amount">
                             <span class="font-28 part2-content-amount-number">{{numberFormat(overviewBlockNumber, 0, ".", ",")}}</span><br>
-                            <span class="font-14">区块数量</span>
+                            <span class="font-14">{{this.$t('project.blocks')}}</span>
                         </div>
                     </div>
                 </el-col>
@@ -38,7 +38,7 @@
                         </div>
                         <div class="part2-content-amount">
                             <span class="font-28 part2-content-amount-number">{{numberFormat(overviewNodesNumber, 0, ".", ",")}}</span>
-                            <span class="font-14">节点数量</span>
+                            <span class="font-14">{{this.$t('project.nodes')}}</span>
                         </div>
                     </div>
                 </el-col>
@@ -49,7 +49,7 @@
                         </div>
                         <div class="part2-content-amount">
                             <span class="font-28 part2-content-amount-number">{{numberFormat(overviewTxNumber, 0, ".", ",")}}</span>
-                            <span class="font-14">交易数量</span>
+                            <span class="font-14">{{this.$t('project.transactions')}}</span>
                         </div>
                     </div>
                 </el-col>
@@ -60,47 +60,38 @@
                         </div>
                         <div class="part2-content-amount">
                             <span class="font-28 part2-content-amount-number">{{numberFormat(overviewPendingTxNumber, 0, ".", ",")}}</span>
-                            <span class="font-14">待交易数量</span>
+                            <span class="font-14">{{this.$t('project.pendingTransactions')}}</span>
                         </div>
                     </div>
                 </el-col>
             </el-row>
         </div>
         <div class="module-wrapper-small" style="padding: 30px 31px 26px 32px;">
-            <el-input placeholder="请输入 Block / Txhash" v-model="keyword" @keyup.enter.native="submit">
+            <el-input :placeholder="$t('placeholder.globalSearch')" v-model.trim="keyword" @keyup.enter.native="submit">
                 <el-button slot="append" icon="el-icon-search" v-loading="searchLoading" @click="submit"></el-button>
             </el-input>
         </div>
-        <!-- <div class="module-wrapper-small" style="padding: 30px 31px 26px 32px;">
-            <table>
-                <tr v-for="(val, key) in searchMap">
-                    <td>
-                        {{key}}:{{val}}
-                    </td>
-                </tr>
-            </table>
-        </div> -->
         <div class="module-wrapper-small" style="padding: 30px 31px 26px 32px;" v-show="blockData.length > 0" v-loading="loadingBlock">
             <json-viewer :value="searchMap" :expand-depth="2" copyable>
 
             </json-viewer>
         </div>
         <div class="module-wrapper-small" style="padding: 30px 31px 26px 32px;" v-show="transactionList.length > 0" v-loading="loadingTransaction">
-            <el-table :data="transactionList" class="block-table-content" :row-key="getRowKeys" @row-click="clickTable" ref="refTable">
+            <el-table :data="transactionList" class="block-table-content" @row-click="clickTable" ref="refTable">
                 <el-table-column type="expand" align="center">
                     <template slot-scope="scope">
                         <v-transaction-detail :transHash="scope.row.transHash"></v-transaction-detail>
                     </template>
                 </el-table-column>
-                <el-table-column prop="transHash" label="交易哈希" align="center" :show-overflow-tooltip="true">
+                <el-table-column prop="transHash" :label="$t('table.transactionHash')" align="center" :show-overflow-tooltip="true">
                     <template slot-scope="scope">
                         <span>
-                            <i class="wbs-icon-copy font-12 copy-key" @click="copyPubilcKey(scope.row['transHash'])" title="复制哈希"></i>
+                            <i class="wbs-icon-copy font-12 copy-key" @click="copyPubilcKey(scope.row['transHash'])" :title="$t('title.copyHash')"></i>
                             {{scope.row['transHash']}}
                         </span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="blockNumber" label="块高" width="260" align="center" :show-overflow-tooltip="true">
+                <el-table-column prop="blockNumber" :label="$t('table.blockHeight')" width="260" align="center" :show-overflow-tooltip="true">
                     <template slot-scope="scope">
                         <span>{{scope.row['blockNumber']}}</span>
                     </template>
@@ -196,7 +187,6 @@ import {
 } from "@/util/api";
 import { changWeek, numberFormat, format } from "@/util/util";
 import router from "@/router";
-import errcode from "@/util/errcode";
 import block_img from "@/../static/image/block.png"
 import nodes_img from "@/../static/image/nodes.png"
 import transation_img from "@/../static/image/transation.png"
@@ -352,7 +342,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 })
         },
@@ -381,14 +371,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -401,14 +391,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: data.errorMessage || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -421,14 +411,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -441,14 +431,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -458,7 +448,6 @@ export default {
             };
             queryHomeSearch(this.group, reqQuery)
                 .then(res => {
-                    console.log(res)
                     const { data, status } = res;
                     if (status === 200) {
                         if (!data) {
@@ -466,7 +455,7 @@ export default {
                             this.transactionList = [];
                             this.$message({
                                 type: "error",
-                                message: "查询结果为空！"
+                                message: this.$t('text.searchEmpty')
                             });
                         } else {
                             var arr = [];
@@ -494,14 +483,14 @@ export default {
                         this.transactionList = [];
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -523,14 +512,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误！"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -555,14 +544,14 @@ export default {
                     } else {
                         this.$message({
                             type: "error",
-                            message: errcode.errCode[res.data.code].cn || "系统错误"
+                            message: this.$chooseLang(res.data.code)
                         });
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: "系统错误！"
+                        message: this.$t('text.systemError')
                     });
                 });
         },
@@ -591,7 +580,7 @@ export default {
                         });
                     } else {
                         this.$message({
-                            message: errcode.errCode[res.data.code].cn || "系统错误",
+                            message: this.$chooseLang(res.data.code),
                             type: "error",
                             duration: 2000
                         });
@@ -599,7 +588,7 @@ export default {
                 })
                 .catch(err => {
                     this.$message({
-                        message: "查询失败！",
+                        message: this.$t('text.systemError'),
                         type: "error",
                         duration: 2000
                     });
@@ -622,7 +611,7 @@ export default {
                         this.blockData = res.data.data;
                     } else {
                         this.$message({
-                            message: errcode.errCode[res.data.code].cn || "系统错误",
+                            message: this.$chooseLang(res.data.code),
                             type: "error",
                             duration: 2000
                         });
@@ -630,7 +619,7 @@ export default {
                 })
                 .catch(err => {
                     this.$message({
-                        message: "系统错误！",
+                        message: this.$t('text.systemError'),
                         type: "error",
                         duration: 2000
                     });
@@ -653,14 +642,14 @@ export default {
                         this.transactionList = res.data.data;
                     } else {
                         this.$message({
-                            message: errcode.errCode[res.data.code].cn || "系统错误",
+                            message: this.$chooseLang(res.data.code),
                             type: "error",
                             duration: 2000
                         });
                     }
                 })
                 .catch(err => {
-                    this.$message.error("系统错误");
+                    this.$message.error(this.$t('text.systemError'));
                 });
         },
         bindSvg(item) {
@@ -748,18 +737,14 @@ export default {
             if (nodeName === "I") {
                 return;
             }
-            if (this.keyword.length == 66) {
-                this.$refs.refTable.toggleRowExpansion(row);
-            } else {
-                // this.link(row.blockNumber);
-            }
+            this.$refs.refTable.toggleRowExpansion(row);
         },
         copyPubilcKey(val) {
             if (!val) {
                 this.$message({
                     type: "fail",
                     showClose: true,
-                    message: "key为空，不复制。",
+                    message: this.$t('notice.copyFailure'),
                     duration: 2000
                 });
             } else {
@@ -767,7 +752,7 @@ export default {
                     this.$message({
                         type: "success",
                         showClose: true,
-                        message: "复制成功",
+                        message: this.$t('notice.copySuccessfully'),
                         duration: 2000
                     });
                 });

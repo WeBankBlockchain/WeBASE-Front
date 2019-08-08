@@ -128,7 +128,7 @@ export default {
                 })
                 .catch(err => {
                     this.$message({
-                        message: "系统错误",
+                        message: this.$t('text.systemError'),
                         type: "error"
                     });
                 });
@@ -154,7 +154,7 @@ export default {
                 })
                 .catch(err => {
                     this.$message({
-                        message: "系统错误",
+                        message: this.$t('text.systemError'),
                         type: "error"
                     });
                 });
