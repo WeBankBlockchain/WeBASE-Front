@@ -173,7 +173,7 @@ export default {
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
         hide: '隐藏',
         expand: '显示',
-        compilationFailed: '合约编译失败',
+        compilationFailed: '合约未编译或编译失败',
         compilationSucceeded: '合约编译成功',
         compilationBegin: '合约开始编译',
         compiling: '合约编译中...',
