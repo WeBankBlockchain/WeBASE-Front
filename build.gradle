@@ -110,7 +110,7 @@ jar {
 			exclude '**/static'
         }
 		copy {
-			from file('src/main/resources/static/dist')
+			from file('src/main/resources/static')
 			into 'dist/static'
 		}
         copy {
