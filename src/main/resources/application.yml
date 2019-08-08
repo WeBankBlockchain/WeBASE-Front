@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:~/.h2/webasefront;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:./h2/webasefront;DB_CLOSE_ON_EXIT=FALSE
     databaseName: db
     driverClassName: org.h2.Driver
     serverName:
@@ -49,6 +49,6 @@ logging:
 constant:
   keyServer: 127.0.0.1:5001
   transMaxWait: 30
-  monitorDisk: /data
+  monitorDisk: /
   aesKey: EfdsW23D23d3df43
 
