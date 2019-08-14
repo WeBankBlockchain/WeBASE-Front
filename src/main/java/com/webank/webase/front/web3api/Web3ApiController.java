@@ -1,21 +1,20 @@
 package com.webank.webase.front.web3api;
 
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.web3api.entity.NodeId;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
-
 import org.fisco.bcos.web3j.protocol.core.methods.response.*;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.List;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -230,26 +229,26 @@ public class Web3ApiController {
     }
 
     @PostMapping("/addSealer")
-    public Object addSealer(@PathVariable int groupId,@RequestBody String nodeId) throws Exception {
-//        if (nodeId.length() != 128) {
-//            throw new FrontException("nodeId is invalid");
-//        }
-        return web3ApiService.addSealer(groupId, nodeId);
+    public Object addSealer(@PathVariable int groupId, @RequestBody NodeId nodeId) throws Exception {
+        if (nodeId.getNodeId().length() != 128) {
+            throw new FrontException("nodeId is invalid");
+        }
+        return web3ApiService.addSealer(groupId, nodeId.getNodeId());
     }
 
     @PostMapping("/addObserver")
-    public Object addObserver(@PathVariable int groupId,@RequestBody String nodeId) throws Exception {
-//        if (nodeId.length() != 128) {
-//            throw new FrontException("nodeId is invalid");
-//        }
-        return web3ApiService.addObserver(groupId, nodeId);
+    public Object addObserver(@PathVariable int groupId,@RequestBody NodeId nodeId) throws Exception {
+        if (nodeId.getNodeId().length() != 128) {
+            throw new FrontException("nodeId is invalid");
+        }
+        return web3ApiService.addObserver(groupId, nodeId.getNodeId());
     }
 
     @PostMapping("/removeNode")
-    public String removeNode(@PathVariable int groupId,@RequestBody String nodeId) throws Exception {
-//        if (nodeId.length() != 128) {
-//            throw new FrontException("nodeId is invalid");
-//        }
-        return web3ApiService.removeNode(groupId, nodeId);
+    public String removeNode(@PathVariable int groupId,@RequestBody NodeId nodeId) throws Exception {
+        if (nodeId.getNodeId().length() != 128) {
+            throw new FrontException("nodeId is invalid");
+        }
+        return web3ApiService.removeNode(groupId, nodeId.getNodeId());
     }
 }
