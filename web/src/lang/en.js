@@ -126,7 +126,7 @@ export default {
         pleaseType: 'Please type in',
     },
     placeholder: {
-        globalSearch: 'Search by Address / Txn Hash',
+        globalSearch: 'Search by Block / Txn Hash',
         javaPackage: 'Example: com.webank',
         selected: 'select',
         selectedAccountAddress: 'Select Account Address',
