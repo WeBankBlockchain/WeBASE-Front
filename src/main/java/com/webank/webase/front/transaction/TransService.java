@@ -397,7 +397,7 @@ public class TransService {
                     constants.GAS_PRICE, constants.GAS_LIMIT, blockLimit, contractAddress,
                     BigInteger.ZERO, data);
             byte[] encodedTransaction = TransactionEncoder.encode(rawTransaction);
-            String encodedDataStr = new String(encodedTransaction);
+            String encodedDataStr = Numeric.toHexString(encodedTransaction);
 
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setUserId(userId);
@@ -418,7 +418,7 @@ public class TransService {
                             constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, data,
                             new BigInteger(chainId), BigInteger.valueOf(groupId), "");
             byte[] encodedTransaction = ExtendedTransactionEncoder.encode(extendedRawTransaction);
-            String encodedDataStr = new String(encodedTransaction);
+            String encodedDataStr = Numeric.toHexString(encodedTransaction);
 
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setUserId(userId);
