@@ -36,4 +36,13 @@ public class BasePageResponse {
         this.code = retcode.getCode();
         this.message = retcode.getMsg();
     }
+
+
+    public BasePageResponse(RetCode retCode, Object data, long totalCount) {
+        this.code = retCode.getCode();
+        this.message = retCode.getMsg();
+        this.data = data;
+        this.totalCount = totalCount;
+    }
+
 }
