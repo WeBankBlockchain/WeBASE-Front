@@ -61,4 +61,7 @@ public class Constants {
     private int transMaxWait = 30;
     private String monitorDisk = "/data";
     private String aesKey = "4d5dFr4fG446GBde";
+
+    public static final String account1Path = "node.key";
+
 }
