@@ -100,5 +100,7 @@ public interface ConstantCode {
     RetCode UNSUPPORT_SYSTEM_CONFIG_KEY = RetCode.mark(201206, "unsupport for this system config key");
     RetCode FAIL_QUERY_SYSTEM_CONFIG = RetCode.mark(201207, "query system config value list fail");
     RetCode SQL_ERROR = RetCode.mark(201208, "crud sql fail");
+    RetCode FAIL_SET_SYSTEM_CONFIG_TOO_SMALL =  RetCode.mark(201209,
+            "provide value by positive integer mode, from 100000 to 2147483647");
 
 }
