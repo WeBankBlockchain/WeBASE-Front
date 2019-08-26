@@ -2,6 +2,7 @@ package com.webank.webase.front.precompiledapi.sysconf;
 
 import com.webank.webase.front.base.BasePageResponse;
 import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.precompiledapi.sysconf.entity.SystemConfig;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.util.pageutils.List2Page;

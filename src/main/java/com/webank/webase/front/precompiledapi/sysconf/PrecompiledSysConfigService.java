@@ -64,6 +64,12 @@ public class PrecompiledSysConfigService {
         // for undo
         String oldValue = getSysConfigByKey(groupId, key);
 
+        // check system value
+        if(PrecompiledUtils.TxGasLimit.equals(key)) {
+            if (Integer.valueOf(value) < PrecompiledUtils.TxGasLimitMin) {
+                return ConstantCode.FAIL_SET_SYSTEM_CONFIG_TOO_SMALL;
+            }
+        }
         SystemConfigService systemConfigService = new SystemConfigService(
                 web3jMap.get(groupId), getCredentials(fromAddress));
         try{
@@ -85,7 +91,7 @@ public class PrecompiledSysConfigService {
         }catch (JsonParseException | JsonMappingException | FrontException e) {
             // parse失败回滚, save2Db失败回滚
             systemConfigService.setValueByKey(key, oldValue);
-            return new PrecompiledResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse string to map." + e.getMessage());
         }
 
