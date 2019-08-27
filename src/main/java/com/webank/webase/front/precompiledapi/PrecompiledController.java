@@ -398,9 +398,8 @@ public class PrecompiledController {
         try {
             CRUDParseUtils.parseRemove(sql, table, conditions);
         } catch (JSQLParserException | NullPointerException e) {
-            code = PrecompiledUtils.CRUD_SQL_ERROR;
-            msg = "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql);
-            return mapper.writeValueAsString(new PrecompiledResponse(code, msg));
+            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
+                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
         }
 
         Table descTable = precompiledService.desc(groupId, table.getTableName());
