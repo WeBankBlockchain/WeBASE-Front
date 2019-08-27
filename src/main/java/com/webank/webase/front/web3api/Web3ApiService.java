@@ -63,7 +63,7 @@ public class Web3ApiService {
     ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
-    private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 3000L;
+    private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
     private static final int HASH_OF_TRANSACTION_LENGTH = 66;
 
     /**
@@ -318,7 +318,8 @@ public class Web3ApiService {
         log.info("start getNodeStatusList. groupId:{}", groupId);
         try {
             List<NodeStatusInfo> statusList = new ArrayList<>();
-            List<String> peerStrList = getGroupPeers(groupId);//get peers
+            List<String> peerStrList = getGroupPeers(groupId);
+            List<String> observerList = getObserverList(groupId);
             SyncStatus syncStatus = JSON.parseObject(getSyncStatus(groupId), SyncStatus.class);
             List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
             if (Objects.isNull(peerStrList) || peerStrList.isEmpty()|| consensusList == null) {
@@ -326,12 +327,18 @@ public class Web3ApiService {
                return Collections.emptyList();
             }
             for (String peer : peerStrList) {
+                int nodeType = 0;   //0-consensus;1-observer
+                if (observerList != null) {
+                    nodeType = observerList.stream()
+                            .filter(observer -> peer.equals(observer)).map(c -> 1).findFirst()
+                            .orElse(0);
+                }
                 BigInteger blockNumberOnChain = getBlockNumberOfNodeOnChain(syncStatus, peer);
                 BigInteger latestView = consensusList.stream()
                     .filter(cl -> peer.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
                     .orElse(BigInteger.ZERO);//pbftView
                 //check node status
-                statusList.add(checkNodeStatus(groupId, peer, blockNumberOnChain, latestView));
+                statusList.add(checkNodeStatus(groupId, peer, blockNumberOnChain, latestView, nodeType));
             }
 
             nodeStatusMap.put(groupId, statusList);
@@ -348,9 +355,9 @@ public class Web3ApiService {
      * check node status.
      */
     private NodeStatusInfo checkNodeStatus(int groupId, String nodeId, BigInteger chainBlockNumber,
-        BigInteger chainView) {
+        BigInteger chainView, int nodeType) {
         log.info("start checkNodeStatus. groupId:{} nodeId:{} blockNumber:{} chainView:{}", groupId,
-            chainBlockNumber, chainView);
+                nodeId, chainBlockNumber, chainView);
 
         if (Objects.isNull(nodeStatusMap.get(groupId))) {
             log.info("end checkNodeStatus. no cache group:{}", groupId);
@@ -375,15 +382,26 @@ public class Web3ApiService {
 
             BigInteger localBlockNumber = localNodeStatus.getBlockNumber();
             BigInteger localPbftView = localNodeStatus.getPbftView();
-            if (localBlockNumber.equals(chainBlockNumber) && localPbftView.equals(chainView)) {
-                log.warn(
-                    "node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
-                    nodeId, localBlockNumber, chainBlockNumber, localPbftView, chainView);
-                localNodeStatus.setStatus(DataStatus.INVALID.getValue());
+            if (nodeType == 0) {    //0-consensus;1-observer
+                if (localBlockNumber.equals(chainBlockNumber) && localPbftView.equals(chainView)) {
+                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                            nodeId, localBlockNumber, chainBlockNumber, localPbftView, chainView);
+                    localNodeStatus.setStatus(DataStatus.INVALID.getValue());
+                } else {
+                    localNodeStatus.setBlockNumber(chainBlockNumber);
+                    localNodeStatus.setPbftView(chainView);
+                    localNodeStatus.setStatus(DataStatus.NORMAL.getValue());
+                }
             } else {
-                localNodeStatus.setBlockNumber(chainBlockNumber);
-                localNodeStatus.setPbftView(chainView);
-                localNodeStatus.setStatus(DataStatus.NORMAL.getValue());
+                if (!chainBlockNumber.equals(getBlockNumber(groupId))) {
+                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                            nodeId, localBlockNumber, chainBlockNumber, localPbftView, chainView);
+                    localNodeStatus.setStatus(DataStatus.INVALID.getValue());
+                } else {
+                    localNodeStatus.setBlockNumber(chainBlockNumber);
+                    localNodeStatus.setPbftView(chainView);
+                    localNodeStatus.setStatus(DataStatus.NORMAL.getValue());
+                }
             }
             localNodeStatus.setLatestStatusUpdateTime(LocalDateTime.now());
             return localNodeStatus;
