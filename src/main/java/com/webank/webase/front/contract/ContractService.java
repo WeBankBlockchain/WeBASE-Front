@@ -454,7 +454,31 @@ public class ContractService {
     /**
      * find contract by page.
      */
-    public Page<Contract> findContractByPage(ReqPageContract param) {
+    public Page<Contract> findContractByPage(ReqPageContract param) throws IOException {
+        // init templates
+        List<String> templates = CommonUtils.readFileToList(Constants.TEMPLATE);
+        String contractPath = "template";
+        List<Contract> contracts = contractRepository.findByGroupIdAndContractPath(param.getGroupId(), contractPath);
+        if ((contracts.isEmpty() && !Objects.isNull(templates)) 
+                || (!contracts.isEmpty() && !Objects.isNull(templates) && templates.size() != contracts.size())) {
+            for (String template : templates) {
+                Contract localContract = contractRepository.findByGroupIdAndContractPathAndContractName(
+                        param.getGroupId(), contractPath, template.split(",")[0]);
+                if (Objects.isNull(localContract)) {
+                    log.info("init template contract:{}", template.split(",")[0]);
+                    Contract contract = new Contract();
+                    contract.setGroupId(param.getGroupId());
+                    contract.setContractName(template.split(",")[0]);
+                    contract.setContractSource(template.split(",")[1]);
+                    contract.setContractPath(contractPath);
+                    contract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
+                    contract.setModifyTime(LocalDateTime.now());
+                    contract.setCreateTime(LocalDateTime.now());
+                    contractRepository.save(contract);
+                }
+            }
+        }
+        // findContractByPage
         Pageable pageable = new PageRequest(param.getPageNumber(), param.getPageSize(),
                 Direction.DESC, "modifyTime");
         Page<Contract> contractPage = contractRepository.findAll(

@@ -50,6 +50,7 @@ public class Constants {
     public static final String ABI_DIR = "./conf/files/abi";
     public static final String BIN_DIR = "./conf/files/bin";
     public static final String JAVA_DIR = "./conf/files/java";
+    public static final String TEMPLATE = "./conf/template";
     public static final String FILE_SOL = ".sol";
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI = "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
