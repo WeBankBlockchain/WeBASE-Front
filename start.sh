@@ -16,10 +16,11 @@ mkdir -p log
 
 processPid=0
 processStatus=0
+server_pid=0
 checkProcess(){
     server_pid=`ps aux | grep java | grep $APP_MAIN | awk '{print $2}'`
     port_pid=`netstat -anp|grep $SERVER_PORT|awk '{printf $7}'|cut -d/ -f1`
-    if [ -n "$port_pid" ]; then
+    if [ -n "$port_pid" ] && [ -n "$(echo $port_pid| sed -n "/^[0-9]\+$/p")" ]; then
         if [[ $server_pid =~ $port_pid ]]; then
             processPid=$port_pid
             processStatus=2
@@ -64,6 +65,12 @@ start(){
            echo "PID($processPid) [Success]"
            echo "==============================================================================================="
        else
+           for subPid in ${server_pid[@]} ; do
+               checkResult=`netstat -tunpl |grep $subPid|awk '{printf $7}'|cut -d/ -f1`
+               if [ -z "$checkResult" ]; then
+                   kill -9 $subPid
+               fi
+           done
            echo "[Failed]"
            echo "==============================================================================================="
        fi
