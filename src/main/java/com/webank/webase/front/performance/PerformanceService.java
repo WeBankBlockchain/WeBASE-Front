@@ -164,6 +164,10 @@ public class PerformanceService {
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncPerformanceInfo() throws SigarException {
         log.debug("begin sync performance");
+        if (!constants.isMonitorEnabled())
+        {
+            return;
+        }
         Performance performance = new Performance();
         performance.setMemoryUseRatio(getMemoryRatio());
         performance.setCpuUseRatio(getCpuRatio());
@@ -189,6 +193,10 @@ public class PerformanceService {
     @Scheduled(cron = "0 0 0 * * ?")
     public void deletePerformanceInfoPerWeek() throws SigarException {
         log.debug("begin delete performance");
+        if (!constants.isMonitorEnabled())
+        {
+            return;
+        }
         Long currentTime = System.currentTimeMillis();
         Long weekAgo = currentTime - 3600 * 24 * 7 * 1000;
         int i = performanceRepository.deleteTimeAgo(weekAgo);

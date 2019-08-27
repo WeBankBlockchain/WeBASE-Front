@@ -212,7 +212,7 @@ public class ContractController extends BaseController {
     @ApiImplicitParam(name = "req", value = "param info", required = true, dataType = "ReqPageContract")
     @PostMapping(value = "/contractList")
     public BasePageResponse findByPage(@RequestBody @Valid ReqPageContract req,
-        BindingResult result) throws FrontException {
+        BindingResult result) throws FrontException, IOException {
         log.info("findByPage start. ReqPageContract:{}", JSON.toJSONString(req));
         checkParamResult(result);
         Page<Contract> page = contractService.findContractByPage(req);

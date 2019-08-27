@@ -50,6 +50,7 @@ public class Constants {
     public static final String ABI_DIR = "./conf/files/abi";
     public static final String BIN_DIR = "./conf/files/bin";
     public static final String JAVA_DIR = "./conf/files/java";
+    public static final String TEMPLATE = "./conf/template";
     public static final String FILE_SOL = ".sol";
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI = "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
@@ -59,6 +60,10 @@ public class Constants {
     private String nodeDir = "";
     private String keyServer = "127.0.0.1:8080";
     private int transMaxWait = 30;
-    private String monitorDisk = "/data";
+    private String monitorDisk = "/";
+    private boolean monitorEnabled = true;
     private String aesKey = "4d5dFr4fG446GBde";
+
+    public static final String account1Path = "node.key";
+
 }
