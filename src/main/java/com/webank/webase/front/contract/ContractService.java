@@ -14,24 +14,28 @@
 package com.webank.webase.front.contract;
 
 import static com.webank.webase.front.base.ConstantCode.GROUPID_NOT_EXIST;
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.*;
+import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.ABI;
+import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.BIN;
+import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.INTERFACE;
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.METADATA;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-
-import com.webank.webase.front.contract.entity.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
@@ -49,8 +53,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
@@ -58,6 +64,16 @@ import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.FrontUtils;
 import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.contract.entity.ContractPath;
+import com.webank.webase.front.contract.entity.ContractPathKey;
+import com.webank.webase.front.contract.entity.ReqContractPath;
+import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqDeployWithSign;
+import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqSendAbi;
+import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.file.FileContent;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.transaction.TransService;
@@ -84,6 +100,8 @@ public class ContractService {
     private HashMap<Integer, CnsService> cnsServiceMap;
     @Autowired
     private ContractRepository contractRepository;
+    @Autowired
+    private ContractPathRepository contractPathRepository;
     @Autowired
     private TransService transService;
     @Autowired
@@ -419,6 +437,7 @@ public class ContractService {
     /**
      * save new contract.
      */
+    @Transactional
     private Contract newContract(ReqContractSave contractReq) {
         // check contract not exist.
         verifyContractNotExist(contractReq.getGroupId(), contractReq.getContractPath(),
@@ -431,6 +450,13 @@ public class ContractService {
         contract.setModifyTime(LocalDateTime.now());
         contract.setCreateTime(LocalDateTime.now());
         contractRepository.save(contract);
+        // update time
+        ContractPath contractPathVo = new ContractPath();
+        contractPathVo.setGroupId(contractReq.getGroupId());
+        contractPathVo.setContractPath(contractReq.getContractPath());
+        contractPathVo.setModifyTime(LocalDateTime.now());
+        contractPathRepository.save(contractPathVo);
+        
         return contract;
     }
 
@@ -438,6 +464,7 @@ public class ContractService {
     /**
      * update contract.
      */
+    @Transactional
     private Contract updateContract(ReqContractSave contractReq) {
         // check contract exist
         Contract contract =
@@ -448,12 +475,20 @@ public class ContractService {
         BeanUtils.copyProperties(contractReq, contract);
         contract.setModifyTime(LocalDateTime.now());
         contractRepository.save(contract);
+        // update time
+        ContractPath contractPathVo = new ContractPath();
+        contractPathVo.setGroupId(contractReq.getGroupId());
+        contractPathVo.setContractPath(contractReq.getContractPath());
+        contractPathVo.setModifyTime(LocalDateTime.now());
+        contractPathRepository.save(contractPathVo);
+        
         return contract;
     }
 
     /**
      * find contract by page.
      */
+    @Transactional
     public Page<Contract> findContractByPage(ReqPageContract param) throws IOException {
         // init templates
         List<String> templates = CommonUtils.readFileToList(Constants.TEMPLATE);
@@ -477,6 +512,12 @@ public class ContractService {
                     contractRepository.save(contract);
                 }
             }
+            ContractPath contractPathVo = new ContractPath();
+            contractPathVo.setGroupId(param.getGroupId());
+            contractPathVo.setContractPath(contractPath);
+            contractPathVo.setModifyTime(LocalDateTime.now());
+            contractPathVo.setCreateTime(LocalDateTime.now());
+            contractPathRepository.save(contractPathVo);
         }
         // findContractByPage
         Pageable pageable = new PageRequest(param.getPageNumber(), param.getPageSize(),
@@ -594,5 +635,42 @@ public class ContractService {
             }
         }
 
+    }
+    
+    /**
+     * addContractPath.
+     */
+    public ContractPath addContractPath(ReqContractPath req) {
+        // add to database.
+        ContractPath contractPath = new ContractPath();
+        BeanUtils.copyProperties(req, contractPath);
+        contractPath.setModifyTime(LocalDateTime.now());
+        contractPath.setCreateTime(LocalDateTime.now());
+        contractPathRepository.save(contractPath);
+        return contractPath;
+    }
+    
+    /**
+     * addContractPath.
+     */
+    public List<ContractPath> findPathList(Integer groupId) {
+        // get from database.
+        Sort sort = new Sort(Sort.Direction.DESC, "modifyTime");
+        List<ContractPath> contractPaths = contractPathRepository.findAll(
+                (Root<ContractPath> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                    Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
+                    return criteriaBuilder.and(predicate);
+                }, sort);
+        return contractPaths;
+    }
+    
+    /**
+     * deletePath.
+     */
+    public void deletePath(Integer groupId, String contractPath) {
+        ContractPathKey contractPathKey = new ContractPathKey();
+        contractPathKey.setGroupId(groupId);
+        contractPathKey.setContractPath(contractPath);
+        contractPathRepository.delete(contractPathKey);
     }
 }
