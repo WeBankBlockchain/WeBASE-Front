@@ -64,6 +64,12 @@ public class PrecompiledSysConfigService {
         // for undo
         String oldValue = getSysConfigByKey(groupId, key);
 
+        // check system value
+        if(PrecompiledUtils.TxGasLimit.equals(key)) {
+            if (Integer.valueOf(value) < PrecompiledUtils.TxGasLimitMin) {
+                return ConstantCode.FAIL_SET_SYSTEM_CONFIG_TOO_SMALL;
+            }
+        }
         SystemConfigService systemConfigService = new SystemConfigService(
                 web3jMap.get(groupId), getCredentials(fromAddress));
         try{
@@ -85,16 +91,19 @@ public class PrecompiledSysConfigService {
         }catch (JsonParseException | JsonMappingException | FrontException e) {
             // parse失败回滚, save2Db失败回滚
             systemConfigService.setValueByKey(key, oldValue);
-            return new PrecompiledResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse string to map." + e.getMessage());
         }
 
     }
 
-    public  List<SystemConfig> querySysConfigByGroupId(int groupId) throws Exception {
+    public List<SystemConfig> querySysConfigByGroupId(int groupId) throws Exception {
 
-        BaseResponse response = new BaseResponse();
         List<SystemConfig> list = getConfigListFromDb(groupId);
+        if(list.size() == 0) {
+            initSysConfigDb(groupId);
+            list = getConfigListFromDb(groupId);
+        }
         return list;
     }
 
@@ -105,6 +114,35 @@ public class PrecompiledSysConfigService {
 
     }
 
+    public void initSysConfigDb(int groupId) throws Exception{
+        // 再次确认db的system config为空
+        List<SystemConfig> check = systemConfigRepository.findByGroupId(groupId);
+        if(check.size() == 0) {
+            String txCountLimitValue = web3jMap.get(groupId).
+                    getSystemConfigByKey(PrecompiledUtils.TxCountLimit).sendForReturnString();
+
+            String txGasLimitValue = web3jMap.get(groupId).
+                    getSystemConfigByKey(PrecompiledUtils.TxGasLimit).sendForReturnString();
+
+            // 初始化数据库 tx_count_limit init from chain
+            SystemConfig systemConfigCount = new SystemConfig();
+            systemConfigCount.setId(Long.valueOf("1"));
+            systemConfigCount.setGroupId(groupId);
+            systemConfigCount.setFromAddress("0x0");
+            systemConfigCount.setConfigKey(PrecompiledUtils.TxCountLimit);
+            systemConfigCount.setConfigValue(txCountLimitValue);
+            newSystemConfig(systemConfigCount);// new
+
+            // tx_gas_limit init from chain
+            SystemConfig systemConfigGas = new SystemConfig();
+            systemConfigGas.setId(Long.valueOf("2"));
+            systemConfigGas.setGroupId(groupId);
+            systemConfigGas.setFromAddress("0x0");
+            systemConfigGas.setConfigKey(PrecompiledUtils.TxGasLimit);
+            systemConfigGas.setConfigValue(txGasLimitValue);
+            newSystemConfig(systemConfigGas);// new
+        }
+    }
 
     /**
      * save config data.
