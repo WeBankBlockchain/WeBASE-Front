@@ -42,7 +42,7 @@
                     <div v-for='(item,index) in inputs' :key='item.name'>
                         <el-input v-model="parameter[index]" style="width: 310px;margin-bottom:10px;" :placeholder="item.type">
                             <template slot="prepend">
-                                <span>{{item.name}}</span>
+                                <span class="parame-item-name" :title="item.name">{{item.name}}</span>
                             </template>
                         </el-input>
                     </div>
@@ -174,6 +174,13 @@ export default {
     max-width: 45px;
 }
 .text-td {
+    white-space: nowrap;
+}
+.parame-item-name {
+    display: inline-block;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow:ellipsis;
     white-space: nowrap;
 }
 </style>

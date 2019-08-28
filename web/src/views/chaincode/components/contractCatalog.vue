@@ -24,7 +24,7 @@
             </el-tooltip>
             <el-tooltip class="item" effect="dark" :content="$t('title.upload')" placement="top-start">
                 <i class="wbs-icon-shangchuan contract-icon" style="position:relative;">
-                    <input type="file" id="file" ref='file' name="chaincodes" class="uploads" @change="upload($event)" />
+                    <input multiple type="file" id="file" ref='file' name="chaincodes" class="uploads" @change="upload($event)" />
                 </i>
             </el-tooltip>
 
@@ -52,8 +52,8 @@
                         <i :class="item.folderIcon" @click='open(item)' v-if="!item.renameShow" :id='item.folderId' class="cursor-pointer font-16 no-chase"></i>
                         <i class="wbs-icon-folder cursor-pointer no-chase" @click='open(item)' @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
-                        <div class="contract-menu-handle" v-if=' item.handleModel' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
-                            <ul>
+                        <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
+                            <ul >
                                 <li class="contract-menu-handle-list" @click="addFiles">{{$t('dialog.newFile')}}</li>
                                 <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
                             </ul>
@@ -69,7 +69,7 @@
 
                                 <el-input v-model="contractName" autofocus='autofocus' maxlength="32" @blur="changeName(list)" v-if="list.renameShow"></el-input>
                                 <div class="contract-menu-handle" v-if='list.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX - 35}px`}" v-Clickoutside="checkNull">
-                                    <ul v-if="contractFile">
+                                    <ul v-if="contractFile&&item.contractName!=='template'">
                                         <li class="contract-menu-handle-list" @click="rename">重命名</li>
                                         <li class="contract-menu-handle-list" @click="deleteFile(list)">删除</li>
                                     </ul>
@@ -120,7 +120,8 @@ export default {
             handleModel: false,
             folderId: null,
             modifyState: false,
-            modifyParam: {}
+            modifyParam: {},
+            uploadFiles: []
         };
     },
     beforeDestroy: function () {
@@ -323,63 +324,69 @@ export default {
             if (!e.target.files.length) {
                 return;
             }
-            this.filename = "";
-            this.fileString = "";
-            let files = e.target.files[0];
-            let filessize = Math.ceil(files.size / 1024);
-            let filetype = files.name.split(".")[1];
-            if (filessize > 400) {
-                this.$message({
-                    message: this.$t('text.fileExceeds'),
-                    type: "error"
-                });
-            } else if (filetype !== "sol") {
-                this.$message({
-                    message: this.$t('text.uploadSol'),
-                    type: "error"
-                });
-            } else {
-                this.filename = files.name.split(".")[0];
-                this.file = files.name;
-                let reader = new FileReader(); //新建一个FileReader
-                reader.readAsText(files, "UTF-8"); //读取文件
-                let _this = this;
-                reader.onload = function (evt) {
-                    _this.fileString = Base64.encode(evt.target.result); // 读取文件内容
-                    if (_this.fileString) {
-                        _this.cataLogShow = true;
-                    }
-                };
+            this.uploadFiles = e.target.files;
+
+            for (let i = 0; i < this.uploadFiles.length; i++) {
+                let filessize = Math.ceil(this.uploadFiles[i].size / 1024);
+                let filetype = this.uploadFiles[i].name.split(".")[1];
+                if (filessize > 400) {
+                    this.$message({
+                        message: this.$t('text.fileExceeds'),
+                        type: "error"
+                    });
+                    this.cataLogShow = false
+                    break;
+                } else if (filetype !== "sol") {
+                    this.$message({
+                        message: this.$t('text.uploadSol'),
+                        type: "error"
+                    });
+                    this.cataLogShow = false
+                    break;
+                } else {
+                    this.cataLogShow = true
+                }
             }
-            this.$refs.file.value = "";
         },
         catalogSuccess: function (val) {
-            let num = 0;
-            this.contractList.forEach(value => {
-                if (value.contractName == this.filename && value.contractPath == val) {
-                    this.$message({
-                        type: "error",
-                        message: this.$t('text.contractSameDirectory')
-                    });
-                    num++;
+            for (let i = 0; i < this.uploadFiles.length; i++) {
+                let reader = new FileReader(); //新建一个FileReader
+                reader.readAsText(this.uploadFiles[i], "UTF-8"); //读取文件
+                let filename = "", _this = this;
+                filename = this.uploadFiles[i].name.split(".")[0];
+                let num = 0;
+                this.contractList.forEach(value => {
+                    if (value.contractName == filename && value.contractPath == val&& num===0) {
+                        console.log(num)
+                        this.$message({
+                            type: "error",
+                            message: this.$t('text.contractSameDirectory')
+                        });
+                        num++;
+                    }
+                });
+                if (!num) {
+                    reader.onload = function (evt) {
+                        var fileString = "";
+                        fileString = Base64.encode(evt.target.result); // 读取文件内容
+                        let data = {
+                            contractName: filename,
+                            contractSource: fileString,
+                            contractPath: val,
+                            contractType: "file",
+                            contractActive: false,
+                            contractstatus: 0,
+                            contractAbi: "",
+                            contractBin: "",
+                            contractAddress: "",
+                            contractVersion: "",
+                            contractNo: new Date().getTime()
+                        };
+                        _this.saveContract(data);
+                    };
                 }
-            });
-            if (!num) {
-                let data = {
-                    contractName: this.filename,
-                    contractSource: this.fileString,
-                    contractPath: val,
-                    contractType: "file",
-                    contractActive: false,
-                    contractstatus: 0,
-                    contractAbi: "",
-                    contractBin: "",
-                    contractAddress: "",
-                    contractVersion: "",
-                    contractNo: new Date().getTime()
-                };
-                this.saveContract(data);
             }
+            this.$refs.file.value = "";
             this.catalogClose();
         },
         catalogClose: function () {
@@ -479,10 +486,6 @@ export default {
                     if (status === 200) {
                         this.contractList = data.data || [];
                         localStorage.setItem("contractList", JSON.stringify(this.contractList))
-                        localStorage.setItem(
-                            "contractList",
-                            JSON.stringify(this.contractList)
-                        );
                         if (data.data.length) {
                             if (localStorage.getItem("folderList")) {
                                 this.folderList = JSON.parse(
@@ -606,7 +609,7 @@ export default {
                         renameShow: false,
                         inputShow: false
                     };
-                    this.contractArry.forEach((item,index) => {
+                    this.contractArry.forEach((item, index) => {
                         if (item.contractType == "folder" && item.folderId == value.folderId) {
                             data.folderIcon = item.folderIcon;
                             data.folderActive = item.folderActive;

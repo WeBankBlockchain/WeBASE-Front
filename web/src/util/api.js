@@ -547,3 +547,35 @@ export function queryJavaClass(data, str) {
         responseType: 'blob/json'
     })
 }
+
+export function addFunctionAbi(data) {
+    return post({
+        url: `${HANDLE}method/add`,
+        method: 'post',
+        data: data,
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+export function getFunctionAbi(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}method/findById/${params.str}`,
+        method: 'get',
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+// add contractpath
+export function addContractpath(data) {
+    return post({
+        url: `${HANDLE}contract/addContractPath`,
+        method: 'post',
+        data: data,
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
