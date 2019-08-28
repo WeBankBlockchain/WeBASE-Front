@@ -1,5 +1,7 @@
 package com.webank.webase.front.precompiledapi.permission;
 
+import com.webank.webase.front.base.BaseResponse;
+import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -105,13 +108,14 @@ public class PermissionManageService {
      * @return
      * @throws Exception
      */
-    public String grantUserTableManager(int groupId, String fromAddress, String tableName, String userAddress) throws Exception {
+    public Object grantUserTableManager(int groupId, String fromAddress, String tableName, String userAddress) throws Exception {
         PermissionService permissionService = new PermissionService(web3jMap.get(groupId), getCredentials(fromAddress));
 
         return permissionService.grantUserTableManager(tableName, userAddress);
+
     }
 
-    public String revokeUserTableManager(int groupId, String fromAddress, String tableName, String userAddress) throws Exception {
+    public Object revokeUserTableManager(int groupId, String fromAddress, String tableName, String userAddress) throws Exception {
         PermissionService permissionService = new PermissionService(web3jMap.get(groupId), getCredentials(fromAddress));
 
         return permissionService.revokeUserTableManager(tableName, userAddress);
@@ -121,6 +125,7 @@ public class PermissionManageService {
 
         PermissionService permissionService = new PermissionService(web3jMap.get(groupId), getCredentialsForQuery());
         return permissionService.listUserTableManager(tableName);
+
     }
 
     /**
