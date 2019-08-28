@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
+import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.common.PrecompiledResponse;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
@@ -45,16 +46,20 @@ public class PrecompiledController {
             @RequestParam String contractNameAndVersion,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
-        List<CnsInfo> cnsList = new ArrayList<>();
+        List<CnsInfo> resList = new ArrayList<>();
         // get "name:version"
         String[] params = contractNameAndVersion.split(":");
         if(params.length == 1) {
             String name = params[0];
-            cnsList =  precompiledService.queryCnsByName(groupId, name);
-            List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(cnsList, pageSize, pageNumber);
-            List<CnsInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
-            return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+            resList =  precompiledService.queryCnsByName(groupId, name);
+            if(resList.size() != 0){
+                List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
+                List<CnsInfo> finalList = list2Page.getPagedList();
+                Long totalCount = (long) finalList.size();
+                return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+            } else {
+                return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
+            }
         }else if(params.length == 2) {
             String name = params[0];
             String version = params[1];
@@ -62,14 +67,14 @@ public class PrecompiledController {
                 return ConstantCode.INVALID_VERSION;
             }
             // check return list size
-            cnsList = precompiledService.queryCnsByNameAndVersion(groupId, name, version);
-            if(cnsList.isEmpty()) {
-                return ConstantCode.RET_SUCCESS_EMPTY_LIST;
-            }else {
-                List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(cnsList, pageSize, pageNumber);
+            resList = precompiledService.queryCnsByNameAndVersion(groupId, name, version);
+            if(resList.size() != 0) {
+                List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
                 List<CnsInfo> finalList = list2Page.getPagedList();
                 Long totalCount = (long) finalList.size();
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+            } else {
+                return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
             }
         }else {
             return ConstantCode.PARAM_ERROR;
@@ -88,11 +93,16 @@ public class PrecompiledController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
 
-        List<NodeInfo> nodeInfoList = precompiledService.getNodeList(groupId);
-        List2Page<NodeInfo> list2Page = new List2Page<NodeInfo>(nodeInfoList, pageSize, pageNumber);
-        List<NodeInfo> finalList = list2Page.getPagedList();
-        Long totalCount = (long) finalList.size();
-        return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);    }
+        List<NodeInfo> resList = precompiledService.getNodeList(groupId);
+        if(resList.size() != 0) {
+            List2Page<NodeInfo> list2Page = new List2Page<NodeInfo>(resList, pageSize, pageNumber);
+            List<NodeInfo> finalList = list2Page.getPagedList();
+            Long totalCount = (long) finalList.size();
+            return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+        } else {
+            return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
+        }
+    }
 
     @ApiOperation(value = "nodeManageControl", notes = "set system config value by key")
     @ApiImplicitParam(name = "consensusHandle", value = "node consensus status control", required = true, dataType = "ConsensusHandle")
@@ -176,14 +186,24 @@ public class PrecompiledController {
         try {
             CRUDParseUtils.parseCreateTable(sql, table);
         } catch (FrontException | JSQLParserException | NullPointerException e) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql), null);
         }
         CRUDParseUtils.checkTableParams(table);
-        return new BaseResponse(ConstantCode.RET_SUCCESS,
-                precompiledService.createTable(groupId, fromAddress, table));
+        int result = precompiledService.createTable(groupId, fromAddress, table);
+
+        if (result == 0) {
+            return new BaseResponse(0,"Create '" + table.getTableName() + "' Ok.", null);
+        } else if (result == PrecompiledCommon.TableExist_RC3) {
+            return new BaseResponse(PrecompiledCommon.TableExist_RC3, "Table already exists", null);
+        } else if (result == PrecompiledCommon.PermissionDenied_RC3) {
+            return new BaseResponse(PrecompiledCommon.PermissionDenied_RC3, "Permission denied", null);
+        } else {
+            return new BaseResponse(result, "code: " + result + "Create '" + table.getTableName() + "' failed.", null);
+        }
     }
 
+    // check table name exist by desc(tableName)
     public Object desc(int groupId, String sql) throws Exception {
         Table table = new Table();
         String[] sqlParams = sql.split(" ");
@@ -191,17 +211,20 @@ public class PrecompiledController {
         String tableName = sqlParams[1];
 
         if (tableName.length() > PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH) {
-            throw new FrontException(PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH,
+            return new BaseResponse(PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH,
                             "The table name length is greater than " +
-                            PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH + ".");
+                            PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH + ".", null);
         }
         CRUDParseUtils.invalidSymbol(tableName);
         if (tableName.endsWith(";")) {
             tableName = tableName.substring(0, tableName.length() - 1);
         }
-        table = precompiledService.desc(groupId, tableName);
-
-        return new BaseResponse(ConstantCode.RET_SUCCESS, table);
+        try {
+            table = precompiledService.desc(groupId, tableName);
+            return new BaseResponse(ConstantCode.RET_SUCCESS, table);
+        } catch (Exception e) {
+            return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, null);
+        }
     }
 
     public Object select(int groupId, String fromAddress, String sql) throws Exception {
@@ -213,28 +236,30 @@ public class PrecompiledController {
         try { //转化select语句
             CRUDParseUtils.parseSelect(sql, table, conditions, selectColumns);
         } catch (JSQLParserException | NullPointerException e) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql), null);
         }
 
-        Table descTable = precompiledService.desc(groupId, table.getTableName());
+        Table descTable;
+        try {
+            descTable = precompiledService.desc(groupId, table.getTableName());
+        } catch (Exception e) {
+            return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+        }
         table.setKey(descTable.getKey());
         CRUDParseUtils.handleKey(table, conditions);
         String fields = descTable.getKey() + "," + descTable.getValueFields();
         List<String> fieldsList = Arrays.asList(fields.split(","));
         for (String column : selectColumns) {
             if (!fieldsList.contains(column) && !"*".equals(column)) {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Unknown field '" + column + "' in field list.");
+                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                        "Unknown field '" + column + "' in field list.", null);
             }
         }
-
-        List<Map<String, String>> result =
-                precompiledService.select(groupId, fromAddress, table, conditions);
-
+        List<Map<String, String>> result = precompiledService.select(groupId, fromAddress, table, conditions);
         int rows = 0;
         if (result.size() == 0) {
-            return new BaseResponse(ConstantCode.RET_SUCCESS, ConstantCode.RET_SUCCESS_EMPTY_LIST);
+            return new BaseResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST);
         }
         result = CRUDParseUtils.filterSystemColum(result);
         if ("*".equals(selectColumns.get(0))) {
@@ -258,30 +283,35 @@ public class PrecompiledController {
         Table table = new Table();
         Entry entry = new Entry();
 
-        ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
         // insert sql use "values" or not
         boolean useValues = false;
         try {
             useValues = CRUDParseUtils.parseInsert(sql, table, entry);
         } catch (JSQLParserException | NullPointerException e) {
-            return new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                             "Could not parse SQL statement."
-                            + CRUDParseUtils.invalidSymbolReturn(sql));
+                            + CRUDParseUtils.invalidSymbolReturn(sql), null);
         }
 
         Set<String> entryFields = entry.getFields().keySet();
 
         String tableName = table.getTableName();
-        Table descTable = precompiledService.desc(groupId, tableName);
+        Table descTable;
+        try {
+            descTable = precompiledService.desc(groupId, tableName);
+        } catch (Exception e) {
+            return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+        }
         String keyName = descTable.getKey();
         String fields = keyName + "," + descTable.getValueFields();
+
         List<String> fieldsList = Arrays.asList(fields.split(","));
 
         // ex: insert into t_test values (fruit, 1, apple)
         if (useValues) {
             if (entry.getFields().size() != fieldsList.size()) {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Column count doesn't match value count.");
+                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                        "Column count doesn't match value count.", null);
             } else {
                 Entry entryValue = table.getEntry();
                 for (int i = 0; i < entry.getFields().size(); i++) {
@@ -301,8 +331,8 @@ public class PrecompiledController {
         else {
             for (String entryField : entryFields) {
                 if (!fieldsList.contains(entryField)) {
-                    throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                            "Unknown field '" + entryField + "' in field list.");
+                    return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                            "Unknown field '" + entryField + "' in field list.", null);
                 }
                 if (fieldsList.size() != entryFields.size()) {
                     List<String> listString = new ArrayList<String>(fieldsList);
@@ -318,14 +348,14 @@ public class PrecompiledController {
                         }
                     }
                     strBuilder.append("in field list.");
-                    throw new FrontException(
-                            PrecompiledUtils.CRUD_SQL_ERROR, strBuilder.toString());
+                    return new BaseResponse(
+                            PrecompiledUtils.CRUD_SQL_ERROR, strBuilder.toString(), null);
                 }
             }
             String keyValue = entry.get(keyName);
             if (keyValue == null) {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Column count doesn't match value count.");
+                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                        "Column count doesn't match value count.", null);
             }
             table.setKey(keyValue);
         }
@@ -344,23 +374,26 @@ public class PrecompiledController {
         Entry entry = new Entry();
         Condition conditions = new Condition();
 
-        int code;
-        String msg;
-        ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
         try {
             CRUDParseUtils.parseUpdate(sql, table, entry, conditions);
         } catch (JSQLParserException | NullPointerException e) {
-            return new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement."
-                            + CRUDParseUtils.invalidSymbolReturn(sql));
+                            + CRUDParseUtils.invalidSymbolReturn(sql), null);
         }
 
         String tableName = table.getTableName();
-        Table descTable = precompiledService.desc(groupId, tableName);
+        Table descTable;
+        try {
+           descTable = precompiledService.desc(groupId, tableName);
+        } catch (Exception e) {
+            return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+        }
+
         String keyName = descTable.getKey();
         if (entry.getFields().containsKey(keyName)) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Please don't set the key field '" + keyName + "'.");
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                    "Please don't set the key field '" + keyName + "'.", null);
         }
         table.setKey(descTable.getKey());
         CRUDParseUtils.handleKey(table, conditions);
@@ -373,8 +406,8 @@ public class PrecompiledController {
         allFields.addAll(conditonFields);
         for (String entryField : allFields) {
             if (!fieldsList.contains(entryField)) {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Unknown field '" + entryField + "' in field list.");
+                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                        "Unknown field '" + entryField + "' in field list.", null);
             }
         }
         CRUDParseUtils.checkUserTableParam(entry, descTable);
@@ -398,11 +431,16 @@ public class PrecompiledController {
         try {
             CRUDParseUtils.parseRemove(sql, table, conditions);
         } catch (JSQLParserException | NullPointerException e) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql), null);
         }
 
-        Table descTable = precompiledService.desc(groupId, table.getTableName());
+        Table descTable;
+        try {
+            descTable = precompiledService.desc(groupId, table.getTableName());
+        } catch (Exception e) {
+            return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+        }
         table.setKey(descTable.getKey());
         CRUDParseUtils.handleKey(table, conditions);
         int removeResult = precompiledService.remove(groupId, fromAddress, table, conditions);

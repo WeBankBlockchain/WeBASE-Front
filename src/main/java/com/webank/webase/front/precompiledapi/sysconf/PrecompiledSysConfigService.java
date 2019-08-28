@@ -84,11 +84,11 @@ public class PrecompiledSysConfigService {
                 // save失败会抛出FrontException
                 SystemConfig saveResult = saveSysConfig(systemConfig);
 
-                return new PrecompiledResponse(0, result);//透传
+                return result;//透传
             }else {
                 return ConstantCode.FAIL_SET_SYSTEM_CONFIG;
             }
-        }catch (JsonParseException | JsonMappingException | FrontException e) {
+        }catch (JsonParseException | JsonMappingException e) {
             // parse失败回滚, save2Db失败回滚
             systemConfigService.setValueByKey(key, oldValue);
             throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
