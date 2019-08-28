@@ -230,5 +230,7 @@ export default {
         nameNoSame: 'User names cannot be the same',
         uploadSol: 'Please upload contract files(extension: .sol)', 
         fileExceeds: 'File size exceeds 400k, please upload files smaller than 400k',
+        txnDecodeBtn: 'Decode',
+        txnEncodeBtn: 'Restore',
     }
 }
