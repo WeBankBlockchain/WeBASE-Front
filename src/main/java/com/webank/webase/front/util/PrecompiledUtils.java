@@ -33,6 +33,7 @@ public class PrecompiledUtils {
 
     public static int PermissionCode = 0;
     public static int TableExist = 0;
+    public static int CRUD_SQL_ERROR = -51503; // process sql sentence error
 
     public static int SYS_TABLE_KEY_MAX_LENGTH = 58; // 64- "_user_".length
     public static int SYS_TABLE_KEY_FIELD_NAME_MAX_LENGTH = 64;
@@ -41,7 +42,6 @@ public class PrecompiledUtils {
     public static int USER_TABLE_FIELD_NAME_MAX_LENGTH = 64;
     public static int USER_TABLE_FIELD_VALUE_MAX_LENGTH = 16 * 1024 * 1024 - 1;
 
-    public static int CRUD_SQL_ERROR = -51503;
 
     public static boolean checkVersion(String version) {
 

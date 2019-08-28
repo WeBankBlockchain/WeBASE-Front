@@ -313,6 +313,7 @@ public class PermissionManageController extends BaseController {
         //checkParamResult(result);
         return permissionManageService.revokeCNSManager(groupId, from, address);
     }
+
     public Object listCNSManager(int groupId, int pageSize, int pageNumber) throws Exception {
         log.info("listCNSManager start.  ");
         List<PermissionInfo> resList = permissionManageService.listCNSManager(groupId);
@@ -324,6 +325,7 @@ public class PermissionManageController extends BaseController {
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
         }
+
     }
 
 }
