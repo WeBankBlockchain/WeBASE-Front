@@ -56,7 +56,7 @@ public class PrecompiledSysConfigController {
                 return ConstantCode.FAIL_SET_SYSTEM_CONFIG;
             }
         }else {
-            return ConstantCode.UNSUPPORT_SYSTEM_CONFIG_KEY;
+            return ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY;
         }
     }
 
