@@ -159,6 +159,8 @@ public class PrecompiledController {
         int groupId = crudHandle.getGroupId();
         String from = crudHandle.getFromAddress();
         String sql = crudHandle.getSql();
+        // to lower case
+        sql = sql.toLowerCase();
         String[] sqlParams = sql.split(" ");
 
         switch (sqlParams[0]) {
