@@ -104,13 +104,11 @@ public class PrecompiledService{
 
             for(int j= 0; j < sealerList.size(); j++){
                 if(sealerList.get(j).equals(nodeId)) {
-                    System.out.println("sealer: " + sealerList.get(j));
                     nodeInfo.setNodeType("sealer");
                 }
             }
             for(int k= 0; k < observerList.size(); k++){
                 if(observerList.get(k).equals(nodeId)) {
-                    System.out.println("observer: " + observerList.get(k));
                     nodeInfo.setNodeType("observer");
                 }
             }
@@ -124,19 +122,11 @@ public class PrecompiledService{
      * CRUD related
      * Table table - validation in controller
      */
-    public String createTable(int groupId, String fromAddress, Table table) throws Exception {
+    public int createTable(int groupId, String fromAddress, Table table) throws Exception {
         CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentials(fromAddress));
 
-        int result = crudService.createTable(table);
-        if (result == 0) {
-            return "Create '" + table.getTableName() + "' Ok.";
-        } else if (result == PrecompiledCommon.TableExist_RC3) {
-            return PrecompiledCommon.transferToJson(PrecompiledCommon.TableExist_RC3);
-        } else if (result == PrecompiledCommon.PermissionDenied_RC3) {
-            return PrecompiledCommon.transferToJson(PrecompiledCommon.PermissionDenied_RC3);
-        } else {
-            return "code: " + result + "Create '" + table.getTableName() + "' failed.";
-        }
+        return crudService.createTable(table);
+
 
     }
 
@@ -144,8 +134,8 @@ public class PrecompiledService{
         CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentialsForQuery());
 
         Table descRes = crudService.desc(tableName);
-
         return descRes;
+
     }
 
     //select
