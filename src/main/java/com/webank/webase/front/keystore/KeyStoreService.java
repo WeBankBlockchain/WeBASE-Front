@@ -15,6 +15,8 @@ package com.webank.webase.front.keystore;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -52,6 +54,7 @@ public class KeyStoreService {
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
     @Autowired
     KeystoreRepository keystoreRepository;
+    private static Map<String, String> PRIVATE_KEY_MAP = new HashMap<>();
 
 
     /**
@@ -140,6 +143,11 @@ public class KeyStoreService {
             return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
         }
 
+        String key_of_user = user + "_" + useAes;
+        if (PRIVATE_KEY_MAP.containsKey(key_of_user)) {
+            return PRIVATE_KEY_MAP.get(key_of_user);
+        }
+
         //get privateKey by userId
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         String[] ipPortArr = constants.getKeyServer().split(",");
@@ -159,11 +167,19 @@ public class KeyStoreService {
                 continue;
             }
         }
+
+        String private_key;
         if (useAes) {
-            return aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+            private_key = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+        } else {
+            private_key = keyStoreInfo.getPrivateKey();
         }
 
-        return keyStoreInfo.getPrivateKey();
+        if (StringUtils.isNotBlank(private_key)) {
+            PRIVATE_KEY_MAP.put(key_of_user, private_key);
+        }
+
+        return private_key;
     }
 
     /**
