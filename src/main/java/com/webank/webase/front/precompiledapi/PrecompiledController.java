@@ -160,10 +160,8 @@ public class PrecompiledController {
         String from = crudHandle.getFromAddress();
         String sql = crudHandle.getSql();
         // to lower case
-        sql = sql.toLowerCase();
         String[] sqlParams = sql.split(" ");
-
-        switch (sqlParams[0]) {
+        switch (sqlParams[0].toLowerCase()) {
             case "create":
                 return createTable(groupId, from, sql);
             case "desc":
