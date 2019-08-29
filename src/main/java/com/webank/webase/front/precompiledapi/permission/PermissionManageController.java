@@ -94,7 +94,7 @@ public class PermissionManageController extends BaseController {
         }
     }
 
-    //分发Get请求
+    //分发del请求
     @ApiOperation(value = "revokePermissionManager", notes = "revoke address PermissionManager")
     @ApiImplicitParam(name = "permissionHandle", value = "transaction info", required = true, dataType = "PermissionHandle")
     @DeleteMapping("/permission")
@@ -188,7 +188,7 @@ public class PermissionManageController extends BaseController {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             return new BaseResponse(ConstantCode.RET_SUCCESS, list2Page.getPagedList());
         } else {
-            return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, null, 0);
+            return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
         }
     }
 
