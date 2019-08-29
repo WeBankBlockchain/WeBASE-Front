@@ -148,12 +148,12 @@ public class PrecompiledController {
     }
 
     /**
-     * CRUD opperation
+     * CRUD operation
      * checkVersionForCRUD();
-     * TODO exception for "bcos's version above of 2.0.0-rc3 support crud opperation"
+     * TODO exception for "bcos's version above of 2.0.0-rc3 support crud operation"
      */
-    @ApiOperation(value = "crudManage", notes = "opperate table by crud")
-    @ApiImplicitParam(name = "crudHandle", value = "crud opperation info", required = true, dataType = "CrudHandle")
+    @ApiOperation(value = "crudManage", notes = "operate table by crud")
+    @ApiImplicitParam(name = "crudHandle", value = "crud operation info", required = true, dataType = "CrudHandle")
     @PostMapping("crud")
     public Object crudManageControl(@Valid @RequestBody CrudHandle crudHandle, BindingResult bindingResult)throws Exception {
         int groupId = crudHandle.getGroupId();
@@ -175,7 +175,8 @@ public class PrecompiledController {
             case "delete":
                 return remove(groupId, from, sql);
             default:
-                return ConstantCode.PARAM_FAIL_SQL_ERROR;
+                return new BaseResponse(ConstantCode.PARAM_FAIL_SQL_ERROR,
+                        "no such crud operation");
         }
     }
 
@@ -185,7 +186,7 @@ public class PrecompiledController {
         Table table = new Table();
         try {
             CRUDParseUtils.parseCreateTable(sql, table);
-        } catch (FrontException | JSQLParserException | NullPointerException e) {
+        } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
@@ -239,7 +240,7 @@ public class PrecompiledController {
         ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
         try { //转化select语句
             CRUDParseUtils.parseSelect(sql, table, conditions, selectColumns);
-        } catch (JSQLParserException | NullPointerException e) {
+        } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
@@ -262,7 +263,10 @@ public class PrecompiledController {
                         "Unknown field '" + column + "' in field list.");
             }
         }
-        List<Map<String, String>> result = precompiledService.select(groupId, fromAddress, table, conditions);
+        List<Map<String, String>> result = new ArrayList<>();
+
+        result = precompiledService.select(groupId, fromAddress, table, conditions);
+
         int rows = 0;
         if (result.size() == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, ConstantCode.CRUD_EMPTY_SET);
@@ -293,7 +297,7 @@ public class PrecompiledController {
         boolean useValues = false;
         try {
             useValues = CRUDParseUtils.parseInsert(sql, table, entry);
-        } catch (JSQLParserException | NullPointerException e) {
+        } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                             "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
@@ -385,7 +389,7 @@ public class PrecompiledController {
 
         try {
             CRUDParseUtils.parseUpdate(sql, table, entry, conditions);
-        } catch (JSQLParserException | NullPointerException e) {
+        } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
@@ -441,7 +445,7 @@ public class PrecompiledController {
         ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
         try {
             CRUDParseUtils.parseRemove(sql, table, conditions);
-        } catch (JSQLParserException | NullPointerException e) {
+        } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
