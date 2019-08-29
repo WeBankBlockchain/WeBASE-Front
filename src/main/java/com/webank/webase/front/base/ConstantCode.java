@@ -110,7 +110,7 @@ public interface ConstantCode {
     public static int CODE_CRUD_SQL_ERROR = -51503;
     RetCode PARAM_FAIL_SQL_ERROR = RetCode.mark(201226, "sql syntax error");
     RetCode SQL_ERROR = RetCode.mark(201227, "crud sql fail");
-    RetCode FAIL_TABLE_NOT_EXISTS = RetCode.mark(2012228, "table not exists");
+    RetCode FAIL_TABLE_NOT_EXISTS = RetCode.mark(201228, "table not exists");
     String CRUD_EMPTY_SET = "Empty Set.";
 
 

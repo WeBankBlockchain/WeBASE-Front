@@ -52,7 +52,7 @@ public class PrecompiledSysConfigController {
             // post返回透传
             try {
                 return precompiledSysConfigService.setSysConfigValueByKey(systemConfig);
-            } catch (FrontException e) { //parse error
+            } catch (Exception e) { //parse error
                 return ConstantCode.FAIL_SET_SYSTEM_CONFIG;
             }
         }else {
