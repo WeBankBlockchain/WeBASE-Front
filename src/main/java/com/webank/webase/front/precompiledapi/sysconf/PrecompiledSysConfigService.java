@@ -84,11 +84,11 @@ public class PrecompiledSysConfigService {
                 // save失败会抛出FrontException
                 SystemConfig saveResult = saveSysConfig(systemConfig);
 
-                return new PrecompiledResponse(0, result);//透传
+                return result;//透传
             }else {
                 return ConstantCode.FAIL_SET_SYSTEM_CONFIG;
             }
-        }catch (JsonParseException | JsonMappingException | FrontException e) {
+        }catch (JsonParseException | JsonMappingException e) {
             // parse失败回滚, save2Db失败回滚
             systemConfigService.setValueByKey(key, oldValue);
             throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
@@ -189,30 +189,30 @@ public class PrecompiledSysConfigService {
      */
 
 
-
-    private void verifyConfigKeyNotExist(int groupId, String configKey) {
-        SystemConfig systemConfig =
-                systemConfigRepository.findByGroupIdAndConfigKey(groupId, configKey);
-        if (Objects.nonNull(systemConfig)) {
-            log.warn("system config exists. groupId:{} configKey:{}", groupId, configKey);
-            throw new FrontException(ConstantCode.SYSTEM_CONFIG_EXIST);
-        }
-    }
-
     private SystemConfig getByConfigKeyFromDb(int groupId, String configKey) {
         SystemConfig systemConfig = systemConfigRepository.findByGroupIdAndConfigKey(groupId, configKey);
         return systemConfig;
     }
 
-    private SystemConfig verifyConfigKeyExist(int groupId, String configKey) {
-        // 如果有多个相同的就会报错
-        SystemConfig systemConfig = systemConfigRepository.findByGroupIdAndConfigKey(groupId, configKey);
-        if (Objects.isNull(systemConfig)) {
-            log.info("system config key is invalid. configKey:{}", configKey);
-            throw new FrontException(ConstantCode.INVALID_SYSTEM_CONFIG_KEY);
-        }
-        return systemConfig;
-    }
+//    private void verifyConfigKeyNotExist(int groupId, String configKey) {
+//        SystemConfig systemConfig =
+//                systemConfigRepository.findByGroupIdAndConfigKey(groupId, configKey);
+//        if (Objects.nonNull(systemConfig)) {
+//            log.warn("system config exists. groupId:{} configKey:{}", groupId, configKey);
+//            throw new FrontException(ConstantCode.SYSTEM_CONFIG_EXIST);
+//        }
+//    }
+
+
+//    private SystemConfig verifyConfigKeyExist(int groupId, String configKey) {
+//        // 如果有多个相同的就会报错
+//        SystemConfig systemConfig = systemConfigRepository.findByGroupIdAndConfigKey(groupId, configKey);
+//        if (Objects.isNull(systemConfig)) {
+//            log.info("system config key is invalid. configKey:{}", configKey);
+//            throw new FrontException(ConstantCode.INVALID_SYSTEM_CONFIG_KEY);
+//        }
+//        return systemConfig;
+//    }
 
 
 }

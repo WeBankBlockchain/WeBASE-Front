@@ -50,9 +50,13 @@ public class PrecompiledSysConfigController {
         // tx_count_limit, tx_gas_limit
         if (PrecompiledUtils.TxCountLimit.equals(key) || PrecompiledUtils.TxGasLimit.equals(key)) {
             // post返回透传
-            return precompiledSysConfigService.setSysConfigValueByKey(systemConfig);
+            try {
+                return precompiledSysConfigService.setSysConfigValueByKey(systemConfig);
+            } catch (FrontException e) { //parse error
+                return ConstantCode.FAIL_SET_SYSTEM_CONFIG;
+            }
         }else {
-            return ConstantCode.UNSUPPORT_SYSTEM_CONFIG_KEY;
+            return ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY;
         }
     }
 

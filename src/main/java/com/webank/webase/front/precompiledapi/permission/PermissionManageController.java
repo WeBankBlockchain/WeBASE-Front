@@ -78,7 +78,11 @@ public class PermissionManageController extends BaseController {
             case "deployAndCreate":
                 return grantDeployAndCreateManager(groupId, from, address);
             case "userTable":
-                return grantUserTableManager(groupId, from, tableName, address);
+                if(tableName.isEmpty()){
+                    return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
+                }else {
+                    return grantUserTableManager(groupId, from, tableName, address);
+                }
             case "node":
                 return grantNodeManager(groupId, from, address);
             case "sysConfig":
@@ -90,7 +94,7 @@ public class PermissionManageController extends BaseController {
         }
     }
 
-    //分发Get请求
+    //分发del请求
     @ApiOperation(value = "revokePermissionManager", notes = "revoke address PermissionManager")
     @ApiImplicitParam(name = "permissionHandle", value = "transaction info", required = true, dataType = "PermissionHandle")
     @DeleteMapping("/permission")
@@ -113,7 +117,11 @@ public class PermissionManageController extends BaseController {
             case "deployAndCreate":
                 return revokeDeployAndCreateManager(groupId, from, address);
             case "userTable":
-                return revokeUserTableManager(groupId, from, tableName, address);
+                if(tableName.isEmpty()){
+                    return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
+                }else {
+                    return revokeUserTableManager(groupId, from, tableName, address);
+                }
             case "node":
                 return revokeNodeManager(groupId, from, address);
             case "sysConfig":
@@ -147,10 +155,14 @@ public class PermissionManageController extends BaseController {
     public Object listPermissionManager(int groupId, int pageSize, int pageNumber) throws Exception {
         log.info("listPermissionManager start. ");
         List<PermissionInfo> resList = permissionManageService.listPermissionManager(groupId);
-        List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
-        List<PermissionInfo> finalList = list2Page.getPagedList();
-        Long totalCount = (long) finalList.size();
-        return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+        if(resList.size() != 0) {
+            List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
+            List<PermissionInfo> finalList = list2Page.getPagedList();
+            Long totalCount = (long) finalList.size();
+            return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+        } else {
+            return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
+        }
     }
 
     /**
@@ -172,8 +184,12 @@ public class PermissionManageController extends BaseController {
     public Object listDeployAndCreateManager(int groupId, int pageSize, int pageNumber) throws Exception {
         log.info("listDeployAndCreateManager start. ");
         List<PermissionInfo> resList = permissionManageService.listDeployAndCreateManager(groupId);
-        List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
-        return new BaseResponse(ConstantCode.RET_SUCCESS, list2Page.getPagedList());
+        if(resList.size() != 0) {
+            List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
+            return new BaseResponse(ConstantCode.RET_SUCCESS, list2Page.getPagedList());
+        } else {
+            return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
+        }
     }
 
     /**
@@ -185,7 +201,11 @@ public class PermissionManageController extends BaseController {
         }else {
             log.info("grantUserTableManager start.tableName: ", tableName, "  address:[{}]: ", address);
             //checkParamResult(result);
-            return permissionManageService.grantUserTableManager(groupId, from, tableName, address);
+            try{
+                return permissionManageService.grantUserTableManager(groupId, from, tableName, address);
+            } catch (Exception e) {
+                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, null);
+            }
         }
     }
 
@@ -195,7 +215,11 @@ public class PermissionManageController extends BaseController {
         }else {
             log.info("revokeUserTableManager start.tableName: ", tableName, "  address: ", address);
             //checkParamResult(result);
-            return permissionManageService.revokeUserTableManager(groupId, from, tableName, address);
+            try {
+                return permissionManageService.revokeUserTableManager(groupId, from, tableName, address);
+            } catch (Exception e) {
+                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, null);
+            }
         }
     }
 
@@ -204,11 +228,18 @@ public class PermissionManageController extends BaseController {
             return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
         }else {
             log.info("listPermissionManager start. ");
+            //  if tableName not exists, exception catch will return list whose size is 0
+
             List<PermissionInfo> resList = permissionManageService.listUserTableManager(groupId, tableName);
-            List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
-            List<PermissionInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
-            return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+            if(resList.size() != 0) {
+                List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
+                List<PermissionInfo> finalList = list2Page.getPagedList();
+                Long totalCount = (long) finalList.size();
+                return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+            } else {
+                return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
+            }
+
         }
     }
 
@@ -230,10 +261,14 @@ public class PermissionManageController extends BaseController {
     public Object listNodeManager(int groupId, int pageSize, int pageNumber) throws Exception {
         log.info("listNodeManager start.  ");
         List<PermissionInfo> resList = permissionManageService.listNodeManager(groupId);
-        List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
-        List<PermissionInfo> finalList = list2Page.getPagedList();
-        Long totalCount = (long) finalList.size();
-        return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+        if(resList.size() != 0) {
+            List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
+            List<PermissionInfo> finalList = list2Page.getPagedList();
+            Long totalCount = (long) finalList.size();
+            return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+        } else {
+            return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
+        }
     }
 
     /**
@@ -253,10 +288,14 @@ public class PermissionManageController extends BaseController {
     public Object listSysConfigManager(int groupId, int pageSize, int pageNumber) throws Exception {
         log.info("listSysConfigManager start.  ");
         List<PermissionInfo> resList = permissionManageService.listSysConfigManager(groupId);
-        List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
-        List<PermissionInfo> finalList = list2Page.getPagedList();
-        Long totalCount = (long) finalList.size();
-        return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+        if(resList.size() != 0){
+            List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
+            List<PermissionInfo> finalList = list2Page.getPagedList();
+            Long totalCount = (long) finalList.size();
+            return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+        } else {
+            return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
+        }
     }
 
     /**
@@ -274,13 +313,19 @@ public class PermissionManageController extends BaseController {
         //checkParamResult(result);
         return permissionManageService.revokeCNSManager(groupId, from, address);
     }
+
     public Object listCNSManager(int groupId, int pageSize, int pageNumber) throws Exception {
         log.info("listCNSManager start.  ");
         List<PermissionInfo> resList = permissionManageService.listCNSManager(groupId);
-        List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
-        List<PermissionInfo> finalList = list2Page.getPagedList();
-        Long totalCount = (long) finalList.size();
-        return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+        if(resList.size() != 0){
+            List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
+            List<PermissionInfo> finalList = list2Page.getPagedList();
+            Long totalCount = (long) finalList.size();
+            return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+        } else {
+            return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
+        }
+
     }
 
 }
