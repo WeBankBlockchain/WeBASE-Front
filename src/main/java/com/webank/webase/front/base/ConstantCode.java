@@ -24,13 +24,13 @@ public interface ConstantCode {
 
     /* paramaters check */
     RetCode PARAM_FAIL_GROUP_ID_IS_EMPTY =  RetCode.mark(201001, "groupId cannot be empty");
-    String PARAM_FAIL_USER_IS_EMPTY = "{\"code\":201002,\"msg\":\"user cannot be empty\"}";
+    String PARAM_FAIL_USER_IS_EMPTY = "{\"code\":201002,\"message\":\"user cannot be empty\"}";
     String PARAM_FAIL_USEAES_IS_EMPTY =
-        "{\"code\":201003,\"msg\":\"useAes cannot be empty\"}";
-    String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"msg\":\"version cannot be empty\"}";
-    String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"msg\":\"funcName cannot be empty\"}";
-    String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"msg\":\"abiInfo cannot be empty\"}";
-    String PARAM_FAIL_CONTRACTBIN_IS_EMPTY = "{\"code\":201007,\"msg\":\"contractBin cannot be empty\"}";
+        "{\"code\":201003,\"message\":\"useAes cannot be empty\"}";
+    String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"message\":\"version cannot be empty\"}";
+    String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"message\":\"funcName cannot be empty\"}";
+    String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"message\":\"abiInfo cannot be empty\"}";
+    String PARAM_FAIL_CONTRACTBIN_IS_EMPTY = "{\"code\":201007,\"message\":\"contractBin cannot be empty\"}";
 
     /* general error */
     RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");
@@ -75,16 +75,16 @@ public interface ConstantCode {
     RetCode RET_SUCCESS_EMPTY_LIST = RetCode.mark(0,"Empty Set ");
 
     /* precompiled check */
-    String PARAM_FAIL_GROUPID_IS_EMPTY = "{\"code\":201101,\"msg\":\"groupId cannot be empty\"}";
+    String PARAM_FAIL_GROUPID_IS_EMPTY = "{\"code\":201101,\"message\":\"groupId cannot be empty\"}";
     RetCode PARAM_FAIL_TABLE_NAME_IS_EMPTY = RetCode.mark(201102, "tableName cannot be empty");
-    String PARAM_FAIL_PERMISSION_TYPE_IS_EMPTY = "{\"code\":201103,\"msg\":\"permissionType cannot be empty\"}";
+    String PARAM_FAIL_PERMISSION_TYPE_IS_EMPTY = "{\"code\":201103,\"message\":\"permissionType cannot be empty\"}";
     RetCode PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST =  RetCode.mark(201104, "permissionType not exists");
-    String PARAM_FAIL_FROM_IS_EMPTY = "{\"code\":201105,\"msg\":\"from address cannot be empty\"}";
-    String PARAM_FAIL_CONTRACT_NAME_IS_EMPTY = "{\"code\":201106,\"msg\":\"contract name cannot be empty\"}";
-    String PARAM_FAIL_CONFIG_KEY_IS_EMPTY = "{\"code\":201107,\"msg\":\"system config key cannot be empty\"}";
-    String PARAM_FAIL_CONFIG_VALUE_IS_EMPTY = "{\"code\":201108,\"msg\":\"system config value cannot be empty\"}";
-    String PARAM_FAIL_NODE_ID_IS_EMPTY = "{\"code\":2011109,\"msg\":\"node id cannot be empty\"}";
-    String PARAM_FAIL_NODE_TYPE_IS_EMPTY = "{\"code\":201110,\"msg\":\"node type cannot be empty\"}";
+    String PARAM_FAIL_FROM_IS_EMPTY = "{\"code\":201105,\"message\":\"from address cannot be empty\"}";
+    String PARAM_FAIL_CONTRACT_NAME_IS_EMPTY = "{\"code\":201106,\"message\":\"contract name cannot be empty\"}";
+    String PARAM_FAIL_CONFIG_KEY_IS_EMPTY = "{\"code\":201107,\"message\":\"system config key cannot be empty\"}";
+    String PARAM_FAIL_CONFIG_VALUE_IS_EMPTY = "{\"code\":201108,\"message\":\"system config value cannot be empty\"}";
+    String PARAM_FAIL_NODE_ID_IS_EMPTY = "{\"code\":2011109,\"message\":\"node id cannot be empty\"}";
+    String PARAM_FAIL_NODE_TYPE_IS_EMPTY = "{\"code\":201110,\"message\":\"node type cannot be empty\"}";
 
     /* precompiled runtime check or error */
 
