@@ -89,7 +89,7 @@ public interface ConstantCode {
     /* precompiled runtime check or error */
 
     // param
-    RetCode PARAM_ERROR = RetCode.mark(201100,"params not fit");
+    RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
     RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
     // sys config
     RetCode SYSTEM_CONFIG_EXIST = RetCode.mark(201206, "create system config in db fail for already exist");
