@@ -28,7 +28,7 @@ public class FrontException extends RuntimeException {
     private RetCode retCode;
 
     public FrontException(RetCode retCode) {
-        super(retCode.getMsg());
+        super(retCode.getMessage());
         this.retCode = retCode;
     }
 
