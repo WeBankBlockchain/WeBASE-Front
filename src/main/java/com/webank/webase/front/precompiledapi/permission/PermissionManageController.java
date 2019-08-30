@@ -13,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,6 +52,42 @@ public class PermissionManageController extends BaseController {
                 return listSysConfigManager(groupId, pageSize, pageNumber);
             case "cns":
                 return listCNSManager(groupId, pageSize, pageNumber);
+            default:
+                return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
+        }
+    }
+
+    // 获取不分页的管理员list
+    @GetMapping("/permission/full")
+    public Object getFullListByType(
+            @RequestParam(defaultValue = "1") int groupId,
+            @RequestParam String permissionType,
+            @RequestParam(defaultValue = "", required = false) String tableName) throws Exception {
+
+        List<PermissionInfo> resList = new ArrayList<>();
+        switch (permissionType) {
+            case "permission":
+                resList = permissionManageService.listPermissionManager(groupId);
+                return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
+            case "deployAndCreate":
+                resList = permissionManageService.listDeployAndCreateManager(groupId);
+                return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
+            case "userTable":
+                if(tableName.isEmpty()){
+                    return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
+                }else {
+                    resList = permissionManageService.listUserTableManager(groupId, tableName);
+                    return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
+                }
+            case "node":
+                resList = permissionManageService.listNodeManager(groupId);
+                return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
+            case "sysConfig":
+                resList = permissionManageService.listSysConfigManager(groupId);
+                return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
+            case "cns":
+                resList = permissionManageService.listCNSManager(groupId);
+                return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
             default:
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
         }
