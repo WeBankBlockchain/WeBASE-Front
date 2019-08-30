@@ -100,10 +100,16 @@ public class PrecompiledSysConfigService {
     public List<SystemConfig> querySysConfigByGroupId(int groupId) throws Exception {
 
         List<SystemConfig> list = getConfigListFromDb(groupId);
+        // first time initialize db
         if(list.size() == 0) {
             initSysConfigDb(groupId);
             list = getConfigListFromDb(groupId);
         }
+        // if sync with chain, update list
+        if(syncSysConfigDb(groupId) > 0) {
+            list = getConfigListFromDb(groupId);
+        }
+
         return list;
     }
 
@@ -142,6 +148,35 @@ public class PrecompiledSysConfigService {
             systemConfigGas.setConfigValue(txGasLimitValue);
             newSystemConfig(systemConfigGas);// new
         }
+    }
+
+    // sync db's system config value with chain's config value
+    public int syncSysConfigDb(int groupId) throws Exception{
+        int syncNum = 0;
+        String txCountLimitValue = web3jMap.get(groupId).
+                getSystemConfigByKey(PrecompiledUtils.TxCountLimit).sendForReturnString();
+        String txGasLimitValue = web3jMap.get(groupId).
+                getSystemConfigByKey(PrecompiledUtils.TxGasLimit).sendForReturnString();
+
+        SystemConfig systemConfigCount = systemConfigRepository.findByGroupIdAndConfigKey(groupId, PrecompiledUtils.TxCountLimit);
+        SystemConfig systemConfigGas = systemConfigRepository.findByGroupIdAndConfigKey(groupId, PrecompiledUtils.TxGasLimit);
+
+        if(systemConfigCount.getConfigValue() != txCountLimitValue) {
+            // tx_count_limit synchronize from chain
+            systemConfigCount.setConfigValue(txCountLimitValue);
+            // 要有主键id才能保证update，否则会当作新的直接insert
+            systemConfigCount.setId(systemConfigCount.getId());
+            systemConfigRepository.save(systemConfigCount);
+            syncNum++;
+        }
+        if(systemConfigGas.getConfigValue() != txGasLimitValue) {
+            // tx_gas_limit synchronize from chain
+            systemConfigGas.setConfigValue(txGasLimitValue);
+            systemConfigGas.setId(systemConfigGas.getId());
+            systemConfigRepository.save(systemConfigGas);
+            syncNum++;
+        }
+        return syncNum;
     }
 
     /**

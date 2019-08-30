@@ -15,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 @Api(value = "/sys", tags = "precompiled manage interface")
@@ -35,7 +36,12 @@ public class PrecompiledSysConfigController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
 
-        List<SystemConfig> list = precompiledSysConfigService.querySysConfigByGroupId(groupId);
+        List<SystemConfig> list = new ArrayList<>();
+        try {
+            list = precompiledSysConfigService.querySysConfigByGroupId(groupId);
+        } catch (Exception e) { //get from db or sync db with chain fail
+            return ConstantCode.FAIL_QUERY_SYSTEM_CONFIG;
+        }
         List2Page<SystemConfig> list2Page = new List2Page<>(list, pageSize, pageNumber);
         List<SystemConfig> finalList = list2Page.getPagedList();
         Long totalCount = (long) finalList.size();
