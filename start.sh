@@ -72,7 +72,7 @@ start(){
                    kill -9 $subPid
                fi
            done
-           echo "[Failed]. Please view log file (path:./log/)."
+           echo "[Failed]. Please view log file (default path:./log/)."
            echo "==============================================================================================="
        fi
     fi
