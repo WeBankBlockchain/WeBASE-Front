@@ -691,7 +691,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.getContracts();
+                        // this.getContracts();
                     } else {
                         this.$message({
                             type: "error",
@@ -728,7 +728,7 @@ export default {
                         if (list.length === 0) {
                             setTimeout(() => {
                                 this.getContracts()
-                            }, 0);
+                            }, 10);
                         }
                     })
                 })
