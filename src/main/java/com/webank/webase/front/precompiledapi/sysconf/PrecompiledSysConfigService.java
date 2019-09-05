@@ -40,8 +40,6 @@ public class PrecompiledSysConfigService {
         return keyStoreService.getCredentials(fromAddress, false);
     }
     public Credentials getCredentialsForQuery() throws Exception {
-//        KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
-//        return Credentials.create(keyStoreInfo.getPrivateKey());
         PEMManager pemManager = new PEMManager();
         InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
         pemManager.load(pemStream);
@@ -71,10 +69,6 @@ public class PrecompiledSysConfigService {
 
         // @param result {"code":0,"msg":"success"}
         String result = systemConfigService.setValueByKey(key, value);
-//        Map<String, Object> resMapForCheck;
-//        ObjectMapper mapper = new ObjectMapper();
-//        resMapForCheck = mapper.readValue(result, Map.class);
-
         return result;
     }
 
