@@ -159,7 +159,7 @@ public class CommonUtils {
      * @return
      */
     public static List<String> readFileToList(String filePath) throws IOException {
-    	log.info("readFile dir:{}", filePath);
+    	log.debug("readFile dir:{}", filePath);
     	File dirFile = new File(filePath);
     	if (!dirFile.exists()) {
     		return null;

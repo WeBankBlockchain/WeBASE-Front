@@ -48,6 +48,8 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
+import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
+import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -318,12 +320,12 @@ public class TransService {
             address = cnsMap.get(contractName + ":" + version);
         }
 
+        ContractGasProvider contractGasProvider = new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
         if (address != null) {
-            commonContract = CommonContract.load(address, web3j, credentials, Constants.GAS_PRICE,
-                    Constants.GAS_LIMIT);
+            commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
         } else {
             commonContract = CommonContract.loadByName(contractName + Constants.SYMPOL + version,
-                    web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+                    web3j, credentials, contractGasProvider);
         }
         // request
         Function function = new Function(funcName, finalInputs, finalOutputs);

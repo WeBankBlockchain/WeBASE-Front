@@ -50,5 +50,6 @@ constant:
   keyServer: 127.0.0.1:5001
   transMaxWait: 30
   monitorDisk: /
+  monitorEnabled: true
   aesKey: EfdsW23D23d3df43
 

@@ -109,7 +109,8 @@ export default {
             constant: false,
             contractAddress: this.data.contractAddress || "",
             errorMessage: '',
-            placeholderText: this.$t('placeholder.selectedAccountAddress')
+            placeholderText: this.$t('placeholder.selectedAccountAddress'),
+            pramasObj: null
         };
     },
     mounted: function () {
@@ -171,6 +172,7 @@ export default {
                 this.abiList.forEach(value => {
                     if (value.type === val) {
                         this.pramasData = value.inputs;
+                        this.pramasObj = value
                     }
                 });
             } else {
@@ -199,6 +201,7 @@ export default {
                 if (value.funcId === this.transation.funcName) {
                     this.pramasData = value.inputs;
                     this.constant = value.constant;
+                    this.pramasObj = value
                 }
             });
             this.funcList.sort(function (a, b) {
@@ -241,7 +244,15 @@ export default {
                     const { data, status } = res
                     if (status === 200) {
                         let resData = data;
-                        this.$emit("success", resData);
+                        let successData = {
+                            resData: resData,
+                            input: {
+                                name: functionName,
+                                inputs: this.pramasData
+                            },
+                            data: this.pramasObj
+                        }
+                        this.$emit("success", successData);
                         if (this.constant) {
                             this.$message({
                                 type: "success",
