@@ -46,7 +46,7 @@ start(){
         echo "==============================================================================================="
         processStatus=0
     else
-        echo -n "Starting Server $APP_MAIN Port $SERVER_PORT ... "
+        echo -n "Starting Server $APP_MAIN Port $SERVER_PORT ..."
         nohup $JAVA_HOME/bin/java -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1 &
         
         count=1
@@ -58,6 +58,7 @@ start(){
                break
            fi
            let count++
+           echo -n "."
            sleep 1
        done
         
@@ -71,7 +72,7 @@ start(){
                    kill -9 $subPid
                fi
            done
-           echo "[Failed]"
+           echo "[Failed]. Please view log file (default path:./log/)."
            echo "==============================================================================================="
        fi
     fi

@@ -13,7 +13,9 @@
  */
 package com.webank.webase.front.keystore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -57,6 +59,7 @@ public class KeyStoreService {
     @Autowired
     KeystoreRepository keystoreRepository;
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
+    private static Map<String, String> PRIVATE_KEY_MAP = new HashMap<>();
 
 
     /**
@@ -190,6 +193,11 @@ public class KeyStoreService {
             return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
         }
 
+        String key_of_user = user + "_" + useAes;
+        if (PRIVATE_KEY_MAP.containsKey(key_of_user)) {
+            return PRIVATE_KEY_MAP.get(key_of_user);
+        }
+
         //get privateKey by userId
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         String[] ipPortArr = constants.getKeyServer().split(",");
@@ -209,11 +217,19 @@ public class KeyStoreService {
                 continue;
             }
         }
+
+        String private_key;
         if (useAes) {
-            return aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+            private_key = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+        } else {
+            private_key = keyStoreInfo.getPrivateKey();
         }
 
-        return keyStoreInfo.getPrivateKey();
+        if (StringUtils.isNotBlank(private_key)) {
+            PRIVATE_KEY_MAP.put(key_of_user, private_key);
+        }
+
+        return private_key;
     }
 
     /**
