@@ -15,6 +15,7 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.junit.Test;
 
@@ -95,7 +96,8 @@ public class ContractAbiUtilTest extends TestBase {
         Function function = new Function(funcName, finalInputs, finalOutputs);
 
         Ok okDemo = Ok.deploy(web3j, credentials, gasPrice, gasLimit).send();
-        CommonContract commonContract = CommonContract.load(okDemo.getContractAddress(), web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        ContractGasProvider contractGasProvider = new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        CommonContract commonContract = CommonContract.load(okDemo.getContractAddress(), web3j, credentials, contractGasProvider);
 
         TransactionReceipt t  = TransService.execTransaction(function, commonContract);
         System.out.println("***********************");
@@ -133,7 +135,8 @@ public class ContractAbiUtilTest extends TestBase {
         Function function = new Function(funcName, finalInputs, finalOutputs);
 
         HelloWorld okDemo = HelloWorld.deploy(web3j, credentials, gasPrice, gasLimit).send();
-        CommonContract commonContract = CommonContract.load(okDemo.getContractAddress(), web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        ContractGasProvider contractGasProvider = new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        CommonContract commonContract = CommonContract.load(okDemo.getContractAddress(), web3j, credentials, contractGasProvider);
 
         TransactionReceipt t  = TransService.execTransaction(function, commonContract);
         System.out.println(t);

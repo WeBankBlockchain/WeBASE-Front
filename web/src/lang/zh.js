@@ -226,5 +226,7 @@ export default {
         nameNoSame: '用户名不能相同',
         uploadSol: '请上传.sol格式的文件',
         fileExceeds: '文件大小超过400k，请上传小于400k的文件',
+        txnDecodeBtn: '解码',
+        txnEncodeBtn: '还原',
     }
 }

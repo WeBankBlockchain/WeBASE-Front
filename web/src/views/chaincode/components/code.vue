@@ -18,7 +18,7 @@
     <div class="contract-code" :class="{changeActive:changeWidth }" v-loading="loading">
         <div class="contract-code-head">
             <span class="contract-code-title" v-show="codeShow" :class="{titleActive:changeWidth }">
-                <span>{{contractName + '.sol'}}</span>
+                <span ref="setReadOnly">{{contractName + '.sol'}}</span>
             </span>
             <span class="contract-code-handle" v-show="codeShow">
                 <span class="contract-code-done" @click="saveCode">
@@ -138,7 +138,7 @@
         <el-dialog :title="$t('title.selectAccountAddress')" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
             <v-user @change="deployContract($event)" @close="userClose" :abi='abiFile'></v-user>
         </el-dialog>
-        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' ref="editor"></v-editor>
+        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' ref="editor" :input='editorInput' :editorOutput="editorOutput"></v-editor>
         <el-dialog :title="$t('title.writeJavaName')" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
             <el-input v-model="javaClassName" :placeholder="$t('placeholder.javaPackage')"></el-input>
             <!-- <i style="color: #606266"></i> -->
@@ -166,7 +166,8 @@ import Bus from "@/bus";
 import {
     getDeployStatus,
     ifChangedDepaloy,
-    queryJavaClass
+    queryJavaClass,
+    addFunctionAbi
 } from "@/util/api";
 import transaction from "../dialog/sendTransaction";
 import changeUser from "../dialog/changeUser";
@@ -213,6 +214,8 @@ export default {
             saveShow: false,
             editorShow: false,
             editorData: null,
+            editorInput: null,
+            editorOutput: null,
             showAbi: true,
             showBin: true,
             complieAbiTextHeight: false,
@@ -324,6 +327,13 @@ export default {
 
                 })
             }
+            this.$nextTick(() => {
+                if (this.contractName === 'Asset'&&data.contractPath==="template" || this.contractName === 'Evidence'&&data.contractPath==="template" || this.contractName === 'EvidenceFactory'&&data.contractPath==="template") {
+                    this.aceEditor.setReadOnly(true);
+                } else {
+                    this.aceEditor.setReadOnly(false);
+                }
+            })
         });
         Bus.$on("noData", data => {
             this.codeShow = false;
@@ -395,6 +405,7 @@ export default {
             });
             let editor = this.aceEditor.alignCursors();
             this.aceEditor.getSession().setUseWrapMode(true);
+
             this.aceEditor.getSession().on("change", this.changeAce);
             this.aceEditor.setHighlightActiveLine(true)
             this.aceEditor.on("blur", this.blurAce);
@@ -404,8 +415,8 @@ export default {
             let data = Base64.encode(this.content);
         },
         saveCode: function () {
-                this.data.contractSource = Base64.encode(this.content);
-                Bus.$emit("save", this.data);
+            this.data.contractSource = Base64.encode(this.content);
+            Bus.$emit("save", this.data);
         },
         resizeCode: function () {
             this.aceEditor.setOptions({
@@ -435,7 +446,9 @@ export default {
             this.dialogVisible = false;
             this.editorShow = true;
             this.editorData = null;
-            this.editorData = val;
+            this.editorData = val.resData;
+            this.editorInput = val.input;
+            this.editorOutput = val.data.outputs;
         },
         editorClose: function () {
             this.editorShow = false;
@@ -688,7 +701,7 @@ export default {
                     }
                 });
                 if (arry.length) {
-                    //    this.addAbiMethod(arry)
+                    this.addAbiMethod(arry)
                 }
             }
         },
@@ -917,7 +930,7 @@ export default {
                     this.$message({
                         type: "success",
                         showClose: true,
-                        message:this.$t('notice.copySuccessfully'),
+                        message: this.$t('notice.copySuccessfully'),
                         duration: 2000
                     });
                 });
