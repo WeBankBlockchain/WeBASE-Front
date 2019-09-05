@@ -2,8 +2,6 @@ package com.webank.webase.front.precompiledapi.sysconf;
 
 import com.webank.webase.front.base.BasePageResponse;
 import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.precompiledapi.sysconf.entity.SystemConfig;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
 import io.swagger.annotations.Api;
@@ -36,14 +34,14 @@ public class PrecompiledSysConfigController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
 
-        List<SystemConfig> list = new ArrayList<>();
+        List<SystemConfigHandle> list = new ArrayList<>();
         try {
             list = precompiledSysConfigService.querySysConfigByGroupId(groupId);
-        } catch (Exception e) { //get from db or sync db with chain fail
+        } catch (Exception e) { //get sys config fail
             return ConstantCode.FAIL_QUERY_SYSTEM_CONFIG;
         }
-        List2Page<SystemConfig> list2Page = new List2Page<>(list, pageSize, pageNumber);
-        List<SystemConfig> finalList = list2Page.getPagedList();
+        List2Page<SystemConfigHandle> list2Page = new List2Page<>(list, pageSize, pageNumber);
+        List<SystemConfigHandle> finalList = list2Page.getPagedList();
         Long totalCount = (long) finalList.size();
         return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
     }
@@ -51,13 +49,13 @@ public class PrecompiledSysConfigController {
     @ApiOperation(value = "setSysConfigValueByKey", notes = "set system config value by key")
     @ApiImplicitParam(name = "sysConfigHandle", value = "system config info", required = true, dataType = "SysConfigHandle")
     @PostMapping("config")
-    public Object setSysConfigValueByKey(@Valid @RequestBody SystemConfig systemConfig, BindingResult bindingResult)throws Exception {
-        String key = systemConfig.getConfigKey();
+    public Object setSysConfigValueByKey(@Valid @RequestBody SystemConfigHandle systemConfigHandle, BindingResult bindingResult)throws Exception {
+        String key = systemConfigHandle.getConfigKey();
         // tx_count_limit, tx_gas_limit
         if (PrecompiledUtils.TxCountLimit.equals(key) || PrecompiledUtils.TxGasLimit.equals(key)) {
             // post返回透传
             try {
-                return precompiledSysConfigService.setSysConfigValueByKey(systemConfig);
+                return precompiledSysConfigService.setSysConfigValueByKey(systemConfigHandle);
             } catch (Exception e) { //parse error
                 return ConstantCode.FAIL_SET_SYSTEM_CONFIG;
             }
