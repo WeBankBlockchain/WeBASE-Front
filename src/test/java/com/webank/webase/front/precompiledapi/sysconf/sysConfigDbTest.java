@@ -42,4 +42,13 @@ public class sysConfigDbTest extends TestBase {
         String queryByGroupId = "select * from sysconfig";
         return "";
     }
+
+    @Test
+    public void testResponse() throws Exception {
+//        String res = web3j.getSystemConfigByKey("tx_count_limit").send();
+        System.out.println("response" + web3j.getSystemConfigByKey("tx_count_limit").send());
+        System.out.println(web3j.getSystemConfigByKey("tx_count_limit").send().getSystemConfigByKey());
+//        System.out.println(web3j.getSystemConfigByKey("tx_count_limit"));
+
+    }
 }
