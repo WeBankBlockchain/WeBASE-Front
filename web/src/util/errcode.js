@@ -229,6 +229,55 @@ let errCode = {
         en: "crud sql fail",
         zh: '增删改查失败'
     },
+    "201100": {
+        en: "Params not fit",
+        zh: '参数不合适'
+    },
+    "201102": {
+        en: "TableName cannot be empty",
+        zh: '表名不能为空'
+    },
+
+    "201112": {
+        en: "sql syntax error",
+        zh: 'sql语法错误'
+    },
+    "201213": {
+        en: "address is invalid",
+        zh: '地址无效'
+    },
+    "201201": {
+        en: "create system config in db fail for already exist",
+        zh: 'db中的create system config已经存在'
+    },
+    "201202": {
+        en: "system config key is invalid",
+        zh: '系统配置密钥无效'
+    },
+    "201203": {
+        en: "node id is invalid",
+        zh: '节点ID无效'
+    },
+    "201204": {
+        en: "invalid node type: sealer, observer, remove",
+        zh: '无效的节点类型：sealer，observer，remove'
+    },
+    "201205": {
+        en: "permission denied or params error, set system config value fail",
+        zh: '权限被拒绝或params错误，设置系统配置值失败'
+    },
+    "201206": {
+        en: "unsupport for this system config key",
+        zh: '不支持此系统配置密钥'
+    },
+    "201207": {
+        en: "query system config value list fail",
+        zh: '查询系统配置值列表失败'
+    },
+    "201208": {
+        en: "crud sql fail",
+        zh: '增删改查失败'
+    },
     "202000": {
         en: "invalid node info",
         zh: '无效的节点信息'
