@@ -39,8 +39,6 @@ public class PrecompiledService{
         return keyStoreService.getCredentials(fromAddress, false);
     }
     public Credentials getCredentialsForQuery() throws Exception {
-//        KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
-//        return Credentials.create(keyStoreInfo.getPrivateKey());
         PEMManager pemManager = new PEMManager();
         InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
         pemManager.load(pemStream);
