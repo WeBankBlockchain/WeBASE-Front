@@ -40,8 +40,6 @@ public class PermissionManageService {
         pemManager.load(pemStream);
         Credentials credentialsPEM = GenCredential.create(pemManager.getECKeyPair().getPrivateKey().toString(16));
         return credentialsPEM;
-//        KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
-//        return Credentials.create(keyStoreInfo.getPrivateKey());
     }
 
     /**
