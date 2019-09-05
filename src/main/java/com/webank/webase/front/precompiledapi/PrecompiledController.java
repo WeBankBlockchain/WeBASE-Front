@@ -131,20 +131,29 @@ public class PrecompiledController {
 
     public Object addSealer(int groupId, String fromAddress, String nodeId) throws Exception {
         log.info("addSealer start. nodeId:: ", nodeId);
-
-        return precompiledService.addSealer(groupId, fromAddress, nodeId);
+        try{
+            return precompiledService.addSealer(groupId, fromAddress, nodeId);
+        } catch (Exception e) {
+            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE);
+        }
     }
 
     public Object addObserver(int groupId, String fromAddress, String nodeId) throws Exception {
         log.info("addObserver start. nodeId:: ", nodeId);
-
-        return precompiledService.addObserver(groupId, fromAddress, nodeId);
+        try{
+            return precompiledService.addObserver(groupId, fromAddress, nodeId);
+        } catch (Exception e) {
+            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE);
+        }
     }
 
     public Object removeNode(int groupId, String fromAddress, String nodeId) throws Exception {
         log.info("removeNode start. nodeId:: ", nodeId);
-
-        return precompiledService.removeNode(groupId, fromAddress, nodeId);
+        try{
+            return precompiledService.removeNode(groupId, fromAddress, nodeId);
+        } catch (Exception e) {
+            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE);
+        }
     }
 
     /**
