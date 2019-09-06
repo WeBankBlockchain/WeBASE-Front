@@ -53,7 +53,7 @@
                         <i class="wbs-icon-folder cursor-pointer no-chase" @click='open(item)' @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
                         <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
-                            <ul >
+                            <ul>
                                 <li class="contract-menu-handle-list" @click="addFiles">{{$t('dialog.newFile')}}</li>
                                 <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
                             </ul>
@@ -99,7 +99,7 @@ export default {
         "add-file": addFile,
         "select-catalog": selectCatalog
     },
-    data: function () {
+    data() {
         return {
             foldershow: false,
             fileshow: false,
@@ -124,14 +124,14 @@ export default {
             uploadFiles: []
         };
     },
-    beforeDestroy: function () {
+    beforeDestroy() {
         Bus.$off("compile");
         Bus.$off("deploy");
         Bus.$off("open");
         Bus.$off("save");
         Bus.$off("modifyState");
     },
-    mounted: function () {
+    mounted() {
         this.$nextTick(function () {
             this.getContracts();
         });
@@ -169,7 +169,7 @@ export default {
     directives: {
         Clickoutside,
         focus: {
-            update: function (el, { value }) {
+            update(el, { value }) {
                 if (value) {
                     el.focus();
                 }
@@ -177,7 +177,7 @@ export default {
         }
     },
     methods: {
-        checkNull: function (list) {
+        checkNull(list) {
             this.contractArry.forEach(value => {
                 value.handleModel = false;
                 if (value.contractType == 'folder') {
@@ -191,7 +191,7 @@ export default {
             this.contractFolder = false;
             this.handleModel = false;
         },
-        handle: function (e, list) {
+        handle(e, list) {
             this.checkNull()
             list.handleModel = true
             if (e.clientX > 201) {
@@ -230,7 +230,7 @@ export default {
                 this.handleModel = false;
             }
         },
-        rename: function (val) {
+        rename(val) {
             this.contractArry.forEach(value => {
                 value.handleModel = false;
                 if (value.contractType == 'folder') {
@@ -271,7 +271,7 @@ export default {
             this.contractFolder = false;
             this.handleModel = false;
         },
-        changeName: function (val) {
+        changeName(val) {
             let pattern = /^[A-Za-z0-9_]+$/;
             if (pattern.test(this.contractName) && this.contractName.length < 32 && this.contractName.length > 1) {
                 if (this.contractName !== val.contractName) {
@@ -303,15 +303,15 @@ export default {
                 this.$set(val, "renameShow", false);
             }
         },
-        addFolder: function () {
+        addFolder() {
             this.checkNull();
             this.foldershow = true;
         },
-        addFile: function () {
+        addFile() {
             this.checkNull();
             this.fileshow = true;
         },
-        addFiles: function () {
+        addFiles() {
             this.fileshow = true;
             this.folderId = this.ID;
             this.ID = "";
@@ -319,7 +319,7 @@ export default {
             this.contractFolder = false;
             this.handleModel = false;
         },
-        upload: function (e) {
+        upload(e) {
             this.checkNull();
             if (!e.target.files.length) {
                 return;
@@ -348,7 +348,7 @@ export default {
                 }
             }
         },
-        catalogSuccess: function (val) {
+        catalogSuccess(val) {
             for (let i = 0; i < this.uploadFiles.length; i++) {
                 let reader = new FileReader(); //新建一个FileReader
                 reader.readAsText(this.uploadFiles[i], "UTF-8"); //读取文件
@@ -356,7 +356,7 @@ export default {
                 filename = this.uploadFiles[i].name.split(".")[0];
                 let num = 0;
                 this.contractList.forEach(value => {
-                    if (value.contractName == filename && value.contractPath == val&& num===0) {
+                    if (value.contractName == filename && value.contractPath == val && num === 0) {
                         console.log(num)
                         this.$message({
                             type: "error",
@@ -389,22 +389,22 @@ export default {
             this.$refs.file.value = "";
             this.catalogClose();
         },
-        catalogClose: function () {
+        catalogClose() {
             this.cataLogShow = false;
         },
-        folderClose: function () {
+        folderClose() {
             this.foldershow = false;
         },
-        folderSuccess: function () {
+        folderSuccess() {
             this.folderClose();
             this.getContractArry();
         },
-        fileClose: function () {
+        fileClose() {
             this.fileshow = false;
             this.folderId = "";
             this.ID = "";
         },
-        getContractArry: function (val) {
+        getContractArry(val) {
             let result = [];
             let list = [];
             let folderArry = this.createFolder();
@@ -435,7 +435,7 @@ export default {
                 Bus.$emit("noData", true);
             }
         },
-        saveContract: function (param, title, callback) {
+        saveContract(param, title, callback) {
             let reqData = {
                 groupId: localStorage.getItem("groupId"),
                 contractName: param.contractName,
@@ -474,7 +474,7 @@ export default {
                     });
                 });
         },
-        getContracts: function (list) {
+        getContracts(list) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
                 pageNumber: 0,
@@ -571,7 +571,7 @@ export default {
                     });
                 });
         },
-        fileSucccess: function (val) {
+        fileSucccess(val) {
             let num = 0;
             this.contractList.forEach(value => {
                 if (value.contractName == val.contractName && value.contractPath == val.contractPath) {
@@ -587,7 +587,7 @@ export default {
             }
             this.fileClose();
         },
-        createFolder: function () {
+        createFolder() {
             let result = [];
             if (localStorage.getItem("folderList")) {
                 this.folderList = JSON.parse(
@@ -596,10 +596,10 @@ export default {
             } else {
                 this.folderList = [];
             }
-            this.folderList.forEach((value) => {
+            this.folderList.forEach((value, index) => {
                 let num = 0;
                 if (!value.groupId || (value.groupId && localStorage.getItem("groupId") && value.groupId == localStorage.getItem("groupId"))) {
-                    let data = {
+                    var data = {
                         contractName: value.folderName,
                         folderId: value.folderId,
                         contractActive: false,
@@ -609,6 +609,18 @@ export default {
                         renameShow: false,
                         inputShow: false
                     };
+                    if (index != 0) {
+                        data = {
+                            contractName: value.folderName,
+                            folderId: value.folderId,
+                            contractActive: false,
+                            contractType: "folder",
+                            folderIcon: "el-icon-caret-right",
+                            folderActive: false,
+                            renameShow: false,
+                            inputShow: false
+                        }
+                    }
                     this.contractArry.forEach((item, index) => {
                         if (item.contractType == "folder" && item.folderId == value.folderId) {
                             data.folderIcon = item.folderIcon;
@@ -620,7 +632,7 @@ export default {
             });
             return result;
         },
-        open: function (val) {
+        open(val) {
             this.contractArry.forEach(value => {
                 this.$set(value, "contractActive", false);
                 if (value.contractType == "folder") {
@@ -638,7 +650,7 @@ export default {
             }
             this.$set(val, "contractActive", true);
         },
-        sureSelect: function (val) {
+        sureSelect(val) {
             let num = 0;
             this.contractArry.forEach(value => {
                 if (value.id == val.id) {
@@ -659,7 +671,7 @@ export default {
             this.modifyState = false;
             Bus.$emit("select", val);
         },
-        select: function (val) {
+        select(val) {
             if (this.modifyState) {
                 this.$confirm(`${this.$t('text.unsavedContract')}？`, {
                     center: true,
@@ -675,14 +687,14 @@ export default {
                 this.sureSelect(val)
             }
         },
-        deleteFile: function (val) {
+        deleteFile(val) {
             this.$confirm(`${this.$t('dialog.sureDelete')}？`)
                 .then(_ => {
                     this.deleteData(val);
                 })
                 .catch(_ => { });
         },
-        deleteData: function (val) {
+        deleteData(val) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
                 contractId: val.id
@@ -707,7 +719,7 @@ export default {
                     });
                 });
         },
-        deleteFolder: function (val) {
+        deleteFolder(val) {
             this.$confirm(`${this.$t('dialog.sureDelete')}？`)
                 .then(_ => {
                     let list = val.child;
