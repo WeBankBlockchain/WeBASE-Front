@@ -32,4 +32,5 @@ gradle.properties
 /out
 /log
 /dist
+/bin
 
