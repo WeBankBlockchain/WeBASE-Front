@@ -181,6 +181,11 @@ public class Web3ApiController {
     public  List<String> getGroupList() throws IOException {
         return web3ApiService.getGroupList();
     }
+    
+    @GetMapping("/nodeIdList")
+    public  List<String> getNodeIDList() throws IOException {
+        return web3ApiService.getNodeIDList();
+    }
 
     @GetMapping("/peers")
     public  List<Peers.Peer> getPeers(@PathVariable int groupId)   {
