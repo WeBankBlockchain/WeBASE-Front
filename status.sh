@@ -13,7 +13,7 @@ fi
 processPid=0
 checkProcess(){
     server_pid=`ps aux | grep java | grep $APP_MAIN | awk '{print $2}'`
-    port_pid=`netstat -anp|grep $SERVER_PORT|awk '{printf $7}'|cut -d/ -f1`
+    port_pid=`netstat -anp 2>&1|grep $SERVER_PORT|awk '{printf $7}'|cut -d/ -f1`
     if [ -n "$port_pid" ]; then
         if [[ $server_pid =~ $port_pid ]]; then
             processPid=$port_pid
