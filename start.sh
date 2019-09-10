@@ -67,7 +67,7 @@ start(){
            echo "==============================================================================================="
        else
            for subPid in ${server_pid[@]} ; do
-               checkResult=`netstat -tunpl |grep $subPid|awk '{printf $7}'|cut -d/ -f1`
+               checkResult=`netstat -tunpl 2>&1|grep $subPid|awk '{printf $7}'|cut -d/ -f1`
                if [ -z "$checkResult" ]; then
                    kill -9 $subPid
                fi
