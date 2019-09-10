@@ -24,13 +24,13 @@ public interface ConstantCode {
 
     /* paramaters check */
     RetCode PARAM_FAIL_GROUP_ID_IS_EMPTY =  RetCode.mark(201001, "groupId cannot be empty");
-    String PARAM_FAIL_USER_IS_EMPTY = "{\"code\":201002,\"msg\":\"user cannot be empty\"}";
+    String PARAM_FAIL_USER_IS_EMPTY = "{\"code\":201002,\"message\":\"user cannot be empty\"}";
     String PARAM_FAIL_USEAES_IS_EMPTY =
-        "{\"code\":201003,\"msg\":\"useAes cannot be empty\"}";
-    String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"msg\":\"version cannot be empty\"}";
-    String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"msg\":\"funcName cannot be empty\"}";
-    String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"msg\":\"abiInfo cannot be empty\"}";
-    String PARAM_FAIL_CONTRACTBIN_IS_EMPTY = "{\"code\":201007,\"msg\":\"contractBin cannot be empty\"}";
+        "{\"code\":201003,\"message\":\"useAes cannot be empty\"}";
+    String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"message\":\"version cannot be empty\"}";
+    String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"message\":\"funcName cannot be empty\"}";
+    String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"message\":\"abiInfo cannot be empty\"}";
+    String PARAM_FAIL_CONTRACTBIN_IS_EMPTY = "{\"code\":201007,\"message\":\"contractBin cannot be empty\"}";
 
     /* general error */
     RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");
@@ -69,4 +69,50 @@ public interface ConstantCode {
     /* system error */
     RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
     RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
+
+    /* precompiled success */
+    RetCode RET_SUCCESS = RetCode.mark(0, "success");
+    RetCode RET_SUCCESS_EMPTY_LIST = RetCode.mark(0,"Empty Set ");
+
+    /* precompiled check */
+    String PARAM_FAIL_GROUPID_IS_EMPTY = "{\"code\":201101,\"message\":\"groupId cannot be empty\"}";
+    RetCode PARAM_FAIL_TABLE_NAME_IS_EMPTY = RetCode.mark(201102, "tableName cannot be empty");
+    String PARAM_FAIL_PERMISSION_TYPE_IS_EMPTY = "{\"code\":201103,\"message\":\"permissionType cannot be empty\"}";
+    RetCode PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST =  RetCode.mark(201104, "permissionType not exists");
+    String PARAM_FAIL_FROM_IS_EMPTY = "{\"code\":201105,\"message\":\"from address cannot be empty\"}";
+    String PARAM_FAIL_CONTRACT_NAME_IS_EMPTY = "{\"code\":201106,\"message\":\"contract name cannot be empty\"}";
+    String PARAM_FAIL_CONFIG_KEY_IS_EMPTY = "{\"code\":201107,\"message\":\"system config key cannot be empty\"}";
+    String PARAM_FAIL_CONFIG_VALUE_IS_EMPTY = "{\"code\":201108,\"message\":\"system config value cannot be empty\"}";
+    String PARAM_FAIL_NODE_ID_IS_EMPTY = "{\"code\":2011109,\"message\":\"node id cannot be empty\"}";
+    String PARAM_FAIL_NODE_TYPE_IS_EMPTY = "{\"code\":201110,\"message\":\"node type cannot be empty\"}";
+
+    /* precompiled runtime check or error */
+
+    // param
+    RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
+    RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
+    // sys config
+    RetCode SYSTEM_CONFIG_EXIST = RetCode.mark(201206, "create system config in db fail for already exist");
+    RetCode INVALID_SYSTEM_CONFIG_KEY = RetCode.mark(201207, "system config key is invalid");
+    RetCode UNSUPPORTED_SYSTEM_CONFIG_KEY = RetCode.mark(201208, "unsupported for this system config key");
+    RetCode FAIL_SET_SYSTEM_CONFIG_TOO_SMALL =  RetCode.mark(201209,
+            "provide value by positive integer mode, from 100000 to 2147483647");
+    RetCode FAIL_SET_SYSTEM_CONFIG = RetCode.mark(201210, "set system config value fail for params error or permission denied ");
+    RetCode FAIL_QUERY_SYSTEM_CONFIG = RetCode.mark(201211, "query system config value list fail");
+    // consensus (node manager)
+    RetCode INVALID_NODE_ID = RetCode.mark(201216,"node id is invalid");
+    RetCode INVALID_NODE_TYPE = RetCode.mark(201217,"invalid node type: sealer, observer, remove ");
+    RetCode FAIL_CHANGE_NODE_TYPE = RetCode.mark(201218,"set node consensus type fail, check permission or node's group config file");
+    // cns
+    RetCode INVALID_VERSION = RetCode.mark(201221,"Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ");
+    RetCode INVALID_VERSION_EXCEED_LENGTH = RetCode.mark(201222,"version of contract is out of length");
+
+    // crud
+    public static int CODE_CRUD_SQL_ERROR = -51503;
+    RetCode PARAM_FAIL_SQL_ERROR = RetCode.mark(201226, "sql syntax error");
+    RetCode SQL_ERROR = RetCode.mark(201227, "crud sql fail");
+    RetCode FAIL_TABLE_NOT_EXISTS = RetCode.mark(201228, "table not exists");
+    String CRUD_EMPTY_SET = "Empty Set.";
+
+
 }
