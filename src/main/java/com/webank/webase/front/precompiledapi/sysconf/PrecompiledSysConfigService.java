@@ -1,0 +1,114 @@
+package com.webank.webase.front.precompiledapi.sysconf;
+
+import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.util.PrecompiledUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.channel.client.PEMManager;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.web3j.precompile.config.SystemConfigService;
+import org.fisco.bcos.web3j.protocol.Web3j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+@Slf4j
+@Service
+public class PrecompiledSysConfigService {
+
+    @Autowired
+    Map<Integer, Web3j> web3jMap;
+    @Autowired
+    private KeyStoreService keyStoreService;
+
+    // 根据前台传的user address获取私钥
+    public Credentials getCredentials(String fromAddress) throws Exception {
+        return keyStoreService.getCredentials(fromAddress, false);
+    }
+    public Credentials getCredentialsForQuery() throws Exception {
+        PEMManager pemManager = new PEMManager();
+        InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
+        pemManager.load(pemStream);
+        return GenCredential.create(pemManager.getECKeyPair().getPrivateKey().toString(16));
+    }
+
+    /**
+     * System config related
+     * 启动项目时，检查是否已有table，
+     * 否则Create table sysconfig(groupId, from key, value)
+     */
+    public Object setSysConfigValueByKey(SystemConfigHandle systemConfigHandle) throws Exception {
+        int groupId = systemConfigHandle.getGroupId();
+        String fromAddress = systemConfigHandle.getFromAddress();
+        String key = systemConfigHandle.getConfigKey();
+        String value = systemConfigHandle.getConfigValue();
+
+
+        // check system value
+        if(PrecompiledUtils.TxGasLimit.equals(key)) {
+            if (Integer.valueOf(value) < PrecompiledUtils.TxGasLimitMin) {
+                return ConstantCode.FAIL_SET_SYSTEM_CONFIG_TOO_SMALL;
+            }
+        }
+        SystemConfigService systemConfigService = new SystemConfigService(
+                web3jMap.get(groupId), getCredentials(fromAddress));
+
+        // @param result {"code":0,"msg":"success"}
+        String result = systemConfigService.setValueByKey(key, value);
+        return result;
+    }
+
+    public List<SystemConfigHandle> querySysConfigByGroupId(int groupId) throws Exception {
+
+        List<SystemConfigHandle> list = getConfigList(groupId);
+
+        return list;
+    }
+
+
+    private List<SystemConfigHandle> getConfigList(int groupId) throws IOException {
+        List<SystemConfigHandle> list = new ArrayList<>();
+
+        String txCountLimit = web3jMap.get(groupId)
+                .getSystemConfigByKey(PrecompiledUtils.TxCountLimit).sendForReturnString();
+        SystemConfigHandle systemConfigCount = new SystemConfigHandle();
+        systemConfigCount.setConfigKey(PrecompiledUtils.TxCountLimit);
+        systemConfigCount.setConfigValue(txCountLimit);
+        systemConfigCount.setGroupId(groupId);
+
+        String txGasLimit = web3jMap.get(groupId)
+                .getSystemConfigByKey(PrecompiledUtils.TxGasLimit).sendForReturnString();
+        SystemConfigHandle systemConfigGas = new SystemConfigHandle();
+        systemConfigGas.setConfigKey(PrecompiledUtils.TxGasLimit);
+        systemConfigGas.setConfigValue(txGasLimit);
+        systemConfigGas.setGroupId(groupId);
+
+        list.add(systemConfigCount);
+        list.add(systemConfigGas);
+        return list;
+    }
+
+    public String getSysConfigByKey(int groupId, String key) throws Exception {
+        // 校验
+        String result = web3jMap.get(groupId).getSystemConfigByKey(key).sendForReturnString();
+        return result;
+
+    }
+
+
+
+}

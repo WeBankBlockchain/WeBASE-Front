@@ -1,22 +1,36 @@
-#!/bin/sh
+#!/bin/bash
 
 APP_MAIN=com.webank.webase.front.Application
-tradePortalPID=0
-getTradeProtalPID(){
-    javaps=`$JAVA_HOME/bin/jps -l | grep $APP_MAIN`
-    if [ -n "$javaps" ]; then
-        tradePortalPID=`echo $javaps | awk '{print $1}'`
+CURRENT_DIR=`pwd`
+CONF_DIR=${CURRENT_DIR}/conf
+
+SERVER_PORT=$(cat $CONF_DIR/application.yml| grep "port" | awk '{print $2}'| sed 's/\r//')
+if [ ${SERVER_PORT}"" = "" ];then
+    echo "$CONF_DIR/application.yml server port has not been configured"
+    exit -1
+fi
+
+processPid=0
+checkProcess(){
+    server_pid=`ps aux | grep java | grep $APP_MAIN | awk '{print $2}'`
+    port_pid=`netstat -anp 2>&1|grep $SERVER_PORT|awk '{printf $7}'|cut -d/ -f1`
+    if [ -n "$port_pid" ]; then
+        if [[ $server_pid =~ $port_pid ]]; then
+            processPid=$port_pid
+        else
+            processPid=0
+        fi
     else
-        tradePortalPID=0
+        processPid=0
     fi
 }
 
-stopFront(){
-	getTradeProtalPID
+stop(){
+	checkProcess
 	echo "==============================================================================================="
-	if [ $tradePortalPID -ne 0 ]; then
-	    echo -n "Stopping $APP_MAIN (PID=$tradePortalPID)..."
-	    kill -9 $tradePortalPID
+	if [ $processPid -ne 0 ]; then
+	    echo -n "Stopping Server $APP_MAIN Port $SERVER_PORT PID($processPid)..."
+	    kill -9 $processPid
 	    if [ $? -eq 0 ]; then
 	        echo "[Success]"
 	        echo "==============================================================================================="
@@ -24,17 +38,10 @@ stopFront(){
 	        echo "[Failed]"
 	        echo "==============================================================================================="
 	    fi
-	    getTradeProtalPID
-	    if [ $tradePortalPID -ne 0 ]; then
-	        stopFront
-	    fi
 	else
-	    echo "$APP_MAIN is not running"
+	    echo "Server $APP_MAIN Port $SERVER_PORT is not running"
 	    echo "==============================================================================================="
 	fi
 }
 
-# stop front
-stopFront
-# stop report
-#cd ./report && sh report_stop.sh
+stop
