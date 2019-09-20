@@ -1,8 +1,12 @@
 package com.webank.webase.front.precompiledapi.permission;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.webank.webase.front.base.*;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.AddressUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
+import com.webank.webase.front.util.pageutils.Map2PagedList;
+import com.webank.webase.front.util.pageutils.MapHandle;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -15,19 +19,33 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-@Api(value = "/", tags = "permission manage interface")
+@Api(value = "/permission", tags = "permission manage interface")
 @Slf4j
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/permission")
 
 public class PermissionManageController extends BaseController {
     @Autowired
     private PermissionManageService permissionManageService;
 
+    @GetMapping("/sorted")
+    public Object gerPermissionState(
+            @RequestParam(defaultValue = "1") int groupId,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
+        Map<String, PermissionState> resultMap = permissionManageService.getPermissionStateList(groupId);
+        // Map分页
+        Map2PagedList<MapHandle> list2Page = new Map2PagedList(resultMap, pageSize, pageNumber);
+        List<MapHandle> finalList = list2Page.getPagedList();
+        Long totalCount = (long) finalList.size();
+        return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+    }
+
     //分发Get请求
-    @GetMapping("/permission")
+    @GetMapping("")
     public Object permissionGetControl(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String permissionType,
@@ -58,7 +76,7 @@ public class PermissionManageController extends BaseController {
     }
 
     // 获取不分页的管理员list
-    @GetMapping("/permission/full")
+    @GetMapping("/full")
     public Object getFullListByType(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String permissionType,
@@ -93,10 +111,60 @@ public class PermissionManageController extends BaseController {
         }
     }
 
+    // 方案一 先get后发交易
+    // 批量修改address的权限，包含grant&revoke
+    @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
+    @ApiImplicitParam(name = "permissionHandle", value = "permission info", required = true, dataType = "PermissionHandle")
+    @PostMapping("/sorted")
+    public Object updateUserPermissionStateAfterCheck(@Valid @RequestBody PermissionHandle permissionHandle){
+        int groupId = permissionHandle.getGroupId();
+        String fromAddress = permissionHandle.getFromAddress();
+        String userAddress = permissionHandle.getAddress();
+        PermissionState permissionState = permissionHandle.getPermissionState();
+        try {
+            Object resultState = permissionManageService.updatePermissionStateAfterCheck(groupId, fromAddress, userAddress, permissionState);
+            return new BaseResponse(ConstantCode.RET_SUCCEED, resultState);
+        }catch (Exception e) {
+            if(e instanceof JsonParseException) {
+                return new BaseResponse(ConstantCode.SYSTEM_ERROR, "Parse json fail, please check permissionState's object structure");
+            }
+            if(e instanceof NullPointerException) {
+                return new BaseResponse(ConstantCode.PARAM_VAILD_FAIL, "all cns, node, sysConfig, deployAndCreate cannot be null");
+            }
+            if(e instanceof FrontException) {
+                return new BaseResponse(ConstantCode.PERMISSION_DENIED, e.getMessage());
+            }
+            return new BaseResponse(ConstantCode.SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
+    // 批量修改address的权限，包含grant&revoke
+    @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
+    @ApiImplicitParam(name = "permissionHandle", value = "permission info", required = true, dataType = "PermissionHandle")
+    @PostMapping("/sorted/2")
+    public Object updateUserPermissionState(@Valid @RequestBody PermissionHandle permissionHandle){
+        int groupId = permissionHandle.getGroupId();
+        String fromAddress = permissionHandle.getFromAddress();
+        String userAddress = permissionHandle.getAddress();
+        PermissionState permissionState = permissionHandle.getPermissionState();
+        try {
+            Object resultState = permissionManageService.updatePermissionState(groupId, fromAddress, userAddress, permissionState);
+            return new BaseResponse(ConstantCode.RET_SUCCEED, resultState);
+        }catch (Exception e) {
+            if(e instanceof JsonParseException) {
+                return new BaseResponse(ConstantCode.SYSTEM_ERROR, "Parse json fail, please check permissionState's object structure");
+            }
+            if(e instanceof NullPointerException) {
+                return new BaseResponse(ConstantCode.PARAM_VAILD_FAIL, "all cns, node, sysConfig, deployAndCreate cannot be null");
+            }
+            return new BaseResponse(ConstantCode.SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
     // 分发Post请求
     @ApiOperation(value = "grantPermissionManager", notes = "grant address PermissionManager")
     @ApiImplicitParam(name = "permissionHandle", value = "transaction info", required = true, dataType = "PermissionHandle")
-    @PostMapping("/permission")
+    @PostMapping("")
     public Object permissionPostControl(@Valid @RequestBody PermissionHandle permissionHandle, BindingResult result) throws Exception {
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
@@ -134,7 +202,7 @@ public class PermissionManageController extends BaseController {
     //分发del请求
     @ApiOperation(value = "revokePermissionManager", notes = "revoke address PermissionManager")
     @ApiImplicitParam(name = "permissionHandle", value = "transaction info", required = true, dataType = "PermissionHandle")
-    @DeleteMapping("/permission")
+    @DeleteMapping("")
     public Object permissionDeleteControl(@Valid @RequestBody PermissionHandle permissionHandle, BindingResult result) throws Exception {
 
         int groupId = permissionHandle.getGroupId();
@@ -241,7 +309,7 @@ public class PermissionManageController extends BaseController {
             try{
                 return permissionManageService.grantUserTableManager(groupId, from, tableName, address);
             } catch (Exception e) {
-                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, null);
+                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, e.getMessage());
             }
         }
     }
@@ -255,7 +323,7 @@ public class PermissionManageController extends BaseController {
             try {
                 return permissionManageService.revokeUserTableManager(groupId, from, tableName, address);
             } catch (Exception e) {
-                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, null);
+                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, e.getMessage());
             }
         }
     }
