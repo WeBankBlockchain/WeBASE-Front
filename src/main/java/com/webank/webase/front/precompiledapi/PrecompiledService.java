@@ -2,13 +2,13 @@ package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precompiledapi.precompiledHandle.NodeInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
-import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.consensus.ConsensusService;
 import org.fisco.bcos.web3j.precompile.crud.CRUDService;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
