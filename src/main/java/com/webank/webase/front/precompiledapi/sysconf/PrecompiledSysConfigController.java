@@ -1,6 +1,7 @@
 package com.webank.webase.front.precompiledapi.sysconf;
 
 import com.webank.webase.front.base.BasePageResponse;
+import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
@@ -26,7 +27,6 @@ public class PrecompiledSysConfigController {
 
     /**
      * System config manage
-     * 在service校验存到db
      */
     @GetMapping("config/list")
     public Object querySystemConfigByGroupId(
@@ -38,7 +38,7 @@ public class PrecompiledSysConfigController {
         try {
             list = precompiledSysConfigService.querySysConfigByGroupId(groupId);
         } catch (Exception e) { //get sys config fail
-            return ConstantCode.FAIL_QUERY_SYSTEM_CONFIG;
+            return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
         }
         List2Page<SystemConfigHandle> list2Page = new List2Page<>(list, pageSize, pageNumber);
         List<SystemConfigHandle> finalList = list2Page.getPagedList();
@@ -57,7 +57,7 @@ public class PrecompiledSysConfigController {
             try {
                 return precompiledSysConfigService.setSysConfigValueByKey(systemConfigHandle);
             } catch (Exception e) { //parse error
-                return ConstantCode.FAIL_SET_SYSTEM_CONFIG;
+                return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
             }
         }else {
             return ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY;

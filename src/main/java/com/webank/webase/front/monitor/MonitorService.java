@@ -26,7 +26,10 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PendingTxSize;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -36,6 +39,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledFuture;
 
 @Slf4j
 @Service
@@ -126,6 +130,7 @@ public class MonitorService {
         }
         return newMonitorList;
     }
+
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncMonitorInfo() throws ExecutionException, InterruptedException {
         log.debug("begin sync chain data");
