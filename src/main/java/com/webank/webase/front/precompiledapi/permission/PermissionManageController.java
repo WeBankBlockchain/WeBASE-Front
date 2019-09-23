@@ -36,7 +36,7 @@ public class PermissionManageController extends BaseController {
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
-        Map<String, PermissionState> resultMap = permissionManageService.getPermissionStateList(groupId);
+        Map<String, PermissionState> resultMap = permissionManageService.getAllPermissionStateList(groupId);
         // Map分页
         Map2PagedList<MapHandle> list2Page = new Map2PagedList(resultMap, pageSize, pageNumber);
         List<MapHandle> finalList = list2Page.getPagedList();
