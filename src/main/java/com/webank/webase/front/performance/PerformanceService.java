@@ -154,16 +154,18 @@ public class PerformanceService {
         return performanceDataList;
     }
 
-    public Boolean toggleSync() throws Exception {
-        if(constants.isMonitorEnabled() == true) {
-            constants.setMonitorEnabled(false);
-            log.debug("toggle sync performance status to OFF");
-            return false;
+    public boolean toggleSync(boolean toggle) throws Exception {
+        constants.setMonitorEnabled(toggle);
+        if(constants.isMonitorEnabled() == toggle) {
+            log.debug("toggle sync performance status to " + toggle);
+            return toggle;
         }else {
-            constants.setMonitorEnabled(true);
-            log.debug("toggle sync performance status to ON");
-            return true;
+            throw new FrontException("Fail to toggle sync performance status to "+ toggle);
         }
+    }
+
+    public boolean getToggleStatus() throws Exception {
+        return constants.isMonitorEnabled();
     }
     /**
      * syncPerformanceInfo.

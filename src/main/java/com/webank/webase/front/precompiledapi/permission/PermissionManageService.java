@@ -2,6 +2,7 @@ package com.webank.webase.front.precompiledapi.permission;
 
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.keystore.KeyStoreInfo;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +29,7 @@ public class PermissionManageService {
 
     // 根据前台传的user address获取私钥
     public Credentials getCredentials(String fromAddress) throws Exception {
-        PEMManager pemManager = new PEMManager();
-        InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
-        pemManager.load(pemStream);
-        Credentials credentialsPEM = GenCredential.create(pemManager.getECKeyPair().getPrivateKey().toString(16));
-        return credentialsPEM;
-//        return keyStoreService.getCredentials(fromAddress, false);
+        return keyStoreService.getCredentials(fromAddress, false);
     }
     public Credentials getCredentialsForQuery() throws Exception {
         PEMManager pemManager = new PEMManager();
@@ -48,6 +44,21 @@ public class PermissionManageService {
      * 仅包含cns, node, sysConfig, deployAndCreate
      * response's data structure: { (address, {(cns, 1), (sysConfig, 0)}) }
      */
+    public Map<String, PermissionState> getAllPermissionStateList(int groupId) throws Exception {
+        Map<String, PermissionState> resultMap = getPermissionStateList(groupId);
+        // 将没有权限的address也全部加进去
+        List<KeyStoreInfo> emptyPermissionStateList = keyStoreService.getLocalKeyStores();
+        PermissionState emptyState = getDefaultPermissionState();
+        for(KeyStoreInfo info: emptyPermissionStateList) {
+            String address = info.getAddress();
+            if(!resultMap.containsKey(address)) {
+                resultMap.put(address, emptyState);
+            }
+        }
+        return resultMap;
+    }
+
+
     public Map<String, PermissionState> getPermissionStateList(int groupId) throws Exception {
         // key is address, value is map of its permission ex: { (address, {(cns, 1), (sysConfig, 0)}) }
         Map<String, PermissionState> resultMap = new HashMap<String, PermissionState>();
