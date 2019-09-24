@@ -579,3 +579,25 @@ export function addContractpath(data) {
         }
     })
 }
+// performance toggle
+export function performanceSwitch() {
+    return get({
+        url: `${HANDLE}performance/toggle`,
+        method: 'get',
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+// post performance toggle
+export function postPerformanceSwitch(data) {
+    return post({
+        url: `${HANDLE}performance/toggle`,
+        method: 'post',
+        data: data,
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}

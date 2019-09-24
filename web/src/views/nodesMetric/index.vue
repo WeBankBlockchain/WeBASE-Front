@@ -2,6 +2,7 @@
     <div>
         <v-content-head :headTitle="$t('route.systemMonitoring')" :headSubTitle="$t('route.nodeMetrics')" @changeGroup="changeGroup"></v-content-head>
         <div class="module-wrapper">
+
             <div class="more-search-table">
                 <div class="search-item">
                     <span>{{$t('text.showDate')}}</span>
@@ -27,6 +28,8 @@
                     </el-radio-group>
                     <el-button type="primary" @click="confirmParam()" size="small" style="margin-left: 12px;" :loading="sureing">{{$t('text.confirm')}}</el-button>
                 </div>
+                <el-switch v-model="switchBtn" active-color="#13ce66" inactive-color="#ff4949" title="采集数据开关" @change="changeToggle">
+                </el-switch>
             </div>
             <div class="metric-content">
                 <div class="metric-split-line"></div>
@@ -45,7 +48,7 @@
 <script>
 import contentHead from "@/components/contentHead";
 import metricChart from "@/components/metricChart";
-import { nodesHealth } from "@/util/api";
+import { nodesHealth, performanceSwitch, postPerformanceSwitch } from "@/util/api";
 import { format, numberFormat } from "@/util/util.js";
 import Bus from "@/bus"
 export default {
@@ -60,6 +63,7 @@ export default {
             sureing: false,
             loading: false,
             loadingInit: false,
+            switchBtn: false,
             currentDate: format(new Date().getTime(), "yyyy-MM-dd"),
             contrastDate: null,
             startEndTime: [
@@ -98,6 +102,7 @@ export default {
         if (this.chartParam.group) {
             this.getHealthData();
         }
+        this.getPerformanceSwitch();
     },
     methods: {
         changeGroup(val) {
@@ -196,6 +201,34 @@ export default {
             this.chartParam.contrastEndDate = this.contrastEndDate;
             this.chartParam.gap = this.timeGranularity;
             this.chartParam.group = localStorage.getItem('groupName') ? localStorage.getItem('groupName') : '1';
+        },
+        getPerformanceSwitch() {
+            performanceSwitch().then(res=>{
+                const { data } = res;
+                if(data.code === 0) {
+                    this.switchBtn = data.data;
+                }
+            })
+        },
+        changeToggle(val) {
+            let data = {
+                enable: val
+            }
+            postPerformanceSwitch(data).then(res=>{
+                const { data } = res;
+                if(data.code === 0 ){
+                    this.$message({
+                        type: 'success',
+                        message: this.$t('text.toggleSuccessed')
+                    })
+                }else {
+                    this.$message({
+                        type: 'success',
+                        message: this.$t('text.toggleFailed')
+                    })
+                }
+                
+            })
         }
     }
 };
