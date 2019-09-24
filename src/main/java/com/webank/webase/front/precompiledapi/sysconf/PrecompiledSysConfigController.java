@@ -42,7 +42,7 @@ public class PrecompiledSysConfigController {
         }
         List2Page<SystemConfigHandle> list2Page = new List2Page<>(list, pageSize, pageNumber);
         List<SystemConfigHandle> finalList = list2Page.getPagedList();
-        Long totalCount = (long) finalList.size();
+        long totalCount = (long) list.size();
         return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
     }
 
