@@ -232,5 +232,7 @@ export default {
         fileExceeds: 'File size exceeds 400k, please upload files smaller than 400k',
         txnDecodeBtn: 'Decode',
         txnEncodeBtn: 'Restore',
+        toggleSuccessed: 'Switch successed',
+        toggleFailed: 'Switch failed'
     }
 }

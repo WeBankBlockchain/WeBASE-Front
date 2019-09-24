@@ -228,5 +228,7 @@ export default {
         fileExceeds: '文件大小超过400k，请上传小于400k的文件',
         txnDecodeBtn: '解码',
         txnEncodeBtn: '还原',
+        toggleSuccessed: '切换成功',
+        toggleFailed: '切换失败'
     }
 }
