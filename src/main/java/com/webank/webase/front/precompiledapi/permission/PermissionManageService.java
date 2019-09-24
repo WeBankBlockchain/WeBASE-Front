@@ -46,15 +46,6 @@ public class PermissionManageService {
      */
     public Map<String, PermissionState> getAllPermissionStateList(int groupId) throws Exception {
         Map<String, PermissionState> resultMap = getPermissionStateList(groupId);
-        // 将没有权限的address也全部加进去
-        List<KeyStoreInfo> emptyPermissionStateList = keyStoreService.getLocalKeyStores();
-        PermissionState emptyState = getDefaultPermissionState();
-        for(KeyStoreInfo info: emptyPermissionStateList) {
-            String address = info.getAddress();
-            if(!resultMap.containsKey(address)) {
-                resultMap.put(address, emptyState);
-            }
-        }
         return resultMap;
     }
 

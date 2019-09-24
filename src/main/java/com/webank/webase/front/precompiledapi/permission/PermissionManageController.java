@@ -31,20 +31,7 @@ public class PermissionManageController extends BaseController {
     @Autowired
     private PermissionManageService permissionManageService;
 
-    @GetMapping("/sorted")
-    public Object gerPermissionState(
-            @RequestParam(defaultValue = "1") int groupId,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
-        Map<String, PermissionState> resultMap = permissionManageService.getAllPermissionStateList(groupId);
-        // Map分页
-        Map2PagedList<MapHandle> list2Page = new Map2PagedList(resultMap, pageSize, pageNumber);
-        List<MapHandle> finalList = list2Page.getPagedList();
-        Long totalCount = (long) finalList.size();
-        return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
-    }
-
-    //分发Get请求
+    //分发Get请求, 根据type获取权限管理员的list
     @GetMapping("")
     public Object permissionGetControl(
             @RequestParam(defaultValue = "1") int groupId,
@@ -75,7 +62,7 @@ public class PermissionManageController extends BaseController {
         }
     }
 
-    // 获取不分页的管理员list
+    // 根据type获取不分页的管理员list
     @GetMapping("/full")
     public Object getFullListByType(
             @RequestParam(defaultValue = "1") int groupId,
@@ -111,6 +98,14 @@ public class PermissionManageController extends BaseController {
         }
     }
 
+    // 返回不分页的全量的list
+    @GetMapping("/sorted/full")
+    public Object gerPermissionStateFull(
+            @RequestParam(defaultValue = "1") int groupId) throws Exception {
+        Map<String, PermissionState> resultMap = permissionManageService.getAllPermissionStateList(groupId);
+        return new BasePageResponse(ConstantCode.RET_SUCCESS, resultMap, resultMap.size());
+    }
+
     // 方案一 先get后发交易
     // 批量修改address的权限，包含grant&revoke
     @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
@@ -133,29 +128,6 @@ public class PermissionManageController extends BaseController {
             }
             if(e instanceof FrontException) {
                 return new BaseResponse(ConstantCode.PERMISSION_DENIED, e.getMessage());
-            }
-            return new BaseResponse(ConstantCode.SYSTEM_ERROR, e.getMessage());
-        }
-    }
-
-    // 批量修改address的权限，包含grant&revoke
-    @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
-    @ApiImplicitParam(name = "permissionHandle", value = "permission info", required = true, dataType = "PermissionHandle")
-    @PostMapping("/sorted/2")
-    public Object updateUserPermissionState(@Valid @RequestBody PermissionHandle permissionHandle){
-        int groupId = permissionHandle.getGroupId();
-        String fromAddress = permissionHandle.getFromAddress();
-        String userAddress = permissionHandle.getAddress();
-        PermissionState permissionState = permissionHandle.getPermissionState();
-        try {
-            Object resultState = permissionManageService.updatePermissionState(groupId, fromAddress, userAddress, permissionState);
-            return new BaseResponse(ConstantCode.RET_SUCCEED, resultState);
-        }catch (Exception e) {
-            if(e instanceof JsonParseException) {
-                return new BaseResponse(ConstantCode.SYSTEM_ERROR, "Parse json fail, please check permissionState's object structure");
-            }
-            if(e instanceof NullPointerException) {
-                return new BaseResponse(ConstantCode.PARAM_VAILD_FAIL, "all cns, node, sysConfig, deployAndCreate cannot be null");
             }
             return new BaseResponse(ConstantCode.SYSTEM_ERROR, e.getMessage());
         }
