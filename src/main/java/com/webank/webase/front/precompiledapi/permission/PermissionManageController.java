@@ -235,7 +235,7 @@ public class PermissionManageController extends BaseController {
         if(resList.size() != 0) {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -263,7 +263,7 @@ public class PermissionManageController extends BaseController {
         List<PermissionInfo> resList = permissionManageService.listDeployAndCreateManager(groupId);
         if(resList.size() != 0) {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
-            return new BaseResponse(ConstantCode.RET_SUCCESS, list2Page.getPagedList());
+            return new BasePageResponse(ConstantCode.RET_SUCCESS, list2Page.getPagedList(), resList.size());
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
         }
@@ -311,7 +311,7 @@ public class PermissionManageController extends BaseController {
             if(resList.size() != 0) {
                 List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
                 List<PermissionInfo> finalList = list2Page.getPagedList();
-                Long totalCount = (long) finalList.size();
+                long totalCount = (long) resList.size();
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -341,7 +341,7 @@ public class PermissionManageController extends BaseController {
         if(resList.size() != 0) {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -368,7 +368,7 @@ public class PermissionManageController extends BaseController {
         if(resList.size() != 0){
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -397,7 +397,7 @@ public class PermissionManageController extends BaseController {
         if(resList.size() != 0){
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);

@@ -53,7 +53,7 @@ public class PrecompiledController {
             if(resList.size() != 0){
                 List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
                 List<CnsInfo> finalList = list2Page.getPagedList();
-                Long totalCount = (long) finalList.size();
+                long totalCount = (long) resList.size();
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -69,7 +69,7 @@ public class PrecompiledController {
             if(resList.size() != 0) {
                 List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
                 List<CnsInfo> finalList = list2Page.getPagedList();
-                Long totalCount = (long) finalList.size();
+                long totalCount = (long) resList.size();
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -95,7 +95,7 @@ public class PrecompiledController {
         if(resList.size() != 0) {
             List2Page<NodeInfo> list2Page = new List2Page<NodeInfo>(resList, pageSize, pageNumber);
             List<NodeInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);

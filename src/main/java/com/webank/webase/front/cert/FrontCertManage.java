@@ -16,27 +16,40 @@ import java.io.*;
 @RestController
 @RequestMapping(value = "cert")
 public class FrontCertManage {
+    public final static String flag = "-----";
 
     @GetMapping("chain")
-    public InputStream getChainCrt() throws Exception {
+    public String getChainCrt() throws Exception {
         InputStream crtStream = new ClassPathResource("ca.crt").getInputStream();
-        return crtStream;
+        String chainCrtStr = getFirstCrt(getString(crtStream));
+        return formatStr(chainCrtStr);
     }
 
     @GetMapping("agency")
-    public InputStream getAgencyCrt() throws Exception {
-        // 只读取后面那段String
-        InputStream crtStream = new ClassPathResource("node.crt").getInputStream();
-        String agency = getString(crtStream);
+    public String getAgencyCrt() throws Exception {
 
-        return crtStream;
+        InputStream crtStream = new ClassPathResource("node.crt").getInputStream();
+        // 只读取后面那段String
+        String agencyCrtStr = getSecondCrt(getString(crtStream));
+        return formatStr(agencyCrtStr);
     }
 
     @GetMapping("node")
-    public InputStream getNodeCrt() throws Exception {
-        // 只读取前面那段String
+    public String getNodeCrt() throws Exception {
         InputStream crtStream = new ClassPathResource("node.crt").getInputStream();
-        return crtStream;
+        // 只读取前面那段String
+        String nodeCrtStr = getFirstCrt(getString(crtStream));
+        return formatStr(nodeCrtStr);
+    }
+
+    public String getFirstCrt(String string) {
+        String[] strArray = string.split(flag);
+        return strArray[2];
+    }
+
+    public String getSecondCrt(String string) {
+        String[] strArray = string.split(flag);
+        return strArray[6];
     }
 
     public String getString(InputStream inputStream) throws IOException {
@@ -50,5 +63,9 @@ public class FrontCertManage {
     public InputStream getStream(String string) throws IOException {
         InputStream is = new ByteArrayInputStream(string.getBytes());
         return is;
+    }
+
+    public String formatStr(String string) {
+        return string.substring(1, string.length() - 1);
     }
 }
