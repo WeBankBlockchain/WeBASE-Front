@@ -105,6 +105,7 @@ export default {
         if (this.chartParam.group) {
             this.getChartData();
         }
+        this.getPerformanceSwitch();
     },
     methods: {
         changeGroup(val) {
