@@ -241,7 +241,7 @@ export default {
                     })
                 } else {
                     this.$message({
-                        type: 'success',
+                        type: 'error',
                         message: this.$t('text.toggleFailed')
                     })
                 }
