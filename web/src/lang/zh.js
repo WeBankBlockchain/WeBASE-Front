@@ -168,6 +168,7 @@ export default {
         tiled: '平铺',
         detailsAbi: 'abi详情',
         detailsTxn: '交易内容',
+        acquisitionSwitch: '采集数据开关',
     },
     text: {
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',

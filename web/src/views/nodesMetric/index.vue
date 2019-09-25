@@ -28,7 +28,7 @@
                     </el-radio-group>
                     <el-button type="primary" @click="confirmParam()" size="small" style="margin-left: 12px;" :loading="sureing">{{$t('text.confirm')}}</el-button>
                 </div>
-                <el-switch v-model="switchBtn" active-color="#13ce66" inactive-color="#ff4949" title="采集数据开关" @change="changeToggle">
+                <el-switch v-model="switchBtn" active-color="#13ce66" inactive-color="#ff4949" :title="$t('title.acquisitionSwitch')" @change="changeToggle">
                 </el-switch>
             </div>
             <div class="metric-content">

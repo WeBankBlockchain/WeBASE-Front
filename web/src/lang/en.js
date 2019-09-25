@@ -172,6 +172,7 @@ export default {
         tiled: 'Tiled',
         detailsAbi: 'Details Abi',
         detailsTxn: 'Transactions Details',
+        acquisitionSwitch: 'Acquisition switch',
     },
     text: {
         noContract: 'Please create a new contract',
