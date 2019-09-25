@@ -597,7 +597,7 @@ export default {
                         this.changeOutput(output.contracts[this.contractName + ".sol"], callback);
                     }
                 } else {
-                    this.errorMessage = output.errors[0];
+                    this.errorMessage = output.errors;
                     this.errorInfo = this.$t('text.compilationFailed');
                     this.loading = false;
                 }
