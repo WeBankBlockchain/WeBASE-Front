@@ -55,6 +55,8 @@ public class Constants {
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI = "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
     public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
+    public static final String NODE_CERT_PATH_CONF_DIR = "/conf";
+    public static final String account1Path = "node.key";
 
     public static final String CONSTANT_PREFIX = "constant";
     private String nodeDir = "";
@@ -63,7 +65,6 @@ public class Constants {
     private String monitorDisk = "/";
     private boolean monitorEnabled = true;
     private String aesKey = "4d5dFr4fG446GBde";
-
-    public static final String account1Path = "node.key";
+    private String nodeCertPath = "/fisco/nodes/127.0.0.1/node0";
 
 }

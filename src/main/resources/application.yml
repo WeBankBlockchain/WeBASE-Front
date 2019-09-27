@@ -52,4 +52,5 @@ constant:
   monitorDisk: /
   monitorEnabled: true
   aesKey: EfdsW23D23d3df43
+  nodeCertPath: /fisco/nodes/127.0.0.1/node0
 
