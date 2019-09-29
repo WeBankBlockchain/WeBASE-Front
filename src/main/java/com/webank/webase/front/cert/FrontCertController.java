@@ -1,5 +1,6 @@
 package com.webank.webase.front.cert;
 
+import com.webank.webase.front.base.exception.FrontException;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,36 @@ public class FrontCertController {
     @GetMapping("")
     public Object getFrontCerts() throws Exception {
         List<String> certList = new ArrayList<>();
+        String chainCertStr;
+        String nodeCrtStr;
+        String agencyCrtStr;
         // node.crt = node +agency
-        certList = certService.getNodeCerts();
+        try {
+            certList = certService.getNodeCerts();
+            chainCertStr = certService.getChainCrt();
+        }catch (FrontException e) {
+            return e.getMessage();
+        }
         Map<String, String> map = new HashMap<>();
-        map.put("node", certList.get(0));
-        map.put("agency", certList.get(1));
-        String chainCert = certService.getChainCrt();
-        map.put("chain", chainCert);
+        nodeCrtStr = certList.get(0);
+        agencyCrtStr = certList.get(1);
+        if(checkCertStrNonNull(nodeCrtStr)) {
+            map.put("node", nodeCrtStr);
+        }
+        if(checkCertStrNonNull(agencyCrtStr)) {
+            map.put("agency", agencyCrtStr);
+        }
+        if(checkCertStrNonNull(chainCertStr)) {
+            map.put("chain", chainCertStr);
+        }
         return map;
+    }
+
+    private boolean checkCertStrNonNull(String certStr) {
+        if(certStr != "" || certStr != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
