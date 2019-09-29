@@ -2,10 +2,9 @@ package com.webank.webase.front.cert;
 
 
 import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -18,8 +17,8 @@ public class FrontCertService {
     private final static String flag = "-----" ;
     private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
     private final static String tail = "-----END CERTIFICATE-----\n" ;
-    private final static String nodeCrt = "node.crt";
-    private final static String caCrt = "ca.crt";
+    private final static String nodeCrt = "/node.crt";
+    private final static String caCrt = "/ca.crt";
     @Autowired
     Constants constants;
     /**
@@ -47,6 +46,7 @@ public class FrontCertService {
             }
         }catch (IOException e) {
             log.error("FrontCertService getCerts, node cert(node.crt) path prefix error");
+            throw new FrontException("FileNotFound, node cert(node.crt) path prefix error");
         }
         return list;
     }
@@ -70,6 +70,7 @@ public class FrontCertService {
             }
         }catch (IOException e) {
             log.error("FrontCertService getCerts, chain cert(ca.crt) path prefix error");
+            throw new FrontException("FileNotFound, chain cert(ca.crt) path error");
         }
         return ca;
     }
@@ -83,10 +84,6 @@ public class FrontCertService {
         return str;
     }
 
-    public InputStream getStream(String string) throws IOException {
-        InputStream is = new ByteArrayInputStream(string.getBytes());
-        return is;
-    }
 
     public String formatStr(String string) {
         return string.substring(0, string.length() - 1);
