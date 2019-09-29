@@ -14,11 +14,10 @@ import java.util.List;
 @Slf4j
 @Service
 public class FrontCertService {
-    private final static String flag = "-----" ;
     private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
     private final static String tail = "-----END CERTIFICATE-----\n" ;
-    private final static String nodeCrt = "/node.crt";
-    private final static String caCrt = "/ca.crt";
+    private final static String nodeCrt = "/conf/node.crt";
+    private final static String caCrt = "/conf/ca.crt";
     @Autowired
     Constants constants;
     /**
@@ -30,7 +29,6 @@ public class FrontCertService {
     public List<String> getNodeCerts() {
         List<String> list = new ArrayList<>();
         String nodeCertPath = constants.getNodeCertPath();
-        nodeCertPath = nodeCertPath.concat(Constants.NODE_CERT_PATH_CONF_DIR);
         try {
             InputStream nodeCrtInput = new FileInputStream(nodeCertPath.concat(nodeCrt));
             String nodeCrtStr = getString(nodeCrtInput);
@@ -53,7 +51,6 @@ public class FrontCertService {
 
     public String getChainCrt() {
         String chainCertPath = constants.getNodeCertPath();
-        chainCertPath = chainCertPath.concat(Constants.NODE_CERT_PATH_CONF_DIR);
         String ca = "";
         try{
             InputStream caInput = new FileInputStream(chainCertPath.concat(caCrt));
