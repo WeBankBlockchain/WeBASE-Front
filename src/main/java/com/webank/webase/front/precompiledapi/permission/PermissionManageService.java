@@ -27,6 +27,11 @@ public class PermissionManageService {
     @Autowired
     private KeyStoreService keyStoreService;
 
+    private static final int FLAG_FAIL = -1; //grant/revoke permission fail
+    private static final int FLAG_GRANTED = 1; // permission state is already granted
+    private static final int FLAG_REVOKED = 0; // permission state is already revoked
+
+
     // 根据前台传的user address获取私钥
     public Credentials getCredentials(String fromAddress) throws Exception {
         return keyStoreService.getCredentials(fromAddress, false);
@@ -115,10 +120,10 @@ public class PermissionManageService {
     public PermissionState getDefaultPermissionState() {
         // 默认全部权限为0
         PermissionState initState = new PermissionState();
-        initState.setDeployAndCreate(0);
-        initState.setCns(0);
-        initState.setNode(0);
-        initState.setSysConfig(0);
+        initState.setDeployAndCreate(FLAG_REVOKED);
+        initState.setCns(FLAG_REVOKED);
+        initState.setNode(FLAG_REVOKED);
+        initState.setSysConfig(FLAG_REVOKED);
         return initState;
     }
 
@@ -158,8 +163,8 @@ public class PermissionManageService {
             sysConfigMgrState = sysConfigMgrHandle(groupId, fromAddress, userAddress, sysConfigMgrState);
         }
 
-        if(cnsMgrState == -1 || deployAndCreateMgrState == -1
-                || nodeMgrState == -1 || sysConfigMgrState == -1) {
+        if(cnsMgrState == FLAG_FAIL || deployAndCreateMgrState == FLAG_FAIL
+                || nodeMgrState == FLAG_FAIL || sysConfigMgrState == FLAG_FAIL) {
             throw new FrontException("Update permission state fail, please check admin permission or param not null");
         } else {
             resultList.put("deployAndCreate", deployAndCreateMgrState);
@@ -169,42 +174,24 @@ public class PermissionManageService {
         }
         return resultList;
     }
-    // 方案二 all grant: 1.6s  all revoke:2.5  2 grant 2 revoke: 3.8s 1.8s
-    public Object updatePermissionState(int groupId, String fromAddress, String userAddress, PermissionState permissionState) throws Exception {
-        Map<String, Integer> resultList = new HashMap<>();
-        int cnsMgrState = cnsMgrHandle(groupId, fromAddress, userAddress, permissionState.getCns());
-        int deployAndCreateMgrState = deployAndCreateMgrHandle(groupId, fromAddress, userAddress, permissionState.getDeployAndCreate());
-        int nodeMgrState = nodeMgrHandle(groupId, fromAddress, userAddress, permissionState.getNode());
-        int sysConfigMgrState = sysConfigMgrHandle(groupId, fromAddress, userAddress, permissionState.getSysConfig());
-        if(cnsMgrState == -1 || deployAndCreateMgrState == -1
-                || nodeMgrState == -1 || sysConfigMgrState == -1) {
-            return "Update permission state fail, please check admin permission";
-        } else {
-            resultList.put("cns", cnsMgrState);
-            resultList.put("deployAndCreate", deployAndCreateMgrState);
-            resultList.put("node", nodeMgrState);
-            resultList.put("sysConfig", sysConfigMgrState);
-        }
-        return resultList;
-    }
 
     // deploy and create handle
     public int deployAndCreateMgrHandle(int groupId, String fromAddress, String userAddress, int deployAndCreateState) throws Exception {
-        int resState = -1;
-        if(deployAndCreateState == 1) {
+        int resState = FLAG_FAIL;
+        if(deployAndCreateState == FLAG_GRANTED) {
             String result = grantDeployAndCreateManager(groupId, fromAddress, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
-            if( resCode == 0 || resCode == -51000) {
-                resState = 1;
-            }else if(resCode == -50000){  // permission denied
+            if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
+                resState = FLAG_GRANTED;
+            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){  // permission denied
                 throw new FrontException("Update permission state fail for permission denied");
             }
-        }else if(deployAndCreateState == 0) {
+        }else if(deployAndCreateState == FLAG_REVOKED) {
             String result = revokeDeployAndCreateManager(groupId, fromAddress, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
-            if( resCode == 0 || resCode == -51001) {
-                resState = 0;
-            }else if(resCode == -50000){
+            if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
+                resState = FLAG_REVOKED;
+            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){
                 throw new FrontException("Update permission state fail for permission denied");
             }
         }
@@ -212,21 +199,21 @@ public class PermissionManageService {
     }
     // cns handle
     public int cnsMgrHandle(int groupId, String fromAddress, String userAddress, int cnsState) throws Exception {
-        int resState = -1;
-        if(cnsState == 1) {
+        int resState = FLAG_FAIL;
+        if(cnsState == FLAG_GRANTED) {
             String result = grantCNSManager(groupId, fromAddress, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
-            if( resCode == 0 || resCode == -51000) {
-                resState = 1;
-            }else if(resCode == -50000){  // permission denied
+            if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
+                resState = FLAG_GRANTED;
+            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){  // permission denied
                 throw new FrontException("Update permission state fail for permission denied");
             }
-        }else if(cnsState == 0) {
+        }else if(cnsState == FLAG_REVOKED) {
             String result = revokeCNSManager(groupId, fromAddress, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
-            if( resCode == 0 || resCode == -51001) {
-                resState = 0;
-            }else if(resCode == -50000){
+            if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
+                resState = FLAG_REVOKED;
+            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){
                 throw new FrontException("Update permission state fail for permission denied");
             }
         }
@@ -234,21 +221,21 @@ public class PermissionManageService {
     }
     // node handle
     public int nodeMgrHandle(int groupId, String fromAddress, String userAddress, int nodeState) throws Exception {
-        int resState = -1;
-        if(nodeState == 1) {
+        int resState = FLAG_FAIL;
+        if(nodeState == FLAG_GRANTED) {
             String result = grantNodeManager(groupId, fromAddress, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
-            if( resCode == 0 || resCode == -51000) {
-                resState = 1;
-            }else if(resCode == -50000){  // permission denied
+            if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
+                resState = FLAG_GRANTED;
+            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){  // permission denied
                 throw new FrontException("Update permission state fail for permission denied");
             }
-        }else if(nodeState == 0) {
+        }else if(nodeState == FLAG_REVOKED) {
             String result = revokeNodeManager(groupId, fromAddress, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
-            if( resCode == 0 || resCode == -51001) {
-                resState = 0;
-            }else if(resCode == -50000){
+            if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
+                resState = FLAG_REVOKED;
+            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){
                 throw new FrontException("Update permission state fail for permission denied");
             }
         }
@@ -256,21 +243,21 @@ public class PermissionManageService {
     }
     // system config handle
     public int sysConfigMgrHandle(int groupId, String fromAddress, String userAddress, int sysConfigState) throws Exception {
-        int resState = -1;
-        if(sysConfigState == 1) {
+        int resState = FLAG_FAIL;
+        if(sysConfigState == FLAG_GRANTED) {
             String result = grantSysConfigManager(groupId, fromAddress, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
-            if( resCode == 0 || resCode == -51000) {
-                resState = 1;
-            }else if(resCode == -50000){  // permission denied
+            if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
+                resState = FLAG_GRANTED;
+            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){  // permission denied
                 throw new FrontException("Update permission state fail for permission denied");
             }
-        }else if(sysConfigState == 0) {
+        }else if(sysConfigState == FLAG_REVOKED) {
             String result = revokeSysConfigManager(groupId, fromAddress, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
-            if( resCode == 0 || resCode == -51001) {
-                resState = 0;
-            }else if(resCode == -50000){
+            if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
+                resState = FLAG_REVOKED;
+            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){
                 throw new FrontException("Update permission state fail for permission denied");
             }
         }

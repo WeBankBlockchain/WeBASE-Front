@@ -106,8 +106,8 @@ public class PermissionManageController extends BaseController {
         return new BasePageResponse(ConstantCode.RET_SUCCESS, resultMap, resultMap.size());
     }
 
-    // 方案一 先get后发交易
-    // 批量修改address的权限，包含grant&revoke
+
+    // 批量修改address的权限，包含grant&revoke 先get后发交易
     @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
     @ApiImplicitParam(name = "permissionHandle", value = "permission info", required = true, dataType = "PermissionHandle")
     @PostMapping("/sorted")
