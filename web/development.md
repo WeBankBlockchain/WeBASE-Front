@@ -69,7 +69,7 @@ nodejs下载地址：https://nodejs.org/en/download/
             assetsPublicPath: '/',
             proxyTable: {
             '/mgr':{
-                target:'http://10.0.0.1:8080/',  //在此修改跨域地址，这里是node_mgr服务ip和端口，且可以访问
+                target:'http://127.0.0.1:8080/',  //在此修改跨域地址，这里是node_mgr服务ip和端口，且可以访问
                 changeOrigin:true,
                 pathRewrite:{
                     '^/mgr':''
