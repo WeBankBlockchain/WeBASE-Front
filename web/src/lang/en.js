@@ -172,6 +172,7 @@ export default {
         tiled: 'Tiled',
         detailsAbi: 'Details Abi',
         detailsTxn: 'Transactions Details',
+        acquisitionSwitch: 'Acquisition switch',
     },
     text: {
         noContract: 'Please create a new contract',
@@ -232,5 +233,7 @@ export default {
         fileExceeds: 'File size exceeds 400k, please upload files smaller than 400k',
         txnDecodeBtn: 'Decode',
         txnEncodeBtn: 'Restore',
+        toggleSuccessed: 'Switch successed',
+        toggleFailed: 'Switch failed'
     }
 }
