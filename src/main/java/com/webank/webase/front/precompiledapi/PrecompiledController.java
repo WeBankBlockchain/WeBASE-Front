@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.BasePageResponse;
 import com.webank.webase.front.base.BaseResponse;
 import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.precompiledapi.precompiledHandle.ConsensusHandle;
 import com.webank.webase.front.precompiledapi.precompiledHandle.CrudHandle;
+import com.webank.webase.front.precompiledapi.precompiledHandle.NodeInfo;
 import com.webank.webase.front.util.CRUDParseUtils;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
@@ -14,10 +14,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.JSQLParserException;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
-import org.fisco.bcos.web3j.precompile.common.PrecompiledResponse;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
@@ -55,7 +53,7 @@ public class PrecompiledController {
             if(resList.size() != 0){
                 List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
                 List<CnsInfo> finalList = list2Page.getPagedList();
-                Long totalCount = (long) finalList.size();
+                long totalCount = (long) resList.size();
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -71,7 +69,7 @@ public class PrecompiledController {
             if(resList.size() != 0) {
                 List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
                 List<CnsInfo> finalList = list2Page.getPagedList();
-                Long totalCount = (long) finalList.size();
+                long totalCount = (long) resList.size();
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -97,7 +95,7 @@ public class PrecompiledController {
         if(resList.size() != 0) {
             List2Page<NodeInfo> list2Page = new List2Page<NodeInfo>(resList, pageSize, pageNumber);
             List<NodeInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -134,7 +132,7 @@ public class PrecompiledController {
         try{
             return precompiledService.addSealer(groupId, fromAddress, nodeId);
         } catch (Exception e) {
-            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE);
+            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }
 
@@ -143,7 +141,7 @@ public class PrecompiledController {
         try{
             return precompiledService.addObserver(groupId, fromAddress, nodeId);
         } catch (Exception e) {
-            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE);
+            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }
 
@@ -152,7 +150,7 @@ public class PrecompiledController {
         try{
             return precompiledService.removeNode(groupId, fromAddress, nodeId);
         } catch (Exception e) {
-            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE);
+            return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }
 
@@ -237,7 +235,7 @@ public class PrecompiledController {
             table = precompiledService.desc(groupId, tableName);
             return new BaseResponse(ConstantCode.RET_SUCCESS, table);
         } catch (Exception e) {
-            return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists ");
+            return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, e.getMessage());
         }
     }
 

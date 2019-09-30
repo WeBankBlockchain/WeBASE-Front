@@ -33,7 +33,26 @@ public class PrecompiledUtils {
 
     public static int PermissionCode = 0;
     public static int TableExist = 0;
-    public static int CRUD_SQL_ERROR = -51503; // process sql sentence error
+    public static int PRECOMPILED_SUCCESS = 0; // permission denied
+    public static int PERMISSION_DENIED = -50000; // permission denied
+    public static int TABLE_NAME_ALREADY_EXIST = -50001; // table name already exist
+    public static int UNKNOWN_FUNCTION_CALL = -50100; // unknown function call
+    public static int TABLE_NOT_EXIST = -50101; // table does not exist
+    public static int TABLE_NAME_AND_ADDRESS_ALREADY_EXIST = -51000; // table name and address already exist
+    public static int TABLE_NAME_AND_ADDRESS_NOT_EXIST = -51001; // table name and address does not exist
+    public static int SDK_INVALID_NODE_ID = -51100; // invalid node ID
+    public static int LAST_SEALER_CANNOT_BE_MOVED = -51101; // the last sealer cannot be removed
+    public static int SDK_NOT_REACHABLE_NODE = -51102; // the node is not reachable
+    public static int SDK_NOT_A_GROUP_PEER_NODE = -51103; // the node is not a group peer
+    public static int SDK_ALREADY_SEALER = -51104; // the node is already in the sealer list
+    public static int SDK_ALREADY_OBSERVER = -51105; // the node is already in the observer list
+    public static int SDK_CONTRACT_NAME_AND_VERSION_EXIST = -51200; // contract name and version already exist
+    public static int SDK_VERSION_STRING_LENGTH_EXCEEDS_LIMIT = -51201; // version string length exceeds the maximum limit
+    public static int INVALID_CONFIGURATION_ENTRY = -51300; // invalid configuration entry
+    public static int CONTRACT_NAME_AND_VERSION_EXIST = -51500; // contract name and version already exist
+    public static int SQL_CONDITION_PARSE_ERROR = -51501; // condition parse error
+    public static int SQL_CONDITION_OPERATION_UNDEFINED = -51502; // condition operation undefined
+    public static int CRUD_SQL_ERROR = -51503; // process sql error
 
     public static int SYS_TABLE_KEY_MAX_LENGTH = 58; // 64- "_user_".length
     public static int SYS_TABLE_KEY_FIELD_NAME_MAX_LENGTH = 64;

@@ -14,10 +14,6 @@ public class List2Page<T> {
         this.pageIndex = pageIndex;
     }
 
-    public List2Page(List<T> data, PageQuery pageQuery) {
-        this(data, pageQuery.getPageSize(), pageQuery.getPageIndex());
-    }
-
     public PageData<T> getResult() {
         List<T> resList = null; // 结果记录列表
         Integer size = data.size(); // 总记录数

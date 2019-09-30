@@ -1,8 +1,12 @@
 package com.webank.webase.front.precompiledapi.permission;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.webank.webase.front.base.*;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.AddressUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
+import com.webank.webase.front.util.pageutils.Map2PagedList;
+import com.webank.webase.front.util.pageutils.MapHandle;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -15,19 +19,20 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-@Api(value = "/", tags = "permission manage interface")
+@Api(value = "/permission", tags = "permission manage interface")
 @Slf4j
 @RestController
-@RequestMapping(value = "/")
+@RequestMapping(value = "/permission")
 
 public class PermissionManageController extends BaseController {
     @Autowired
     private PermissionManageService permissionManageService;
 
-    //分发Get请求
-    @GetMapping("/permission")
+    //分发Get请求, 根据type获取权限管理员的list
+    @GetMapping("")
     public Object permissionGetControl(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String permissionType,
@@ -57,8 +62,8 @@ public class PermissionManageController extends BaseController {
         }
     }
 
-    // 获取不分页的管理员list
-    @GetMapping("/permission/full")
+    // 根据type获取不分页的管理员list
+    @GetMapping("/full")
     public Object getFullListByType(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String permissionType,
@@ -93,10 +98,45 @@ public class PermissionManageController extends BaseController {
         }
     }
 
+    // 返回不分页的全量的list
+    @GetMapping("/sorted/full")
+    public Object gerPermissionStateFull(
+            @RequestParam(defaultValue = "1") int groupId) throws Exception {
+        Map<String, PermissionState> resultMap = permissionManageService.getAllPermissionStateList(groupId);
+        return new BasePageResponse(ConstantCode.RET_SUCCESS, resultMap, resultMap.size());
+    }
+
+
+    // 批量修改address的权限，包含grant&revoke 先get后发交易
+    @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
+    @ApiImplicitParam(name = "permissionHandle", value = "permission info", required = true, dataType = "PermissionHandle")
+    @PostMapping("/sorted")
+    public Object updateUserPermissionStateAfterCheck(@Valid @RequestBody PermissionHandle permissionHandle){
+        int groupId = permissionHandle.getGroupId();
+        String fromAddress = permissionHandle.getFromAddress();
+        String userAddress = permissionHandle.getAddress();
+        PermissionState permissionState = permissionHandle.getPermissionState();
+        try {
+            Object resultState = permissionManageService.updatePermissionStateAfterCheck(groupId, fromAddress, userAddress, permissionState);
+            return new BaseResponse(ConstantCode.RET_SUCCEED, resultState);
+        }catch (Exception e) {
+            if(e instanceof JsonParseException) {
+                return new BaseResponse(ConstantCode.SYSTEM_ERROR, "Parse json fail, please check permissionState's object structure");
+            }
+            if(e instanceof NullPointerException) {
+                return new BaseResponse(ConstantCode.PARAM_VAILD_FAIL, "all cns, node, sysConfig, deployAndCreate cannot be null");
+            }
+            if(e instanceof FrontException) {
+                return new BaseResponse(ConstantCode.PERMISSION_DENIED, e.getMessage());
+            }
+            return new BaseResponse(ConstantCode.SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
     // 分发Post请求
     @ApiOperation(value = "grantPermissionManager", notes = "grant address PermissionManager")
     @ApiImplicitParam(name = "permissionHandle", value = "transaction info", required = true, dataType = "PermissionHandle")
-    @PostMapping("/permission")
+    @PostMapping("")
     public Object permissionPostControl(@Valid @RequestBody PermissionHandle permissionHandle, BindingResult result) throws Exception {
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
@@ -134,7 +174,7 @@ public class PermissionManageController extends BaseController {
     //分发del请求
     @ApiOperation(value = "revokePermissionManager", notes = "revoke address PermissionManager")
     @ApiImplicitParam(name = "permissionHandle", value = "transaction info", required = true, dataType = "PermissionHandle")
-    @DeleteMapping("/permission")
+    @DeleteMapping("")
     public Object permissionDeleteControl(@Valid @RequestBody PermissionHandle permissionHandle, BindingResult result) throws Exception {
 
         int groupId = permissionHandle.getGroupId();
@@ -195,7 +235,7 @@ public class PermissionManageController extends BaseController {
         if(resList.size() != 0) {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -223,7 +263,7 @@ public class PermissionManageController extends BaseController {
         List<PermissionInfo> resList = permissionManageService.listDeployAndCreateManager(groupId);
         if(resList.size() != 0) {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
-            return new BaseResponse(ConstantCode.RET_SUCCESS, list2Page.getPagedList());
+            return new BasePageResponse(ConstantCode.RET_SUCCESS, list2Page.getPagedList(), resList.size());
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
         }
@@ -241,7 +281,7 @@ public class PermissionManageController extends BaseController {
             try{
                 return permissionManageService.grantUserTableManager(groupId, from, tableName, address);
             } catch (Exception e) {
-                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, null);
+                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, e.getMessage());
             }
         }
     }
@@ -255,7 +295,7 @@ public class PermissionManageController extends BaseController {
             try {
                 return permissionManageService.revokeUserTableManager(groupId, from, tableName, address);
             } catch (Exception e) {
-                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, null);
+                return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, e.getMessage());
             }
         }
     }
@@ -271,7 +311,7 @@ public class PermissionManageController extends BaseController {
             if(resList.size() != 0) {
                 List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
                 List<PermissionInfo> finalList = list2Page.getPagedList();
-                Long totalCount = (long) finalList.size();
+                long totalCount = (long) resList.size();
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -301,7 +341,7 @@ public class PermissionManageController extends BaseController {
         if(resList.size() != 0) {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -328,7 +368,7 @@ public class PermissionManageController extends BaseController {
         if(resList.size() != 0){
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -357,7 +397,7 @@ public class PermissionManageController extends BaseController {
         if(resList.size() != 0){
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
-            Long totalCount = (long) finalList.size();
+            long totalCount = (long) resList.size();
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
