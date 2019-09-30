@@ -6,7 +6,6 @@ import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
 import lombok.extern.slf4j.Slf4j;
-import org.hyperic.sigar.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
+
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.FileSystem;
@@ -28,9 +27,6 @@ import org.hyperic.sigar.NetInterfaceConfig;
 import org.hyperic.sigar.NetInterfaceStat;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 /*
  * Copyright 2012-2019 the original author or authors.
@@ -158,6 +154,19 @@ public class PerformanceService {
         return performanceDataList;
     }
 
+    public boolean toggleSync(boolean toggle) throws Exception {
+        constants.setMonitorEnabled(toggle);
+        if(constants.isMonitorEnabled() == toggle) {
+            log.debug("toggle sync performance status to " + toggle);
+            return toggle;
+        }else {
+            throw new FrontException("Fail to toggle sync performance status to "+ toggle);
+        }
+    }
+
+    public boolean getToggleStatus() throws Exception {
+        return constants.isMonitorEnabled();
+    }
     /**
      * syncPerformanceInfo.
      */
