@@ -1,5 +1,7 @@
 package com.webank.webase.front.cert;
 
+import com.webank.webase.front.base.BaseResponse;
+import com.webank.webase.front.base.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +34,7 @@ public class FrontCertController {
             certList = certService.getNodeCerts();
             chainCertStr = certService.getChainCrt();
         }catch (FrontException e) {
-            return e.getMessage();
+            return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getMessage());
         }
         Map<String, String> map = new HashMap<>();
         nodeCrtStr = certList.get(0);
