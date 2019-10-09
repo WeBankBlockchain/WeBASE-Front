@@ -28,9 +28,10 @@ public class FrontCertService {
     // 0 is node ca, 1 is agency ca
     public List<String> getNodeCerts() {
         List<String> list = new ArrayList<>();
-        String nodeCertPath = constants.getNodeCertPath();
+        String nodePath = constants.getNodePath();
+        log.debug("start getNodeCerts in {}" + nodePath);
         try {
-            InputStream nodeCrtInput = new FileInputStream(nodeCertPath.concat(nodeCrt));
+            InputStream nodeCrtInput = new FileInputStream(nodePath.concat(nodeCrt));
             String nodeCrtStr = getString(nodeCrtInput);
             String[] nodeCrtStrArray = nodeCrtStr.split(head);
             for(int i = 0; i < nodeCrtStrArray.length; i++) {
@@ -42,6 +43,7 @@ public class FrontCertService {
                     }
                 }
             }
+            log.debug("end getNodeCerts in {}" + nodePath);
         }catch (IOException e) {
             log.error("FrontCertService getCerts, node cert(node.crt) path prefix error");
             throw new FrontException("FileNotFound, node cert(node.crt) path prefix error");
@@ -50,10 +52,11 @@ public class FrontCertService {
     }
 
     public String getChainCrt() {
-        String chainCertPath = constants.getNodeCertPath();
+        String nodePath = constants.getNodePath();
         String ca = "";
+        log.debug("start getChainCrt in {}" + nodePath);
         try{
-            InputStream caInput = new FileInputStream(chainCertPath.concat(caCrt));
+            InputStream caInput = new FileInputStream(nodePath.concat(caCrt));
             String caStr = getString(caInput);
             String[] caStrArray = caStr.split(head); // 一个是空，一个是去除了head的string
             for(int i = 0; i < caStrArray.length; i++) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
@@ -65,6 +68,7 @@ public class FrontCertService {
                     }
                 }
             }
+            log.debug("end getChainCrt in {}" + nodePath);
         }catch (IOException e) {
             log.error("FrontCertService getCerts, chain cert(ca.crt) path prefix error");
             throw new FrontException("FileNotFound, chain cert(ca.crt) path error");
