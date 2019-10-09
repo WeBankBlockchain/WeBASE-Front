@@ -117,5 +117,8 @@ public interface ConstantCode {
     RetCode FAIL_TABLE_NOT_EXISTS = RetCode.mark(201228, "table not exists");
     String CRUD_EMPTY_SET = "Empty Set.";
 
+    // cert
+    RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
+
 
 }
