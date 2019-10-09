@@ -64,6 +64,6 @@ public class Constants {
     private String monitorDisk = "/";
     private boolean monitorEnabled = true;
     private String aesKey = "4d5dFr4fG446GBde";
-    private String nodeCertPath = "/fisco/nodes/127.0.0.1/node0";
+    private String nodePath = "/fisco/nodes/127.0.0.1/node0";
 
 }
