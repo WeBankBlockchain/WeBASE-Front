@@ -122,7 +122,7 @@ export default {
         pleaseType: '请输入',
     },
     placeholder: {
-        globalSearch: '请输入 Block / Txn Hash',
+        globalSearch: '请输入 Block 或 Txn Hash',
         javaPackage: '如：com.webank',
         selected: '请选择',
         selectedAccountAddress: '请选择用户地址',
