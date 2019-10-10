@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014-2019  the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.webank.webase.front.cert;
 
 
@@ -23,6 +38,7 @@ public class FrontCertService {
     /**
      * 设置了front对应的节点的目录，如/data/fisco/nodes/127.0.0.1/node0
      * 则获取 ${path}/conf 中的ca.crt, node.crt
+     * 无需填agency.crt的读取，因为node.crt会包含node和agency的证书
      * @return List<String> 或者 String
      */
     // 0 is node ca, 1 is agency ca
