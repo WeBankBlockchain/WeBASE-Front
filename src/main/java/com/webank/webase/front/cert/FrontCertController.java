@@ -39,7 +39,7 @@ public class FrontCertController {
     FrontCertService certService;
 
     @GetMapping("")
-    public Object getFrontCerts() throws Exception {
+    public Object getFrontCerts() {
         List<String> certList = new ArrayList<>();
         String chainCertStr;
         String nodeCrtStr;
@@ -49,7 +49,7 @@ public class FrontCertController {
             certList = certService.getNodeCerts();
             chainCertStr = certService.getChainCrt();
         }catch (FrontException e) {
-            return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getMessage());
+            return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getCause());
         }
         Map<String, String> map = new HashMap<>();
         nodeCrtStr = certList.get(0);
