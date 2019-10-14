@@ -194,8 +194,8 @@ public class ContractService {
             BeanUtils.copyProperties(req, contract);
             contract.setContractAddress(contractAddress);
             contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-            contract.setModifyTime(LocalDateTime.now());
             contract.setDeployTime(LocalDateTime.now());
+            contract.setModifyTime(contract.getDeployTime());
             contractRepository.save(contract);
         }
         return contractAddress;
@@ -447,8 +447,8 @@ public class ContractService {
         Contract contract = new Contract();
         BeanUtils.copyProperties(contractReq, contract);
         contract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
-        contract.setModifyTime(LocalDateTime.now());
         contract.setCreateTime(LocalDateTime.now());
+        contract.setModifyTime(contract.getCreateTime());
         contractRepository.save(contract);
         // update time
         ContractPath contractPathVo = new ContractPath();
@@ -507,16 +507,16 @@ public class ContractService {
                     contract.setContractSource(template.split(",")[1]);
                     contract.setContractPath(contractPath);
                     contract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
-                    contract.setModifyTime(LocalDateTime.now());
                     contract.setCreateTime(LocalDateTime.now());
+                    contract.setModifyTime(contract.getCreateTime());
                     contractRepository.save(contract);
                 }
             }
             ContractPath contractPathVo = new ContractPath();
             contractPathVo.setGroupId(param.getGroupId());
             contractPathVo.setContractPath(contractPath);
-            contractPathVo.setModifyTime(LocalDateTime.now());
             contractPathVo.setCreateTime(LocalDateTime.now());
+            contractPathVo.setModifyTime(contractPathVo.getCreateTime());
             contractPathRepository.save(contractPathVo);
         }
         // findContractByPage
@@ -644,8 +644,8 @@ public class ContractService {
         // add to database.
         ContractPath contractPath = new ContractPath();
         BeanUtils.copyProperties(req, contractPath);
-        contractPath.setModifyTime(LocalDateTime.now());
         contractPath.setCreateTime(LocalDateTime.now());
+        contractPath.setModifyTime(contractPath.getCreateTime());
         contractPathRepository.save(contractPath);
         return contractPath;
     }
