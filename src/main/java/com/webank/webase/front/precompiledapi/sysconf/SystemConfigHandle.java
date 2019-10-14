@@ -19,7 +19,6 @@ import com.webank.webase.front.base.ConstantCode;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Data

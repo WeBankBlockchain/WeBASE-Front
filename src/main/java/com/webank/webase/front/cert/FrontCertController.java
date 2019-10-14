@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,12 +41,14 @@ public class FrontCertController {
     FrontCertService certService;
 
     @GetMapping("")
-    public Object getFrontCerts() throws Exception {
+    public Object getFrontCerts() {
+        Instant startTime = Instant.now();
+        log.info("start getFrontCerts. startTime:{}", startTime.toEpochMilli());
         List<String> certList = new ArrayList<>();
         String chainCertStr;
         String nodeCrtStr;
         String agencyCrtStr;
-        // node.crt = node +agency
+        // node.crt = node + agency (+ chain)
         try {
             certList = certService.getNodeCerts();
             chainCertStr = certService.getChainCrt();
@@ -63,6 +67,8 @@ public class FrontCertController {
         if(checkCertStrNonNull(chainCertStr)) {
             map.put("chain", chainCertStr);
         }
+        log.info("end getFrontCerts. startTime:{}, certMap:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), map);
         return map;
     }
 

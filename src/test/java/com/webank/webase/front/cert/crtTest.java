@@ -15,6 +15,7 @@
  */
 package com.webank.webase.front.cert;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -43,6 +44,7 @@ public class crtTest {
             }
         }
         System.out.println(ca);
+        Assert.assertNull(ca);
     }
 
     @Test
@@ -55,6 +57,7 @@ public class crtTest {
             String[] strArray2 = strArray[i].split(tail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
             for(int j = 0; j < strArray2.length; j++) {
                 System.out.println("i: " + i + " j: " + j + " " + strArray2[j]);
+                Assert.assertNull(strArray2[j]);
             }
         }
     }
@@ -76,8 +79,9 @@ public class crtTest {
             }
         }
         System.out.println(list.get(0));
+        Assert.assertNull(list.get(0));
         System.out.println(list.get(1));
-
+        Assert.assertNull(list.get(1));
     }
 
     public String formatStr(String string) {
