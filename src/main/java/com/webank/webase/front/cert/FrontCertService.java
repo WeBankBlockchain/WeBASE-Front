@@ -65,8 +65,8 @@ public class FrontCertService {
             nodeCrtInput.close();
             log.debug("end getNodeCerts in {}" + nodePath);
         }catch (IOException e) {
-            log.error("FrontCertService getCerts, node cert(node.crt) path prefix error");
-            throw (FrontException)new FrontException("FileNotFound, chain cert(ca.crt) path error \n").initCause(e);
+            log.error("FrontCertService getCerts, node cert(node.crt) path prefix error, Exception:{}", e.getMessage());
+            throw (FrontException)new FrontException("FileNotFound, chain cert(ca.crt) path error").initCause(e);
         }
         return list;
     }
@@ -92,7 +92,7 @@ public class FrontCertService {
             caInput.close();
             log.debug("end getChainCrt in {}" + nodePath);
         }catch (IOException e) {
-            log.error("FrontCertService getCerts, chain cert(ca.crt) path prefix error");
+            log.error("FrontCertService getCerts, chain cert(ca.crt) path prefix error, Exception:{}", e.getMessage());
             throw (FrontException)new FrontException("FileNotFound, chain cert(ca.crt) path error \n").initCause(e);
         }
         return ca;

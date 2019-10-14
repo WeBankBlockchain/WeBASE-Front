@@ -48,16 +48,18 @@ public class PrecompiledSysConfigController {
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
-
+        log.info("start querySystemConfigByGroupId. groupId:{}", groupId);
         List<SystemConfigHandle> list = new ArrayList<>();
         try {
             list = precompiledSysConfigService.querySysConfigByGroupId(groupId);
+            log.info("in querySystemConfigByGroupId. list:{}", list);
         } catch (Exception e) { //get sys config fail
             return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
         }
         List2Page<SystemConfigHandle> list2Page = new List2Page<>(list, pageSize, pageNumber);
         List<SystemConfigHandle> finalList = list2Page.getPagedList();
         long totalCount = (long) list.size();
+        log.info("end querySystemConfigByGroupId. finalList:{}", finalList);
         return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
     }
 
@@ -65,16 +67,22 @@ public class PrecompiledSysConfigController {
     @ApiImplicitParam(name = "sysConfigHandle", value = "system config info", required = true, dataType = "SysConfigHandle")
     @PostMapping("config")
     public Object setSysConfigValueByKey(@Valid @RequestBody SystemConfigHandle systemConfigHandle, BindingResult bindingResult)throws Exception {
+        log.info("start setSysConfigValueByKey. systemConfigHandle:{}", systemConfigHandle);
         String key = systemConfigHandle.getConfigKey();
         // tx_count_limit, tx_gas_limit
         if (PrecompiledUtils.TxCountLimit.equals(key) || PrecompiledUtils.TxGasLimit.equals(key)) {
             // post返回透传
             try {
-                return precompiledSysConfigService.setSysConfigValueByKey(systemConfigHandle);
+                Object res = precompiledSysConfigService.setSysConfigValueByKey(systemConfigHandle);
+                log.info("end setSysConfigValueByKey. res:{}", res);
+                return res;
             } catch (Exception e) { //parse error
+                log.error("end setSysConfigValueByKey. Exception:{}", e.getMessage());
                 return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
             }
         }else {
+            log.error("end setSysConfigValueByKey. Exception:{}",
+                    ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY.getMessage());
             return ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY;
         }
     }

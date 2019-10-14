@@ -59,16 +59,20 @@ public class PrecompiledController {
             @RequestParam String contractNameAndVersion,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
+        log.info("start queryCns. groupId:{}, contractNameAndVersion:{}",
+                groupId, contractNameAndVersion);
         List<CnsInfo> resList = new ArrayList<>();
         // get "name:version"
         String[] params = contractNameAndVersion.split(":");
         if(params.length == 1) {
             String name = params[0];
             resList =  precompiledService.queryCnsByName(groupId, name);
+            log.info("in queryCns case: Contract Name. resList:{}", resList);
             if(resList.size() != 0){
                 List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
                 List<CnsInfo> finalList = list2Page.getPagedList();
                 long totalCount = (long) resList.size();
+                log.info("end queryCns. Contract Name finalList:{}", finalList);
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -81,10 +85,12 @@ public class PrecompiledController {
             }
             // check return list size
             resList = precompiledService.queryCnsByNameAndVersion(groupId, name, version);
+            log.info("in queryCns case: Contract Name And Version. resList:{}", resList);
             if(resList.size() != 0) {
                 List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
                 List<CnsInfo> finalList = list2Page.getPagedList();
                 long totalCount = (long) resList.size();
+                log.info("in queryCns case: Contract Name And Version. finalList:{}", finalList);
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -105,12 +111,14 @@ public class PrecompiledController {
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
-
+        log.info("start getNodeList. groupId:{}", groupId);
         List<NodeInfo> resList = precompiledService.getNodeList(groupId);
+        log.info("end getNodeList. resList:{}", resList);
         if(resList.size() != 0) {
             List2Page<NodeInfo> list2Page = new List2Page<NodeInfo>(resList, pageSize, pageNumber);
             List<NodeInfo> finalList = list2Page.getPagedList();
             long totalCount = (long) resList.size();
+            log.info("end getNodeList. finalList:{}", finalList);
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
             return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
@@ -121,8 +129,8 @@ public class PrecompiledController {
     @ApiImplicitParam(name = "consensusHandle", value = "node consensus status control", required = true, dataType = "ConsensusHandle")
     @PostMapping("consensus")
     public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle, BindingResult bindingResult)throws Exception {
+        log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();
-
         int groupId = consensusHandle.getGroupId();
         String from = consensusHandle.getFromAddress();
         String nodeId = consensusHandle.getNodeId();
@@ -143,27 +151,33 @@ public class PrecompiledController {
     }
 
     public Object addSealer(int groupId, String fromAddress, String nodeId) throws Exception {
-        log.info("addSealer start. nodeId:: ", nodeId);
+        log.info("start addSealer. groupId:{},fromAddress:{},nodeId:{}", groupId, fromAddress, nodeId);
         try{
-            return precompiledService.addSealer(groupId, fromAddress, nodeId);
+            Object res = precompiledService.addSealer(groupId, fromAddress, nodeId);
+            log.info("end addSealer. res:{}", res);
+            return res;
         } catch (Exception e) {
             return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }
 
     public Object addObserver(int groupId, String fromAddress, String nodeId) throws Exception {
-        log.info("addObserver start. nodeId:: ", nodeId);
+        log.info("start addObserver. groupId:{},fromAddress:{},nodeId:{}", groupId, fromAddress, nodeId);
         try{
-            return precompiledService.addObserver(groupId, fromAddress, nodeId);
+            Object res = precompiledService.addObserver(groupId, fromAddress, nodeId);
+            log.info("end addObserver. res:{}", res);
+            return res;
         } catch (Exception e) {
             return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }
 
     public Object removeNode(int groupId, String fromAddress, String nodeId) throws Exception {
-        log.info("removeNode start. nodeId:: ", nodeId);
+        log.info("start removeNode. groupId:{},fromAddress:{},nodeId:{}", groupId, fromAddress, nodeId);
         try{
-            return precompiledService.removeNode(groupId, fromAddress, nodeId);
+            Object res = precompiledService.removeNode(groupId, fromAddress, nodeId);
+            log.info("end removeNode. res:{}", res);
+            return res;
         } catch (Exception e) {
             return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
@@ -178,6 +192,7 @@ public class PrecompiledController {
     @ApiImplicitParam(name = "crudHandle", value = "crud operation info", required = true, dataType = "CrudHandle")
     @PostMapping("crud")
     public Object crudManageControl(@Valid @RequestBody CrudHandle crudHandle, BindingResult bindingResult)throws Exception {
+        log.info("start crudManageControl. crudHandle:{}", crudHandle);
         int groupId = crudHandle.getGroupId();
         String from = crudHandle.getFromAddress();
         String sql = crudHandle.getSql();
@@ -204,10 +219,12 @@ public class PrecompiledController {
 
 
     public Object createTable(int groupId, String fromAddress, String sql) throws Exception {
-        log.info("createTable start. address:: ", fromAddress);
+        log.info("start createTable. groupId:{},fromAddress:{},sql:{}", groupId, fromAddress, sql);
         Table table = new Table();
         try {
+            log.info("start parseCreateTable.");
             CRUDParseUtils.parseCreateTable(sql, table);
+            log.info("end parseCreateTable. table:{}", table);
         } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
@@ -215,6 +232,7 @@ public class PrecompiledController {
         }
         CRUDParseUtils.checkTableParams(table);
         int result = precompiledService.createTable(groupId, fromAddress, table);
+        log.info("end createTable. result:{}", result);
 
         if (result == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCESS,"Create '" + table.getTableName() + "' Ok.");
@@ -230,6 +248,7 @@ public class PrecompiledController {
 
     // check table name exist by desc(tableName)
     public Object desc(int groupId, String sql) throws Exception {
+        log.info("start desc. groupId:{}, sql:{}", groupId, sql);
         Table table = new Table();
         String[] sqlParams = sql.split(" ");
         // "desc t_demo"
@@ -255,13 +274,17 @@ public class PrecompiledController {
     }
 
     public Object select(int groupId, String fromAddress, String sql) throws Exception {
+        log.info("start select. groupId:{},fromAddress:{},sql:{}", groupId, fromAddress, sql);
         Table table = new Table();
         Condition conditions = table.getCondition();
         List<String> selectColumns = new ArrayList<>();
 
         ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
         try { //转化select语句
+            log.info("start parseSelect. sql:{}", sql);
             CRUDParseUtils.parseSelect(sql, table, conditions, selectColumns);
+            log.info("end parseSelect. table:{}, conditions:{}, selectColumns:{}",
+                    table, conditions, selectColumns);
         } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
@@ -300,11 +323,11 @@ public class PrecompiledController {
             String[] valueArr = descTable.getValueFields().split(",");
             selectColumns.addAll(Arrays.asList(valueArr));
             result = CRUDParseUtils.getSeletedColumn(selectColumns, result);
-            rows = result.size();
+            log.info("end desc. result:{}", result);
             return new BaseResponse(ConstantCode.RET_SUCCESS, result);
         } else {
             List<Map<String, String>> selectedResult = CRUDParseUtils.getSeletedColumn(selectColumns, result);
-            rows = selectedResult.size();
+            log.info("end desc. selectedResult:{}", selectedResult);
             return new BaseResponse(ConstantCode.RET_SUCCESS, selectedResult);
         }
 
@@ -312,13 +335,16 @@ public class PrecompiledController {
     }
 
     public Object insert(int groupId, String fromAddress, String sql) throws Exception {
+        log.info("start insert. groupId:{},fromAddress:{},sql:{}", groupId, fromAddress, sql);
         Table table = new Table();
         Entry entry = new Entry();
 
         // insert sql use "values" or not
         boolean useValues = false;
         try {
+            log.info("start parseInsert. sql:{}", sql);
             useValues = CRUDParseUtils.parseInsert(sql, table, entry);
+            log.info("end parseInsert. table:{}, entry:{}", table, entry);
         } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                             "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
@@ -396,6 +422,7 @@ public class PrecompiledController {
         }
         CRUDParseUtils.checkUserTableParam(entry, descTable);
         int insertResult = precompiledService.insert(groupId, fromAddress, table, entry);
+        log.info("end insert. insertResult:{}", insertResult);
         if (insertResult >= 0) {
             return new BaseResponse(ConstantCode.RET_SUCCESS,
                     "Insert OK, " + insertResult + " row(s) affected.");
@@ -405,12 +432,16 @@ public class PrecompiledController {
     }
 
     public Object update(int groupId, String fromAddress, String sql) throws Exception {
+        log.info("start update. groupId:{},fromAddress:{},sql:{}", groupId, fromAddress, sql);
         Table table = new Table();
         Entry entry = new Entry();
         Condition conditions = new Condition();
 
         try {
+            log.info("start parseUpdate. sql:{}", sql);
             CRUDParseUtils.parseUpdate(sql, table, entry, conditions);
+            log.info("end parseUpdate. table:{}, entry:{}, conditions:{}",
+                    table, entry, conditions);
         } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
@@ -449,6 +480,7 @@ public class PrecompiledController {
         }
         CRUDParseUtils.checkUserTableParam(entry, descTable);
         int updateResult = precompiledService.update(groupId, fromAddress, table, entry, conditions);
+        log.info("end update. updateResult:{}", updateResult);
         if (updateResult >= 0) {
             return new BaseResponse(ConstantCode.RET_SUCCESS,
                     "Update OK, " + updateResult + " row(s) affected.");
@@ -459,6 +491,7 @@ public class PrecompiledController {
     }
 
     public Object remove(int groupId, String fromAddress, String sql) throws Exception {
+        log.info("start remove. groupId:{},fromAddress:{},sql:{}", groupId, fromAddress, sql);
         Table table = new Table();
         Condition conditions = new Condition();
 
@@ -466,7 +499,9 @@ public class PrecompiledController {
         String msg;
         ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
         try {
+            log.info("start parseRemove. sql:{}", sql);
             CRUDParseUtils.parseRemove(sql, table, conditions);
+            log.info("end parseRemove. table:{}, conditions:{}", table, conditions);
         } catch (Exception e) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
@@ -482,6 +517,7 @@ public class PrecompiledController {
         table.setKey(descTable.getKey());
         CRUDParseUtils.handleKey(table, conditions);
         int removeResult = precompiledService.remove(groupId, fromAddress, table, conditions);
+        log.info("end remove. removeResult:{}", removeResult);
         if (removeResult >= 0) {
             return new BaseResponse(ConstantCode.RET_SUCCESS,
                     "Remove OK, " + removeResult + " row(s) affected.");
