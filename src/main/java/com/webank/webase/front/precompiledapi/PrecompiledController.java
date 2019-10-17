@@ -154,6 +154,7 @@ public class PrecompiledController {
             case PrecompiledUtils.NODE_TYPE_REMOVE:
                 return removeNode(groupId, from, nodeId);
             default:
+                log.debug("end nodeManageControl invalid node type");
                 return ConstantCode.INVALID_NODE_TYPE;
         }
     }
