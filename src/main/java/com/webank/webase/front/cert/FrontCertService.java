@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import org.apache.commons.io.IOUtils;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -31,10 +32,10 @@ import java.util.List;
 @Slf4j
 @Service
 public class FrontCertService {
-    private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
-    private final static String tail = "-----END CERTIFICATE-----\n" ;
-    private final static String nodeCrt = "/conf/node.crt";
-    private final static String caCrt = "/conf/ca.crt";
+    private final static String crtContentHead = "-----BEGIN CERTIFICATE-----\n" ;
+    private final static String crtContentTail = "-----END CERTIFICATE-----\n" ;
+    private final static String nodeCrtPath = "/conf/node.crt";
+    private final static String caCrtPath = "/conf/ca.crt";
     @Autowired
     Constants constants;
     /**
@@ -49,11 +50,11 @@ public class FrontCertService {
         String nodePath = constants.getNodePath();
         log.debug("start getNodeCerts in {}" + nodePath);
         try {
-            InputStream nodeCrtInput = Files.newInputStream(Paths.get(nodePath.concat(nodeCrt)));
-            String nodeCrtStr = getString(nodeCrtInput);
-            String[] nodeCrtStrArray = nodeCrtStr.split(head);
+            InputStream nodeCrtInput = Files.newInputStream(Paths.get(nodePath.concat(nodeCrtPath)));
+            String nodeCrtStr = inputStream2String(nodeCrtInput);
+            String[] nodeCrtStrArray = nodeCrtStr.split(crtContentHead);
             for(String nodeCrtStrNoHead: nodeCrtStrArray) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
-                String[] nodeCrtStrArray2 = nodeCrtStrNoHead.split(tail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
+                String[] nodeCrtStrArray2 = nodeCrtStrNoHead.split(crtContentTail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
                 for(String nodeCrtStrNoTail: nodeCrtStrArray2) {
                     // 去头尾的ca证书内容
                     String ca = nodeCrtStrNoTail;
@@ -65,7 +66,7 @@ public class FrontCertService {
             nodeCrtInput.close();
             log.debug("end getNodeCerts in {}" + nodePath);
         }catch (IOException e) {
-            log.error("FrontCertService getCerts, node cert(node.crt) path prefix error, Exception:{}", e.getMessage());
+            log.error("FrontCertService getCerts, node cert(node.crt) path prefix error, Exception:{}", e);
             throw (FrontException)new FrontException("FileNotFound, chain cert(ca.crt) path error").initCause(e);
         }
         return list;
@@ -75,12 +76,13 @@ public class FrontCertService {
         String nodePath = constants.getNodePath();
         String ca = "";
         log.debug("start getChainCrt in {}" + nodePath);
+        // try 里的inputstream
         try{
-            InputStream caInput = Files.newInputStream(Paths.get(nodePath.concat(caCrt)));
-            String caStr = getString(caInput);
-            String[] caStrArray = caStr.split(head); // 一个是空，一个是去除了head的string
+            InputStream caInput = Files.newInputStream(Paths.get(nodePath.concat(caCrtPath)));
+            String caStr = inputStream2String(caInput);
+            String[] caStrArray = caStr.split(crtContentHead); // 一个是空，一个是去除了head的string
             for(String caCrtStrNoHead: caStrArray) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
-                String[] caStrArray2 = caCrtStrNoHead.split(tail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
+                String[] caStrArray2 = caCrtStrNoHead.split(crtContentTail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
                 for(String caCrtStrNoTail: caStrArray2) {
                     // 去头尾的ca证书内容
                     ca  = caCrtStrNoTail;
@@ -92,19 +94,14 @@ public class FrontCertService {
             caInput.close();
             log.debug("end getChainCrt in {}" + nodePath);
         }catch (IOException e) {
-            log.error("FrontCertService getCerts, chain cert(ca.crt) path prefix error, Exception:{}", e.getMessage());
+            log.error("FrontCertService getCerts, chain cert(ca.crt) path prefix error, Exception:{}", e);
             throw (FrontException)new FrontException("FileNotFound, chain cert(ca.crt) path error \n").initCause(e);
         }
         return ca;
     }
 
-
-    public String getString(InputStream inputStream) throws IOException {
-        byte[] bytes = new byte[0];
-        bytes = new byte[inputStream.available()];
-        inputStream.read(bytes);
-        String str = new String(bytes);
-        inputStream.close();
+    public String inputStream2String(InputStream inputStream) throws IOException {
+        String str = IOUtils.toString(inputStream,"UTF-8");
         return str;
     }
 
