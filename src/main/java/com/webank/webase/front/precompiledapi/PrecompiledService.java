@@ -18,6 +18,7 @@ package com.webank.webase.front.precompiledapi;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.precompiledHandle.NodeInfo;
+import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -112,17 +113,18 @@ public class PrecompiledService{
         // process nodeList
         List<NodeInfo> nodeListWithType = new ArrayList<>();
         for(int i = 0; i < nodeList.size(); i++) {
-            String nodeId = nodeList.get(i);// 默认游离节点
-            NodeInfo nodeInfo = new NodeInfo(nodeId, "remove");
+            // 默认游离节点
+            String nodeId = nodeList.get(i);
+            NodeInfo nodeInfo = new NodeInfo(nodeId, PrecompiledUtils.NODE_TYPE_REMOVE);
 
             for(int j= 0; j < sealerList.size(); j++){
                 if(sealerList.get(j).equals(nodeId)) {
-                    nodeInfo.setNodeType("sealer");
+                    nodeInfo.setNodeType(PrecompiledUtils.NODE_TYPE_SEALER);
                 }
             }
             for(int k= 0; k < observerList.size(); k++){
                 if(observerList.get(k).equals(nodeId)) {
-                    nodeInfo.setNodeType("observer");
+                    nodeInfo.setNodeType(PrecompiledUtils.NODE_TYPE_OBSERVER);
                 }
             }
             nodeListWithType.add(nodeInfo);
