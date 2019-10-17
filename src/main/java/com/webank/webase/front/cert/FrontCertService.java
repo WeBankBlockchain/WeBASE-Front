@@ -19,11 +19,11 @@ package com.webank.webase.front.cert;
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import org.apache.commons.io.IOUtils;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -32,10 +32,10 @@ import java.util.List;
 @Slf4j
 @Service
 public class FrontCertService {
-    private final static String crtContentHead = "-----BEGIN CERTIFICATE-----\n" ;
-    private final static String crtContentTail = "-----END CERTIFICATE-----\n" ;
-    private final static String nodeCrtPath = "/conf/node.crt";
-    private final static String caCrtPath = "/conf/ca.crt";
+    private static final String crtContentHead = "-----BEGIN CERTIFICATE-----\n";
+    private static final String crtContentTail = "-----END CERTIFICATE-----\n";
+    private static final String nodeCrtPath = "/conf/node.crt";
+    private static final String caCrtPath = "/conf/ca.crt";
     @Autowired
     Constants constants;
     /**
