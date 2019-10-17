@@ -39,7 +39,6 @@ import java.util.Map;
 public class FrontCertController {
     @Autowired
     FrontCertService certService;
-    // TODO函数命名
     @GetMapping("")
     public Object getFrontCerts() {
         Instant startTime = Instant.now();

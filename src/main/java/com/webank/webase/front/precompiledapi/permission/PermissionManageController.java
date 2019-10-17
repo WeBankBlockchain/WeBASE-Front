@@ -85,6 +85,7 @@ public class PermissionManageController extends BaseController {
                     .PERMISSION_TYPE_CNS:
                 return listCNSManager(groupId, pageSize, pageNumber);
             default:
+                log.debug("end permissionGetControl, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
         }
     }
@@ -127,6 +128,7 @@ public class PermissionManageController extends BaseController {
                 resList = permissionManageService.listCNSManager(groupId);
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
             default:
+                log.debug("end getFullListByType, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
         }
     }
@@ -219,6 +221,7 @@ public class PermissionManageController extends BaseController {
                     .PERMISSION_TYPE_CNS:
                 return grantCNSManager(groupId, from, address);
             default:
+                log.debug("end permissionPostControl, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
         }
     }
@@ -241,23 +244,30 @@ public class PermissionManageController extends BaseController {
         }
         address = convertAddress.getAddress();
         switch (permissionType) {
-            case "permission":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_PERMISSION:
                 return revokePermissionManager(groupId, from, address);
-            case "deployAndCreate":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_DEPLOY_AND_CREATE:
                 return revokeDeployAndCreateManager(groupId, from, address);
-            case "userTable":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_USERTABLE:
                 if(tableName.isEmpty()){
                     return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
                 }else {
                     return revokeUserTableManager(groupId, from, tableName, address);
                 }
-            case "node":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_NODE:
                 return revokeNodeManager(groupId, from, address);
-            case "sysConfig":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_SYS_CONFIG:
                 return revokeSysConfigManager(groupId, from, address);
-            case "cns":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_CNS:
                 return revokeCNSManager(groupId, from, address);
             default:
+                log.debug("end permissionDeleteControl, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
         }
     }
