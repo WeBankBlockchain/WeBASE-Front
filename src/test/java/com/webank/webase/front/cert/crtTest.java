@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class crtTest {
-    private final static String flag = "-----" ;
-    private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
-    private final static String tail = "-----END CERTIFICATE-----\n" ;
+    private static final String flag = "-----" ;
+    private static final String head = "-----BEGIN CERTIFICATE-----\n" ;
+    private static final String tail = "-----END CERTIFICATE-----\n" ;
 
     @Test
     public void getChainCrt() throws IOException {
