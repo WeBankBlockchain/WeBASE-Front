@@ -39,7 +39,7 @@ import java.util.Map;
 public class FrontCertController {
     @Autowired
     FrontCertService certService;
-
+    // TODO函数命名
     @GetMapping("")
     public Object getFrontCerts() {
         Instant startTime = Instant.now();
@@ -48,7 +48,7 @@ public class FrontCertController {
         String chainCertStr;
         String nodeCrtStr;
         String agencyCrtStr;
-        // node.crt = node + agency (+ chain)
+        // node的crt文件可能包含节点、机构、链证书三个
         try {
             certList = certService.getNodeCerts();
             chainCertStr = certService.getChainCrt();
