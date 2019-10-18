@@ -1,5 +1,21 @@
+/*
+ * Copyright 2014-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.webank.webase.front.cert;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -8,9 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class crtTest {
-    private final static String flag = "-----" ;
-    private final static String head = "-----BEGIN CERTIFICATE-----\n" ;
-    private final static String tail = "-----END CERTIFICATE-----\n" ;
+    private static final String flag = "-----" ;
+    private static final String head = "-----BEGIN CERTIFICATE-----\n" ;
+    private static final String tail = "-----END CERTIFICATE-----\n" ;
 
     @Test
     public void getChainCrt() throws IOException {
@@ -28,6 +44,7 @@ public class crtTest {
             }
         }
         System.out.println(ca);
+        Assert.assertNull(ca);
     }
 
     @Test
@@ -40,6 +57,7 @@ public class crtTest {
             String[] strArray2 = strArray[i].split(tail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
             for(int j = 0; j < strArray2.length; j++) {
                 System.out.println("i: " + i + " j: " + j + " " + strArray2[j]);
+                Assert.assertNull(strArray2[j]);
             }
         }
     }
@@ -61,8 +79,9 @@ public class crtTest {
             }
         }
         System.out.println(list.get(0));
+        Assert.assertNull(list.get(0));
         System.out.println(list.get(1));
-
+        Assert.assertNull(list.get(1));
     }
 
     public String formatStr(String string) {

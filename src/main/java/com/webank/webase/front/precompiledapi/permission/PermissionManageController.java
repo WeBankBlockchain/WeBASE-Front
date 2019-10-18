@@ -1,9 +1,26 @@
+/*
+ * Copyright 2014-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.webank.webase.front.precompiledapi.permission;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.webank.webase.front.base.*;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.AddressUtils;
+import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
 import com.webank.webase.front.util.pageutils.Map2PagedList;
 import com.webank.webase.front.util.pageutils.MapHandle;
@@ -17,6 +34,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,33 +50,42 @@ public class PermissionManageController extends BaseController {
     @Autowired
     private PermissionManageService permissionManageService;
 
-    //分发Get请求, 根据type获取权限管理员的list
+    /**
+     * 分发Get请求, 根据type获取权限管理员的list
+     */
     @GetMapping("")
     public Object permissionGetControl(
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String permissionType,
-            @RequestParam(defaultValue = "", required = false) String tableName,
+            @RequestParam(defaultValue = "") String tableName,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
-
+        log.info("start permissionGetControl permissionType:{}", permissionType);
         switch (permissionType) {
-            case "permission":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_PERMISSION:
                 return listPermissionManager(groupId, pageSize, pageNumber);
-            case "deployAndCreate":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_DEPLOY_AND_CREATE:
                 return listDeployAndCreateManager(groupId, pageSize, pageNumber);
-            case "userTable":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_USERTABLE:
                 if(tableName.isEmpty()){
                     return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
                 }else {
                     return listUserTableManager(groupId, tableName, pageSize, pageNumber);
                 }
-            case "node":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_NODE:
                 return listNodeManager(groupId, pageSize, pageNumber);
-            case "sysConfig":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_SYS_CONFIG:
                 return listSysConfigManager(groupId, pageSize, pageNumber);
-            case "cns":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_CNS:
                 return listCNSManager(groupId, pageSize, pageNumber);
             default:
+                log.debug("end permissionGetControl, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
         }
     }
@@ -68,32 +96,39 @@ public class PermissionManageController extends BaseController {
             @RequestParam(defaultValue = "1") int groupId,
             @RequestParam String permissionType,
             @RequestParam(defaultValue = "", required = false) String tableName) throws Exception {
-
+        log.info("start getFullListByType permissionType:{}", permissionType);
         List<PermissionInfo> resList = new ArrayList<>();
         switch (permissionType) {
-            case "permission":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_PERMISSION:
                 resList = permissionManageService.listPermissionManager(groupId);
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
-            case "deployAndCreate":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_DEPLOY_AND_CREATE:
                 resList = permissionManageService.listDeployAndCreateManager(groupId);
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
-            case "userTable":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_USERTABLE:
                 if(tableName.isEmpty()){
                     return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
                 }else {
                     resList = permissionManageService.listUserTableManager(groupId, tableName);
                     return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
                 }
-            case "node":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_NODE:
                 resList = permissionManageService.listNodeManager(groupId);
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
-            case "sysConfig":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_SYS_CONFIG:
                 resList = permissionManageService.listSysConfigManager(groupId);
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
-            case "cns":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_CNS:
                 resList = permissionManageService.listCNSManager(groupId);
                 return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
             default:
+                log.debug("end getFullListByType, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
         }
     }
@@ -102,7 +137,11 @@ public class PermissionManageController extends BaseController {
     @GetMapping("/sorted/full")
     public Object gerPermissionStateFull(
             @RequestParam(defaultValue = "1") int groupId) throws Exception {
+        Instant startTime = Instant.now();
+        log.info("start gerPermissionStateFull startTime:{}", startTime.toEpochMilli());
         Map<String, PermissionState> resultMap = permissionManageService.getAllPermissionStateList(groupId);
+        log.info("end listCns useTime:{} result:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(resultMap));
         return new BasePageResponse(ConstantCode.RET_SUCCESS, resultMap, resultMap.size());
     }
 
@@ -111,33 +150,42 @@ public class PermissionManageController extends BaseController {
     @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
     @ApiImplicitParam(name = "permissionHandle", value = "permission info", required = true, dataType = "PermissionHandle")
     @PostMapping("/sorted")
-    public Object updateUserPermissionStateAfterCheck(@Valid @RequestBody PermissionHandle permissionHandle){
+    public Object updateUserPermissionStateAfterCheck(@Valid @RequestBody PermissionHandle permissionHandle) throws Exception {
+        Instant startTime = Instant.now();
+        log.info("start updateUserPermissionStateAfterCheck startTime:{}, permissionHandle:{}",
+                startTime.toEpochMilli(), permissionHandle);
         int groupId = permissionHandle.getGroupId();
         String fromAddress = permissionHandle.getFromAddress();
         String userAddress = permissionHandle.getAddress();
         PermissionState permissionState = permissionHandle.getPermissionState();
         try {
             Object resultState = permissionManageService.updatePermissionStateAfterCheck(groupId, fromAddress, userAddress, permissionState);
+            log.info("end updateUserPermissionStateAfterCheck startTime:{}, resultState:{}",
+                    Instant.now().toEpochMilli(), resultState);
             return new BaseResponse(ConstantCode.RET_SUCCEED, resultState);
-        }catch (Exception e) {
-            if(e instanceof JsonParseException) {
+        }
+        catch (JsonParseException e) {
+            log.error("end updateUserPermissionStateAfterCheck for startTime:{}, Exception:{}",
+                    Instant.now().toEpochMilli(), e.getMessage());
                 return new BaseResponse(ConstantCode.SYSTEM_ERROR, "Parse json fail, please check permissionState's object structure");
             }
-            if(e instanceof NullPointerException) {
-                return new BaseResponse(ConstantCode.PARAM_VAILD_FAIL, "all cns, node, sysConfig, deployAndCreate cannot be null");
-            }
-            if(e instanceof FrontException) {
-                return new BaseResponse(ConstantCode.PERMISSION_DENIED, e.getMessage());
-            }
-            return new BaseResponse(ConstantCode.SYSTEM_ERROR, e.getMessage());
+        catch(NullPointerException e) {
+            log.error("end updateUserPermissionStateAfterCheck for startTime:{}, Exception:{}",
+                    Instant.now().toEpochMilli(), e.getMessage());
+            return new BaseResponse(ConstantCode.PARAM_VAILD_FAIL, "all cns, node, sysConfig, deployAndCreate cannot be null");
+        }
+        catch(FrontException e) {
+            log.error("end updateUserPermissionStateAfterCheck for startTime:{}, Exception:{}",
+                    Instant.now().toEpochMilli(), e.getMessage());
+            return new BaseResponse(ConstantCode.PERMISSION_DENIED, e.getMessage());
         }
     }
 
     // 分发Post请求
     @ApiOperation(value = "grantPermissionManager", notes = "grant address PermissionManager")
-    @ApiImplicitParam(name = "permissionHandle", value = "transaction info", required = true, dataType = "PermissionHandle")
-    @PostMapping("")
-    public Object permissionPostControl(@Valid @RequestBody PermissionHandle permissionHandle, BindingResult result) throws Exception {
+    @PostMapping
+    public Object permissionPostControl(@Valid @RequestBody PermissionHandle permissionHandle) throws Exception {
+        log.info("start permissionPostControl permissionHandle:{}", permissionHandle);
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
         String from = permissionHandle.getFromAddress();
@@ -150,23 +198,30 @@ public class PermissionManageController extends BaseController {
         }
         address = converAddr.getAddress();
         switch (permissionType) {
-            case "permission":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_PERMISSION:
                 return grantPermissionManager(groupId, from, address);
-            case "deployAndCreate":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_DEPLOY_AND_CREATE:
                 return grantDeployAndCreateManager(groupId, from, address);
-            case "userTable":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_USERTABLE:
                 if(tableName.isEmpty()){
                     return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
                 }else {
                     return grantUserTableManager(groupId, from, tableName, address);
                 }
-            case "node":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_NODE:
                 return grantNodeManager(groupId, from, address);
-            case "sysConfig":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_SYS_CONFIG:
                 return grantSysConfigManager(groupId, from, address);
-            case "cns":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_CNS:
                 return grantCNSManager(groupId, from, address);
             default:
+                log.debug("end permissionPostControl, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
         }
     }
@@ -175,8 +230,8 @@ public class PermissionManageController extends BaseController {
     @ApiOperation(value = "revokePermissionManager", notes = "revoke address PermissionManager")
     @ApiImplicitParam(name = "permissionHandle", value = "transaction info", required = true, dataType = "PermissionHandle")
     @DeleteMapping("")
-    public Object permissionDeleteControl(@Valid @RequestBody PermissionHandle permissionHandle, BindingResult result) throws Exception {
-
+    public Object permissionDeleteControl(@Valid @RequestBody PermissionHandle permissionHandle) throws Exception {
+        log.info("start permissionDeleteControl permissionHandle:{}", permissionHandle);
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
         String from = permissionHandle.getFromAddress();
@@ -189,23 +244,30 @@ public class PermissionManageController extends BaseController {
         }
         address = convertAddress.getAddress();
         switch (permissionType) {
-            case "permission":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_PERMISSION:
                 return revokePermissionManager(groupId, from, address);
-            case "deployAndCreate":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_DEPLOY_AND_CREATE:
                 return revokeDeployAndCreateManager(groupId, from, address);
-            case "userTable":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_USERTABLE:
                 if(tableName.isEmpty()){
                     return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
                 }else {
                     return revokeUserTableManager(groupId, from, tableName, address);
                 }
-            case "node":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_NODE:
                 return revokeNodeManager(groupId, from, address);
-            case "sysConfig":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_SYS_CONFIG:
                 return revokeSysConfigManager(groupId, from, address);
-            case "cns":
+            case PrecompiledUtils
+                    .PERMISSION_TYPE_CNS:
                 return revokeCNSManager(groupId, from, address);
             default:
+                log.debug("end permissionDeleteControl, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
         }
     }
@@ -215,23 +277,32 @@ public class PermissionManageController extends BaseController {
      */
 
     public Object grantPermissionManager(int groupId, String from, String address) throws Exception {
-        log.info("grantPermissionManager start. address:[{}]", address);
-        //checkParamResult(result);
+        Instant startTime = Instant.now();
+        log.info("start grantPermissionManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.grantPermissionManager(groupId, from, address);
-
+        log.info("end grantPermissionManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
     }
 
     public Object revokePermissionManager(int groupId, String from, String address) throws Exception {
-        log.info("revokePermissionManager start. address:[{}]", address);
-        //checkParamResult(result);
+        Instant startTime = Instant.now();
+        log.info("start revokePermissionManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.revokePermissionManager(groupId, from, address);
+        log.info("end revokePermissionManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
     }
 
     public Object listPermissionManager(int groupId, int pageSize, int pageNumber) throws Exception {
-        log.info("listPermissionManager start. ");
+        Instant startTime = Instant.now();
+        log.info("start listPermissionManager startTime:{}, groupId:{}",
+                startTime.toEpochMilli(), groupId);
         List<PermissionInfo> resList = permissionManageService.listPermissionManager(groupId);
+        log.info("end listPermissionManager useTime:{} resList:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), resList);
         if(resList.size() != 0) {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
@@ -247,20 +318,32 @@ public class PermissionManageController extends BaseController {
      */
 
     public Object grantDeployAndCreateManager(int groupId, String from, String address) throws Exception {
-        log.info("grantDeployAndCreateManager start. address:[{}]", address);
-        //checkParamResult(result);
-        return permissionManageService.grantDeployAndCreateManager(groupId, from, address);
+        Instant startTime = Instant.now();
+        log.info("start grantDeployAndCreateManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
+        String res = permissionManageService.grantDeployAndCreateManager(groupId, from, address);
+        log.info("end grantDeployAndCreateManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+        return res;
     }
 
     public Object revokeDeployAndCreateManager(int groupId, String from, String address) throws Exception {
-        log.info("revokeDeployAndCreateManager start. address:[{}]", address);
-        //checkParamResult(result);
-        return permissionManageService.revokeDeployAndCreateManager(groupId, from, address);
+        Instant startTime = Instant.now();
+        log.info("start revokeDeployAndCreateManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
+        String res =  permissionManageService.revokeDeployAndCreateManager(groupId, from, address);
+        log.info("end revokeDeployAndCreateManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+        return res;
     }
 
     public Object listDeployAndCreateManager(int groupId, int pageSize, int pageNumber) throws Exception {
-        log.info("listDeployAndCreateManager start. ");
+        Instant startTime = Instant.now();
+        log.info("start listDeployAndCreateManager startTime:{}, groupId:{}",
+                startTime.toEpochMilli(), groupId);
         List<PermissionInfo> resList = permissionManageService.listDeployAndCreateManager(groupId);
+        log.info("end listDeployAndCreateManager useTime:{} resList:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), resList);
         if(resList.size() != 0) {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             return new BasePageResponse(ConstantCode.RET_SUCCESS, list2Page.getPagedList(), resList.size());
@@ -274,13 +357,20 @@ public class PermissionManageController extends BaseController {
      */
     public Object grantUserTableManager(int groupId, String from, String tableName, String address) throws Exception {
         if(Objects.isNull(tableName)){
+            log.error("grantUserTableManager error for table name is empty");
             return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
         }else {
-            log.info("grantUserTableManager start.tableName: ", tableName, "  address:[{}]: ", address);
-            //checkParamResult(result);
+            Instant startTime = Instant.now();
+            log.info("start grantUserTableManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                    startTime.toEpochMilli(), groupId, from, address);
             try{
-                return permissionManageService.grantUserTableManager(groupId, from, tableName, address);
+                Object res = permissionManageService.grantUserTableManager(groupId, from, tableName, address);
+                log.info("end grantUserTableManager useTime:{} res:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                return res;
             } catch (Exception e) {
+                log.error("end grantUserTableManager for startTime:{}, Exception:{}",
+                        Instant.now().toEpochMilli(), e);
                 return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, e.getMessage());
             }
         }
@@ -288,13 +378,20 @@ public class PermissionManageController extends BaseController {
 
     public Object revokeUserTableManager(int groupId, String from, String tableName, String address) throws Exception {
         if(Objects.isNull(tableName)){
+            log.error("revokeUserTableManager error for table name is empty");
             return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
         }else {
-            log.info("revokeUserTableManager start.tableName: ", tableName, "  address: ", address);
-            //checkParamResult(result);
+            Instant startTime = Instant.now();
+            log.info("start revokeUserTableManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                    startTime.toEpochMilli(), groupId, from, address);
             try {
-                return permissionManageService.revokeUserTableManager(groupId, from, tableName, address);
+                Object res = permissionManageService.revokeUserTableManager(groupId, from, tableName, address);
+                log.info("end revokeUserTableManager useTime:{} res:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                return res;
             } catch (Exception e) {
+                log.error("end grantUserTableManager for startTime:{}, Exception:{}",
+                        Instant.now().toEpochMilli(), e);
                 return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, e.getMessage());
             }
         }
@@ -304,10 +401,12 @@ public class PermissionManageController extends BaseController {
         if(Objects.isNull(tableName)){
             return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
         }else {
-            log.info("listPermissionManager start. ");
-            //  if tableName not exists, exception catch will return list whose size is 0
-
+            Instant startTime = Instant.now();
+            log.info("start listUserTableManager startTime:{}, groupId:{}",
+                    startTime.toEpochMilli(), groupId);
             List<PermissionInfo> resList = permissionManageService.listUserTableManager(groupId, tableName);
+            log.info("end listUserTableManager useTime:{} resList:{}",
+                    Duration.between(startTime, Instant.now()).toMillis(), resList);
             if(resList.size() != 0) {
                 List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
                 List<PermissionInfo> finalList = list2Page.getPagedList();
@@ -324,20 +423,32 @@ public class PermissionManageController extends BaseController {
      * node
      */
     public Object grantNodeManager(int groupId, String from, String address) throws Exception {
-        log.info("grantNodeManager start. address:: ", address);
-        //checkParamResult(result);
-        return permissionManageService.grantNodeManager(groupId, from, address);
+        Instant startTime = Instant.now();
+        log.info("start grantNodeManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
+        String res = permissionManageService.grantNodeManager(groupId, from, address);
+        log.info("end grantNodeManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+        return res;
     }
 
     public Object revokeNodeManager(int groupId, String from, String address) throws Exception {
-        log.info("revokeNodeManager start. address:: ", address);
-        //checkParamResult(result);
-        return permissionManageService.revokeNodeManager(groupId, from, address);
+        Instant startTime = Instant.now();
+        log.info("start revokeNodeManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
+        String res = permissionManageService.revokeNodeManager(groupId, from, address);
+        log.info("end revokeNodeManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+        return res;
     }
 
     public Object listNodeManager(int groupId, int pageSize, int pageNumber) throws Exception {
-        log.info("listNodeManager start.  ");
+        Instant startTime = Instant.now();
+        log.info("start listNodeManager startTime:{}, groupId:{}",
+                startTime.toEpochMilli(), groupId);
         List<PermissionInfo> resList = permissionManageService.listNodeManager(groupId);
+        log.info("end listNodeManager useTime:{} resList:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), resList);
         if(resList.size() != 0) {
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
@@ -352,19 +463,31 @@ public class PermissionManageController extends BaseController {
      * manage system config Manager related
      */
     public Object grantSysConfigManager(int groupId, String from, String address) throws Exception {
-        log.info("grantSysConfigManager start. address:: ", address);
-        //checkParamResult(result);
-        return permissionManageService.grantSysConfigManager(groupId, from, address);
+        Instant startTime = Instant.now();
+        log.info("start grantSysConfigManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
+        String res = permissionManageService.grantSysConfigManager(groupId, from, address);
+        log.info("end grantSysConfigManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+        return res;
     }
 
     public Object revokeSysConfigManager(int groupId, String from, String address) throws Exception {
-        log.info("revokeSysConfigManager start. address:: ", address);
-        //checkParamResult(result);
-        return permissionManageService.revokeSysConfigManager(groupId, from, address);
+        Instant startTime = Instant.now();
+        log.info("start revokeSysConfigManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
+        String res = permissionManageService.revokeSysConfigManager(groupId, from, address);
+        log.info("end revokeSysConfigManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+        return res;
     }
     public Object listSysConfigManager(int groupId, int pageSize, int pageNumber) throws Exception {
-        log.info("listSysConfigManager start.  ");
+        Instant startTime = Instant.now();
+        log.info("start listSysConfigManager startTime:{}, groupId:{}",
+                startTime.toEpochMilli(), groupId);
         List<PermissionInfo> resList = permissionManageService.listSysConfigManager(groupId);
+        log.info("end listSysConfigManager useTime:{} resList:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), resList);
         if(resList.size() != 0){
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();
@@ -380,20 +503,31 @@ public class PermissionManageController extends BaseController {
      */
 
     public Object grantCNSManager(int groupId, String from, String address) throws Exception {
-        log.info("grantCNSManager start. address:: ", address);
-        //checkParamResult(result);
-        return permissionManageService.grantCNSManager(groupId, from, address);
+        Instant startTime = Instant.now();
+        log.info("start grantCNSManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
+        String res = permissionManageService.grantCNSManager(groupId, from, address);
+        log.info("end grantCNSManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+        return res;
     }
 
     public Object revokeCNSManager(int groupId, String from, String address) throws Exception {
-        log.info("revokeCNSManager start. address:: ", address);
-        //checkParamResult(result);
-        return permissionManageService.revokeCNSManager(groupId, from, address);
-    }
+        Instant startTime = Instant.now();
+        log.info("start revokeCNSManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
+                startTime.toEpochMilli(), groupId, from, address);
+        String res = permissionManageService.revokeCNSManager(groupId, from, address);
+        log.info("end revokeCNSManager useTime:{} res:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+        return res;}
 
     public Object listCNSManager(int groupId, int pageSize, int pageNumber) throws Exception {
-        log.info("listCNSManager start.  ");
+        Instant startTime = Instant.now();
+        log.info("start listCNSManager startTime:{}, groupId:{}",
+                startTime.toEpochMilli(), groupId);
         List<PermissionInfo> resList = permissionManageService.listCNSManager(groupId);
+        log.info("end listCNSManager useTime:{} resList:{}",
+                Duration.between(startTime, Instant.now()).toMillis(), resList);
         if(resList.size() != 0){
             List2Page<PermissionInfo> list2Page = new List2Page<>(resList, pageSize, pageNumber);
             List<PermissionInfo> finalList = list2Page.getPagedList();

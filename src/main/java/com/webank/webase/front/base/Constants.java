@@ -1,12 +1,5 @@
-package com.webank.webase.front.base;
-
-import java.math.BigInteger;
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +13,12 @@ import org.springframework.context.annotation.Configuration;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webank.webase.front.base;
+
+import java.math.BigInteger;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Contract Constant.
@@ -64,6 +63,6 @@ public class Constants {
     private String monitorDisk = "/";
     private boolean monitorEnabled = true;
     private String aesKey = "4d5dFr4fG446GBde";
-    private String nodeCertPath = "/fisco/nodes/127.0.0.1/node0";
+    private String nodePath = "/fisco/nodes/127.0.0.1/node0";
 
 }

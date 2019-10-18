@@ -1,8 +1,24 @@
+/*
+ * Copyright 2014-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.base.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.precompiledHandle.NodeInfo;
+import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -97,17 +113,18 @@ public class PrecompiledService{
         // process nodeList
         List<NodeInfo> nodeListWithType = new ArrayList<>();
         for(int i = 0; i < nodeList.size(); i++) {
-            String nodeId = nodeList.get(i);// 默认游离节点
-            NodeInfo nodeInfo = new NodeInfo(nodeId, "remove");
+            // 默认游离节点
+            String nodeId = nodeList.get(i);
+            NodeInfo nodeInfo = new NodeInfo(nodeId, PrecompiledUtils.NODE_TYPE_REMOVE);
 
             for(int j= 0; j < sealerList.size(); j++){
                 if(sealerList.get(j).equals(nodeId)) {
-                    nodeInfo.setNodeType("sealer");
+                    nodeInfo.setNodeType(PrecompiledUtils.NODE_TYPE_SEALER);
                 }
             }
             for(int k= 0; k < observerList.size(); k++){
                 if(observerList.get(k).equals(nodeId)) {
-                    nodeInfo.setNodeType("observer");
+                    nodeInfo.setNodeType(PrecompiledUtils.NODE_TYPE_OBSERVER);
                 }
             }
             nodeListWithType.add(nodeInfo);
