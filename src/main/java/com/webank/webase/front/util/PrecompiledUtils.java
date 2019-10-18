@@ -32,6 +32,17 @@ public class PrecompiledUtils {
     // SystemConfig key
     public static final String TxCountLimit = "tx_count_limit";
     public static final String TxGasLimit = "tx_gas_limit";
+    // node consensus type
+    public static final String NODE_TYPE_SEALER = "sealer";
+    public static final String NODE_TYPE_OBSERVER = "observer";
+    public static final String NODE_TYPE_REMOVE = "remove";
+    // permission manage type
+    public static final String PERMISSION_TYPE_PERMISSION = "permission";
+    public static final String PERMISSION_TYPE_DEPLOY_AND_CREATE = "deployAndCreate";
+    public static final String PERMISSION_TYPE_USERTABLE = "userTable";
+    public static final String PERMISSION_TYPE_NODE = "node";
+    public static final String PERMISSION_TYPE_SYS_CONFIG = "sysConfig";
+    public static final String PERMISSION_TYPE_CNS = "cns";
 
     public static final int InvalidReturnNumber = -100;
     public static final int QueryLogCount = 20;
