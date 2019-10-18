@@ -14,7 +14,7 @@ fi
 
 mkdir -p log
 
-startWaitTime=120
+startWaitTime=60
 processPid=0
 processStatus=0
 server_pid=0
