@@ -234,6 +234,8 @@ export default {
         txnDecodeBtn: 'Decode',
         txnEncodeBtn: 'Restore',
         toggleSuccessed: 'Switch successed',
-        toggleFailed: 'Switch failed'
+        toggleFailed: 'Switch failed',
+        toggleOpen: 'Open',
+        toggleDown: 'Down',
     }
 }
