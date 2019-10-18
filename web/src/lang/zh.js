@@ -230,6 +230,8 @@ export default {
         txnDecodeBtn: '解码',
         txnEncodeBtn: '还原',
         toggleSuccessed: '切换成功',
-        toggleFailed: '切换失败'
+        toggleFailed: '切换失败',
+        toggleOpen: '打开',
+        toggleDown: '关闭',
     }
 }
