@@ -278,6 +278,10 @@ let errCode = {
         en: "crud sql fail",
         zh: '增删改查失败'
     },
+    "201231": {
+        en: "Cert file not found, please check cert path in config",
+        zh: '找不到证书文件，请检查配置中的证书路径'
+    },
     "202000": {
         en: "invalid node info",
         zh: '无效的节点信息'

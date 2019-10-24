@@ -1,7 +1,7 @@
 <template>
     <div style="background-color: #20293c">
         <v-content-head :headTitle="$t('route.systemMonitoring')" :headSubTitle="$t('route.hostMetrics')" @changeGroup="changeGroup"></v-content-head>
-        <div class="module-wrapper" >
+        <div class="module-wrapper">
             <div class="more-search-table">
                 <div class="search-item">
                     <span>{{$t('text.showDate')}}</span>
@@ -27,6 +27,8 @@
                     </el-radio-group>
                     <el-button type="primary" @click="confirmParam()" size="small" style="margin-left: 12px;" :loading="sureing">{{$t('text.confirm')}}</el-button>
                 </div>
+                <el-switch v-model="switchBtn" active-color="#13ce66" :active-text="$t('text.toggleOpen')" :inactive-text="$t('text.toggleDown')" inactive-color="#ff4949" :title="$t('title.acquisitionSwitch')" @change="changeToggle">
+                </el-switch>
             </div>
             <div class="metric-content">
                 <div class="metric-split-line"></div>
@@ -37,15 +39,15 @@
                         </el-col>
                     </template>
                 </el-row>
+            </div>
         </div>
-        </div>
-        
+
     </div>
 </template>
 <script>
 import contentHead from "@/components/contentHead";
 import metricChart from "@/components/metricChart";
-import { metricInfo } from "@/util/api";
+import { metricInfo, performanceSwitch, postPerformanceSwitch } from "@/util/api";
 import { format, numberFormat } from "@/util/util.js";
 import Bus from "@/bus"
 export default {
@@ -60,6 +62,7 @@ export default {
             sureing: false,
             loading: false,
             loadingInit: false,
+            switchBtn: false,
             currentDate: format(new Date().getTime(), "yyyy-MM-dd"),
             contrastDate: null,
             startEndTime: [
@@ -74,8 +77,8 @@ export default {
             },
             chartParam: {
                 gap: 60,
-                beginDate: `${format(new Date().getTime(),'yyyy-MM-dd')}T${format(new Date(new Date().toLocaleDateString()).getTime(),'HH:mm:ss')}`,
-                endDate: `${format(new Date().getTime(),'yyyy-MM-dd')}T${format(new Date().getTime(),'HH:mm:ss')}`,
+                beginDate: `${format(new Date().getTime(), 'yyyy-MM-dd')}T${format(new Date(new Date().toLocaleDateString()).getTime(), 'HH:mm:ss')}`,
+                endDate: `${format(new Date().getTime(), 'yyyy-MM-dd')}T${format(new Date().getTime(), 'HH:mm:ss')}`,
                 contrastBeginDate: "",
                 contrastEndDate: "",
                 group: localStorage.getItem('groupId') || null
@@ -85,26 +88,27 @@ export default {
         };
     },
 
-    beforeDestroy: function(){
+    beforeDestroy: function () {
         Bus.$off("changeGroup")
         Bus.$off("chooselanguage")
     },
 
     mounted() {
         var group = localStorage.getItem('groupId');
-        Bus.$on("changeGroup",data => {
+        Bus.$on("changeGroup", data => {
             this.changeGroup(data)
             group = data
         })
-        Bus.$on("chooselanguage",data => {
+        Bus.$on("chooselanguage", data => {
             this.changeGroup(group)
         })
-        if(this.chartParam.group){
+        if (this.chartParam.group) {
             this.getChartData();
         }
+        this.getPerformanceSwitch();
     },
     methods: {
-        changeGroup(val){
+        changeGroup(val) {
             this.chartParam.group = val
             this.getChartData();
         },
@@ -114,7 +118,7 @@ export default {
                 new Date()
             ];
         },
-        changeContrastDate($event) {},
+        changeContrastDate($event) { },
         getChartData() {
             if (this.reloadNum === 1) {
                 this.loadingInit = true;
@@ -122,8 +126,8 @@ export default {
             this.loading = true;
             this.sureing = true;
             var reqData = {
-                    // nodeId: 500001
-                },
+                // nodeId: 500001
+            },
                 reqQurey = {};
             reqQurey = this.chartParam;
             metricInfo(reqData, reqQurey)
@@ -131,12 +135,12 @@ export default {
                     this.loadingInit = false;
                     this.loading = false;
                     this.sureing = false;
-                    const {data,status,statusText} = res;
+                    const { data, status, statusText } = res;
                     if (status === 200) {
                         if (data[0]["data"]["lineDataList"]["timestampList"].length > 0) {
-                            var timestampList =data[0]["data"]["lineDataList"]["timestampList"] || [];
+                            var timestampList = data[0]["data"]["lineDataList"]["timestampList"] || [];
                         } else {
-                            var timestampList =data[0]["data"]["contrastDataList"]["timestampList"] || [];
+                            var timestampList = data[0]["data"]["contrastDataList"]["timestampList"] || [];
                         }
                         this.metricData = data;
                         this.metricData.forEach(item => {
@@ -162,9 +166,9 @@ export default {
                                 item.metricUint = this.$t('text.bandwidth');;
                                 item.metricU = "KB/s";
                             }
-                            if(this.chartParam.contrastBeginDate){
+                            if (this.chartParam.contrastBeginDate) {
                                 item.data.contrastDataList.contractDataShow = true
-                            }else{
+                            } else {
                                 item.data.contrastDataList.contractDataShow = false
                             }
                             item.data.contrastDataList.timestampList = timestampList;
@@ -190,8 +194,8 @@ export default {
             this.getChartData()
         },
         timeParam() {
-            let initStartTime = format(new Date(this.startEndTime[0]).getTime(),'HH:mm:ss') ,
-                initEndTime = format(new Date(this.startEndTime[1]).getTime(),'HH:mm:ss');
+            let initStartTime = format(new Date(this.startEndTime[0]).getTime(), 'HH:mm:ss'),
+                initEndTime = format(new Date(this.startEndTime[1]).getTime(), 'HH:mm:ss');
             if (this.currentDate) {
                 this.beginDate = `${this.currentDate}T${initStartTime}`;
                 this.endDate = `${this.currentDate}T${initEndTime}`;
@@ -215,6 +219,34 @@ export default {
             this.chartParam.contrastEndDate = this.contrastEndDate;
             this.chartParam.gap = this.timeGranularity;
             this.chartParam.group = localStorage.getItem('groupName') ? localStorage.getItem('groupName') : '1';
+        },
+        getPerformanceSwitch() {
+            performanceSwitch().then(res => {
+                const { data } = res;
+                if (data.code === 0) {
+                    this.switchBtn = data.data;
+                }
+            })
+        },
+        changeToggle(val) {
+            let data = {
+                enable: val
+            }
+            postPerformanceSwitch(data).then(res => {
+                const { data } = res;
+                if (data.code === 0) {
+                    this.$message({
+                        type: 'success',
+                        message: this.$t('text.toggleSuccessed')
+                    })
+                } else {
+                    this.$message({
+                        type: 'error',
+                        message: this.$t('text.toggleFailed')
+                    })
+                }
+
+            })
         }
     }
 };

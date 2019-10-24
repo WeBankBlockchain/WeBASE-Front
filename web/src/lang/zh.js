@@ -122,7 +122,7 @@ export default {
         pleaseType: '请输入',
     },
     placeholder: {
-        globalSearch: '请输入 Block / Txn Hash',
+        globalSearch: '请输入 Block 或 Txn Hash',
         javaPackage: '如：com.webank',
         selected: '请选择',
         selectedAccountAddress: '请选择用户地址',
@@ -168,6 +168,7 @@ export default {
         tiled: '平铺',
         detailsAbi: 'abi详情',
         detailsTxn: '交易内容',
+        acquisitionSwitch: '采集数据开关',
     },
     text: {
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
@@ -228,5 +229,9 @@ export default {
         fileExceeds: '文件大小超过400k，请上传小于400k的文件',
         txnDecodeBtn: '解码',
         txnEncodeBtn: '还原',
+        toggleSuccessed: '切换成功',
+        toggleFailed: '切换失败',
+        toggleOpen: '打开',
+        toggleDown: '关闭',
     }
 }

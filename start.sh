@@ -14,6 +14,7 @@ fi
 
 mkdir -p log
 
+startWaitTime=600
 processPid=0
 processStatus=0
 server_pid=0
@@ -34,6 +35,10 @@ checkProcess(){
     fi
 }
 
+JAVA_OPTS=" -Dfile.encoding=UTF-8"
+JAVA_OPTS+=" -Xmx256m -Xms256m -Xmn128m -Xss512k -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m"
+JAVA_OPTS+=" -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOG_DIR}/heap_error.log"
+
 start(){
     checkProcess
     echo "==============================================================================================="
@@ -47,11 +52,11 @@ start(){
         processStatus=0
     else
         echo -n "Starting Server $APP_MAIN Port $SERVER_PORT ..."
-        nohup $JAVA_HOME/bin/java -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1 &
+        nohup $JAVA_HOME/bin/java $JAVA_OPTS -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1 &
         
         count=1
         result=0
-        while [ $count -lt 20 ] ; do
+        while [ $count -lt $startWaitTime ] ; do
            checkProcess
            if [ $processPid -ne 0 ]; then
                result=1
@@ -70,9 +75,11 @@ start(){
                checkResult=`netstat -tunpl 2>&1|grep $subPid|awk '{printf $7}'|cut -d/ -f1`
                if [ -z "$checkResult" ]; then
                    kill -9 $subPid
+                   message="Because port $SERVER_PORT not up in $startWaitTime seconds.Script finally killed the process."
                fi
            done
            echo "[Failed]. Please view log file (default path:./log/)."
+           echo $message
            echo "==============================================================================================="
        fi
     fi
