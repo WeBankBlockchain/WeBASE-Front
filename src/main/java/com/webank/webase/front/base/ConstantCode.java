@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2014-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -85,12 +85,15 @@ public interface ConstantCode {
     String PARAM_FAIL_CONFIG_VALUE_IS_EMPTY = "{\"code\":201108,\"message\":\"system config value cannot be empty\"}";
     String PARAM_FAIL_NODE_ID_IS_EMPTY = "{\"code\":2011109,\"message\":\"node id cannot be empty\"}";
     String PARAM_FAIL_NODE_TYPE_IS_EMPTY = "{\"code\":201110,\"message\":\"node type cannot be empty\"}";
-
+    String PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY = "{\"code\":201111,\"message\":\"Permission state cannot be all empty\"}";
     /* precompiled runtime check or error */
 
     // param
     RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
     RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
+    // permission
+    RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied, please check chain administrator permission");
+
     // sys config
     RetCode SYSTEM_CONFIG_EXIST = RetCode.mark(201206, "create system config in db fail for already exist");
     RetCode INVALID_SYSTEM_CONFIG_KEY = RetCode.mark(201207, "system config key is invalid");
@@ -113,6 +116,9 @@ public interface ConstantCode {
     RetCode SQL_ERROR = RetCode.mark(201227, "crud sql fail");
     RetCode FAIL_TABLE_NOT_EXISTS = RetCode.mark(201228, "table not exists");
     String CRUD_EMPTY_SET = "Empty Set.";
+
+    // cert
+    RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
 
 
 }

@@ -2,6 +2,7 @@
     <div>
         <v-content-head :headTitle="$t('route.systemMonitoring')" :headSubTitle="$t('route.nodeMetrics')" @changeGroup="changeGroup"></v-content-head>
         <div class="module-wrapper">
+
             <div class="more-search-table">
                 <div class="search-item">
                     <span>{{$t('text.showDate')}}</span>

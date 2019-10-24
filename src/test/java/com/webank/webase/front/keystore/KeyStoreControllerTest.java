@@ -13,20 +13,11 @@
  */
 package com.webank.webase.front.keystore;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.webank.webase.front.Application;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import java.util.List;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +27,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.webank.webase.front.Application;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
