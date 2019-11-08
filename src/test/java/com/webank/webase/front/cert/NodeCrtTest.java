@@ -23,7 +23,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class crtTest {
+public class NodeCrtTest {
     private static final String flag = "-----" ;
     private static final String head = "-----BEGIN CERTIFICATE-----\n" ;
     private static final String tail = "-----END CERTIFICATE-----\n" ;
