@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class SdkCertTest {
@@ -32,7 +34,12 @@ public class SdkCertTest {
 
     @Test
     public void testSdkCertService() {
-        String sdk = frontCertService.getSDKNodeCert();
-        System.out.println(sdk);
+        List<String> sdkList = frontCertService.getSDKNodeCert();
+        // upper node.crt
+        System.out.println(sdkList.get(0));
+        // lower agency
+        System.out.println(sdkList.get(1));
     }
+
+
 }

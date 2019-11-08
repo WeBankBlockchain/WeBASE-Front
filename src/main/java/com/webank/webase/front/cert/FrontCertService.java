@@ -68,35 +68,6 @@ public class FrontCertService {
         return resList.get(0);
     }
 
-    /**
-     * get SDK crts, including agency's crt, node.crt
-     * excluding ca.crt because node's certs already including ca.crt
-     * @return
-     */
-    public String getSDKNodeCert() {
-        String sdkCertStrt = "";
-        log.debug("start getSDKNodeCerts.");
-        try(InputStream nodeCrtInput = new ClassPathResource("node.crt").getInputStream()){
-            String nodeCrtStr = inputStream2String(nodeCrtInput);
-            String[] nodeCrtStrArray = nodeCrtStr.split(crtContentHead);
-            for(String nodeCrtStrNoHead: nodeCrtStrArray) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
-                String[] nodeCrtStrArray2 = nodeCrtStrNoHead.split(crtContentTail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
-                for(String nodeCrtStrNoTail: nodeCrtStrArray2) {
-                    // 去头尾的ca证书内容
-                    String ca = nodeCrtStrNoTail;
-                    if(ca.length() != 0) {
-                        sdkCertStrt = formatStr(ca);
-                    }
-                }
-            }
-        }catch (IOException e) {
-            log.error("FrontCertService getCertList, cert(.crt) path prefix error, Exception:[]", e);
-            throw (FrontException)new FrontException("FileNotFound, cert(.crt) path error").initCause(e);
-        }
-        log.debug("end getSDKNodeCerts sdkCertStrt {}" + sdkCertStrt);
-        return sdkCertStrt;
-    }
-
     private void getCertList(String nodePath, int certTypes, List<String> resultList) {
         log.debug("start tools: getCertList in nodePath:{},certTypes:{}", nodePath, certTypes);
 
@@ -123,33 +94,37 @@ public class FrontCertService {
         }
     }
 
-//    public String getChainCert() {
-//        String nodePath = constants.getNodePath();
-//        String ca = "";
-//        log.debug("start getChainCrt in {}" + nodePath);
-//        // try 里的inputstream
-//        try{
-//            InputStream caInput = Files.newInputStream(Paths.get(nodePath.concat(caCrtPath)));
-//            String caStr = inputStream2String(caInput);
-//            String[] caStrArray = caStr.split(crtContentHead); // 一个是空，一个是去除了head的string
-//            for(String caCrtStrNoHead: caStrArray) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
-//                String[] caStrArray2 = caCrtStrNoHead.split(crtContentTail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
-//                for(String caCrtStrNoTail: caStrArray2) {
-//                    // 去头尾的ca证书内容
-//                    ca  = caCrtStrNoTail;
-//                    if(ca.length() != 0) {
-//                        ca = formatStr(ca);
-//                    }
-//                }
-//            }
-//            caInput.close();
-//            log.debug("end getChainCrt in {}" + nodePath);
-//        }catch (IOException e) {
-//            log.error("FrontCertService getCerts, chain cert(ca.crt) path prefix error, Exception:[]", e);
-//            throw (FrontException)new FrontException("FileNotFound, chain cert(ca.crt) path error \n").initCause(e);
-//        }
-//        return ca;
-//    }
+
+    /**
+     * get SDK crts in directory /resource/
+     * including agency's crt, node.crt
+     * excluding ca.crt because node's certs already including ca.crt
+     * @return
+     */
+    public List<String> getSDKNodeCert() {
+        List<String> sdkCertStrList = new ArrayList<>();
+        log.debug("start getSDKNodeCerts.");
+        try(InputStream nodeCrtInput = new ClassPathResource("node.crt").getInputStream()){
+            String nodeCrtStr = inputStream2String(nodeCrtInput);
+            String[] nodeCrtStrArray = nodeCrtStr.split(crtContentHead);
+            for(String nodeCrtStrNoHead: nodeCrtStrArray) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
+                String[] nodeCrtStrArray2 = nodeCrtStrNoHead.split(crtContentTail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
+                for(String nodeCrtStrNoTail: nodeCrtStrArray2) {
+                    // 去头尾的ca证书内容
+                    String ca = nodeCrtStrNoTail;
+                    if(ca.length() != 0) {
+                        sdkCertStrList.add(formatStr(ca));
+                    }
+                }
+            }
+        }catch (IOException e) {
+            log.error("FrontCertService getCertList, cert(.crt) path prefix error, Exception:[]", e);
+            throw (FrontException)new FrontException("FileNotFound, cert(.crt) path error").initCause(e);
+        }
+        log.debug("end getSDKNodeCerts sdkCertStrt {}" + sdkCertStrList);
+        return sdkCertStrList;
+    }
+
 
     public String inputStream2String(InputStream inputStream) throws IOException {
         String str = IOUtils.toString(inputStream,"UTF-8");
