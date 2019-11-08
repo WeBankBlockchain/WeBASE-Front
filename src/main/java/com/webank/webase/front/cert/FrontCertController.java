@@ -39,24 +39,31 @@ import java.util.Map;
 public class FrontCertController {
     @Autowired
     FrontCertService certService;
+
     @GetMapping("")
     public Object getFrontCerts() {
         Instant startTime = Instant.now();
         log.info("start getFrontCerts. startTime:{}", startTime.toEpochMilli());
+        // one crt file has multiple certs string
         List<String> certList = new ArrayList<>();
+        List<String> sdkCertList = new ArrayList<>();
         String chainCertStr;
         String nodeCrtStr;
         String agencyCrtStr;
+        String sdkCrtStr;
         // node的crt文件可能包含节点、机构、链证书三个
+        // sdk的node.crt文件一般包含sdk节点证书，机构证书两个
         try {
             certList = certService.getNodeCerts();
-            chainCertStr = certService.getChainCrt();
+            chainCertStr = certService.getChainCert();
+            sdkCertList = certService.getSDKNodeCert();
         }catch (FrontException e) {
             return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getMessage());
         }
         Map<String, String> map = new HashMap<>();
         nodeCrtStr = certList.get(0);
         agencyCrtStr = certList.get(1);
+        sdkCrtStr = sdkCertList.get(0);
         if(checkCertStrNonNull(nodeCrtStr)) {
             map.put("node", nodeCrtStr);
         }
@@ -66,13 +73,16 @@ public class FrontCertController {
         if(checkCertStrNonNull(chainCertStr)) {
             map.put("chain", chainCertStr);
         }
+        if(checkCertStrNonNull(sdkCrtStr)) {
+            map.put("sdk", sdkCrtStr);
+        }
         log.info("end getFrontCerts. startTime:{}, certMap:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), map);
         return map;
     }
 
     private boolean checkCertStrNonNull(String certStr) {
-        if(certStr != "" || certStr != null) {
+        if(certStr != null && certStr != "" ) {
             return true;
         } else {
             return false;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.precompiledapi.precompiledHandle;
+package com.webank.webase.front.precompiledapi.precompiledhandle;
 
 import com.webank.webase.front.base.ConstantCode;
 import lombok.Data;
@@ -22,10 +22,19 @@ import org.hibernate.validator.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class CrudHandle {
+public class CnsHandle {
+
+    // defaultValue = "1"
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private int groupId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String fromAddress;
-    private String sql;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_NAME_IS_EMPTY)
+    private String contractName;
+    private String contractNameAndVersion;
+    private String version;
+    // register
+    private String contractAddress;
+    private String abi;
+
 }
