@@ -49,7 +49,7 @@ public class crtTest {
 
     @Test
     public void getAgencyCrt() throws IOException {
-        InputStream inputStream = new ClassPathResource("node.crt").getInputStream();
+        InputStream inputStream = new ClassPathResource("").getInputStream();
         String str = getString(inputStream);
         String[] strArray = str.split(head); // 一个是空，一个是去除了head的string
         for(int i = 0; i < strArray.length; i++) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
