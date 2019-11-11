@@ -13,7 +13,7 @@
  */
 package com.webank.webase.front.contract;
 
-import static com.webank.webase.front.base.ConstantCode.GROUPID_NOT_EXIST;
+import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.ABI;
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.BIN;
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.INTERFACE;
@@ -58,10 +58,10 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.Constants;
-import com.webank.webase.front.base.FrontUtils;
+import com.webank.webase.front.base.entity.BaseResponse;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.entity.Contract;
@@ -74,7 +74,7 @@ import com.webank.webase.front.contract.entity.ReqDeployWithSign;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
-import com.webank.webase.front.file.FileContent;
+import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.AbiUtil;
@@ -380,8 +380,8 @@ public class ContractService {
         return cnsServiceMap.get(groupId).getAddressByContractNameAndVersion(name + ":" + version);
     }
 
-    public static FileContent compileToJavaFile(String contractName, List<AbiDefinition> abiInfo,
-            String contractBin, String packageName) throws IOException {
+    public static FileContentHandle compileToJavaFile(String contractName, List<AbiDefinition> abiInfo,
+                                                      String contractBin, String packageName) throws IOException {
 
         File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
         FrontUtils.createFileIfNotExist(abiFile, true);
@@ -405,7 +405,7 @@ public class ContractService {
                 + contractName + ".java");
         FrontUtils.createFileIfNotExist(file, true);
         InputStream targetStream = new FileInputStream(file);
-        return new FileContent(contractName + ".java", targetStream);
+        return new FileContentHandle(contractName + ".java", targetStream);
     }
 
 

@@ -17,9 +17,10 @@ package com.webank.webase.front.performance;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.entity.BaseResponse;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.performance.entity.ToggleHandle;
 import com.webank.webase.front.performance.result.PerformanceData;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
