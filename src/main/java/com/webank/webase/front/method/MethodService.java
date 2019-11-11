@@ -17,10 +17,10 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.webank.webase.front.method.entity.MethodHandle;
+import com.webank.webase.front.method.entity.NewMethodInputParamHandle;
 import com.webank.webase.front.method.entity.Method;
-import com.webank.webase.front.method.entity.NewMethodInputParam;
-import com.webank.webase.front.method.entity.TbMethod;
-import com.webank.webase.front.method.entity.TbMethodKey;
+import com.webank.webase.front.method.entity.MethodKey;
 
 @Service
 public class MethodService {
@@ -31,23 +31,23 @@ public class MethodService {
     /**
      * save method info.
      */
-    public void saveMethod(NewMethodInputParam newMethodInputParam) {
-        List<Method> methodList = newMethodInputParam.getMethodList();
-        TbMethod tbMethod = new TbMethod();
-        tbMethod.setGroupId(newMethodInputParam.getGroupId());
+    public void saveMethod(NewMethodInputParamHandle newMethodInputParamHandle) {
+        List<MethodHandle> methodHandleList = newMethodInputParamHandle.getMethodHandleList();
+        Method method = new Method();
+        method.setGroupId(newMethodInputParamHandle.getGroupId());
         
         //save each method
-        for (Method method : methodList) {
-            BeanUtils.copyProperties(method, tbMethod);
-            methodRepository.save(tbMethod);
+        for (MethodHandle methodHandle : methodHandleList) {
+            BeanUtils.copyProperties(methodHandle, method);
+            methodRepository.save(method);
         }
     }
 
     /**
      * query by methodId.
      */
-    public TbMethod getByMethodId(String methodId, int groupId) {
-        TbMethodKey pram = new TbMethodKey();
+    public Method getByMethodId(String methodId, int groupId) {
+        MethodKey pram = new MethodKey();
         pram.setMethodId(methodId);
         pram.setGroupId(groupId);
         return methodRepository.findOne(pram);

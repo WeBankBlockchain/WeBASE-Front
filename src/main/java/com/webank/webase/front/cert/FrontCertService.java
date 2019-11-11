@@ -16,7 +16,7 @@
 package com.webank.webase.front.cert;
 
 
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;

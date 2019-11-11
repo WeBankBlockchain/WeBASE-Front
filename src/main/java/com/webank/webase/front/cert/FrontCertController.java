@@ -15,8 +15,8 @@
  */
 package com.webank.webase.front.cert;
 
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.entity.BaseResponse;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;

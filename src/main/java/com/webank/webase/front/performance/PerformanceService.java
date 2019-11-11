@@ -15,8 +15,9 @@
  */
 package com.webank.webase.front.performance;
 
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.performance.entity.Performance;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;

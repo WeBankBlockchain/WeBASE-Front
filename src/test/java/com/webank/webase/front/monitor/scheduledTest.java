@@ -15,6 +15,7 @@
  */
 package com.webank.webase.front.monitor;
 
+import com.webank.webase.front.monitor.entity.Monitor;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PendingTxSize;
