@@ -280,7 +280,7 @@ export default {
     beforeMount() {
         var head = document.head;
         var script = document.createElement("script");
-        script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+        script.src = "./static/js/soljson-v0.5.6+commit.b259423e.js";
         script.setAttribute('id', 'soljson');
         if (!document.getElementById('soljson')) {
             head.append(script)
