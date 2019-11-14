@@ -15,7 +15,7 @@
  */
 package com.webank.webase.front.monitor;
 
-import com.webank.webase.front.performance.result.PerformanceDataHandle;
+import com.webank.webase.front.performance.result.PerformanceData;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -53,13 +53,13 @@ public class MonitorController {
             @ApiImplicitParam(name = "gap", value = "时间间隔", dataType = "int")
     })
     @GetMapping
-    public List<PerformanceDataHandle> getChainMonitor(@RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime beginDate,
-                                                       @RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime endDate,
-                                                       @RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime contrastBeginDate,
-                                                       @RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime contrastEndDate,
-                                                       @RequestParam(required = false, defaultValue = "1") int gap,
-                                                       @RequestParam(defaultValue = "1") int groupId)   {
-        List<PerformanceDataHandle> performanceList = monitorService.findContrastDataByTime(groupId, beginDate,endDate,contrastBeginDate,contrastEndDate,gap);
+    public List<PerformanceData> getChainMonitor(@RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime beginDate,
+                                                 @RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime endDate,
+                                                 @RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime contrastBeginDate,
+                                                 @RequestParam(required= false) @DateTimeFormat(iso=DATE_TIME) LocalDateTime contrastEndDate,
+                                                 @RequestParam(required = false, defaultValue = "1") int gap,
+                                                 @RequestParam(defaultValue = "1") int groupId)   {
+        List<PerformanceData> performanceList = monitorService.findContrastDataByTime(groupId, beginDate,endDate,contrastBeginDate,contrastEndDate,gap);
         return performanceList;
     }
 }

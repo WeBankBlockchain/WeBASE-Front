@@ -17,17 +17,20 @@ package com.webank.webase.front.performance.result;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 /**
- * performance Data of monitor and performance module
- * performance response to web
+ * DATA UNIT of Performance data
+ * containing list of result number which comes from monitor result
  */
 @Data
-public class PerformanceDataHandle {
-    private String metricType;
-    private PerformanceData performanceData;
+public class LineDataList {
+    List<Long> timestampList;
+    List<BigDecimal> valueList;
 
-    public PerformanceDataHandle(String metricType, PerformanceData performanceData) {
-        this.metricType = metricType;
-        this.performanceData = performanceData;
+    public LineDataList(List<Long> timestampList, List<BigDecimal> valueList) {
+        this.timestampList = timestampList;
+        this.valueList = valueList;
     }
 }
