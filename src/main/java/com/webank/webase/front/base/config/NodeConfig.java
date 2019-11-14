@@ -26,6 +26,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * initial info of node's configuration
+ */
 @Slf4j
 @Data
 @Configuration

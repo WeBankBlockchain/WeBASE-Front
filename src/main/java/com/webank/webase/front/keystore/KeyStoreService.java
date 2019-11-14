@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.util.AesUtils;
-import com.webank.webase.front.base.entity.BaseResponse;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.KeyTypes;

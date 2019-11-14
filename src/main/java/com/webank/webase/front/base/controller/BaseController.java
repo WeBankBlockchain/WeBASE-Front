@@ -20,7 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.code.RetCode;
-import com.webank.webase.front.base.entity.BaseResponse;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import org.springframework.validation.ObjectError;
 
 /**
  * BaseController.
- * 
+ * containing check param function
  */
 @Slf4j
 public abstract class BaseController {

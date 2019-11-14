@@ -23,6 +23,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.math.BigInteger;
 
+/**
+ * entity of Monitor in db
+ */
 @Entity
 @Data
 public class Monitor {
