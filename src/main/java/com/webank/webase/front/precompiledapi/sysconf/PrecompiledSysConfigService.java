@@ -15,8 +15,8 @@
  */
 package com.webank.webase.front.precompiledapi.sysconf;
 
-import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;

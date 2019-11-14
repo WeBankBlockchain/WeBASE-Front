@@ -15,7 +15,7 @@
  */
 package com.webank.webase.front.util;
 
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.channel.test.Ok;
 import com.webank.webase.front.channel.test.TestBase;
 import com.webank.webase.front.contract.CommonContract;

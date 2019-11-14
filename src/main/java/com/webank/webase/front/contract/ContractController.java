@@ -36,10 +36,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.BaseController;
-import com.webank.webase.front.base.BasePageResponse;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.controller.BaseController;
+import com.webank.webase.front.base.response.BasePageResponse;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.contract.entity.ContractPath;
@@ -51,7 +51,7 @@ import com.webank.webase.front.contract.entity.ReqDeployWithSign;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
-import com.webank.webase.front.file.FileContent;
+import com.webank.webase.front.contract.entity.FileContentHandle;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -122,11 +122,11 @@ public class ContractController extends BaseController {
         BindingResult result) throws FrontException, IOException {
         log.info("compileJavaFile start. reqSendAbi:{}", JSON.toJSONString(param));
         checkParamResult(result);
-        FileContent fileContent = contractService
+        FileContentHandle fileContentHandle = contractService
             .compileToJavaFile(param.getContractName(), param.getAbiInfo(), param.getContractBin(),
                 param.getPackageName());
-        return ResponseEntity.ok().headers(headers(fileContent.getFileName()))
-            .body(new InputStreamResource(fileContent.getInputStream()));
+        return ResponseEntity.ok().headers(headers(fileContentHandle.getFileName()))
+            .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
 

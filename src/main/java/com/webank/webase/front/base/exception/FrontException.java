@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.base.exception;
 
-import com.webank.webase.front.base.RetCode;
+import com.webank.webase.front.base.code.RetCode;
 
 /**
  * FrontException.

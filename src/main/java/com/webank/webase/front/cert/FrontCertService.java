@@ -16,7 +16,7 @@
 package com.webank.webase.front.cert;
 
 
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +32,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * get Front's sdk's cert(.crt) in /resource
+ * get ca.crt/node.crt of the node which linked with Front
+ */
 @Slf4j
 @Service
 public class FrontCertService {

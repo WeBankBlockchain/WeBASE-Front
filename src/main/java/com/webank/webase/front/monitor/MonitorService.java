@@ -16,30 +16,30 @@
 package com.webank.webase.front.monitor;
 
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.performance.result.Data;
-import com.webank.webase.front.performance.result.LineDataList;
+import com.webank.webase.front.monitor.entity.Monitor;
+import com.webank.webase.front.performance.result.LineDataListUnit;
 import com.webank.webase.front.performance.result.PerformanceData;
+import com.webank.webase.front.performance.result.PerformanceDataHandle;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PendingTxSize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledFuture;
+
+/**
+ * monitor of abnormal contract, abnormal user
+ * and abnormal transactions
+ */
 
 @Slf4j
 @Service
@@ -49,7 +49,7 @@ public class MonitorService {
     @Autowired
     MonitorRepository monitorRepository;
 
-    public List<PerformanceData> findContrastDataByTime(int groupId, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap)  {
+    public List<PerformanceDataHandle> findContrastDataByTime(int groupId, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap)  {
 
         List<Monitor> monitorList;
         if (startTime == null || endTime == null) {
@@ -65,7 +65,7 @@ public class MonitorService {
 
     }
 
-    private List<PerformanceData> transferToPerformanceData(List<Monitor> monitorList, List<Monitor> contrastMonitorList) {
+    private List<PerformanceDataHandle> transferToPerformanceData(List<Monitor> monitorList, List<Monitor> contrastMonitorList) {
         List<Long> timestampList = new ArrayList<>();
         List<BigDecimal> blockHeightValueList = new ArrayList<>();
         List<BigDecimal> pbftViewValueList = new ArrayList<>();
@@ -89,11 +89,11 @@ public class MonitorService {
             contrastTimestampList.add(monitor.getTimestamp());
         }
         contrastMonitorList.clear();
-        List<PerformanceData> performanceDataList = new ArrayList<>();
-        performanceDataList.add(new PerformanceData("blockHeight", new Data(new LineDataList(timestampList, blockHeightValueList), new LineDataList(contrastTimestampList, contrastBlockHeightValueList))));
-        performanceDataList.add(new PerformanceData("pbftView", new Data(new LineDataList(null, pbftViewValueList), new LineDataList(null, contrastPbftViewValueList))));
-        performanceDataList.add(new PerformanceData("pendingCount", new Data(new LineDataList(null, pendingCountValueList), new LineDataList(null, contrastPendingCountValueList))));
-        return performanceDataList;
+        List<PerformanceDataHandle> performanceDataHandleList = new ArrayList<>();
+        performanceDataHandleList.add(new PerformanceDataHandle("blockHeight", new PerformanceData(new LineDataListUnit(timestampList, blockHeightValueList), new LineDataListUnit(contrastTimestampList, contrastBlockHeightValueList))));
+        performanceDataHandleList.add(new PerformanceDataHandle("pbftView", new PerformanceData(new LineDataListUnit(null, pbftViewValueList), new LineDataListUnit(null, contrastPbftViewValueList))));
+        performanceDataHandleList.add(new PerformanceDataHandle("pendingCount", new PerformanceData(new LineDataListUnit(null, pendingCountValueList), new LineDataListUnit(null, contrastPendingCountValueList))));
+        return performanceDataHandleList;
     }
 
     public List transferListByGap(List arrayList, int gap)  {
