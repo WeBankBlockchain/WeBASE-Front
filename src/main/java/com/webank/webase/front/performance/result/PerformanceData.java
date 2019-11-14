@@ -15,13 +15,19 @@
  */
 package com.webank.webase.front.performance.result;
 
-@lombok.Data
-public class PerformanceData {
-    private String metricType;
-    private Data data;
+import lombok.Data;
 
-    public PerformanceData(String metricType, Data data) {
-        this.metricType = metricType;
-        this.data = data;
+/**
+ * data entity of monitor and performance module
+ * related with LineDataListUnit => MonitorData => PerformanceDataHandle
+ */
+@Data
+public class MonitorData {
+    private LineDataListUnit lineDataListUnit;
+    private LineDataListUnit contrastDataList;
+
+    public MonitorData(LineDataListUnit lineDataListUnit, LineDataListUnit contrastDataList) {
+        this.lineDataListUnit = lineDataListUnit;
+        this.contrastDataList = contrastDataList;
     }
 }

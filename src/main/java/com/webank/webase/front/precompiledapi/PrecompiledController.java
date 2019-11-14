@@ -16,8 +16,8 @@
 package com.webank.webase.front.precompiledapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.webase.front.base.entity.BasePageResponse;
-import com.webank.webase.front.base.entity.BaseResponse;
+import com.webank.webase.front.base.response.BasePageResponse;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.precompiledapi.entity.ConsensusHandle;
 import com.webank.webase.front.precompiledapi.entity.CrudHandle;
