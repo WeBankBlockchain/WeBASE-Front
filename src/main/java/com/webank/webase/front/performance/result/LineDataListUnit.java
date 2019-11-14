@@ -20,6 +20,10 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * result of monitor and performance module
+ * related with PerformanceData
+ */
 @Data
 public class LineDataList {
     List<Long> timestampList;

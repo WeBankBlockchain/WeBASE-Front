@@ -46,7 +46,7 @@ public class PermissionManageService {
     private static final int FLAG_REVOKED = 0; // permission state is already revoked
 
 
-    // 根据前台传的user address获取私钥
+    // get credentials from user address
     public Credentials getCredentials(String fromAddress) throws Exception {
         return keyStoreService.getCredentials(fromAddress, false);
     }

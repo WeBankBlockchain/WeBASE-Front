@@ -16,12 +16,12 @@
 package com.webank.webase.front.performance.result;
 
 @lombok.Data
-public class Data {
-    private LineDataList lineDataList;
-    private LineDataList contrastDataList;
+public class PerformanceData {
+    private String metricType;
+    private Data data;
 
-    public Data(LineDataList lineDataList, LineDataList contrastDataList) {
-        this.lineDataList = lineDataList;
-        this.contrastDataList = contrastDataList;
+    public PerformanceData(String metricType, Data data) {
+        this.metricType = metricType;
+        this.data = data;
     }
 }

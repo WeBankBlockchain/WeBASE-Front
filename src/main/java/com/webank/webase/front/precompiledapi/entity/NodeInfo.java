@@ -23,5 +23,4 @@ import lombok.Data;
 public class NodeInfo {
     private String nodeId;
     private String nodeType;
-
 }
