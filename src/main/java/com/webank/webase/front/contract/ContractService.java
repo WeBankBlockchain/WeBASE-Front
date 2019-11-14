@@ -58,7 +58,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.entity.BaseResponse;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.util.FrontUtils;

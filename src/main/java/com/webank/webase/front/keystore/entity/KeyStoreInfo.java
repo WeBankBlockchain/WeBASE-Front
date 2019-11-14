@@ -20,6 +20,9 @@ import lombok.Data;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+/**
+ * KeyStoreInfo as user's key pair
+ */
 @Data
 @Entity
 public class KeyStoreInfo {

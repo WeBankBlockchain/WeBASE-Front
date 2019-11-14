@@ -32,6 +32,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * get Front's sdk's cert(.crt) in /resource
+ * get ca.crt/node.crt of the node which linked with Front
+ */
 @Slf4j
 @Service
 public class FrontCertService {

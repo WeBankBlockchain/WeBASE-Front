@@ -20,8 +20,10 @@ import org.hibernate.validator.constraints.NotBlank;
 
 @Data
 public class ReqContractCompile {
+    // Base64 of the contract source
     @NotBlank
-    private String solidityBase64; // Base64 of the contract source
+    private String solidityBase64;
+    // name of contract
     @NotBlank
-    private String solidityName; // name of contract
+    private String solidityName;
 }

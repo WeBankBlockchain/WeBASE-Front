@@ -22,6 +22,9 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import lombok.Data;
 
+/**
+ * Entity of contract path in web solidity IDE in db(using h2.db)
+ */
 @Data
 @Entity
 @IdClass(ContractPathKey.class)

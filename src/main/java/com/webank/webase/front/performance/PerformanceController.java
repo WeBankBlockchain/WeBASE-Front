@@ -17,11 +17,11 @@ package com.webank.webase.front.performance;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
-import com.webank.webase.front.base.entity.BaseResponse;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.performance.entity.ToggleHandle;
-import com.webank.webase.front.performance.result.PerformanceData;
+import com.webank.webase.front.performance.result.PerformanceDataHandle;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +33,11 @@ import org.hyperic.sigar.SigarException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+/**
+ * monitor of host computer's performance
+ * such as cpu, memory, disk etc.
+ */
 
 @RestController
 @RequestMapping(value = "/performance")
@@ -58,7 +63,7 @@ public class PerformanceController {
             @ApiImplicitParam(name = "contrastEndDate", value = "compare end time"),
             @ApiImplicitParam(name = "gap", value = "time gap", dataType = "int")})
     @GetMapping
-    public List<PerformanceData> getPerformanceRatio(
+    public List<PerformanceDataHandle> getPerformanceRatio(
             @RequestParam(required = false) @DateTimeFormat(
                     iso = DATE_TIME) LocalDateTime beginDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DATE_TIME) LocalDateTime endDate,
@@ -67,7 +72,7 @@ public class PerformanceController {
             @RequestParam(required = false) @DateTimeFormat(
                     iso = DATE_TIME) LocalDateTime contrastEndDate,
             @RequestParam(required = false, defaultValue = "1") int gap) throws Exception {
-        List<PerformanceData> performanceList = performanceService.findContrastDataByTime(beginDate,
+        List<PerformanceDataHandle> performanceList = performanceService.findContrastDataByTime(beginDate,
                 endDate, contrastBeginDate, contrastEndDate, gap);
         return performanceList;
     }

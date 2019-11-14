@@ -15,13 +15,19 @@
  */
 package com.webank.webase.front.performance.result;
 
-@lombok.Data
-public class PerformanceData {
-    private String metricType;
-    private Data data;
+import lombok.Data;
 
-    public PerformanceData(String metricType, Data data) {
+/**
+ * performance Data of monitor and performance module
+ * performance response to web
+ */
+@Data
+public class PerformanceDataHandle {
+    private String metricType;
+    private PerformanceData performanceData;
+
+    public PerformanceDataHandle(String metricType, PerformanceData performanceData) {
         this.metricType = metricType;
-        this.data = data;
+        this.performanceData = performanceData;
     }
 }

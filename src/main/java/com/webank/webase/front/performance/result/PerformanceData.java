@@ -22,11 +22,11 @@ import lombok.Data;
  * related with LineDataListUnit => MonitorData => PerformanceDataHandle
  */
 @Data
-public class MonitorData {
+public class PerformanceData {
     private LineDataListUnit lineDataListUnit;
     private LineDataListUnit contrastDataList;
 
-    public MonitorData(LineDataListUnit lineDataListUnit, LineDataListUnit contrastDataList) {
+    public PerformanceData(LineDataListUnit lineDataListUnit, LineDataListUnit contrastDataList) {
         this.lineDataListUnit = lineDataListUnit;
         this.contrastDataList = contrastDataList;
     }

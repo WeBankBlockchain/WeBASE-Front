@@ -21,15 +21,15 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * result of monitor and performance module
- * related with PerformanceData
+ * data unit of Performance data
+ * containing list of result number which comes from monitor result
  */
 @Data
-public class LineDataList {
+public class LineDataListUnit {
     List<Long> timestampList;
     List<BigDecimal> valueList;
 
-    public LineDataList(List<Long> timestampList, List<BigDecimal> valueList) {
+    public LineDataListUnit(List<Long> timestampList, List<BigDecimal> valueList) {
         this.timestampList = timestampList;
         this.valueList = valueList;
     }

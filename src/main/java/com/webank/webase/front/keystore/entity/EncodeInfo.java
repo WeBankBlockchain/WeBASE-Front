@@ -17,8 +17,7 @@ package com.webank.webase.front.keystore.entity;
 import lombok.Data;
 
 /**
- * EncodeInfo.
- * 
+ * EncodeInfo
  */
 @Data
 public class EncodeInfo {

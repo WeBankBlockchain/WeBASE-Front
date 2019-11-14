@@ -18,6 +18,9 @@ import lombok.Data;
 
 import java.io.InputStream;
 
+/**
+ * handle contract file's content from entity to .java file
+ */
 @Data
 public class FileContentHandle {
     private String  fileName;

@@ -1,4 +1,4 @@
-package com.webank.webase.front.base.entity;
+package com.webank.webase.front.base.response;
 
 import com.webank.webase.front.base.code.RetCode;
 import lombok.Data;
@@ -21,7 +21,7 @@ import lombok.Data;
 
 /**
  * BaseResponse.
- * includi
+ * related with base/code/ConstantCode and base/code/Retcode (ReturnCode)
  */
 @Data
 public class BaseResponse {
