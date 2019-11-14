@@ -8,12 +8,12 @@
 * 2: eclipse环境编译源码失败，错误提示如下；
 ```
 ...
-/performanceData/temp/WeBASE-Front/src/main/java/com/webank/webase/front/performance/PerformanceService.java:167: error: cannot find symbol
+/data/temp/WeBASE-Front/src/main/java/com/webank/webase/front/performance/PerformanceService.java:167: error: cannot find symbol
         log.info("begin sync performance");
         ^
   symbol:   variable log
   location: class PerformanceService
-Note: /performanceData/temp/WeBASE-Front/src/main/java/com/webank/webase/front/contract/CommonContract.java uses or overrides a deprecated API.
+Note: /data/temp/WeBASE-Front/src/main/java/com/webank/webase/front/contract/CommonContract.java uses or overrides a deprecated API.
 Note: Recompile with -Xlint:deprecation for details.
 Note: Some input files use unchecked or unsafe operations.
 Note: Recompile with -Xlint:unchecked for details.
