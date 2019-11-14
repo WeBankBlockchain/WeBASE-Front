@@ -23,7 +23,7 @@ public enum DataStatus {
 
     private int value;
 
-    private DataStatus(Integer dataStatus) {
+    DataStatus(Integer dataStatus) {
         this.value = dataStatus;
     }
 

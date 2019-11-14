@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
 
 /**

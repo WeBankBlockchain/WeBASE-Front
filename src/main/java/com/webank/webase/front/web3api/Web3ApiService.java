@@ -15,12 +15,12 @@ package com.webank.webase.front.web3api;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.FrontUtils;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.config.NodeConfig;
-import com.webank.webase.front.config.Web3Config;
+import com.webank.webase.front.base.config.NodeConfig;
+import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.PeerOfConsensusStatus;
 import com.webank.webase.front.web3api.entity.PeerOfSyncStatus;

@@ -15,7 +15,7 @@
  */
 package com.webank.webase.front.util;
 
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;

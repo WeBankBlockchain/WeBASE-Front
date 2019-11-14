@@ -13,7 +13,7 @@
  */
 package com.webank.webase.front.transaction;
 
-import static com.webank.webase.front.base.ConstantCode.GROUPID_NOT_EXIST;
+import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -23,6 +23,9 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import com.webank.webase.front.transaction.entity.ReqTransHandle;
+import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
@@ -56,15 +59,15 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.ContractRepository;
 import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.keystore.EncodeInfo;
-import com.webank.webase.front.keystore.KeyStoreInfo;
+import com.webank.webase.front.keystore.entity.EncodeInfo;
+import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
