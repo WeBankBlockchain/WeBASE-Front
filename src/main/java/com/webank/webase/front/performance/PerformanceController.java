@@ -21,7 +21,7 @@ import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.performance.entity.ToggleHandle;
-import com.webank.webase.front.performance.result.PerformanceDataHandle;
+import com.webank.webase.front.performance.result.PerformanceData;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -63,7 +63,7 @@ public class PerformanceController {
             @ApiImplicitParam(name = "contrastEndDate", value = "compare end time"),
             @ApiImplicitParam(name = "gap", value = "time gap", dataType = "int")})
     @GetMapping
-    public List<PerformanceDataHandle> getPerformanceRatio(
+    public List<PerformanceData> getPerformanceRatio(
             @RequestParam(required = false) @DateTimeFormat(
                     iso = DATE_TIME) LocalDateTime beginDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DATE_TIME) LocalDateTime endDate,
@@ -72,7 +72,7 @@ public class PerformanceController {
             @RequestParam(required = false) @DateTimeFormat(
                     iso = DATE_TIME) LocalDateTime contrastEndDate,
             @RequestParam(required = false, defaultValue = "1") int gap) throws Exception {
-        List<PerformanceDataHandle> performanceList = performanceService.findContrastDataByTime(beginDate,
+        List<PerformanceData> performanceList = performanceService.findContrastDataByTime(beginDate,
                 endDate, contrastBeginDate, contrastEndDate, gap);
         return performanceList;
     }

@@ -18,9 +18,9 @@ package com.webank.webase.front.performance;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.performance.entity.Performance;
-import com.webank.webase.front.performance.result.LineDataListUnit;
+import com.webank.webase.front.performance.result.Data;
+import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
-import com.webank.webase.front.performance.result.PerformanceDataHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -85,9 +85,9 @@ public class PerformanceService {
      * @param gap gap
      * @return
      */
-    public List<PerformanceDataHandle> findContrastDataByTime(LocalDateTime startTime,
-                                                              LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
-                                                              int gap)  {
+    public List<PerformanceData> findContrastDataByTime(LocalDateTime startTime,
+                                                        LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
+                                                        int gap)  {
 
         List<Performance> performanceList;
         if (startTime == null || endTime == null) {
@@ -108,8 +108,8 @@ public class PerformanceService {
 
     }
 
-    private List<PerformanceDataHandle> transferToPerformanceData(List<Performance> performanceList,
-                                                                  List<Performance> contrastPerformanceList) {
+    private List<PerformanceData> transferToPerformanceData(List<Performance> performanceList,
+                                                            List<Performance> contrastPerformanceList) {
         List<Long> timestampList = new ArrayList<>();
         List<BigDecimal> memoryValueList = new ArrayList<>();
         List<BigDecimal> cpuValueList = new ArrayList<>();
@@ -141,23 +141,23 @@ public class PerformanceService {
             contrastTimestampList.add(performance.getTimestamp());
         }
         contrastPerformanceList.clear();
-        List<PerformanceDataHandle> performanceDataHandleList = new ArrayList<>();
-        performanceDataHandleList.add(
-                new PerformanceDataHandle("cpu", new PerformanceData(new LineDataListUnit(timestampList, cpuValueList),
-                        new LineDataListUnit(contrastTimestampList, contrastCpuValueList))));
-        performanceDataHandleList
-                .add(new PerformanceDataHandle("memory", new PerformanceData(new LineDataListUnit(null, memoryValueList),
-                        new LineDataListUnit(null, contrastMemoryValueList))));
-        performanceDataHandleList
-                .add(new PerformanceDataHandle("disk", new PerformanceData(new LineDataListUnit(null, diskValueList),
-                        new LineDataListUnit(null, contrastDiskValueList))));
-        performanceDataHandleList
-                .add(new PerformanceDataHandle(TXBPS, new PerformanceData(new LineDataListUnit(null, txbpsValueList),
-                        new LineDataListUnit(null, contrastTxbpsValueList))));
-        performanceDataHandleList
-                .add(new PerformanceDataHandle(RXBPS, new PerformanceData(new LineDataListUnit(null, rxbpsValueList),
-                        new LineDataListUnit(null, contrastRxbpsValueList))));
-        return performanceDataHandleList;
+        List<PerformanceData> performanceDataList = new ArrayList<>();
+        performanceDataList.add(
+                new PerformanceData("cpu", new Data(new LineDataList(timestampList, cpuValueList),
+                        new LineDataList(contrastTimestampList, contrastCpuValueList))));
+        performanceDataList
+                .add(new PerformanceData("memory", new Data(new LineDataList(null, memoryValueList),
+                        new LineDataList(null, contrastMemoryValueList))));
+        performanceDataList
+                .add(new PerformanceData("disk", new Data(new LineDataList(null, diskValueList),
+                        new LineDataList(null, contrastDiskValueList))));
+        performanceDataList
+                .add(new PerformanceData(TXBPS, new Data(new LineDataList(null, txbpsValueList),
+                        new LineDataList(null, contrastTxbpsValueList))));
+        performanceDataList
+                .add(new PerformanceData(RXBPS, new Data(new LineDataList(null, rxbpsValueList),
+                        new LineDataList(null, contrastRxbpsValueList))));
+        return performanceDataList;
     }
 
     public boolean toggleSync(boolean toggle) throws Exception {
