@@ -20,7 +20,7 @@ processStatus=0
 server_pid=0
 checkProcess(){
     server_pid=`ps aux | grep java | grep $APP_MAIN | awk '{print $2}'`
-    port_pid=`netstat -anp 2>&1|grep $SERVER_PORT|awk '{printf $7}'|cut -d/ -f1`
+    port_pid=`netstat -anp 2>&1|grep ":$SERVER_PORT "|awk '{printf $7}'|cut -d/ -f1`
     if [ -n "$port_pid" ] && [ -n "$(echo $port_pid| sed -n "/^[0-9]\+$/p")" ]; then
         if [[ $server_pid =~ $port_pid ]]; then
             processPid=$port_pid
@@ -52,7 +52,7 @@ start(){
         processStatus=0
     else
         echo -n "Starting Server $APP_MAIN Port $SERVER_PORT ..."
-        nohup $JAVA_HOME/bin/java $JAVA_OPTS -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1 &
+        nohup $JAVA_HOME/bin/java -Djdk.tls.namedGroups="secp256k1" $JAVA_OPTS -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1 &
         
         count=1
         result=0
