@@ -33,8 +33,8 @@ import java.util.List;
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
 /**
- * monitor of abnormal contract, abnormal user
- * and abnormal transactions
+ * Node monitor controller
+ * distinguished from host monitor: performance
  */
 @Slf4j
 @RestController

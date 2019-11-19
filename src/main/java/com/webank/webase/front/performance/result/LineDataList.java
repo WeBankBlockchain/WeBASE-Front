@@ -21,7 +21,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * DATA UNIT of Performance data
+ * DATA UNIT of monitor data
+ * LineDataList => Data => PerformanceData
  * containing list of result number which comes from monitor result
  */
 @Data

@@ -16,8 +16,7 @@
 package com.webank.webase.front.performance.result;
 
 /**
- * performance data handle (Data Transport Object)
- * performance Data of monitor and performance module
+ * Performance data handle(DTO) of monitor and performance module
  * performance response to web
  */
 @lombok.Data
