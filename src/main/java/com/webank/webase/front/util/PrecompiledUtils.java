@@ -23,7 +23,9 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import java.io.IOException;
 import java.util.Map;
 
-
+/**
+ * Constants and tool function related with Precompiled module
+ */
 public class PrecompiledUtils {
 
 

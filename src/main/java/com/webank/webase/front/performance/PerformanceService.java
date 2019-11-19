@@ -45,7 +45,7 @@ import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 
 /**
- * monitor of host computer's performance
+ * Host monitor: monitor computer's performance
  * such as cpu, memory, disk etc.
  */
 
@@ -57,7 +57,9 @@ public class PerformanceService {
     private PerformanceRepository performanceRepository;
     @Autowired
     private Constants constants;
+    // host upload bps(bit per second)
     private static  final String TXBPS = "txbps";
+    // host download bps(bit per second)
     private static final String RXBPS = "rxbps";
 
     private static Sigar sigar = new Sigar();
@@ -174,7 +176,7 @@ public class PerformanceService {
         return constants.isMonitorEnabled();
     }
     /**
-     * syncPerformanceInfo.
+     * syncPerformanceInfo per 5s
      */
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncPerformanceInfo() throws SigarException {
@@ -203,7 +205,7 @@ public class PerformanceService {
     }
 
     /**
-     * deletePerformanceInfoPerWeek.
+     * deletePerformanceInfoPerWeek at 00:00:00 per week
      */
     @Scheduled(cron = "0 0 0 * * ?")
     public void deletePerformanceInfoPerWeek() throws SigarException {

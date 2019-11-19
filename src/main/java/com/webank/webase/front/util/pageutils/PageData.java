@@ -17,6 +17,10 @@ package com.webank.webase.front.util.pageutils;
 
 import java.util.List;
 
+/**
+ * data unit of page in List2Page tool
+ * @param <T>
+ */
 public class PageData<T> {
     //当前页
     private int pageIndex;

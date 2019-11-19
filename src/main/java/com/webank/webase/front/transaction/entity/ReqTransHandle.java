@@ -24,6 +24,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * transHandler interface parameter.
+ * handle transactions of deploy/call contract
  */
 @Data
 public class ReqTransHandle {

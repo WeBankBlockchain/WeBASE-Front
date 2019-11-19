@@ -20,6 +20,9 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * handle POST permission state in api("/sorted") in permission controller
+ */
 @Data
 public class PermissionState {
     // 0 means revoked, 1 means granted

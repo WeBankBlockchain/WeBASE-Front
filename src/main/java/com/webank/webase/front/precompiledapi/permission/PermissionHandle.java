@@ -20,6 +20,9 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * handle POST request for permission controller
+ */
 @Data
 public class PermissionHandle {
     // defaultValue = "1"

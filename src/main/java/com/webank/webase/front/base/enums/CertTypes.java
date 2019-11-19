@@ -18,6 +18,8 @@ package com.webank.webase.front.base.enums;
 
 /**
  * cert type enums
+ * chain: ca.crt, node: node.crt
+ * sdk: certs in sdk directory
  */
 public enum CertTypes {
     CHAIN(1), NODE(2), SDK(3);

@@ -17,6 +17,9 @@ package com.webank.webase.front.base.code;
 
 import lombok.Data;
 
+/**
+ * Constant Return Code
+ */
 @Data
 public class RetCode {
     private Integer code;

@@ -22,6 +22,10 @@ import com.webank.webase.front.method.entity.NewMethodInputParamHandle;
 import com.webank.webase.front.method.entity.Method;
 import com.webank.webase.front.method.entity.MethodKey;
 
+/**
+ * Method is used in transaction data's analysis
+ * Store contract's method in db
+ */
 @Service
 public class MethodService {
 

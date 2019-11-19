@@ -18,7 +18,7 @@ package com.webank.webase.front.util;
 
 /**
  * This Address is different from org.fisco.bcos.web3j.abi.datatypes.Address
- * it's used to check validity of address in AddressUtils
+ * used to check validity of address in AddressUtils
  */
 public class Address {
 

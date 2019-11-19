@@ -74,9 +74,9 @@ import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import lombok.extern.slf4j.Slf4j;
 
-
 /**
  * TransService.
+ * handle transactions of deploy/call contract
  */
 @Slf4j
 @Service
@@ -97,7 +97,7 @@ public class TransService {
 
     /**
      * transHandle.
-     *
+     * validate request body's param
      * @param req request
      */
     public Object transHandle(ReqTransHandle req) throws Exception {
@@ -123,7 +123,7 @@ public class TransService {
         if (!ifExisted) {
             throw new FrontException(ConstantCode.ABI_GET_ERROR);
         }
-
+        // handle calling contract's method/function
         Object baseRsp = dealWithtrans(req);
         log.info("transHandle end. name:{} func:{} baseRsp:{}", req.getContractName(),
                 req.getFuncName(), JSON.toJSONString(baseRsp));
@@ -269,7 +269,8 @@ public class TransService {
 
     /**
      * transaction request.
-     *
+     * separate contract's input/output types and functions
+     * execute common contract functions in module:contract after validation
      * @param req request
      */
     public Object dealWithtrans(ReqTransHandle req) throws FrontException {
@@ -341,7 +342,7 @@ public class TransService {
     }
 
     /**
-     * execCall.
+     * execCall through common contract
      *
      * @param funOutputTypes list
      * @param function function
@@ -364,7 +365,7 @@ public class TransService {
     }
 
     /**
-     * execTransaction.
+     * execTransaction  through common contract
      *
      * @param function function
      * @param commonContract contract
@@ -383,7 +384,7 @@ public class TransService {
     }
 
     /**
-     * signMessage.
+     * signMessage to create raw transaction and encode data
      * 
      * @param groupId id
      * @param contractAddress info
