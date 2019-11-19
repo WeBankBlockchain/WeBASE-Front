@@ -21,8 +21,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Contract Constant.
- *
+ * Contract Constant
+ * linked with constants in application.yml
  */
 @Data
 @Configuration

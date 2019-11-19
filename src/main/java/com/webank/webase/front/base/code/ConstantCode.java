@@ -15,7 +15,9 @@ package com.webank.webase.front.base.code;
 
 
 /**
- * Code Constant.
+ * Code Constant
+ * String constants used in ReqXXXParam for validation
+ * RetCode constants used in controller for response
  */
 public class ConstantCode {
 

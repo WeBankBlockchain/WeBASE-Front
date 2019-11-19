@@ -1,8 +1,3 @@
-package com.webank.webase.front.base.response;
-
-import com.webank.webase.front.base.code.RetCode;
-import lombok.Data;
-
 /*
  * Copyright 2014-2019 the original author or authors.
  *
@@ -18,6 +13,11 @@ import lombok.Data;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.webank.webase.front.base.response;
+
+import com.webank.webase.front.base.code.RetCode;
+import lombok.Data;
 
 /**
  * BaseResponse.

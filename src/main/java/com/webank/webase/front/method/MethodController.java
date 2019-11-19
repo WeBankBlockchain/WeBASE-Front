@@ -33,6 +33,10 @@ import com.webank.webase.front.method.entity.NewMethodInputParamHandle;
 import com.webank.webase.front.method.entity.Method;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Method controller
+ * used in transaction data's analysis
+ */
 @Log4j2
 @RestController
 @RequestMapping("method")

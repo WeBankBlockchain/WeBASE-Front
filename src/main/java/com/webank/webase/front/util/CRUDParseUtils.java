@@ -38,6 +38,10 @@ import org.fisco.bcos.web3j.precompile.crud.Table;
 
 import java.util.*;
 
+/**
+ * Handle CRUD operation on chain's table
+ * parse sql(string type) to Table, Condition etc.
+ */
 public class CRUDParseUtils {
 
     public static final String PRIMARY_KEY = "primary key";
