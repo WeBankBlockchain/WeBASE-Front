@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.util.pageutils;
+package com.webank.webase.front.util.pageutils.entity;
 
 import lombok.Data;
 
+/**
+ * data unit to handle map2PagedList tool
+ * @param <T>
+ */
 @Data
 public class MapHandle<T> {
     private String key;

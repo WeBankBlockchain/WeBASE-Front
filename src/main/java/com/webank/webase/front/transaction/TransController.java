@@ -37,7 +37,7 @@ import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS
 
 /**
  * TransController.
- *
+ * handle transactions of deploy/call contract
  */
 @Api(value = "/trans", tags = "transaction interface")
 @Slf4j

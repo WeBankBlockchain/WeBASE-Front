@@ -15,6 +15,9 @@
  */
 package com.webank.webase.front.util;
 
+/**
+ * get Address from String
+ */
 public class AddressUtils {
 
     public static Address convertAddress(String addressStr) {

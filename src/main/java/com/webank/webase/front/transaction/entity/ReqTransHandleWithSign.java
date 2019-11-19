@@ -24,6 +24,7 @@ import lombok.Data;
 
 /**
  * transHandleWithSign interface parameter.
+ * handle transactions of deploy/call contract
  */
 @Data
 public class ReqTransHandleWithSign {
