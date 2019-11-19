@@ -40,6 +40,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * Precompiled common service
+ * including management of CNS, node consensus status, CRUD
+ */
 @Slf4j
 @Service
 public class PrecompiledService{

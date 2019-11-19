@@ -42,17 +42,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Permission contoller
+ * grant or revoke administrator and get administrators on chain
+ */
 @Api(value = "/permission", tags = "permission manage interface")
 @Slf4j
 @RestController
 @RequestMapping(value = "/permission")
-
 public class PermissionManageController extends BaseController {
     @Autowired
     private PermissionManageService permissionManageService;
 
     /**
-     * 分发Get请求, 根据type获取权限管理员的list
+     * handle get request by permission type
+     * to get list of different administrators on chain
      */
     @GetMapping("")
     public Object permissionGetControl(
@@ -91,7 +95,9 @@ public class PermissionManageController extends BaseController {
         }
     }
 
-    // 根据type获取不分页的管理员list
+    /**
+     * get list of different administrators on chain not paged
+     */
     @GetMapping("/full")
     public Object getFullListByType(
             @RequestParam(defaultValue = "1") int groupId,
@@ -134,7 +140,9 @@ public class PermissionManageController extends BaseController {
         }
     }
 
-    // 返回不分页的全量的list
+    /**
+     * get list of user's permission state not paged
+     */
     @GetMapping("/sorted/full")
     public Object gerPermissionStateFull(
             @RequestParam(defaultValue = "1") int groupId) throws Exception {
@@ -147,7 +155,13 @@ public class PermissionManageController extends BaseController {
     }
 
 
-    // 批量修改address的权限，包含grant&revoke 先get后发交易
+    /**
+     * manage user's permission state by address,
+     * get state before grant or revoke
+     * @param permissionHandle
+     * @return
+     * @throws Exception
+     */
     @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
     @ApiImplicitParam(name = "permissionHandle", value = "permission info", required = true, dataType = "PermissionHandle")
     @PostMapping("/sorted")
@@ -182,7 +196,12 @@ public class PermissionManageController extends BaseController {
         }
     }
 
-    // 分发Post请求
+    /**
+     * handle post request(grant) by permission type
+     * @param permissionHandle
+     * @return
+     * @throws Exception
+     */
     @ApiOperation(value = "grantPermissionManager", notes = "grant address PermissionManager")
     @PostMapping
     public Object permissionPostControl(@Valid @RequestBody PermissionHandle permissionHandle) throws Exception {
@@ -227,7 +246,12 @@ public class PermissionManageController extends BaseController {
         }
     }
 
-    //分发del请求
+    /**
+     * handle delete request(revoke) by permission type
+     * @param permissionHandle
+     * @return
+     * @throws Exception
+     */
     @ApiOperation(value = "revokePermissionManager", notes = "revoke address PermissionManager")
     @ApiImplicitParam(name = "permissionHandle", value = "transaction info", required = true, dataType = "PermissionHandle")
     @DeleteMapping("")
@@ -274,9 +298,8 @@ public class PermissionManageController extends BaseController {
     }
 
     /**
-     * manage PermissionManager related
+     * Permission manager, the admin to manage all types of admins
      */
-
     public Object grantPermissionManager(int groupId, String from, String address) throws Exception {
         Instant startTime = Instant.now();
         log.info("start grantPermissionManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
@@ -317,7 +340,6 @@ public class PermissionManageController extends BaseController {
     /**
      * manage DeployAndCreateManager related
      */
-
     public Object grantDeployAndCreateManager(int groupId, String from, String address) throws Exception {
         Instant startTime = Instant.now();
         log.info("start grantDeployAndCreateManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
@@ -355,6 +377,7 @@ public class PermissionManageController extends BaseController {
 
     /**
      * manage UserTableManager
+     * admin that manage who can use CRUD in spectacular table on chain
      */
     public Object grantUserTableManager(int groupId, String from, String tableName, String address) throws Exception {
         if(Objects.isNull(tableName)){
@@ -421,7 +444,7 @@ public class PermissionManageController extends BaseController {
     }
 
     /**
-     * node
+     * node consensus admin  manage
      */
     public Object grantNodeManager(int groupId, String from, String address) throws Exception {
         Instant startTime = Instant.now();
@@ -462,6 +485,7 @@ public class PermissionManageController extends BaseController {
 
     /**
      * manage system config Manager related
+     * admin who manage gas limit per tx and transaction limit per block
      */
     public Object grantSysConfigManager(int groupId, String from, String address) throws Exception {
         Instant startTime = Instant.now();
@@ -501,6 +525,7 @@ public class PermissionManageController extends BaseController {
 
     /**
      *  manage CNS Manager related
+     *  cns admin
      */
 
     public Object grantCNSManager(int groupId, String from, String address) throws Exception {

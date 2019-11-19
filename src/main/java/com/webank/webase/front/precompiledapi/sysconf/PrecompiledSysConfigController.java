@@ -34,6 +34,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * System config value controller
+ * manage tx_count and gas_limit
+ */
 @Api(value = "/sys", tags = "precompiled manage interface")
 @Slf4j
 @RestController
