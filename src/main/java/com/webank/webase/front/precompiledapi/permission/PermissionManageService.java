@@ -33,6 +33,10 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.util.*;
 
+/**
+ * Permission manage service
+ * grant or revoke administrator and get administrators on chain
+ */
 @Slf4j
 @Service
 public class PermissionManageService {
@@ -41,9 +45,15 @@ public class PermissionManageService {
     @Autowired
     private KeyStoreService keyStoreService;
 
-    private static final int FLAG_FAIL = -1; //grant/revoke permission fail
-    private static final int FLAG_GRANTED = 1; // permission state is already granted
-    private static final int FLAG_REVOKED = 0; // permission state is already revoked
+    /**
+     * permission state flag(enum)
+     */
+    //grant/revoke permission fail
+    private static final int FLAG_FAIL = -1;
+    // permission state is already granted
+    private static final int FLAG_GRANTED = 1;
+    // permission state is already revoked
+    private static final int FLAG_REVOKED = 0;
 
 
     // get credentials from user address
@@ -131,8 +141,11 @@ public class PermissionManageService {
         return resultMap;
     }
 
+    /**
+     * init PermissionState all 0(revoked)
+     * @return
+     */
     public PermissionState getDefaultPermissionState() {
-        // 默认全部权限为0
         PermissionState initState = new PermissionState();
         initState.setDeployAndCreate(FLAG_REVOKED);
         initState.setCns(FLAG_REVOKED);
@@ -143,11 +156,9 @@ public class PermissionManageService {
 
     /**
      * 批量grant/revoke权限
-     * 两种方案： 如果发送三笔交易的时间远超一秒，才需要先get再发交易
-     * 先getList(约1秒），XOR异或(不同的)才需要发交易。
+     * 先getList(约1秒），XOR异或(权限状态有修改的)才需要发交易。
      * 直接发四个交易
      */
-    // 方案一 如果全部相同，只需要200ms, 如果全部不同，要2s
     public Object updatePermissionStateAfterCheck(int groupId, String fromAddress, String userAddress, PermissionState permissionState) throws Exception {
         Map<String, Integer> resultList = new HashMap<>();
         Map<String, PermissionState> checkList = getPermissionStateList(groupId);
@@ -211,6 +222,7 @@ public class PermissionManageService {
         }
         return resState;
     }
+
     // cns handle
     public int cnsMgrHandle(int groupId, String fromAddress, String userAddress, int cnsState) throws Exception {
         int resState = FLAG_FAIL;
@@ -233,6 +245,7 @@ public class PermissionManageService {
         }
         return resState;
     }
+
     // node handle
     public int nodeMgrHandle(int groupId, String fromAddress, String userAddress, int nodeState) throws Exception {
         int resState = FLAG_FAIL;
@@ -255,6 +268,7 @@ public class PermissionManageService {
         }
         return resState;
     }
+
     // system config handle
     public int sysConfigMgrHandle(int groupId, String fromAddress, String userAddress, int sysConfigState) throws Exception {
         int resState = FLAG_FAIL;

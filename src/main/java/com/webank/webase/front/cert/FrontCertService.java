@@ -15,7 +15,6 @@
  */
 package com.webank.webase.front.cert;
 
-
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
@@ -32,10 +31,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * get Front's sdk's cert(.crt) in /resource
- * get ca.crt/node.crt of the node which linked with Front
+ * 1. get Front's sdk's certs(.crt) in /resource
+ * 2. get ca.crt/node.crt of the node which linked with Front
  */
 @Slf4j
 @Service
@@ -73,10 +71,16 @@ public class FrontCertService {
         return resList.get(0);
     }
 
-    private void getCertList(String nodePath, int certTypes, List<String> resultList) {
-        log.debug("start tools: getCertList in nodePath:{},certTypes:{}", nodePath, certTypes);
+    /**
+     * get Cert from crt file through nodePath and certType
+     * @param nodePath
+     * @param certType
+     * @param resultList
+     */
+    private void getCertList(String nodePath, int certType, List<String> resultList) {
+        log.debug("start tools: getCertList in nodePath:{},certType:{}", nodePath, certType);
 
-        Path certPath = getCertPath(nodePath, certTypes);
+        Path certPath = getCertPath(nodePath, certType);
         try(InputStream nodeCrtInput = Files.newInputStream(certPath)){
             String nodeCrtStr = inputStream2String(nodeCrtInput);
             String[] nodeCrtStrArray = nodeCrtStr.split(crtContentHead);
@@ -101,7 +105,7 @@ public class FrontCertService {
 
 
     /**
-     * get SDK crts in directory /resource/
+     * get SDK crts in directory ~/resource/
      * including agency's crt, node.crt
      * excluding ca.crt because node's certs already including ca.crt
      * @return
@@ -136,15 +140,22 @@ public class FrontCertService {
         return str;
     }
 
-    public Path getCertPath(String nodePath, int certTypes) {
-        if(certTypes == CertTypes.CHAIN.getValue()) {
+    /**
+     * get cert file's path through concatting nodePath with certType
+     * @param nodePath
+     * @param certType
+     * @return
+     */
+    public Path getCertPath(String nodePath, int certType) {
+        if(certType == CertTypes.CHAIN.getValue()) {
             return Paths.get(nodePath.concat(caCrtPath));
-        }else if(certTypes == CertTypes.NODE.getValue()) {
+        }else if(certType == CertTypes.NODE.getValue()) {
             return Paths.get(nodePath.concat(nodeCrtPath));
         }
         return null;
     }
 
+    // remove the last character: "\n"
     public String formatStr(String string) {
         return string.substring(0, string.length() - 1);
     }

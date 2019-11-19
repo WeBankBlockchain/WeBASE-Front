@@ -44,6 +44,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
+/**
+ * Precompiled common controller
+ * including management of CNS, node consensus status, CRUD
+ */
 @Api(value = "/precompiled", tags = "precompiled manage interface")
 @Slf4j
 @RestController
@@ -134,7 +138,7 @@ public class PrecompiledController {
 
     @ApiOperation(value = "nodeManageControl", notes = "set system config value by key")
     @ApiImplicitParam(name = "consensusHandle", value = "node consensus status control", required = true, dataType = "ConsensusHandle")
-    @PostMapping("consensus") //TODO node
+    @PostMapping("consensus") //TODO url change to node
     public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle)throws Exception {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();

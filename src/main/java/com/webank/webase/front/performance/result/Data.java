@@ -16,8 +16,9 @@
 package com.webank.webase.front.performance.result;
 
 /**
- * DATA ENTITY of monitor and performance module
- * related with LineDataList => MonitorData => PerformanceData
+ * DATA ENTITY of node monitor and host monitor (performance) module
+ * related with LineDataList and PerformanceData
+ * LineDataList => Data => PerformanceData
  */
 @lombok.Data
 public class Data {

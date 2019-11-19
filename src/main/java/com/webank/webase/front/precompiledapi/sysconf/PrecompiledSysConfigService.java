@@ -35,6 +35,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * System config service
+ */
 @Slf4j
 @Service
 public class PrecompiledSysConfigService {
@@ -47,12 +50,6 @@ public class PrecompiledSysConfigService {
     // 根据前台传的user address获取私钥
     public Credentials getCredentials(String fromAddress) throws Exception {
         return keyStoreService.getCredentials(fromAddress, false);
-    }
-    public Credentials getCredentialsForQuery() throws Exception {
-        PEMManager pemManager = new PEMManager();
-        InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
-        pemManager.load(pemStream);
-        return GenCredential.create(pemManager.getECKeyPair().getPrivateKey().toString(16));
     }
 
     /**
@@ -88,7 +85,13 @@ public class PrecompiledSysConfigService {
         return list;
     }
 
-
+    /**
+     * get system config list by groupId
+     * directory through web3j instead of Precompiled instance
+     * @param groupId
+     * @return
+     * @throws IOException
+     */
     private List<SystemConfigHandle> getConfigList(int groupId) throws IOException {
         List<SystemConfigHandle> list = new ArrayList<>();
 

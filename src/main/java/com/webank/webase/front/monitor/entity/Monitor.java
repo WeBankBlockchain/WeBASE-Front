@@ -24,7 +24,7 @@ import javax.persistence.Id;
 import java.math.BigInteger;
 
 /**
- * entity of Monitor in db
+ * entity of Node Monitor in db
  */
 @Entity
 @Data

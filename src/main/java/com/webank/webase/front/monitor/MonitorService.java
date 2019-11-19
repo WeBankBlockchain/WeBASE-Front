@@ -37,8 +37,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
- * monitor of abnormal contract, abnormal user
- * and abnormal transactions
+ * Node monitor service
+ * distinguished from host monitor: performance
  */
 
 @Slf4j
@@ -131,6 +131,11 @@ public class MonitorService {
         return newMonitorList;
     }
 
+    /**
+     * scheduled task to sync Monitor Info per 5s
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncMonitorInfo() throws ExecutionException, InterruptedException {
         log.debug("begin sync chain data");
@@ -153,7 +158,9 @@ public class MonitorService {
         }
     }
 
-
+    /**
+     * scheduled task to delete Monitor Info at 00:00:00 per week
+     */
     @Scheduled(cron = "0 0 0 * * ?")
     public void deleteMonitorInfoPerWeek()   {
         log.debug("begin delete monitor");
