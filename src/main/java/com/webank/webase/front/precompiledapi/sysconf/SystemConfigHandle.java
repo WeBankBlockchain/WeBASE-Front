@@ -15,12 +15,16 @@
  */
 package com.webank.webase.front.precompiledapi.sysconf;
 
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * handle POST request to manage system config value
+ * check param's validation
+ */
 @Data
 public class SystemConfigHandle {
 

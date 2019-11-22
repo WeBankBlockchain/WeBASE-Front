@@ -15,9 +15,9 @@
  */
 package com.webank.webase.front.precompiledapi;
 
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.precompiledapi.precompiledHandle.NodeInfo;
+import com.webank.webase.front.precompiledapi.entity.NodeInfo;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.PEMManager;
@@ -40,6 +40,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * Precompiled common service
+ * including management of CNS, node consensus status, CRUD
+ */
 @Slf4j
 @Service
 public class PrecompiledService{
@@ -51,10 +56,10 @@ public class PrecompiledService{
 
 
     // 根据前台传的user address获取私钥
-    public Credentials getCredentials(String fromAddress) throws Exception {
+    private Credentials getCredentials(String fromAddress) throws Exception {
         return keyStoreService.getCredentials(fromAddress, false);
     }
-    public Credentials getCredentialsForQuery() throws Exception {
+    private Credentials getCredentialsForQuery() throws Exception {
         PEMManager pemManager = new PEMManager();
         InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
         pemManager.load(pemStream);
@@ -109,26 +114,19 @@ public class PrecompiledService{
         // nodeListWithType 组合多个带有类型的nodeid list
         List<String> sealerList = web3jMap.get(groupId).getSealerList().send().getResult();
         List<String> observerList = web3jMap.get(groupId).getObserverList().send().getResult();
-        List<String> nodeList = web3jMap.get(groupId).getNodeIDList().send().getResult();
+        List<String> peerList = web3jMap.get(groupId).getNodeIDList().send().getResult();
         // process nodeList
         List<NodeInfo> nodeListWithType = new ArrayList<>();
-        for(int i = 0; i < nodeList.size(); i++) {
-            // 默认游离节点
-            String nodeId = nodeList.get(i);
-            NodeInfo nodeInfo = new NodeInfo(nodeId, PrecompiledUtils.NODE_TYPE_REMOVE);
 
-            for(int j= 0; j < sealerList.size(); j++){
-                if(sealerList.get(j).equals(nodeId)) {
-                    nodeInfo.setNodeType(PrecompiledUtils.NODE_TYPE_SEALER);
-                }
-            }
-            for(int k= 0; k < observerList.size(); k++){
-                if(observerList.get(k).equals(nodeId)) {
-                    nodeInfo.setNodeType(PrecompiledUtils.NODE_TYPE_OBSERVER);
-                }
-            }
-            nodeListWithType.add(nodeInfo);
-        }
+        // add all sealer and observer in List
+        sealerList.stream().forEach(sealer ->
+                nodeListWithType.add(new NodeInfo(sealer, PrecompiledUtils.NODE_TYPE_SEALER)));
+        observerList.stream().forEach(observer ->
+                nodeListWithType.add(new NodeInfo(observer, PrecompiledUtils.NODE_TYPE_OBSERVER)));
+        // peer not in sealer/observer but connected is remove node(游离节点)
+        peerList.stream().filter(peer -> !sealerList.contains(peer) && !observerList.contains(peer))
+                .forEach(peerToAdd ->
+                        nodeListWithType.add(new NodeInfo(peerToAdd, PrecompiledUtils.NODE_TYPE_REMOVE)));
 
         return nodeListWithType;
     }

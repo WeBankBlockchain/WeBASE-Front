@@ -18,6 +18,10 @@ package com.webank.webase.front.util.pageutils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * use PageData to transfer list to paged list
+ * @param <T>
+ */
 public class List2Page<T> {
     private List<T> data;
     private Integer pageSize;

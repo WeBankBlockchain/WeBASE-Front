@@ -15,8 +15,9 @@
  */
 package com.webank.webase.front.performance;
 
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.performance.entity.Performance;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
@@ -43,6 +44,11 @@ import org.hyperic.sigar.NetInterfaceStat;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 
+/**
+ * Host monitor: monitor computer's performance
+ * such as cpu, memory, disk etc.
+ */
+
 @Slf4j
 @Service
 public class PerformanceService {
@@ -51,7 +57,9 @@ public class PerformanceService {
     private PerformanceRepository performanceRepository;
     @Autowired
     private Constants constants;
+    // host upload bps(bit per second)
     private static  final String TXBPS = "txbps";
+    // host download bps(bit per second)
     private static final String RXBPS = "rxbps";
 
     private static Sigar sigar = new Sigar();
@@ -80,8 +88,8 @@ public class PerformanceService {
      * @return
      */
     public List<PerformanceData> findContrastDataByTime(LocalDateTime startTime,
-            LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
-            int gap)  {
+                                                        LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
+                                                        int gap)  {
 
         List<Performance> performanceList;
         if (startTime == null || endTime == null) {
@@ -103,7 +111,7 @@ public class PerformanceService {
     }
 
     private List<PerformanceData> transferToPerformanceData(List<Performance> performanceList,
-            List<Performance> contrastPerformanceList) {
+                                                            List<Performance> contrastPerformanceList) {
         List<Long> timestampList = new ArrayList<>();
         List<BigDecimal> memoryValueList = new ArrayList<>();
         List<BigDecimal> cpuValueList = new ArrayList<>();
@@ -168,7 +176,7 @@ public class PerformanceService {
         return constants.isMonitorEnabled();
     }
     /**
-     * syncPerformanceInfo.
+     * syncPerformanceInfo per 5s
      */
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncPerformanceInfo() throws SigarException {
@@ -197,7 +205,7 @@ public class PerformanceService {
     }
 
     /**
-     * deletePerformanceInfoPerWeek.
+     * deletePerformanceInfoPerWeek at 00:00:00 per week
      */
     @Scheduled(cron = "0 0 0 * * ?")
     public void deletePerformanceInfoPerWeek() throws SigarException {

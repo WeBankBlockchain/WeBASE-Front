@@ -24,7 +24,7 @@ public enum KeyTypes {
 
     private int value;
 
-    private KeyTypes(int type) {
+    KeyTypes(int type) {
         this.value = type;
     }
 

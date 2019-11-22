@@ -36,7 +36,7 @@ import com.webank.webase.front.base.exception.FrontException;
 
 /**
  * ContractAbiUtil.
- * 
+ * format abi types from String
  */
 public class AbiUtil {
 

@@ -25,6 +25,9 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import lombok.Data;
 
+/**
+ * Contract's entity in db(using h2.db)
+ */
 @Entity
 @Data
 @Table(uniqueConstraints = {

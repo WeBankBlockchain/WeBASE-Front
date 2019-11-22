@@ -16,8 +16,10 @@
 package com.webank.webase.front.transaction;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.BaseController;
+import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.transaction.entity.ReqTransHandle;
+import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -31,11 +33,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.webank.webase.front.base.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
+import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
 
 /**
  * TransController.
- *
+ * handle transactions of deploy/call contract
  */
 @Api(value = "/trans", tags = "transaction interface")
 @Slf4j
