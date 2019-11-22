@@ -56,10 +56,10 @@ public class PrecompiledService{
 
 
     // 根据前台传的user address获取私钥
-    public Credentials getCredentials(String fromAddress) throws Exception {
+    private Credentials getCredentials(String fromAddress) throws Exception {
         return keyStoreService.getCredentials(fromAddress, false);
     }
-    public Credentials getCredentialsForQuery() throws Exception {
+    private Credentials getCredentialsForQuery() throws Exception {
         PEMManager pemManager = new PEMManager();
         InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
         pemManager.load(pemStream);
