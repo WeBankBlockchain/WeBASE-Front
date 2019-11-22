@@ -15,9 +15,13 @@
  */
 package com.webank.webase.front.util;
 
+import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.abi.datatypes.*;
 import org.fisco.bcos.web3j.abi.datatypes.generated.*;
 
+/**
+ * DataTypes for abi in web3j
+ */
 public class AbiTypes {
 
     private AbiTypes() {

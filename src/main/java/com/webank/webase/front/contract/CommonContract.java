@@ -29,7 +29,7 @@ import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 
 /**
- * CommonContract.
+ * Contract's common functions
  *
  */
 public final class CommonContract extends Contract {

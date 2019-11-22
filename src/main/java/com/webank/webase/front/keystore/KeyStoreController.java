@@ -16,6 +16,8 @@
 package com.webank.webase.front.keystore;
 
 import java.util.List;
+
+import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,9 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.webank.webase.front.base.BaseController;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.controller.BaseController;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

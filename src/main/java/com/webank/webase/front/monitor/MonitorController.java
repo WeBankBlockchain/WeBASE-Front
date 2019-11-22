@@ -32,6 +32,10 @@ import java.util.List;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
+/**
+ * Node monitor controller
+ * distinguished from host monitor: performance
+ */
 @Slf4j
 @RestController
 @RequestMapping(value = "/chain")

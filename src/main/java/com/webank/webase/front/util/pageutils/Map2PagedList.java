@@ -15,11 +15,17 @@
  */
 package com.webank.webase.front.util.pageutils;
 
+import com.webank.webase.front.util.pageutils.entity.MapHandle;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * transfer map to paged list through PageData
+ * @param <T>
+ */
 public class Map2PagedList<T> {
     private List<MapHandle> data;
     private Integer pageSize;

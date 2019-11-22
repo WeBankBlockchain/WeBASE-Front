@@ -24,7 +24,7 @@ public enum ContractStatus {
 
     private int value;
 
-    private ContractStatus(Integer dataStatus) {
+    ContractStatus(Integer dataStatus) {
         this.value = dataStatus;
     }
 

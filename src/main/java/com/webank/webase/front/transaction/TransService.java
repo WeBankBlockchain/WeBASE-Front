@@ -13,7 +13,7 @@
  */
 package com.webank.webase.front.transaction;
 
-import static com.webank.webase.front.base.ConstantCode.GROUPID_NOT_EXIST;
+import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -23,6 +23,9 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import com.webank.webase.front.transaction.entity.ReqTransHandle;
+import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
@@ -56,24 +59,24 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.ContractRepository;
 import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.keystore.EncodeInfo;
-import com.webank.webase.front.keystore.KeyStoreInfo;
+import com.webank.webase.front.keystore.entity.EncodeInfo;
+import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import lombok.extern.slf4j.Slf4j;
 
-
 /**
  * TransService.
+ * handle transactions of deploy/call contract
  */
 @Slf4j
 @Service
@@ -94,7 +97,7 @@ public class TransService {
 
     /**
      * transHandle.
-     *
+     * validate request body's param
      * @param req request
      */
     public Object transHandle(ReqTransHandle req) throws Exception {
@@ -120,7 +123,7 @@ public class TransService {
         if (!ifExisted) {
             throw new FrontException(ConstantCode.ABI_GET_ERROR);
         }
-
+        // handle calling contract's method/function
         Object baseRsp = dealWithtrans(req);
         log.info("transHandle end. name:{} func:{} baseRsp:{}", req.getContractName(),
                 req.getFuncName(), JSON.toJSONString(baseRsp));
@@ -266,7 +269,8 @@ public class TransService {
 
     /**
      * transaction request.
-     *
+     * separate contract's input/output types and functions
+     * execute common contract functions in module:contract after validation
      * @param req request
      */
     public Object dealWithtrans(ReqTransHandle req) throws FrontException {
@@ -338,7 +342,7 @@ public class TransService {
     }
 
     /**
-     * execCall.
+     * execCall through common contract
      *
      * @param funOutputTypes list
      * @param function function
@@ -361,7 +365,7 @@ public class TransService {
     }
 
     /**
-     * execTransaction.
+     * execTransaction  through common contract
      *
      * @param function function
      * @param commonContract contract
@@ -380,7 +384,7 @@ public class TransService {
     }
 
     /**
-     * signMessage.
+     * signMessage to create raw transaction and encode data
      * 
      * @param groupId id
      * @param contractAddress info

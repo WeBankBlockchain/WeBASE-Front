@@ -15,6 +15,10 @@
  */
 package com.webank.webase.front.performance.result;
 
+/**
+ * Performance data handle(DTO) of monitor and performance module
+ * performance response to web
+ */
 @lombok.Data
 public class PerformanceData {
     private String metricType;

@@ -15,9 +15,9 @@
  */
 package com.webank.webase.front.precompiledapi.sysconf;
 
-import com.webank.webase.front.base.BasePageResponse;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.response.BasePageResponse;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
 import io.swagger.annotations.Api;
@@ -34,6 +34,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * System config value controller
+ * manage tx_count and gas_limit
+ */
 @Api(value = "/sys", tags = "precompiled manage interface")
 @Slf4j
 @RestController

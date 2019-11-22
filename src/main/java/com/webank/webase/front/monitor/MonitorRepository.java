@@ -15,6 +15,7 @@
  */
 package com.webank.webase.front.monitor;
 
+import com.webank.webase.front.monitor.entity.Monitor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

@@ -25,14 +25,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.BaseController;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.controller.BaseController;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.method.entity.NewMethodInputParam;
-import com.webank.webase.front.method.entity.TbMethod;
+import com.webank.webase.front.method.entity.NewMethodInputParamHandle;
+import com.webank.webase.front.method.entity.Method;
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * Method controller
+ * used in transaction data's analysis
+ */
 @Log4j2
 @RestController
 @RequestMapping("method")
@@ -45,15 +49,15 @@ public class MethodController extends BaseController {
      * add method info.
      */
     @PostMapping(value = "/add")
-    public BaseResponse addMethod(@RequestBody @Valid NewMethodInputParam newMethodInputParam,
+    public BaseResponse addMethod(@RequestBody @Valid NewMethodInputParamHandle newMethodInputParamHandle,
         BindingResult result) throws FrontException {
         checkParamResult(result);
         BaseResponse baseResponse = new BaseResponse(ConstantCode.RET_SUCCEED);
         Instant startTime = Instant.now();
         log.info("start addMethod. startTime:{} newMethodInputParam:{}",
-            startTime.toEpochMilli(), JSON.toJSONString(newMethodInputParam));
+            startTime.toEpochMilli(), JSON.toJSONString(newMethodInputParamHandle));
 
-        methodService.saveMethod(newMethodInputParam);
+        methodService.saveMethod(newMethodInputParamHandle);
 
         log.info("end addMethod. useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
@@ -71,8 +75,8 @@ public class MethodController extends BaseController {
         log.info("start getBymethodId. startTime:{} groupId:{} methodId:{}",
             startTime.toEpochMilli(), groupId, methodId);
 
-        TbMethod tbMethod = methodService.getByMethodId(methodId, groupId);
-        baseResponse.setData(tbMethod);
+        Method method = methodService.getByMethodId(methodId, groupId);
+        baseResponse.setData(method);
 
         log.info("end getBymethodId. useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));

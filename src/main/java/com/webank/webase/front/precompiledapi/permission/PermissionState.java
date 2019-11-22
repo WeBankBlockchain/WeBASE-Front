@@ -15,14 +15,17 @@
  */
 package com.webank.webase.front.precompiledapi.permission;
 
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * handle POST permission state in api("/sorted") in permission controller
+ */
 @Data
 public class PermissionState {
-    // 0 means revoke, 1 means grant
+    // 0 means revoked, 1 means granted
     @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
     private int deployAndCreate;
     @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
