@@ -48,7 +48,7 @@ public class PrecompiledSysConfigService {
     private KeyStoreService keyStoreService;
 
     // 根据前台传的user address获取私钥
-    public Credentials getCredentials(String fromAddress) throws Exception {
+    private Credentials getCredentials(String fromAddress) throws Exception {
         return keyStoreService.getCredentials(fromAddress, false);
     }
 
