@@ -1,3 +1,25 @@
+v1.2.1 (2019-11-22)
+
+**Add**
+- 证书管理增加SDK证书
+
+**Fix**
+- 优化：precompiled节点列表接口增加离线的共识/观察节点
+- 优化：调整代码结构，增加代码注释
+- 优化：sh脚本支持secp256k1
+- 优化：升级fastjson为1.2.60, gradle-wrapper为v6.0.1
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 版本
+- WeBASE-Web v1.2.0
+- WeBASE-Node-Manager v1.2.0
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 v1.2.0 (2019-10-29)
 
 **Add**
@@ -15,12 +37,12 @@ v1.2.0 (2019-10-29)
 - 支持FISCO-BCOS v2.0.0-rc2 版本
 - 支持FISCO-BCOS v2.0.0-rc3 版本
 - 支持FISCO-BCOS v2.0.0 版本
-- WeBASE-Web V1.2.0
-- WeBASE-Node-Manager V1.2.0
+- WeBASE-Web v1.2.0
+- WeBASE-Node-Manager v1.2.0
 
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
 
-V1.1.0 (2019-09-9)
+v1.1.0 (2019-09-9)
 
 **Fix**
 - 植入默认的Asset合约和存证合约
@@ -34,14 +56,14 @@ V1.1.0 (2019-09-9)
 支持FISCO-BCOS v2.0.0-rc2 版本
 支持FISCO-BCOS v2.0.0-rc3 版本
 支持FISCO-BCOS v2.0.0 版本
-WeBASE-Web V1.1.0
-WeBASE-Node-Manager V1.1.0
+WeBASE-Web v1.1.0
+WeBASE-Node-Manager v1.1.0
 
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
 
 
 
-V1.0.0
+v1.0.0
 (2019-06-27)
 
 WeBASE-Front（微众区块链中间件平台-前置服务）。
