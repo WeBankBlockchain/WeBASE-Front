@@ -59,6 +59,7 @@ v1.1.0 (2019-09-9)
 WeBASE-Web v1.1.0
 WeBASE-Node-Manager v1.1.0
 
+
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
 
 
