@@ -69,7 +69,7 @@ List jaxb = [
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb
 
-	compile 'org.fisco-bcos:web3sdk:2.0.5'
+	compile 'org.fisco-bcos:web3sdk:2.1.2'
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8'
 	compile 'com.alibaba:fastjson:1.2.60'
 	compile 'com.h2database:h2:1.4.197'
