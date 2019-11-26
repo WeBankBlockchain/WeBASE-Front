@@ -15,22 +15,17 @@
  */
 package com.webank.webase.front.precompiledapi.permission;
 
-import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.precompile.permission.PermissionService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -59,13 +54,6 @@ public class PermissionManageService {
     // get credentials from user address
     private Credentials getCredentials(String fromAddress) throws Exception {
         return keyStoreService.getCredentials(fromAddress, false);
-    }
-    private Credentials getCredentialsForQuery() throws Exception {
-        PEMManager pemManager = new PEMManager();
-        InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
-        pemManager.load(pemStream);
-        Credentials credentialsPEM = GenCredential.create(pemManager.getECKeyPair().getPrivateKey().toString(16));
-        return credentialsPEM;
     }
 
     /**
@@ -317,7 +305,7 @@ public class PermissionManageService {
      */
     public List<PermissionInfo> listPermissionManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
 
         return permissionService.listPermissionManager();
     }
@@ -339,7 +327,7 @@ public class PermissionManageService {
 
     public List<PermissionInfo> listDeployAndCreateManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
         return permissionService.listDeployAndCreateManager();
     }
 
@@ -366,7 +354,7 @@ public class PermissionManageService {
 
     public List<PermissionInfo> listUserTableManager(int groupId, String tableName) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
         return permissionService.listUserTableManager(tableName);
 
     }
@@ -392,7 +380,7 @@ public class PermissionManageService {
 
     public List<PermissionInfo> listNodeManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
         return permissionService.listNodeManager();
     }
 
@@ -417,7 +405,7 @@ public class PermissionManageService {
 
     public List<PermissionInfo> listSysConfigManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
         return permissionService.listSysConfigManager();
     }
 
@@ -442,7 +430,7 @@ public class PermissionManageService {
 
     public List<PermissionInfo> listCNSManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
         return permissionService.listCNSManager();
     }
 
