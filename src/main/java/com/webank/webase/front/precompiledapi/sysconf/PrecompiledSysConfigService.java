@@ -16,17 +16,13 @@
 package com.webank.webase.front.precompiledapi.sysconf;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.config.SystemConfigService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

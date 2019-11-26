@@ -6,6 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * guomi configuration in web3sdk
+ */
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "encrypt-type")
@@ -14,7 +17,7 @@ public class EncryptTypeConfig {
     private int encryptType;
 
     /**
-     * 覆盖构造函数，不能写getEncrytType()
+     * 覆盖EncryptType构造函数，不能写getEncrytType()
      * @return
      */
     @Bean

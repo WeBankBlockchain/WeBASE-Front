@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.keystore;
 
+import java.security.KeyPair;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,13 +23,17 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.web3j.crypto.gm.sm2.crypto.asymmetric.SM2KeyGenerator;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -49,6 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * KeyStoreService.
+ * 2019/11/26 support guomi： create keyPair, useAes=>aes or sm4 encrypt
  */
 @Slf4j
 @Service
@@ -67,7 +73,7 @@ public class KeyStoreService {
 
 
     /**
-     * createKeyStore.
+     * createKeyStore
      */
     public KeyStoreInfo createKeyStore(boolean useAes, int type, String userName) {
         log.info("start createKeyStore. useAes:{} type:{} userName:{}", useAes, type, userName);
@@ -83,9 +89,14 @@ public class KeyStoreService {
                 throw new FrontException(ConstantCode.USER_NAME_EXISTS);
             }
         }
-        // create
+        // create keyPair(support guomi)
         try {
-            ECKeyPair keyPair = Keys.createEcKeyPair();
+            ECKeyPair keyPair;
+            if(GMStatus.GUOMI.getValue() == EncryptType.encryptType) {
+                keyPair = GenCredential.createGuomiKeyPair();
+            } else {
+                keyPair = Keys.createEcKeyPair();
+            }
             return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
         } catch (Exception e) {
             log.error("fail createKeyStore.", e);
@@ -94,7 +105,7 @@ public class KeyStoreService {
     }
 
     /**
-     * get KeyStoreInfo by privateKey.
+     * get KeyStoreInfo by privateKey to store keyStoreInfo
      */
     public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey, boolean useAes, int type, String userName) {
         log.info("start getKeyStoreFromPrivateKey. privateKey:{} userName:{}", privateKey, userName);
@@ -116,7 +127,16 @@ public class KeyStoreService {
             log.error("fail getKeyStoreFromPrivateKey. user name already exists.");
             throw new FrontException(ConstantCode.USER_NAME_EXISTS);
         }
-        ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
+        // support guomi
+        ECKeyPair keyPair;
+        if(GMStatus.GUOMI.getValue() == EncryptType.encryptType) {
+            SM2KeyGenerator sm2KeyGenerator = new SM2KeyGenerator();
+            KeyPair sm2KeyPair = sm2KeyGenerator.generateKeyPair(privateKey);
+            keyPair = ECKeyPair.create(sm2KeyPair);
+        } else {
+            keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
+        }
+//        ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
         return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
     }
     
@@ -172,7 +192,8 @@ public class KeyStoreService {
 
 
     /**
-     * get credential.
+     * get credential to send transaction
+     * 2019/11/26 support guomi
      */
     public Credentials getCredentials(String user, boolean useAes) throws FrontException {
         String privateKey = Optional.ofNullable(getPrivateKey(user, useAes)).orElse(null);
@@ -180,9 +201,23 @@ public class KeyStoreService {
             log.warn("fail getCredentials. user:{} privateKey is null", user);
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
         }
-        return Credentials.create(privateKey);
+        return GenCredential.create(privateKey);
     }
 
+    /**
+     * get credential to send transaction
+     * 2019/11/26 support guomi
+     * @return
+     */
+    // TODO 直接用一个固定的credential，不用每次都新建
+    public Credentials getCredentialsForQuery() {
+//        KeyStoreInfo keyStoreInfo = createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
+//        return GenCredential.create(keyStoreInfo.getPrivateKey());
+        Credentials credentialsForQuery =
+                GenCredential.create(
+                        "a392604efc2fad9c0b3da43b5f698a2e3f270f170d859912be0d54742275c5f6");
+        return credentialsForQuery;
+    }
 
     /**
      * get PrivateKey.
@@ -237,8 +272,7 @@ public class KeyStoreService {
     }
 
     /**
-     * getSignDate from sign service.
-     * 
+     * getSignDate from sign service. (webase-sign)
      * @param params params
      * @return
      */

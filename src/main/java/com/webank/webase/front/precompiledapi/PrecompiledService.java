@@ -15,14 +15,11 @@
  */
 package com.webank.webase.front.precompiledapi;
 
-import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.precompile.consensus.ConsensusService;
@@ -32,10 +29,8 @@ import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,12 +54,6 @@ public class PrecompiledService{
     private Credentials getCredentials(String fromAddress) throws Exception {
         return keyStoreService.getCredentials(fromAddress, false);
     }
-    private Credentials getCredentialsForQuery() throws Exception {
-        PEMManager pemManager = new PEMManager();
-        InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
-        pemManager.load(pemStream);
-        return GenCredential.create(pemManager.getECKeyPair().getPrivateKey().toString(16));
-    }
 
     /**
      * CNS config related
@@ -72,18 +61,18 @@ public class PrecompiledService{
      */
 //    get single cns is not necessary
 //    public Object getAddressByContractNameAndVersion(int groupId, String contractNameAndVersion) throws Exception {
-//        CnsService cnsService = new CnsService(web3jMap.get(groupId), getCredentialsForQuery());
+//        CnsService cnsService = new CnsService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
 //
 //        return cnsService.getAddressByContractNameAndVersion(contractNameAndVersion);
 //    }
 
     public List<CnsInfo> queryCnsByName(int groupId, String contractName) throws Exception {
-        CnsService cnsService = new CnsService(web3jMap.get(groupId), getCredentialsForQuery());
+        CnsService cnsService = new CnsService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
 
         return cnsService.queryCnsByName(contractName);
     }
     public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName, String version) throws Exception {
-        CnsService cnsService = new CnsService(web3jMap.get(groupId), getCredentialsForQuery());
+        CnsService cnsService = new CnsService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
 
         return cnsService.queryCnsByNameAndVersion(contractName, version);
     }
@@ -144,7 +133,7 @@ public class PrecompiledService{
     }
 
     public Table desc(int groupId, String tableName) throws Exception {
-        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentialsForQuery());
+        CRUDService crudService = new CRUDService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
 
         Table descRes = crudService.desc(tableName);
         return descRes;
