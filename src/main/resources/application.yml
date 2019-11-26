@@ -43,6 +43,9 @@ sdk:
   ip: 127.0.0.1
   channelPort: 20200
 
+encrypt-type:
+  encryptType: 1 #0:standard, 1:guomi
+
 logging:
   config: classpath:log4j2.xml
 

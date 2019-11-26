@@ -48,10 +48,10 @@ public class Web3Config {
     private int corePoolSize;
     private int maxPoolSize;
     private int queueCapacity;
-    public static int timeout=30000;
+    public static int timeout = 30000;
     private int keepAlive;
-    private String ip= "127.0.0.1";
-    private String channelPort= "20200";
+    private String ip = "127.0.0.1";
+    private String channelPort = "20200";
 
     @Bean
     public GroupChannelConnectionsConfig getGroupChannelConnectionsConfig(){
