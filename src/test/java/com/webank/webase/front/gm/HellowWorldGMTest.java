@@ -68,8 +68,10 @@ public class HellowWorldGMTest {
                 GenCredential.create(
                         "a392604efc2fad9c0b3da43b5f698a2e3f270f170d859912be0d54742275c5f6");
                 // address 0x1a3fc157bd47c3fc2e260b34abbf481730d0f80f
+        String notGuomiPrivateKey = "71f1479d9051e8d6b141a3b3ef9c01a7756da823a0af280c6bf62d18ee0cc978";
+        Credentials credentials2 = GenCredential.create(notGuomiPrivateKey);
         // 测试合约部署
-        HelloWorldGM test = HelloWorldGM.deploy(web3, credentials1, new StaticGasProvider(gasPrice, gasLimit)).send();
+        HelloWorldGM test = HelloWorldGM.deploy(web3, credentials2, new StaticGasProvider(gasPrice, gasLimit)).send();
         address = test.getContractAddress();
         blockNumber = test.getTransactionReceipt().get().getBlockNumber();
         blockHash = test.getTransactionReceipt().get().getBlockHash();
