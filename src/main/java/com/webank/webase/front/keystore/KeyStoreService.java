@@ -27,6 +27,7 @@ import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
+import com.webank.webase.front.util.GmUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
@@ -91,12 +92,7 @@ public class KeyStoreService {
         }
         // create keyPair(support guomi)
         try {
-            ECKeyPair keyPair;
-            if(GMStatus.GUOMI.getValue() == EncryptType.encryptType) {
-                keyPair = GenCredential.createGuomiKeyPair();
-            } else {
-                keyPair = Keys.createEcKeyPair();
-            }
+            ECKeyPair keyPair = GmUtils.createKeyPair();
             return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
         } catch (Exception e) {
             log.error("fail createKeyStore.", e);
@@ -128,15 +124,7 @@ public class KeyStoreService {
             throw new FrontException(ConstantCode.USER_NAME_EXISTS);
         }
         // support guomi
-        ECKeyPair keyPair;
-        if(GMStatus.GUOMI.getValue() == EncryptType.encryptType) {
-            SM2KeyGenerator sm2KeyGenerator = new SM2KeyGenerator();
-            KeyPair sm2KeyPair = sm2KeyGenerator.generateKeyPair(privateKey);
-            keyPair = ECKeyPair.create(sm2KeyPair);
-        } else {
-            keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
-        }
-//        ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
+        ECKeyPair keyPair = GmUtils.createKeyPair(privateKey);
         return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
     }
     
@@ -209,14 +197,10 @@ public class KeyStoreService {
      * 2019/11/26 support guomi
      * @return
      */
-    // TODO 直接用一个固定的credential，不用每次都新建
+    // 直接用一个固定的credential，不用每次都新建
     public Credentials getCredentialsForQuery() {
-//        KeyStoreInfo keyStoreInfo = createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
-//        return GenCredential.create(keyStoreInfo.getPrivateKey());
-        Credentials credentialsForQuery =
-                GenCredential.create(
-                        "a392604efc2fad9c0b3da43b5f698a2e3f270f170d859912be0d54742275c5f6");
-        return credentialsForQuery;
+        KeyStoreInfo keyStoreInfo = createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
+        return GenCredential.create(keyStoreInfo.getPrivateKey());
     }
 
     /**
