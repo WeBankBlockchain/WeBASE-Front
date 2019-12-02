@@ -25,6 +25,7 @@ import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -45,7 +46,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class Web3Config {
 //    @Autowired
 //    NodeConfig nodeConfig;
-    public   static String orgName;
+    // 0:standard, 1:guomi
+    private int encryptType = 1;
+    public static String orgName;
     private List<Integer> groupIdList;
     private int corePoolSize;
     private int maxPoolSize;
@@ -54,6 +57,16 @@ public class Web3Config {
     private int keepAlive;
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
+    /**
+     * 覆盖EncryptType构造函数，不能写getEncrytType()
+     * 放在web3sdk初始化前，否则当前类里的CnsServiceMap的credential为非国密的
+     * @return
+     */
+    @Bean
+    public EncryptType EncryptType() {
+        log.info("*****init EncrytType:" + encryptType);
+        return new EncryptType(encryptType);
+    }
 
     @Bean
     public GroupChannelConnectionsConfig getGroupChannelConnectionsConfig(){
@@ -151,8 +164,10 @@ public class Web3Config {
 
     @Bean
     public HashMap<Integer, CnsService> getCnsService(HashMap<Integer,Web3j> web3jMap) {
-        // support guomi
-        Credentials credentials = GenCredential.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+        // support guomi TODO 这里credential导致cns insert失败
+            log.info("credential encryptType: " + encryptType);
+//        Credentials credentials = GenCredential.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+        Credentials credentials = GenCredential.create();
         HashMap cnsServiceMap = new HashMap<Integer, CnsService>();
         Iterator entries = web3jMap.entrySet().iterator();
 
