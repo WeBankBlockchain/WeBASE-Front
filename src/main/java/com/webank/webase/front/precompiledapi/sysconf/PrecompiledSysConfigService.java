@@ -45,12 +45,13 @@ public class PrecompiledSysConfigService {
 
     // 根据前台传的user address获取私钥
     private Credentials getCredentials(String fromAddress) throws Exception {
+        // TODO controller 默认值false，非必填向后兼容
         return keyStoreService.getCredentials(fromAddress, false);
     }
 
     /**
      * System config related
-     * 启动项目时，检查是否已有table，
+     * 启动项目时，检查是否已有table
      * 否则Create table sysconfig(groupId, from key, value)
      */
     public Object setSysConfigValueByKey(SystemConfigHandle systemConfigHandle) throws Exception {
