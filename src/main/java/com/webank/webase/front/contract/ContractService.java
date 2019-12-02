@@ -173,7 +173,8 @@ public class ContractService {
     }
 
     /**
-     * case deploy type.
+     * case deploy type
+     * @param: ReqDeploy-contractId -> deployLocalContract / deploy
      */
     public String caseDeploy(ReqDeploy req) throws Exception {
         if (Objects.nonNull(req.getContractId())) {
@@ -183,6 +184,12 @@ public class ContractService {
         }
     }
 
+    /**
+     * check contract exists before deploy
+     * @param req
+     * @return
+     * @throws Exception
+     */
     private String deployLocalContract(ReqDeploy req) throws Exception {
         // check contract status
         Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
