@@ -229,16 +229,16 @@ public class ContractService {
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
-
+        // TODO cns invalid signature
         if (version != null) {
             checkContractAbiExistedAndSave(contractName, version, abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
-                    JSON.toJSONString(abiInfos));
+//            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
+//                    JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + version, contractAddress);
         } else {
             checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
-                    contractAddress, JSON.toJSONString(abiInfos));
+//            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
+//                    contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
         }
         log.info("success deploy. contractAddress:{}", contractAddress);
@@ -627,11 +627,14 @@ public class ContractService {
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
             //compile
             SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, true, ABI, BIN, INTERFACE, METADATA);
-
+            if ("".equals(res.output)) {
+                log.error("contractCompile error", res.errors);
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.errors);
+            }
             // compile result
             CompilationResult result = CompilationResult.parse(res.output);
             CompilationResult.ContractMetadata meta = result.getContract(contractName);
-            RspContractCompile compileResult = new RspContractCompile(contractName, meta.abi, meta.bin);
+            RspContractCompile compileResult = new RspContractCompile(contractName, meta.abi, meta.bin, res.errors);
             return compileResult;
         } catch (Exception ex) {
             log.error("contractCompile error", ex);
