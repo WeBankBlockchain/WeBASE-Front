@@ -84,17 +84,17 @@ public class BasicTestGM extends TestBaseGM {
    */
   @Test
   public void testSendTx() throws Exception {
-    String contractAddress = "0xec14ed13e3f4dfe2874f5dd13ba7d8363518bc41";
+    String contractAddress = "0x83a06fea6eba30c4f9f045279d95a02415b45614";
     HelloWorldGM helloWorldGM =
             HelloWorldGM.load(contractAddress, web3j, credentials,
                     new StaticGasProvider(gasPrice, gasLimit));
-//    TransactionReceipt receipt = helloWorldGM.set("test gm send tx").send();
-//    System.out.println("======receipt==========");
-//
-//    System.out.println(receipt.getTransactionHash());
-//    String result = helloWorldGM.get().send();
-//    System.out.println(result);
-//    assertTrue("test gm send tx".equals(result));
+    TransactionReceipt receipt = helloWorldGM.set("test gm send tx").send();
+    System.out.println("======receipt==========");
+
+    System.out.println(receipt.getTransactionHash());
+    String result = helloWorldGM.get().send();
+    System.out.println(result);
+    assertTrue("test gm send tx".equals(result));
 
 //      System.out.println(web3j.getCode("0xec14ed13e3f4dfe2874f5dd13ba7d8363518bc41", DefaultBlockParameter.valueOf(new BigInteger("117"))));
 

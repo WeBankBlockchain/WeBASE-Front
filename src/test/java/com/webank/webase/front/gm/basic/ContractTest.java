@@ -1,4 +1,4 @@
-package com.webank.webase.front.gm.runtime;
+package com.webank.webase.front.gm.basic;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
@@ -54,6 +54,7 @@ public class ContractTest {
         System.out.println(res.getContractName());
         System.out.println(res.getContractBin());
         System.out.println(res.getContractAbi());
+        System.out.println(res.getErrors());
         assertNotNull(res.getContractBin());
     }
 
@@ -69,14 +70,15 @@ public class ContractTest {
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
             //compile
             SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, true, ABI, BIN, INTERFACE, METADATA);
-
+            if ("".equals(res.output)) {
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.errors);
+            }
             // compile result
             CompilationResult result = CompilationResult.parse(res.output);
             CompilationResult.ContractMetadata meta = result.getContract(contractName);
-            RspContractCompile compileResult = new RspContractCompile(contractName, meta.abi, meta.bin);
+            RspContractCompile compileResult = new RspContractCompile(contractName, meta.abi, meta.bin, res.errors);
             return compileResult;
         } catch (Exception ex) {
-//            log.error("contractCompile error", ex);
             throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), ex.getMessage());
         } finally {
             if (contractFile != null) {
