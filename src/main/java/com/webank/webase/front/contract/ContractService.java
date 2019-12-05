@@ -232,13 +232,13 @@ public class ContractService {
         // TODO cns invalid signature
         if (version != null) {
             checkContractAbiExistedAndSave(contractName, version, abiInfos);
-//            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
-//                    JSON.toJSONString(abiInfos));
+            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
+                    JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + version, contractAddress);
         } else {
             checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-//            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
-//                    contractAddress, JSON.toJSONString(abiInfos));
+            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
+                    contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
         }
         log.info("success deploy. contractAddress:{}", contractAddress);

@@ -11,7 +11,7 @@ import java.util.HashMap;
 
 import static org.junit.Assert.assertTrue;
 
-public class PrecompiledServiceApiTest extends BaseTest {
+public class SendGMTxTest extends BaseTest {
 
     @Autowired
     HashMap<Integer, Web3j> web3jMap;

@@ -33,6 +33,7 @@ import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -62,7 +63,7 @@ public class Web3Config {
      * 放在web3sdk初始化前，否则当前类里的CnsServiceMap的credential为非国密的
      * @return
      */
-    @Bean
+    @Bean(name = "encryptType")
     public EncryptType EncryptType() {
         log.info("*****init EncrytType:" + encryptType);
         return new EncryptType(encryptType);
@@ -163,10 +164,9 @@ public class Web3Config {
     }
 
     @Bean
+    @DependsOn("encryptType")
     public HashMap<Integer, CnsService> getCnsService(HashMap<Integer,Web3j> web3jMap) {
-        // support guomi TODO 这里credential导致cns insert失败
-            log.info("credential encryptType: " + encryptType);
-//        Credentials credentials = GenCredential.create("3bed914595c159cbce70ec5fb6aff3d6797e0c5ee5a7a9224a21cae8932d84a4");
+        // support guomi
         Credentials credentials = GenCredential.create();
         HashMap cnsServiceMap = new HashMap<Integer, CnsService>();
         Iterator entries = web3jMap.entrySet().iterator();
