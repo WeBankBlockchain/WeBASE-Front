@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.keystore;
 
-import java.security.KeyPair;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
@@ -31,10 +29,8 @@ import com.webank.webase.front.util.GmUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.crypto.gm.sm2.crypto.asymmetric.SM2KeyGenerator;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -92,6 +88,7 @@ public class KeyStoreService {
         }
         // create keyPair(support guomi)
         try {
+            // TODO upgrade in web3sdk 2.1.3+
             ECKeyPair keyPair = GmUtils.createKeyPair();
             return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
         } catch (Exception e) {

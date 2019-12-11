@@ -48,7 +48,7 @@ public class Web3Config {
 //    @Autowired
 //    NodeConfig nodeConfig;
     // 0:standard, 1:guomi
-    private int encryptType = 1;
+    private int encryptType;
     public static String orgName;
     private List<Integer> groupIdList;
     private int corePoolSize;
