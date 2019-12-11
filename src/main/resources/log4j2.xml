@@ -81,6 +81,7 @@
         <Root level="info">
             <AppenderRef ref="asyncFront" />
             <AppenderRef ref="asyncError" />
+<!--            <AppenderRef ref="asyncWeb3sdk" />-->
         </Root>
     </Loggers>
 </Configuration>
