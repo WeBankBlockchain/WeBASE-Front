@@ -601,3 +601,22 @@ export function postPerformanceSwitch(data) {
         }
     })
 }
+
+/* Background compilation*/
+export function backgroundCompile(data){
+    return post({
+        url: `${HANDLE}contract/contractCompile `,
+        method: 'post',
+        data: data
+    })
+}
+export function encryption() {
+    return get({
+        url: `${url.ORG_LIST}/encrypt`,
+        method: 'get',
+        responseType: 'text'
+        // headers: {
+        //     Authorization: "Token " + localStorage.getItem("token") || ""
+        // }
+    })
+}
