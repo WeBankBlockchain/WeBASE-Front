@@ -167,11 +167,12 @@ import {
     getDeployStatus,
     ifChangedDepaloy,
     queryJavaClass,
-    addFunctionAbi
+    addFunctionAbi,
+    backgroundCompile
 } from "@/util/api";
 import transaction from "../dialog/sendTransaction";
 import changeUser from "../dialog/changeUser";
-
+import web3 from "@/util/ethAbi"
 export default {
     name: "codes",
     props: ["show", "changeStyle"],
@@ -280,7 +281,11 @@ export default {
     beforeMount() {
         var head = document.head;
         var script = document.createElement("script");
-        script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+        if(localStorage.getItem("encryptionId") == 0){
+            script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+        }else{
+            script.src = "./static/js/soljson.js";
+        }
         script.setAttribute('id', 'soljson');
         if (!document.getElementById('soljson')) {
             head.append(script)
@@ -671,29 +676,47 @@ export default {
             this.dialogUser = false;
         },
         setMethod: function () {
-            let web3 = new Web3(Web3.givenProvider);
+            let Web3EthAbi = web3;
             let arry = [];
             if (this.abiFile) {
                 let list = JSON.parse(this.abiFile);
                 list.forEach(value => {
                     if (value.name && value.type == "function") {
                         let data = {};
-                        let methodId = web3.eth.abi.encodeFunctionSignature({
-                            name: value.name,
-                            type: value.type,
-                            inputs: value.inputs
-                        });
+                        let methodId;
+                        if(localStorage.getItem("encryptionId") == 1){
+                            methodId = Web3EthAbi.smEncodeFunctionSignature({
+                                name: value.name,
+                                type: value.type,
+                                inputs: value.inputs
+                            });
+                        }else{
+                            methodId = Web3EthAbi.encodeFunctionSignature({
+                                name: value.name,
+                                type: value.type,
+                                inputs: value.inputs
+                            });
+                        }
                         data.methodId = methodId;
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
                         arry.push(data);
                     } else if (value.name && value.type == "event") {
                         let data = {};
-                        let methodId = web3.eth.abi.encodeEventSignature({
-                            name: value.name,
-                            type: value.type,
-                            inputs: value.inputs
-                        });
+                        let methodId;
+                        if(localStorage.getItem("encryptionId") == 1){
+                            methodId = Web3EthAbi.smEncodeEventSignature({
+                                name: value.name,
+                                type: value.type,
+                                inputs: value.inputs
+                            });
+                        }else{
+                            methodId = Web3EthAbi.encodeEventSignature({
+                                name: value.name,
+                                type: value.type,
+                                inputs: value.inputs
+                            });
+                        }
                         data.methodId = methodId;
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
@@ -708,7 +731,7 @@ export default {
         addAbiMethod: function (list) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                methodList: list
+                methodHandleList: list
             };
             addFunctionAbi(data)
                 .then(res => {
