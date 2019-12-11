@@ -218,7 +218,7 @@ public class KeyStoreService {
             return PRIVATE_KEY_MAP.get(key_of_user);
         }
 
-        //get privateKey by userId
+        //get privateKey by userId from nodemgr
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         String[] ipPortArr = constants.getKeyServer().split(",");
         for (String ipPort : ipPortArr) {
