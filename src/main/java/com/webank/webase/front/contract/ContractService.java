@@ -229,7 +229,6 @@ public class ContractService {
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
-        // TODO cns invalid signature
         if (version != null) {
             checkContractAbiExistedAndSave(contractName, version, abiInfos);
             cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
