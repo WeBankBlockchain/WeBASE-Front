@@ -25,7 +25,7 @@ import javax.persistence.criteria.Root;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
-import com.webank.webase.front.util.GmUtils;
+import com.webank.webase.front.util.CredentialUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
@@ -89,7 +89,7 @@ public class KeyStoreService {
         // create keyPair(support guomi)
         try {
             // TODO upgrade in web3sdk 2.1.3+
-            ECKeyPair keyPair = GmUtils.createKeyPair();
+            ECKeyPair keyPair = CredentialUtils.createKeyPair();
             return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
         } catch (Exception e) {
             log.error("fail createKeyStore.", e);
@@ -121,7 +121,7 @@ public class KeyStoreService {
             throw new FrontException(ConstantCode.USER_NAME_EXISTS);
         }
         // support guomi
-        ECKeyPair keyPair = GmUtils.createKeyPair(privateKey);
+        ECKeyPair keyPair = CredentialUtils.createKeyPair(privateKey);
         return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
     }
     
