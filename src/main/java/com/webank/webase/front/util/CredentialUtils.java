@@ -30,7 +30,7 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 
 @Log4j2
-public class GmUtils extends GenCredential {
+public class CredentialUtils extends GenCredential {
 
     public static ECKeyPair createKeyPair(String privKey) {
         if (EncryptType.encryptType == 1) return createGuomiKeyPair(privKey);
