@@ -13,21 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.precompiledapi.entity;
+package com.webank.webase.front.gm.runtime;
 
-import com.webank.webase.front.base.code.ConstantCode;
-import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import com.webank.webase.front.Application;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.validation.constraints.NotNull;
-
-@Data
-public class CrudHandle {
-    @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
-    private int groupId;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
-    private String fromAddress;
-    private String sql;
-    // 向后兼容 默认useAes为false
-    private Boolean useAes;
-}
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class)
+public abstract class BaseTest {
+   }
