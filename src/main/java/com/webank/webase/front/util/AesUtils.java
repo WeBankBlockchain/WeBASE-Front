@@ -30,6 +30,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * 落盘加密相关，请参考FISCO-BCOS文档
+ * 修改为EncryptUtil, 通过EncryptType来判断使用aes或者sm4以支持国密
  */
 @Log4j2
 @Component

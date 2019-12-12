@@ -308,8 +308,7 @@ public class TransService {
         // get privateKey
         Credentials credentials = null;
         if ("true".equals(constant)) {
-            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
-            credentials = Credentials.create(keyStoreInfo.getPrivateKey());
+            credentials = keyStoreService.getCredentialsForQuery();
         } else {
             credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
         }

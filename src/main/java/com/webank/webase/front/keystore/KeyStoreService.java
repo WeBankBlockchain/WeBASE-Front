@@ -25,10 +25,12 @@ import javax.persistence.criteria.Root;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
+import com.webank.webase.front.util.CredentialUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -49,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * KeyStoreService.
+ * 2019/11/26 support guomi： create keyPair, useAes=>aes or sm4 encrypt
  */
 @Slf4j
 @Service
@@ -67,7 +70,7 @@ public class KeyStoreService {
 
 
     /**
-     * createKeyStore.
+     * createKeyStore
      */
     public KeyStoreInfo createKeyStore(boolean useAes, int type, String userName) {
         log.info("start createKeyStore. useAes:{} type:{} userName:{}", useAes, type, userName);
@@ -83,9 +86,10 @@ public class KeyStoreService {
                 throw new FrontException(ConstantCode.USER_NAME_EXISTS);
             }
         }
-        // create
+        // create keyPair(support guomi)
         try {
-            ECKeyPair keyPair = Keys.createEcKeyPair();
+            // TODO upgrade in web3sdk 2.1.3+
+            ECKeyPair keyPair = CredentialUtils.createKeyPair();
             return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
         } catch (Exception e) {
             log.error("fail createKeyStore.", e);
@@ -94,7 +98,7 @@ public class KeyStoreService {
     }
 
     /**
-     * get KeyStoreInfo by privateKey.
+     * get KeyStoreInfo by privateKey to store keyStoreInfo
      */
     public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey, boolean useAes, int type, String userName) {
         log.info("start getKeyStoreFromPrivateKey. privateKey:{} userName:{}", privateKey, userName);
@@ -116,7 +120,8 @@ public class KeyStoreService {
             log.error("fail getKeyStoreFromPrivateKey. user name already exists.");
             throw new FrontException(ConstantCode.USER_NAME_EXISTS);
         }
-        ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
+        // support guomi
+        ECKeyPair keyPair = CredentialUtils.createKeyPair(privateKey);
         return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
     }
     
@@ -172,7 +177,8 @@ public class KeyStoreService {
 
 
     /**
-     * get credential.
+     * get credential to send transaction
+     * 2019/11/26 support guomi
      */
     public Credentials getCredentials(String user, boolean useAes) throws FrontException {
         String privateKey = Optional.ofNullable(getPrivateKey(user, useAes)).orElse(null);
@@ -180,9 +186,19 @@ public class KeyStoreService {
             log.warn("fail getCredentials. user:{} privateKey is null", user);
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
         }
-        return Credentials.create(privateKey);
+        return GenCredential.create(privateKey);
     }
 
+    /**
+     * get credential to send transaction
+     * 2019/11/26 support guomi
+     * @return
+     */
+    // 直接用一个固定的credential，不用每次都新建
+    public Credentials getCredentialsForQuery() {
+        KeyStoreInfo keyStoreInfo = createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
+        return GenCredential.create(keyStoreInfo.getPrivateKey());
+    }
 
     /**
      * get PrivateKey.
@@ -202,7 +218,7 @@ public class KeyStoreService {
             return PRIVATE_KEY_MAP.get(key_of_user);
         }
 
-        //get privateKey by userId
+        //get privateKey by userId from nodemgr
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         String[] ipPortArr = constants.getKeyServer().split(",");
         for (String ipPort : ipPortArr) {
@@ -237,8 +253,7 @@ public class KeyStoreService {
     }
 
     /**
-     * getSignDate from sign service.
-     * 
+     * getSignDate from sign service. (webase-sign)
      * @param params params
      * @return
      */
