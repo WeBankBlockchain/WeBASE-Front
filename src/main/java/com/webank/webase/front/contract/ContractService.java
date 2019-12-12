@@ -173,7 +173,8 @@ public class ContractService {
     }
 
     /**
-     * case deploy type.
+     * case deploy type
+     * @param: ReqDeploy-contractId -> deployLocalContract / deploy
      */
     public String caseDeploy(ReqDeploy req) throws Exception {
         if (Objects.nonNull(req.getContractId())) {
@@ -183,6 +184,12 @@ public class ContractService {
         }
     }
 
+    /**
+     * check contract exists before deploy
+     * @param req
+     * @return
+     * @throws Exception
+     */
     private String deployLocalContract(ReqDeploy req) throws Exception {
         // check contract status
         Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
@@ -221,7 +228,6 @@ public class ContractService {
         // contract deploy
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
-
 
         if (version != null) {
             checkContractAbiExistedAndSave(contractName, version, abiInfos);
@@ -620,11 +626,14 @@ public class ContractService {
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
             //compile
             SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, true, ABI, BIN, INTERFACE, METADATA);
-
+            if ("".equals(res.output)) {
+                log.error("contractCompile error", res.errors);
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.errors);
+            }
             // compile result
             CompilationResult result = CompilationResult.parse(res.output);
             CompilationResult.ContractMetadata meta = result.getContract(contractName);
-            RspContractCompile compileResult = new RspContractCompile(contractName, meta.abi, meta.bin);
+            RspContractCompile compileResult = new RspContractCompile(contractName, meta.abi, meta.bin, res.errors);
             return compileResult;
         } catch (Exception ex) {
             log.error("contractCompile error", ex);
