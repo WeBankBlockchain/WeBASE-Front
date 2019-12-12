@@ -284,7 +284,7 @@ export default {
         if(localStorage.getItem("encryptionId") == 0){
             script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
         }else{
-            script.src = "./static/js/sol-0.4.25-gm.js";
+            script.src = "./static/js/soljson-v0.4.25-gm.js";
         }
         script.setAttribute('id', 'soljson');
         if (!document.getElementById('soljson')) {
