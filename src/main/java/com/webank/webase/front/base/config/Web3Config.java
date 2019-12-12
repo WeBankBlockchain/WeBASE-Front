@@ -15,10 +15,13 @@
  */
 package com.webank.webase.front.base.config;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.GMStatus;
+import com.webank.webase.front.base.exception.FrontException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
@@ -131,7 +134,13 @@ public class Web3Config {
      * @return
      */
     @Bean
+    @DependsOn("encryptType")
     public HashMap<Integer, Web3j> web3j(Web3j web3j, GroupChannelConnectionsConfig groupChannelConnectionsConfig) throws Exception {
+        if(!isMatchEncryptType(web3j)){
+            log.error("Chain's version not matches with Front's  encryptType:{}", EncryptType.encryptType);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR.getCode(), "Chain's version not matches with Front's" +
+                    " encryptType: " + EncryptType.encryptType);
+        }
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
         List<ChannelConnections> channelConnectionsList = groupChannelConnectionsConfig.getAllChannelConnections();
         channelConnectionsList.clear();
@@ -161,6 +170,17 @@ public class Web3Config {
             web3jMap.put(Integer.valueOf(groupIdList.get(i)) ,web3j1 );
         }
         return web3jMap;
+    }
+
+    public boolean isMatchEncryptType(Web3j web3j) throws IOException {
+        // 1: guomi, 0: standard
+        String clientVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
+        log.info("Chain's clientVersion:{}", clientVersion);
+        if(clientVersion.contains("gm")){
+            return EncryptType.encryptType == 1;
+        } else {
+            return EncryptType.encryptType == 0;
+        }
     }
 
     @Bean
