@@ -81,6 +81,9 @@ public class PrecompiledSysConfigController {
         log.info("start querySystemConfigByGroupId startTime:{}, systemConfigHandle:{}",
                 startTime.toEpochMilli(), systemConfigHandle);
         String key = systemConfigHandle.getConfigKey();
+        if(systemConfigHandle.getUseAes() == null) {
+            systemConfigHandle.setUseAes(false);
+        }
         // tx_count_limit, tx_gas_limit
         if (PrecompiledUtils.TxCountLimit.equals(key) || PrecompiledUtils.TxGasLimit.equals(key)) {
             // post返回透传

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2019  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.contract.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+package com.webank.webase.front.base.enums;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class RspContractCompile {
-    private String contractName;
-    private String contractAbi;
-    private String contractBin;
-    private String errors;
+/**
+ * encrypt type status:
+ * 1: guomi, 0: standard
+ */
+public enum GMStatus {
+    STANDARD(0), GUOMI(1);
 
+    private int value;
+
+    GMStatus(Integer gmStatus) {
+        this.value = gmStatus;
+    }
+
+    public int getValue() {
+        return this.value;
+    }
 }

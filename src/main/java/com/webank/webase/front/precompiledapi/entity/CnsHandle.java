@@ -36,5 +36,6 @@ public class CnsHandle {
     // register
     private String contractAddress;
     private String abi;
-
+    // 向后兼容 默认useAes为false
+    private Boolean useAes;
 }

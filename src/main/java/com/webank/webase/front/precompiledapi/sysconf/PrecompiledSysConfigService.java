@@ -16,17 +16,13 @@
 package com.webank.webase.front.precompiledapi.sysconf;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.config.SystemConfigService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -49,12 +45,13 @@ public class PrecompiledSysConfigService {
 
     // 根据前台传的user address获取私钥
     private Credentials getCredentials(String fromAddress) throws Exception {
+        // TODO controller 默认值false，非必填向后兼容
         return keyStoreService.getCredentials(fromAddress, false);
     }
 
     /**
      * System config related
-     * 启动项目时，检查是否已有table，
+     * 启动项目时，检查是否已有table
      * 否则Create table sysconfig(groupId, from key, value)
      */
     public Object setSysConfigValueByKey(SystemConfigHandle systemConfigHandle) throws Exception {
