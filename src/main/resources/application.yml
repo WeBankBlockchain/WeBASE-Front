@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:D:\.h2\webasefront_gm;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:./h2/webasefront;DB_CLOSE_ON_EXIT=FALSE
     databaseName: db
     driverClassName: org.h2.Driver
     serverName:
@@ -41,14 +41,14 @@ sdk:
   timeout: 10000
   keepAlive: 60
   ip: 127.0.0.1
-  channelPort: 25210
-  encryptType: 1 #0:standard, 1:guomi
+  channelPort: 20200
+  encryptType: 0 #0:standard, 1:guomi
 
 logging:
   config: classpath:log4j2.xml
 
 constant:
-  keyServer: 127.0.0.1:5004 # webase-sign
+  keyServer: 127.0.0.1:5001 # webase-sign
   transMaxWait: 30
   monitorDisk: /
   monitorEnabled: true
