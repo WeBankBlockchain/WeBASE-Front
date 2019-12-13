@@ -16,15 +16,29 @@ package com.webank.webase.front.web3api;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.util.FrontUtils;
-import com.webank.webase.front.base.enums.DataStatus;
-import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.config.Web3Config;
+import com.webank.webase.front.base.enums.DataStatus;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.PeerOfConsensusStatus;
 import com.webank.webase.front.web3api.entity.PeerOfSyncStatus;
 import com.webank.webase.front.web3api.entity.SyncStatus;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
@@ -32,18 +46,17 @@ import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
-import org.fisco.bcos.web3j.protocol.core.methods.response.*;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
+import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
+import org.fisco.bcos.web3j.protocol.core.methods.response.GroupPeers;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -90,8 +103,8 @@ public class Web3ApiService {
         BcosBlock.Block block;
         try {
             block = web3jMap.get(groupId)
-                .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
-                .send().getBlock();
+                    .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send()
+                    .getBlock();
         } catch (Exception e) {
             log.info("get blocknumber failed" + e.getMessage());
             log.error("getBlockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
@@ -129,8 +142,8 @@ public class Web3ApiService {
                 throw new FrontException("ConstantCode.NODE_REQUEST_FAILED");
             }
             BcosBlock.Block block = web3jMap.get(groupId)
-                .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
-                .send().getBlock();
+                    .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send()
+                    .getBlock();
             transCnt = block.getTransactions().size();
 
         } catch (IOException e) {
@@ -165,7 +178,7 @@ public class Web3ApiService {
         TransactionReceipt transactionReceipt = null;
         try {
             Optional<TransactionReceipt> opt = web3jMap.get(groupId)
-                .getTransactionReceipt(transHash).send().getTransactionReceipt();
+                    .getTransactionReceipt(transHash).send().getTransactionReceipt();
             if (opt.isPresent()) {
                 transactionReceipt = opt.get();
             }
@@ -185,8 +198,8 @@ public class Web3ApiService {
 
         Transaction transaction = null;
         try {
-            Optional<Transaction> opt = web3jMap.get(groupId).getTransactionByHash(transHash).send()
-                .getTransaction();
+            Optional<Transaction> opt =
+                    web3jMap.get(groupId).getTransactionByHash(transHash).send().getTransaction();
             if (opt.isPresent()) {
                 transaction = opt.get();
             }
@@ -225,7 +238,7 @@ public class Web3ApiService {
                 throw new FrontException("requst blockNumber is greater than latest");
             }
             code = web3jMap.get(groupId)
-                .getCode(address, DefaultBlockParameter.valueOf(blockNumber)).send().getCode();
+                    .getCode(address, DefaultBlockParameter.valueOf(blockNumber)).send().getCode();
         } catch (IOException e) {
             log.error("getCode fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -240,7 +253,7 @@ public class Web3ApiService {
         TotalTransactionCount.TransactionCount transactionCount;
         try {
             transactionCount = web3jMap.get(groupId).getTotalTransactionCount().send()
-                .getTotalTransactionCount();
+                    .getTotalTransactionCount();
         } catch (IOException e) {
             log.error("getTransCnt fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -255,13 +268,13 @@ public class Web3ApiService {
      * @param transactionIndex index
      */
     public Transaction getTransByBlockHashAndIndex(int groupId, String blockHash,
-        BigInteger transactionIndex) {
+            BigInteger transactionIndex) {
 
         Transaction transaction = null;
         try {
             Optional<Transaction> opt = web3jMap.get(groupId)
-                .getTransactionByBlockHashAndIndex(blockHash, transactionIndex).send()
-                .getTransaction();
+                    .getTransactionByBlockHashAndIndex(blockHash, transactionIndex).send()
+                    .getTransaction();
             if (opt.isPresent()) {
                 transaction = opt.get();
             }
@@ -279,15 +292,17 @@ public class Web3ApiService {
      * @param transactionIndex index
      */
     public Transaction getTransByBlockNumberAndIndex(int groupId, BigInteger blockNumber,
-        BigInteger transactionIndex) {
+            BigInteger transactionIndex) {
         Transaction transaction = null;
         try {
             if (blockNumberCheck(groupId, blockNumber)) {
                 throw new FrontException("ConstantCode.NODE_REQUEST_FAILED");
             }
-            Optional<Transaction> opt = web3jMap.get(groupId)
-                .getTransactionByBlockNumberAndIndex(DefaultBlockParameter.valueOf(blockNumber),
-                    transactionIndex).send().getTransaction();
+            Optional<Transaction> opt =
+                    web3jMap.get(groupId)
+                            .getTransactionByBlockNumberAndIndex(
+                                    DefaultBlockParameter.valueOf(blockNumber), transactionIndex)
+                            .send().getTransaction();
             if (opt.isPresent()) {
                 transaction = opt.get();
             }
@@ -306,7 +321,7 @@ public class Web3ApiService {
             e.printStackTrace();
         }
         System.out.println("****" + currentNumber);
-        return  (blockNumber.compareTo(currentNumber) > 0) ;
+        return (blockNumber.compareTo(currentNumber) > 0);
 
     }
 
@@ -322,28 +337,28 @@ public class Web3ApiService {
             List<String> observerList = getObserverList(groupId);
             SyncStatus syncStatus = JSON.parseObject(getSyncStatus(groupId), SyncStatus.class);
             List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
-            if (Objects.isNull(peerStrList) || peerStrList.isEmpty()|| consensusList == null) {
+            if (Objects.isNull(peerStrList) || peerStrList.isEmpty() || consensusList == null) {
                 log.info("end getNodeStatusList. peerStrList is empty");
-               return Collections.emptyList();
+                return Collections.emptyList();
             }
             for (String peer : peerStrList) {
-                int nodeType = 0;   //0-consensus;1-observer
+                int nodeType = 0; // 0-consensus;1-observer
                 if (observerList != null) {
-                    nodeType = observerList.stream()
-                            .filter(observer -> peer.equals(observer)).map(c -> 1).findFirst()
-                            .orElse(0);
+                    nodeType = observerList.stream().filter(observer -> peer.equals(observer))
+                            .map(c -> 1).findFirst().orElse(0);
                 }
                 BigInteger blockNumberOnChain = getBlockNumberOfNodeOnChain(syncStatus, peer);
-                BigInteger latestView = consensusList.stream()
-                    .filter(cl -> peer.equals(cl.getNodeId())).map(c -> c.getView()).findFirst()
-                    .orElse(BigInteger.ZERO);//pbftView
-                //check node status
-                statusList.add(checkNodeStatus(groupId, peer, blockNumberOnChain, latestView, nodeType));
+                BigInteger latestView =
+                        consensusList.stream().filter(cl -> peer.equals(cl.getNodeId()))
+                                .map(c -> c.getView()).findFirst().orElse(BigInteger.ZERO);// pbftView
+                // check node status
+                statusList.add(
+                        checkNodeStatus(groupId, peer, blockNumberOnChain, latestView, nodeType));
             }
 
             nodeStatusMap.put(groupId, statusList);
             log.info("end getNodeStatusList. groupId:{} statusList:{}", groupId,
-                JSON.toJSONString(statusList));
+                    JSON.toJSONString(statusList));
             return statusList;
         } catch (Exception e) {
             log.error("nodeHeartBeat Exception.", e);
@@ -355,22 +370,22 @@ public class Web3ApiService {
      * check node status.
      */
     private NodeStatusInfo checkNodeStatus(int groupId, String nodeId, BigInteger chainBlockNumber,
-        BigInteger chainView, int nodeType) {
+            BigInteger chainView, int nodeType) {
         log.info("start checkNodeStatus. groupId:{} nodeId:{} blockNumber:{} chainView:{}", groupId,
                 nodeId, chainBlockNumber, chainView);
 
         if (Objects.isNull(nodeStatusMap.get(groupId))) {
             log.info("end checkNodeStatus. no cache group:{}", groupId);
             return new NodeStatusInfo(nodeId, chainBlockNumber, chainView,
-                DataStatus.NORMAL.getValue(), LocalDateTime.now());
+                    DataStatus.NORMAL.getValue(), LocalDateTime.now());
         } else {
             List<NodeStatusInfo> statusList = nodeStatusMap.get(groupId);
             NodeStatusInfo localNodeStatus = statusList.stream()
-                .filter(s -> nodeId.equals(s.getNodeId())).findFirst().orElse(null);
+                    .filter(s -> nodeId.equals(s.getNodeId())).findFirst().orElse(null);
             if (Objects.isNull(localNodeStatus)) {
                 log.info("end checkNodeStatus. no cache node:{}", nodeId);
                 return new NodeStatusInfo(nodeId, chainBlockNumber, chainView,
-                    DataStatus.NORMAL.getValue(), LocalDateTime.now());
+                        DataStatus.NORMAL.getValue(), LocalDateTime.now());
             }
 
             LocalDateTime latestUpdate = localNodeStatus.getLatestStatusUpdateTime();
@@ -382,9 +397,10 @@ public class Web3ApiService {
 
             BigInteger localBlockNumber = localNodeStatus.getBlockNumber();
             BigInteger localPbftView = localNodeStatus.getPbftView();
-            if (nodeType == 0) {    //0-consensus;1-observer
+            if (nodeType == 0) { // 0-consensus;1-observer
                 if (localBlockNumber.equals(chainBlockNumber) && localPbftView.equals(chainView)) {
-                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                    log.warn(
+                            "node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                             nodeId, localBlockNumber, chainBlockNumber, localPbftView, chainView);
                     localNodeStatus.setStatus(DataStatus.INVALID.getValue());
                 } else {
@@ -394,7 +410,8 @@ public class Web3ApiService {
                 }
             } else {
                 if (!chainBlockNumber.equals(getBlockNumber(groupId))) {
-                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
+                    log.warn(
+                            "node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
                             nodeId, localBlockNumber, chainBlockNumber, localPbftView, chainView);
                     localNodeStatus.setStatus(DataStatus.INVALID.getValue());
                 } else {
@@ -426,7 +443,7 @@ public class Web3ApiService {
         }
         List<PeerOfSyncStatus> peerList = syncStatus.getPeers();
         BigInteger latestNumber = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
-            .map(s -> s.getBlockNumber()).findFirst().orElse(BigInteger.ZERO);//blockNumber
+                .map(s -> s.getBlockNumber()).findFirst().orElse(BigInteger.ZERO);// blockNumber
         return latestNumber;
     }
 
@@ -440,18 +457,18 @@ public class Web3ApiService {
             return Collections.emptyList();
         }
         JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
-        List<Object> dataIsList = jsonArr.stream().filter(jsonObj -> jsonObj instanceof List)
-            .map(arr -> {
-                Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
-                try {
-                    FrontUtils.object2JavaBean(obj, PeerOfConsensusStatus.class);
-                } catch (Exception e) {
-                    return null;
-                }
-                return arr;
-            }).collect(Collectors.toList());
-        return JSONArray
-            .parseArray(JSON.toJSONString(dataIsList.get(0)), PeerOfConsensusStatus.class);
+        List<Object> dataIsList =
+                jsonArr.stream().filter(jsonObj -> jsonObj instanceof List).map(arr -> {
+                    Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
+                    try {
+                        FrontUtils.object2JavaBean(obj, PeerOfConsensusStatus.class);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                    return arr;
+                }).collect(Collectors.toList());
+        return JSONArray.parseArray(JSON.toJSONString(dataIsList.get(0)),
+                PeerOfConsensusStatus.class);
     }
 
 
@@ -473,7 +490,7 @@ public class Web3ApiService {
             throw new FrontException(e.getMessage());
         }
     }
-    
+
     public List<String> getNodeIDList() {
         try {
             Set<Integer> iset = web3jMap.keySet();
@@ -485,17 +502,18 @@ public class Web3ApiService {
 
     public void refreshWeb3jMap() throws FrontException {
         List<String> groupList = getGroupList();
-        List<ChannelConnections> channelConnectionsList = groupChannelConnectionsConfig
-            .getAllChannelConnections();
+        List<ChannelConnections> channelConnectionsList =
+                groupChannelConnectionsConfig.getAllChannelConnections();
 
         for (int i = 0; i < groupList.size(); i++) {
             if (web3jMap.get(new Integer(groupList.get(i))) == null) {
                 ChannelConnections channelConnections = new ChannelConnections();
                 channelConnections
-                    .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
+                        .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
                 channelConnections.setGroupId(Integer.valueOf(groupList.get(i)));
                 channelConnectionsList.add(channelConnections);
-                org.fisco.bcos.channel.client.Service service1 = new org.fisco.bcos.channel.client.Service();
+                org.fisco.bcos.channel.client.Service service1 =
+                        new org.fisco.bcos.channel.client.Service();
                 service1.setOrgID(Web3Config.orgName);
                 service1.setGroupId(Integer.valueOf(groupList.get(i)));
                 service1.setThreadPool(threadPoolTaskExecutor);
@@ -585,5 +603,21 @@ public class Web3ApiService {
         }
 
         return null;
+    }
+
+    public Object generateGroup(int groupId, GenerateGroupInfo generateGroupInfo)
+            throws IOException {
+        Status status = web3jMap.get(groupId)
+                .generateGroup(generateGroupInfo.getGenerateGroupId(),
+                        generateGroupInfo.getTimestamp().intValue(),
+                        generateGroupInfo.getNodeList())
+                .send().getStatus();
+        return status;
+    }
+
+    public Object startGroup(int groupId, int startGroupId) throws IOException {
+        org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
+                web3jMap.get(groupId).startGroup(startGroupId).send().getStatus();
+        return status;
     }
 }
