@@ -49,4 +49,5 @@ public class PublicKeyTest extends BaseTest {
         System.out.println(credential.getAddress());
         System.out.println(Keys.getAddress(credential.getEcKeyPair().getPublicKey()));
     }
+
 }
