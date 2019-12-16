@@ -20,6 +20,7 @@ import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,11 @@ import java.util.List;
 /**
  * 1. get Front's sdk's certs(.crt) in /resource
  * 2. get ca.crt/node.crt of the node which linked with Front
+ *
+ * guomi chain use double cert mechanism including:
+ * 1. sign cert(gmca.crt, gmnode.crt, gmnode.key),
+ * 2. encrypt cert(gmennode.crt, gmennode.key
+ * 3. as well as original cert for sdk's TLS, same as standard chain
  */
 @Slf4j
 @Service
@@ -42,6 +48,12 @@ public class FrontCertService {
     private static final String crtContentTail = "-----END CERTIFICATE-----\n";
     private static final String nodeCrtPath = "/conf/node.crt";
     private static final String caCrtPath = "/conf/ca.crt";
+    // 国密双证书模式
+    // 国密证书
+    private static final String gmNodeCrtPath = "/conf/gmnode.crt";
+    private static final String gmCaCrtPath = "/conf/gmca.crt";
+    // 国密加密证书
+    private static final String gmEncryptCrtPath = "/conf/gmennode.crt";
 
     @Autowired
     Constants constants;
@@ -50,6 +62,7 @@ public class FrontCertService {
      * 则获取 ${path}/conf 中的ca.crt, node.crt
      * 无需填agency.crt的读取，因为node.crt会包含node和agency的证书
      * @return List<String> 或者 String
+     * 2019/12: support guomi: add encrypt node cert in resultList
      */
     // 0 is node ca, 1 is agency ca
     public List<String> getNodeCerts() {
@@ -57,6 +70,8 @@ public class FrontCertService {
         String nodePath = constants.getNodePath();
         log.debug("start getNodeCerts in {}" + nodePath);
         getCertList(nodePath, CertTypes.NODE.getValue(), resList);
+        // gm cert added to resList
+        getCertList(nodePath, CertTypes.OTHERS.getValue(), resList);
         log.debug("end getNodeCerts in {}" + nodePath);
         return resList;
     }
@@ -145,14 +160,31 @@ public class FrontCertService {
      * @param nodePath
      * @param certType
      * @return
+     * 2019/12 support guomi
      */
     public Path getCertPath(String nodePath, int certType) {
-        if(certType == CertTypes.CHAIN.getValue()) {
+        if (certType == CertTypes.CHAIN.getValue()) {
+            if (EncryptType.encryptType == 1){
+                return Paths.get(nodePath.concat(gmCaCrtPath));
+            }
             return Paths.get(nodePath.concat(caCrtPath));
-        }else if(certType == CertTypes.NODE.getValue()) {
+        } else if (certType == CertTypes.NODE.getValue()) {
+            if (EncryptType.encryptType == 1){
+                return Paths.get(nodePath.concat(gmNodeCrtPath));
+            }
             return Paths.get(nodePath.concat(nodeCrtPath));
+        } else if(certType == CertTypes.OTHERS.getValue()){
+            return getEncrytCertPath(nodePath);
         }
         return null;
+    }
+
+    public Path getEncrytCertPath(String nodePath) {
+        if (EncryptType.encryptType == 1){
+            return Paths.get(nodePath.concat(gmEncryptCrtPath));
+        } else {
+            return null;
+        }
     }
 
     // remove the last character: "\n"
