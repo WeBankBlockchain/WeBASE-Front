@@ -51,7 +51,7 @@ public class FrontCertController {
         Instant startTime = Instant.now();
         log.info("start getFrontCerts. startTime:{}", startTime.toEpochMilli());
         // one crt file has multiple certs string
-        List<String> certList = new ArrayList<>();
+        List<String> nodeCertList = new ArrayList<>();
         List<String> sdkCertList = new ArrayList<>();
         String chainCertStr;
         String nodeCrtStr;
@@ -60,25 +60,36 @@ public class FrontCertController {
         // node的crt文件可能包含节点、机构、链证书三个
         // sdk的node.crt文件一般包含sdk节点证书，机构证书两个
         try {
-            certList = certService.getNodeCerts();
+            nodeCertList = certService.getNodeCerts();
             chainCertStr = certService.getChainCert();
             sdkCertList = certService.getSDKNodeCert();
         }catch (FrontException e) {
             return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getMessage());
         }
         Map<String, String> map = new HashMap<>();
-        nodeCrtStr = certList.get(0);
-        agencyCrtStr = certList.get(1);
-        sdkCrtStr = sdkCertList.get(0);
+        // chain ca.crt
+        if(!StringUtils.isEmpty(chainCertStr)) {
+            map.put("chain", chainCertStr);
+        }
+        // node.crt
+        nodeCrtStr = nodeCertList.get(0);
+        agencyCrtStr = nodeCertList.get(1);
+        // 链证书重复：ca.crt = nodeCertList.get(2);
         if(!StringUtils.isEmpty(nodeCrtStr)) {
             map.put("node", nodeCrtStr);
         }
         if(!StringUtils.isEmpty(agencyCrtStr)) {
             map.put("agency", agencyCrtStr);
         }
-        if(!StringUtils.isEmpty(chainCertStr)) {
-            map.put("chain", chainCertStr);
+        // guomi: encrypt cert included: 3 normal cert, 1 encrypt cert
+        if(nodeCertList.size() == 4){
+            String enNodeCrtStr = nodeCertList.get(3);
+            if(!StringUtils.isEmpty(enNodeCrtStr)) {
+                map.put("ennode", enNodeCrtStr);
+            }
         }
+        // sdk.crt
+        sdkCrtStr = sdkCertList.get(0);
         if(!StringUtils.isEmpty(sdkCrtStr)) {
             map.put("sdk", sdkCrtStr);
         }
