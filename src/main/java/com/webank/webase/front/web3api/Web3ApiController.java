@@ -242,14 +242,14 @@ public class Web3ApiController {
     }
 
     @PostMapping("/generateGroup")
-    public Object generateGroup(@PathVariable int groupId, @RequestBody GenerateGroupInfo req)
+    public Object generateGroup(@RequestBody GenerateGroupInfo req)
             throws IOException {
-        return web3ApiService.generateGroup(groupId, req);
+        return web3ApiService.generateGroup(req);
     }
 
     @GetMapping("/startGroup/{startGroupId}")
-    public Object startGroup(@PathVariable int groupId, @PathVariable int startGroupId)
+    public Object startGroup(@PathVariable int startGroupId)
             throws IOException {
-        return web3ApiService.startGroup(groupId, startGroupId);
+        return web3ApiService.startGroup(startGroupId);
     }
 }

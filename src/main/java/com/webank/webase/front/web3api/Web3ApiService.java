@@ -605,9 +605,10 @@ public class Web3ApiService {
         return null;
     }
 
-    public Object generateGroup(int groupId, GenerateGroupInfo generateGroupInfo)
+    public Object generateGroup(GenerateGroupInfo generateGroupInfo)
             throws IOException {
-        Status status = web3jMap.get(groupId)
+        Set<Integer> iset = web3jMap.keySet();
+        Status status = web3jMap.get(iset.toArray()[0])
                 .generateGroup(generateGroupInfo.getGenerateGroupId(),
                         generateGroupInfo.getTimestamp().intValue(),
                         generateGroupInfo.getNodeList())
@@ -615,9 +616,10 @@ public class Web3ApiService {
         return status;
     }
 
-    public Object startGroup(int groupId, int startGroupId) throws IOException {
+    public Object startGroup(int startGroupId) throws IOException {
+        Set<Integer> iset = web3jMap.keySet();
         org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
-                web3jMap.get(groupId).startGroup(startGroupId).send().getStatus();
+                web3jMap.get(iset.toArray()[0]).startGroup(startGroupId).send().getStatus();
         return status;
     }
 }
