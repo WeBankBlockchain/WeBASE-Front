@@ -233,7 +233,7 @@ public class Web3ApiController {
 
     @GetMapping("/refresh")
     public void refresh(@PathVariable int groupId) {
-        web3ApiService.refreshWeb3jMap();
+        web3ApiService.refreshServiceMap();
     }
 
     @GetMapping("/search")
