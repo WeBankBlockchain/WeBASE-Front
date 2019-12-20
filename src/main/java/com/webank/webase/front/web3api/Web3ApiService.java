@@ -43,6 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
@@ -50,6 +53,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.*;
 //import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -63,6 +67,8 @@ public class Web3ApiService {
 
     @Autowired
     Map<Integer, Web3j> web3jMap;
+    @Autowired
+    private HashMap<Integer, CnsService> cnsServiceMap;
     @Autowired
     NodeConfig nodeConfig;
     @Autowired
@@ -495,34 +501,38 @@ public class Web3ApiService {
         }
     }
 
-    public void refreshWeb3jMap() throws FrontException {
+    @DependsOn("encryptType")
+    public void refreshServiceMap() throws FrontException {
         List<String> groupList = getGroupList();
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
 
         for (int i = 0; i < groupList.size(); i++) {
-            if (web3jMap.get(new Integer(groupList.get(i))) == null) {
+            Integer groupId = new Integer(groupList.get(i));
+            Credentials credentials = GenCredential.create();
+            if (web3jMap.get(groupId) == null) {
                 ChannelConnections channelConnections = new ChannelConnections();
                 channelConnections
                         .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
                 channelConnections.setGroupId(Integer.valueOf(groupList.get(i)));
                 channelConnectionsList.add(channelConnections);
-                org.fisco.bcos.channel.client.Service service1 =
+                org.fisco.bcos.channel.client.Service service =
                         new org.fisco.bcos.channel.client.Service();
-                service1.setOrgID(Web3Config.orgName);
-                service1.setGroupId(Integer.valueOf(groupList.get(i)));
-                service1.setThreadPool(threadPoolTaskExecutor);
-                service1.setAllChannelConnections(groupChannelConnectionsConfig);
+                service.setOrgID(Web3Config.orgName);
+                service.setGroupId(Integer.valueOf(groupList.get(i)));
+                service.setThreadPool(threadPoolTaskExecutor);
+                service.setAllChannelConnections(groupChannelConnectionsConfig);
                 try {
-                    service1.run();
+                    service.run();
                 } catch (Exception e) {
                     new FrontException("refresh web3j failed");
                 }
                 ChannelEthereumService channelEthereumService = new ChannelEthereumService();
                 channelEthereumService.setTimeout(Web3Config.timeout);
-                channelEthereumService.setChannelService(service1);
-                Web3j web3j1 = Web3j.build(channelEthereumService, service1.getGroupId());
-                web3jMap.put(Integer.valueOf(groupList.get(i)), web3j1);
+                channelEthereumService.setChannelService(service);
+                Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
+                web3jMap.put(groupId, web3j);
+                cnsServiceMap.put(groupId, new CnsService(web3j, credentials));
             }
         }
     }
@@ -600,8 +610,7 @@ public class Web3ApiService {
         return null;
     }
 
-    public Object generateGroup(GenerateGroupInfo generateGroupInfo)
-            throws IOException {
+    public Object generateGroup(GenerateGroupInfo generateGroupInfo) throws IOException {
         Set<Integer> iset = web3jMap.keySet();
         GenerateGroup.Status status = web3jMap.get(iset.toArray()[0])
                 .generateGroup(generateGroupInfo.getGenerateGroupId(),
