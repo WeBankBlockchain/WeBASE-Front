@@ -73,7 +73,7 @@
 
 <script>
 import contentHead from "@/components/contentHead";
-import { queryCreatePrivateKey, queryImportPrivateKey, queryLocalKeyStores, queryDeletePrivateKey } from "@/util/api";
+import { queryCreatePrivateKey, queryImportPrivateKey, queryLocalKeyStores, queryDeletePrivateKey,encryption } from "@/util/api";
 import { unique } from "@/util/util";
 const FileSaver = require("file-saver");
 import Bus from "@/bus";
@@ -147,9 +147,28 @@ export default {
         };
     },
     mounted() {
-        this.getLocalKeyStores()
+        this.getLocalKeyStores();
+        this.getEncryption()
     },
     methods: {
+        getEncryption: function(){
+            encryption().then(res => {
+                if(res.data.code === 0){
+                    localStorage.setItem("encryptionId",res.data)
+                }else {
+                    this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+        },
         creatUserBtn() {
             this.userForm.userName = "";
             this.creatUserNameVisible = true;
