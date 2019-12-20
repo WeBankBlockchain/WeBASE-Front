@@ -233,5 +233,6 @@ export default {
         toggleFailed: '切换失败',
         toggleOpen: '打开',
         toggleDown: '关闭',
+        privateKeyManagementInfo: "支持导出私钥，可以将私钥导出到本地"
     }
 }
