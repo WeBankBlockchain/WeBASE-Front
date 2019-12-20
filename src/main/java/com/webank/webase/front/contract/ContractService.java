@@ -46,6 +46,7 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.fisco.bcos.web3j.solidity.compiler.CompilationResult;
 import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
@@ -355,7 +356,12 @@ public class ContractService {
                             .deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
                                     Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor)
                             .send();
-        } catch (Exception e) {
+        }
+        catch (TransactionException e) {
+            log.error("commonContract deploy failed.", e);
+            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
+        }
+        catch (Exception e) {
             log.error("commonContract deploy failed.", e);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
