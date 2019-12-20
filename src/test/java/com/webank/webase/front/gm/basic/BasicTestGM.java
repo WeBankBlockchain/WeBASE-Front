@@ -34,6 +34,8 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
+import org.fisco.bcos.web3j.utils.Numeric;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -202,7 +204,17 @@ public class BasicTestGM extends TestBaseGM {
 
     }
 
-
+    /**
+     * get node version
+     * api: rpc's getClientVersion
+     */
+    @Test
+    public void getNodeVersion() throws IOException {
+        String clientVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
+        System.out.println(clientVersion.contains("gm"));
+        System.out.println(web3j.getNodeVersion().send().getNodeVersion().getVersion());
+        System.out.println("============");
+    }
 
 
 

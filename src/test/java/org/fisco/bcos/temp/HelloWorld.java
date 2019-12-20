@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
+import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
@@ -15,9 +16,11 @@ import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.RemoteCall;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.tuples.generated.Tuple1;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.TransactionManager;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
+import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 
 /**
  * <p>Auto generated code.
@@ -30,9 +33,11 @@ import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
  */
 @SuppressWarnings("unchecked")
 public class HelloWorld extends Contract {
-    public static final String BINARY = "608060405234801561001057600080fd5b50610233806100206000396000f30060806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680636d4ce63c146100515780636ea9bfc5146100bd575b600080fd5b34801561005d57600080fd5b50610066610123565b6040518080602001828103825283818151815260200191508051906020019060200280838360005b838110156100a957808201518184015260208101905061008e565b505050509050019250505060405180910390f35b3480156100c957600080fd5b506101216004803603810190808035906020019082018035906020019080806020026020016040519081016040528093929190818152602001838360200280828437820191505050505050919291929050505061017b565b005b6060600080548060200260200160405190810160405280929190818152602001828054801561017157602002820191906000526020600020905b81548152602001906001019080831161015d575b5050505050905090565b8060009080519060200190610191929190610195565b5050565b8280548282559060005260206000209081019282156101d1579160200282015b828111156101d05782518255916020019190600101906101b5565b5b5090506101de91906101e2565b5090565b61020491905b808211156102005760008160009055506001016101e8565b5090565b905600a165627a7a72305820f402aecb72ab30bc297d3d94a62ff18265710c3d9ec208395699ff643466f87e0029";
+    public static String BINARY = "608060405234801561001057600080fd5b50610233806100206000396000f30060806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680636d4ce63c146100515780636ea9bfc5146100bd575b600080fd5b34801561005d57600080fd5b50610066610123565b6040518080602001828103825283818151815260200191508051906020019060200280838360005b838110156100a957808201518184015260208101905061008e565b505050509050019250505060405180910390f35b3480156100c957600080fd5b506101216004803603810190808035906020019082018035906020019080806020026020016040519081016040528093929190818152602001838360200280828437820191505050505050919291929050505061017b565b005b6060600080548060200260200160405190810160405280929190818152602001828054801561017157602002820191906000526020600020905b81548152602001906001019080831161015d575b5050505050905090565b8060009080519060200190610191929190610195565b5050565b8280548282559060005260206000209081019282156101d1579160200282015b828111156101d05782518255916020019190600101906101b5565b5b5090506101de91906101e2565b5090565b61020491905b808211156102005760008160009055506001016101e8565b5090565b905600a165627a7a723058203c4a2561bb7fc792f0e012c886b7646a93fc55165ff257e255bd93fd475b2c240029";
 
     public static final String ABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
+
+    public static final TransactionDecoder transactionDecoder = new TransactionDecoder(ABI, BINARY);
 
     public static final String FUNC_GET = "get";
 
@@ -56,6 +61,10 @@ public class HelloWorld extends Contract {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
+    public static TransactionDecoder getTransactionDecoder() {
+        return transactionDecoder;
+    }
+
     public RemoteCall<List> get() {
         final Function function = new Function(FUNC_GET, 
                 Arrays.<Type>asList(), 
@@ -74,7 +83,7 @@ public class HelloWorld extends Contract {
     public RemoteCall<TransactionReceipt> set(List<BigInteger> _ua) {
         final Function function = new Function(
                 FUNC_SET, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
+                Arrays.<Type>asList(_ua.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(_ua, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class))), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
@@ -83,7 +92,7 @@ public class HelloWorld extends Contract {
     public void set(List<BigInteger> _ua, TransactionSucCallback callback) {
         final Function function = new Function(
                 FUNC_SET, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
+                Arrays.<Type>asList(_ua.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(_ua, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class))), 
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
@@ -92,10 +101,22 @@ public class HelloWorld extends Contract {
     public String setSeq(List<BigInteger> _ua) {
         final Function function = new Function(
                 FUNC_SET, 
-                Arrays.<Type>asList(new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
+                Arrays.<Type>asList(_ua.isEmpty()?org.fisco.bcos.web3j.abi.datatypes.DynamicArray.empty("uint256[]"):new org.fisco.bcos.web3j.abi.datatypes.DynamicArray<org.fisco.bcos.web3j.abi.datatypes.generated.Uint256>(
                         org.fisco.bcos.web3j.abi.Utils.typeMap(_ua, org.fisco.bcos.web3j.abi.datatypes.generated.Uint256.class))), 
                 Collections.<TypeReference<?>>emptyList());
         return createTransactionSeq(function);
+    }
+
+    public Tuple1<List<BigInteger>> getSetInput(TransactionReceipt transactionReceipt) {
+        String data = transactionReceipt.getInput().substring(10);
+        final Function function = new Function(FUNC_SET, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<DynamicArray<Uint256>>() {}));
+        List<Type> results = FunctionReturnDecoder.decode(data, function.getOutputParameters());;
+        return new Tuple1<List<BigInteger>>(
+
+                convertToNative((List<Uint256>) results.get(0).getValue())
+                );
     }
 
     @Deprecated
