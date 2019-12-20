@@ -46,14 +46,9 @@ import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
-import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
-import org.fisco.bcos.web3j.protocol.core.methods.response.GroupPeers;
+import org.fisco.bcos.web3j.protocol.core.methods.response.*;
+//import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -608,7 +603,7 @@ public class Web3ApiService {
     public Object generateGroup(GenerateGroupInfo generateGroupInfo)
             throws IOException {
         Set<Integer> iset = web3jMap.keySet();
-        Status status = web3jMap.get(iset.toArray()[0])
+        GenerateGroup.Status status = web3jMap.get(iset.toArray()[0])
                 .generateGroup(generateGroupInfo.getGenerateGroupId(),
                         generateGroupInfo.getTimestamp().intValue(),
                         generateGroupInfo.getNodeList())
