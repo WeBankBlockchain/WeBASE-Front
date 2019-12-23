@@ -237,5 +237,6 @@ export default {
         toggleFailed: 'Switch failed',
         toggleOpen: 'Open',
         toggleDown: 'Down',
+        privateKeyManagementInfo: "Support for exporting private keys, you can export private keys to local."
     }
 }
