@@ -24,6 +24,9 @@
                         <span>{{$t('table.importPrivateKey')}}</span>
                         <input type="file" @change="importFile($event)" />
                     </span>
+                    <el-tooltip class="item" effect="dark" :content="$t('text.privateKeyManagementInfo')" placement="top-start">
+                        <i class="el-icon-info" style="color: #fff;font-size: 18px;margin: 12px 0 0 15px;"></i>
+                    </el-tooltip>
 
                 </div>
             </div>
