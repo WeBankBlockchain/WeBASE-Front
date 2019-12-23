@@ -16,6 +16,8 @@ package com.webank.webase.front.transaction;
 import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -372,6 +374,8 @@ public class TransService {
     public static TransactionReceipt execTransaction(Function function,
             CommonContract commonContract) throws FrontException {
         TransactionReceipt transactionReceipt = null;
+        Instant startTime = Instant.now();
+        log.info("execTransaction start startTime:{}", startTime.toEpochMilli());
         try {
             transactionReceipt = commonContract.execTransaction(function);
         } catch (IOException | TransactionException | ContractCallException e) {
@@ -379,6 +383,8 @@ public class TransService {
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
                     e.getMessage());
         }
+        log.info("execTransaction end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
         return transactionReceipt;
     }
 
