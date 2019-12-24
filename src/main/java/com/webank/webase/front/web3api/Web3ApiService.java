@@ -73,7 +73,7 @@ public class Web3ApiService {
     @Autowired
     Map<Integer, Web3j> web3jMap;
     @Autowired
-    private HashMap<Integer, CnsService> cnsServiceMap;
+    Map<Integer, CnsService> cnsServiceMap;
     @Autowired
     NodeConfig nodeConfig;
     @Autowired
