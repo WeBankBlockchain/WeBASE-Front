@@ -40,8 +40,6 @@ public class ContractTest {
 
     @Test
     public void compileTest() throws Exception {
-//        Credentials credentials2 =
-//                GenCredential.create("a392604efc2fad9c0b3da43b5f698a2e3f270f170d859912be0d54742275c5f6");
 
         String solidityName = "HelloWorldGM";
         // HelloWorldGM.sol encoded in base64
