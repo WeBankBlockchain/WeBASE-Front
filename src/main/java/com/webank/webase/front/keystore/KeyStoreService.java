@@ -196,6 +196,7 @@ public class KeyStoreService {
      */
     // 直接用一个固定的credential，不用每次都新建
     public Credentials getCredentialsForQuery() {
+        log.debug("start getCredentialsForQuery. ");
         KeyStoreInfo keyStoreInfo = createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
         return GenCredential.create(keyStoreInfo.getPrivateKey());
     }
