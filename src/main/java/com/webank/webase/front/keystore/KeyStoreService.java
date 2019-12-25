@@ -284,17 +284,25 @@ public class KeyStoreService {
         return null;
     }
 
-    // false, KeyTypes.LOCALUSER.getValue(),
-    public KeyStoreInfo getKeyStoreFromPem(String pemContent, boolean useAes, int userType,  String userName) {
+    /**
+     * import keystore info from pem file's content
+     * @param pemContent
+     * @param useAes false
+     * @param userType local
+     * @param userName
+     * @return
+     */
+    public KeyStoreInfo importKeyStoreFromPem(String pemContent, boolean useAes, int userType,  String userName) {
         PEMManager pemManager = new PEMManager();
+        String privateKey;
         try {
             pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
-            String privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
-            getKeyStoreFromPrivateKey(privateKey, useAes, userType, userName);
+            privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
         }catch (Exception e) {
-            log.error("getKeyStoreFromPem error:[]", e);
+            log.error("importKeyStoreFromPem error:[]", e);
             throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
         }
+        getKeyStoreFromPrivateKey(privateKey, useAes, userType, userName);
         return null;
     }
 
