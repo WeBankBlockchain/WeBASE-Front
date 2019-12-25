@@ -13,7 +13,7 @@ fi
 processPid=0
 checkProcess(){
     server_pid=`ps aux | grep java | grep $CURRENT_DIR | grep $APP_MAIN | awk '{print $2}'`
-    if [ -n "$server_pid" ] && [ -n "$(echo $server_pid| sed -n "/^[0-9]\+$/p")" ]; then
+    if [ -n "$server_pid" ]; then
         processPid=$server_pid
     else
         processPid=0
