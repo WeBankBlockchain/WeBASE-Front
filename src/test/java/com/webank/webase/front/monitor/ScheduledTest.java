@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 
-public class scheduledTest extends TestBase {
+public class ScheduledTest extends TestBase {
 
     @Autowired
     private ThreadPoolTaskScheduler threadPoolTaskScheduler;
