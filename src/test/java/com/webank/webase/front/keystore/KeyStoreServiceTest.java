@@ -16,14 +16,6 @@
 
 package com.webank.webase.front.keystore;
 
-import com.webank.webase.front.util.CommonUtils;
-import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.jcajce.PKCS12Key;
-import org.bouncycastle.jcajce.PKIXCertStore;
-import org.bouncycastle.jcajce.provider.keystore.PKCS12;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Test;
@@ -32,13 +24,9 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 
 public class KeyStoreServiceTest {
 

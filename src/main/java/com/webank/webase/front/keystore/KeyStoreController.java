@@ -19,14 +19,10 @@ import java.util.List;
 
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
+import com.webank.webase.front.keystore.entity.ReqImportPem;
 import com.webank.webase.front.util.PemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
@@ -35,6 +31,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+
+import javax.validation.Valid;
 
 @Slf4j
 @RestController
@@ -69,18 +67,16 @@ public class KeyStoreController extends BaseController {
     }
 
     @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "pemContent", value = "raw pem content including ---XXX--- surrounded", required = true, dataType = "String"),
-            @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
-    })
-    @RequestMapping(method = RequestMethod.GET, value = "/importPem")
-    public KeyStoreInfo importPemPrivateKey(@RequestParam String pemContent,
-                                         @RequestParam String userName) {
-        if(!pemContent.startsWith(PemUtils.crtContentHead)
-                || !pemContent.endsWith(PemUtils.crtTailForConcat)) {
+    @ApiImplicitParam(name = "reqImportPem", value = "import pem info", required = true, dataType = "ReqImportPem")
+    @PostMapping("/importPem")
+    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
+        String pemContent = reqImportPem.getPemContent();
+        String userName = reqImportPem.getUserName();
+        if(!pemContent.startsWith(PemUtils.crtContentHead)) {
             throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
         }
-        return keyStoreService.getKeyStoreFromPem(pemContent, false, KeyTypes.LOCALUSER.getValue(), userName);
+        keyStoreService.importKeyStoreFromPem(pemContent, false, KeyTypes.LOCALUSER.getValue(), userName);
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
     
     @ApiOperation(value = "getKeyStores", notes = "get local KeyStore lists")
