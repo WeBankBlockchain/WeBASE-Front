@@ -47,7 +47,7 @@
 
 <script>
 import sidebar from "./sidebar";
-import { resetPassword, addnodes } from "@/util/api";
+import { resetPassword, addnodes,encryption } from "@/util/api";
 import router from "@/router";
 const sha256 = require("js-sha256").sha256;
 import errcode from "@/util/errcode";
@@ -146,8 +146,27 @@ export default {
     },
     mounted() {
         this.accountStatus = sessionStorage.getItem("accountStatus");
+        this.getEncryption()
     },
     methods: {
+        getEncryption: function(){
+            encryption().then(res => {
+                if(res.status == 200){
+                    localStorage.setItem("encryptionId",res.data)
+                }else {
+                    this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+        },
         change: function (val) {
             this.menuShow = !val;
             this.menuHide = val;
