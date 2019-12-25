@@ -17,7 +17,9 @@ package com.webank.webase.front.keystore;
 
 import java.util.List;
 
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
+import com.webank.webase.front.util.PemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,6 +66,21 @@ public class KeyStoreController extends BaseController {
     public KeyStoreInfo importPrivateKey(@RequestParam(required = true) String privateKey,
         @RequestParam(required = true) String userName) {
         return keyStoreService.getKeyStoreFromPrivateKey(privateKey, false, KeyTypes.LOCALUSER.getValue(), userName);
+    }
+
+    @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pemContent", value = "raw pem content including ---XXX--- surrounded", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
+    })
+    @RequestMapping(method = RequestMethod.GET, value = "/importPem")
+    public KeyStoreInfo importPemPrivateKey(@RequestParam String pemContent,
+                                         @RequestParam String userName) {
+        if(!pemContent.startsWith(PemUtils.crtContentHead)
+                || !pemContent.endsWith(PemUtils.crtTailForConcat)) {
+            throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
+        }
+        return keyStoreService.getKeyStoreFromPem(pemContent, false, KeyTypes.LOCALUSER.getValue(), userName);
     }
     
     @ApiOperation(value = "getKeyStores", notes = "get local KeyStore lists")
