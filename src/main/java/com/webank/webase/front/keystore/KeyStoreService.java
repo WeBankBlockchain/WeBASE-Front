@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.keystore;
 
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,10 @@ import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
 import com.webank.webase.front.util.CredentialUtils;
+import com.webank.webase.front.util.PemUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
@@ -37,6 +41,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.util.AesUtils;
@@ -196,6 +201,7 @@ public class KeyStoreService {
      */
     // 直接用一个固定的credential，不用每次都新建
     public Credentials getCredentialsForQuery() {
+        log.debug("start getCredentialsForQuery. ");
         KeyStoreInfo keyStoreInfo = createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
         return GenCredential.create(keyStoreInfo.getPrivateKey());
     }
@@ -275,6 +281,28 @@ public class KeyStoreService {
         } catch (Exception e) {
             log.error("getSignDate exception", e);
         }
+        return null;
+    }
+
+    /**
+     * import keystore info from pem file's content
+     * @param pemContent
+     * @param useAes false
+     * @param userType local
+     * @param userName
+     * @return
+     */
+    public KeyStoreInfo importKeyStoreFromPem(String pemContent, boolean useAes, int userType,  String userName) {
+        PEMManager pemManager = new PEMManager();
+        String privateKey;
+        try {
+            pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
+            privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
+        }catch (Exception e) {
+            log.error("importKeyStoreFromPem error:[]", e);
+            throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
+        }
+        getKeyStoreFromPrivateKey(privateKey, useAes, userType, userName);
         return null;
     }
 
