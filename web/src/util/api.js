@@ -621,11 +621,8 @@ export function backgroundCompile(data){
 }
 export function encryption() {
     return get({
-        url: `${HANDLE}/encrypt`,
+        url: `${HANDLE}encrypt`,
         method: 'get',
         responseType: 'text'
-        // headers: {
-        //     Authorization: "Token " + localStorage.getItem("token") || ""
-        // }
     })
 }
