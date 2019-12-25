@@ -24,7 +24,7 @@ processPid=0
 processStatus=0
 checkProcess(){
     server_pid=`ps aux | grep java | grep $CURRENT_DIR | grep $APP_MAIN | awk '{print $2}'`
-    if [ -n "$server_pid" ] && [ -n "$(echo $server_pid| sed -n "/^[0-9]\+$/p")" ]; then
+    if [ -n "$server_pid" ]; then
         processPid=$server_pid
         processStatus=1
     else
@@ -61,10 +61,10 @@ start(){
        done
         
        if [ $result -ne 0 ]; then
-           echo "PID($processPid) [Starting]. Please check through the log file (default path:./log/)."
+           echo "PID($processPid) [Starting]. Please check message through the log file (default path:./log/)."
            echo "==============================================================================================="
        else
-           echo "[Failed]. Please check through the log file (default path:./log/)."
+           echo "[Failed]. Please check message through the log file (default path:./log/)."
            echo "==============================================================================================="
        fi
     fi
