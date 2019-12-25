@@ -83,6 +83,7 @@ export default {
         contractAbi: 'Abi',
         contractBin: 'Bin',
         createdTime: 'Created Time',
+        importPem: "Import Pem Private Key"
     },
     errorLog: {
         tips: 'Please click the bug icon in the upper right corner',
@@ -237,6 +238,9 @@ export default {
         toggleFailed: 'Switch failed',
         toggleOpen: 'Open',
         toggleDown: 'Down',
-        privateKeyManagementInfo: "Support for exporting private keys, you can export private keys to local."
+        privateKeyManagementInfo: "Support for exporting private keys, you can export private keys to local.",
+        fileName: "File Name",
+        importFile: "Import File",
+        pemName: "Pem File Name"
     }
 }
