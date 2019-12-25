@@ -134,7 +134,7 @@ public class CommonUtils {
 
     /**
      * base64Decode.
-     * 
+     *
      * @param str String
      * @return
      */

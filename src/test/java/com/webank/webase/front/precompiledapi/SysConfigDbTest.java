@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.precompiledapi.sysconf;
+package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.channel.test.TestBase;
 import org.fisco.bcos.channel.client.PEMManager;
@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class sysConfigDbTest extends TestBase {
+public class SysConfigDbTest extends TestBase {
 
 
     public static ApplicationContext context = null;
@@ -44,7 +44,6 @@ public class sysConfigDbTest extends TestBase {
         Credentials credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
         SystemConfigService systemConfigService = new SystemConfigService(web3j, credentialsPEM);
 
-        String insertSysConfig = "insert ";
         systemConfigService.setValueByKey(key, value);
     }
 
