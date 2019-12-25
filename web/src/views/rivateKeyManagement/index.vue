@@ -24,6 +24,7 @@
                         <span>{{$t('table.importPrivateKey')}}</span>
                         <input type="file" @change="importFile($event)" />
                     </span>
+                    <el-button type="primary" style="margin-left: 10px;" class="search-part-left-btn" @click="importPemFile">{{$t('table.importPem')}}</el-button>
                     <el-tooltip class="item" effect="dark" :content="$t('text.privateKeyManagementInfo')" placement="top-start">
                         <i class="el-icon-info" style="color: #fff;font-size: 18px;margin: 12px 0 0 15px;"></i>
                     </el-tooltip>
@@ -69,21 +70,24 @@
                 <el-button type="primary" @click="sureUserName('userForm')">{{$t('table.confirm')}}</el-button>
             </div>
         </el-dialog>
-
+        <import-pem v-if='importPemShow' :show='importPemShow' @close='importPemClose'></import-pem>
     </div>
 </template>
 
 
 <script>
 import contentHead from "@/components/contentHead";
-import { queryCreatePrivateKey, queryImportPrivateKey, queryLocalKeyStores, queryDeletePrivateKey,encryption } from "@/util/api";
+import importPem from "./dialog/importPem"
+import { queryCreatePrivateKey, queryImportPrivateKey, queryLocalKeyStores, queryDeletePrivateKey,encryption,ImportPemPrivateKey } from "@/util/api";
 import { unique } from "@/util/util";
 const FileSaver = require("file-saver");
 import Bus from "@/bus";
+
 export default {
     name: "RivateKeyManagement",
     components: {
-        "v-contentHead": contentHead
+        "v-contentHead": contentHead,
+        "import-pem": importPem
     },
     computed: {
         privateKeyHead() {
@@ -146,7 +150,8 @@ export default {
             creatUserNameVisible: false,
             privateKeyList: localStorage.getItem("privateKeyList") ? JSON.parse(localStorage.getItem("privateKeyList")) : [],
             fileString: "",
-            uploadMap: {}
+            uploadMap: {},
+            importPemShow: false
         };
     },
     mounted() {
@@ -154,9 +159,16 @@ export default {
         this.getEncryption()
     },
     methods: {
+        importPemFile: function(){
+            this.importPemShow = true
+        },
+        importPemClose: function(){
+            this.importPemShow = false;
+            this.getLocalKeyStores();
+        },
         getEncryption: function(){
             encryption().then(res => {
-                if(res.data.code === 0){
+                if(res.status == 200){
                     localStorage.setItem("encryptionId",res.data)
                 }else {
                     this.$message({
