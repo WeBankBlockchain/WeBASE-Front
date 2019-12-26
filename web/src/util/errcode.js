@@ -510,6 +510,14 @@ let errCode = {
         en: "not support transaction",
         zh: "不支持发交易"
     },
+    "201232": {
+        en: "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----",
+        zh: "Pem文件格式错误，必须包含-----XXXXX PRIVATE KEY----- "
+    },
+    "201233": {
+        en: "Pem file content error",
+        zh: "Pem文件内容错误"
+    },
 
     "302000": {
         en: "user not logged in",
