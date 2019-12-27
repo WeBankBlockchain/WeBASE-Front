@@ -235,7 +235,7 @@ export default {
         toggleOpen: '打开',
         toggleDown: '关闭',
         privateKeyManagementInfo: "支持导出私钥，可以将私钥导出到本地",
-        fileName: "文件名称",
+        fileName: "私钥用户名",
         importFile: "导入文件",
         pemName: "pem 文件名称"
     }
