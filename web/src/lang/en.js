@@ -239,7 +239,7 @@ export default {
         toggleOpen: 'Open',
         toggleDown: 'Down',
         privateKeyManagementInfo: "Support for exporting private keys, you can export private keys to local.",
-        fileName: "File Name",
+        FileName: "privateKey Name",
         importFile: "Import File",
         pemName: "Pem File Name"
     }
