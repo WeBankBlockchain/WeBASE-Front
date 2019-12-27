@@ -1,7 +1,7 @@
 <template>
     <div>
         <el-dialog :title="$t('table.importPem')" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="433px" :center="true">
-            <el-form :model="importPemFrom" :rules="rules" ref="importPemFrom" label-width="116px" class="demo-ruleForm">
+            <el-form :model="importPemFrom" :rules="rules" ref="importPemFrom" label-width="125px" class="demo-ruleForm">
                 <el-form-item :label="$t('text.fileName')" prop="fileName">
                     <el-input v-model="importPemFrom.fileName" style="width: 210px;"></el-input>
                 </el-form-item>
