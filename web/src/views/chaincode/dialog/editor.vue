@@ -225,12 +225,8 @@ export default {
             }
         },
         decodefun() {
-            let web3 = new Web3(Web3.givenProvider);
-            // this.methodId = input.substring(0, 10);
-            // this.methodId = data;
-            // let inputDatas = "0x" + input.substring(10);
+            let Web3EthAbi = require('web3-eth-abi');
             if (this.typesArray) {
-                // abiData.abiInfo = JSON.parse(abiData.abiInfo)
                 this.typesArray.inputs.forEach((val, index) => {
                     if (val && index < this.typesArray.inputs.length - 1) {
                         this.abiType = this.abiType + val.type + " " + val.name + ",";
@@ -240,7 +236,7 @@ export default {
                 });
                 this.funcData = this.typesArray.name;
                 if (this.typesArray.inputs.length) {
-                    this.decodeData = web3.eth.abi.decodeParameters(this.editorOutput, this.transationData.output);
+                    this.decodeData = Web3EthAbi.decodeParameters(this.editorOutput, this.transationData.output);
                     if (JSON.stringify(this.decodeData) != "{}") {
                         for (const key in this.decodeData) {
                             for (let index = 0; index < this.editorOutput.length; index++) {
@@ -250,22 +246,6 @@ export default {
                                 this.inputData[index].data = this.decodeData[index];
                                 
                             }
-                            // this.typesArray.inputs.forEach((val, index) => {
-                            //     if (val && val.name && val.type) {
-                            //         if (key === val.name) {
-                            //             this.inputData[index] = {};
-                            //             this.inputData[index].name = val.name;
-                            //             this.inputData[index].type = val.type;
-                            //             this.inputData[index].data = this.decodeData[key];
-                            //         }
-                            //     } else if (val) {
-                            //         if (index == key) {
-                            //             this.inputData[index] = {};
-                            //             this.inputData[index].type = val;
-                            //             this.inputData[index].data = this.decodeData[key];
-                            //         }
-                            //     }
-                            // });
                         }
                     }
                 }
@@ -285,7 +265,6 @@ export default {
                         setTimeout(() => {
                             this.eventSHow = true;
                         }, 200)
-                        // console.log(this.transationData.logs[i])
                     } else if (res.data.code !== 0) {
                         this.$message({
                             type: "error",
@@ -301,7 +280,7 @@ export default {
             }
         },
         decodeLogs(eventData, data) {
-            let web3 = new Web3(Web3.givenProvider);
+            let Web3EthAbi = require('web3-eth-abi');
             let abi = "";
             eventData.abiInfo = JSON.parse(eventData.abiInfo)
             let list = data;
@@ -317,7 +296,7 @@ export default {
                 }
             }
             list.eventName = list.eventName + ")";
-            let eventResult = web3.eth.abi.decodeLog(eventData.abiInfo.inputs, list.data, list.topics.slice(1));
+            let eventResult = Web3EthAbi.decodeLog(eventData.abiInfo.inputs, list.data, list.topics.slice(1));
             list.outData = {};
             list.eventLgData = [];
             for (const key in eventResult) {
@@ -372,7 +351,6 @@ export default {
 </script>
 <style>
 .transation-content {
-    /* width:200px; */
     word-wrap: break-word;
     word-break: break-all;
 }

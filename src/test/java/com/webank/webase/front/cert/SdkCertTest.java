@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -32,14 +33,26 @@ public class SdkCertTest {
     @Autowired
     FrontCertService frontCertService;
 
+
     @Test
     public void testSdkCertService() {
         List<String> sdkList = frontCertService.getSDKNodeCert();
-        // upper node.crt
-        System.out.println(sdkList.get(0));
-        // lower agency
-        System.out.println(sdkList.get(1));
+        Assert.notNull(sdkList, "load sdk crt error");
+        sdkList.stream().forEach(c -> System.out.println(c));
     }
 
+    @Test
+    public void testChainCertService() {
+        String sdkList = frontCertService.getChainCert();
+        System.out.println(sdkList);
+        Assert.notNull(sdkList, "load sdk crt error");
+    }
+
+    @Test
+    public void testNodeCertsService() {
+        List<String> sdkList = frontCertService.getNodeCerts();
+        Assert.notNull(sdkList, "load sdk crt error");
+        sdkList.stream().forEach(c -> System.out.println(c));
+    }
 
 }

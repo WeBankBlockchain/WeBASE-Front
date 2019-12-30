@@ -15,14 +15,11 @@
  */
 package com.webank.webase.front.precompiledapi;
 
-import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.precompile.consensus.ConsensusService;
@@ -32,10 +29,8 @@ import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,14 +51,8 @@ public class PrecompiledService{
 
 
     // 根据前台传的user address获取私钥
-    private Credentials getCredentials(String fromAddress) throws Exception {
-        return keyStoreService.getCredentials(fromAddress, false);
-    }
-    private Credentials getCredentialsForQuery() throws Exception {
-        PEMManager pemManager = new PEMManager();
-        InputStream pemStream = new ClassPathResource(Constants.account1Path).getInputStream();
-        pemManager.load(pemStream);
-        return GenCredential.create(pemManager.getECKeyPair().getPrivateKey().toString(16));
+    private Credentials getCredentials(String fromAddress, Boolean useAes) throws Exception {
+        return keyStoreService.getCredentials(fromAddress, useAes);
     }
 
     /**
@@ -72,18 +61,21 @@ public class PrecompiledService{
      */
 //    get single cns is not necessary
 //    public Object getAddressByContractNameAndVersion(int groupId, String contractNameAndVersion) throws Exception {
-//        CnsService cnsService = new CnsService(web3jMap.get(groupId), getCredentialsForQuery());
+//        CnsService cnsService = new CnsService(web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
 //
 //        return cnsService.getAddressByContractNameAndVersion(contractNameAndVersion);
 //    }
 
     public List<CnsInfo> queryCnsByName(int groupId, String contractName) throws Exception {
-        CnsService cnsService = new CnsService(web3jMap.get(groupId), getCredentialsForQuery());
+        CnsService cnsService = new CnsService(web3jMap.get(groupId),
+                keyStoreService.getCredentialsForQuery());
 
         return cnsService.queryCnsByName(contractName);
     }
-    public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName, String version) throws Exception {
-        CnsService cnsService = new CnsService(web3jMap.get(groupId), getCredentialsForQuery());
+    public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName,
+                                                  String version) throws Exception {
+        CnsService cnsService = new CnsService(web3jMap.get(groupId),
+                keyStoreService.getCredentialsForQuery());
 
         return cnsService.queryCnsByNameAndVersion(contractName, version);
     }
@@ -94,18 +86,24 @@ public class PrecompiledService{
     /**
      * Consensus config related
      */
-    public Object addSealer(int groupId, String fromAddress, String nodeId) throws Exception {
-        ConsensusService consensusService = new ConsensusService(web3jMap.get(groupId), getCredentials(fromAddress));
+    public Object addSealer(int groupId, String fromAddress, String nodeId,
+                            Boolean useAes) throws Exception {
+        ConsensusService consensusService =
+                new ConsensusService(web3jMap.get(groupId), getCredentials(fromAddress, useAes));
 
         return consensusService.addSealer(nodeId);
     }
-    public Object addObserver(int groupId, String fromAddress, String nodeId) throws Exception {
-        ConsensusService consensusService = new ConsensusService(web3jMap.get(groupId), getCredentials(fromAddress));
+    public Object addObserver(int groupId, String fromAddress, String nodeId,
+                              Boolean useAes) throws Exception {
+        ConsensusService consensusService =
+                new ConsensusService(web3jMap.get(groupId), getCredentials(fromAddress, useAes));
 
         return consensusService.addObserver(nodeId);
     }
-    public Object removeNode(int groupId, String fromAddress, String nodeId) throws Exception {
-        ConsensusService consensusService = new ConsensusService(web3jMap.get(groupId), getCredentials(fromAddress));
+    public Object removeNode(int groupId, String fromAddress, String nodeId,
+                             Boolean useAes) throws Exception {
+        ConsensusService consensusService =
+                new ConsensusService(web3jMap.get(groupId), getCredentials(fromAddress, useAes));
 
         return consensusService.removeNode(nodeId);
     }
@@ -135,8 +133,10 @@ public class PrecompiledService{
      * CRUD related
      * Table table - validation in controller
      */
-    public int createTable(int groupId, String fromAddress, Table table) throws Exception {
-        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentials(fromAddress));
+    public int createTable(int groupId, String fromAddress, Table table,
+                           Boolean useAes) throws Exception {
+        CRUDService crudService = new CRUDService(web3jMap.get(groupId),
+                getCredentials(fromAddress, useAes));
 
         return crudService.createTable(table);
 
@@ -144,7 +144,8 @@ public class PrecompiledService{
     }
 
     public Table desc(int groupId, String tableName) throws Exception {
-        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentialsForQuery());
+        CRUDService crudService = new CRUDService(web3jMap.get(groupId),
+                keyStoreService.getCredentialsForQuery());
 
         Table descRes = crudService.desc(tableName);
         return descRes;
@@ -152,32 +153,37 @@ public class PrecompiledService{
     }
 
     //select
-    public List<Map<String, String>> select(int groupId, String fromAddress, Table table, Condition conditions) throws Exception {
-        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentials(fromAddress));
+    public List<Map<String, String>> select(int groupId, String fromAddress, Table table,
+                                            Condition conditions, Boolean useAes) throws Exception {
+        CRUDService crudService = new CRUDService(web3jMap.get(groupId),
+                getCredentials(fromAddress, useAes));
 
         List<Map<String, String>> selectRes = crudService.select(table, conditions);
         return selectRes;
     }
 
     // insert 校验tableName等操作放在controller
-    public int insert(int groupId, String fromAddress, Table table, Entry entry) throws Exception {
-        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentials(fromAddress));
+    public int insert(int groupId, String fromAddress, Table table,
+                      Entry entry, Boolean useAes) throws Exception {
+        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentials(fromAddress, useAes));
 
         int insertRes = crudService.insert(table, entry);
         return insertRes;
     }
 
     // update
-    public int update(int groupId, String fromAddress, Table table, Entry entry, Condition conditions) throws Exception {
-        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentials(fromAddress));
+    public int update(int groupId, String fromAddress, Table table,
+                      Entry entry, Condition conditions, Boolean useAes) throws Exception {
+        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentials(fromAddress, useAes));
 
         int updateRes = crudService.update(table, entry, conditions);
         return updateRes;
     }
 
     // remove
-    public int remove(int groupId, String fromAddress, Table table, Condition conditions) throws Exception {
-        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentials(fromAddress));
+    public int remove(int groupId, String fromAddress, Table table,
+                      Condition conditions, Boolean useAes) throws Exception {
+        CRUDService crudService = new CRUDService(web3jMap.get(groupId), getCredentials(fromAddress, useAes));
 
         int removeRes = crudService.remove(table, conditions);
         return removeRes;
