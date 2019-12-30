@@ -173,8 +173,13 @@ public class PermissionManageController extends BaseController {
         String fromAddress = permissionHandle.getFromAddress();
         String userAddress = permissionHandle.getAddress();
         PermissionState permissionState = permissionHandle.getPermissionState();
+        if(permissionHandle.getUseAes() == null){
+            permissionHandle.setUseAes(false);
+        }
+        Boolean useAes = permissionHandle.getUseAes();
         try {
-            Object resultState = permissionManageService.updatePermissionStateAfterCheck(groupId, fromAddress, userAddress, permissionState);
+            Object resultState = permissionManageService.updatePermissionStateAfterCheck(groupId,
+                    fromAddress, userAddress, permissionState, useAes);
             log.info("end updateUserPermissionStateAfterCheck startTime:{}, resultState:{}",
                     Instant.now().toEpochMilli(), resultState);
             return new BaseResponse(ConstantCode.RET_SUCCEED, resultState);
@@ -213,6 +218,10 @@ public class PermissionManageController extends BaseController {
         String tableName = permissionHandle.getTableName();
         // validate address
         Address converAddr = AddressUtils.convertAddress(address);
+        if(permissionHandle.getUseAes() == null){
+            permissionHandle.setUseAes(false);
+        }
+        Boolean useAes = permissionHandle.getUseAes();
         if(!converAddr.isValid()){
             return ConstantCode.PARAM_ADDRESS_IS_INVALID;
         }
@@ -220,26 +229,26 @@ public class PermissionManageController extends BaseController {
         switch (permissionType) {
             case PrecompiledUtils
                     .PERMISSION_TYPE_PERMISSION:
-                return grantPermissionManager(groupId, from, address);
+                return grantPermissionManager(groupId, from, address, useAes);
             case PrecompiledUtils
                     .PERMISSION_TYPE_DEPLOY_AND_CREATE:
-                return grantDeployAndCreateManager(groupId, from, address);
+                return grantDeployAndCreateManager(groupId, from, address, useAes);
             case PrecompiledUtils
                     .PERMISSION_TYPE_USERTABLE:
                 if(tableName.isEmpty()){
                     return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
                 }else {
-                    return grantUserTableManager(groupId, from, tableName, address);
+                    return grantUserTableManager(groupId, from, tableName, address, useAes);
                 }
             case PrecompiledUtils
                     .PERMISSION_TYPE_NODE:
-                return grantNodeManager(groupId, from, address);
+                return grantNodeManager(groupId, from, address, useAes);
             case PrecompiledUtils
                     .PERMISSION_TYPE_SYS_CONFIG:
-                return grantSysConfigManager(groupId, from, address);
+                return grantSysConfigManager(groupId, from, address, useAes);
             case PrecompiledUtils
                     .PERMISSION_TYPE_CNS:
-                return grantCNSManager(groupId, from, address);
+                return grantCNSManager(groupId, from, address, useAes);
             default:
                 log.debug("end permissionPostControl, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
@@ -264,6 +273,10 @@ public class PermissionManageController extends BaseController {
         String tableName = permissionHandle.getTableName();
         // validate address
         Address convertAddress = AddressUtils.convertAddress(address);
+        if(permissionHandle.getUseAes() == null){
+            permissionHandle.setUseAes(false);
+        }
+        Boolean useAes = permissionHandle.getUseAes();
         if(!convertAddress.isValid()){
             return ConstantCode.PARAM_ADDRESS_IS_INVALID;
         }
@@ -271,26 +284,26 @@ public class PermissionManageController extends BaseController {
         switch (permissionType) {
             case PrecompiledUtils
                     .PERMISSION_TYPE_PERMISSION:
-                return revokePermissionManager(groupId, from, address);
+                return revokePermissionManager(groupId, from, address, useAes);
             case PrecompiledUtils
                     .PERMISSION_TYPE_DEPLOY_AND_CREATE:
-                return revokeDeployAndCreateManager(groupId, from, address);
+                return revokeDeployAndCreateManager(groupId, from, address, useAes);
             case PrecompiledUtils
                     .PERMISSION_TYPE_USERTABLE:
                 if(tableName.isEmpty()){
                     return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
                 }else {
-                    return revokeUserTableManager(groupId, from, tableName, address);
+                    return revokeUserTableManager(groupId, from, tableName, address, useAes);
                 }
             case PrecompiledUtils
                     .PERMISSION_TYPE_NODE:
-                return revokeNodeManager(groupId, from, address);
+                return revokeNodeManager(groupId, from, address, useAes);
             case PrecompiledUtils
                     .PERMISSION_TYPE_SYS_CONFIG:
-                return revokeSysConfigManager(groupId, from, address);
+                return revokeSysConfigManager(groupId, from, address, useAes);
             case PrecompiledUtils
                     .PERMISSION_TYPE_CNS:
-                return revokeCNSManager(groupId, from, address);
+                return revokeCNSManager(groupId, from, address, useAes);
             default:
                 log.debug("end permissionDeleteControl, permission type not exists");
                 return ConstantCode.PARAM_FAIL_PERMISSION_TYPE_NOT_EXIST;
@@ -300,21 +313,22 @@ public class PermissionManageController extends BaseController {
     /**
      * Permission manager, the admin to manage all types of admins
      */
-    public Object grantPermissionManager(int groupId, String from, String address) throws Exception {
+    public Object grantPermissionManager(int groupId, String from, String address
+            , Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start grantPermissionManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res = permissionManageService.grantPermissionManager(groupId, from, address);
+        String res = permissionManageService.grantPermissionManager(groupId, from, address, useAes);
         log.info("end grantPermissionManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
     }
 
-    public Object revokePermissionManager(int groupId, String from, String address) throws Exception {
+    public Object revokePermissionManager(int groupId, String from, String address, Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start revokePermissionManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res = permissionManageService.revokePermissionManager(groupId, from, address);
+        String res = permissionManageService.revokePermissionManager(groupId, from, address, useAes);
         log.info("end revokePermissionManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
@@ -340,21 +354,23 @@ public class PermissionManageController extends BaseController {
     /**
      * manage DeployAndCreateManager related
      */
-    public Object grantDeployAndCreateManager(int groupId, String from, String address) throws Exception {
+    public Object grantDeployAndCreateManager(int groupId, String from, String address,
+                                              Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start grantDeployAndCreateManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res = permissionManageService.grantDeployAndCreateManager(groupId, from, address);
+        String res = permissionManageService.grantDeployAndCreateManager(groupId, from, address, useAes);
         log.info("end grantDeployAndCreateManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
     }
 
-    public Object revokeDeployAndCreateManager(int groupId, String from, String address) throws Exception {
+    public Object revokeDeployAndCreateManager(int groupId, String from, String address,
+                                               Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start revokeDeployAndCreateManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res =  permissionManageService.revokeDeployAndCreateManager(groupId, from, address);
+        String res =  permissionManageService.revokeDeployAndCreateManager(groupId, from, address, useAes);
         log.info("end revokeDeployAndCreateManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
@@ -379,7 +395,8 @@ public class PermissionManageController extends BaseController {
      * manage UserTableManager
      * admin that manage who can use CRUD in spectacular table on chain
      */
-    public Object grantUserTableManager(int groupId, String from, String tableName, String address) throws Exception {
+    public Object grantUserTableManager(int groupId, String from, String tableName,
+                                        String address, Boolean useAes) throws Exception {
         if(Objects.isNull(tableName)){
             log.error("grantUserTableManager error for table name is empty");
             return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
@@ -388,7 +405,8 @@ public class PermissionManageController extends BaseController {
             log.info("start grantUserTableManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                     startTime.toEpochMilli(), groupId, from, address);
             try{
-                Object res = permissionManageService.grantUserTableManager(groupId, from, tableName, address);
+                Object res = permissionManageService
+                        .grantUserTableManager(groupId, from, tableName, address, useAes);
                 log.info("end grantUserTableManager useTime:{} res:{}",
                         Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
                 return res;
@@ -400,7 +418,8 @@ public class PermissionManageController extends BaseController {
         }
     }
 
-    public Object revokeUserTableManager(int groupId, String from, String tableName, String address) throws Exception {
+    public Object revokeUserTableManager(int groupId, String from, String tableName,
+                                         String address, Boolean useAes) throws Exception {
         if(Objects.isNull(tableName)){
             log.error("revokeUserTableManager error for table name is empty");
             return ConstantCode.PARAM_FAIL_TABLE_NAME_IS_EMPTY;
@@ -409,7 +428,8 @@ public class PermissionManageController extends BaseController {
             log.info("start revokeUserTableManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                     startTime.toEpochMilli(), groupId, from, address);
             try {
-                Object res = permissionManageService.revokeUserTableManager(groupId, from, tableName, address);
+                Object res = permissionManageService
+                        .revokeUserTableManager(groupId, from, tableName, address, useAes);
                 log.info("end revokeUserTableManager useTime:{} res:{}",
                         Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
                 return res;
@@ -446,21 +466,22 @@ public class PermissionManageController extends BaseController {
     /**
      * node consensus admin  manage
      */
-    public Object grantNodeManager(int groupId, String from, String address) throws Exception {
+    public Object grantNodeManager(int groupId, String from, String address,
+                                   Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start grantNodeManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res = permissionManageService.grantNodeManager(groupId, from, address);
+        String res = permissionManageService.grantNodeManager(groupId, from, address, useAes);
         log.info("end grantNodeManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
     }
 
-    public Object revokeNodeManager(int groupId, String from, String address) throws Exception {
+    public Object revokeNodeManager(int groupId, String from, String address, Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start revokeNodeManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res = permissionManageService.revokeNodeManager(groupId, from, address);
+        String res = permissionManageService.revokeNodeManager(groupId, from, address, useAes);
         log.info("end revokeNodeManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
@@ -487,21 +508,23 @@ public class PermissionManageController extends BaseController {
      * manage system config Manager related
      * admin who manage gas limit per tx and transaction limit per block
      */
-    public Object grantSysConfigManager(int groupId, String from, String address) throws Exception {
+    public Object grantSysConfigManager(int groupId, String from, String address,
+                                        Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start grantSysConfigManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res = permissionManageService.grantSysConfigManager(groupId, from, address);
+        String res = permissionManageService.grantSysConfigManager(groupId, from, address, useAes);
         log.info("end grantSysConfigManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
     }
 
-    public Object revokeSysConfigManager(int groupId, String from, String address) throws Exception {
+    public Object revokeSysConfigManager(int groupId, String from, String address,
+                                         Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start revokeSysConfigManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res = permissionManageService.revokeSysConfigManager(groupId, from, address);
+        String res = permissionManageService.revokeSysConfigManager(groupId, from, address, useAes);
         log.info("end revokeSysConfigManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
@@ -528,21 +551,23 @@ public class PermissionManageController extends BaseController {
      *  cns admin
      */
 
-    public Object grantCNSManager(int groupId, String from, String address) throws Exception {
+    public Object grantCNSManager(int groupId, String from, String address,
+                                  Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start grantCNSManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res = permissionManageService.grantCNSManager(groupId, from, address);
+        String res = permissionManageService.grantCNSManager(groupId, from, address, useAes);
         log.info("end grantCNSManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;
     }
 
-    public Object revokeCNSManager(int groupId, String from, String address) throws Exception {
+    public Object revokeCNSManager(int groupId, String from, String address,
+                                   Boolean useAes) throws Exception {
         Instant startTime = Instant.now();
         log.info("start revokeCNSManager.  startTime:{}, groupId:{}, fromAddress:{}, address:{}",
                 startTime.toEpochMilli(), groupId, from, address);
-        String res = permissionManageService.revokeCNSManager(groupId, from, address);
+        String res = permissionManageService.revokeCNSManager(groupId, from, address, useAes);
         log.info("end revokeCNSManager useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
         return res;}

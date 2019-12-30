@@ -26,5 +26,6 @@ public class RspContractCompile {
     private String contractName;
     private String contractAbi;
     private String contractBin;
+    private String errors;
 
 }

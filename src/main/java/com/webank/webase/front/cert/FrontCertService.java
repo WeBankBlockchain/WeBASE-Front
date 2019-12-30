@@ -20,6 +20,7 @@ import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,11 @@ import java.util.List;
 /**
  * 1. get Front's sdk's certs(.crt) in /resource
  * 2. get ca.crt/node.crt of the node which linked with Front
+ *
+ * guomi chain use double cert mechanism including:
+ * 1. sign cert(gmca.crt, gmnode.crt, gmnode.key),
+ * 2. encrypt cert(gmennode.crt, gmennode.key
+ * 3. as well as original cert for sdk's TLS, same as standard chain
  */
 @Slf4j
 @Service
@@ -42,6 +48,15 @@ public class FrontCertService {
     private static final String crtContentTail = "-----END CERTIFICATE-----\n";
     private static final String nodeCrtPath = "/conf/node.crt";
     private static final String caCrtPath = "/conf/ca.crt";
+    // 国密双证书模式
+    // 国密证书
+    private static final String gmNodeCrtPath = "/conf/gmnode.crt";
+    private static final String gmCaCrtPath = "/conf/gmca.crt";
+    // 国密加密证书
+    private static final String gmEncryptCrtPath = "/conf/gmennode.crt";
+
+    private static final String frontSdkCaCrt = "ca.crt";
+    private static final String frontSdkNodeCrt = "node.crt";
 
     @Autowired
     Constants constants;
@@ -50,13 +65,16 @@ public class FrontCertService {
      * 则获取 ${path}/conf 中的ca.crt, node.crt
      * 无需填agency.crt的读取，因为node.crt会包含node和agency的证书
      * @return List<String> 或者 String
+     * 2019/12: support guomi: add encrypt node cert in resultList
      */
     // 0 is node ca, 1 is agency ca
     public List<String> getNodeCerts() {
         List<String> resList = new ArrayList<>();
         String nodePath = constants.getNodePath();
         log.debug("start getNodeCerts in {}" + nodePath);
-        getCertList(nodePath, CertTypes.NODE.getValue(), resList);
+        getCertListByPathAndType(nodePath, CertTypes.NODE.getValue(), resList);
+        // gm cert added to resList
+        getCertListByPathAndType(nodePath, CertTypes.OTHERS.getValue(), resList);
         log.debug("end getNodeCerts in {}" + nodePath);
         return resList;
     }
@@ -66,7 +84,7 @@ public class FrontCertService {
         List<String> resList = new ArrayList<>();
         String nodePath = constants.getNodePath();
         log.debug("start getChainCert in {}" + nodePath);
-        getCertList(nodePath, CertTypes.CHAIN.getValue(), resList);
+        getCertListByPathAndType(nodePath, CertTypes.CHAIN.getValue(), resList);
         log.debug("end getChainCert in {}" + nodePath);
         return resList.get(0);
     }
@@ -75,34 +93,13 @@ public class FrontCertService {
      * get Cert from crt file through nodePath and certType
      * @param nodePath
      * @param certType
-     * @param resultList
+     * @param targetList
      */
-    private void getCertList(String nodePath, int certType, List<String> resultList) {
+    private void getCertListByPathAndType(String nodePath, int certType, List<String> targetList) {
         log.debug("start tools: getCertList in nodePath:{},certType:{}", nodePath, certType);
-
         Path certPath = getCertPath(nodePath, certType);
-        try(InputStream nodeCrtInput = Files.newInputStream(certPath)){
-            String nodeCrtStr = inputStream2String(nodeCrtInput);
-            String[] nodeCrtStrArray = nodeCrtStr.split(crtContentHead);
-            for(String nodeCrtStrNoHead: nodeCrtStrArray) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
-                String[] nodeCrtStrArray2 = nodeCrtStrNoHead.split(crtContentTail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
-                for(String nodeCrtStrNoTail: nodeCrtStrArray2) {
-                    // 去头尾的ca证书内容
-                    String ca = nodeCrtStrNoTail;
-                    if(ca.length() != 0) {
-                        resultList.add(formatStr(ca));
-                        log.debug("tools: getCertList add one:{}", formatStr(ca));
-                    }
-                }
-            }
-            log.debug("end tools: getCertList resultList:{}", resultList);
-
-        }catch (IOException e) {
-            log.error("FrontCertService getCertList, cert(.crt) path prefix error, Exception:[]", e);
-            throw (FrontException)new FrontException("FileNotFound, cert(.crt) path error").initCause(e);
-        }
+        loadCrtContentByPath(certPath, targetList);
     }
-
 
     /**
      * get SDK crts in directory ~/resource/
@@ -113,7 +110,20 @@ public class FrontCertService {
     public List<String> getSDKNodeCert() {
         List<String> sdkCertStrList = new ArrayList<>();
         log.debug("start getSDKNodeCerts.");
-        try(InputStream nodeCrtInput = new ClassPathResource("node.crt").getInputStream()){
+        // add sdk cert: node.crt
+        loadCrtContentByStringPath(frontSdkNodeCrt, sdkCertStrList);
+        loadCrtContentByStringPath(frontSdkCaCrt, sdkCertStrList);
+        log.debug("end getSDKNodeCerts sdkCertStrt []" + sdkCertStrList);
+        return sdkCertStrList;
+    }
+
+    /**
+     * get crt file content in dir(String)
+     * @param certPath
+     * @param targetList
+     */
+    private void loadCrtContentByPath(Path certPath, List<String> targetList) {
+        try(InputStream nodeCrtInput = Files.newInputStream(certPath)){
             String nodeCrtStr = inputStream2String(nodeCrtInput);
             String[] nodeCrtStrArray = nodeCrtStr.split(crtContentHead);
             for(String nodeCrtStrNoHead: nodeCrtStrArray) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
@@ -122,22 +132,47 @@ public class FrontCertService {
                     // 去头尾的ca证书内容
                     String ca = nodeCrtStrNoTail;
                     if(ca.length() != 0) {
-                        sdkCertStrList.add(formatStr(ca));
+                        targetList.add(formatStr(ca));
+                        log.debug("tools: loadCrtContentByPath add one:{}", formatStr(ca));
                     }
                 }
             }
+            log.debug("end tools: loadCrtContentByPath resultList:{}", targetList);
+        }catch (IOException e) {
+            log.error("FrontCertService loadCrtContentByPath, cert(.crt) path prefix error, Exception:[]", e);
+            throw (FrontException)new FrontException("FileNotFound, cert(.crt) path error").initCause(e);
+        }
+    }
+
+    /**
+     * get crt file content in dir: /resource
+     * @param crtFilePath
+     * @return
+     */
+    public void loadCrtContentByStringPath(String crtFilePath, List<String> targetList) {
+        try(InputStream nodeCrtInput = new ClassPathResource(crtFilePath).getInputStream()){
+            String nodeCrtStr = inputStream2String(nodeCrtInput);
+            String[] nodeCrtStrArray = nodeCrtStr.split(crtContentHead);
+            for(String nodeCrtStrNoHead: nodeCrtStrArray) { //i=0时为空，跳过，i=1时进入第二次spilt，去除tail
+                String[] nodeCrtStrArray2 = nodeCrtStrNoHead.split(crtContentTail); // i=1时，j=0是string, 因为\n去除了换行符，不包含j=1的情况
+                for(String nodeCrtStrNoTail: nodeCrtStrArray2) {
+                    // 去头尾的ca证书内容
+                    String ca = nodeCrtStrNoTail;
+                    if(ca.length() != 0) {
+                        targetList.add(formatStr(ca));
+                        log.debug("tools: loadCrtContentByPath add one:{}", formatStr(ca));
+                    }
+                }
+            }
+            log.debug("end tools: loadCrtContentByPath resultList:{}", targetList);
         }catch (IOException e) {
             log.error("FrontCertService getCertList, cert(.crt) path prefix error, Exception:[]", e);
             throw (FrontException)new FrontException("FileNotFound, cert(.crt) path error").initCause(e);
         }
-        log.debug("end getSDKNodeCerts sdkCertStrt {}" + sdkCertStrList);
-        return sdkCertStrList;
     }
 
-
     public String inputStream2String(InputStream inputStream) throws IOException {
-        String str = IOUtils.toString(inputStream,"UTF-8");
-        return str;
+        return IOUtils.toString(inputStream,"UTF-8");
     }
 
     /**
@@ -145,14 +180,31 @@ public class FrontCertService {
      * @param nodePath
      * @param certType
      * @return
+     * 2019/12 support guomi
      */
     public Path getCertPath(String nodePath, int certType) {
-        if(certType == CertTypes.CHAIN.getValue()) {
+        if (certType == CertTypes.CHAIN.getValue()) {
+            if (EncryptType.encryptType == 1){
+                return Paths.get(nodePath.concat(gmCaCrtPath));
+            }
             return Paths.get(nodePath.concat(caCrtPath));
-        }else if(certType == CertTypes.NODE.getValue()) {
+        } else if (certType == CertTypes.NODE.getValue()) {
+            if (EncryptType.encryptType == 1){
+                return Paths.get(nodePath.concat(gmNodeCrtPath));
+            }
             return Paths.get(nodePath.concat(nodeCrtPath));
+        } else if(certType == CertTypes.OTHERS.getValue()){
+            return getEncrytCertPath(nodePath);
         }
         return null;
+    }
+
+    public Path getEncrytCertPath(String nodePath) {
+        if (EncryptType.encryptType == 1){
+            return Paths.get(nodePath.concat(gmEncryptCrtPath));
+        } else {
+            return null;
+        }
     }
 
     // remove the last character: "\n"
