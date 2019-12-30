@@ -28,4 +28,6 @@ public class CrudHandle {
     @NotBlank(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String fromAddress;
     private String sql;
+    // 向后兼容 默认useAes为false
+    private Boolean useAes;
 }

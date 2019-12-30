@@ -385,6 +385,15 @@ export function queryImportPrivateKey(data){
         params: data
     })
 }
+//import pem privateKey 
+export function ImportPemPrivateKey(data){
+    return post({
+        url: `${HANDLE}privateKey/importPem`,
+        method: 'post',
+        data: data,
+    })
+}
+
 // localKeyStores
 export function queryLocalKeyStores() {
     return get({
@@ -599,5 +608,21 @@ export function postPerformanceSwitch(data) {
         headers: {
             Authorization: "Token " + localStorage.getItem("token") || ""
         }
+    })
+}
+
+/* Background compilation*/
+export function backgroundCompile(data){
+    return post({
+        url: `${HANDLE}contract/contractCompile `,
+        method: 'post',
+        data: data
+    })
+}
+export function encryption() {
+    return get({
+        url: `${HANDLE}encrypt`,
+        method: 'get',
+        responseType: 'text'
     })
 }
