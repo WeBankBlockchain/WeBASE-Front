@@ -44,9 +44,8 @@ public class PrecompiledSysConfigService {
     private KeyStoreService keyStoreService;
 
     // 根据前台传的user address获取私钥
-    private Credentials getCredentials(String fromAddress) throws Exception {
-        // TODO controller 默认值false，非必填向后兼容
-        return keyStoreService.getCredentials(fromAddress, false);
+    private Credentials getCredentials(String fromAddress, Boolean useAes) throws Exception {
+        return keyStoreService.getCredentials(fromAddress, useAes);
     }
 
     /**
@@ -59,7 +58,7 @@ public class PrecompiledSysConfigService {
         String fromAddress = systemConfigHandle.getFromAddress();
         String key = systemConfigHandle.getConfigKey();
         String value = systemConfigHandle.getConfigValue();
-
+        Boolean useAes = systemConfigHandle.getUseAes();
 
         // check system value
         if(PrecompiledUtils.TxGasLimit.equals(key)) {
@@ -68,7 +67,7 @@ public class PrecompiledSysConfigService {
             }
         }
         SystemConfigService systemConfigService = new SystemConfigService(
-                web3jMap.get(groupId), getCredentials(fromAddress));
+                web3jMap.get(groupId), getCredentials(fromAddress, useAes));
 
         // @param result {"code":0,"msg":"success"}
         String result = systemConfigService.setValueByKey(key, value);
