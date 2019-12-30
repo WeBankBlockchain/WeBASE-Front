@@ -17,6 +17,8 @@
 package com.webank.webase.front.keystore;
 
 import org.fisco.bcos.channel.client.PEMManager;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -24,6 +26,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
@@ -55,4 +58,19 @@ public class KeyStoreServiceTest {
         System.out.println(pemManager.getPrivateKey());
         System.out.println(Numeric.toHexString(pemManager.getPrivateKey().getEncoded()));
     }
+
+    @Test
+    public void loadPrivateKeyTest() throws Exception {
+        String privateKey = "71f1479d9051e8d6b141a3b3ef9c01a7756da823a0af280c6bf62d18ee0cc978";
+        Credentials credentials = GenCredential.create(privateKey);
+        // private key 实例
+        BigInteger privateKeyInstance = credentials.getEcKeyPair().getPrivateKey();
+        System.out.println(Numeric.toHexStringNoPrefix(privateKeyInstance));
+        // public key 实例
+        BigInteger publicKeyInstance = credentials.getEcKeyPair().getPublicKey();
+        System.out.println(Numeric.toHexString(publicKeyInstance.toByteArray()));
+        String address = credentials.getAddress();
+        System.out.println(address);
+    }
+
 }
