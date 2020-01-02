@@ -4,11 +4,13 @@ v1.2.2 (2020-01-02)
 - 支持国密（sm2, sm3, 合约编译）
 - 私钥管理支持导入pem私钥
 - 合约接口支持传入`abi`进行合约调用
+- 新增`/encrypt`接口判断是否国密
 
 **Fix**
 - bugfix：precompiled api加入`useAes`字段，默认为false
 - 优化：KeystoreService分离getCredentials方法
 - 优化：web3sdk升级至v2.2.0
+- bugifx: 修复start.sh启动时间过长的问题
 
 **兼容性**
 - 支持FISCO-BCOS v2.0.0-rc1 版本
