@@ -3,7 +3,7 @@ v1.2.2 (2020-01-02)
 **Add**
 - 支持国密（sm2, sm3, 合约编译）
 - 私钥管理支持导入pem私钥
-- Web页面支持中英文切换
+- 合约接口支持传入`abi`进行合约调用
 
 **Fix**
 - bugfix：precompiled api加入`useAes`字段，默认为false
