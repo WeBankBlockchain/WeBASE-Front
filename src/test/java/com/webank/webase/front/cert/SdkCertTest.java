@@ -33,6 +33,7 @@ public class SdkCertTest {
     @Autowired
     FrontCertService frontCertService;
 
+
     @Test
     public void testSdkCertService() {
         List<String> sdkList = frontCertService.getSDKNodeCert();
@@ -40,5 +41,18 @@ public class SdkCertTest {
         sdkList.stream().forEach(c -> System.out.println(c));
     }
 
+    @Test
+    public void testChainCertService() {
+        String sdkList = frontCertService.getChainCert();
+        System.out.println(sdkList);
+        Assert.notNull(sdkList, "load sdk crt error");
+    }
+
+    @Test
+    public void testNodeCertsService() {
+        List<String> sdkList = frontCertService.getNodeCerts();
+        Assert.notNull(sdkList, "load sdk crt error");
+        sdkList.stream().forEach(c -> System.out.println(c));
+    }
 
 }
