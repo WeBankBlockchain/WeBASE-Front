@@ -1,3 +1,28 @@
+v1.2.2 (2020-01-02)
+
+**Add**
+- 支持国密（sm2, sm3, 合约编译）
+- 私钥管理支持导入pem私钥
+- Web页面支持中英文切换
+
+**Fix**
+- bugfix：precompiled api加入`useAes`字段，默认为false
+- 优化：KeystoreService分离getCredentials方法
+- 优化：web3sdk升级至v2.2.0
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 及以上版本
+- WeBASE-Web v1.2.2
+- WeBASE-Node-Manager v1.2.2
+- WeBASE-Sign v1.2.2
+- WeBASE-Transaction v1.2.2
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 v1.2.1 (2019-11-22)
 
 **Add**
@@ -42,7 +67,7 @@ v1.2.0 (2019-10-29)
 
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
 
-v1.1.0 (2019-09-9)
+v1.1.0 (2019-09-09)
 
 **Fix**
 - 植入默认的Asset合约和存证合约
