@@ -11,6 +11,7 @@
 - 优化：KeystoreService分离getCredentials方法
 - 优化：web3sdk升级至v2.2.0
 - bugifx: 修复start.sh启动时间过长的问题
+- bugfix：CommonUtils的`SignatureData`序列化支持国密
 
 **兼容性**
 - 支持FISCO-BCOS v2.0.0-rc1 版本
