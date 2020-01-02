@@ -83,6 +83,7 @@ export default {
         contractAbi: '合约abi',
         contractBin: '合约bin',
         createdTime: '创建时间',
+        importPem: "导入pem私钥"
     },
     errorLog: {
         tips: '请点击右上角bug小图标',
@@ -233,6 +234,9 @@ export default {
         toggleFailed: '切换失败',
         toggleOpen: '打开',
         toggleDown: '关闭',
-        privateKeyManagementInfo: "支持导出私钥，可以将私钥导出到本地"
+        privateKeyManagementInfo: "支持导出私钥，可以将私钥导出到本地",
+        fileName: "私钥用户名",
+        importFile: "导入文件",
+        pemName: "pem 文件名称"
     }
 }
