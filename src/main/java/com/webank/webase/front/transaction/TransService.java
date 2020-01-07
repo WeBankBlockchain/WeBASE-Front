@@ -336,7 +336,7 @@ public class TransService {
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setUserId(userId);
             encodeInfo.setEncodedDataStr(encodedDataStr);
-            String signDataStr = keyStoreService.getSignDate(encodeInfo);
+            String signDataStr = keyStoreService.getSignData(encodeInfo);
             if (StringUtils.isBlank(signDataStr)) {
                 log.warn("deploySend get sign data error.");
                 return null;
@@ -357,7 +357,7 @@ public class TransService {
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setUserId(userId);
             encodeInfo.setEncodedDataStr(encodedDataStr);
-            String signDataStr = keyStoreService.getSignDate(encodeInfo);
+            String signDataStr = keyStoreService.getSignData(encodeInfo);
             if (StringUtils.isBlank(signDataStr)) {
                 log.warn("deploySend get sign data error.");
                 return null;
