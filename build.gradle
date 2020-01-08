@@ -23,7 +23,7 @@ repositories {
 
 }
 
-def spring_version="4.3.16.RELEASE"
+def spring_version="4.3.25.RELEASE"
 List spring =[ 
 	"org.springframework:spring-core:$spring_version", 
 	"org.springframework:spring-beans:$spring_version", 
@@ -52,26 +52,35 @@ List swagger = [
 
 def log4j_version="2.9.0"
 List logger = [
-        "org.apache.logging.log4j:log4j-api:$log4j_version",
-        "org.apache.logging.log4j:log4j-core:$log4j_version",
-        "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
-        "org.apache.logging.log4j:log4j-web:$log4j_version",
-        "org.slf4j:jcl-over-slf4j:1.7.12"
+	"org.apache.logging.log4j:log4j-api:$log4j_version",
+	"org.apache.logging.log4j:log4j-core:$log4j_version",
+	"org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
+	"org.apache.logging.log4j:log4j-web:$log4j_version",
+	"org.slf4j:jcl-over-slf4j:1.7.12"
 ]
 
+List jaxb = [
+     "javax.xml.bind:jaxb-api:2.3.0",
+     "com.sun.xml.bind:jaxb-impl:2.3.0",
+     "com.sun.xml.bind:jaxb-core:2.3.0",
+     "javax.activation:activation:1.1.1"
+]
 
 dependencies {
-    compile spring,spring_boot,swagger,logger
-
-	compile 'org.fisco-bcos:web3sdk:2.0.5'
+    compile spring,spring_boot,swagger,logger,jaxb
+	// guomi contract compile: USE 'socJ-all-0.4.25-gm' to REPLACE 'ethereum:solcJ-all'
+	compile ('org.fisco-bcos:web3sdk:2.2.0')
+//        {
+//            exclude group:"org.ethereum"
+//        }
+//    compile fileTree(dir:'lib',includes:['solcJ-all-0.4.25-gm.jar'])
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8'
-//	compile "org.fisco-bcos:web3sdk:2.0.0-SNAPSHOT"
-//	compile group:"org.fisco-bcos", name:"web3sdk", version:"2.0.0-SNAPSHOT", changing: true
-	compile 'com.alibaba:fastjson:1.2.58'
+	compile 'com.alibaba:fastjson:1.2.60'
 	compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
 	compile 'org.projectlombok:lombok:1.18.2'
+	compile 'com.github.jsqlparser:jsqlparser:2.0'
 
 	testCompile 'junit:junit:4.12',
 				'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',

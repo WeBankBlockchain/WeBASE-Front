@@ -1,9 +1,9 @@
-#webase开发文档
+# webase开发文档
 
 
 ## 1、开发环境搭建
 
-###1.1 依赖环境
+### 1.1 依赖环境
 
 | 环境     | 版本              |
 | ------   | ---------------  |
@@ -13,7 +13,7 @@ nodejs下载地址：https://nodejs.org/en/download/
 
 ### 1.2 安装依赖包
 
-####1.2.1 拉取代码
+#### 1.2.1 拉取代码
 
 > 执行命令：
 
@@ -42,7 +42,7 @@ nodejs下载地址：https://nodejs.org/en/download/
    	var Module = module.constructor;
 
 
-###1.3 启动项目
+### 1.3 启动项目
 
 > 在项目根目录使用命令：
 
@@ -69,7 +69,7 @@ nodejs下载地址：https://nodejs.org/en/download/
             assetsPublicPath: '/',
             proxyTable: {
             '/mgr':{
-                target:'http://10.0.0.1:8080/',  //在此修改跨域地址，这里是node_mgr服务ip和端口，且可以访问
+                target:'http://127.0.0.1:8080/',  //在此修改跨域地址，这里是node_mgr服务ip和端口，且可以访问
                 changeOrigin:true,
                 pathRewrite:{
                     '^/mgr':''
@@ -79,7 +79,7 @@ nodejs下载地址：https://nodejs.org/en/download/
         },
 
 
-###1.4 模拟数据
+### 1.4 模拟数据
 
 模拟数据在mock.js中，在开发联调前使用，使用中注意mock.js的url和axios请求的url要保持一致。`包括get拼接在url上面的参数`
 
@@ -120,7 +120,7 @@ nodejs下载地址：https://nodejs.org/en/download/
 
 ## 2、项目打包部署
 
-###2.1 项目打包
+### 2.1 项目打包
 
 > 切换到项目根目录，执行命令：
 
@@ -128,6 +128,6 @@ nodejs下载地址：https://nodejs.org/en/download/
 
 > 进行打包，生成打包文件dist，在项目根目录下。
 
-###2.2 部署
+### 2.2 部署
 
 请参考部署文档

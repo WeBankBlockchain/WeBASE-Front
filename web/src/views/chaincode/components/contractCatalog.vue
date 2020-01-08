@@ -24,7 +24,7 @@
             </el-tooltip>
             <el-tooltip class="item" effect="dark" :content="$t('title.upload')" placement="top-start">
                 <i class="wbs-icon-shangchuan contract-icon" style="position:relative;">
-                    <input type="file" id="file" ref='file' name="chaincodes" class="uploads" @change="upload($event)" />
+                    <input multiple type="file" id="file" ref='file' name="chaincodes" class="uploads" @change="upload($event)" />
                 </i>
             </el-tooltip>
 
@@ -52,7 +52,7 @@
                         <i :class="item.folderIcon" @click='open(item)' v-if="!item.renameShow" :id='item.folderId' class="cursor-pointer font-16 no-chase"></i>
                         <i class="wbs-icon-folder cursor-pointer no-chase" @click='open(item)' @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
-                        <div class="contract-menu-handle" v-if=' item.handleModel' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
+                        <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
                                 <li class="contract-menu-handle-list" @click="addFiles">{{$t('dialog.newFile')}}</li>
                                 <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
@@ -69,7 +69,7 @@
 
                                 <el-input v-model="contractName" autofocus='autofocus' maxlength="32" @blur="changeName(list)" v-if="list.renameShow"></el-input>
                                 <div class="contract-menu-handle" v-if='list.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX - 35}px`}" v-Clickoutside="checkNull">
-                                    <ul v-if="contractFile">
+                                    <ul v-if="contractFile&&item.contractName!=='template'">
                                         <li class="contract-menu-handle-list" @click="rename">重命名</li>
                                         <li class="contract-menu-handle-list" @click="deleteFile(list)">删除</li>
                                     </ul>
@@ -99,7 +99,7 @@ export default {
         "add-file": addFile,
         "select-catalog": selectCatalog
     },
-    data: function () {
+    data() {
         return {
             foldershow: false,
             fileshow: false,
@@ -120,17 +120,18 @@ export default {
             handleModel: false,
             folderId: null,
             modifyState: false,
-            modifyParam: {}
+            modifyParam: {},
+            uploadFiles: []
         };
     },
-    beforeDestroy: function () {
+    beforeDestroy() {
         Bus.$off("compile");
         Bus.$off("deploy");
         Bus.$off("open");
         Bus.$off("save");
         Bus.$off("modifyState");
     },
-    mounted: function () {
+    mounted() {
         this.$nextTick(function () {
             this.getContracts();
         });
@@ -168,7 +169,7 @@ export default {
     directives: {
         Clickoutside,
         focus: {
-            update: function (el, { value }) {
+            update(el, { value }) {
                 if (value) {
                     el.focus();
                 }
@@ -176,7 +177,7 @@ export default {
         }
     },
     methods: {
-        checkNull: function (list) {
+        checkNull(list) {
             this.contractArry.forEach(value => {
                 value.handleModel = false;
                 if (value.contractType == 'folder') {
@@ -190,7 +191,7 @@ export default {
             this.contractFolder = false;
             this.handleModel = false;
         },
-        handle: function (e, list) {
+        handle(e, list) {
             this.checkNull()
             list.handleModel = true
             if (e.clientX > 201) {
@@ -229,7 +230,7 @@ export default {
                 this.handleModel = false;
             }
         },
-        rename: function (val) {
+        rename(val) {
             this.contractArry.forEach(value => {
                 value.handleModel = false;
                 if (value.contractType == 'folder') {
@@ -270,7 +271,7 @@ export default {
             this.contractFolder = false;
             this.handleModel = false;
         },
-        changeName: function (val) {
+        changeName(val) {
             let pattern = /^[A-Za-z0-9_]+$/;
             if (pattern.test(this.contractName) && this.contractName.length < 32 && this.contractName.length > 1) {
                 if (this.contractName !== val.contractName) {
@@ -302,15 +303,15 @@ export default {
                 this.$set(val, "renameShow", false);
             }
         },
-        addFolder: function () {
+        addFolder() {
             this.checkNull();
             this.foldershow = true;
         },
-        addFile: function () {
+        addFile() {
             this.checkNull();
             this.fileshow = true;
         },
-        addFiles: function () {
+        addFiles() {
             this.fileshow = true;
             this.folderId = this.ID;
             this.ID = "";
@@ -318,86 +319,91 @@ export default {
             this.contractFolder = false;
             this.handleModel = false;
         },
-        upload: function (e) {
+        upload(e) {
             this.checkNull();
             if (!e.target.files.length) {
                 return;
             }
-            this.filename = "";
-            this.fileString = "";
-            let files = e.target.files[0];
-            let filessize = Math.ceil(files.size / 1024);
-            let filetype = files.name.split(".")[1];
-            if (filessize > 400) {
-                this.$message({
-                    message: this.$t('text.fileExceeds'),
-                    type: "error"
-                });
-            } else if (filetype !== "sol") {
-                this.$message({
-                    message: this.$t('text.uploadSol'),
-                    type: "error"
-                });
-            } else {
-                this.filename = files.name.split(".")[0];
-                this.file = files.name;
+            this.uploadFiles = e.target.files;
+
+            for (let i = 0; i < this.uploadFiles.length; i++) {
+                let filessize = Math.ceil(this.uploadFiles[i].size / 1024);
+                let filetype = this.uploadFiles[i].name.split(".")[1];
+                if (filessize > 400) {
+                    this.$message({
+                        message: this.$t('text.fileExceeds'),
+                        type: "error"
+                    });
+                    this.cataLogShow = false
+                    break;
+                } else if (filetype !== "sol") {
+                    this.$message({
+                        message: this.$t('text.uploadSol'),
+                        type: "error"
+                    });
+                    this.cataLogShow = false
+                    break;
+                } else {
+                    this.cataLogShow = true
+                }
+            }
+        },
+        catalogSuccess(val) {
+            for (let i = 0; i < this.uploadFiles.length; i++) {
                 let reader = new FileReader(); //新建一个FileReader
-                reader.readAsText(files, "UTF-8"); //读取文件
-                let _this = this;
-                reader.onload = function (evt) {
-                    _this.fileString = Base64.encode(evt.target.result); // 读取文件内容
-                    if (_this.fileString) {
-                        _this.cataLogShow = true;
+                reader.readAsText(this.uploadFiles[i], "UTF-8"); //读取文件
+                let filename = "", _this = this;
+                filename = this.uploadFiles[i].name.split(".")[0];
+                let num = 0;
+                this.contractList.forEach(value => {
+                    if (value.contractName == filename && value.contractPath == val && num === 0) {
+                        this.$message({
+                            type: "error",
+                            message: this.$t('text.contractSameDirectory')
+                        });
+                        num++;
                     }
-                };
+                });
+                if (!num) {
+                    reader.onload = function (evt) {
+                        var fileString = "";
+                        fileString = Base64.encode(evt.target.result); // 读取文件内容
+                        let data = {
+                            contractName: filename,
+                            contractSource: fileString,
+                            contractPath: val,
+                            contractType: "file",
+                            contractActive: false,
+                            contractstatus: 0,
+                            contractAbi: "",
+                            contractBin: "",
+                            contractAddress: "",
+                            contractVersion: "",
+                            contractNo: new Date().getTime()
+                        };
+                        _this.saveContract(data);
+                    };
+                }
             }
             this.$refs.file.value = "";
-        },
-        catalogSuccess: function (val) {
-            let num = 0;
-            this.contractList.forEach(value => {
-                if (value.contractName == this.filename && value.contractPath == val) {
-                    this.$message({
-                        type: "error",
-                        message: this.$t('text.contractSameDirectory')
-                    });
-                    num++;
-                }
-            });
-            if (!num) {
-                let data = {
-                    contractName: this.filename,
-                    contractSource: this.fileString,
-                    contractPath: val,
-                    contractType: "file",
-                    contractActive: false,
-                    contractstatus: 0,
-                    contractAbi: "",
-                    contractBin: "",
-                    contractAddress: "",
-                    contractVersion: "",
-                    contractNo: new Date().getTime()
-                };
-                this.saveContract(data);
-            }
             this.catalogClose();
         },
-        catalogClose: function () {
+        catalogClose() {
             this.cataLogShow = false;
         },
-        folderClose: function () {
+        folderClose() {
             this.foldershow = false;
         },
-        folderSuccess: function () {
+        folderSuccess() {
             this.folderClose();
             this.getContractArry();
         },
-        fileClose: function () {
+        fileClose() {
             this.fileshow = false;
             this.folderId = "";
             this.ID = "";
         },
-        getContractArry: function (val) {
+        getContractArry(val) {
             let result = [];
             let list = [];
             let folderArry = this.createFolder();
@@ -428,7 +434,7 @@ export default {
                 Bus.$emit("noData", true);
             }
         },
-        saveContract: function (param, title, callback) {
+        saveContract(param, title, callback) {
             let reqData = {
                 groupId: localStorage.getItem("groupId"),
                 contractName: param.contractName,
@@ -467,7 +473,7 @@ export default {
                     });
                 });
         },
-        getContracts: function (list) {
+        getContracts(list) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
                 pageNumber: 0,
@@ -479,10 +485,6 @@ export default {
                     if (status === 200) {
                         this.contractList = data.data || [];
                         localStorage.setItem("contractList", JSON.stringify(this.contractList))
-                        localStorage.setItem(
-                            "contractList",
-                            JSON.stringify(this.contractList)
-                        );
                         if (data.data.length) {
                             if (localStorage.getItem("folderList")) {
                                 this.folderList = JSON.parse(
@@ -568,7 +570,7 @@ export default {
                     });
                 });
         },
-        fileSucccess: function (val) {
+        fileSucccess(val) {
             let num = 0;
             this.contractList.forEach(value => {
                 if (value.contractName == val.contractName && value.contractPath == val.contractPath) {
@@ -584,7 +586,7 @@ export default {
             }
             this.fileClose();
         },
-        createFolder: function () {
+        createFolder() {
             let result = [];
             if (localStorage.getItem("folderList")) {
                 this.folderList = JSON.parse(
@@ -593,10 +595,10 @@ export default {
             } else {
                 this.folderList = [];
             }
-            this.folderList.forEach((value) => {
+            this.folderList.forEach((value, index) => {
                 let num = 0;
                 if (!value.groupId || (value.groupId && localStorage.getItem("groupId") && value.groupId == localStorage.getItem("groupId"))) {
-                    let data = {
+                    var data = {
                         contractName: value.folderName,
                         folderId: value.folderId,
                         contractActive: false,
@@ -606,7 +608,19 @@ export default {
                         renameShow: false,
                         inputShow: false
                     };
-                    this.contractArry.forEach((item,index) => {
+                    if (index != 0) {
+                        data = {
+                            contractName: value.folderName,
+                            folderId: value.folderId,
+                            contractActive: false,
+                            contractType: "folder",
+                            folderIcon: "el-icon-caret-right",
+                            folderActive: false,
+                            renameShow: false,
+                            inputShow: false
+                        }
+                    }
+                    this.contractArry.forEach((item, index) => {
                         if (item.contractType == "folder" && item.folderId == value.folderId) {
                             data.folderIcon = item.folderIcon;
                             data.folderActive = item.folderActive;
@@ -617,7 +631,7 @@ export default {
             });
             return result;
         },
-        open: function (val) {
+        open(val) {
             this.contractArry.forEach(value => {
                 this.$set(value, "contractActive", false);
                 if (value.contractType == "folder") {
@@ -635,7 +649,7 @@ export default {
             }
             this.$set(val, "contractActive", true);
         },
-        sureSelect: function (val) {
+        sureSelect(val) {
             let num = 0;
             this.contractArry.forEach(value => {
                 if (value.id == val.id) {
@@ -656,7 +670,7 @@ export default {
             this.modifyState = false;
             Bus.$emit("select", val);
         },
-        select: function (val) {
+        select(val) {
             if (this.modifyState) {
                 this.$confirm(`${this.$t('text.unsavedContract')}？`, {
                     center: true,
@@ -672,14 +686,14 @@ export default {
                 this.sureSelect(val)
             }
         },
-        deleteFile: function (val) {
+        deleteFile(val) {
             this.$confirm(`${this.$t('dialog.sureDelete')}？`)
                 .then(_ => {
                     this.deleteData(val);
                 })
                 .catch(_ => { });
         },
-        deleteData: function (val) {
+        deleteData(val) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
                 contractId: val.id
@@ -704,7 +718,7 @@ export default {
                     });
                 });
         },
-        deleteFolder: function (val) {
+        deleteFolder(val) {
             this.$confirm(`${this.$t('dialog.sureDelete')}？`)
                 .then(_ => {
                     let list = val.child;
@@ -725,7 +739,7 @@ export default {
                         if (list.length === 0) {
                             setTimeout(() => {
                                 this.getContracts()
-                            }, 0);
+                            }, 10);
                         }
                     })
                 })

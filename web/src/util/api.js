@@ -385,6 +385,15 @@ export function queryImportPrivateKey(data){
         params: data
     })
 }
+//import pem privateKey 
+export function ImportPemPrivateKey(data){
+    return post({
+        url: `${HANDLE}privateKey/importPem`,
+        method: 'post',
+        data: data,
+    })
+}
+
 // localKeyStores
 export function queryLocalKeyStores() {
     return get({
@@ -545,5 +554,75 @@ export function queryJavaClass(data, str) {
         method: 'post',
         data: data,
         responseType: 'blob/json'
+    })
+}
+
+export function addFunctionAbi(data) {
+    return post({
+        url: `${HANDLE}method/add`,
+        method: 'post',
+        data: data,
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+export function getFunctionAbi(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}method/findById/${params.str}`,
+        method: 'get',
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+// add contractpath
+export function addContractpath(data) {
+    return post({
+        url: `${HANDLE}contract/addContractPath`,
+        method: 'post',
+        data: data,
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+// performance toggle
+export function performanceSwitch() {
+    return get({
+        url: `${HANDLE}performance/toggle`,
+        method: 'get',
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+// post performance toggle
+export function postPerformanceSwitch(data) {
+    return post({
+        url: `${HANDLE}performance/toggle`,
+        method: 'post',
+        data: data,
+        headers: {
+            Authorization: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+/* Background compilation*/
+export function backgroundCompile(data){
+    return post({
+        url: `${HANDLE}contract/contractCompile `,
+        method: 'post',
+        data: data
+    })
+}
+export function encryption() {
+    return get({
+        url: `${HANDLE}encrypt`,
+        method: 'get',
+        responseType: 'text'
     })
 }

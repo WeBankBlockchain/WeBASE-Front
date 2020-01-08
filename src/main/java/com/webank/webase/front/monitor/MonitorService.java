@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2014-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 package com.webank.webase.front.monitor;
 
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.monitor.entity.Monitor;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
@@ -29,13 +29,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
+/**
+ * Node monitor service
+ * distinguished from host monitor: performance
+ */
 
 @Slf4j
 @Service
@@ -126,6 +130,12 @@ public class MonitorService {
         }
         return newMonitorList;
     }
+
+    /**
+     * scheduled task to sync Monitor Info per 5s
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncMonitorInfo() throws ExecutionException, InterruptedException {
         log.debug("begin sync chain data");
@@ -148,7 +158,9 @@ public class MonitorService {
         }
     }
 
-
+    /**
+     * scheduled task to delete Monitor Info at 00:00:00 per week
+     */
     @Scheduled(cron = "0 0 0 * * ?")
     public void deleteMonitorInfoPerWeek()   {
         log.debug("begin delete monitor");

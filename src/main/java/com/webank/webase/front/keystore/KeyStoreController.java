@@ -1,21 +1,38 @@
+/*
+ * Copyright 2014-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.webank.webase.front.keystore;
 
 import java.util.List;
+
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.keystore.entity.KeyStoreInfo;
+import com.webank.webase.front.keystore.entity.ReqImportPem;
+import com.webank.webase.front.util.PemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import com.webank.webase.front.base.BaseController;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
+import org.springframework.web.bind.annotation.*;
+import com.webank.webase.front.base.controller.BaseController;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+
+import javax.validation.Valid;
 
 @Slf4j
 @RestController
@@ -47,6 +64,19 @@ public class KeyStoreController extends BaseController {
     public KeyStoreInfo importPrivateKey(@RequestParam(required = true) String privateKey,
         @RequestParam(required = true) String userName) {
         return keyStoreService.getKeyStoreFromPrivateKey(privateKey, false, KeyTypes.LOCALUSER.getValue(), userName);
+    }
+
+    @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
+    @ApiImplicitParam(name = "reqImportPem", value = "import pem info", required = true, dataType = "ReqImportPem")
+    @PostMapping("/importPem")
+    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
+        String pemContent = reqImportPem.getPemContent();
+        String userName = reqImportPem.getUserName();
+        if(!pemContent.startsWith(PemUtils.crtContentHead)) {
+            throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
+        }
+        keyStoreService.importKeyStoreFromPem(pemContent, false, KeyTypes.LOCALUSER.getValue(), userName);
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
     
     @ApiOperation(value = "getKeyStores", notes = "get local KeyStore lists")

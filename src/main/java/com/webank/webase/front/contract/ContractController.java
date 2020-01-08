@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2014-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -17,10 +17,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
-
-import com.webank.webase.front.contract.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -37,12 +36,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.BaseController;
-import com.webank.webase.front.base.BasePageResponse;
-import com.webank.webase.front.base.BaseResponse;
-import com.webank.webase.front.base.ConstantCode;
+import com.webank.webase.front.base.controller.BaseController;
+import com.webank.webase.front.base.response.BasePageResponse;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.file.FileContent;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.contract.entity.ContractPath;
+import com.webank.webase.front.contract.entity.ReqContractCompile;
+import com.webank.webase.front.contract.entity.ReqContractPath;
+import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqDeployWithSign;
+import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqSendAbi;
+import com.webank.webase.front.contract.entity.RspContractCompile;
+import com.webank.webase.front.contract.entity.FileContentHandle;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -113,11 +122,11 @@ public class ContractController extends BaseController {
         BindingResult result) throws FrontException, IOException {
         log.info("compileJavaFile start. reqSendAbi:{}", JSON.toJSONString(param));
         checkParamResult(result);
-        FileContent fileContent = contractService
+        FileContentHandle fileContentHandle = contractService
             .compileToJavaFile(param.getContractName(), param.getAbiInfo(), param.getContractBin(),
                 param.getPackageName());
-        return ResponseEntity.ok().headers(headers(fileContent.getFileName()))
-            .body(new InputStreamResource(fileContent.getInputStream()));
+        return ResponseEntity.ok().headers(headers(fileContentHandle.getFileName()))
+            .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
 
@@ -212,7 +221,7 @@ public class ContractController extends BaseController {
     @ApiImplicitParam(name = "req", value = "param info", required = true, dataType = "ReqPageContract")
     @PostMapping(value = "/contractList")
     public BasePageResponse findByPage(@RequestBody @Valid ReqPageContract req,
-        BindingResult result) throws FrontException {
+        BindingResult result) throws FrontException, IOException {
         log.info("findByPage start. ReqPageContract:{}", JSON.toJSONString(req));
         checkParamResult(result);
         Page<Contract> page = contractService.findContractByPage(req);
@@ -235,7 +244,6 @@ public class ContractController extends BaseController {
         return contractService.verifyContractChange(contractId, groupId);
     }
 
-
     /**
      * query list of contract.
      */
@@ -243,10 +251,31 @@ public class ContractController extends BaseController {
     @ApiImplicitParam(name = "req", value = "param info", required = true, dataType = "ReqContractCompile")
     @PostMapping(value = "/contractCompile")
     public RspContractCompile contractCompile(@RequestBody @Valid ReqContractCompile req,
-                                              BindingResult result) throws FrontException {
+            BindingResult result) throws FrontException {
         log.info("contractCompile start. param:{}", JSON.toJSONString(req));
         checkParamResult(result);
-
         return contractService.contractCompile(req.getSolidityName(), req.getSolidityBase64());
+    }
+    
+    @PostMapping(value = "/addContractPath")
+    public ContractPath addContractPath(@RequestBody @Valid ReqContractPath req) {
+        log.info("addContractPath start. param:{}", JSON.toJSONString(req));
+        return contractService.addContractPath(req);
+    }
+    
+    /**
+     * query by groupId.
+     */
+    @GetMapping(value = "/findPathList/{groupId}")
+    public List<ContractPath> findPathList(@PathVariable("groupId") Integer groupId) {
+        log.info("start findPathList. groupId:{}", groupId);
+        return contractService.findPathList(groupId);
+    }
+    
+    @DeleteMapping("deletePath/{groupId}/{contractPath}")
+    public BaseResponse deletePath(@PathVariable("groupId") Integer groupId, @PathVariable String contractPath) {
+        log.info("start deletePath. contractPath:{}", contractPath);
+        contractService.deletePath(groupId, contractPath);
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 }

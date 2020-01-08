@@ -1,39 +1,5 @@
-package com.webank.webase.front.performance;
-
-import com.webank.webase.front.base.Constants;
-import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.performance.result.Data;
-import com.webank.webase.front.performance.result.LineDataList;
-import com.webank.webase.front.performance.result.PerformanceData;
-import lombok.extern.slf4j.Slf4j;
-import org.hyperic.sigar.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import java.math.BigDecimal;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
-import org.hyperic.sigar.CpuInfo;
-import org.hyperic.sigar.CpuPerc;
-import org.hyperic.sigar.FileSystem;
-import org.hyperic.sigar.Mem;
-import org.hyperic.sigar.NetInterfaceConfig;
-import org.hyperic.sigar.NetInterfaceStat;
-import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2014-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +13,42 @@ import org.springframework.stereotype.Service;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webank.webase.front.performance;
+
+import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.performance.entity.Performance;
+import com.webank.webase.front.performance.result.Data;
+import com.webank.webase.front.performance.result.LineDataList;
+import com.webank.webase.front.performance.result.PerformanceData;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hyperic.sigar.CpuInfo;
+import org.hyperic.sigar.CpuPerc;
+import org.hyperic.sigar.FileSystem;
+import org.hyperic.sigar.Mem;
+import org.hyperic.sigar.NetInterfaceConfig;
+import org.hyperic.sigar.NetInterfaceStat;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
+
+/**
+ * Host monitor: monitor computer's performance
+ * such as cpu, memory, disk etc.
+ */
+
 @Slf4j
 @Service
 public class PerformanceService {
@@ -55,7 +57,9 @@ public class PerformanceService {
     private PerformanceRepository performanceRepository;
     @Autowired
     private Constants constants;
+    // host upload bps(bit per second)
     private static  final String TXBPS = "txbps";
+    // host download bps(bit per second)
     private static final String RXBPS = "rxbps";
 
     private static Sigar sigar = new Sigar();
@@ -84,8 +88,8 @@ public class PerformanceService {
      * @return
      */
     public List<PerformanceData> findContrastDataByTime(LocalDateTime startTime,
-            LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
-            int gap)  {
+                                                        LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
+                                                        int gap)  {
 
         List<Performance> performanceList;
         if (startTime == null || endTime == null) {
@@ -107,7 +111,7 @@ public class PerformanceService {
     }
 
     private List<PerformanceData> transferToPerformanceData(List<Performance> performanceList,
-            List<Performance> contrastPerformanceList) {
+                                                            List<Performance> contrastPerformanceList) {
         List<Long> timestampList = new ArrayList<>();
         List<BigDecimal> memoryValueList = new ArrayList<>();
         List<BigDecimal> cpuValueList = new ArrayList<>();
@@ -158,12 +162,29 @@ public class PerformanceService {
         return performanceDataList;
     }
 
+    public boolean toggleSync(boolean toggle) throws Exception {
+        constants.setMonitorEnabled(toggle);
+        if(constants.isMonitorEnabled() == toggle) {
+            log.debug("toggle sync performance status to " + toggle);
+            return toggle;
+        }else {
+            throw new FrontException("Fail to toggle sync performance status to "+ toggle);
+        }
+    }
+
+    public boolean getToggleStatus() throws Exception {
+        return constants.isMonitorEnabled();
+    }
     /**
-     * syncPerformanceInfo.
+     * syncPerformanceInfo per 5s
      */
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncPerformanceInfo() throws SigarException {
         log.debug("begin sync performance");
+        if (!constants.isMonitorEnabled())
+        {
+            return;
+        }
         Performance performance = new Performance();
         performance.setMemoryUseRatio(getMemoryRatio());
         performance.setCpuUseRatio(getCpuRatio());
@@ -184,11 +205,15 @@ public class PerformanceService {
     }
 
     /**
-     * deletePerformanceInfoPerWeek.
+     * deletePerformanceInfoPerWeek at 00:00:00 per week
      */
     @Scheduled(cron = "0 0 0 * * ?")
     public void deletePerformanceInfoPerWeek() throws SigarException {
         log.debug("begin delete performance");
+        if (!constants.isMonitorEnabled())
+        {
+            return;
+        }
         Long currentTime = System.currentTimeMillis();
         Long weekAgo = currentTime - 3600 * 24 * 7 * 1000;
         int i = performanceRepository.deleteTimeAgo(weekAgo);

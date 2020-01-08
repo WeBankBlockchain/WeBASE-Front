@@ -42,13 +42,16 @@ sdk:
   keepAlive: 60
   ip: 127.0.0.1
   channelPort: 20200
+  encryptType: 0 #0:standard, 1:guomi
 
 logging:
   config: classpath:log4j2.xml
 
 constant:
-  keyServer: 127.0.0.1:5001
+  keyServer: 127.0.0.1:5001 # webase-sign
   transMaxWait: 30
   monitorDisk: /
+  monitorEnabled: true
   aesKey: EfdsW23D23d3df43
+  nodePath: /fisco/nodes/127.0.0.1/node0
 

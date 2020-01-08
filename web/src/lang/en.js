@@ -83,6 +83,7 @@ export default {
         contractAbi: 'Abi',
         contractBin: 'Bin',
         createdTime: 'Created Time',
+        importPem: "Import Pem Private Key"
     },
     errorLog: {
         tips: 'Please click the bug icon in the upper right corner',
@@ -126,7 +127,7 @@ export default {
         pleaseType: 'Please type in',
     },
     placeholder: {
-        globalSearch: 'Search by Address / Txn Hash',
+        globalSearch: 'Search by Block / Txn Hash',
         javaPackage: 'Example: com.webank',
         selected: 'select',
         selectedAccountAddress: 'Select Account Address',
@@ -172,6 +173,7 @@ export default {
         tiled: 'Tiled',
         detailsAbi: 'Details Abi',
         detailsTxn: 'Transactions Details',
+        acquisitionSwitch: 'Acquisition switch',
     },
     text: {
         noContract: 'Please create a new contract',
@@ -230,5 +232,15 @@ export default {
         nameNoSame: 'User names cannot be the same',
         uploadSol: 'Please upload contract files(extension: .sol)', 
         fileExceeds: 'File size exceeds 400k, please upload files smaller than 400k',
+        txnDecodeBtn: 'Decode',
+        txnEncodeBtn: 'Restore',
+        toggleSuccessed: 'Switch successed',
+        toggleFailed: 'Switch failed',
+        toggleOpen: 'Open',
+        toggleDown: 'Down',
+        privateKeyManagementInfo: "Support for exporting private keys, you can export private keys to local.",
+        FileName: "privateKey Name",
+        importFile: "Import File",
+        pemName: "Pem File Name"
     }
 }

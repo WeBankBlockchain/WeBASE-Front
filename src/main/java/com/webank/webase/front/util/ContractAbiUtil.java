@@ -1,37 +1,5 @@
-package com.webank.webase.front.util;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
-import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
-import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.webank.webase.front.base.ConstantCode;
-import com.webank.webase.front.base.Constants;
-import com.webank.webase.front.base.FrontUtils;
-import com.webank.webase.front.base.exception.FrontException;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2014-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +13,32 @@ import lombok.extern.slf4j.Slf4j;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webank.webase.front.util;
+
+import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.properties.Constants;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
+import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes;
+import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * ContractAbiUtil.
@@ -72,15 +66,15 @@ public class ContractAbiUtil {
         /**
          * VersionEvent.
          *
-         * @param version contract version
-         * @param events events
-         * @param functions functions
-         * @param funcInputs funcInputs
+         * @param version     contract version
+         * @param events      events
+         * @param functions   functions
+         * @param funcInputs  funcInputs
          * @param funcOutputs funcOutputs
          */
         public VersionEvent(String version, HashMap<String, List<Class<? extends Type>>> events,
-            HashMap<String, Boolean> functions, HashMap<String, List<String>> funcInputs,
-            HashMap<String, List<String>> funcOutputs) {
+                            HashMap<String, Boolean> functions, HashMap<String, List<String>> funcInputs,
+                            HashMap<String, List<String>> funcOutputs) {
             this.version = version;
             this.events = events;
             this.functions = functions;
@@ -132,12 +126,12 @@ public class ContractAbiUtil {
     /**
      * set contract in map and save file.
      *
-     * @param contractName contractName
-     * @param version version
+     * @param contractName      contractName
+     * @param version           version
      * @param abiDefinitionList abi info
      */
     public static void setContractWithAbi(String contractName, String version,
-        List<AbiDefinition> abiDefinitionList, boolean ifSaveFile) throws FrontException {
+                                          List<AbiDefinition> abiDefinitionList, boolean ifSaveFile) throws FrontException {
 
         List<VersionEvent> versionEventList = getAbiVersionList(contractName, version);
         setFunctionFromAbi(contractName, version, abiDefinitionList, versionEventList);
@@ -148,7 +142,7 @@ public class ContractAbiUtil {
     }
 
     public static void setFunctionFromAbi(String contractName, String version,
-        List<AbiDefinition> abiDefinitionList, List<VersionEvent> versionEventList) {
+                                          List<AbiDefinition> abiDefinitionList, List<VersionEvent> versionEventList) {
         HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
         HashMap<String, Boolean> functions = new HashMap<>();
         HashMap<String, List<String>> funcInputs = new HashMap<>();
@@ -252,22 +246,22 @@ public class ContractAbiUtil {
      * save abi file to disk which dir declare in config.
      *
      * @param contractName contractName
-     * @param version version
+     * @param version      version
      */
     public static void saveAbiFile(String contractName, String version,
-        List<AbiDefinition> abiDefinitionList)
-        throws FrontException {
+                                   List<AbiDefinition> abiDefinitionList)
+            throws FrontException {
         FileOutputStream outputStream = null;
         try {
             File file = new File(
-                Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
-            FrontUtils.createFileIfNotExist(file,true);
+                    Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
+            FrontUtils.createFileIfNotExist(file, true);
             outputStream = new FileOutputStream(file);
 
             //todo
             outputStream.write(JSON.toJSONString(abiDefinitionList).getBytes());
             outputStream.flush();
-            log.info(file.getName()+"file create successfully");
+            log.info(file.getName() + "file create successfully");
         } catch (IOException e) {
             log.error("saveAbiFile failed.", e);
             throw new FrontException(ConstantCode.ABI_SAVE_ERROR);
@@ -286,7 +280,7 @@ public class ContractAbiUtil {
     /**
      * check if the contract has been deployed.
      *
-     * @param contractName contractName
+     * @param contractName    contractName
      * @param contractVersion version
      */
     public static Boolean ifContractAbiExisted(String contractName, String contractVersion) {
@@ -308,49 +302,32 @@ public class ContractAbiUtil {
      * check if the function is constant.
      *
      * @param contractName contractName
-     * @param funcName funcName
-     * @param version version
+     * @param funcName     funcName
+     * @param version      version
      */
-    public static String ifConstantFunc(String contractName, String funcName, String version) {
-        if (!contractEventMap.containsKey(contractName)) {
-            return null;
-        }
-        List<VersionEvent> versionEventList = contractEventMap.get(contractName);
-        VersionEvent target = null;
-        for (VersionEvent versionEvent : versionEventList) {
-            if (versionEvent.getVersion().equals(version)) {
-                target = versionEvent;
-                break;
-            }
-        }
+    public static boolean getConstant(String contractName, String funcName, String version) {
+        VersionEvent target = getVersionEvent(contractName, version);
         if (target == null) {
-            return null;
+            log.warn("getConstant fail. contract name:{} func:{} version:{} is not existed",
+                    contractName, funcName, version);
+            throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
-        return target.getFunctions().get(funcName).toString();
+        return target.getFunctions().get(funcName);
     }
 
     /**
      * get input types.
      *
      * @param contractName contractName
-     * @param funcName funcName
-     * @param version version
+     * @param funcName     funcName
+     * @param version      version
      */
     public static List<String> getFuncInputType(String contractName, String funcName,
-        String version) {
-        if (!contractEventMap.containsKey(contractName)) {
-            return null;
-        }
-        List<VersionEvent> versionEventList = contractEventMap.get(contractName);
-        VersionEvent target = null;
-        for (VersionEvent versionEvent : versionEventList) {
-            if (versionEvent.getVersion().equals(version)) {
-                target = versionEvent;
-                break;
-            }
-        }
+                                                String version) {
+        VersionEvent target = getVersionEvent(contractName, version);
+
         if (target == null) {
-            return null;
+            return Collections.emptyList();
         }
         return target.getFuncInputs().get(funcName);
     }
@@ -359,25 +336,14 @@ public class ContractAbiUtil {
      * get output types.
      *
      * @param contractName contractName
-     * @param funcName funcName
-     * @param version version
+     * @param funcName     funcName
+     * @param version      version
      */
     public static List<String> getFuncOutputType(String contractName, String funcName,
-        String version) {
-        if (!contractEventMap.containsKey(contractName)) {
-            return   Collections.emptyList();
-        }
-
-        List<VersionEvent> versionEventList = contractEventMap.get(contractName);
-        VersionEvent target = null;
-        for (VersionEvent versionEvent : versionEventList) {
-            if (versionEvent.getVersion().equals(version)) {
-                target = versionEvent;
-                break;
-            }
-        }
+                                                 String version) {
+        VersionEvent target = getVersionEvent(contractName, version);
         if (target == null) {
-            return   Collections.emptyList();
+            return Collections.emptyList();
         }
         return target.getFuncOutputs().get(funcName);
     }
@@ -404,7 +370,7 @@ public class ContractAbiUtil {
         Matcher matcher = pattern.matcher(type);
         if (matcher.find()) {
             Class<?> baseType = org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes
-                .getType(matcher.group(1));
+                    .getType(matcher.group(1));
             String firstArrayDimension = matcher.group(2);
             String secondArrayDimension = matcher.group(3);
 
@@ -451,4 +417,24 @@ public class ContractAbiUtil {
             return type;
         }
     }
+
+
+    /**
+     * get VersionEvent.
+     */
+    private static VersionEvent getVersionEvent(String contractName, String version) {
+        if (!contractEventMap.containsKey(contractName)) {
+            return null;
+        }
+        List<VersionEvent> versionEventList = contractEventMap.get(contractName);
+        VersionEvent target = null;
+        for (VersionEvent versionEvent : versionEventList) {
+            if (versionEvent.getVersion().equals(version)) {
+                target = versionEvent;
+                break;
+            }
+        }
+        return target;
+    }
+
 }

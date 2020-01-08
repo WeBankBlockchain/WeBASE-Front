@@ -18,7 +18,7 @@
     <div class="contract-code" :class="{changeActive:changeWidth }" v-loading="loading">
         <div class="contract-code-head">
             <span class="contract-code-title" v-show="codeShow" :class="{titleActive:changeWidth }">
-                <span>{{contractName + '.sol'}}</span>
+                <span ref="setReadOnly">{{contractName + '.sol'}}</span>
             </span>
             <span class="contract-code-handle" v-show="codeShow">
                 <span class="contract-code-done" @click="saveCode">
@@ -92,7 +92,7 @@
                         {{errorInfo}}
                     </div>
                     <div class="contract-info-list1" style="color: #f00" v-show="errorInfo">
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">{{errorMessage}}</span>
+                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage">{{index+1}}、{{item}}</span>
                     </div>
                     <div style="color: #68E600;padding-bottom: 15px;" v-show="abiFileShow">{{successInfo}}</div>
                     <div class="contract-info-list" v-show="contractAddress">
@@ -138,7 +138,7 @@
         <el-dialog :title="$t('title.selectAccountAddress')" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
             <v-user @change="deployContract($event)" @close="userClose" :abi='abiFile'></v-user>
         </el-dialog>
-        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' ref="editor"></v-editor>
+        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' ref="editor" :input='editorInput' :editorOutput="editorOutput"></v-editor>
         <el-dialog :title="$t('title.writeJavaName')" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
             <el-input v-model="javaClassName" :placeholder="$t('placeholder.javaPackage')"></el-input>
             <!-- <i style="color: #606266"></i> -->
@@ -166,11 +166,13 @@ import Bus from "@/bus";
 import {
     getDeployStatus,
     ifChangedDepaloy,
-    queryJavaClass
+    queryJavaClass,
+    addFunctionAbi,
+    backgroundCompile
 } from "@/util/api";
 import transaction from "../dialog/sendTransaction";
 import changeUser from "../dialog/changeUser";
-
+import web3 from "@/util/ethAbi"
 export default {
     name: "codes",
     props: ["show", "changeStyle"],
@@ -213,6 +215,8 @@ export default {
             saveShow: false,
             editorShow: false,
             editorData: null,
+            editorInput: null,
+            editorOutput: null,
             showAbi: true,
             showBin: true,
             complieAbiTextHeight: false,
@@ -277,7 +281,11 @@ export default {
     beforeMount() {
         var head = document.head;
         var script = document.createElement("script");
-        script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+        if(localStorage.getItem("encryptionId") == 0){
+            script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+        }else{
+            script.src = "./static/js/soljson-v0.4.25-gm.js";
+        }
         script.setAttribute('id', 'soljson');
         if (!document.getElementById('soljson')) {
             head.append(script)
@@ -324,6 +332,13 @@ export default {
 
                 })
             }
+            this.$nextTick(() => {
+                if (this.contractName === 'Asset'&&data.contractPath==="template" || this.contractName === 'Evidence'&&data.contractPath==="template" || this.contractName === 'EvidenceFactory'&&data.contractPath==="template") {
+                    this.aceEditor.setReadOnly(true);
+                } else {
+                    this.aceEditor.setReadOnly(false);
+                }
+            })
         });
         Bus.$on("noData", data => {
             this.codeShow = false;
@@ -395,6 +410,7 @@ export default {
             });
             let editor = this.aceEditor.alignCursors();
             this.aceEditor.getSession().setUseWrapMode(true);
+
             this.aceEditor.getSession().on("change", this.changeAce);
             this.aceEditor.setHighlightActiveLine(true)
             this.aceEditor.on("blur", this.blurAce);
@@ -404,8 +420,8 @@ export default {
             let data = Base64.encode(this.content);
         },
         saveCode: function () {
-                this.data.contractSource = Base64.encode(this.content);
-                Bus.$emit("save", this.data);
+            this.data.contractSource = Base64.encode(this.content);
+            Bus.$emit("save", this.data);
         },
         resizeCode: function () {
             this.aceEditor.setOptions({
@@ -435,7 +451,9 @@ export default {
             this.dialogVisible = false;
             this.editorShow = true;
             this.editorData = null;
-            this.editorData = val;
+            this.editorData = val.resData;
+            this.editorInput = val.input;
+            this.editorOutput = val.data.outputs;
         },
         editorClose: function () {
             this.editorShow = false;
@@ -584,7 +602,7 @@ export default {
                         this.changeOutput(output.contracts[this.contractName + ".sol"], callback);
                     }
                 } else {
-                    this.errorMessage = output.errors[0];
+                    this.errorMessage = output.errors;
                     this.errorInfo = this.$t('text.compilationFailed');
                     this.loading = false;
                 }
@@ -658,29 +676,47 @@ export default {
             this.dialogUser = false;
         },
         setMethod: function () {
-            let web3 = new Web3(Web3.givenProvider);
+            let Web3EthAbi = web3;
             let arry = [];
             if (this.abiFile) {
                 let list = JSON.parse(this.abiFile);
                 list.forEach(value => {
                     if (value.name && value.type == "function") {
                         let data = {};
-                        let methodId = web3.eth.abi.encodeFunctionSignature({
-                            name: value.name,
-                            type: value.type,
-                            inputs: value.inputs
-                        });
+                        let methodId;
+                        if(localStorage.getItem("encryptionId") == 1){
+                            methodId = Web3EthAbi.smEncodeFunctionSignature({
+                                name: value.name,
+                                type: value.type,
+                                inputs: value.inputs
+                            });
+                        }else{
+                            methodId = Web3EthAbi.encodeFunctionSignature({
+                                name: value.name,
+                                type: value.type,
+                                inputs: value.inputs
+                            });
+                        }
                         data.methodId = methodId;
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
                         arry.push(data);
                     } else if (value.name && value.type == "event") {
                         let data = {};
-                        let methodId = web3.eth.abi.encodeEventSignature({
-                            name: value.name,
-                            type: value.type,
-                            inputs: value.inputs
-                        });
+                        let methodId;
+                        if(localStorage.getItem("encryptionId") == 1){
+                            methodId = Web3EthAbi.smEncodeEventSignature({
+                                name: value.name,
+                                type: value.type,
+                                inputs: value.inputs
+                            });
+                        }else{
+                            methodId = Web3EthAbi.encodeEventSignature({
+                                name: value.name,
+                                type: value.type,
+                                inputs: value.inputs
+                            });
+                        }
                         data.methodId = methodId;
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
@@ -688,14 +724,14 @@ export default {
                     }
                 });
                 if (arry.length) {
-                    //    this.addAbiMethod(arry)
+                    this.addAbiMethod(arry)
                 }
             }
         },
         addAbiMethod: function (list) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                methodList: list
+                methodHandleList: list
             };
             addFunctionAbi(data)
                 .then(res => {
@@ -917,7 +953,7 @@ export default {
                     this.$message({
                         type: "success",
                         showClose: true,
-                        message:this.$t('notice.copySuccessfully'),
+                        message: this.$t('notice.copySuccessfully'),
                         duration: 2000
                     });
                 });

@@ -83,6 +83,7 @@ export default {
         contractAbi: '合约abi',
         contractBin: '合约bin',
         createdTime: '创建时间',
+        importPem: "导入pem私钥"
     },
     errorLog: {
         tips: '请点击右上角bug小图标',
@@ -122,7 +123,7 @@ export default {
         pleaseType: '请输入',
     },
     placeholder: {
-        globalSearch: '请输入 Address / Txn Hash',
+        globalSearch: '请输入 Block 或 Txn Hash',
         javaPackage: '如：com.webank',
         selected: '请选择',
         selectedAccountAddress: '请选择用户地址',
@@ -168,6 +169,7 @@ export default {
         tiled: '平铺',
         detailsAbi: 'abi详情',
         detailsTxn: '交易内容',
+        acquisitionSwitch: '采集数据开关',
     },
     text: {
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
@@ -226,5 +228,15 @@ export default {
         nameNoSame: '用户名不能相同',
         uploadSol: '请上传.sol格式的文件',
         fileExceeds: '文件大小超过400k，请上传小于400k的文件',
+        txnDecodeBtn: '解码',
+        txnEncodeBtn: '还原',
+        toggleSuccessed: '切换成功',
+        toggleFailed: '切换失败',
+        toggleOpen: '打开',
+        toggleDown: '关闭',
+        privateKeyManagementInfo: "支持导出私钥，可以将私钥导出到本地",
+        fileName: "私钥用户名",
+        importFile: "导入文件",
+        pemName: "pem 文件名称"
     }
 }

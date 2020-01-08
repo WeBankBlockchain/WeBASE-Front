@@ -1,6 +1,21 @@
+/*
+ * Copyright 2014-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.webank.webase.front.util;
 
-import com.webank.webase.front.base.Constants;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.channel.test.Ok;
 import com.webank.webase.front.channel.test.TestBase;
 import com.webank.webase.front.contract.CommonContract;
@@ -15,6 +30,7 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.junit.Test;
 
@@ -95,7 +111,8 @@ public class ContractAbiUtilTest extends TestBase {
         Function function = new Function(funcName, finalInputs, finalOutputs);
 
         Ok okDemo = Ok.deploy(web3j, credentials, gasPrice, gasLimit).send();
-        CommonContract commonContract = CommonContract.load(okDemo.getContractAddress(), web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        ContractGasProvider contractGasProvider = new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        CommonContract commonContract = CommonContract.load(okDemo.getContractAddress(), web3j, credentials, contractGasProvider);
 
         TransactionReceipt t  = TransService.execTransaction(function, commonContract);
         System.out.println("***********************");
@@ -133,7 +150,8 @@ public class ContractAbiUtilTest extends TestBase {
         Function function = new Function(funcName, finalInputs, finalOutputs);
 
         HelloWorld okDemo = HelloWorld.deploy(web3j, credentials, gasPrice, gasLimit).send();
-        CommonContract commonContract = CommonContract.load(okDemo.getContractAddress(), web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        ContractGasProvider contractGasProvider = new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        CommonContract commonContract = CommonContract.load(okDemo.getContractAddress(), web3j, credentials, contractGasProvider);
 
         TransactionReceipt t  = TransService.execTransaction(function, commonContract);
         System.out.println(t);

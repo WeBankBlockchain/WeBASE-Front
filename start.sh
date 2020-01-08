@@ -1,41 +1,79 @@
-#!/bin/sh
+#!/bin/bash
+
+/usr/local/bin/fisco-bcos -c /data/config.ini >>nohup.out&
 
 APP_MAIN=com.webank.webase.front.Application
+cp -r /data/sdk/* /dist/conf/
 CLASSPATH='conf/:apps/*:lib/*'
+cd /dist
+
 CURRENT_DIR=`pwd`
 LOG_DIR=${CURRENT_DIR}/log
 CONF_DIR=${CURRENT_DIR}/conf
 
+
+SERVER_PORT=$(cat $CONF_DIR/application.yml| grep "port" | awk '{print $2}'| sed 's/\r//')
+if [ ${SERVER_PORT}"" = "" ];then
+    echo "$CONF_DIR/application.yml server port has not been configured"
+    exit -1
+fi
+
+if [ ${JAVA_HOME}"" = "" ];then
+    echo "JAVA_HOME has not been configured"
+    exit -1
+fi
+
 mkdir -p log
 
-tradePortalPID=0
-getTradeProtalPID(){
-    javaps=`$JAVA_HOME/bin/jps -l | grep $APP_MAIN`
-    if [ -n "$javaps" ]; then
-        tradePortalPID=`echo $javaps | awk '{print $1}'`
+startWaitTime=30
+processPid=0
+processStatus=0
+checkProcess(){
+    server_pid=`ps aux | grep java | grep $CURRENT_DIR | grep $APP_MAIN | awk '{print $2}'`
+    if [ -n "$server_pid" ]; then
+        processPid=$server_pid
+        processStatus=1
     else
-        tradePortalPID=0
+        processPid=0
+        processStatus=0
     fi
 }
 
-startFront(){
-	getTradeProtalPID
-	echo "==============================================================================================="
-	if [ $tradePortalPID -ne 0 ]; then
-	    echo "$APP_MAIN is already started(PID=$tradePortalPID)"
-	    echo "==============================================================================================="
-	else
-	    echo -n "Starting $APP_MAIN "
-	    nohup $JAVA_HOME/bin/java -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1 &
-	    sleep 5
-	    getTradeProtalPID
-	    if [ $tradePortalPID -ne 0 ]; then
-	        echo "(PID=$tradePortalPID)...[Success]"
-	        echo "==============================================================================================="
-	    else
-	        echo "[Failed]"
-	        echo "==============================================================================================="
-	    fi
-	fi
+JAVA_OPTS=" -Dfile.encoding=UTF-8"
+JAVA_OPTS+=" -Xmx256m -Xms256m -Xmn128m -Xss512k -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m"
+JAVA_OPTS+=" -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOG_DIR}/heap_error.log"
+
+start(){
+    checkProcess
+    echo "==============================================================================================="
+    if [ $processStatus == 1 ]; then
+        echo "Server $APP_MAIN Port $SERVER_PORT is running PID($processPid)"
+        echo "==============================================================================================="
+    else
+        echo -n "Server $APP_MAIN Port $SERVER_PORT ..."
+        nohup $JAVA_HOME/bin/java -Djdk.tls.namedGroups="secp256k1" $JAVA_OPTS -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1
+        
+        count=1
+        result=0
+        while [ $count -lt $startWaitTime ] ; do
+           checkProcess
+           if [ $processPid -ne 0 ]; then
+               result=1
+               break
+           fi
+           let count++
+           echo -n "."
+           sleep 1
+       done
+        
+       if [ $result -ne 0 ]; then
+           echo "PID($processPid) [Starting]. Please check message through the log file (default path:./log/)."
+           echo "==============================================================================================="
+       else
+           echo "[Failed]. Please check message through the log file (default path:./log/)."
+           echo "==============================================================================================="
+       fi
+    fi
 }
-startFront
+
+start
