@@ -1,10 +1,16 @@
 #!/bin/bash
 
+/usr/local/bin/fisco-bcos -c /data/config.ini >>nohup.out&
+
 APP_MAIN=com.webank.webase.front.Application
+cp -r /data/sdk/* /dist/conf/
 CLASSPATH='conf/:apps/*:lib/*'
+cd /dist
+
 CURRENT_DIR=`pwd`
 LOG_DIR=${CURRENT_DIR}/log
 CONF_DIR=${CURRENT_DIR}/conf
+
 
 SERVER_PORT=$(cat $CONF_DIR/application.yml| grep "port" | awk '{print $2}'| sed 's/\r//')
 if [ ${SERVER_PORT}"" = "" ];then
@@ -45,7 +51,7 @@ start(){
         echo "==============================================================================================="
     else
         echo -n "Server $APP_MAIN Port $SERVER_PORT ..."
-        nohup $JAVA_HOME/bin/java -Djdk.tls.namedGroups="secp256k1" $JAVA_OPTS -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1 &
+        nohup $JAVA_HOME/bin/java -Djdk.tls.namedGroups="secp256k1" $JAVA_OPTS -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1
         
         count=1
         result=0
