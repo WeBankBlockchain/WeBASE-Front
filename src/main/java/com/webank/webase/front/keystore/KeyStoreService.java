@@ -279,7 +279,7 @@ public class KeyStoreService {
             }
             return signInfo.getSignDataStr();
         } catch (Exception e) {
-            log.error("getSignDate exception", e);
+            log.error("***getSignDate exception", e);
         }
         return null;
     }

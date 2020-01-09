@@ -64,5 +64,8 @@ public class Constants {
     private boolean monitorEnabled = true;
     private String aesKey = "4d5dFr4fG446GBde";
     private String nodePath = "/fisco/nodes/127.0.0.1/node0";
+    private Integer http_read_timeOut = 10000;
+    private Integer http_connect_timeOut = 10000;
+
 
 }
