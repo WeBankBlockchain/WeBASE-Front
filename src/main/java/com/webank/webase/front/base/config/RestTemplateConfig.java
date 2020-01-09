@@ -15,7 +15,9 @@
  */
 package com.webank.webase.front.base.config;
 
+import com.webank.webase.front.base.properties.Constants;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -32,7 +34,8 @@ public class RestTemplateConfig {
     public RestTemplate restTemplate(ClientHttpRequestFactory factory) {
         return new RestTemplate(factory);
     }
-
+    @Autowired
+    private Constants constants;
     /**
      * httpRequestFactory.
      * 
@@ -41,8 +44,10 @@ public class RestTemplateConfig {
     @Bean
     public ClientHttpRequestFactory simpleClientHttpRequestFactory() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setReadTimeout(20000);
-        factory.setConnectTimeout(5000);
+        factory.setReadTimeout(constants.getHttp_read_timeOut());
+        factory.setConnectTimeout(constants.getHttp_connect_timeOut());
+
+
         return factory;
     }
 }

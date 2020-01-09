@@ -64,6 +64,8 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -178,6 +180,7 @@ public class TransService {
 
         // trans handle
         Object response = "";
+        Instant startTime = Instant.now();
         if (cf.getConstant()) {
             KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
             String callOutput = web3j
@@ -204,6 +207,7 @@ public class TransService {
                     transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
             response = receipt;
         }
+        log.info("*** node transaction cost time***: {}", Duration.between(startTime, Instant.now()).toMillis());
 
         log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(),
                 JSON.toJSONString(response));
@@ -357,7 +361,13 @@ public class TransService {
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setUserId(userId);
             encodeInfo.setEncodedDataStr(encodedDataStr);
+
+            Instant startTime = Instant.now();
+
             String signDataStr = keyStoreService.getSignDate(encodeInfo);
+
+            log.info("end get  signdatastr cost time: {}", Duration.between(startTime, Instant.now()).toMillis());
+
             if (StringUtils.isBlank(signDataStr)) {
                 log.warn("deploySend get sign data error.");
                 return null;
