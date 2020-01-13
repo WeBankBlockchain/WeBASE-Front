@@ -26,10 +26,7 @@ import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
-import com.webank.webase.front.transaction.entity.ContractFunction;
-import com.webank.webase.front.transaction.entity.ContractOfTrans;
-import com.webank.webase.front.transaction.entity.ReqTransHandle;
-import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
+import com.webank.webase.front.transaction.entity.*;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
@@ -43,6 +40,7 @@ import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.*;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -54,11 +52,13 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
+import org.fisco.bcos.web3j.tx.TransactionManager;
 import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -68,7 +68,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 
@@ -92,6 +95,12 @@ public class TransService {
     private Constants constants;
     @Autowired
     private ContractRepository contractRepository;
+
+    private static LinkedBlockingQueue<String> linkedBlockingQueue = new LinkedBlockingQueue();
+
+    private String parallelokAddr;
+    private static  ParallelOk parallelok;
+    private TransactionManager transactionManager;
 
     /**
      * send transaction.
@@ -522,4 +531,74 @@ public class TransService {
         }
         return web3j;
     }
+
+    public boolean preSign(Integer count, Integer group) throws Exception {
+        Credentials credentials = GenCredential.create();
+         parallelok =
+                ParallelOk.deploy(
+                        getWeb3j(group),
+                        credentials,
+                        new BigInteger("3"),
+                        new BigInteger("30000000"))
+                        .send();
+        parallelok.enableParallel().send();
+        parallelokAddr = parallelok.getContractAddress();
+
+        transactionManager = org.fisco.bcos.web3j.tx.Contract.getTheTransactionManager( getWeb3j(group), credentials);
+
+        //prepare user
+        ThreadPoolTaskExecutor threadPool = new ThreadPoolTaskExecutor();
+        threadPool.setCorePoolSize(200);
+        threadPool.setMaxPoolSize(500);
+        threadPool.setQueueCapacity(count.intValue());
+        threadPool.initialize();
+
+        long seconds = System.currentTimeMillis() / 1000l;
+        //  Lock lock = new ReentrantLock();
+
+        for (int i = 0; i < count.intValue(); ++i) {
+            final int index = i;
+            threadPool.execute(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            while (true) {
+                                String user = Long.toHexString(seconds) + Integer.toHexString(index);
+                                // String to = ;
+
+                                Random random = new Random();
+                                int r = random.nextInt(100);
+                                BigInteger amount = BigInteger.valueOf(r);
+
+                                try {
+                                    String signedTransaction = parallelok.setSeq(user, amount);
+                                    //  lock.lock();
+                                    linkedBlockingQueue.put(signedTransaction);
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    continue;
+                                }
+                            }
+                        }
+                    });
+        }
+        return true;
+
+    }
+
+
+    public Boolean pressureTest() throws InterruptedException, IOException {
+
+        PerformanceDTCallback callback = new PerformanceDTCallback();
+        log.info("count {}", linkedBlockingQueue.size());
+        String s = linkedBlockingQueue.take();
+        log.info("***{}***",s );
+        SendTransaction transactionHash = transactionManager.sendTransaction(s, callback);
+      //  log.info("!!!{} ", transactionHash.getTransactionHash());
+        return true;
+    }
 }
+
+
+
