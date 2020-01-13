@@ -20,6 +20,7 @@ import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
+import com.webank.webase.front.transaction.entity.SignCount;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -28,10 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
 
@@ -82,5 +80,17 @@ public class TransController extends BaseController {
         log.info("transHandleWithSign start. req:[{}]", JSON.toJSONString(req));
         checkParamResult(result);
         return transServiceImpl.transHandleWithSign(req);
+    }
+
+    @PostMapping("/presign")
+    public Boolean preSign(@Valid @RequestBody SignCount req, BindingResult result) throws Exception {
+        checkParamResult(result);
+        return transServiceImpl.preSign(req.getCount(),req.getGroup());
+    }
+
+    @GetMapping("/pressure-test")
+    public Boolean pressureTest() throws Exception {
+
+        return transServiceImpl.pressureTest();
     }
 }
