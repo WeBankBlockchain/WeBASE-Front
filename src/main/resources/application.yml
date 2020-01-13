@@ -42,7 +42,7 @@ sdk:
   keepAlive: 60
   ip: 127.0.0.1
   channelPort: 20200
-  encryptType: 0 #0:standard, 1:guomi
+  encryptType: 1 #0:standard, 1:guomi
 
 logging:
   config: classpath:log4j2.xml

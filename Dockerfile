@@ -1,4 +1,4 @@
-FROM fiscoorg/fiscobcos:v2.2.0
+FROM fiscoorg/fiscobcos:v2.2.0-gm
 
 LABEL maintainer service@fisco.com.cn
 
