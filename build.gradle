@@ -70,10 +70,10 @@ dependencies {
     compile spring,spring_boot,swagger,logger,jaxb
 	// guomi contract compile: USE 'socJ-all-0.4.25-gm' to REPLACE 'ethereum:solcJ-all'
 	compile ('org.fisco-bcos:web3sdk:2.2.0')
-//        {
-//            exclude group:"org.ethereum"
-//        }
-//    compile fileTree(dir:'lib',includes:['solcJ-all-0.4.25-gm.jar'])
+        {
+            exclude group:"org.ethereum"
+        }
+    compile fileTree(dir:'lib',includes:['solcJ-all-0.4.25-gm.jar'])
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8'
 	compile 'com.alibaba:fastjson:1.2.60'
 	compile 'com.h2database:h2:1.4.197'
