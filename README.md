@@ -2,8 +2,6 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://webasedoc.readthedocs.io/zh_CN/latest/docs/WeBASE/CONTRIBUTING.html)
 [![GitHub (pre-)release](https://img.shields.io/github/release/WeBankFinTech/WeBASE-Front/all.svg)](https://github.com/WeBankFinTech/WeBASE-Front/releases)
 [![CodeFactor](https://www.codefactor.io/repository/github/webankfintech/webase-front/badge)](https://www.codefactor.io/repository/github/webankfintech/webase-front)
-[![Build Status](https://travis-ci.org/CodingCattwo/WeBASE-Front.svg?branch=master)](https://travis-ci.org/CodingCattwo/WeBASE-Front)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f3058e6ab59d443ab124f6f0c0111bf0)](https://www.codacy.com/manual/CodingCattwo/WeBASE-Front?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=CodingCattwo/WeBASE-Front&amp;utm_campaign=Badge_Grade)
 [![Code Lines](https://tokei.rs/b1/github/WeBankFinTech/WeBASE-Front?category=code)](https://github.com/WeBankFinTech/WeBASE-Front)
 [![license](http://img.shields.io/badge/license-Apache%20v2-blue.svg)](http://www.apache.org/licenses/)
 
