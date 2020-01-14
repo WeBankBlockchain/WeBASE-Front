@@ -489,10 +489,15 @@ public class Web3ApiService {
     }
 
     public List<String> getGroupList() {
+        log.debug("getGroupList. ");
         try {
             Set<Integer> iset = web3jMap.keySet();
-            return web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
+            List<String> groupIdList = web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
+            // check web3jMap, if not match groupIdList, refresh web3jMap in front
+            refreshWeb3jMapService(groupIdList);
+            return groupIdList;
         } catch (IOException e) {
+            log.error("getGroupList error:[]", e);
             throw new FrontException(e.getMessage());
         }
     }
@@ -507,39 +512,43 @@ public class Web3ApiService {
     }
 
     @DependsOn("encryptType")
-    public void refreshServiceMap() throws FrontException {
-        List<String> groupList = getGroupList();
+    public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
+        log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
 
-        for (int i = 0; i < groupList.size(); i++) {
-            Integer groupId = new Integer(groupList.get(i));
-            Credentials credentials = GenCredential.create();
-            if (web3jMap.get(groupId) == null) {
-                ChannelConnections channelConnections = new ChannelConnections();
-                channelConnections
-                        .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
-                channelConnections.setGroupId(Integer.valueOf(groupList.get(i)));
-                channelConnectionsList.add(channelConnections);
-                org.fisco.bcos.channel.client.Service service =
-                        new org.fisco.bcos.channel.client.Service();
-                service.setOrgID(Web3Config.orgName);
-                service.setGroupId(Integer.valueOf(groupList.get(i)));
-                service.setThreadPool(threadPoolTaskExecutor);
-                service.setAllChannelConnections(groupChannelConnectionsConfig);
-                try {
-                    service.run();
-                } catch (Exception e) {
-                    new FrontException("refresh web3j failed");
-                }
-                ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-                channelEthereumService.setTimeout(Web3Config.timeout);
-                channelEthereumService.setChannelService(service);
-                Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
-                web3jMap.put(groupId, web3j);
-                cnsServiceMap.put(groupId, new CnsService(web3j, credentials));
+        groupIdList.forEach(gId -> {
+            Integer groupId = new Integer(gId);
+            if(web3jMap.get(groupId) == null) {
+                refreshWeb3jMap(groupId, channelConnectionsList);
             }
+        });
+    }
+
+    private void refreshWeb3jMap(int groupId, List<ChannelConnections> channelConnectionsList) {
+        Credentials credentials = GenCredential.create();
+        ChannelConnections channelConnections = new ChannelConnections();
+        channelConnections
+                .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
+        channelConnections.setGroupId(groupId);
+        channelConnectionsList.add(channelConnections);
+        org.fisco.bcos.channel.client.Service service =
+                new org.fisco.bcos.channel.client.Service();
+        service.setOrgID(Web3Config.orgName);
+        service.setGroupId(groupId);
+        service.setThreadPool(threadPoolTaskExecutor);
+        service.setAllChannelConnections(groupChannelConnectionsConfig);
+        try {
+            service.run();
+        } catch (Exception e) {
+            throw new FrontException("refresh web3j failed");
         }
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setTimeout(Web3Config.timeout);
+        channelEthereumService.setChannelService(service);
+        Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
+        web3jMap.put(groupId, web3j);
+        cnsServiceMap.put(groupId, new CnsService(web3j, credentials));
     }
 
     // get all peers of chain
