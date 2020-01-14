@@ -20,6 +20,7 @@ import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
@@ -638,6 +639,11 @@ public class Web3ApiService {
         Set<Integer> iset = web3jMap.keySet();
         org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
                 web3jMap.get(iset.toArray()[0]).startGroup(startGroupId).send().getStatus();
+        // if start group success, refresh web3jMap
+        if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+            refreshWeb3jMap(startGroupId,
+                    groupChannelConnectionsConfig.getAllChannelConnections());
+        }
         return status;
     }
 }
