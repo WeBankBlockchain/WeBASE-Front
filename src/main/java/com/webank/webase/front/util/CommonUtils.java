@@ -305,4 +305,17 @@ public class CommonUtils {
         }
         return null;
     }
+
+    /**
+     * parseHexStr2Int.
+     *
+     * @param str str
+     * @return
+     */
+    public static int parseHexStr2Int(String str) {
+        if (StringUtils.isBlank(str)) {
+            return 0;
+        }
+        return Integer.parseInt(str.substring(2), 16);
+    }
 }
