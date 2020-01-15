@@ -130,3 +130,4 @@ nodejs下载地址：https://nodejs.org/en/download/
 
 ###2.2 部署
 
+请参考部署文档
