@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 @ConfigurationProperties(prefix = "sdk")
 public class Web3Config {
-    
+
     public static String orgName;
     private List<Integer> groupIdList;
     private int corePoolSize;
@@ -137,7 +138,7 @@ public class Web3Config {
      */
     @Bean
     @DependsOn("encryptType")
-    public HashMap<Integer, Web3j> web3jMap(Web3j web3j,
+    public Map<Integer, Web3j> web3jMap(Web3j web3j,
             GroupChannelConnectionsConfig groupChannelConnectionsConfig) throws Exception {
         // whether front' encrypt type matches with chain's
         isMatchEncryptType(web3j);
@@ -154,7 +155,7 @@ public class Web3Config {
             log.info("*** groupId " + groupIdList.get(i));
             channelConnectionsList.add(channelConnections);
         }
-        HashMap web3jMap = new HashMap<Integer, Web3j>();
+        Map web3jMap = new ConcurrentHashMap<Integer, Web3j>();
         for (int i = 0; i < groupIdList.size(); i++) {
             Service service = new Service();
             service.setOrgID(orgName);
@@ -194,10 +195,10 @@ public class Web3Config {
 
     @Bean
     @DependsOn("encryptType")
-    public HashMap<Integer, CnsService> cnsServiceMap(HashMap<Integer, Web3j> web3jMap) {
+    public Map<Integer, CnsService> cnsServiceMap(Map<Integer, Web3j> web3jMap) {
         // support guomi
         Credentials credentials = GenCredential.create();
-        HashMap cnsServiceMap = new HashMap<Integer, CnsService>();
+        Map cnsServiceMap = new ConcurrentHashMap<Integer, CnsService>();
         Iterator entries = web3jMap.entrySet().iterator();
 
         while (entries.hasNext()) {
