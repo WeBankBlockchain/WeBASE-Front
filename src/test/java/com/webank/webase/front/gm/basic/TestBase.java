@@ -25,7 +25,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.math.BigInteger;
 
-public class TestBaseGM {
+public class TestBase {
   public static ApplicationContext context = null;
   // 初始化交易签名私钥 国密的create方法
 
