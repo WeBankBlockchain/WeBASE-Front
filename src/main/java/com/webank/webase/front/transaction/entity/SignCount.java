@@ -7,4 +7,5 @@ import lombok.Data;
 public class SignCount {
     private Integer count;
     private Integer group;
+    private Integer id;
 }
