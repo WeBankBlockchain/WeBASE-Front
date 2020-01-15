@@ -532,7 +532,9 @@ public class TransService {
         return web3j;
     }
 
-    public boolean preSign(Integer count, Integer group) throws Exception {
+    public boolean preSign(Integer count, Integer group, Integer id) throws Exception {
+        linkedBlockingQueue.clear();
+        log.info("clear success");
         Credentials credentials = GenCredential.create();
          parallelok =
                 ParallelOk.deploy(
@@ -548,8 +550,8 @@ public class TransService {
 
         //prepare user
         ThreadPoolTaskExecutor threadPool = new ThreadPoolTaskExecutor();
-        threadPool.setCorePoolSize(200);
-        threadPool.setMaxPoolSize(500);
+        threadPool.setCorePoolSize(3000);
+        threadPool.setMaxPoolSize(5000);
         threadPool.setQueueCapacity(count.intValue());
         threadPool.initialize();
 
@@ -557,17 +559,17 @@ public class TransService {
         //  Lock lock = new ReentrantLock();
 
         for (int i = 0; i < count.intValue(); ++i) {
-            final int index = i;
+             int index = i;
             threadPool.execute(
                     new Runnable() {
                         @Override
                         public void run() {
-                            while (true) {
-                                String user = Long.toHexString(seconds) + Integer.toHexString(index);
+
+                                String user =id.toString()+  Long.toHexString(seconds) + Integer.toHexString(index);
                                 // String to = ;
 
                                 Random random = new Random();
-                                int r = random.nextInt(100);
+                                int r = random.nextInt(10000);
                                 BigInteger amount = BigInteger.valueOf(r);
 
                                 try {
@@ -577,12 +579,13 @@ public class TransService {
 
                                 } catch (Exception e) {
                                     e.printStackTrace();
-                                    continue;
                                 }
-                            }
+
                         }
                     });
         }
+        Thread.sleep(1000);
+         log.info("size: {}" + linkedBlockingQueue.size());
         return true;
 
     }
@@ -596,7 +599,11 @@ public class TransService {
         log.info("***{}***",s );
         SendTransaction transactionHash = transactionManager.sendTransaction(s, callback);
       //  log.info("!!!{} ", transactionHash.getTransactionHash());
+        while(callback.getStatus()==0) {
+            Thread.sleep(1000);
+        }
         return true;
+
     }
 }
 

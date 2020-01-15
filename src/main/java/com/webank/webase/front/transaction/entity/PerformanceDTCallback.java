@@ -9,6 +9,7 @@ import java.math.BigInteger;
 
 public class PerformanceDTCallback extends TransactionSucCallback {
     private Long startTime = System.currentTimeMillis();
+    private int status = 0 ;
 
     static Logger logger = LoggerFactory.getLogger(PerformanceDTCallback.class);
 
@@ -17,7 +18,11 @@ public class PerformanceDTCallback extends TransactionSucCallback {
     @Override
     public void onResponse(TransactionReceipt receipt) {
         Long cost = System.currentTimeMillis() - startTime;
+        status=1;
         logger.info("{}cost time :{}",receipt.getTransactionHash(), cost);
+    }
+    public int getStatus() {
+        return status;
     }
 
 }

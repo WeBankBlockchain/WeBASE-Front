@@ -85,7 +85,7 @@ public class TransController extends BaseController {
     @PostMapping("/presign")
     public Boolean preSign(@Valid @RequestBody SignCount req, BindingResult result) throws Exception {
         checkParamResult(result);
-        return transServiceImpl.preSign(req.getCount(),req.getGroup());
+        return transServiceImpl.preSign(req.getCount(),req.getGroup(),req.getId());
     }
 
     @GetMapping("/pressure-test")
