@@ -226,11 +226,7 @@ export default {
         },
         decodefun() {
             let Web3EthAbi = require('web3-eth-abi');
-            // this.methodId = input.substring(0, 10);
-            // this.methodId = data;
-            // let inputDatas = "0x" + input.substring(10);
             if (this.typesArray) {
-                // abiData.abiInfo = JSON.parse(abiData.abiInfo)
                 this.typesArray.inputs.forEach((val, index) => {
                     if (val && index < this.typesArray.inputs.length - 1) {
                         this.abiType = this.abiType + val.type + " " + val.name + ",";
@@ -250,22 +246,6 @@ export default {
                                 this.inputData[index].data = this.decodeData[index];
                                 
                             }
-                            // this.typesArray.inputs.forEach((val, index) => {
-                            //     if (val && val.name && val.type) {
-                            //         if (key === val.name) {
-                            //             this.inputData[index] = {};
-                            //             this.inputData[index].name = val.name;
-                            //             this.inputData[index].type = val.type;
-                            //             this.inputData[index].data = this.decodeData[key];
-                            //         }
-                            //     } else if (val) {
-                            //         if (index == key) {
-                            //             this.inputData[index] = {};
-                            //             this.inputData[index].type = val;
-                            //             this.inputData[index].data = this.decodeData[key];
-                            //         }
-                            //     }
-                            // });
                         }
                     }
                 }
@@ -285,7 +265,6 @@ export default {
                         setTimeout(() => {
                             this.eventSHow = true;
                         }, 200)
-                        // console.log(this.transationData.logs[i])
                     } else if (res.data.code !== 0) {
                         this.$message({
                             type: "error",
@@ -372,7 +351,6 @@ export default {
 </script>
 <style>
 .transation-content {
-    /* width:200px; */
     word-wrap: break-word;
     word-break: break-all;
 }

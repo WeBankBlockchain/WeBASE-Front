@@ -17,14 +17,12 @@
 package com.webank.webase.front.gm.runtime;
 
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.util.CommonUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.crypto.Sign;
@@ -73,29 +71,10 @@ public class SignDataTest extends BaseTest {
         EncodeInfo encodeInfo = new EncodeInfo();
         encodeInfo.setUserId(100001);
         encodeInfo.setEncodedDataStr(Hash.sha3String(rawData));
-        String signedData = keyStoreService.getSignDate(encodeInfo);// from webase-sign
+        String signedData = keyStoreService.getSignData(encodeInfo);// from webase-sign
         System.out.println(signedData); // 00fd8bbc86faa0cf9216886e15118862ef5469c5283ab43b727ebaee93d866ced346c6eea89aac11be598de5ad8b3711791594651a3a3e44df2f7d9a522da351e0
 //        Assert.assertTrue(StringUtils.isNotBlank(signedData));
 
-        // 获取webase-sing 私钥
-        String pri = getPriFromSign(100001);
-        System.out.println("private key :" + pri);
-//        // 验证sign Data是否正确
-//        String localSigned = getLocalSignedData(pri);
-//        Assert.assertTrue(signedData.equals(localSigned));
-
-        Sign.SignatureData signatureData = CommonUtils.stringToSignatureData(signedData);
-        System.out.println("sign" + ByteUtil.hexStringToBytes(encodeInfo.getEncodedDataStr()));
-        BigInteger pubRecover = Sign.signedMessageToKey(ByteUtil.hexStringToBytes(encodeInfo.getEncodedDataStr()), signatureData);
-        String pubRecStr = Numeric.toHexStringWithPrefix(pubRecover);
-        System.out.println("pubRecStr");
-        System.out.println(pubRecStr);
-
-        Credentials credentials = GenCredential.create(pri);
-        String pubFromPri = Numeric.toHexStringWithPrefix(credentials.getEcKeyPair().getPublicKey());
-        System.out.println("pubFromPri");
-        System.out.println(pubFromPri);
-//        Assert.assertTrue(pubFromPri.equals(pubRecStr));
     }
 
     public String getPriFromSign(int userIdSign) {
