@@ -119,8 +119,10 @@ public class ConstantCode {
     public static final RetCode FAIL_TABLE_NOT_EXISTS = RetCode.mark(201228, "table not exists");
     public static final String CRUD_EMPTY_SET = "Empty Set.";
 
-    // cert
+    // cert PEM_FORMAT_ERROR
     public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
+    public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
+    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201233, "Pem file content error");
 
 
 }

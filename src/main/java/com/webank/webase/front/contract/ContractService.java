@@ -18,6 +18,30 @@ import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.AB
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.BIN;
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.INTERFACE;
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.METADATA;
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.enums.ContractStatus;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.contract.entity.ContractPath;
+import com.webank.webase.front.contract.entity.ContractPathKey;
+import com.webank.webase.front.contract.entity.FileContentHandle;
+import com.webank.webase.front.contract.entity.ReqContractPath;
+import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqDeployWithSign;
+import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqSendAbi;
+import com.webank.webase.front.contract.entity.RspContractCompile;
+import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.transaction.TransService;
+import com.webank.webase.front.util.AbiUtil;
+import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,7 +50,6 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +59,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
@@ -46,6 +70,7 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.fisco.bcos.web3j.solidity.compiler.CompilationResult;
 import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
@@ -57,31 +82,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.properties.Constants;
-import com.webank.webase.front.util.FrontUtils;
-import com.webank.webase.front.base.enums.ContractStatus;
-import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ContractPath;
-import com.webank.webase.front.contract.entity.ContractPathKey;
-import com.webank.webase.front.contract.entity.ReqContractPath;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqDeployWithSign;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
-import com.webank.webase.front.contract.entity.RspContractCompile;
-import com.webank.webase.front.contract.entity.FileContentHandle;
-import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.transaction.TransService;
-import com.webank.webase.front.util.AbiUtil;
-import com.webank.webase.front.util.CommonUtils;
-import com.webank.webase.front.util.ContractAbiUtil;
-import com.webank.webase.front.web3api.Web3ApiService;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * contract management.
@@ -97,7 +97,7 @@ public class ContractService {
     @Autowired
     private Map<String, String> cnsMap;
     @Autowired
-    private HashMap<Integer, CnsService> cnsServiceMap;
+    private Map<Integer, CnsService> cnsServiceMap;
     @Autowired
     private ContractRepository contractRepository;
     @Autowired
@@ -174,6 +174,7 @@ public class ContractService {
 
     /**
      * case deploy type
+     * 
      * @param: ReqDeploy-contractId -> deployLocalContract / deploy
      */
     public String caseDeploy(ReqDeploy req) throws Exception {
@@ -186,6 +187,7 @@ public class ContractService {
 
     /**
      * check contract exists before deploy
+     * 
      * @param req
      * @return
      * @throws Exception
@@ -355,6 +357,9 @@ public class ContractService {
                             .deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
                                     Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor)
                             .send();
+        } catch (TransactionException e) {
+            log.error("commonContract deploy failed.", e);
+            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
         } catch (Exception e) {
             log.error("commonContract deploy failed.", e);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
@@ -386,8 +391,9 @@ public class ContractService {
         return cnsServiceMap.get(groupId).getAddressByContractNameAndVersion(name + ":" + version);
     }
 
-    public static FileContentHandle compileToJavaFile(String contractName, List<AbiDefinition> abiInfo,
-                                                      String contractBin, String packageName) throws IOException {
+    public static FileContentHandle compileToJavaFile(String contractName,
+            List<AbiDefinition> abiInfo, String contractBin, String packageName)
+            throws IOException {
 
         File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
         FrontUtils.createFileIfNotExist(abiFile, true);
@@ -462,7 +468,7 @@ public class ContractService {
         contractPathVo.setContractPath(contractReq.getContractPath());
         contractPathVo.setModifyTime(LocalDateTime.now());
         contractPathRepository.save(contractPathVo);
-        
+
         return contract;
     }
 
@@ -487,7 +493,7 @@ public class ContractService {
         contractPathVo.setContractPath(contractReq.getContractPath());
         contractPathVo.setModifyTime(LocalDateTime.now());
         contractPathRepository.save(contractPathVo);
-        
+
         return contract;
     }
 
@@ -499,12 +505,14 @@ public class ContractService {
         // init templates
         List<String> templates = CommonUtils.readFileToList(Constants.TEMPLATE);
         String contractPath = "template";
-        List<Contract> contracts = contractRepository.findByGroupIdAndContractPath(param.getGroupId(), contractPath);
-        if ((contracts.isEmpty() && !Objects.isNull(templates)) 
-                || (!contracts.isEmpty() && !Objects.isNull(templates) && templates.size() != contracts.size())) {
+        List<Contract> contracts =
+                contractRepository.findByGroupIdAndContractPath(param.getGroupId(), contractPath);
+        if ((contracts.isEmpty() && !Objects.isNull(templates)) || (!contracts.isEmpty()
+                && !Objects.isNull(templates) && templates.size() != contracts.size())) {
             for (String template : templates) {
-                Contract localContract = contractRepository.findByGroupIdAndContractPathAndContractName(
-                        param.getGroupId(), contractPath, template.split(",")[0]);
+                Contract localContract =
+                        contractRepository.findByGroupIdAndContractPathAndContractName(
+                                param.getGroupId(), contractPath, template.split(",")[0]);
                 if (Objects.isNull(localContract)) {
                     log.info("init template contract:{}", template.split(",")[0]);
                     Contract contract = new Contract();
@@ -574,7 +582,7 @@ public class ContractService {
         }
         return contract;
     }
-    
+
     /**
      * verify that if the contract changed.
      */
@@ -624,8 +632,9 @@ public class ContractService {
             // save contract to file
             contractFile = new File(contractFilePath);
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
-            //compile
-            SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, true, ABI, BIN, INTERFACE, METADATA);
+            // compile
+            SolidityCompiler.Result res =
+                    SolidityCompiler.compile(contractFile, true, ABI, BIN, INTERFACE, METADATA);
             if ("".equals(res.output)) {
                 log.error("contractCompile error", res.errors);
                 throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.errors);
@@ -633,7 +642,8 @@ public class ContractService {
             // compile result
             CompilationResult result = CompilationResult.parse(res.output);
             CompilationResult.ContractMetadata meta = result.getContract(contractName);
-            RspContractCompile compileResult = new RspContractCompile(contractName, meta.abi, meta.bin, res.errors);
+            RspContractCompile compileResult =
+                    new RspContractCompile(contractName, meta.abi, meta.bin, res.errors);
             return compileResult;
         } catch (Exception ex) {
             log.error("contractCompile error", ex);
@@ -645,7 +655,7 @@ public class ContractService {
         }
 
     }
-    
+
     /**
      * addContractPath.
      */
@@ -658,21 +668,21 @@ public class ContractService {
         contractPathRepository.save(contractPath);
         return contractPath;
     }
-    
+
     /**
      * addContractPath.
      */
     public List<ContractPath> findPathList(Integer groupId) {
         // get from database.
         Sort sort = new Sort(Sort.Direction.DESC, "modifyTime");
-        List<ContractPath> contractPaths = contractPathRepository.findAll(
-                (Root<ContractPath> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
-                    Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
-                    return criteriaBuilder.and(predicate);
-                }, sort);
+        List<ContractPath> contractPaths = contractPathRepository.findAll((Root<ContractPath> root,
+                CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+            Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
+            return criteriaBuilder.and(predicate);
+        }, sort);
         return contractPaths;
     }
-    
+
     /**
      * deletePath.
      */

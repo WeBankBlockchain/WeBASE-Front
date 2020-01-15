@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.keystore;
 
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,10 @@ import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
 import com.webank.webase.front.util.CredentialUtils;
+import com.webank.webase.front.util.PemUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
@@ -37,6 +41,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.client.RestTemplate;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.util.AesUtils;
@@ -124,7 +129,7 @@ public class KeyStoreService {
         ECKeyPair keyPair = CredentialUtils.createKeyPair(privateKey);
         return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
     }
-    
+
     /**
      * getLocalKeyStores.
      */
@@ -140,7 +145,7 @@ public class KeyStoreService {
         }
         return keyStores;
     }
-    
+
     /**
      * deleteKeyStore.
      */
@@ -153,11 +158,11 @@ public class KeyStoreService {
      */
     private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, boolean useAes, int type, String userName) {
         String publicKey = Numeric
-            .toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
+                .toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
         String privateKey = Numeric.toHexStringNoPrefix(keyPair.getPrivateKey());
         String address = "0x" + Keys.getAddress(keyPair.getPublicKey());
         log.debug("publicKey:{} privateKey:{} address:{}", publicKey, privateKey, address);
-        
+
         String realPrivateKey = privateKey;
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setPublicKey(publicKey);
@@ -196,6 +201,7 @@ public class KeyStoreService {
      */
     // 直接用一个固定的credential，不用每次都新建
     public Credentials getCredentialsForQuery() {
+        log.debug("start getCredentialsForQuery. ");
         KeyStoreInfo keyStoreInfo = createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
         return GenCredential.create(keyStoreInfo.getPrivateKey());
     }
@@ -206,30 +212,33 @@ public class KeyStoreService {
      * @param user userId or userAddress.
      */
     public String getPrivateKey(String user, boolean useAes) {
-        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByAddress(user);
 
-        if (keyStoreInfoLocal != null) {
-            //get privateKey by address
-            return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
-        }
-
+        // get privateKey from map (in memory, not db)
         String key_of_user = user + "_" + useAes;
         if (PRIVATE_KEY_MAP.containsKey(key_of_user)) {
             return PRIVATE_KEY_MAP.get(key_of_user);
         }
 
-        //get privateKey by userId from nodemgr
+        // get from local db
+        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByAddress(user);
+        // no need for if(useAes), default aesDecrypt before saving in front db
+        if (keyStoreInfoLocal != null) {
+            //get privateKey by address
+            return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
+        }
+
+        //get privateKey by userId from nodemgr or webase-sign
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         String[] ipPortArr = constants.getKeyServer().split(",");
         for (String ipPort : ipPortArr) {
             try {
-                String url = String.format(Constants.MGR_PRIVATE_KEY_URI, ipPort, user);
+                String url = String.format(Constants.MGR_PRIVATE_KEY_URI, ipPort.trim(), user);
                 log.info("getPrivateKey url:{}", url);
                 BaseResponse response = restTemplate.getForObject(url, BaseResponse.class);
                 log.info("getPrivateKey response:{}", JSON.toJSONString(response));
                 if (response.getCode() == 0) {
                     keyStoreInfo =
-                        CommonUtils.object2JavaBean(response.getData(), KeyStoreInfo.class);
+                            CommonUtils.object2JavaBean(response.getData(), KeyStoreInfo.class);
                     break;
                 }
             } catch (Exception e) {
@@ -253,28 +262,50 @@ public class KeyStoreService {
     }
 
     /**
-     * getSignDate from sign service. (webase-sign)
+     * getSignData from sign service. (webase-sign)
      * @param params params
      * @return
      */
-    public String getSignDate(EncodeInfo params) {
+    public String getSignData(EncodeInfo params) {
         try {
             SignInfo signInfo = new SignInfo();
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
-            log.info("getSignDate url:{}", url);
+            log.info("getSignData url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
             HttpEntity<String> formEntity =
                     new HttpEntity<String>(JSON.toJSONString(params), headers);
             BaseResponse response =
                     restTemplate.postForObject(url, formEntity, BaseResponse.class);
-            log.info("getSignDate response:{}", JSON.toJSONString(response));
+            log.info("getSignData response:{}", JSON.toJSONString(response));
             if (response.getCode() == 0) {
                 signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
             }
             return signInfo.getSignDataStr();
         } catch (Exception e) {
-            log.error("getSignDate exception", e);
+            log.error("getSignData exception", e);
         }
+        return null;
+    }
+
+    /**
+     * import keystore info from pem file's content
+     * @param pemContent
+     * @param useAes false
+     * @param userType local
+     * @param userName
+     * @return
+     */
+    public KeyStoreInfo importKeyStoreFromPem(String pemContent, boolean useAes, int userType,  String userName) {
+        PEMManager pemManager = new PEMManager();
+        String privateKey;
+        try {
+            pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
+            privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
+        }catch (Exception e) {
+            log.error("importKeyStoreFromPem error:[]", e);
+            throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
+        }
+        getKeyStoreFromPrivateKey(privateKey, useAes, userType, userName);
         return null;
     }
 
