@@ -28,10 +28,22 @@ spring:
       settings:
         web-allow-others: false
         trace: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username:
+    password:
+    virtual-host:
+    ssl:
+      enabled: false
 
 server:
   port: 5002
   context-path: /WeBASE-Front
+
+rabbitmq:
+  service-name: mq_webase
+  queue-name: block_exchange.block_queue_1
 
 sdk:
   orgName: orgTest
