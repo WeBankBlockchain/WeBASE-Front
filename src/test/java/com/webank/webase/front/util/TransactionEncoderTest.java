@@ -45,7 +45,7 @@ public class TransactionEncoderTest {
 
             byte[] signedMessage = TransactionEncoder.signMessage(createContractTransaction(), credentials);
             System.out.println("       sign  useTime: " + Duration.between(startTime, Instant.now()).toMillis());
-            String hexMessage = Numeric.toHexString(signedMessage);
+         //   String hexMessage = Numeric.toHexString(signedMessage);
 
 
             // gm createTransaction!
@@ -66,7 +66,6 @@ public class TransactionEncoderTest {
         for (int i = 0; i < 10; i++) {
 
             Instant systartTime = Instant.now();
-            Credentials credentials =
                     GenCredential.create(
                             "a392604efc2fad9c0b3da43b5f698a2e3f270f170d859912be0d54742275c5f"+i);
             System.out.println("       siyao  useTime: " + Duration.between(systartTime, Instant.now()).toMillis());
@@ -75,18 +74,20 @@ public class TransactionEncoderTest {
 
             // gm createTransaction!
             EncryptType encryptType = new EncryptType(1);
+            assertTrue(encryptType.getEncryptType()==1);
             Instant gmsystartTime = Instant.now();
 
             GenCredential.create(
                             "a392604efc2fad9c0b3da43b5f698a2e3f270f170d859912be0d54742275c5f"+i);
             //     System.out.println(gmcredentials.getEcKeyPair().getPublicKey().toString(16));
             System.out.println(encryptType+ "      gmsiyao  useTime: " + Duration.between(gmsystartTime, Instant.now()).toMillis());
+
         }
     }
 //
 
 
-    static RawTransaction createContractTransaction() {
+    private static RawTransaction createContractTransaction() {
 
         BigInteger randomid = new BigInteger("500");
         BigInteger blockLimit = new BigInteger("501");
