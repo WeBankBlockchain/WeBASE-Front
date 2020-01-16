@@ -22,11 +22,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class PerformanceHelloWorld {
-  private static Logger logger = LoggerFactory.getLogger(PerformanceHelloWorld.class);
+  public static Logger logger = LoggerFactory.getLogger(PerformanceHelloWorld.class);
   private static AtomicInteger sended = new AtomicInteger(0);
 
   public static void main(String[] args) throws Exception {
@@ -62,7 +61,7 @@ public class PerformanceHelloWorld {
       case "trans":
         count = Integer.parseInt(args[1]);
         qps = Integer.parseInt(args[2]);
-        break;
+       // break;
       default:
         System.out.println("Args: <trans> <Total> <QPS>");
       }
