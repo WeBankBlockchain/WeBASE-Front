@@ -10,6 +10,20 @@ import java.util.concurrent.atomic.AtomicLong;
 public class PerformanceCollector {
   static Logger logger = LoggerFactory.getLogger(PerformanceCollector.class);
 
+  private AtomicLong less50 = new AtomicLong(0);
+  private AtomicLong less100 = new AtomicLong(0);
+  private AtomicLong less200 = new AtomicLong(0);
+  private AtomicLong less400 = new AtomicLong(0);
+  private AtomicLong less1000 = new AtomicLong(0);
+  private AtomicLong less2000 = new AtomicLong(0);
+  private AtomicLong timeout2000 = new AtomicLong(0);
+  private AtomicLong totalCost = new AtomicLong(0);
+
+  private Integer total = 0;
+  private AtomicInteger received = new AtomicInteger(0);
+  private AtomicInteger error = new AtomicInteger(0);
+  private Long startTimestamp = System.currentTimeMillis();
+
   public Integer getTotal() {
     return total;
   }
@@ -87,24 +101,11 @@ public class PerformanceCollector {
         System.out.println("2000 < time           : " + String.valueOf(timeout2000) + "  : "
             + String.valueOf((double) timeout2000.get() / total * 100) + "%");
 
-        System.exit(0);
+      //  System.exit(0);
       }
     } catch (Exception e) {
       logger.error("error:", e);
     }
   }
 
-  private AtomicLong less50 = new AtomicLong(0);
-  private AtomicLong less100 = new AtomicLong(0);
-  private AtomicLong less200 = new AtomicLong(0);
-  private AtomicLong less400 = new AtomicLong(0);
-  private AtomicLong less1000 = new AtomicLong(0);
-  private AtomicLong less2000 = new AtomicLong(0);
-  private AtomicLong timeout2000 = new AtomicLong(0);
-  private AtomicLong totalCost = new AtomicLong(0);
-
-  private Integer total = 0;
-  private AtomicInteger received = new AtomicInteger(0);
-  private AtomicInteger error = new AtomicInteger(0);
-  private Long startTimestamp = System.currentTimeMillis();
 }
