@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -50,7 +51,7 @@ public class TransactionEncoderTest {
 
             // gm createTransaction!
             EncryptType encryptType = new EncryptType(1);
-             assertTrue(encryptType.getEncryptType()==1);
+             assertSame(encryptType.getEncryptType(),1);
             Credentials gmcredentials =
                     GenCredential.create(
                             "a392604efc2fad9c0b3da43b5f698a2e3f270f170d859912be0d54742275c5f");
@@ -74,7 +75,7 @@ public class TransactionEncoderTest {
 
             // gm createTransaction!
             EncryptType encryptType = new EncryptType(1);
-            assertTrue(encryptType.getEncryptType()==1);
+            assertSame(encryptType.getEncryptType(),1);
             Instant gmsystartTime = Instant.now();
 
             GenCredential.create(
