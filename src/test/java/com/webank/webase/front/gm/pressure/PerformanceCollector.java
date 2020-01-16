@@ -41,22 +41,18 @@ public class PerformanceCollector {
         less50.incrementAndGet();
       } else if (cost < 100) {
         less100.incrementAndGet();
-        ;
+
       } else if (cost < 200) {
         less200.incrementAndGet();
-        ;
+
       } else if (cost < 400) {
         less400.incrementAndGet();
-        ;
       } else if (cost < 1000) {
         less1000.incrementAndGet();
-        ;
       } else if (cost < 2000) {
         less2000.incrementAndGet();
-        ;
       } else {
         timeout2000.incrementAndGet();
-        ;
       }
 
       totalCost.addAndGet(cost);
