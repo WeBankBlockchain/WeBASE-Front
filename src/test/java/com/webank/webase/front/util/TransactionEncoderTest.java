@@ -1,19 +1,20 @@
 package com.webank.webase.front.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.crypto.RawTransaction;
+import org.fisco.bcos.web3j.crypto.TransactionEncoder;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.web3j.utils.Numeric;
+import org.junit.Test;
 
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 
-import org.fisco.bcos.web3j.crypto.*;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.rlp.RlpType;
-import org.fisco.bcos.web3j.utils.Numeric;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class TransactionEncoderTest {
 
@@ -49,15 +50,15 @@ public class TransactionEncoderTest {
 
             // gm createTransaction!
             EncryptType encryptType = new EncryptType(1);
-
+             assertTrue(encryptType.getEncryptType()==1);
             Credentials gmcredentials =
                     GenCredential.create(
                             "a392604efc2fad9c0b3da43b5f698a2e3f270f170d859912be0d54742275c5f");
 
             Instant startTime1 = Instant.now();
-            byte[] signedMessage1 = TransactionEncoder.signMessage(createContractTransaction(), gmcredentials);
+             TransactionEncoder.signMessage(createContractTransaction(), gmcredentials);
             System.out.println(" guomi sign  useTime: " + Duration.between(startTime1, Instant.now()).toMillis());
-            String hexMessage1 = Numeric.toHexString(signedMessage1);
+      //      String hexMessage1 = Numeric.toHexString(signedMessage1);
     }
     @Test
     public void testGMCrendetial() {
@@ -75,11 +76,11 @@ public class TransactionEncoderTest {
             // gm createTransaction!
             EncryptType encryptType = new EncryptType(1);
             Instant gmsystartTime = Instant.now();
-            Credentials gmcredentials =
-                    GenCredential.create(
+
+            GenCredential.create(
                             "a392604efc2fad9c0b3da43b5f698a2e3f270f170d859912be0d54742275c5f"+i);
             //     System.out.println(gmcredentials.getEcKeyPair().getPublicKey().toString(16));
-            System.out.println("       gmsiyao  useTime: " + Duration.between(gmsystartTime, Instant.now()).toMillis());
+            System.out.println(encryptType+ "      gmsiyao  useTime: " + Duration.between(gmsystartTime, Instant.now()).toMillis());
         }
     }
 //
