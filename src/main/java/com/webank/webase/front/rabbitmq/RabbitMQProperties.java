@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
-@ConfigurationProperties("rabbitmq")
+@ConfigurationProperties("rabbitmq.queue")
 public class RabbitMQProperties {
 
     private String serviceName;
