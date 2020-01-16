@@ -22,6 +22,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 public class PerformanceHelloWorld {
   private static Logger logger = LoggerFactory.getLogger(PerformanceHelloWorld.class);
   private static AtomicInteger sended = new AtomicInteger(0);
@@ -109,7 +112,7 @@ public class PerformanceHelloWorld {
       }
     } catch (Exception e) {
       e.printStackTrace();
-      System.exit(-1);
+//      System.exit(-1);
     }
   }
 
@@ -141,7 +144,6 @@ public class PerformanceHelloWorld {
       BigInteger gasPrice = new BigInteger("3");
       BigInteger gasLimit = new BigInteger("30000000");
 
-      String command = "set";
       Integer count = 0;
       Integer qps = 0;
 
@@ -193,12 +195,14 @@ public class PerformanceHelloWorld {
           }
         });
       }
+      assertTrue(count>0);
     } catch (Exception e) {
       e.printStackTrace();
-      System.exit(-1);
+    //  System.exit(-1);
     }
 
     Thread.sleep(100000);
+
   }
 
 

@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 
 public class PerformanceHelloWorldCallback extends TransactionSucCallback {
   private static ObjectMapper objectMapper = new ObjectMapper();
+
+  public  static Logger logger = LoggerFactory.getLogger(PerformanceHelloWorldCallback.class);
+
   private Long startTime = System.currentTimeMillis();
 
   private PerformanceCollector collector;
@@ -18,8 +21,6 @@ public class PerformanceHelloWorldCallback extends TransactionSucCallback {
   public void setCollector(PerformanceCollector collector) {
     this.collector = collector;
   }
-
-  static Logger logger = LoggerFactory.getLogger(PerformanceHelloWorldCallback.class);
 
   PerformanceHelloWorldCallback() {
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
