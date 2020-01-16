@@ -22,24 +22,8 @@ import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.FrontUtils;
-import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
-import com.webank.webase.front.web3api.entity.NodeStatusInfo;
-import com.webank.webase.front.web3api.entity.PeerOfConsensusStatus;
-import com.webank.webase.front.web3api.entity.PeerOfSyncStatus;
+import com.webank.webase.front.web3api.entity.*;
 import com.webank.webase.front.web3api.entity.SyncStatus;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
@@ -51,12 +35,20 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
 import org.fisco.bcos.web3j.protocol.core.methods.response.*;
-//import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+//import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
 
 
 /**

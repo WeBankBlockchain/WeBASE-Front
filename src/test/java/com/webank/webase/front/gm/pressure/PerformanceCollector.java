@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class PerformanceCollector {
-  static Logger logger = LoggerFactory.getLogger(PerformanceCollector.class);
+  public static Logger logger = LoggerFactory.getLogger(PerformanceCollector.class);
 
   private AtomicLong less50 = new AtomicLong(0);
   private AtomicLong less100 = new AtomicLong(0);
