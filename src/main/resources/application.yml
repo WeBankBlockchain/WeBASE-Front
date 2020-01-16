@@ -37,13 +37,14 @@ spring:
     ssl:
       enabled: false
 
+rabbitmq:
+  queue:
+    service-name: mq_webase
+    queue-name: block_exchange.block_queue_1
+
 server:
   port: 5002
   context-path: /WeBASE-Front
-
-rabbitmq:
-  service-name: mq_webase
-  queue-name: block_exchange.block_queue_1
 
 sdk:
   orgName: orgTest
