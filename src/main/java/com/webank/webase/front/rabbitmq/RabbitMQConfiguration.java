@@ -19,7 +19,7 @@ import java.util.Map;
 @EnableConfigurationProperties(RabbitMQProperties.class)
 public class RabbitMQConfiguration {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    public final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private AmqpAdmin rabbitAdmin;
