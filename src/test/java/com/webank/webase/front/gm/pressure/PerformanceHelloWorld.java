@@ -110,7 +110,6 @@ public class PerformanceHelloWorld {
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
-      ;
     }
   }
 
@@ -197,7 +196,6 @@ public class PerformanceHelloWorld {
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
-      ;
     }
 
     Thread.sleep(100000);
