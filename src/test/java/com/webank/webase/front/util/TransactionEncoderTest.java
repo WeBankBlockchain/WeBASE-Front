@@ -17,8 +17,8 @@ import org.junit.Test;
 
 public class TransactionEncoderTest {
 
-    static BigInteger gasPrice = BigInteger.ONE;
-    static BigInteger gasLimit = BigInteger.TEN;
+   public static BigInteger gasPrice = BigInteger.ONE;
+   public static BigInteger gasLimit = BigInteger.TEN;
 
     @Test
     public void testSignMessage() {
