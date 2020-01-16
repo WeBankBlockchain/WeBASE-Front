@@ -33,4 +33,6 @@ gradle.properties
 /log
 /dist
 /bin
+*.crt
+*.key
 
