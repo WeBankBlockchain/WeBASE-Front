@@ -19,7 +19,14 @@ package com.webank.webase.front.base.enums;
  * Enumeration of data status.
  */
 public enum DataStatus {
-    NORMAL(1), INVALID(2);
+    /**
+     * normal status
+     */
+    NORMAL(1),
+    /**
+     * abnormal/invalid status
+     */
+    INVALID(2);
 
     private int value;
 

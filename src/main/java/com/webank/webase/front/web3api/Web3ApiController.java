@@ -128,7 +128,11 @@ public class Web3ApiController {
         return web3ApiService.getCode(groupId, address, blockNumber);
     }
 
-    // todo
+    /**
+     * getTotalTransactionCount
+     * @param groupId
+     * @return
+     */
     @ApiOperation(value = "getTotalTransactionCount",
             notes = "Get the  total number of execution transactions count ")
     @ApiImplicitParams({
