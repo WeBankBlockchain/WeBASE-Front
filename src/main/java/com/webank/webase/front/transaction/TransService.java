@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.transaction;
 
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,6 +65,8 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -301,6 +304,8 @@ public class TransService {
     public static TransactionReceipt execTransaction(Function function,
                                                      CommonContract commonContract) throws FrontException {
         TransactionReceipt transactionReceipt = null;
+        Instant startTime = Instant.now();
+        log.info("execTransaction start startTime:{}", startTime.toEpochMilli());
         try {
             transactionReceipt = commonContract.execTransaction(function);
         } catch (IOException | TransactionException | ContractCallException e) {
@@ -308,6 +313,8 @@ public class TransService {
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
                     e.getMessage());
         }
+        log.info("execTransaction end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
         return transactionReceipt;
     }
 
