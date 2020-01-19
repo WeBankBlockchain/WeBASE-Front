@@ -2,7 +2,7 @@ linter:
   pmd_java:
     dir: src
     encoding: Shift_JIS
-    min_priority: 3
+    min_priority: 2
   eslint:
     dir: web/src
     ext: ".js,.vue"
