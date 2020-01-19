@@ -28,6 +28,7 @@ public class NodeCrtTest {
     private static final String head = "-----BEGIN CERTIFICATE-----\n" ;
     private static final String tail = "-----END CERTIFICATE-----\n" ;
 
+    // TODO 调用CertTools的工具类
     @Test
     public void getChainCrt() throws IOException {
         InputStream inputStream = new ClassPathResource("ca.crt").getInputStream();
