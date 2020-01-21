@@ -110,7 +110,7 @@ public class Web3Config {
         channelEthereumService.setTimeout(timeout);
         channelEthereumService.setChannelService(service);
 //        Web3j web3j = Web3j.build(channelEthereumService);
-        Web3j web3j = Web3j.build(channelEthereumService, 1);
+        Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
         return web3j;
     }
 

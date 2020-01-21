@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.base.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
+/**
+ * get rabbit mq queue's config in yml
+ * TODO 默认连接配置中的mq，后续支持动态增加修改
+ * @author marsli
+ */
 @ConfigurationProperties("rabbitmq.queue")
 public class RabbitMQProperties {
 
