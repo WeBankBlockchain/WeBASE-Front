@@ -29,7 +29,7 @@ spring:
         web-allow-others: false
         trace: true
   rabbitmq:
-    host: localhost
+    host: 127.0.0.1
     port: 5672
     username:
     password:
@@ -37,10 +37,11 @@ spring:
     ssl:
       enabled: false
 
+# config for message queue
 rabbitmq:
   queue:
     service-name: mq_webase
-    queue-name: block_exchange.block_queue_1
+    queue-names: block_exchange.block_queue_1
 
 server:
   port: 5002
