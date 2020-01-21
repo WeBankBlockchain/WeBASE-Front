@@ -15,36 +15,25 @@
  */
 package com.webank.webase.front.rabbitmq;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Configuration
-@EnableConfigurationProperties(RabbitMQProperties.class)
-public class RabbitMQConfiguration {
-
-    public final Logger logger = LoggerFactory.getLogger(getClass());
+/**
+ * 初始化RabbitMQ实例
+ * @author marsli
+ */
+@Slf4j
+public class RabbitMQService {
 
     @Autowired
-    private AmqpAdmin rabbitAdmin;
-
-    @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, RabbitMQProperties config) {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        binding(config.getQueueNames());
-        return rabbitTemplate;
-    }
+    private RabbitAdmin rabbitAdmin;
 
     private Map<String,List<String>> distinctList(List<String> list){
         Map<String,List<String>> map = new HashMap<>();
@@ -65,7 +54,7 @@ public class RabbitMQConfiguration {
     }
 
 
-    private void  binding(List<String> queueNames){
+    private void binding(List<String> queueNames){
         Map<String ,List<String>> map = distinctList(queueNames);
         for (String string : map.keySet()){
             FanoutExchange fanoutExchange = new FanoutExchange(string);
