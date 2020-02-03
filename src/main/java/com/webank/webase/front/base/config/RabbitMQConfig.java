@@ -17,26 +17,12 @@ package com.webank.webase.front.base.config;
 
 import com.webank.webase.front.base.properties.RabbitMQProperties;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConversionException;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 初始化RabbitMQ实例
@@ -48,61 +34,66 @@ import java.util.Map;
 public class RabbitMQConfig {
 
     /**
-     *
-     * @param connectionFactory spring的yml中rabbitmq项配置
-     * @param config 单独的rabbitmq-queue的配置
+     * 配置注入到RabbitTemplate的Bean中
+     * 指定 messageConverter为Json
+     * @param connectionFactory 包含了本地连接rabbitmq服务器的配置信息
      * @return
      */
-    @Bean
-    public RabbitAdmin initRabbitAdmin(ConnectionFactory connectionFactory, RabbitMQProperties config) {
-        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-        // bind queue which configured in yml
-        binding(rabbitAdmin, config.getQueueNames());
-        return rabbitAdmin;
-    }
-
-    @Bean
+    @Bean(name = "rabbitTemplate")
     public RabbitTemplate getRabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
         return rabbitTemplate;
     }
 
-
-    private Map<String,List<String>> distinctList(List<String> list){
-        Map<String,List<String>> map = new HashMap<>();
-        for (String string :list){
-            if(!string.contains(".")){
-                continue;
-            }
-            List<String> list1 = new ArrayList<>();
-            String key =string.split("\\.")[0];
-            if(map.keySet().contains(key)){
-                map.get(key).add(string);
-            }else{
-                list1.add(string);
-                map.put(key,list1);
-            }
-        }
-        return map;
-    }
-
-    /**
-     * bind queue name for rabbitAdmin
-     * @param rabbitAdmin
-     * @param queueNames
-     */
-    private void  binding(RabbitAdmin rabbitAdmin, List<String> queueNames){
-        Map<String ,List<String>> map = distinctList(queueNames);
-        for (String string : map.keySet()){
-            FanoutExchange fanoutExchange = new FanoutExchange(string);
-            for(String string1 : map.get(string)){
-                Binding binding = BindingBuilder.bind(new Queue(string1)).to(fanoutExchange);
-                rabbitAdmin.declareQueue(new Queue(string1));
-                rabbitAdmin.declareExchange(fanoutExchange);
-                rabbitAdmin.declareBinding(binding);
-            }
-        }
-    }
-
+    // 未使用
+//    /**
+//     *
+//     * @param connectionFactory spring的yml中rabbitmq项配置
+//     * @param config 单独的rabbitmq-queue的配置
+//     * @return
+//     */
+//    @Bean(name = "rabbitAdmin")
+//    public RabbitAdmin initRabbitAdmin(ConnectionFactory connectionFactory, RabbitMQProperties config) {
+//        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+//        // bind queue which configured in yml
+//        binding(rabbitAdmin, config.getQueueNames());
+//        return rabbitAdmin;
+//    }
+//
+//    /**
+//     * bind queue name for rabbitAdmin
+//     * @param rabbitAdmin
+//     * @param queueNames
+//     */
+//    private void  binding(RabbitAdmin rabbitAdmin, List<String> queueNames){
+//        Map<String ,List<String>> map = distinctList(queueNames);
+//        for (String string : map.keySet()){
+//            FanoutExchange fanoutExchange = new FanoutExchange(string);
+//            for(String string1 : map.get(string)){
+//                Binding binding = BindingBuilder.bind(new Queue(string1)).to(fanoutExchange);
+//                rabbitAdmin.declareQueue(new Queue(string1));
+//                rabbitAdmin.declareExchange(fanoutExchange);
+//                rabbitAdmin.declareBinding(binding);
+//            }
+//        }
+//    }
+//
+//    private Map<String,List<String>> distinctList(List<String> list){
+//        Map<String,List<String>> map = new HashMap<>();
+//        for (String string :list){
+//            if(!string.contains(".")){
+//                continue;
+//            }
+//            List<String> list1 = new ArrayList<>();
+//            String key =string.split("\\.")[0];
+//            if(map.keySet().contains(key)){
+//                map.get(key).add(string);
+//            }else{
+//                list1.add(string);
+//                map.put(key,list1);
+//            }
+//        }
+//        return map;
+//    }
 }
