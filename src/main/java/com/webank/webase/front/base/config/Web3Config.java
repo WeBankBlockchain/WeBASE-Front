@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+
+import com.webank.webase.front.rabbitmq.base.callback.MQBlockNotifyCallBack;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
@@ -97,7 +99,8 @@ public class Web3Config {
      * @return
      */
     @Bean
-    public Web3j getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig)
+    public Web3j getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig,
+                            MQBlockNotifyCallBack mqBlockNotifyCallBack)
             throws Exception {
 
         Service service = new Service();
@@ -105,6 +108,8 @@ public class Web3Config {
         service.setGroupId(1);
         service.setThreadPool(sdkThreadPool());
         service.setAllChannelConnections(groupChannelConnectionsConfig);
+        // blockNotifyCallBack message enqueues in MQ
+        service.setBlockNotifyCallBack(mqBlockNotifyCallBack);
         service.run();
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(timeout);

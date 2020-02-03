@@ -16,9 +16,9 @@
 
 package com.webank.webase.front.rabbitmq;
 
+import com.webank.webase.front.rabbitmq.base.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.BlockPushMessage;
 import org.junit.Test;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
@@ -30,12 +30,13 @@ public class SendMessageTest extends BaseTest {
 
     @Test
     public void testMsg() {
+        String exchangeName = "block_exchange";
         Integer i = 0;
         while( i < 10) {
             i++;
             BlockPushMessage blockPushMessage = new BlockPushMessage();
             blockPushMessage.setBlockNumber(new BigInteger(i.toString()));
-            rabbitMQPublisher.sendToTradeFinishedByString(blockPushMessage.toString());
+            rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, blockPushMessage.toString());
         }
     }
 }
