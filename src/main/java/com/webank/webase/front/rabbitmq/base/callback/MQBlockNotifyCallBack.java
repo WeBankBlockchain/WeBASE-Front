@@ -14,34 +14,55 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.callback;
+package com.webank.webase.front.rabbitmq.base.callback;
 
-import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
+import com.webank.webase.front.rabbitmq.base.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.BlockPushMessage;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Setter;
 import org.fisco.bcos.channel.client.BlockNotifyCallBack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 
 /**
+ * TODO 动态修改exchange
+ * 出块后将Push一个信息到RabbitMQ
  * @author marsli
  */
-@Slf4j
+@Component
 public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 
+    private static Logger logger = LoggerFactory.getLogger(MQBlockNotifyCallBack.class);
+
+    @Setter
+    private String blockExchange= "block_exchange";
+
     @Autowired
-    RabbitMQPublisher rabbitMQPublisher;
+    RabbitMQPublisher rabbitMQPublisher; // 不使用autowired
 
     @Override
     public void onBlockNotify(int groupID, BigInteger blockNumber) {
-        log.info("MQBlockNotifyCallBack groupID:{}, blockNumber:{}",
+        logger.info("MQBlockNotifyCallBack groupID:{}, blockNumber:{}",
                 groupID, blockNumber);
-        // TODO pull block data or pull message and enqueue in MQ
+        pushMessage2MQ(blockExchange, groupID, blockNumber);
+    }
+
+    /**
+     * push message to mq
+     * @param exchangeName
+     * @param groupID
+     * @param blockNumber
+     */
+    private void pushMessage2MQ(String exchangeName,
+                                int groupID, BigInteger blockNumber) {
+        // TODO pull block data or and enqueue message in RabbitMQ
         BlockPushMessage blockPushMessage = new BlockPushMessage();
         blockPushMessage.setBlockNumber(blockNumber);
         blockPushMessage.setGroupId(groupID);
-        rabbitMQPublisher.sendToTradeFinishedByString(blockPushMessage.toString());
+        rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, blockPushMessage.toString());
 
         // TODO 确认需要哪些类型的消息/数据
         // TODO 获取节点heartbeat等等的message，see in ChannelMessageType.java
