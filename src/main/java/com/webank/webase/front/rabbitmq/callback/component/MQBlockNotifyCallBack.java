@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.callback.client;
+package com.webank.webase.front.rabbitmq.callback.component;
 
-import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
-import com.webank.webase.front.rabbitmq.entity.BlockPushMessage;
+import com.webank.webase.front.rabbitmq.mqservice.RabbitMQPublisher;
+import com.webank.webase.front.rabbitmq.entity.message.BlockPushMessage;
 import lombok.Setter;
 import org.fisco.bcos.channel.client.BlockNotifyCallBack;
 import org.slf4j.Logger;
@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigInteger;
 
 /**
- * TODO 动态修改exchange
  * 出块后将Push一个信息到RabbitMQ
  * @author marsli
  */
@@ -62,6 +61,8 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
         BlockPushMessage blockPushMessage = new BlockPushMessage();
         blockPushMessage.setBlockNumber(blockNumber);
         blockPushMessage.setGroupId(groupID);
+        logger.info("MQBlockNotifyCallBack pushMessage2MQ blockPushMessage:{}",
+                blockPushMessage.toString());
         rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, "",
                 blockPushMessage.toString());
 
