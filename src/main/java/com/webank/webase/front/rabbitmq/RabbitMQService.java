@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.rabbitmq.mqservice;
+package com.webank.webase.front.rabbitmq;
 
 import com.webank.webase.front.rabbitmq.entity.ReqRegister;
 import com.webank.webase.front.util.RabbitMQUtils;
