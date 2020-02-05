@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.entity;
+package com.webank.webase.front.rabbitmq.entity.message;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ import java.math.BigInteger;
  */
 @Data
 @NoArgsConstructor
-public class BlockPushMessage implements MqObject {
+public class BlockPushMessage implements MQObject {
     /**
      * group id
      */

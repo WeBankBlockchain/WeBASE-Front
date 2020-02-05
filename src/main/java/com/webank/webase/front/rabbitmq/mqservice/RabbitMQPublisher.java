@@ -1,37 +1,32 @@
-package com.webank.webase.front.rabbitmq.base;
+package com.webank.webase.front.rabbitmq.mqservice;
 
-import com.webank.webase.front.rabbitmq.entity.MqObject;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 /**
  * 将RabbitTemplate方法进行简单封装，将message发送到指定的exchange
  * MQ publisher to send message @param: MqObject
  * @author marsli
  */
+@Slf4j
 @Component
 public class RabbitMQPublisher {
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
-//    private RabbitTemplate rabbitTemplate;
-//
-//    public RabbitMQPublisher(RabbitTemplate rabbitTemplate) {
-//        this.rabbitTemplate = rabbitTemplate;
-//    }
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * use string to send message
      * @param exchangeName
      * @param messageStr
      */
-    public void sendToTradeFinishedByString(String exchangeName, String messageStr) {
-        rabbitTemplate.convertAndSend(exchangeName, "", messageStr);
+    public void sendToTradeFinishedByString(String exchangeName, String routingKey,
+                                            String messageStr) {
+        log.info("sendToTradeFinishedByString exchangeName:{}, routingKey:{}, messageStr:{}",
+                exchangeName, routingKey, messageStr);
+        rabbitTemplate.convertAndSend(exchangeName, routingKey, messageStr);
     }
 
 //    public void sendToTradeFinished(String exchangeName, MqObject mqObject) {

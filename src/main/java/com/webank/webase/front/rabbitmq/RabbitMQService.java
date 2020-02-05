@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.rabbitmq.mqservice;
 
+import com.webank.webase.front.rabbitmq.entity.ReqRegister;
+import com.webank.webase.front.util.RabbitMQUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.RabbitUtils;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,36 +38,14 @@ public class RabbitMQService {
     @Autowired
     private RabbitAdmin rabbitAdmin;
 
-    private Map<String,List<String>> distinctList(List<String> list){
-        Map<String,List<String>> map = new HashMap<>();
-        for (String string :list){
-            if(!string.contains(".")){
-                continue;
-            }
-            List<String> list1 = new ArrayList<>();
-            String key =string.split("\\.")[0];
-            if(map.keySet().contains(key)){
-                map.get(key).add(string);
-            }else{
-                list1.add(string);
-                map.put(key,list1);
-            }
-        }
-        return map;
+    public void declareNewQueue(ReqRegister reqRegister) {
+        FanoutExchange fanoutExchange = new FanoutExchange(reqRegister.getExchangeName());
+
+        Binding binding = BindingBuilder.bind(new Queue(reqRegister.getQueueName())).to(fanoutExchange);
+        rabbitAdmin.declareQueue(new Queue(reqRegister.getQueueName()));
+        rabbitAdmin.declareExchange(fanoutExchange);
+        rabbitAdmin.declareBinding(binding);
+
+
     }
-
-
-    private void binding(List<String> queueNames){
-        Map<String ,List<String>> map = distinctList(queueNames);
-        for (String string : map.keySet()){
-            FanoutExchange fanoutExchange = new FanoutExchange(string);
-            for(String string1 : map.get(string)){
-                Binding binding = BindingBuilder.bind(new Queue(string1)).to(fanoutExchange);
-                rabbitAdmin.declareQueue(new Queue(string1));
-                rabbitAdmin.declareExchange(fanoutExchange);
-                rabbitAdmin.declareBinding(binding);
-            }
-        }
-    }
-
 }
