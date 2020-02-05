@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
-import com.webank.webase.front.rabbitmq.base.callback.MQBlockNotifyCallBack;
+import com.webank.webase.front.rabbitmq.callback.component.MQBlockNotifyCallBack;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
@@ -61,12 +61,14 @@ public class Web3Config {
     private int keepAlive;
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
-    // 0:standard, 1:guomi
+    /**
+     * 0:standard, 1:guomi
+     */
     private int encryptType;
 
     /**
-     * 覆盖EncryptType构造函数，不能写getEncrytType() 放在web3sdk初始化前，否则当前类里的CnsServiceMap的credential为非国密的
-     * 
+     * 覆盖EncryptType构造函数
+     * 放在web3sdk初始化前，否则当前类里的CnsServiceMap的credential为非国密的
      * @return
      */
     @Bean(name = "encryptType")
@@ -93,16 +95,9 @@ public class Web3Config {
         return groupChannelConnectionsConfig;
     }
 
-    /**
-     * init getService.
-     * 
-     * @return
-     */
     @Bean
-    public Web3j getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig,
-                            MQBlockNotifyCallBack mqBlockNotifyCallBack)
-            throws Exception {
-
+    public Service getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig,
+                              MQBlockNotifyCallBack mqBlockNotifyCallBack) throws Exception {
         Service service = new Service();
         service.setOrgID(orgName);
         service.setGroupId(1);
@@ -110,7 +105,20 @@ public class Web3Config {
         service.setAllChannelConnections(groupChannelConnectionsConfig);
         // blockNotifyCallBack message enqueues in MQ
         service.setBlockNotifyCallBack(mqBlockNotifyCallBack);
+        // AMOP callback
+//        service.setPushCallback();
         service.run();
+        return service;
+    }
+
+    /**
+     * init getWeb3j.
+     * 
+     * @return
+     */
+    @Bean
+    public Web3j getWeb3j(GroupChannelConnectionsConfig groupChannelConnectionsConfig,
+                          Service service) {
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(timeout);
         channelEthereumService.setChannelService(service);

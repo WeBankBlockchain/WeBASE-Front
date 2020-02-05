@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.base.callback;
+package com.webank.webase.front.rabbitmq.callback.client;
 
-import com.webank.webase.front.rabbitmq.base.RabbitMQPublisher;
+import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.BlockPushMessage;
 import lombok.Setter;
 import org.fisco.bcos.channel.client.BlockNotifyCallBack;
@@ -41,7 +41,7 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
     private String blockExchange= "block_exchange";
 
     @Autowired
-    RabbitMQPublisher rabbitMQPublisher; // 不使用autowired
+    private RabbitMQPublisher rabbitMQPublisher;
 
     @Override
     public void onBlockNotify(int groupID, BigInteger blockNumber) {
@@ -62,10 +62,11 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
         BlockPushMessage blockPushMessage = new BlockPushMessage();
         blockPushMessage.setBlockNumber(blockNumber);
         blockPushMessage.setGroupId(groupID);
-        rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, blockPushMessage.toString());
+        rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, "",
+                blockPushMessage.toString());
 
-        // TODO 确认需要哪些类型的消息/数据
-        // TODO 获取节点heartbeat等等的message，see in ChannelMessageType.java
+        // TODO 确认需要哪些类型的消息/数据 sdk的本地事件 + 链上合约event事件通知
+        // 获取节点heartbeat等等的message，see in ChannelMessageType.java
     }
 
 
