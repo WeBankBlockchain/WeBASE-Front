@@ -1,7 +1,10 @@
 package com.webank.webase.front.transaction.entity;
 
+import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.transaction.TransService;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.omg.IOP.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +21,14 @@ public class PerformanceDTCallback extends TransactionSucCallback {
     @Override
     public void onResponse(TransactionReceipt receipt) {
         Long cost = System.currentTimeMillis() - startTime;
-        status=1;
-        logger.info("{}cost time :{}",receipt.getTransactionHash(), cost);
+        status = 1;
+        if(!receipt.isStatusOK()) {
+              if(!receipt.getStatus().equals("Transaction receipt timeout.")) {
+                  logger.info("{}cost time :{}, status:{}",receipt.getTransactionHash(), cost , receipt.getStatus());
+               //   Constants.error.incrementAndGet();
+              }
+        }
+   //     logger.info("{}cost time :{}, status:{}",receipt.getTransactionHash(), cost , receipt.getStatus());
     }
     public int getStatus() {
         return status;

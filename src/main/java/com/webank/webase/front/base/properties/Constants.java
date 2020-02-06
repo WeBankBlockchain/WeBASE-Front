@@ -16,6 +16,8 @@
 package com.webank.webase.front.base.properties;
 
 import java.math.BigInteger;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -66,6 +68,9 @@ public class Constants {
     private String nodePath = "/fisco/nodes/127.0.0.1/node0";
     private Integer http_read_timeOut = 10000;
     private Integer http_connect_timeOut = 10000;
+    private Integer sleep = 500;
+    public static int error = 0;
+
 
 
 }
