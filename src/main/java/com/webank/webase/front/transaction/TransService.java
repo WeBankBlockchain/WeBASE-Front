@@ -56,6 +56,7 @@ import org.fisco.bcos.web3j.tx.TransactionManager;
 import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
+import org.fisco.bcos.web3j.utils.BlockLimit;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -64,16 +65,18 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
+import static com.webank.webase.front.transaction.entity.ParallelOk.FUNC_SET;
 
 /**
  * TransService.
@@ -96,11 +99,12 @@ public class TransService {
     @Autowired
     private ContractRepository contractRepository;
 
-    private static LinkedBlockingQueue<String> linkedBlockingQueue = new LinkedBlockingQueue();
+    private static LinkedBlockingQueue<String> linkedBlockingQueue = new LinkedBlockingQueue<String>();
 
     private String parallelokAddr;
     private static  ParallelOk parallelok;
-    private TransactionManager transactionManager;
+    private static TransactionManager transactionManager;
+
 
     /**
      * send transaction.
@@ -534,6 +538,10 @@ public class TransService {
 
     public boolean preSign(Integer count, Integer group, Integer id) throws Exception {
         linkedBlockingQueue.clear();
+        BlockLimit.blockLimit=1000;
+        BigInteger blockNumber = getWeb3j(group).getBlockNumberCache();
+        log.info("&&&&&&&blockNumber&&&&&&: {}" ,blockNumber);
+
         log.info("clear success");
         Credentials credentials = GenCredential.create();
          parallelok =
@@ -573,7 +581,27 @@ public class TransService {
                                 BigInteger amount = BigInteger.valueOf(r);
 
                                 try {
-                                    String signedTransaction = parallelok.setSeq(user, amount);
+                                  //  String signedTransaction = parallelok.setSeq(user, amount);
+
+                                    final Function function =
+                                            new Function(
+                                                    FUNC_SET,
+                                                    Arrays.<Type>asList(
+                                                            new org.fisco.bcos.web3j.abi.datatypes.Utf8String(user),
+                                                            new org.fisco.bcos.web3j.abi.datatypes.generated.Uint256(amount)),
+                                                    Collections.<TypeReference<?>>emptyList());
+//                                    Random r = new SecureRandom();
+//                                    BigInteger randomid = new BigInteger(250, r);
+                                    BigInteger blockLimit = web3jMap.get(group).getBlockNumberCache();
+                                    ExtendedRawTransaction rawTransaction =
+                                            transactionManager.createTransaction(
+                                                    new BigInteger("1"),
+                                                    new BigInteger("3000000"),
+                                                    parallelokAddr,
+                                                    FunctionEncoder.encode(function), BigInteger.ZERO,null);
+                                    String signedTransaction =   transactionManager.sign(rawTransaction);
+
+
                                     //  lock.lock();
                                     linkedBlockingQueue.put(signedTransaction);
 
@@ -594,14 +622,13 @@ public class TransService {
     public Boolean pressureTest() throws InterruptedException, IOException {
 
         PerformanceDTCallback callback = new PerformanceDTCallback();
-        log.info("count {}", linkedBlockingQueue.size());
+       // callback.setTimeout(100000);
+        log.info("lalala count {}", linkedBlockingQueue.size());
         String s = linkedBlockingQueue.take();
         log.info("***{}***",s );
         SendTransaction transactionHash = transactionManager.sendTransaction(s, callback);
+        Thread.sleep(constants.getSleep());
       //  log.info("!!!{} ", transactionHash.getTransactionHash());
-        while(callback.getStatus()==0) {
-            Thread.sleep(1000);
-        }
         return true;
 
     }
