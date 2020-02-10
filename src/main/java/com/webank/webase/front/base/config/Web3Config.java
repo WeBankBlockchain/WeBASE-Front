@@ -117,8 +117,7 @@ public class Web3Config {
      * @return
      */
     @Bean
-    public Web3j getWeb3j(GroupChannelConnectionsConfig groupChannelConnectionsConfig,
-                          Service service) {
+    public Web3j getWeb3j(Service service) {
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(timeout);
         channelEthereumService.setChannelService(service);

@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.rabbitmq.callback.event;
 
-import com.webank.webase.front.rabbitmq.mqservice.RabbitMQPublisher;
+import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.message.EventLogPushMessage;
 import lombok.Setter;
 import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
@@ -44,10 +44,19 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
     public MQEventLogPushWithDecodedCallBack(RabbitMQPublisher rabbitMQPublisher,
                                              String exchangeName, String routingKey) {
         this.rabbitMQPublisher = rabbitMQPublisher;
-        this.exchangeName = exchangeName;
-        this.routingKey = routingKey;
+        if(exchangeName != null){
+            this.exchangeName = exchangeName;
+        }
+        if(routingKey != null) {
+            this.routingKey = routingKey;
+        }
     }
 
+    /**
+     * 根据Log对象中的blockNumber，transactionIndex，logIndex进行去重
+     * @param status
+     * @param logs
+     */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
         logger.info(

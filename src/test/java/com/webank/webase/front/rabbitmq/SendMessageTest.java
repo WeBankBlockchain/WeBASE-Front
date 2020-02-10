@@ -16,7 +16,6 @@
 
 package com.webank.webase.front.rabbitmq;
 
-import com.webank.webase.front.rabbitmq.mqservice.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.message.BlockPushMessage;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
