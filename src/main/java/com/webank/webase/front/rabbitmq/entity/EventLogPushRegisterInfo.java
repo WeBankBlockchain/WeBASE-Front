@@ -14,31 +14,41 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.entity.message;
+package com.webank.webase.front.rabbitmq.entity;
 
-import com.alibaba.fastjson.JSONArray;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.fisco.bcos.web3j.tx.txdecode.LogResult;
 
-import java.util.List;
+import javax.persistence.*;
 
 /**
+ * entity to store EventLog push register info
+ * when Service restarts, registerEventLogPushCallBack auto
  * @author marsli
  */
+@Entity
 @Data
-@NoArgsConstructor
-public class EventLogPushMessage implements MQObject {
+public class EventLogPushRegisterInfo {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Long id;
+
     /**
-     * related with
+     * EventLogUserParams info
      */
-    private int status;
-
-    private List<LogResult> logs;
-
-    @Override
-    public String toString() {
-        return "EventLogPushMessage:{" + "status:" + status + ","
-                + "logs:" + JSONArray.toJSONString(logs) + "}";
-    }
+    private String fromBlock;
+    private String toBlock;
+    /**
+     * List<String>
+     */
+    private String addresses;
+    /**
+     * List<String>
+     */
+    private String topics;
+    /**
+     * MQ info
+     */
+    private String exchangeName;
+    private String routingKey;
 }

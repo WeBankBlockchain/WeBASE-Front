@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.rabbitmq.callback.component;
 
-import com.webank.webase.front.rabbitmq.mqservice.RabbitMQPublisher;
+import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
 import org.fisco.bcos.channel.dto.ChannelPush;
 import org.fisco.bcos.channel.dto.ChannelResponse;
@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
+ * AMOP message enqueues in MQ
  * @author marsli
  */
 @Component

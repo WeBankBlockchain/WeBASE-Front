@@ -22,6 +22,7 @@ import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.RabbitUtils;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,10 +30,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 初始化RabbitMQ实例
+ * 初始化RabbitMQ实例，用于新建队列
  * @author marsli
  */
 @Slf4j
+@Service
 public class RabbitMQService {
 
     @Autowired
