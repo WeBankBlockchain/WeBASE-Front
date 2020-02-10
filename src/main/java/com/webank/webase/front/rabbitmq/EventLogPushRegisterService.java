@@ -16,8 +16,8 @@
 
 package com.webank.webase.front.rabbitmq;
 
-import com.webank.webase.front.rabbitmq.mqservice.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.callback.event.MQEventLogPushWithDecodedCallBack;
+import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.channel.event.filter.TopicTools;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +27,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 在org.fisco.bcos.channel.client.Service中注册EventLogPush不会持久化
+ * 如果重启了则需要重新注册
  * @author marsli
  */
+@Slf4j
 @Service
 public class EventLogPushRegisterService {
 
@@ -46,6 +49,8 @@ public class EventLogPushRegisterService {
      */
     public void registerEventLogPush(EventLogUserParams params,
                                      String callbackExchangeName, String callbackRoutingKey) {
+        log.debug("registerEventLogPush params:{},callbackExchangeName:{},callbackRoutingKey:{}",
+            params, callbackExchangeName, callbackRoutingKey);
         // TODO 如果exchange不存在，会发往死信队列
         MQEventLogPushWithDecodedCallBack callBack =
                 new MQEventLogPushWithDecodedCallBack(rabbitMQPublisher,
@@ -58,26 +63,24 @@ public class EventLogPushRegisterService {
      * @param fromBlock
      * @param toBlock
      * @param contractAddress
-     * @param topicList
+     * @param topic
      * @return
      */
     public EventLogUserParams setEventLogUserParams(String fromBlock, String toBlock,
-                                     List<String> contractAddress, List<Object> topicList) {
+                                     String contractAddress, Object topic) {
         EventLogUserParams params = new EventLogUserParams();
         params.setFromBlock(fromBlock);
         params.setToBlock(toBlock);
 
         // addresses，设置为Java合约对象的地址
-        List<String> addresses = new ArrayList<>(contractAddress);
+        List<String> addresses = new ArrayList<>();
+        addresses.add(contractAddress);
         params.setAddresses(addresses);
         // ex: topics.add(TopicTools.stringToTopic("TransferEvent(int256,string,string,uint256)"));
         List<Object> topics = new ArrayList<>();
-        topicList.forEach(topic -> {
-            if (topic instanceof String) {
-                topics.add(TopicTools.stringToTopic((String)topic));
-            }
-            // instanceof others, convert by TopicTools before add
-        });
+        if (topic instanceof String) {
+            topics.add(TopicTools.stringToTopic((String)topic));
+        }// instanceof others, convert by TopicTools before add
         params.setTopics(topics);
 
         return params;

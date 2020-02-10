@@ -16,10 +16,12 @@
 
 package com.webank.webase.front.rabbitmq.callback.event;
 
-import com.webank.webase.front.rabbitmq.mqservice.RabbitMQPublisher;
+import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
 import lombok.Setter;
+import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
 import org.fisco.bcos.channel.event.filter.ServiceEventLogPushCallback;
 import org.fisco.bcos.web3j.tx.txdecode.LogResult;
+import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,7 @@ import java.util.List;
 
 
 /**
+ * 与EventLogPushWithDecodedCallBack类似，ServiceEventLogPushCallback未对log字段解码
  * @author marsli
  */
 public class MQServiceEventLogPushCallBack extends ServiceEventLogPushCallback {

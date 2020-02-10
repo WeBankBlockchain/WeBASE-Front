@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.rabbitmq.callback.component;
 
-import com.webank.webase.front.rabbitmq.mqservice.RabbitMQPublisher;
+import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.message.BlockPushMessage;
 import lombok.Setter;
 import org.fisco.bcos.channel.client.BlockNotifyCallBack;

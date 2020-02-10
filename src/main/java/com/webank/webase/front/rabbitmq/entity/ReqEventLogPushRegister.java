@@ -18,15 +18,24 @@ package com.webank.webase.front.rabbitmq.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 
 /**
+ * Based on EventLogUserParams
  * @author marsli
  */
 @Data
 @NoArgsConstructor
-public class ReqEventLogPushRegister extends EventLogUserParams {
-
+public class ReqEventLogPushRegister {
+    /**
+     * EventLogUserParams info
+     */
+    private String fromBlock;
+    private String toBlock;
+    private String address;
+    private Object topic;
+    /**
+     * MQ info
+     */
     private String exchangeName;
     private String routingKey;
 }
