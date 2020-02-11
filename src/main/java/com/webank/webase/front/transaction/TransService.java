@@ -362,7 +362,8 @@ public class TransService {
             SignatureData signData = CommonUtils.stringToSignatureData(signDataStr);
             byte[] signedMessage = TransactionEncoder.encode(rawTransaction, signData);
             signMsg = Numeric.toHexString(signedMessage);
-        } else {
+        }
+        else {
             String chainId = (String) JSONObject.parseObject(versionContent).get("Chain Id");
             ExtendedRawTransaction extendedRawTransaction =
                     ExtendedRawTransaction.createTransaction(randomid, constants.GAS_PRICE,

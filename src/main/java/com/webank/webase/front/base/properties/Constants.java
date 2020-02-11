@@ -16,6 +16,7 @@
 package com.webank.webase.front.base.properties;
 
 import java.math.BigInteger;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import lombok.Data;
@@ -56,8 +57,9 @@ public class Constants {
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI = "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
     public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
+    public static final String WEBASE_SIGN_URI_WEBSOCKET = "ws://%s/WeBASE-Sign/websocket/";
     public static final String account1Path = "node.key";
-
+    public  static  String frontId = UUID.randomUUID().toString();
     public static final String CONSTANT_PREFIX = "constant";
     private String nodeDir = "";
     private String keyServer = "127.0.0.1:8080";
@@ -69,6 +71,7 @@ public class Constants {
     private Integer http_read_timeOut = 10000;
     private Integer http_connect_timeOut = 10000;
     private Integer sleep = 500;
+    private Integer websocket = 1;
     public static int error = 0;
 
 

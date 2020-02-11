@@ -48,7 +48,7 @@ logging:
   config: classpath:log4j2.xml
 
 constant:
-  keyServer: 127.0.0.1:5001 # webase-sign
+  keyServer: 127.0.0.1:5004 # webase-sign
   transMaxWait: 30
   monitorDisk: /
   monitorEnabled: true
@@ -57,4 +57,4 @@ constant:
   http_read_timeOut: 100000
   http_connect_timeOut: 100000
   sleep: 10
-
+  websocket: 1

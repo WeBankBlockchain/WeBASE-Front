@@ -14,10 +14,7 @@
 package com.webank.webase.front.keystore;
 
 import java.io.ByteArrayInputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -26,6 +23,8 @@ import javax.persistence.criteria.Root;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
+import com.webank.webase.front.transaction.websocket.SignMessage;
+import com.webank.webase.front.transaction.websocket.WebSocketService;
 import com.webank.webase.front.util.CredentialUtils;
 import com.webank.webase.front.util.PemUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +34,8 @@ import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.web3j.protocol.core.Request;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -73,6 +74,8 @@ public class KeyStoreService {
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
     private static Map<String, String> PRIVATE_KEY_MAP = new HashMap<>();
 
+    @Autowired
+    WebSocketService webSocketService;
 
     /**
      * createKeyStore
@@ -264,23 +267,37 @@ public class KeyStoreService {
      * @return
      */
     public String getSignDate(EncodeInfo params) {
-        try {
-            SignInfo signInfo = new SignInfo();
-            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
-            log.info("getSignDate url:{}", url);
-            HttpHeaders headers = CommonUtils.buildHeaders();
-            HttpEntity<String> formEntity =
-                    new HttpEntity<String>(JSON.toJSONString(params), headers);
-            BaseResponse response =
-                    restTemplate.postForObject(url, formEntity, BaseResponse.class);
-            log.info("getSignDate response:{}", JSON.toJSONString(response));
-            if (response.getCode() == 0) {
-                signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
-            }
-            return signInfo.getSignDataStr();
-        } catch (Exception e) {
-            log.error("***getSignDate exception", e);
-        }
+
+           try {
+               if (constants.getWebsocket().intValue() == 0) {
+                   SignInfo signInfo = new SignInfo();
+                   String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
+                   log.info("getSignDate url:{}", url);
+                   HttpHeaders headers = CommonUtils.buildHeaders();
+                   HttpEntity<String> formEntity =
+                           new HttpEntity<String>(JSON.toJSONString(params), headers);
+                   BaseResponse response =
+                           restTemplate.postForObject(url, formEntity, BaseResponse.class);
+                   log.info("getSignDate response:{}", JSON.toJSONString(response));
+                   if (response.getCode() == 0) {
+                       signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
+                   }
+                   return signInfo.getSignDataStr();
+               } else {
+                   String frontId = Constants.frontId;
+                   Request<?, SignMessage> request = new Request<>(
+                           "sign&" + frontId,
+                           Arrays.asList(params.getUserId().toString(), params.getEncodedDataStr()),
+                           webSocketService,
+                           SignMessage.class);
+
+                   SignMessage signMessage = webSocketService.send(request, SignMessage.class);
+                   return signMessage.getSignature();
+               }
+           }catch (Exception e) {
+               log.error("***getSignDate exception", e);
+           }
+
         return null;
     }
 
