@@ -27,6 +27,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReqEventLogPushRegister {
     /**
+     * group id
+     */
+    private int groupId;
+
+    /**
+     * contract abi for decoder
+     */
+    private String contractAbi;
+    /**
      * EventLogUserParams info
      */
     private String fromBlock;

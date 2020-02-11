@@ -16,7 +16,9 @@
 
 package com.webank.webase.front.rabbitmq;
 
+import com.webank.webase.front.util.RabbitMQUtils;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
+import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,12 +35,11 @@ public class RegisterServiceTest extends BaseTest{
         String fromBlock = "latest";
         String toBlock = "latest";
         // empty list means all
-        List<String> address = new ArrayList<>();
+        String address = "";
         List<Object> topics = new ArrayList<>();
-        EventLogUserParams params = eventLogPushRegisterService
-                .setEventLogUserParams(fromBlock, toBlock, address, topics);
-
+        EventLogUserParams params = RabbitMQUtils.initEventLogUserParams(fromBlock, toBlock, address, topics);
+        String abi = "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"name\",\"type\":\"string\"}],\"name\":\"SetName\",\"type\":\"event\"}]";
         String exchangeName = "event_exchange";
-        eventLogPushRegisterService.registerEventLogPush(params, exchangeName, "");
+        eventLogPushRegisterService.registerEventLogPush(1, abi, params, exchangeName, "");
     }
 }

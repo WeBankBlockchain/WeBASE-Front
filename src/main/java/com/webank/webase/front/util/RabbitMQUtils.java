@@ -16,6 +16,8 @@
 
 package com.webank.webase.front.util;
 
+import org.fisco.bcos.channel.event.filter.EventLogUserParams;
+import org.fisco.bcos.channel.event.filter.TopicTools;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @author marsli
  */
 public class RabbitMQUtils {
+
 
     /**
      * bind queue name for rabbitAdmin
@@ -72,4 +75,32 @@ public class RabbitMQUtils {
         }
         return map;
     }
+
+    /**
+     * init EventLogUserParams
+     * @param fromBlock
+     * @param toBlock
+     * @param contractAddress
+     * @param topic
+     * @return
+     */
+    public static EventLogUserParams initEventLogUserParams(String fromBlock, String toBlock,
+                                                            String contractAddress, Object topic) {
+        EventLogUserParams params = new EventLogUserParams();
+        params.setFromBlock(fromBlock);
+        params.setToBlock(toBlock);
+
+        // addresses，设置为Java合约对象的地址
+        List<String> addresses = new ArrayList<>();
+        addresses.add(contractAddress);
+        params.setAddresses(addresses);
+        List<Object> topics = new ArrayList<>();
+        if (topic instanceof String) {
+            topics.add(TopicTools.stringToTopic((String)topic));
+        }// instanceof others, convert by TopicTools before add
+        params.setTopics(topics);
+
+        return params;
+    }
+
 }

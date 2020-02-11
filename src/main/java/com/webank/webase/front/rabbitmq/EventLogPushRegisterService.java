@@ -20,11 +20,15 @@ import com.webank.webase.front.rabbitmq.callback.event.MQEventLogPushWithDecoded
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.channel.event.filter.TopicTools;
+import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 在org.fisco.bcos.channel.client.Service中注册EventLogPush不会持久化
@@ -36,7 +40,7 @@ import java.util.List;
 public class EventLogPushRegisterService {
 
     @Autowired
-    private org.fisco.bcos.channel.client.Service service;
+    Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
 
     @Autowired
     private RabbitMQPublisher rabbitMQPublisher;
@@ -47,43 +51,19 @@ public class EventLogPushRegisterService {
      * @param callbackExchangeName
      * @param callbackRoutingKey
      */
-    public void registerEventLogPush(EventLogUserParams params,
+    public void registerEventLogPush(int groupId, String abi, EventLogUserParams params,
                                      String callbackExchangeName, String callbackRoutingKey) {
         log.debug("registerEventLogPush params:{},callbackExchangeName:{},callbackRoutingKey:{}",
             params, callbackExchangeName, callbackRoutingKey);
         // TODO 如果exchange不存在，会发往死信队列
+        // 传入abi作decoder:
+        TransactionDecoder decoder = new TransactionDecoder(abi);
         MQEventLogPushWithDecodedCallBack callBack =
                 new MQEventLogPushWithDecodedCallBack(rabbitMQPublisher,
-                        callbackExchangeName, callbackRoutingKey);
+                        callbackExchangeName, callbackRoutingKey, decoder);
+        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         service.registerEventLogFilter(params, callBack);
     }
 
-    /**
-     * init EventLogUserParams
-     * @param fromBlock
-     * @param toBlock
-     * @param contractAddress
-     * @param topic
-     * @return
-     */
-    public EventLogUserParams setEventLogUserParams(String fromBlock, String toBlock,
-                                     String contractAddress, Object topic) {
-        EventLogUserParams params = new EventLogUserParams();
-        params.setFromBlock(fromBlock);
-        params.setToBlock(toBlock);
-
-        // addresses，设置为Java合约对象的地址
-        List<String> addresses = new ArrayList<>();
-        addresses.add(contractAddress);
-        params.setAddresses(addresses);
-        // ex: topics.add(TopicTools.stringToTopic("TransferEvent(int256,string,string,uint256)"));
-        List<Object> topics = new ArrayList<>();
-        if (topic instanceof String) {
-            topics.add(TopicTools.stringToTopic((String)topic));
-        }// instanceof others, convert by TopicTools before add
-        params.setTopics(topics);
-
-        return params;
-    }
 
 }

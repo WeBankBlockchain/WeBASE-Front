@@ -19,8 +19,13 @@ package com.webank.webase.front.rabbitmq.callback.event;
 import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.message.EventLogPushMessage;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.channel.event.filter.EventLogPushCallback;
 import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
+import org.fisco.bcos.web3j.tx.txdecode.BaseException;
 import org.fisco.bcos.web3j.tx.txdecode.LogResult;
+import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,21 +33,22 @@ import java.util.List;
 
 /**
  * 指定exchangeName和routingKey, callback后直接push到对应的mq中
+ * 可以用groupId作routingKey
  * @author marsli
  */
+@Slf4j
 public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCallback {
 
     private static final Logger logger =
             LoggerFactory.getLogger(MQEventLogPushWithDecodedCallBack.class);
-    @Setter
-    private String exchangeName = "event_exchange";
-    @Setter
-    private String routingKey = "";
 
+    private String exchangeName = "event_exchange";
+    private String routingKey = "";
     private RabbitMQPublisher rabbitMQPublisher;
 
     public MQEventLogPushWithDecodedCallBack(RabbitMQPublisher rabbitMQPublisher,
-                                             String exchangeName, String routingKey) {
+                                             String exchangeName, String routingKey,
+                                             TransactionDecoder decoder) {
         this.rabbitMQPublisher = rabbitMQPublisher;
         if(exchangeName != null){
             this.exchangeName = exchangeName;
@@ -50,7 +56,10 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
         if(routingKey != null) {
             this.routingKey = routingKey;
         }
+        // onPush will call father class's decoder, init EventLogPushWithDecodeCallback's decoder
+        this.setDecoder(decoder);
     }
+
 
     /**
      * 根据Log对象中的blockNumber，transactionIndex，logIndex进行去重
@@ -59,13 +68,13 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
      */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
-        logger.info(
+        log.info(
                 "MQEventLogPushWithDecodedCallBack " +
                 "onPushEventLog, params: {}, status: {}, logs: {}",
                 getFilter().getParams(),
                 status,
                 logs);
-        // TODO 推送到指定的MQ中
+        // 推送到指定的MQ中
         pushMessage2MQ(status, logs);
     }
 
@@ -73,10 +82,19 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
         EventLogPushMessage eventLogPushMessage = new EventLogPushMessage();
         eventLogPushMessage.setStatus(status);
         eventLogPushMessage.setLogs(logs);
-        // TODO 动态指定exchange的routingKey
-        // sendX(exchangeName, routingKey, ..);
         rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
                 eventLogPushMessage.toString());
+    }
+
+    @Override
+    public LogResult transferLogToLogResult(Log log) {
+        try {
+            LogResult logResult = getDecoder().decodeEventLogReturnObject(log);
+            return logResult;
+        } catch (BaseException e) {
+            logger.warn(" event log decode failed, log: {}", log);
+            return null;
+        }
     }
 
 }
