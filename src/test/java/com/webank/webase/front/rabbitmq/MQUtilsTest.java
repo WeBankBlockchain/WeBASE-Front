@@ -42,4 +42,9 @@ public class MQUtilsTest {
             }
         }
     }
+
+    @Test
+    public void testInitUserParams() {
+        // multiple address and topics example
+    }
 }

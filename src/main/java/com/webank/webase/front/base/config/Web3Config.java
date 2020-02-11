@@ -28,6 +28,9 @@ import com.webank.webase.front.rabbitmq.callback.component.MQBlockNotifyCallBack
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
+import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
+import org.fisco.bcos.channel.event.filter.EventLogUserParams;
+import org.fisco.bcos.channel.event.filter.TopicTools;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -95,29 +98,19 @@ public class Web3Config {
         return groupChannelConnectionsConfig;
     }
 
-    @Bean
-    public Service getService(GroupChannelConnectionsConfig groupChannelConnectionsConfig,
-                              MQBlockNotifyCallBack mqBlockNotifyCallBack) throws Exception {
-        Service service = new Service();
-        service.setOrgID(orgName);
-        service.setGroupId(1);
-        service.setThreadPool(sdkThreadPool());
-        service.setAllChannelConnections(groupChannelConnectionsConfig);
-        // blockNotifyCallBack message enqueues in MQ
-        service.setBlockNotifyCallBack(mqBlockNotifyCallBack);
-        // AMOP callback
-//        service.setPushCallback();
-        service.run();
-        return service;
-    }
-
     /**
      * init getWeb3j.
      * 
      * @return
      */
     @Bean
-    public Web3j getWeb3j(Service service) {
+    public Web3j getWeb3j(GroupChannelConnectionsConfig groupChannelConnectionsConfig) throws Exception {
+        Service service = new Service();
+        service.setOrgID(orgName);
+        service.setGroupId(1);
+        service.setThreadPool(sdkThreadPool());
+        service.setAllChannelConnections(groupChannelConnectionsConfig);
+        service.run();
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(timeout);
         channelEthereumService.setChannelService(service);
@@ -144,14 +137,15 @@ public class Web3Config {
     }
 
     /**
-     * init web3j.
-     * 
+     * init channel service.
+     * set setBlockNotifyCallBack
      * @return
      */
-    @Bean
+    @Bean(name = "serviceMap")
     @DependsOn("encryptType")
-    public Map<Integer, Web3j> web3jMap(Web3j web3j,
-            GroupChannelConnectionsConfig groupChannelConnectionsConfig) throws Exception {
+    public Map<Integer, Service> serviceMap(Web3j web3j,
+                                            GroupChannelConnectionsConfig groupChannelConnectionsConfig,
+                                            MQBlockNotifyCallBack mqBlockNotifyCallBack) throws Exception {
         // whether front' encrypt type matches with chain's
         isMatchEncryptType(web3j);
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
@@ -167,21 +161,41 @@ public class Web3Config {
             log.info("*** groupId " + groupIdList.get(i));
             channelConnectionsList.add(channelConnections);
         }
-        Map web3jMap = new ConcurrentHashMap<Integer, Web3j>();
+        Map serviceMap = new ConcurrentHashMap<Integer, Service>(groupIdList.size());
         for (int i = 0; i < groupIdList.size(); i++) {
             Service service = new Service();
             service.setOrgID(orgName);
-            service.setGroupId(Integer.valueOf(groupIdList.get(i)));
+            service.setGroupId(Integer.parseInt(groupIdList.get(i)));
             service.setThreadPool(sdkThreadPool());
             service.setAllChannelConnections(groupChannelConnectionsConfig);
+            // blockNotifyCallBack message enqueues in MQ
+            service.setBlockNotifyCallBack(mqBlockNotifyCallBack);
+            // AMOP callback
+            // service.setPushCallback();
             service.run();
+            serviceMap.put(Integer.valueOf(groupIdList.get(i)), service);
+        }
+        return serviceMap;
+    }
+
+    /**
+     * init Web3j
+     * @param serviceMap
+     * @return
+     */
+    @Bean
+    @DependsOn("encryptType")
+    public Map<Integer, Web3j> web3jMap(Map<Integer, Service> serviceMap){
+        Map web3jMap = new ConcurrentHashMap<Integer, Web3j>(serviceMap.size());
+        for(Integer i: serviceMap.keySet()){
+            Service service = serviceMap.get(i);
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
             channelEthereumService.setTimeout(timeout);
             channelEthereumService.setChannelService(service);
             Web3j web3jSync = Web3j.build(channelEthereumService, service.getGroupId());
             // for getClockNumber local
             web3jSync.getBlockNumberCache();
-            web3jMap.put(Integer.valueOf(groupIdList.get(i)), web3jSync);
+            web3jMap.put(Integer.valueOf(i), web3jSync);
         }
         return web3jMap;
     }
