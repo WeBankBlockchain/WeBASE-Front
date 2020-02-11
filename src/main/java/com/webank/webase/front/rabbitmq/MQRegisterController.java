@@ -20,6 +20,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.rabbitmq.entity.ReqEventLogPushRegister;
 import com.webank.webase.front.rabbitmq.entity.ReqRegister;
+import com.webank.webase.front.util.RabbitMQUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -53,17 +54,19 @@ public class MQRegisterController {
             notes = "register eventLogPushCallBack and push message to mq")
     @ApiImplicitParam(name = "ReqEventLogPushRegister", value = "EventLogUserParams与消息队列名",
             required = true, dataType = "ReqEventLogPushRegister")
-    @PostMapping("queue")
+    @PostMapping("eventLogPush")
     public Object registerEventLogPush(
             @Valid @RequestBody ReqEventLogPushRegister reqEventLogPushRegister)
             throws Exception {
         log.info("start registerEventLogPush. reqEventLogPushRegister:{}", reqEventLogPushRegister);
-        EventLogUserParams params = eventLogPushRegisterService.setEventLogUserParams(
+        EventLogUserParams params = RabbitMQUtils.initEventLogUserParams(
                 reqEventLogPushRegister.getFromBlock(), reqEventLogPushRegister.getToBlock(),
                 reqEventLogPushRegister.getAddress(), reqEventLogPushRegister.getTopic());
-
-        eventLogPushRegisterService.registerEventLogPush(params,
-                reqEventLogPushRegister.getExchangeName(), reqEventLogPushRegister.getRoutingKey());
+        int groupId = reqEventLogPushRegister.getGroupId();
+        String contractAbi = reqEventLogPushRegister.getContractAbi();
+        String exchangeName = reqEventLogPushRegister.getExchangeName();
+        String routingKey = reqEventLogPushRegister.getRoutingKey();
+        eventLogPushRegisterService.registerEventLogPush(groupId, contractAbi, params, exchangeName, routingKey);
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
@@ -71,7 +74,7 @@ public class MQRegisterController {
             notes = "declare message queue in rabbit mq")
     @ApiImplicitParam(name = "ReqRegister", value = "创建消息队列的队列名与exchangeName",
             required = true, dataType = "ReqRegister")
-    @PostMapping("eventLogPush")
+    @PostMapping("queue")
     public Object createQueue(
             @Valid @RequestBody ReqRegister reqRegister)
             throws Exception {

@@ -37,9 +37,7 @@ public class MQServiceEventLogPushCallBack extends ServiceEventLogPushCallback {
             LoggerFactory.getLogger(MQServiceEventLogPushCallBack.class);
 
     private RabbitMQPublisher rabbitMQPublisher;
-    @Setter
     private String eventExchange = "event_exchange";
-    @Setter
     private String routingKey = "";
 
     public MQServiceEventLogPushCallBack(RabbitMQPublisher rabbitMQPublisher,
