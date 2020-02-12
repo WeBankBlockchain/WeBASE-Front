@@ -1,4 +1,4 @@
-package com.webank.webase.front.transaction.websocket;
+package com.webank.webase.front.transaction.websocket.client;
 
 import java.util.concurrent.CompletableFuture;
 
