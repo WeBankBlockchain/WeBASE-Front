@@ -1,8 +1,8 @@
 package com.webank.webase.front.websocket;
 
-import com.webank.webase.front.transaction.websocket.SignMessage;
-import com.webank.webase.front.transaction.websocket.WebSocketClient;
-import com.webank.webase.front.transaction.websocket.WebSocketService;
+import com.webank.webase.front.transaction.websocket.client.SignMessage;
+import com.webank.webase.front.transaction.websocket.client.WebSocketClient;
+import com.webank.webase.front.transaction.websocket.client.WebSocketService;
 import org.fisco.bcos.web3j.protocol.core.Request;
 import org.junit.Before;
 import org.junit.Test;

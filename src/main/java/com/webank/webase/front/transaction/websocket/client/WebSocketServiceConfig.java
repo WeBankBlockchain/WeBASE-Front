@@ -1,12 +1,10 @@
-package com.webank.webase.front.transaction.websocket;
+package com.webank.webase.front.transaction.websocket.client;
 
 
 import com.webank.webase.front.base.properties.Constants;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

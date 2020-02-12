@@ -1,6 +1,6 @@
 package com.webank.webase.front.websocket;
 
-import com.webank.webase.front.transaction.websocket.WebSocketClient;
+import com.webank.webase.front.transaction.websocket.client.WebSocketClient;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.protocol.websocket.WebSocketListener;
 import org.java_websocket.WebSocket;
@@ -9,8 +9,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URI;
-
-import static org.mockito.Mockito.*;
 
 @Slf4j
 public class WebSocketClientTest {
