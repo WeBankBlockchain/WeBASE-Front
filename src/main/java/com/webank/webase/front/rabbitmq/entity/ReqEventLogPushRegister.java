@@ -19,6 +19,8 @@ package com.webank.webase.front.rabbitmq.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * Based on EventLogUserParams
  * @author marsli
@@ -35,13 +37,21 @@ public class ReqEventLogPushRegister {
      * contract abi for decoder
      */
     private String contractAbi;
-    /**
-     * EventLogUserParams info
-     */
+
     private String fromBlock;
+
     private String toBlock;
+
+    /**
+     * single contract address
+     */
     private String address;
-    private Object topic;
+
+    /**
+     * List of topics
+     */
+    private List<String> topicList;
+
     /**
      * MQ info
      */

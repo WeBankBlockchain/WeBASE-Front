@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @author marsli
@@ -48,7 +49,7 @@ public class MQRegisterController {
     @Autowired
     private RabbitMQPublisher rabbitMQPublisher;
     @Autowired
-    private RabbitMQService rabbitMQService;
+    private MQRegisterService MQRegisterService;
 
     @ApiOperation(value = "registerEventLogPush",
             notes = "register eventLogPushCallBack and push message to mq")
@@ -59,14 +60,16 @@ public class MQRegisterController {
             @Valid @RequestBody ReqEventLogPushRegister reqEventLogPushRegister)
             throws Exception {
         log.info("start registerEventLogPush. reqEventLogPushRegister:{}", reqEventLogPushRegister);
-        EventLogUserParams params = RabbitMQUtils.initEventLogUserParams(
-                reqEventLogPushRegister.getFromBlock(), reqEventLogPushRegister.getToBlock(),
-                reqEventLogPushRegister.getAddress(), reqEventLogPushRegister.getTopic());
+        String fromBlock = reqEventLogPushRegister.getFromBlock();
+        String toBlock = reqEventLogPushRegister.getToBlock();
+        String contractAddress = reqEventLogPushRegister.getAddress();
+        List<String> topicList = reqEventLogPushRegister.getTopicList();
         int groupId = reqEventLogPushRegister.getGroupId();
         String contractAbi = reqEventLogPushRegister.getContractAbi();
         String exchangeName = reqEventLogPushRegister.getExchangeName();
         String routingKey = reqEventLogPushRegister.getRoutingKey();
-        eventLogPushRegisterService.registerEventLogPush(groupId, contractAbi, params, exchangeName, routingKey);
+        eventLogPushRegisterService.registerDecodedEventLogPush(groupId, contractAbi,
+                fromBlock, toBlock, contractAddress, topicList, exchangeName, routingKey);
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
@@ -79,7 +82,7 @@ public class MQRegisterController {
             @Valid @RequestBody ReqRegister reqRegister)
             throws Exception {
         log.info("start createQueue. reqRegister:{}", reqRegister);
-        rabbitMQService.declareNewQueue(reqRegister);
+        MQRegisterService.declareNewQueue(reqRegister);
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 

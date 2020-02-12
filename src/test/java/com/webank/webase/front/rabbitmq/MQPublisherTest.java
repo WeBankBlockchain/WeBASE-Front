@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
 
-public class MQSendMessageTest extends BaseTest {
+public class MQPublisherTest extends BaseTest {
 
     @Autowired
     private RabbitMQPublisher rabbitMQPublisher;

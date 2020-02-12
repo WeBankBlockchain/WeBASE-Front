@@ -41,7 +41,7 @@ spring:
 rabbitmq:
   queue:
     service-name: mq_webase
-    queue-names: block_exchange.block_queue_1,event_echange.event_queue_1
+    queue-names: block_exchange.block_queue_1,event_exchange.event_queue_1
 
 server:
   port: 5002
@@ -68,4 +68,5 @@ constant:
   monitorEnabled: true
   aesKey: EfdsW23D23d3df43
   nodePath: /fisco/nodes/127.0.0.1/node0
+  registerCron:  "0 0 0 * * ?" # register event log push when restarts
 
