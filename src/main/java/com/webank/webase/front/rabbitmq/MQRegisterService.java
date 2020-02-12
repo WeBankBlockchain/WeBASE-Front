@@ -35,7 +35,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class RabbitMQService {
+public class MQRegisterService {
 
     @Autowired
     private RabbitAdmin rabbitAdmin;
@@ -47,7 +47,5 @@ public class RabbitMQService {
         rabbitAdmin.declareQueue(new Queue(reqRegister.getQueueName()));
         rabbitAdmin.declareExchange(fanoutExchange);
         rabbitAdmin.declareBinding(binding);
-
-
     }
 }

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.callback.event;
+package com.webank.webase.front.rabbitmq.callback;
 
 import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.message.EventLogPushMessage;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.channel.event.filter.EventLogPushCallback;
 import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
 import org.fisco.bcos.web3j.tx.txdecode.BaseException;
@@ -36,7 +34,6 @@ import java.util.List;
  * 可以用groupId作routingKey
  * @author marsli
  */
-@Slf4j
 public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCallback {
 
     private static final Logger logger =
@@ -68,7 +65,7 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
      */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
-        log.info(
+        logger.info(
                 "MQEventLogPushWithDecodedCallBack " +
                 "onPushEventLog, params: {}, status: {}, logs: {}",
                 getFilter().getParams(),

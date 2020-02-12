@@ -17,6 +17,7 @@
 package com.webank.webase.front.rabbitmq;
 
 import com.webank.webase.front.util.RabbitMQUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -24,6 +25,7 @@ import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -43,8 +45,4 @@ public class MQUtilsTest {
         }
     }
 
-    @Test
-    public void testInitUserParams() {
-        // multiple address and topics example
-    }
 }

@@ -21,8 +21,9 @@ import lombok.Data;
 import javax.persistence.*;
 
 /**
- * entity to store EventLog push register info
+ * entity to store EventLog push register info (not decoded)
  * when Service restarts, registerEventLogPushCallBack auto
+ * related with ServiceEventLogPushCallback
  * @author marsli
  */
 @Entity
@@ -34,18 +35,29 @@ public class EventLogPushRegisterInfo {
     private Long id;
 
     /**
+     * group id
+     */
+    private int groupId;
+
+    /**
+     * if use DecodedEventLogPushCallback, needs abi for decoder
+     */
+    @Column(columnDefinition = "text")
+    private String contractAbi;
+
+    /**
      * EventLogUserParams info
      */
     private String fromBlock;
     private String toBlock;
     /**
-     * List<String>
+     * single contract address
      */
-    private String addresses;
+    private String contractAddress;
     /**
      * List<String>
      */
-    private String topics;
+    private String topicList;
     /**
      * MQ info
      */
