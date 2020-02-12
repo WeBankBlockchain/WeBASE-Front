@@ -64,5 +64,6 @@ public class Constants {
     private boolean monitorEnabled = true;
     private String aesKey = "4d5dFr4fG446GBde";
     private String nodePath = "/fisco/nodes/127.0.0.1/node0";
+    private String registerCron = "0 0 0 * * ?";
 
 }

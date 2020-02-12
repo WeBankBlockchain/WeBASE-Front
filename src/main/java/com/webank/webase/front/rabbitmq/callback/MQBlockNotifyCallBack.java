@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.callback.component;
+package com.webank.webase.front.rabbitmq.callback;
 
 import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.message.BlockPushMessage;
@@ -63,11 +63,9 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
         blockPushMessage.setGroupId(groupID);
         logger.info("MQBlockNotifyCallBack pushMessage2MQ blockPushMessage:{}",
                 blockPushMessage.toString());
+        // TODO routing key设为groupId
         rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, "",
                 blockPushMessage.toString());
-
-        // TODO 确认需要哪些类型的消息/数据 sdk的本地事件 + 链上合约event事件通知
-        // 获取节点heartbeat等等的message，see in ChannelMessageType.java
     }
 
 

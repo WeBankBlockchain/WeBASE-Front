@@ -24,13 +24,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
-import com.webank.webase.front.rabbitmq.callback.component.MQBlockNotifyCallBack;
+import com.webank.webase.front.rabbitmq.callback.MQBlockNotifyCallBack;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
-import org.fisco.bcos.channel.event.filter.EventLogUserParams;
-import org.fisco.bcos.channel.event.filter.TopicTools;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -170,8 +167,6 @@ public class Web3Config {
             service.setAllChannelConnections(groupChannelConnectionsConfig);
             // blockNotifyCallBack message enqueues in MQ
             service.setBlockNotifyCallBack(mqBlockNotifyCallBack);
-            // AMOP callback
-            // service.setPushCallback();
             service.run();
             serviceMap.put(Integer.valueOf(groupIdList.get(i)), service);
         }

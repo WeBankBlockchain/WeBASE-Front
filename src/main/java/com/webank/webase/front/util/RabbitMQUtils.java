@@ -77,15 +77,15 @@ public class RabbitMQUtils {
     }
 
     /**
-     * init EventLogUserParams
+     * init EventLogUserParams with single contract address
      * @param fromBlock
      * @param toBlock
      * @param contractAddress
-     * @param topic
+     * @param topicList
      * @return
      */
-    public static EventLogUserParams initEventLogUserParams(String fromBlock, String toBlock,
-                                                            String contractAddress, Object topic) {
+    public static EventLogUserParams initSingleEventLogUserParams(String fromBlock, String toBlock,
+                                                            String contractAddress, List<String> topicList) {
         EventLogUserParams params = new EventLogUserParams();
         params.setFromBlock(fromBlock);
         params.setToBlock(toBlock);
@@ -95,11 +95,36 @@ public class RabbitMQUtils {
         addresses.add(contractAddress);
         params.setAddresses(addresses);
         List<Object> topics = new ArrayList<>();
-        if (topic instanceof String) {
-            topics.add(TopicTools.stringToTopic((String)topic));
-        }// instanceof others, convert by TopicTools before add
+        topicList.forEach(t -> topics.add(TopicTools.stringToTopic((String)t)));
         params.setTopics(topics);
 
+        return params;
+    }
+
+    /**
+     * init EventLogUserParams with multiple addresses and topics
+     * @param fromBlock
+     * @param toBlock
+     * @param contractAddressList
+     * @param topicList
+     * @return
+     */
+    public static EventLogUserParams initMultipleEventLogUserParams(String fromBlock, String toBlock,
+                                                                  List<String> contractAddressList, List<Object> topicList) {
+        EventLogUserParams params = new EventLogUserParams();
+        params.setFromBlock(fromBlock);
+        params.setToBlock(toBlock);
+
+        // addresses，设置为Java合约对象的地址
+        List<String> addresses = new ArrayList<>(contractAddressList);
+        params.setAddresses(addresses);
+        List<Object> topics = new ArrayList<>();
+        topicList.forEach(t -> {
+            if (t instanceof String) {
+                topics.add(TopicTools.stringToTopic((String)t));
+            }// instanceof others, convert by TopicTools before add
+        });
+        params.setTopics(topics);
         return params;
     }
 
