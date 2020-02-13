@@ -20,17 +20,6 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.*;
 
-/**
- * Web socket service that allows to interact with JSON-RPC via WebSocket protocol.
- *
- * <p>Allows to interact with JSON-RPC either by sending individual requests or by
- * subscribing to a stream of notifications. To subscribe to a notification it first
- * sends a special JSON-RPC request that returns a unique subscription id. A subscription
- * id is used to identify events for a single notifications stream.
- *
- * <p>To unsubscribe from a stream of notifications it should send another JSON-RPC
- * request.
- */
 @Slf4j
 public class WebSocketService  implements Web3jService {
 
@@ -120,7 +109,7 @@ public class WebSocketService  implements Web3jService {
                 throw (IOException) e.getCause();
             }
 
-            throw new RuntimeException("Unexpected exception", e.getCause());
+            throw new RuntimeException("Unexpected exception :"+ e.getMessage(), e.getCause());
         }
     }
 
@@ -198,11 +187,6 @@ public class WebSocketService  implements Web3jService {
         WebSocketRequest request = getAndRemoveRequest(replyId);
         try {
             Object reply = objectMapper.convertValue(replyJson, request.getResponseType());
-            // Instead of sending a reply to a caller asynchronously we need to process it here
-            // to avoid race conditions we need to modify state of this class.
-//            if (reply instanceof EthSubscribe) {
-//                processSubscriptionResponse(replyId, (EthSubscribe) reply);
-//            }
 
             sendReplyToListener(request, reply);
         } catch (IllegalArgumentException e) {
@@ -229,22 +213,6 @@ public class WebSocketService  implements Web3jService {
                                 replyStr,
                                 request.getResponseType()),
                         e));
-    }
-
-//    private void processSubscriptionEvent(String replyStr, JsonNode replyJson) {
-//        log.info("Processing event: {}", replyStr);
-//        String subscriptionId = extractSubscriptionId(replyJson);
-//        WebSocketSubscription subscription = subscriptionForId.get(subscriptionId);
-//
-//        if (subscription != null) {
-//            sendEventToSubscriber(replyJson, subscription);
-//        } else {
-//            log.warn("No subscriber for WebSocket event with subscription id {}", subscriptionId);
-//        }
-//    }
-
-    private String extractSubscriptionId(JsonNode replyJson) {
-        return replyJson.get("params").get("subscription").asText();
     }
 
 

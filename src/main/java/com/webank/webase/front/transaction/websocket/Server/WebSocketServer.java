@@ -35,7 +35,7 @@ public class WebSocketServer {
      private TransService transService = null ;
     /**
      * onOpen是当用户发起连接时，会生成一个用户的Session 注意此Session是 javax.websocket.Session;
-     * 然后我们用userId作为Key Session作为Vaule存入Map中暂存起来
+     *
      *
      * @param frontId
      * @param session
@@ -61,7 +61,7 @@ public class WebSocketServer {
     }
 
     /**
-     * onMessage 实现聊天功能， message是前端传来的JSON字符串。其中含有MessageVo里的信息。根据vo实现点对点/广播聊天。
+     * onMessage
      *
      * @param message
      */
@@ -91,15 +91,16 @@ public class WebSocketServer {
      */
     private  void one2one(MessageRequest vo) throws BaseException {
         Session consumerSession = sessionMap.get(vo.getFrontId());
-        if (consumerSession == null) {
-            log.info("消息消费者不存在");
-        } else {
-           if(transService == null) {
-               transService = applicationContext.getBean(TransService.class);
-           }
+    //    synchronized (consumerSession) {
+            if (consumerSession == null) {
+                log.info("消息消费者不存在");
+            } else {
+                if (transService == null) {
+                    transService = applicationContext.getBean(TransService.class);
+                }
 
-           MessageResponse messageResponse = methodHandle(vo);
-           consumerSession.getAsyncRemote().sendText(JSON.toJSONString(messageResponse));
+                MessageResponse messageResponse = methodHandle(vo);
+                consumerSession.getAsyncRemote().sendText(JSON.toJSONString(messageResponse));
         }
     }
 
