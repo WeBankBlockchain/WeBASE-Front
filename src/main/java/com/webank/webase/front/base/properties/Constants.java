@@ -72,7 +72,7 @@ public class Constants {
     private Integer http_connect_timeOut = 10000;
     private Integer sleep = 500;
     private Integer websocket = 1;
-    public static int error = 0;
+    public static AtomicInteger error = new AtomicInteger(0);
 
 
 
