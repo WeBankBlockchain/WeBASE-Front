@@ -93,20 +93,20 @@ public class TransController extends BaseController {
 
     @GetMapping("/pressure-test")
     public Boolean pressureTest() throws Exception {
-   log.info("***");
+        log.info("***");
         return transServiceImpl.pressureTest();
     }
 
     @GetMapping("/error-count")
     public Integer errorCount() throws Exception {
 
-        return Constants.error;
+        return Constants.error.intValue();
     }
 
     @PostMapping("/reset")
     public Boolean reset() throws Exception {
 
-         Constants.error=0;
+         Constants.error.set(0);
          return true;
 
     }

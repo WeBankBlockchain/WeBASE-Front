@@ -23,10 +23,9 @@ public class PerformanceDTCallback extends TransactionSucCallback {
         Long cost = System.currentTimeMillis() - startTime;
         status = 1;
         if(!receipt.isStatusOK()) {
-              if(!receipt.getStatus().equals("Transaction receipt timeout.")) {
                   logger.info("{}cost time :{}, status:{}",receipt.getTransactionHash(), cost , receipt.getStatus());
-               //   Constants.error.incrementAndGet();
-              }
+                  Constants.error.incrementAndGet();
+
         }
    //     logger.info("{}cost time :{}, status:{}",receipt.getTransactionHash(), cost , receipt.getStatus());
     }
