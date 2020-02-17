@@ -27,10 +27,17 @@ import java.math.BigInteger;
 @Data
 @NoArgsConstructor
 public class BlockPushMessage implements MQObject {
+
+    /**
+     * event type: 1: blockNotify, 2: eventLogPush, 3: others
+     */
+    private int eventType;
+
     /**
      * group id
      */
     private Integer groupId;
+
     /**
      * block height
      */
@@ -38,30 +45,10 @@ public class BlockPushMessage implements MQObject {
 
     @Override
     public String toString() {
-        return "BlockPushMessage:{" + "groupId:" + groupId.toString() + ","
+        return "BlockPushMessage:{"
+                + "eventType:" + eventType + ","
+                + "groupId:" + groupId.toString() + ","
                 + "blockNumber:" + blockNumber.toString() + "}";
     }
-//    private String hash;
-//    private String parentHash;
-//    private String nonce;
-//    private String sealer;
-//    private String logsBloom;
-//    private String transactionsRoot;
-//    private String stateRoot;
-//    private int difficulty;
-//    private int totalDifficulty;
-//    private List<Object> extraData;
-//    private int size;
-//    private Long gasLimit;
-//    private Long gasUsed;
-//    private String timestamp;
-//    private String gasLimitRaw;
-//    private String timestampRaw;
-//    private String gasUsedRaw;
-//    private String numberRaw;
-//    /**
-//     * list of tx_hash
-//     */
-//    private List<String> transactions;
 
 }

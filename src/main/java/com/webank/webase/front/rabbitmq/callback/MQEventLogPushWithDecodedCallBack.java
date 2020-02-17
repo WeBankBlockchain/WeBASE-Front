@@ -31,7 +31,7 @@ import java.util.List;
 
 /**
  * 指定exchangeName和routingKey, callback后直接push到对应的mq中
- * 可以用groupId作routingKey
+ * routingKey是exchange推送到queue的唯一标志, ex: username_event, username_block
  * @author marsli
  */
 public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCallback {
@@ -39,22 +39,20 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
     private static final Logger logger =
             LoggerFactory.getLogger(MQEventLogPushWithDecodedCallBack.class);
 
-    private String exchangeName = "event_exchange";
-    private String routingKey = "";
     private RabbitMQPublisher rabbitMQPublisher;
+    private String exchangeName;
+    private String routingKey;
+    private int groupId;
 
     public MQEventLogPushWithDecodedCallBack(RabbitMQPublisher rabbitMQPublisher,
                                              String exchangeName, String routingKey,
-                                             TransactionDecoder decoder) {
+                                             TransactionDecoder decoder, int groupId) {
         this.rabbitMQPublisher = rabbitMQPublisher;
-        if(exchangeName != null){
-            this.exchangeName = exchangeName;
-        }
-        if(routingKey != null) {
-            this.routingKey = routingKey;
-        }
+        this.exchangeName = exchangeName;
+        this.routingKey = routingKey;
         // onPush will call father class's decoder, init EventLogPushWithDecodeCallback's decoder
         this.setDecoder(decoder);
+        this.groupId = groupId;
     }
 
 
@@ -72,11 +70,13 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
                 status,
                 logs);
         // 推送到指定的MQ中
-        pushMessage2MQ(status, logs);
+        pushMessage2MQ(groupId, status, logs);
     }
 
-    private void pushMessage2MQ(int status, List<LogResult> logs) {
+    private void pushMessage2MQ(int groupId,
+                                int status, List<LogResult> logs) {
         EventLogPushMessage eventLogPushMessage = new EventLogPushMessage();
+        eventLogPushMessage.setGroupId(groupId);
         eventLogPushMessage.setStatus(status);
         eventLogPushMessage.setLogs(logs);
         rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,

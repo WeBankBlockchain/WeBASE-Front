@@ -19,22 +19,56 @@ package com.webank.webase.front.rabbitmq.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
- * ex: exchange1.queue1
- * exchangeName: exchange1, queueName: exchange1.queue1
+ * Based on EventLogUserParams
  * @author marsli
  */
 @Data
 @NoArgsConstructor
-public class ReqRegister {
+public class ReqRegisterEvent {
 
+    /**
+     * event type: 1: blockNotify, 2: eventLogPush, 3: others
+     */
+    private int eventType;
 
+    /**
+     * group id
+     */
+    private int groupId;
+    /**
+     * MQ info: exchange name
+     */
     private String exchangeName;
-    private String queueName;
-    private String routingKey;
 
-//    @Override
-//    public String toString() {
-//        return exchangeName + "." + routingKey;
-//    }
+    /**
+     * username as queue name
+     */
+    private String queueName;
+
+	/**
+	 * contract abi for decoder
+	 */
+	private String contractAbi;
+
+    /**
+     * event log push info below
+     */
+
+    private String fromBlock;
+
+    private String toBlock;
+
+    /**
+     * single contract address
+     */
+    private String contractAddress;
+
+    /**
+     * List of topics
+     */
+    private List<String> topicList;
+
 }
