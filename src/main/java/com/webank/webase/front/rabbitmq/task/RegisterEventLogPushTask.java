@@ -18,19 +18,19 @@ package com.webank.webase.front.rabbitmq.task;
 
 import com.webank.webase.front.rabbitmq.EventLogPushRegisterInfoRepository;
 import com.webank.webase.front.rabbitmq.EventLogPushRegisterService;
+import com.webank.webase.front.rabbitmq.MQRegisterService;
 import com.webank.webase.front.rabbitmq.entity.EventLogPushRegisterInfo;
 import com.webank.webase.front.util.FrontUtils;
-import com.webank.webase.front.util.RabbitMQUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.event.filter.EventLogUserParams;
-import org.springframework.amqp.rabbit.connection.RabbitUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+
+import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_EVENT;
 
 /**
  * get EventLogPushRegisterInfo from db
@@ -43,6 +43,8 @@ public class RegisterEventLogPushTask {
 
 	@Autowired
 	EventLogPushRegisterService registerService;
+	@Autowired
+	MQRegisterService mqRegisterService;
 	@Autowired
 	EventLogPushRegisterInfoRepository registerInfoRepository;
 	@Autowired
@@ -62,16 +64,22 @@ public class RegisterEventLogPushTask {
 				// register
 				registerList.forEach(rInfo -> {
 					List<String> topicList = FrontUtils.string2ListStr(rInfo.getTopicList());
+					String queueName = rInfo.getQueueName();
 					log.debug("register task groupId:{}, rInfo:{}", groupId, rInfo);
+					// bind queue to exchange by routing key "queueName_event"
+					String routingKey = queueName +  "_" +ROUTING_KEY_EVENT;
+					mqRegisterService.bindQueue2Exchange(rInfo.getExchangeName(), queueName, routingKey);
 					registerService.registerDecodedEventLogPush(
 							groupId,
+							rInfo.getExchangeName(),
+							queueName,
+							routingKey,
 							rInfo.getContractAbi(),
 							rInfo.getFromBlock(),
 							rInfo.getToBlock(),
 							rInfo.getContractAddress(),
-							topicList,
-							rInfo.getExchangeName(),
-							rInfo.getRoutingKey());
+							topicList
+							);
 				});
 			}
 		}catch (Exception ex) {

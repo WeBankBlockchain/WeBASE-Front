@@ -15,22 +15,15 @@
  */
 package com.webank.webase.front.rabbitmq;
 
-import com.webank.webase.front.rabbitmq.entity.ReqRegister;
-import com.webank.webase.front.util.RabbitMQUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.connection.RabbitUtils;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
- * 初始化RabbitMQ实例，用于新建队列
+ * to bind queue with routing key to exchange
  * @author marsli
  */
 @Slf4j
@@ -40,12 +33,21 @@ public class MQRegisterService {
     @Autowired
     private RabbitAdmin rabbitAdmin;
 
-    public void declareNewQueue(ReqRegister reqRegister) {
-        FanoutExchange fanoutExchange = new FanoutExchange(reqRegister.getExchangeName());
-
-        Binding binding = BindingBuilder.bind(new Queue(reqRegister.getQueueName())).to(fanoutExchange);
-        rabbitAdmin.declareQueue(new Queue(reqRegister.getQueueName()));
-        rabbitAdmin.declareExchange(fanoutExchange);
+    /**
+     * bind new queue to existed exchange
+     * @param exchangeName
+     * @param queueName
+     * @param routingKey
+     */
+    public void bindQueue2Exchange(String exchangeName, String queueName, String routingKey){
+        log.info("bindQueue2Exchange exchangeName:{},queueName:{}, routingKey:{}",
+                exchangeName, queueName, routingKey);
+        Binding binding = BindingBuilder
+                .bind(new Queue(queueName))
+                .to(new DirectExchange(exchangeName))
+                .with(routingKey);
         rabbitAdmin.declareBinding(binding);
     }
+
+
 }

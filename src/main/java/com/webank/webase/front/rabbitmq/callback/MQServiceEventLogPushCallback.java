@@ -41,8 +41,7 @@ public class MQServiceEventLogPushCallback extends ServiceEventLogPushCallback {
 	private RabbitMQPublisher rabbitMQPublisher;
 
 	public MQServiceEventLogPushCallback(RabbitMQPublisher rabbitMQPublisher,
-											 String exchangeName, String routingKey,
-											 TransactionDecoder decoder) {
+											 String exchangeName, String routingKey) {
 		this.rabbitMQPublisher = rabbitMQPublisher;
 		if(exchangeName != null){
 			this.exchangeName = exchangeName;

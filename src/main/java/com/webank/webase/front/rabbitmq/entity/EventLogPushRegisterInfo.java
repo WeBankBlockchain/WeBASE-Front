@@ -35,6 +35,11 @@ public class EventLogPushRegisterInfo {
     private Long id;
 
     /**
+     * event type: 1: blockNotify, 2: eventLogPush, 3: others
+     */
+    private int eventType;
+
+    /**
      * group id
      */
     private int groupId;
@@ -62,5 +67,14 @@ public class EventLogPushRegisterInfo {
      * MQ info
      */
     private String exchangeName;
+
+    /**
+     * @username as queue name
+     */
+    private String queueName;
+
+    /**
+     * concat queueName + "_" + event/block as routing key
+     */
     private String routingKey;
 }
