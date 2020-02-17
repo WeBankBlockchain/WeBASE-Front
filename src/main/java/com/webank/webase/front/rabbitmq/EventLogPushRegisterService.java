@@ -57,11 +57,13 @@ public class EventLogPushRegisterService {
      * @param contractAddress single one
      * @param topicList
      * @param exchangeName
-     * @param routingKey
+     * @param queueName
      */
-    public void registerDecodedEventLogPush(int groupId, String abi, String fromBlock,
-                                            String toBlock, String contractAddress, List<String> topicList,
-                                            String exchangeName, String routingKey) {
+    public void registerDecodedEventLogPush(int groupId,
+                                            String exchangeName, String queueName, String routingKey,
+                                            String abi, String fromBlock,
+                                            String toBlock, String contractAddress, List<String> topicList
+                                            ) {
         // TODO 如果exchange不存在，会发往死信队列
         // 传入abi作decoder:
         TransactionDecoder decoder = new TransactionDecoder(abi);
@@ -70,18 +72,22 @@ public class EventLogPushRegisterService {
                 toBlock, contractAddress, topicList);
         MQEventLogPushWithDecodedCallBack callBack =
                 new MQEventLogPushWithDecodedCallBack(rabbitMQPublisher,
-                        exchangeName, routingKey, decoder);
-        log.debug("registerDecodedEventLogPush groupId:{},abi:{},params:{},exchangeNarme:{},routingKey:{}",
-                groupId, abi, params, exchangeName, routingKey);
+                        exchangeName, queueName, decoder, groupId);
+        log.debug("registerDecodedEventLogPush groupId:{},abi:{},params:{},exchangeNarme:{},queueName:{}",
+                groupId, abi, params, exchangeName, queueName);
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         service.registerEventLogFilter(params, callBack);
-        addRegisterInfo(groupId, abi, fromBlock, toBlock, contractAddress, topicList, exchangeName, routingKey);
+        // save to db
+        addRegisterInfo(2, groupId, exchangeName, queueName, routingKey,
+                abi, fromBlock, toBlock, contractAddress, topicList);
     }
 
-    private void addRegisterInfo(int groupId, String abi, String fromBlock,
-                                 String toBlock, String contractAddress, List<String> topicList,
-                                 String exchangeName, String routingKey) {
+    private void addRegisterInfo(int eventType, int groupId,
+                                 String exchangeName, String queueName, String routingKey,
+                                 String abi, String fromBlock,
+                                 String toBlock, String contractAddress, List<String> topicList) {
         EventLogPushRegisterInfo registerInfo = new EventLogPushRegisterInfo();
+        registerInfo.setEventType(eventType);
         registerInfo.setGroupId(groupId);
         registerInfo.setContractAbi(abi);
         registerInfo.setFromBlock(fromBlock);
@@ -90,6 +96,7 @@ public class EventLogPushRegisterService {
         // List converts to [a,b,c]
         registerInfo.setTopicList(FrontUtils.listStr2String(topicList));
         registerInfo.setExchangeName(exchangeName);
+        registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
         registerInfoRepository.save(registerInfo);
     }

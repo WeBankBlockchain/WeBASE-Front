@@ -29,6 +29,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class EventLogPushMessage implements MQObject {
+
+    /**
+     * event type: 1: blockNotify, 2: eventLogPush, 3: others
+     */
+    private Integer eventType;
+
+    private Integer groupId;
+
     /**
      * related with
      */
@@ -38,7 +46,10 @@ public class EventLogPushMessage implements MQObject {
 
     @Override
     public String toString() {
-        return "EventLogPushMessage:{" + "status:" + status + ","
+        return "EventLogPushMessage:{"
+                + "eventType:" + eventType + ","
+                + "groupId:" + groupId  + ","
+                + "status:" + status + ","
                 + "logs:" + JSONArray.toJSONString(logs) + "}";
     }
 }

@@ -18,7 +18,6 @@ package com.webank.webase.front.rabbitmq.callback;
 
 import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
 import com.webank.webase.front.rabbitmq.entity.message.BlockPushMessage;
-import lombok.Setter;
 import org.fisco.bcos.channel.client.BlockNotifyCallBack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,10 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 
+import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
+
 /**
- * 出块后将Push一个信息到RabbitMQ
+ * 出块后将Push一个信息到RabbitMQ，并广播到订阅者的队列中
  * @author marsli
  */
 @Component
@@ -36,8 +37,7 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 
     private static Logger logger = LoggerFactory.getLogger(MQBlockNotifyCallBack.class);
 
-    @Setter
-    private String blockExchange= "block_exchange";
+    private String blockExchange;
 
     @Autowired
     private RabbitMQPublisher rabbitMQPublisher;
@@ -46,25 +46,32 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
     public void onBlockNotify(int groupID, BigInteger blockNumber) {
         logger.info("MQBlockNotifyCallBack groupID:{}, blockNumber:{}",
                 groupID, blockNumber);
-        pushMessage2MQ(blockExchange, groupID, blockNumber);
+        // register map
+		if (BLOCK_ROUTING_KEY_MAP.isEmpty()) {
+			logger.debug("block notify register user is empty. ");
+			return;
+		}
+		BlockPushMessage blockPushMessage = new BlockPushMessage();
+		blockPushMessage.setBlockNumber(blockNumber);
+		blockPushMessage.setGroupId(groupID);
+		for (String blockRoutingKey: BLOCK_ROUTING_KEY_MAP.values()) {
+			pushMessage2MQ(blockExchange, blockRoutingKey, blockPushMessage);
+		}
+
+
     }
 
-    /**
-     * push message to mq
-     * @param exchangeName
-     * @param groupID
-     * @param blockNumber
-     */
-    private void pushMessage2MQ(String exchangeName,
-                                int groupID, BigInteger blockNumber) {
-        // TODO pull block data or and enqueue message in RabbitMQ
-        BlockPushMessage blockPushMessage = new BlockPushMessage();
-        blockPushMessage.setBlockNumber(blockNumber);
-        blockPushMessage.setGroupId(groupID);
+	/**
+	 * push message to mq
+	 * @param exchangeName
+	 * @param routingKey
+	 * @param blockPushMessage
+	 */
+    private void pushMessage2MQ(String exchangeName, String routingKey,
+								BlockPushMessage blockPushMessage) {
         logger.info("MQBlockNotifyCallBack pushMessage2MQ blockPushMessage:{}",
                 blockPushMessage.toString());
-        // TODO routing key设为groupId
-        rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, "",
+        rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
                 blockPushMessage.toString());
     }
 

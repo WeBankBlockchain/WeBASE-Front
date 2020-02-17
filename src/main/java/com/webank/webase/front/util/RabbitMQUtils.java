@@ -18,10 +18,7 @@ package com.webank.webase.front.util;
 
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.channel.event.filter.TopicTools;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.FanoutExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 
 import java.util.ArrayList;
@@ -34,46 +31,47 @@ import java.util.Map;
  */
 public class RabbitMQUtils {
 
-
+    public static final String ROUTING_KEY_EVENT = "event";
+    public static final String ROUTING_KEY_BLOCK = "block";
     /**
-     * bind queue name for rabbitAdmin
-     * @param rabbitAdmin
-     * @param queueNames
+     * map of (username, block_routing_key)
      */
-    public static void declareQueues(RabbitAdmin rabbitAdmin, List<String> queueNames){
-        Map<String,List<String>> map = distinctList(queueNames);
-        for (String string : map.keySet()){
-            FanoutExchange fanoutExchange = new FanoutExchange(string);
-            for(String string1 : map.get(string)){
-                Binding binding = BindingBuilder.bind(new Queue(string1)).to(fanoutExchange);
-                rabbitAdmin.declareQueue(new Queue(string1));
-                rabbitAdmin.declareExchange(fanoutExchange);
-                rabbitAdmin.declareBinding(binding);
-            }
-        }
+    public static Map<String, String> BLOCK_ROUTING_KEY_MAP = new HashMap<>();
+    /**
+     * new exchange by rabbitAdmin
+     * @param rabbitAdmin
+     */
+    public static void declareExchange(RabbitAdmin rabbitAdmin, String exchangeName){
+        DirectExchange directExchange = new DirectExchange(exchangeName);
+        rabbitAdmin.declareExchange(directExchange);
     }
 
     /**
-     * separate queue names
-     * @param list queue1,queue2...
-     * @return
+     * new exchange and bind queue by rabbitAdmin
+     * @param rabbitAdmin
+     * @param exchangeName
+     * @param queueName
+     * @param routingKey
      */
-    public static Map<String,List<String>> distinctList(List<String> list){
-        Map<String,List<String>> map = new HashMap<>();
-        for (String string :list){
-            if(!string.contains(".")){
-                continue;
-            }
-            List<String> list1 = new ArrayList<>();
-            String key =string.split("\\.")[0];
-            if(map.keySet().contains(key)){
-                map.get(key).add(string);
-            }else{
-                list1.add(string);
-                map.put(key,list1);
-            }
-        }
-        return map;
+    public static void declareExchangeAndQueue(RabbitAdmin rabbitAdmin,
+                                                String exchangeName, String queueName, String routingKey){
+        DirectExchange directExchange = new DirectExchange(exchangeName);
+        rabbitAdmin.declareExchange(directExchange);
+        rabbitAdmin.declareQueue(new Queue(queueName));
+    }
+
+    /**
+     * bind queue with routing key to existed exchange
+     * @param rabbitAdmin
+     * @param targetExchange
+     * @param queueName
+     * @param routingKey
+     */
+    public static void bindQueue(RabbitAdmin rabbitAdmin,
+                                 DirectExchange targetExchange, String queueName, String routingKey){
+        rabbitAdmin.declareQueue(new Queue(queueName));
+        Binding binding = BindingBuilder.bind(new Queue(queueName)).to(targetExchange).with(routingKey);
+        rabbitAdmin.declareBinding(binding);
     }
 
     /**

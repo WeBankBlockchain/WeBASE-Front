@@ -18,14 +18,11 @@ package com.webank.webase.front.rabbitmq;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.rabbitmq.entity.ReqEventLogPushRegister;
-import com.webank.webase.front.rabbitmq.entity.ReqRegister;
-import com.webank.webase.front.util.RabbitMQUtils;
+import com.webank.webase.front.rabbitmq.entity.ReqRegisterEvent;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
+
+import static com.webank.webase.front.util.RabbitMQUtils.*;
 
 /**
  * @author marsli
@@ -47,43 +46,46 @@ public class MQRegisterController {
     @Autowired
     private EventLogPushRegisterService eventLogPushRegisterService;
     @Autowired
-    private RabbitMQPublisher rabbitMQPublisher;
-    @Autowired
-    private MQRegisterService MQRegisterService;
+    private MQRegisterService mqRegisterService;
 
     @ApiOperation(value = "registerEventLogPush",
             notes = "register eventLogPushCallBack and push message to mq")
     @ApiImplicitParam(name = "ReqEventLogPushRegister", value = "EventLogUserParams与消息队列名",
             required = true, dataType = "ReqEventLogPushRegister")
-    @PostMapping("eventLogPush")
+    @PostMapping("")
     public Object registerEventLogPush(
-            @Valid @RequestBody ReqEventLogPushRegister reqEventLogPushRegister)
-            throws Exception {
-        log.info("start registerEventLogPush. reqEventLogPushRegister:{}", reqEventLogPushRegister);
-        String fromBlock = reqEventLogPushRegister.getFromBlock();
-        String toBlock = reqEventLogPushRegister.getToBlock();
-        String contractAddress = reqEventLogPushRegister.getAddress();
-        List<String> topicList = reqEventLogPushRegister.getTopicList();
-        int groupId = reqEventLogPushRegister.getGroupId();
-        String contractAbi = reqEventLogPushRegister.getContractAbi();
-        String exchangeName = reqEventLogPushRegister.getExchangeName();
-        String routingKey = reqEventLogPushRegister.getRoutingKey();
-        eventLogPushRegisterService.registerDecodedEventLogPush(groupId, contractAbi,
-                fromBlock, toBlock, contractAddress, topicList, exchangeName, routingKey);
+            @Valid @RequestBody ReqRegisterEvent reqRegisterEvent) {
+        log.info("start registerEventLogPush. reqEventLogPushRegister:{}", reqRegisterEvent);
+        int eventType = reqRegisterEvent.getEventType();
+        int groupId = reqRegisterEvent.getGroupId();
+        String fromBlock = reqRegisterEvent.getFromBlock();
+        String toBlock = reqRegisterEvent.getToBlock();
+        String contractAddress = reqRegisterEvent.getContractAddress();
+        List<String> topicList = reqRegisterEvent.getTopicList();
+        String contractAbi = reqRegisterEvent.getContractAbi();
+        String exchangeName = reqRegisterEvent.getExchangeName();
+        // username as queue name
+        String queueName = reqRegisterEvent.getQueueName();
+
+        // block notify
+        if(eventType == 1) {
+            String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK;
+            mqRegisterService.bindQueue2Exchange(exchangeName, queueName, blockRoutingKey);
+            BLOCK_ROUTING_KEY_MAP.put(queueName, blockRoutingKey);
+            // save to db
+        } else if (eventType == 2) {
+            // event log push
+            // bind queue to exchange by routing key "event"
+            String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT;
+            mqRegisterService.bindQueue2Exchange(exchangeName, queueName, eventRoutingKey);
+            // register event log push in service
+            eventLogPushRegisterService.registerDecodedEventLogPush(groupId, exchangeName, queueName, eventRoutingKey,
+                    contractAbi, fromBlock, toBlock, contractAddress, topicList);
+        }
+
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
-    @ApiOperation(value = "createQueue",
-            notes = "declare message queue in rabbit mq")
-    @ApiImplicitParam(name = "ReqRegister", value = "创建消息队列的队列名与exchangeName",
-            required = true, dataType = "ReqRegister")
-    @PostMapping("queue")
-    public Object createQueue(
-            @Valid @RequestBody ReqRegister reqRegister)
-            throws Exception {
-        log.info("start createQueue. reqRegister:{}", reqRegister);
-        MQRegisterService.declareNewQueue(reqRegister);
-        return new BaseResponse(ConstantCode.RET_SUCCESS);
-    }
+
 
 }

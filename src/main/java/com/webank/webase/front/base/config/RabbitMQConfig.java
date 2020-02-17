@@ -15,16 +15,14 @@
  */
 package com.webank.webase.front.base.config;
 
-import com.webank.webase.front.base.properties.RabbitMQProperties;
-import com.webank.webase.front.util.RabbitMQUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 
 /**
  * 初始化RabbitMQ实例
@@ -32,34 +30,32 @@ import org.springframework.context.annotation.Configuration;
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(RabbitMQProperties.class)
 public class RabbitMQConfig {
 
-    /**
-     * 用于发送消息到队列
-     * 指定 messageConverter为Json
-     * @param connectionFactory 包含了本地连接rabbitmq服务器的配置信息
-     * @return
-     */
-    @Bean(name = "rabbitTemplate")
-    public RabbitTemplate getRabbitTemplate(ConnectionFactory connectionFactory) {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
-        return rabbitTemplate;
-    }
 
     /**
      * 新建yml中rabbitmq-queue默认的队列
      * @param connectionFactory spring的yml中rabbitmq项配置
-     * @param config 单独的rabbitmq-queue的配置
      * @return
      */
     @Bean(name = "rabbitAdmin")
-    public RabbitAdmin initRabbitAdmin(ConnectionFactory connectionFactory, RabbitMQProperties config) {
+    public RabbitAdmin initRabbitAdmin(ConnectionFactory connectionFactory) {
         RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-        // bind queue which configured in yml
-        RabbitMQUtils.declareQueues(rabbitAdmin, config.getQueueNames());
         return rabbitAdmin;
     }
+
+    /**
+     * 用于发送消息到队列
+     * 指定 messageConverter为Json
+     * @param rabbitAdmin
+     * @return
+     */
+    @Bean(name = "rabbitTemplate")
+    public RabbitTemplate getRabbitTemplate(RabbitAdmin rabbitAdmin) {
+        RabbitTemplate rabbitTemplate = rabbitAdmin.getRabbitTemplate();
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        return rabbitTemplate;
+    }
+
 
 }
