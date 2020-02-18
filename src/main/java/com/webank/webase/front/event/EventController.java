@@ -18,16 +18,16 @@ package com.webank.webase.front.event;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.event.entity.BlockNotifyInfo;
+import com.webank.webase.front.event.entity.EventLogPushInfo;
+import com.webank.webase.front.event.entity.ReqBlockNotifyRegister;
 import com.webank.webase.front.event.entity.ReqEventLogPushRegister;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -41,40 +41,40 @@ import static com.webank.webase.front.util.RabbitMQUtils.*;
 @Slf4j
 @RestController
 @RequestMapping(value = "event")
-public class EventRegisterController {
+public class EventController {
 
     @Autowired
-    private EventRegisterService eventRegisterService;
+    private EventService eventService;
 
     @ApiOperation(value = "registerBlockNotify",
             notes = "register registerBlockNotify and push message to mq")
-    @ApiImplicitParam(name = "ReqEventLogPushRegister", value = "EventLogUserParams与消息队列名",
-            required = true, dataType = "ReqEventLogPushRegister")
+    @ApiImplicitParam(name = "ReqBlockNotifyRegister", value = "注册出块通知所需配置",
+            required = true, dataType = "ReqBlockNotifyRegister")
     @PostMapping("blockNotify")
-    public Object registerBlockNotify(
-            @Valid @RequestBody ReqEventLogPushRegister reqEventLogPushRegister) {
-        log.info("start registerEventLogPush. reqEventLogPushRegister:{}", reqEventLogPushRegister);
-        String appId = reqEventLogPushRegister.getAppId();
-        int groupId = reqEventLogPushRegister.getGroupId();
-        String exchangeName = reqEventLogPushRegister.getExchangeName();
+    public BaseResponse registerBlockNotify(
+            @Valid @RequestBody ReqBlockNotifyRegister reqBlockNotifyRegister) {
+        log.info("start registerEventLogPush. reqBlockNotifyRegister:{}", reqBlockNotifyRegister);
+        String appId = reqBlockNotifyRegister.getAppId();
+        int groupId = reqBlockNotifyRegister.getGroupId();
+        String exchangeName = reqBlockNotifyRegister.getExchangeName();
         // username as queue name
-        String queueName = reqEventLogPushRegister.getQueueName();
+        String queueName = reqBlockNotifyRegister.getQueueName();
 
         // "username_routingKey"
-        String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK;
-        eventRegisterService.registerBlockNotify(appId, groupId,
+        String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
+        List<BlockNotifyInfo> resList = eventService.registerBlockNotify(appId, groupId,
                 exchangeName, queueName, blockRoutingKey);
 
-        return new BaseResponse(ConstantCode.RET_SUCCESS);
+        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
     }
 
 
     @ApiOperation(value = "registerEventLogPush",
             notes = "register eventLogPushCallBack and push message to mq")
-    @ApiImplicitParam(name = "ReqEventLogPushRegister", value = "EventLogUserParams与消息队列名",
+    @ApiImplicitParam(name = "ReqEventLogPushRegister", value = "EventLogUserParams与消息队列所需配置",
             required = true, dataType = "ReqEventLogPushRegister")
     @PostMapping("eventLogPush")
-    public Object registerEventLogPush(
+    public BaseResponse registerEventLogPush(
             @Valid @RequestBody ReqEventLogPushRegister reqEventLogPushRegister) {
         log.info("start registerEventLogPush. reqEventLogPushRegister:{}", reqEventLogPushRegister);
         int groupId = reqEventLogPushRegister.getGroupId();
@@ -89,13 +89,13 @@ public class EventRegisterController {
         String queueName = reqEventLogPushRegister.getQueueName();
 
         // bind queue to exchange by routing key "username_event"
-        String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT;
+        String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
         // register event log push in service
-        eventRegisterService.registerDecodedEventLogPush(appId, groupId,
+        List<EventLogPushInfo> resList = eventService.registerDecodedEventLogPush(appId, groupId,
                 exchangeName, queueName, eventRoutingKey,
                 contractAbi, fromBlock, toBlock, contractAddress, topicList);
 
-        return new BaseResponse(ConstantCode.RET_SUCCESS);
+        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
     }
 
 }

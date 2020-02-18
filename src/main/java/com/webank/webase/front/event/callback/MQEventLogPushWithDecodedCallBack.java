@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.event.callback;
 
-import com.webank.webase.front.event.RabbitMQPublisher;
+import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.message.EventLogPushMessage;
 import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
@@ -38,16 +38,16 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
     private static final Logger logger =
             LoggerFactory.getLogger(MQEventLogPushWithDecodedCallBack.class);
 
-    private RabbitMQPublisher rabbitMQPublisher;
+    private MQPublisher MQPublisher;
     private String exchangeName;
     private String routingKey;
     private int groupId;
     private String appId;
 
-    public MQEventLogPushWithDecodedCallBack(RabbitMQPublisher rabbitMQPublisher,
+    public MQEventLogPushWithDecodedCallBack(MQPublisher mqPublisher,
                                              String exchangeName, String routingKey,
                                              TransactionDecoder decoder, int groupId, String appId) {
-        this.rabbitMQPublisher = rabbitMQPublisher;
+        this.MQPublisher = mqPublisher;
         this.exchangeName = exchangeName;
         this.routingKey = routingKey;
         // onPush will call father class's decoder, init EventLogPushWithDecodeCallback's decoder
@@ -65,8 +65,8 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
         logger.info(
-                "MQEventLogPushWithDecodedCallBack " +
-                "onPushEventLog, params: {}, status: {}, logs: {}",
+                "MQEventLogPushWithDecodedCallBack onPushEventLog" +
+                        " params: {}, status: {}, logs: {}",
                 getFilter().getParams(),
                 status,
                 logs);
@@ -81,7 +81,7 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
         eventLogPushMessage.setStatus(status);
         eventLogPushMessage.setLogs(logs);
         eventLogPushMessage.setAppId(appId);
-        rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
+        MQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
                 eventLogPushMessage.toString());
     }
 

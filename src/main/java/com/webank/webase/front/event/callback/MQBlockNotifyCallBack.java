@@ -16,7 +16,9 @@
 
 package com.webank.webase.front.event.callback;
 
-import com.webank.webase.front.event.RabbitMQPublisher;
+import com.webank.webase.front.event.MQPublisher;
+import com.webank.webase.front.event.entity.PublisherHelper;
+import com.webank.webase.front.event.entity.ReqBlockNotifyRegister;
 import com.webank.webase.front.event.entity.message.BlockPushMessage;
 import org.fisco.bcos.channel.client.BlockNotifyCallBack;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
+import java.util.Map;
 
 import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 
@@ -37,10 +40,8 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 
     private static Logger logger = LoggerFactory.getLogger(MQBlockNotifyCallBack.class);
 
-    private String blockExchange;
-
     @Autowired
-    private RabbitMQPublisher rabbitMQPublisher;
+    private MQPublisher MQPublisher;
 
     @Override
     public void onBlockNotify(int groupID, BigInteger blockNumber) {
@@ -48,7 +49,7 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
                 groupID, blockNumber);
         // register map
 		if (BLOCK_ROUTING_KEY_MAP.isEmpty()) {
-			logger.debug("block notify register user is empty. ");
+			logger.debug("block notify register list is empty. ");
 			return;
 		}
 		BlockPushMessage blockPushMessage = new BlockPushMessage();
@@ -56,8 +57,9 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 		blockPushMessage.setGroupId(groupID);
 		for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
 			blockPushMessage.setAppId(appId);
-			String blockRoutingKey = BLOCK_ROUTING_KEY_MAP.get(appId);
-			pushMessage2MQ(blockExchange, blockRoutingKey, blockPushMessage);
+			PublisherHelper blockPublishInfo = BLOCK_ROUTING_KEY_MAP.get(appId);
+			pushMessage2MQ(blockPublishInfo.getExchangeName(),
+					blockPublishInfo.getRoutingKey(), blockPushMessage);
 		}
 
 
@@ -73,7 +75,7 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 								BlockPushMessage blockPushMessage) {
         logger.info("MQBlockNotifyCallBack pushMessage2MQ blockPushMessage:{}",
                 blockPushMessage.toString());
-        rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
+        MQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
                 blockPushMessage.toString());
     }
 

@@ -18,13 +18,15 @@ package com.webank.webase.front.task;
 
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.base.properties.Constants;
-import com.webank.webase.front.event.EventRegisterInfoRepository;
-import com.webank.webase.front.event.EventRegisterService;
-import com.webank.webase.front.event.RabbitMQRegisterService;
-import com.webank.webase.front.event.entity.EventRegisterInfo;
+import com.webank.webase.front.event.BlockNotifyInfoRepository;
+import com.webank.webase.front.event.EventLogPushInfoRepository;
+import com.webank.webase.front.event.EventService;
+import com.webank.webase.front.event.MQService;
+import com.webank.webase.front.event.entity.BlockNotifyInfo;
+import com.webank.webase.front.event.entity.EventLogPushInfo;
+import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.util.FrontUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.bcel.Const;
 import org.fisco.bcos.channel.client.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,11 +48,14 @@ import static com.webank.webase.front.util.RabbitMQUtils.*;
 public class EventRegisterTask {
 
 	@Autowired
-	EventRegisterService registerService;
+	EventService registerService;
 	@Autowired
-	RabbitMQRegisterService rabbitMQRegisterService;
+	MQService mqService;
 	@Autowired
-	EventRegisterInfoRepository registerInfoRepository;
+	BlockNotifyInfoRepository blockNotifyInfoRepository;
+	@Autowired
+	EventLogPushInfoRepository eventLogPushInfoRepository;
+
 	@Autowired
 	Map<Integer, Service> serviceMap;
 
@@ -68,17 +73,15 @@ public class EventRegisterTask {
 		try{
 			log.info("Register task starts.");
 			for (Integer groupId: serviceMap.keySet()) {
-				List<EventRegisterInfo> registerList =
-						registerInfoRepository.findByGroupId(groupId);
-				log.debug("Register task registerList count:{}", registerList.size());
-				// register
-				registerList.forEach(rInfo -> {
-					if (rInfo.getEventType() == EventTypes.BLOCK_NOTIFY.getValue()) {
-						registerBlockNotify(rInfo);
-					} else if (rInfo.getEventType() == EventTypes.EVENT_LOG_PUSH.getValue()) {
-						registerEventLogPush(rInfo);
-					}
-				});
+				List<BlockNotifyInfo> blockNotifyInfoList =
+						blockNotifyInfoRepository.findByGroupId(groupId);
+				List<EventLogPushInfo> eventLogPushInfoList =
+						eventLogPushInfoRepository.findByGroupId(groupId);
+				log.debug("Register task groupId:{},blockNotifyInfoList count:{},eventLogPushInfoList count:{}",
+						groupId, blockNotifyInfoList.size(), eventLogPushInfoList.size());
+				// foreach register
+				blockNotifyInfoList.forEach(this::registerBlockNotify);
+				eventLogPushInfoList.forEach(this::registerEventLogPush);
 			}
 			Constants.registerTaskEnable = false;
 			log.info("Register task finish.");
@@ -87,25 +90,29 @@ public class EventRegisterTask {
 		}
 	}
 
-	private void registerBlockNotify(EventRegisterInfo registerInfo) {
+
+	private void registerBlockNotify(BlockNotifyInfo registerInfo) {
 		String queueName = registerInfo.getQueueName();
-		log.debug("registerBlockNotify task  registerInfo:{}", registerInfo);
-		String blockRoutingKey = queueName +  "_" + ROUTING_KEY_BLOCK;
-		rabbitMQRegisterService.bindQueue2Exchange(registerInfo.getExchangeName(),
+		String appId = registerInfo.getAppId();
+		log.debug("registerBlockNotify task  BlockNotifyInfo:{}", registerInfo);
+		String blockRoutingKey = queueName +  "_" + ROUTING_KEY_BLOCK + "_" + appId;
+		mqService.bindQueue2Exchange(registerInfo.getExchangeName(),
 				queueName, blockRoutingKey);
-		BLOCK_ROUTING_KEY_MAP.put(registerInfo.getAppId(), blockRoutingKey);
+		PublisherHelper blockPublishInfo = new PublisherHelper(registerInfo.getExchangeName(), blockRoutingKey);
+		BLOCK_ROUTING_KEY_MAP.put(appId, blockPublishInfo);
 	}
 
-	private void registerEventLogPush(EventRegisterInfo rInfo) {
+	private void registerEventLogPush(EventLogPushInfo rInfo) {
 		List<String> topicList = FrontUtils.string2ListStr(rInfo.getTopicList());
 		String queueName = rInfo.getQueueName();
-		log.debug("registerEventLogPush task registerInfo:{}", rInfo);
+		String appId = rInfo.getAppId();
+		log.debug("registerEventLogPush task EventLogPushInfo:{}", rInfo);
 		// bind queue to exchange by routing key "queueName_event"
-		String eventRoutingKey = queueName +  "_" + ROUTING_KEY_EVENT;
-		rabbitMQRegisterService.bindQueue2Exchange(rInfo.getExchangeName(),
+		String eventRoutingKey = queueName +  "_" + ROUTING_KEY_EVENT + "_" + appId;
+		mqService.bindQueue2Exchange(rInfo.getExchangeName(),
 				queueName, eventRoutingKey);
 		registerService.registerDecodedEventLogPush(
-				rInfo.getAppId(),
+				appId,
 				rInfo.getGroupId(),
 				rInfo.getExchangeName(),
 				queueName,

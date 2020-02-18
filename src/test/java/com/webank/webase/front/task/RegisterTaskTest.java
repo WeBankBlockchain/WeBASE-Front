@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.task;
 
-import com.webank.webase.front.Application;
-import com.webank.webase.front.rabbitmq.task.RegisterEventLogPushTask;
+import com.webank.webase.front.event.BaseTest;
+import com.webank.webase.front.event.task.RegisterEventLogPushTask;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class RegisterTaskTest extends BaseTest{
+public class RegisterTaskTest extends BaseTest {
 	@Autowired
 	RegisterEventLogPushTask task;
 
