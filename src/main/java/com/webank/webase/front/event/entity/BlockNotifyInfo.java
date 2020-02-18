@@ -19,16 +19,17 @@ package com.webank.webase.front.event.entity;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  * @author marsli
  */
 @Entity
 @Data
+@Table(uniqueConstraints = {
+		@UniqueConstraint(name = "unique_block_notify", columnNames = {"appId", "exchangeName",
+				"routingKey"})
+})
 public class BlockNotifyInfo {
 
 	@Id

@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.event.entity.message;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.fisco.bcos.web3j.tx.txdecode.LogResult;
@@ -51,11 +51,12 @@ public class EventLogPushMessage implements MQObject {
 
     @Override
     public String toString() {
-        return "EventLogPushMessage:{"
-                + "appId:" + appId + ","
-                + "eventType:" + eventType + ","
-                + "groupId:" + groupId  + ","
-                + "status:" + status + ","
-                + "logs:" + JSONArray.toJSONString(logs) + "}";
+        return JSON.toJSONString(this);
+//        return "EventLogPushMessage:{"
+//                + "appId:" + appId + ","
+//                + "eventType:" + eventType + ","
+//                + "groupId:" + groupId  + ","
+//                + "status:" + status + ","
+//                + "logs:" + JSONArray.toJSONString(logs) + "}";
     }
 }
