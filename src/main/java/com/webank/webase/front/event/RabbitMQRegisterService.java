@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.event;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class MQRegisterService {
+public class EventRegisterService {
 
     @Autowired
     private RabbitAdmin rabbitAdmin;

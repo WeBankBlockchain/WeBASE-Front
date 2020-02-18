@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.entity;
+package com.webank.webase.front.event.entity;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.util.List;
+import javax.persistence.*;
 
 /**
- * Based on EventLogUserParams
+ * entity to store EventLog push register info (not decoded)
+ * when Service restarts, registerEventLogPushCallBack auto
+ * related with ServiceEventLogPushCallback
  * @author marsli
  */
+@Entity
 @Data
-@NoArgsConstructor
-public class ReqRegisterEvent {
+public class EventLogPushRegisterInfo {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Long id;
 
     /**
      * event type: 1: blockNotify, 2: eventLogPush, 3: others
@@ -38,37 +43,38 @@ public class ReqRegisterEvent {
      * group id
      */
     private int groupId;
-    /**
-     * MQ info: exchange name
-     */
-    private String exchangeName;
 
     /**
-     * username as queue name
+     * if use DecodedEventLogPushCallback, needs abi for decoder
      */
-    private String queueName;
-
-	/**
-	 * contract abi for decoder
-	 */
-	private String contractAbi;
+    @Column(columnDefinition = "text")
+    private String contractAbi;
 
     /**
-     * event log push info below
+     * EventLogUserParams info
      */
-
     private String fromBlock;
-
     private String toBlock;
-
     /**
      * single contract address
      */
     private String contractAddress;
+    /**
+     * List<String>
+     */
+    private String topicList;
+    /**
+     * MQ info
+     */
+    private String exchangeName;
 
     /**
-     * List of topics
+     * @username as queue name
      */
-    private List<String> topicList;
+    private String queueName;
 
+    /**
+     * concat queueName + "_" + event/block as routing key
+     */
+    private String routingKey;
 }
