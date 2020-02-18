@@ -34,7 +34,7 @@ public class RabbitMQUtils {
     public static final String ROUTING_KEY_EVENT = "event";
     public static final String ROUTING_KEY_BLOCK = "block";
     /**
-     * map of (username, block_routing_key)
+     * map of (appId, block_routing_key)
      */
     public static Map<String, String> BLOCK_ROUTING_KEY_MAP = new HashMap<>();
     /**

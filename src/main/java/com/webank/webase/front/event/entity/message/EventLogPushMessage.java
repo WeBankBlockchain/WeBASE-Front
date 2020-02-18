@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.entity.message;
+package com.webank.webase.front.event.entity.message;
 
 import com.alibaba.fastjson.JSONArray;
 import lombok.Data;
@@ -29,6 +29,11 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class EventLogPushMessage implements MQObject {
+
+    /**
+     * application which register block notify
+     */
+    private String appId;
 
     /**
      * event type: 1: blockNotify, 2: eventLogPush, 3: others
@@ -47,6 +52,7 @@ public class EventLogPushMessage implements MQObject {
     @Override
     public String toString() {
         return "EventLogPushMessage:{"
+                + "appId:" + appId + ","
                 + "eventType:" + eventType + ","
                 + "groupId:" + groupId  + ","
                 + "status:" + status + ","

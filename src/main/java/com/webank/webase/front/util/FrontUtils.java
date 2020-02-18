@@ -141,6 +141,9 @@ public class FrontUtils {
      * @return
      */
     public static String listStr2String(List<String> list) {
+        if(list == null) {
+            return null;
+        }
         return String.join(",", list);
     }
 
@@ -150,6 +153,9 @@ public class FrontUtils {
      * @return
      */
     public static List<String> string2ListStr(String str) {
+        if(str == null) {
+            return null;
+        }
         return Arrays.asList(str.split(","));
     }
 }
