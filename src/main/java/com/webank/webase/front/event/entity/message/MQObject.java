@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.rabbitmq.entity.message;
+package com.webank.webase.front.event.entity.message;
 
 import java.io.Serializable;
 

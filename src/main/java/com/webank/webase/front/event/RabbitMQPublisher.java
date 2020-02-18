@@ -1,4 +1,4 @@
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.event;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

@@ -28,7 +28,7 @@ import javax.persistence.*;
  */
 @Entity
 @Data
-public class EventLogPushRegisterInfo {
+public class EventRegisterInfo {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -37,12 +37,32 @@ public class EventLogPushRegisterInfo {
     /**
      * event type: 1: blockNotify, 2: eventLogPush, 3: others
      */
-    private int eventType;
+    private Integer eventType;
+
+    /**
+     * application id to register
+     */
+    private String appId;
 
     /**
      * group id
      */
-    private int groupId;
+    private Integer groupId;
+
+    /**
+     * MQ info
+     */
+    private String exchangeName;
+
+    /**
+     * @username as queue name
+     */
+    private String queueName;
+
+    /**
+     * concat queueName + "_" + event/block as routing key
+     */
+    private String routingKey;
 
     /**
      * if use DecodedEventLogPushCallback, needs abi for decoder
@@ -63,18 +83,5 @@ public class EventLogPushRegisterInfo {
      * List<String>
      */
     private String topicList;
-    /**
-     * MQ info
-     */
-    private String exchangeName;
 
-    /**
-     * @username as queue name
-     */
-    private String queueName;
-
-    /**
-     * concat queueName + "_" + event/block as routing key
-     */
-    private String routingKey;
 }

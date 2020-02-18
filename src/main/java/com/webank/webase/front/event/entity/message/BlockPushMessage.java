@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.entity.message;
+package com.webank.webase.front.event.entity.message;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,9 +29,14 @@ import java.math.BigInteger;
 public class BlockPushMessage implements MQObject {
 
     /**
+     * application which register block notify
+     */
+    private String appId;
+
+    /**
      * event type: 1: blockNotify, 2: eventLogPush, 3: others
      */
-    private int eventType;
+    private Integer eventType;
 
     /**
      * group id
@@ -43,9 +48,14 @@ public class BlockPushMessage implements MQObject {
      */
     private BigInteger blockNumber;
 
+    /**
+     * optimize serialization method for deserializing more easily
+     * @return
+     */
     @Override
     public String toString() {
         return "BlockPushMessage:{"
+                + "appId:" + appId + ","
                 + "eventType:" + eventType + ","
                 + "groupId:" + groupId.toString() + ","
                 + "blockNumber:" + blockNumber.toString() + "}";

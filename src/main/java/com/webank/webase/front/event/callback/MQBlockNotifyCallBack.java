@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.callback;
+package com.webank.webase.front.event.callback;
 
-import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
-import com.webank.webase.front.rabbitmq.entity.message.BlockPushMessage;
+import com.webank.webase.front.event.RabbitMQPublisher;
+import com.webank.webase.front.event.entity.message.BlockPushMessage;
 import org.fisco.bcos.channel.client.BlockNotifyCallBack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,9 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 		BlockPushMessage blockPushMessage = new BlockPushMessage();
 		blockPushMessage.setBlockNumber(blockNumber);
 		blockPushMessage.setGroupId(groupID);
-		for (String blockRoutingKey: BLOCK_ROUTING_KEY_MAP.values()) {
+		for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
+			blockPushMessage.setAppId(appId);
+			String blockRoutingKey = BLOCK_ROUTING_KEY_MAP.get(appId);
 			pushMessage2MQ(blockExchange, blockRoutingKey, blockPushMessage);
 		}
 

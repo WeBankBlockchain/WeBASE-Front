@@ -19,58 +19,34 @@ package com.webank.webase.front.event.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 
 /**
- * Based on EventLogUserParams
- * handle request for registering contract event log push notify
+ * register request for block notify
  * @author marsli
  */
 @Data
 @NoArgsConstructor
-public class ReqEventLogPushRegister {
-
-    /**
-     * application which register block notify
-     */
-    private String appId;
-
-    /**
-     * group id
-     */
-    private Integer groupId;
-
-    /**
-     * MQ info: exchange name
-     */
-    private String exchangeName;
-
-    /**
-     * username as queue name
-     */
-    private String queueName;
+public class ReqBlockNotifyRegister {
 
 	/**
-	 * contract abi for decoder
+	 * application which register block notify
 	 */
-	private String contractAbi;
+	private String appId;
 
-    /**
-     * event log push info below
-     */
+	/**
+	 * group id
+	 */
+	private Integer groupId;
 
-    private String fromBlock;
+	/**
+	 * MQ info: exchange name
+	 */
+	private String exchangeName;
 
-    private String toBlock;
+	/**
+	 * username as queue name
+	 */
+	private String queueName;
 
-    /**
-     * single contract address
-     */
-    private String contractAddress;
-
-    /**
-     * List of topics
-     */
-    private List<String> topicList;
 
 }

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.callback;
+package com.webank.webase.front.event.callback;
 
-import com.webank.webase.front.rabbitmq.RabbitMQPublisher;
-import com.webank.webase.front.rabbitmq.entity.message.EventLogPushMessage;
-import lombok.extern.slf4j.Slf4j;
+import com.webank.webase.front.event.RabbitMQPublisher;
+import com.webank.webase.front.event.entity.message.EventLogPushMessage;
 import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
 import org.fisco.bcos.web3j.tx.txdecode.BaseException;
@@ -43,16 +42,18 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
     private String exchangeName;
     private String routingKey;
     private int groupId;
+    private String appId;
 
     public MQEventLogPushWithDecodedCallBack(RabbitMQPublisher rabbitMQPublisher,
                                              String exchangeName, String routingKey,
-                                             TransactionDecoder decoder, int groupId) {
+                                             TransactionDecoder decoder, int groupId, String appId) {
         this.rabbitMQPublisher = rabbitMQPublisher;
         this.exchangeName = exchangeName;
         this.routingKey = routingKey;
         // onPush will call father class's decoder, init EventLogPushWithDecodeCallback's decoder
         this.setDecoder(decoder);
         this.groupId = groupId;
+        this.appId = appId;
     }
 
 
@@ -79,6 +80,7 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
         eventLogPushMessage.setGroupId(groupId);
         eventLogPushMessage.setStatus(status);
         eventLogPushMessage.setLogs(logs);
+        eventLogPushMessage.setAppId(appId);
         rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
                 eventLogPushMessage.toString());
     }
