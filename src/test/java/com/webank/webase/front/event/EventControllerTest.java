@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.event;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.rabbitmq.entity.ReqEventLogPushRegister;
-import com.webank.webase.front.rabbitmq.entity.ReqRegister;
+import com.webank.webase.front.event.entity.ReqEventLogPushRegister;
+import com.webank.webase.front.event.entity.ReqRegister;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

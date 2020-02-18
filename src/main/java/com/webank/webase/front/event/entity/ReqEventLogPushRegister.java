@@ -18,7 +18,9 @@ package com.webank.webase.front.event.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -33,40 +35,47 @@ public class ReqEventLogPushRegister {
     /**
      * application which register block notify
      */
-    private String appId;
+	@NotEmpty(message = "appId cannot be empty")
+	private String appId;
 
     /**
      * group id
      */
-    private Integer groupId;
+	@NotNull(message = "groupId cannot be null")
+	private Integer groupId;
 
     /**
      * MQ info: exchange name
      */
-    private String exchangeName;
+	@NotEmpty(message = "exchangeName cannot be empty")
+	private String exchangeName;
 
     /**
      * username as queue name
      */
-    private String queueName;
+	@NotEmpty(message = "queueName cannot be empty, usually use username")
+	private String queueName;
 
 	/**
 	 * contract abi for decoder
 	 */
+	@NotEmpty(message = "contractAbi cannot be empty")
 	private String contractAbi;
 
     /**
      * event log push info below
      */
 
-    private String fromBlock;
+	@NotEmpty(message = "fromBlock cannot be empty")
+	private String fromBlock;
 
-    private String toBlock;
+	@NotEmpty(message = "toBlock cannot be empty")
+	private String toBlock;
 
     /**
      * single contract address
      */
-    private String contractAddress;
+	private String contractAddress;
 
     /**
      * List of topics

@@ -16,7 +16,10 @@
 
 package com.webank.webase.front.event.entity;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 
@@ -28,11 +31,12 @@ import javax.persistence.*;
  */
 @Entity
 @Data
-public class EventRegisterInfo {
+public class EventLogPushInfo {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    @GenericGenerator(name="idGenerator", strategy="uuid")
+    @GeneratedValue(generator="idGenerator")
+    private String id;
 
     /**
      * event type: 1: blockNotify, 2: eventLogPush, 3: others

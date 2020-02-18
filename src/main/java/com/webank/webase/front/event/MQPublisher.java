@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class RabbitMQPublisher {
+public class MQPublisher {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;

@@ -17,43 +17,52 @@
 package com.webank.webase.front.event.entity;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.annotations.GenericGenerator;
 
-import javax.validation.constraints.NotNull;
-
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 /**
- * register request for block notify
  * @author marsli
  */
+@Entity
 @Data
-@NoArgsConstructor
-public class ReqBlockNotifyRegister {
+public class BlockNotifyInfo {
+
+	@Id
+	@GenericGenerator(name="idGenerator", strategy="uuid")
+	@GeneratedValue(generator="idGenerator")
+	private String id;
 
 	/**
-	 * application which register block notify
+	 * event type: 1: blockNotify, 2: eventLogPush, 3: others
 	 */
-	@NotEmpty(message = "appId cannot be empty")
+	private Integer eventType;
+
+	/**
+	 * application id to register
+	 */
 	private String appId;
 
 	/**
 	 * group id
 	 */
-	@NotNull(message = "groupId cannot be empty")
 	private Integer groupId;
 
 	/**
-	 * MQ info: exchange name
+	 * MQ info
 	 */
-	@NotEmpty(message = "exchangeName cannot be empty")
 	private String exchangeName;
 
 	/**
-	 * username as queue name
+	 * @username as queue name
 	 */
-	@NotEmpty(message = "queueName cannot be empty, usually use username")
 	private String queueName;
 
-
+	/**
+	 * concat queueName + "_" + event/block as routing key
+	 */
+	private String routingKey;
 }
