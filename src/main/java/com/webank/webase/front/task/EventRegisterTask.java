@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq.task;
+package com.webank.webase.front.event.task;
 
-import com.webank.webase.front.rabbitmq.EventLogPushRegisterInfoRepository;
-import com.webank.webase.front.rabbitmq.EventLogPushRegisterService;
-import com.webank.webase.front.rabbitmq.MQRegisterService;
-import com.webank.webase.front.rabbitmq.entity.EventLogPushRegisterInfo;
+import com.webank.webase.front.event.EventLogPushRegisterInfoRepository;
+import com.webank.webase.front.event.EventLogPushRegisterService;
+import com.webank.webase.front.event.MQRegisterService;
+import com.webank.webase.front.event.entity.EventLogPushRegisterInfo;
 import com.webank.webase.front.util.FrontUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.event;
 
-import com.webank.webase.front.rabbitmq.callback.MQEventLogPushWithDecodedCallBack;
-import com.webank.webase.front.rabbitmq.entity.EventLogPushRegisterInfo;
+import com.webank.webase.front.event.callback.MQEventLogPushWithDecodedCallBack;
+import com.webank.webase.front.event.entity.EventRegisterInfo;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,6 @@ import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -86,7 +85,7 @@ public class EventLogPushRegisterService {
                                  String exchangeName, String queueName, String routingKey,
                                  String abi, String fromBlock,
                                  String toBlock, String contractAddress, List<String> topicList) {
-        EventLogPushRegisterInfo registerInfo = new EventLogPushRegisterInfo();
+        EventRegisterInfo registerInfo = new EventRegisterInfo();
         registerInfo.setEventType(eventType);
         registerInfo.setGroupId(groupId);
         registerInfo.setContractAbi(abi);
@@ -101,25 +100,6 @@ public class EventLogPushRegisterService {
         registerInfoRepository.save(registerInfo);
     }
 
-    /**
-     * register ServiceEventLogPushCallback
-     * @param params
-     * @param callbackExchangeName
-     * @param callbackRoutingKey
-     */
-//    public void registerEventLogPush(int groupId, String abi, EventLogUserParams params,
-//                                     String callbackExchangeName, String callbackRoutingKey) {
-//        log.debug("registerEventLogPush params:{},callbackExchangeName:{},callbackRoutingKey:{}",
-//            params, callbackExchangeName, callbackRoutingKey);
-//        // TODO 如果exchange不存在，会发往死信队列
-//        // 传入abi作decoder:
-//        TransactionDecoder decoder = new TransactionDecoder(abi);
-//        MQEventLogPushWithDecodedCallBack callBack =
-//                new MQEventLogPushWithDecodedCallBack(rabbitMQPublisher,
-//                        callbackExchangeName, callbackRoutingKey, decoder);
-//        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
-//        service.registerEventLogFilter(params, callBack);
-//    }
 
 
 }
