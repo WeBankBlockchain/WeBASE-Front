@@ -17,13 +17,12 @@
 package com.webank.webase.front.task;
 
 import com.webank.webase.front.event.BaseTest;
-import com.webank.webase.front.event.task.RegisterEventLogPushTask;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class RegisterTaskTest extends BaseTest {
 	@Autowired
-	RegisterEventLogPushTask task;
+	EventRegisterTask task;
 
 	@Test
 	public void testRegisterEventLogPushTask() {

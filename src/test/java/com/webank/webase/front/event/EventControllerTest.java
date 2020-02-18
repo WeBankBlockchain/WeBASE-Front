@@ -17,8 +17,8 @@
 package com.webank.webase.front.event;
 
 import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.event.entity.ReqBlockNotifyRegister;
 import com.webank.webase.front.event.entity.ReqEventLogPushRegister;
-import com.webank.webase.front.event.entity.ReqRegister;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @WebAppConfiguration
-public class RegisterControllerTest extends BaseTest {
+public class EventControllerTest extends BaseTest {
 
 	private MockMvc mockMvc;
 	private Integer groupId = 1;
@@ -49,43 +49,54 @@ public class RegisterControllerTest extends BaseTest {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 	}
 
+	/**
+	 * need to create exchange and queue with routing key in mq
+	 * @throws Exception
+	 */
 	@Test
 	public void testRegisterEventLogPush() throws Exception {
 		ReqEventLogPushRegister param = new ReqEventLogPushRegister();
 		param.setGroupId(groupId);
-		param.setExchangeName("event_exchange");
-		param.setRoutingKey("");
+		param.setAppId("app1");
+		param.setExchangeName("group001");
+		param.setQueueName("user1");
 		param.setContractAbi("[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"name\",\"type\":\"string\"}],\"name\":\"SetName\",\"type\":\"event\"}]");
 		param.setFromBlock("1");
 		param.setToBlock("latest");
-		param.setAddress("0x657201d59ec41d1dc278a67916f751f86ca672f7");
+		param.setContractAddress("0x657201d59ec41d1dc278a67916f751f86ca672f7");
 		List<String> topics = new ArrayList<>();
 		topics.add("[SetName(string)]");
 		param.setTopicList(topics);
 		ResultActions resultActions = mockMvc
-				.perform(MockMvcRequestBuilders.post("/register/eventLogPush").
+				.perform(MockMvcRequestBuilders.post("/event/eventLogPush").
 						content(JSON.toJSONString(param)).
 						contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
-				andExpect(MockMvcResultMatchers.status().isOk()).
+//				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
 		System.out
 				.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
 	}
 
+	/**
+	 * need to create exchange and queue with routing key in mq
+	 * @throws Exception
+	 */
 	@Test
-	public void testDeclareQueue() throws Exception {
-		ReqRegister param = new ReqRegister();
-		param.setExchangeName("test_exchange");
-		param.setQueueName("test_exchange.queue_1");
+	public void testRegisterBlockNotify() throws Exception {
+		ReqBlockNotifyRegister param = new ReqBlockNotifyRegister();
+		param.setExchangeName("group001");
+		param.setQueueName("user1");
+		param.setAppId("app1");
+		param.setGroupId(1);
 		ResultActions resultActions = mockMvc
-				.perform(MockMvcRequestBuilders.post("/register/queue").
+				.perform(MockMvcRequestBuilders.post("/event/blockNotify").
 						content(JSON.toJSONString(param)).
 						contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
-				andExpect(MockMvcResultMatchers.status().isOk()).
+//				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
 		System.out
 				.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
