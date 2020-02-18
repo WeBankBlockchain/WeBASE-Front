@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.event;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.rabbitmq.entity.ReqRegisterEvent;
+import com.webank.webase.front.event.entity.ReqRegisterEvent;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
