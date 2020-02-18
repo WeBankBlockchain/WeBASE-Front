@@ -9,12 +9,16 @@ import java.util.List;
 /**
  * @author marsli
  */
-public interface EventLogPushRegisterInfoRepository extends CrudRepository<EventRegisterInfo, Long>,
+public interface EventRegisterInfoRepository extends CrudRepository<EventRegisterInfo, Long>,
         JpaSpecificationExecutor<EventRegisterInfo> {
 
     EventRegisterInfo findById(Long id);
-    
+
+    List<EventRegisterInfo> findByAppId(String appId);
+
     List<EventRegisterInfo> findByGroupId(int groupId);
+
+    List<EventRegisterInfo> findByQueueName(String queueName);
 
     List<EventRegisterInfo> findByGroupIdAndContractAddress(int groupId, String contractAddress);
 

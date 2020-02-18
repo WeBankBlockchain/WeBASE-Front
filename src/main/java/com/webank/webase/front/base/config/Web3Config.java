@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
-import com.webank.webase.front.rabbitmq.callback.MQBlockNotifyCallBack;
+import com.webank.webase.front.event.callback.MQBlockNotifyCallBack;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;

@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class EventRegisterService {
+public class RabbitMQRegisterService {
 
     @Autowired
     private RabbitAdmin rabbitAdmin;
