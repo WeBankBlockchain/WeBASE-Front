@@ -16,44 +16,14 @@
 
 package com.webank.webase.front.event.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.NotNull;
-
-
-/**
- * register request for block notify
- * @author marsli
- */
 @Data
 @NoArgsConstructor
-public class ReqBlockNotifyRegister {
-
-	/**
-	 * application which register block notify
-	 */
-	@NotEmpty(message = "appId cannot be empty")
-	private String appId;
-
-	/**
-	 * group id
-	 */
-	@NotNull(message = "groupId cannot be empty")
-	private Integer groupId;
-
-	/**
-	 * MQ info: exchange name
-	 */
-	@NotEmpty(message = "exchangeName cannot be empty")
+@AllArgsConstructor
+public class PublisherHelper {
 	private String exchangeName;
-
-	/**
-	 * username as queue name
-	 */
-	@NotEmpty(message = "queueName cannot be empty, usually use username")
-	private String queueName;
-
-
+	private String routingKey;
 }

@@ -18,7 +18,9 @@ package com.webank.webase.front.event;
 
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.callback.MQEventLogPushWithDecodedCallBack;
-import com.webank.webase.front.event.entity.EventRegisterInfo;
+import com.webank.webase.front.event.entity.BlockNotifyInfo;
+import com.webank.webase.front.event.entity.EventLogPushInfo;
+import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,40 +35,44 @@ import java.util.Map;
 import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 
 /**
- * 在org.fisco.bcos.channel.client.Service中注册EventLogPush不会持久化
- * 如果重启了则需要重新注册
+ * event notify in message queue service
+ * including block notify and contract's event log push notify
  * @author marsli
  */
 @Slf4j
 @Service
-public class EventRegisterService {
+public class EventService {
 
     @Autowired
     Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
 
     @Autowired
-    EventRegisterInfoRepository registerInfoRepository;
+    EventLogPushInfoRepository eventLogPushInfoRepository;
+    @Autowired
+    BlockNotifyInfoRepository blockNotifyInfoRepository;
+    @Autowired
+    private MQService mqService;
 
     @Autowired
-    private RabbitMQRegisterService rabbitMQRegisterService;
+    private MQPublisher mqPublisher;
 
-    @Autowired
-    private RabbitMQPublisher rabbitMQPublisher;
-
-    public void registerBlockNotify(String appId, int groupId,
+    public List<BlockNotifyInfo> registerBlockNotify(String appId, int groupId,
                                     String exchangeName, String queueName, String routingKey) {
         // TODO 如果exchange不存在，会发往死信队列
         log.debug("registerDecodedEventLogPush appId:{},groupId:{},exchangeNarme:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
-        rabbitMQRegisterService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        BLOCK_ROUTING_KEY_MAP.put(appId, routingKey);
+        mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
+        BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(exchangeName, routingKey));
         // save to db
-        addRegisterInfo(EventTypes.BLOCK_NOTIFY.getValue(),
-                appId, groupId, exchangeName, queueName, routingKey,
-                null, null, null, null, null);
+        addBlockNotifyInfo(EventTypes.BLOCK_NOTIFY.getValue(),
+                appId, groupId, exchangeName, queueName, routingKey);
+        return blockNotifyInfoRepository.findByQueueName(queueName);
     }
 
+
     /**
+     * 在org.fisco.bcos.channel.client.Service中注册EventLogPush不会持久化
+     * 如果重启了则需要重新注册
      * register DecodedEventLogPushCallback
      * @param groupId
      * @param abi single one
@@ -77,35 +83,48 @@ public class EventRegisterService {
      * @param exchangeName
      * @param queueName
      */
-    public void registerDecodedEventLogPush(String appId, int groupId,
+    public List<EventLogPushInfo> registerDecodedEventLogPush(String appId, int groupId,
                                             String exchangeName, String queueName, String routingKey,
                                             String abi, String fromBlock,
                                             String toBlock, String contractAddress, List<String> topicList
                                             ) {
-        // TODO 如果exchange不存在，会发往死信队列
-        rabbitMQRegisterService.bindQueue2Exchange(exchangeName, queueName, routingKey);
+        mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // 传入abi作decoder:
         TransactionDecoder decoder = new TransactionDecoder(abi);
         // init EventLogUserParams for register
         EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
                 toBlock, contractAddress, topicList);
         MQEventLogPushWithDecodedCallBack callBack =
-                new MQEventLogPushWithDecodedCallBack(rabbitMQPublisher,
-                        exchangeName, queueName, decoder, groupId, appId);
+                new MQEventLogPushWithDecodedCallBack(mqPublisher,
+                        exchangeName, routingKey, decoder, groupId, appId);
         log.debug("registerDecodedEventLogPush appId:{},groupId:{},abi:{},params:{},exchangeNarme:{},queueName:{}",
                 appId, groupId, abi, params, exchangeName, queueName);
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         service.registerEventLogFilter(params, callBack);
         // save to db
-        addRegisterInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId, exchangeName, queueName, routingKey,
+        addEventLogPushInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
+                exchangeName, queueName, routingKey,
                 abi, fromBlock, toBlock, contractAddress, topicList);
+        return eventLogPushInfoRepository.findByQueueName(queueName);
     }
 
-    private void addRegisterInfo(int eventType, String appId, int groupId,
+    private void addBlockNotifyInfo(int eventType, String appId, int groupId,
+                                      String exchangeName, String queueName, String routingKey) {
+        BlockNotifyInfo registerInfo = new BlockNotifyInfo();
+        registerInfo.setEventType(eventType);
+        registerInfo.setAppId(appId);
+        registerInfo.setGroupId(groupId);
+        registerInfo.setExchangeName(exchangeName);
+        registerInfo.setQueueName(queueName);
+        registerInfo.setRoutingKey(routingKey);
+        blockNotifyInfoRepository.save(registerInfo);
+    }
+
+    private void addEventLogPushInfo(int eventType, String appId, int groupId,
                                  String exchangeName, String queueName, String routingKey,
-                                 String abi, String fromBlock,
-                                 String toBlock, String contractAddress, List<String> topicList) {
-        EventRegisterInfo registerInfo = new EventRegisterInfo();
+                                 String abi, String fromBlock, String toBlock,
+                                 String contractAddress, List<String> topicList) {
+        EventLogPushInfo registerInfo = new EventLogPushInfo();
         registerInfo.setEventType(eventType);
         registerInfo.setAppId(appId);
         registerInfo.setGroupId(groupId);
@@ -118,7 +137,8 @@ public class EventRegisterService {
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
-        registerInfoRepository.save(registerInfo);
+        eventLogPushInfoRepository.save(registerInfo);
+
     }
 
 

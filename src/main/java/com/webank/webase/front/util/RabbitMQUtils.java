@@ -16,6 +16,7 @@
 
 package com.webank.webase.front.util;
 
+import com.webank.webase.front.event.entity.PublisherHelper;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.channel.event.filter.TopicTools;
 import org.springframework.amqp.core.*;
@@ -34,9 +35,10 @@ public class RabbitMQUtils {
     public static final String ROUTING_KEY_EVENT = "event";
     public static final String ROUTING_KEY_BLOCK = "block";
     /**
-     * map of (appId, block_routing_key)
+     * map of (appId, "exchange_name,block_routing_key"), one app only needs one block notify
      */
-    public static Map<String, String> BLOCK_ROUTING_KEY_MAP = new HashMap<>();
+    public static Map<String, PublisherHelper> BLOCK_ROUTING_KEY_MAP = new HashMap<>();
+
     /**
      * new exchange by rabbitAdmin
      * @param rabbitAdmin

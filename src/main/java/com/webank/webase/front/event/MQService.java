@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class RabbitMQRegisterService {
+public class MQService {
 
     @Autowired
     private RabbitAdmin rabbitAdmin;
@@ -49,5 +49,14 @@ public class RabbitMQRegisterService {
         rabbitAdmin.declareBinding(binding);
     }
 
+//    public void unbindQueue2Exchange(String exchangeName, String queueName, String routingKey){
+//        log.info("unbindQueue2Exchange exchangeName:{},queueName:{}, routingKey:{}",
+//                exchangeName, queueName, routingKey);
+//        Binding binding = BindingBuilder
+//                .bind(new Queue(queueName))
+//                .to(new DirectExchange(exchangeName))
+//                .with(routingKey);
+//        rabbitAdmin.removeBinding(binding);
+//    }
 
 }
