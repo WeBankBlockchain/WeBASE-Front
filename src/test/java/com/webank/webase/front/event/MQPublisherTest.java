@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.event;
 
-import com.webank.webase.front.rabbitmq.entity.message.BlockPushMessage;
+import com.webank.webase.front.event.entity.message.BlockPushMessage;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,7 +25,7 @@ import java.math.BigInteger;
 public class MQPublisherTest extends BaseTest {
 
     @Autowired
-    private RabbitMQPublisher rabbitMQPublisher;
+    private MQPublisher rabbitMQPublisher;
 
     @Test
     public void testMsg() {

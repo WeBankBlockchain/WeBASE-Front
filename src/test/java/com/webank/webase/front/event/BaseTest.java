@@ -1,4 +1,4 @@
-package com.webank.webase.front.rabbitmq;
+package com.webank.webase.front.event;
 
 import com.webank.webase.front.Application;
 import org.junit.runner.RunWith;
