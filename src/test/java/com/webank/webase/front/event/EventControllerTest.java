@@ -61,11 +61,11 @@ public class EventControllerTest extends BaseTest {
 		param.setExchangeName("group001");
 		param.setQueueName("user1");
 		param.setContractAbi("[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"name\",\"type\":\"string\"}],\"name\":\"SetName\",\"type\":\"event\"}]");
-		param.setFromBlock("1");
+		param.setFromBlock("latest");
 		param.setToBlock("latest");
 		param.setContractAddress("0x657201d59ec41d1dc278a67916f751f86ca672f7");
 		List<String> topics = new ArrayList<>();
-		topics.add("[SetName(string)]");
+		topics.add("SetName(string)");
 		param.setTopicList(topics);
 		ResultActions resultActions = mockMvc
 				.perform(MockMvcRequestBuilders.post("/event/eventLogPush").
@@ -73,7 +73,7 @@ public class EventControllerTest extends BaseTest {
 						contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
-//				andExpect(MockMvcResultMatchers.status().isOk()).
+				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
 		System.out
 				.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
@@ -96,7 +96,7 @@ public class EventControllerTest extends BaseTest {
 						contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
-//				andExpect(MockMvcResultMatchers.status().isOk()).
+				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
 		System.out
 				.println("response:" + resultActions.andReturn().getResponse().getContentAsString());

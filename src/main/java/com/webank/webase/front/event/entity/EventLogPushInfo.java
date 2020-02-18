@@ -16,10 +16,8 @@
 
 package com.webank.webase.front.event.entity;
 
-import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 
@@ -31,6 +29,10 @@ import javax.persistence.*;
  */
 @Entity
 @Data
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "unique_event_log", columnNames = {"appId", "exchangeName",
+                "routingKey"})
+})
 public class EventLogPushInfo {
 
     @Id
