@@ -84,30 +84,4 @@ public class TransController extends BaseController {
         checkParamResult(result);
         return transServiceImpl.transHandleWithSign(req);
     }
-
-    @PostMapping("/presign")
-    public Boolean preSign(@Valid @RequestBody SignCount req, BindingResult result) throws Exception {
-        checkParamResult(result);
-        return transServiceImpl.preSign(req.getCount(),req.getGroup(),req.getId());
-    }
-
-    @GetMapping("/pressure-test")
-    public Boolean pressureTest() throws Exception {
-        log.info("***");
-        return transServiceImpl.pressureTest();
-    }
-
-    @GetMapping("/error-count")
-    public Integer errorCount() throws Exception {
-
-        return Constants.error.intValue();
-    }
-
-    @PostMapping("/reset")
-    public Boolean reset() throws Exception {
-
-         Constants.error.set(0);
-         return true;
-
-    }
 }
