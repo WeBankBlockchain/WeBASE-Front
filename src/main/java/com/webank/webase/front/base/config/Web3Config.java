@@ -114,7 +114,6 @@ public class Web3Config {
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(timeout);
         channelEthereumService.setChannelService(service);
-        //Web3AsyncThreadPoolSize.web3AsyncPoolSize=200;
         Web3j web3j = Web3j.build(channelEthereumService);
         return web3j;
     }

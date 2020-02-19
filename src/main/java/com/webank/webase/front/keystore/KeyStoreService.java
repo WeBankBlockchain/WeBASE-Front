@@ -261,23 +261,23 @@ public class KeyStoreService {
      */
     public String getSignDate(EncodeInfo params) {
 
-           try {
-                   SignInfo signInfo = new SignInfo();
-                   String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
-                   log.info("getSignDate url:{}", url);
-                   HttpHeaders headers = CommonUtils.buildHeaders();
-                   HttpEntity<String> formEntity =
-                           new HttpEntity<String>(JSON.toJSONString(params), headers);
-                   BaseResponse response =
-                           restTemplate.postForObject(url, formEntity, BaseResponse.class);
-                   log.info("getSignDate response:{}", JSON.toJSONString(response));
-                   if (response.getCode() == 0) {
-                       signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
-                   }
-                   return signInfo.getSignDataStr();
-           }catch (Exception e) {
-               log.error("***getSignDate exception", e);
-           }
+        try {
+                SignInfo signInfo = new SignInfo();
+                String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
+                log.info("getSignDate url:{}", url);
+                HttpHeaders headers = CommonUtils.buildHeaders();
+                HttpEntity<String> formEntity =
+                        new HttpEntity<String>(JSON.toJSONString(params), headers);
+                BaseResponse response =
+                        restTemplate.postForObject(url, formEntity, BaseResponse.class);
+                log.info("getSignDate response:{}", JSON.toJSONString(response));
+                if (response.getCode() == 0) {
+                    signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
+                }
+                return signInfo.getSignDataStr();
+        }catch (Exception e) {
+            log.error("***getSignDate exception", e);
+        }
 
         return null;
     }
