@@ -98,7 +98,9 @@ public class EventRegisterTask {
 		String blockRoutingKey = queueName +  "_" + ROUTING_KEY_BLOCK + "_" + appId;
 		mqService.bindQueue2Exchange(registerInfo.getExchangeName(),
 				queueName, blockRoutingKey);
-		PublisherHelper blockPublishInfo = new PublisherHelper(registerInfo.getExchangeName(), blockRoutingKey);
+		// record groupId, exchange, routingKey for all block notify
+		PublisherHelper blockPublishInfo = new PublisherHelper(registerInfo.getGroupId(),
+				registerInfo.getExchangeName(), blockRoutingKey);
 		BLOCK_ROUTING_KEY_MAP.put(appId, blockPublishInfo);
 	}
 
