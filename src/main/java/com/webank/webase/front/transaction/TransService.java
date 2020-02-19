@@ -344,31 +344,30 @@ public class TransService {
         BigInteger randomid = new BigInteger(250, r);
 
         BigInteger blockLimit = web3j.getBlockNumberCache();
-    //    String versionContent = web3j.getNodeVersion().sendForReturnString();
-        String signMsg = "";
-//        if (versionContent.contains("2.0.0-rc1") || versionContent.contains("release-2.0.1")) {
-//            RawTransaction rawTransaction = RawTransaction.createTransaction(randomid,
-//                    constants.GAS_PRICE, constants.GAS_LIMIT, blockLimit, contractAddress,
-//                    BigInteger.ZERO, data);
-//            byte[] encodedTransaction = TransactionEncoder.encode(rawTransaction);
-//            String encodedDataStr = Numeric.toHexString(encodedTransaction);
-//
-//            EncodeInfo encodeInfo = new EncodeInfo();
-//            encodeInfo.setUserId(userId);
-//            encodeInfo.setEncodedDataStr(encodedDataStr);
-//            String signDataStr = keyStoreService.getSignDate(encodeInfo);
-//            if (StringUtils.isBlank(signDataStr)) {
-//                log.warn("deploySend get sign data error.");
-//                return null;
-//            }
-//
-//            SignatureData signData = CommonUtils.stringToSignatureData(signDataStr);
-//            byte[] signedMessage = TransactionEncoder.encode(rawTransaction, signData);
-//            signMsg = Numeric.toHexString(signedMessage);
-//        }
-//        else {
-       //     String chainId = (String) JSONObject.parseObject(versionContent).get("Chain Id");
-            String chainId = "1";
+        String versionContent = Constants.version;
+        String signMsg ;
+        if (versionContent.contains("2.0.0-rc1") || versionContent.contains("release-2.0.1")) {
+            RawTransaction rawTransaction = RawTransaction.createTransaction(randomid,
+                    constants.GAS_PRICE, constants.GAS_LIMIT, blockLimit, contractAddress,
+                    BigInteger.ZERO, data);
+            byte[] encodedTransaction = TransactionEncoder.encode(rawTransaction);
+            String encodedDataStr = Numeric.toHexString(encodedTransaction);
+
+            EncodeInfo encodeInfo = new EncodeInfo();
+            encodeInfo.setUserId(userId);
+            encodeInfo.setEncodedDataStr(encodedDataStr);
+            String signDataStr = keyStoreService.getSignDate(encodeInfo);
+            if (StringUtils.isBlank(signDataStr)) {
+                log.warn("deploySend get sign data error.");
+                return null;
+            }
+
+            SignatureData signData = CommonUtils.stringToSignatureData(signDataStr);
+            byte[] signedMessage = TransactionEncoder.encode(rawTransaction, signData);
+            signMsg = Numeric.toHexString(signedMessage);
+        } else {
+            //String chainId = versionContent.get("Chain Id");
+            String chainId = Constants.chainId;
             ExtendedRawTransaction extendedRawTransaction =
                     ExtendedRawTransaction.createTransaction(randomid, constants.GAS_PRICE,
                             constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, data,
@@ -395,8 +394,9 @@ public class TransService {
             byte[] signedMessage =
                     ExtendedTransactionEncoder.encode(extendedRawTransaction, signData);
             signMsg = Numeric.toHexString(signedMessage);
+        }
+            return signMsg;
 
-        return signMsg;
     }
 
 

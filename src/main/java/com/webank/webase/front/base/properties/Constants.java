@@ -61,6 +61,8 @@ public class Constants {
     public static final String account1Path = "node.key";
     public  static  String frontId = UUID.randomUUID().toString();
     public static final String CONSTANT_PREFIX = "constant";
+    public static  String version;
+    public static String chainId;
     private String nodeDir = "";
     private String keyServer = "127.0.0.1:8080";
     private int transMaxWait = 300;
@@ -71,7 +73,6 @@ public class Constants {
     private Integer http_read_timeOut = 10000;
     private Integer http_connect_timeOut = 10000;
     private Integer sleep = 500;
-    private Integer websocket = 1;
     public static AtomicInteger error = new AtomicInteger(0);
 
 
