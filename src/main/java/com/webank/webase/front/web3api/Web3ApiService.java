@@ -20,6 +20,7 @@ import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
@@ -80,6 +81,8 @@ public class Web3ApiService {
     GroupChannelConnectionsConfig groupChannelConnectionsConfig;
     @Autowired
     ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    @Autowired
+    Constants constants;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -533,7 +536,7 @@ public class Web3ApiService {
                     new FrontException("refresh web3j failed");
                 }
                 ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-                channelEthereumService.setTimeout(30000);
+                channelEthereumService.setTimeout(constants.getTransMaxWait());
                 channelEthereumService.setChannelService(service);
                 Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
                 web3jMap.put(groupId, web3j);
