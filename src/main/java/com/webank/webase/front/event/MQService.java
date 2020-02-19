@@ -15,7 +15,10 @@
  */
 package com.webank.webase.front.event;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +49,12 @@ public class MQService {
                 .bind(new Queue(queueName))
                 .to(new DirectExchange(exchangeName))
                 .with(routingKey);
-        rabbitAdmin.declareBinding(binding);
+        try {
+            rabbitAdmin.declareBinding(binding);
+        } catch (AmqpException ex) {
+            log.error("Exchange or message queue not exists. ex:[]", ex);
+            throw new FrontException(ConstantCode.EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR);
+        }
     }
 
 //    public void unbindQueue2Exchange(String exchangeName, String queueName, String routingKey){
