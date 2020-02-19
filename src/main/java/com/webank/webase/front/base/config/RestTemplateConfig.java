@@ -55,9 +55,9 @@ public class RestTemplateConfig {
         PoolingHttpClientConnectionManager pollingConnectionManager = new PoolingHttpClientConnectionManager(
                 30, TimeUnit.SECONDS);
         // max connection
-        pollingConnectionManager.setMaxTotal(3000);
+        pollingConnectionManager.setMaxTotal(constants.getRestTemplateMaxTotal());
 
-        pollingConnectionManager.setDefaultMaxPerRoute(100);
+        pollingConnectionManager.setDefaultMaxPerRoute(constants.getRestTemplateMaxPerRoute());
         HttpClientBuilder httpClientBuilder = HttpClients.custom();
         httpClientBuilder.setConnectionManager(pollingConnectionManager);
         // add Keep-Alive
