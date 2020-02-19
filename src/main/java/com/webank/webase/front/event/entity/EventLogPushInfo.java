@@ -30,8 +30,8 @@ import javax.persistence.*;
 @Entity
 @Data
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "unique_event_log", columnNames = {"appId", "exchangeName",
-                "routingKey"})
+        @UniqueConstraint(name = "unique_event_log", columnNames = {"appId", "exchangeName", "contractAddress",
+                "queueName"})
 })
 public class EventLogPushInfo {
 
@@ -66,7 +66,7 @@ public class EventLogPushInfo {
     private String queueName;
 
     /**
-     * concat queueName + "_" + event/block as routing key
+     * concat queueName + "_" + event/block + "_" + "appId" as routing key
      */
     private String routingKey;
 
