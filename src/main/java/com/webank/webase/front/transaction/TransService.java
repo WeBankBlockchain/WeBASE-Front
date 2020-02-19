@@ -14,7 +14,6 @@
 package com.webank.webase.front.transaction;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
@@ -40,7 +39,6 @@ import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.*;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -56,27 +54,21 @@ import org.fisco.bcos.web3j.tx.TransactionManager;
 import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
-import org.fisco.bcos.web3j.utils.BlockLimit;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
-import static com.webank.webase.front.transaction.entity.ParallelOk.FUNC_SET;
 
 /**
  * TransService.
@@ -98,12 +90,6 @@ public class TransService {
     private Constants constants;
     @Autowired
     private ContractRepository contractRepository;
-
-    private static LinkedBlockingQueue<String> linkedBlockingQueue = new LinkedBlockingQueue<String>();
-
-    private String parallelokAddr;
-    private static  ParallelOk parallelok;
-    private static TransactionManager transactionManager;
 
 
     /**
