@@ -28,7 +28,7 @@ import javax.persistence.*;
 @Data
 @Table(uniqueConstraints = {
 		@UniqueConstraint(name = "unique_block_notify", columnNames = {"appId", "exchangeName",
-				"routingKey"})
+				"queueName"})
 })
 public class BlockNotifyInfo {
 
