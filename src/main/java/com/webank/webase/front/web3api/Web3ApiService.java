@@ -533,7 +533,7 @@ public class Web3ApiService {
                     new FrontException("refresh web3j failed");
                 }
                 ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-                channelEthereumService.setTimeout(Web3Config.timeout);
+                channelEthereumService.setTimeout(30000);
                 channelEthereumService.setChannelService(service);
                 Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
                 web3jMap.put(groupId, web3j);
