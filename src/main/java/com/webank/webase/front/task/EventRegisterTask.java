@@ -16,20 +16,20 @@
 
 package com.webank.webase.front.task;
 
-import com.webank.webase.front.base.enums.EventTypes;
-import com.webank.webase.front.base.properties.Constants;
-import com.webank.webase.front.event.BlockNotifyInfoRepository;
-import com.webank.webase.front.event.EventLogPushInfoRepository;
-import com.webank.webase.front.event.EventService;
-import com.webank.webase.front.event.MQService;
+import com.webank.webase.front.event.*;
+import com.webank.webase.front.event.callback.MQEventLogPushWithDecodedCallBack;
 import com.webank.webase.front.event.entity.BlockNotifyInfo;
 import com.webank.webase.front.event.entity.EventLogPushInfo;
 import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.util.RabbitMQUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
+import org.fisco.bcos.channel.event.filter.EventLogUserParams;
+import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -45,31 +45,34 @@ import static com.webank.webase.front.util.RabbitMQUtils.*;
  */
 @Slf4j
 @Component
-public class EventRegisterTask {
+public class EventRegisterTask implements ApplicationRunner {
 
-	@Autowired
-	EventService registerService;
 	@Autowired
 	MQService mqService;
 	@Autowired
 	BlockNotifyInfoRepository blockNotifyInfoRepository;
 	@Autowired
 	EventLogPushInfoRepository eventLogPushInfoRepository;
-
+	@Autowired
+	MQPublisher mqPublisher;
 	@Autowired
 	Map<Integer, Service> serviceMap;
 
-	@Scheduled(cron = "${constant.registerCron}")
-	public void taskStart() {
+
+	/**
+	 * Callback used to run the bean.
+	 *
+	 * @param args incoming application arguments
+	 * @throws Exception on error
+	 */
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		log.info("ApplicationRunner start. ");
 		registerStart();
 	}
 
-	public synchronized void registerStart() {
+	public void registerStart() {
 		// after front restart, register only one time
-		if(!Constants.registerTaskEnable) {
-			log.info("Register task stop for already done.");
-			return;
-		}
 		try{
 			log.info("Register task starts.");
 			for (Integer groupId: serviceMap.keySet()) {
@@ -83,7 +86,6 @@ public class EventRegisterTask {
 				blockNotifyInfoList.forEach(this::registerBlockNotify);
 				eventLogPushInfoList.forEach(this::registerEventLogPush);
 			}
-			Constants.registerTaskEnable = false;
 			log.info("Register task finish.");
 		}catch (Exception ex) {
 			log.error("Register task error: ", ex);
@@ -94,36 +96,41 @@ public class EventRegisterTask {
 	private void registerBlockNotify(BlockNotifyInfo registerInfo) {
 		String queueName = registerInfo.getQueueName();
 		String appId = registerInfo.getAppId();
+		String exchangeName = registerInfo.getExchangeName();
+		int groupId = registerInfo.getGroupId();
+		String blockRoutingKey = registerInfo.getRoutingKey();
 		log.debug("registerBlockNotify task  BlockNotifyInfo:{}", registerInfo);
-		String blockRoutingKey = queueName +  "_" + ROUTING_KEY_BLOCK + "_" + appId;
-		mqService.bindQueue2Exchange(registerInfo.getExchangeName(),
+		mqService.bindQueue2Exchange(exchangeName,
 				queueName, blockRoutingKey);
 		// record groupId, exchange, routingKey for all block notify
-		PublisherHelper blockPublishInfo = new PublisherHelper(registerInfo.getGroupId(),
-				registerInfo.getExchangeName(), blockRoutingKey);
+		PublisherHelper blockPublishInfo = new PublisherHelper(groupId,
+				exchangeName, blockRoutingKey);
 		BLOCK_ROUTING_KEY_MAP.put(appId, blockPublishInfo);
 	}
 
 	private void registerEventLogPush(EventLogPushInfo rInfo) {
 		List<String> topicList = FrontUtils.string2ListStr(rInfo.getTopicList());
+		String exchangeName = rInfo.getExchangeName();
 		String queueName = rInfo.getQueueName();
 		String appId = rInfo.getAppId();
+		int groupId = rInfo.getGroupId();
+		String eventRoutingKey = rInfo.getRoutingKey();
+		String contractAddress = rInfo.getContractAddress();
+		String abi = rInfo.getContractAbi();
+		String fromBlock = rInfo.getFromBlock();
+		String toBlock = rInfo.getToBlock();
+		// 传入abi作decoder:
+		TransactionDecoder decoder = new TransactionDecoder(abi);
+		// init EventLogUserParams for register
+		EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(
+				fromBlock, toBlock, contractAddress, topicList);
 		log.debug("registerEventLogPush task EventLogPushInfo:{}", rInfo);
 		// bind queue to exchange by routing key "queueName_event"
-		String eventRoutingKey = queueName +  "_" + ROUTING_KEY_EVENT + "_" + appId;
-		mqService.bindQueue2Exchange(rInfo.getExchangeName(),
-				queueName, eventRoutingKey);
-		registerService.registerDecodedEventLogPush(
-				appId,
-				rInfo.getGroupId(),
-				rInfo.getExchangeName(),
-				queueName,
-				eventRoutingKey,
-				rInfo.getContractAbi(),
-				rInfo.getFromBlock(),
-				rInfo.getToBlock(),
-				rInfo.getContractAddress(),
-				topicList
-		);
+		mqService.bindQueue2Exchange(exchangeName, queueName, eventRoutingKey);
+		MQEventLogPushWithDecodedCallBack callBack =
+				new MQEventLogPushWithDecodedCallBack(mqPublisher, exchangeName,
+						eventRoutingKey, decoder, groupId, appId);
+		org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
+		service.registerEventLogFilter(params, callBack);
 	}
 }
