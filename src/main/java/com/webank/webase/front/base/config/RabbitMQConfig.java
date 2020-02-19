@@ -25,7 +25,21 @@ import org.springframework.context.annotation.Configuration;
 
 
 /**
- * 初始化RabbitMQ实例
+ * init mq instance, add config in spring configuration
+ * ********mq config*******
+ *  spring:
+ *    ...
+ *    rabbitmq:
+ *     host: 127.0.0.1
+ *     port: 5672
+ *     username: youraccount
+ *     password: yourpassword
+ *     virtual-host: yourvirtualhost
+ *     publisher-confirm: true
+ *     ssl:
+ *       enabled: false
+ *   ...
+ * *************************
  * @author marsli
  */
 @Slf4j
