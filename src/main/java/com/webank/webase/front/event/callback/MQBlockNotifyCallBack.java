@@ -16,6 +16,7 @@
 
 package com.webank.webase.front.event.callback;
 
+import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.event.entity.ReqBlockNotifyRegister;
@@ -55,6 +56,7 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 		BlockPushMessage blockPushMessage = new BlockPushMessage();
 		blockPushMessage.setBlockNumber(blockNumber);
 		blockPushMessage.setGroupId(groupID);
+		blockPushMessage.setEventType(EventTypes.BLOCK_NOTIFY.getValue());
 		for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
 			blockPushMessage.setAppId(appId);
 			PublisherHelper blockPublishInfo = BLOCK_ROUTING_KEY_MAP.get(appId);
@@ -75,7 +77,7 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 	 */
     private void pushMessage2MQ(String exchangeName, String routingKey,
 								BlockPushMessage blockPushMessage) {
-        logger.info("MQBlockNotifyCallBack pushMessage2MQ blockPushMessage:{}",
+        logger.debug("MQBlockNotifyCallBack pushMessage2MQ blockPushMessage:{}",
                 blockPushMessage.toString());
         MQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
                 blockPushMessage.toString());
