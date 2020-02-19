@@ -20,10 +20,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * used in block notify static map
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PublisherHelper {
+
+	private Integer groupId;
 	private String exchangeName;
 	private String routingKey;
 }

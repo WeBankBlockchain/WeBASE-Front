@@ -58,8 +58,10 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 		for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
 			blockPushMessage.setAppId(appId);
 			PublisherHelper blockPublishInfo = BLOCK_ROUTING_KEY_MAP.get(appId);
-			pushMessage2MQ(blockPublishInfo.getExchangeName(),
-					blockPublishInfo.getRoutingKey(), blockPushMessage);
+			if (groupID == blockPublishInfo.getGroupId()) {
+				pushMessage2MQ(blockPublishInfo.getExchangeName(),
+						blockPublishInfo.getRoutingKey(), blockPushMessage);
+			}
 		}
 
 

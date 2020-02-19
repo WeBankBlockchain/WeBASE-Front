@@ -62,7 +62,8 @@ public class EventService {
         log.debug("registerDecodedEventLogPush appId:{},groupId:{},exchangeNarme:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(exchangeName, routingKey));
+        // record groupId, exchange, routingKey for all block notify
+        BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
         // save to db
         addBlockNotifyInfo(EventTypes.BLOCK_NOTIFY.getValue(),
                 appId, groupId, exchangeName, queueName, routingKey);
