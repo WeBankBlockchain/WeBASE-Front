@@ -35,6 +35,8 @@ import java.util.List;
 import static com.webank.webase.front.util.RabbitMQUtils.*;
 
 /**
+ * 虽然mq-server限制了用户读取队列权限，但是用户可以无节制发送订阅请求
+ * TODO 需要限制指定的appId订阅对应的queue
  * @author marsli
  */
 @Api(value = "/event", tags = "event notify of event log push and block notify")
@@ -53,7 +55,7 @@ public class EventController {
     @PostMapping("blockNotify")
     public BaseResponse registerBlockNotify(
             @Valid @RequestBody ReqBlockNotifyRegister reqBlockNotifyRegister) {
-        log.info("start registerEventLogPush. reqBlockNotifyRegister:{}", reqBlockNotifyRegister);
+        log.debug("start registerEventLogPush. reqBlockNotifyRegister:{}", reqBlockNotifyRegister);
         String appId = reqBlockNotifyRegister.getAppId();
         int groupId = reqBlockNotifyRegister.getGroupId();
         String exchangeName = reqBlockNotifyRegister.getExchangeName();
@@ -76,7 +78,7 @@ public class EventController {
     @PostMapping("eventLogPush")
     public BaseResponse registerEventLogPush(
             @Valid @RequestBody ReqEventLogPushRegister reqEventLogPushRegister) {
-        log.info("start registerEventLogPush. reqEventLogPushRegister:{}", reqEventLogPushRegister);
+        log.debug("start registerEventLogPush. reqEventLogPushRegister:{}", reqEventLogPushRegister);
         int groupId = reqEventLogPushRegister.getGroupId();
         String appId = reqEventLogPushRegister.getAppId();
         String fromBlock = reqEventLogPushRegister.getFromBlock();

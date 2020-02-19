@@ -24,7 +24,7 @@ public class MQPublisher {
      */
     public void sendToTradeFinishedByString(String exchangeName, String routingKey,
                                             String messageStr) {
-        log.info("sendToTradeFinishedByString exchangeName:{}, routingKey:{}, messageStr:{}",
+        log.debug("sendToTradeFinishedByString exchangeName:{}, routingKey:{}, messageStr:{}",
                 exchangeName, routingKey, messageStr);
         rabbitTemplate.convertAndSend(exchangeName, routingKey, messageStr);
     }
