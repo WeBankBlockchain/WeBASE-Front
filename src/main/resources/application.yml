@@ -60,4 +60,3 @@ constant:
   nodePath: /fisco/nodes/127.0.0.1/node0
   http_read_timeOut: 100000
   http_connect_timeOut: 100000
-  sleep: 10

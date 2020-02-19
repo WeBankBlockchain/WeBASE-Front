@@ -72,8 +72,6 @@ public class Constants {
     private String nodePath = "/fisco/nodes/127.0.0.1/node0";
     private Integer http_read_timeOut = 10000;
     private Integer http_connect_timeOut = 10000;
-    private Integer sleep = 500;
-    public static AtomicInteger error = new AtomicInteger(0);
 
 
 
