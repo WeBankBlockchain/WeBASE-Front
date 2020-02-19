@@ -32,6 +32,10 @@ spring:
 server:
   port: 5002
   context-path: /WeBASE-Front
+  connection-timeout: 30000
+  tomcat:
+    max-threads: 700
+    max-connections: 20000
 
 sdk:
   orgName: orgTest
@@ -57,4 +61,4 @@ constant:
   http_read_timeOut: 100000
   http_connect_timeOut: 100000
   sleep: 10
-  websocket: 1
+  websocket: 0

@@ -34,6 +34,7 @@ import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
+import org.fisco.bcos.web3j.utils.Web3AsyncThreadPoolSize;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,7 +56,7 @@ public class Web3Config {
     private int corePoolSize;
     private int maxPoolSize;
     private int queueCapacity;
-    public static int timeout = 30000;
+    public  int timeout = 30000;
     private int keepAlive;
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
@@ -109,6 +110,7 @@ public class Web3Config {
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(timeout);
         channelEthereumService.setChannelService(service);
+        //Web3AsyncThreadPoolSize.web3AsyncPoolSize=200;
         Web3j web3j = Web3j.build(channelEthereumService);
         return web3j;
     }
