@@ -64,6 +64,4 @@ constant:
   monitorEnabled: true
   aesKey: EfdsW23D23d3df43
   nodePath: /fisco/nodes/127.0.0.1/node0
-  registerTaskEnable: true
-  registerCron:  "0 0 0 * * ?" # register event when restarts
 
