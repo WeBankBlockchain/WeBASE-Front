@@ -16,6 +16,7 @@
 
 package com.webank.webase.front.event.callback;
 
+import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.message.EventLogPushMessage;
 import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
@@ -64,7 +65,7 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
      */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
-        logger.info(
+        logger.debug(
                 "MQEventLogPushWithDecodedCallBack onPushEventLog" +
                         " params: {}, status: {}, logs: {}",
                 getFilter().getParams(),
@@ -77,6 +78,7 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
     private void pushMessage2MQ(int groupId,
                                 int status, List<LogResult> logs) {
         EventLogPushMessage eventLogPushMessage = new EventLogPushMessage();
+        eventLogPushMessage.setEventType(EventTypes.EVENT_LOG_PUSH.getValue());
         eventLogPushMessage.setGroupId(groupId);
         eventLogPushMessage.setStatus(status);
         eventLogPushMessage.setLogs(logs);
