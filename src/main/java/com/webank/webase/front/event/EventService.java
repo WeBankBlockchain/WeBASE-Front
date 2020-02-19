@@ -16,7 +16,9 @@
 
 package com.webank.webase.front.event;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.EventTypes;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.event.callback.MQEventLogPushWithDecodedCallBack;
 import com.webank.webase.front.event.entity.BlockNotifyInfo;
 import com.webank.webase.front.event.entity.EventLogPushInfo;
@@ -118,7 +120,12 @@ public class EventService {
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
-        blockNotifyInfoRepository.save(registerInfo);
+        try{
+            blockNotifyInfoRepository.save(registerInfo);
+        } catch (Exception e) {
+            log.error("insert error:[]", e);
+            throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
+        }
     }
 
     private void addEventLogPushInfo(int eventType, String appId, int groupId,
@@ -138,7 +145,12 @@ public class EventService {
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
-        eventLogPushInfoRepository.save(registerInfo);
+        try{
+            eventLogPushInfoRepository.save(registerInfo);
+        } catch (Exception e) {
+            log.error("insert error:[]", e);
+            throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
+        }
 
     }
 
