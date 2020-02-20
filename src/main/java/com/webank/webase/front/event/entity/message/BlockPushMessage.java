@@ -56,11 +56,6 @@ public class BlockPushMessage implements MQObject {
     @Override
     public String toString() {
         return JSON.toJSONString(this);
-//        return "BlockPushMessage:{"
-//                + "appId:" + appId + ","
-//                + "eventType:" + eventType + ","
-//                + "groupId:" + groupId.toString() + ","
-//                + "blockNumber:" + blockNumber.toString() + "}";
     }
 
 }
