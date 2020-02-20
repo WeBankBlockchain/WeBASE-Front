@@ -38,8 +38,7 @@ import java.util.Map;
 import static com.webank.webase.front.util.RabbitMQUtils.*;
 
 /**
- * initialize map of block and service's event log push
- * automatically register in service when start the program
+ * initialize map of block and service's event log push when start the program
  * get EventLogPushRegisterInfo from db
  * @author marsli
  */
@@ -80,7 +79,7 @@ public class EventRegisterTask implements ApplicationRunner {
 						blockNotifyInfoRepository.findByGroupId(groupId);
 				List<EventLogPushInfo> eventLogPushInfoList =
 						eventLogPushInfoRepository.findByGroupId(groupId);
-				log.debug("Register task groupId:{},blockNotifyInfoList count:{},eventLogPushInfoList count:{}",
+				log.info("Register task groupId:{},blockNotifyInfoList count:{},eventLogPushInfoList count:{}",
 						groupId, blockNotifyInfoList.size(), eventLogPushInfoList.size());
 				// foreach register
 				blockNotifyInfoList.forEach(this::registerBlockNotify);

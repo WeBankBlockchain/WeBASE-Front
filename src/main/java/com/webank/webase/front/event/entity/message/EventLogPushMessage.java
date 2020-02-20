@@ -52,11 +52,5 @@ public class EventLogPushMessage implements MQObject {
     @Override
     public String toString() {
         return JSON.toJSONString(this);
-//        return "EventLogPushMessage:{"
-//                + "appId:" + appId + ","
-//                + "eventType:" + eventType + ","
-//                + "groupId:" + groupId  + ","
-//                + "status:" + status + ","
-//                + "logs:" + JSONArray.toJSONString(logs) + "}";
     }
 }
