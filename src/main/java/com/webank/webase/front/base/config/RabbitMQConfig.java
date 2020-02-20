@@ -60,14 +60,13 @@ public class RabbitMQConfig {
 
     /**
      * 用于发送消息到队列
-     * 指定 messageConverter为Json
+     * 传输的message消息体在Message实体类中使用Fastjson进行序列化
      * @param rabbitAdmin
      * @return
      */
     @Bean(name = "rabbitTemplate")
     public RabbitTemplate getRabbitTemplate(RabbitAdmin rabbitAdmin) {
         RabbitTemplate rabbitTemplate = rabbitAdmin.getRabbitTemplate();
-        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
         return rabbitTemplate;
     }
 
