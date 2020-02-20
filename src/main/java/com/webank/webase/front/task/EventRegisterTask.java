@@ -38,9 +38,9 @@ import java.util.Map;
 import static com.webank.webase.front.util.RabbitMQUtils.*;
 
 /**
+ * initialize map of block and service's event log push
+ * automatically register in service when start the program
  * get EventLogPushRegisterInfo from db
- * automatically register in service after restart
- * initialize map of block and event log push
  * @author marsli
  */
 @Slf4j
