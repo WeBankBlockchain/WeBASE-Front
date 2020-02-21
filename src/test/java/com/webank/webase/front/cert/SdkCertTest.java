@@ -33,7 +33,7 @@ public class SdkCertTest {
     @Autowired
     FrontCertService frontCertService;
 
-
+    // 依赖配置node
     @Test
     public void testSdkCertService() {
         List<String> sdkList = frontCertService.getSDKNodeCert();
