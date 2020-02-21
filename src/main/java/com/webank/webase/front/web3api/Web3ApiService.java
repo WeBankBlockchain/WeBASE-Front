@@ -71,6 +71,8 @@ public class Web3ApiService {
     ThreadPoolTaskExecutor threadPoolTaskExecutor;
     @Autowired
     Constants constants;
+    @Autowired
+    Web3Config web3Config;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -534,7 +536,7 @@ public class Web3ApiService {
             throw new FrontException("refresh web3j failed");
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setTimeout(constants.getTransMaxWait());
+        channelEthereumService.setTimeout(web3Config.getTimeout());
         channelEthereumService.setChannelService(service);
         Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
         web3jMap.put(groupId, web3j);
