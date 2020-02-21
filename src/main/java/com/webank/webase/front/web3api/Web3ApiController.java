@@ -128,7 +128,11 @@ public class Web3ApiController {
         return web3ApiService.getCode(groupId, address, blockNumber);
     }
 
-    // todo
+    /**
+     * getTotalTransactionCount
+     * @param groupId
+     * @return
+     */
     @ApiOperation(value = "getTotalTransactionCount",
             notes = "Get the  total number of execution transactions count ")
     @ApiImplicitParams({
@@ -232,7 +236,7 @@ public class Web3ApiController {
     }
 
     @GetMapping("/refresh")
-    public void refresh(@PathVariable int groupId) {
+    public void refresh() {
         // Service of getGroupList will refresh web3jMap
         web3ApiService.getGroupList();
     }
