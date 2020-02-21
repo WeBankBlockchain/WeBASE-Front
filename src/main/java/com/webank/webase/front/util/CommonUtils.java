@@ -46,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommonUtils {
 
-    public static final int publicKeyLength_64 = 64;
+    public static final int PUBLIC_KEY_LENGTH_64 = 64;
 
     private CommonUtils() {
         throw new IllegalStateException("Utility class");
@@ -81,7 +81,7 @@ public class CommonUtils {
     public static String signatureDataToString(SignatureData signatureData) {
         byte[] byteArr;
         if(EncryptType.encryptType == 1) {
-            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length + publicKeyLength_64];
+            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length + PUBLIC_KEY_LENGTH_64];
             byteArr[0] = signatureData.getV();
             System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
             System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
