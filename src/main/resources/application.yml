@@ -42,6 +42,10 @@ spring:
 server:
   port: 5002
   context-path: /WeBASE-Front
+  connection-timeout: 30000
+  tomcat:
+    max-threads: 200
+    max-connections: 10000
 
 sdk:
   orgName: orgTest
@@ -61,7 +65,8 @@ constant:
   keyServer: 127.0.0.1:5001,127.0.0.1:5004 # webase-node-mgr或webase-sign，英文逗号相隔（不带空格）
   transMaxWait: 30
   monitorDisk: /
-  monitorEnabled: true
+  monitorEnabled: false
   aesKey: EfdsW23D23d3df43
   nodePath: /fisco/nodes/127.0.0.1/node0
-
+  http_read_timeOut: 100000
+  http_connect_timeOut: 100000
