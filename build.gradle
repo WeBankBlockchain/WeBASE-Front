@@ -41,7 +41,9 @@ List spring_boot =[
 	"org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
 	"org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version",
 	//"org.springframework.boot:spring-boot-starter-log4j2:$spring_boot_version"
-//	"org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version"
+
+    //	"org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version"
+	"org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version"
 ]
 
 
@@ -83,10 +85,14 @@ dependencies {
 	compile 'org.projectlombok:lombok:1.18.2'
 	compile 'com.github.jsqlparser:jsqlparser:2.0'
 
+	testCompile('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
 	testCompile 'junit:junit:4.12',
 				'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
 				'com.github.macdao:moscow:0.1.0',
 				'com.squareup.okhttp3:okhttp:3.1.2'
+				'org.springframework.amqp:spring-rabbit-test'
 }
 
 configurations {
