@@ -71,7 +71,7 @@ public class SignDataTest extends BaseTest {
         EncodeInfo encodeInfo = new EncodeInfo();
         encodeInfo.setUserId(100001);
         encodeInfo.setEncodedDataStr(Hash.sha3String(rawData));
-        String signedData = keyStoreService.getSignDate(encodeInfo);// from webase-sign
+        String signedData = keyStoreService.getSignData(encodeInfo);// from webase-sign
         System.out.println(signedData); // 00fd8bbc86faa0cf9216886e15118862ef5469c5283ab43b727ebaee93d866ced346c6eea89aac11be598de5ad8b3711791594651a3a3e44df2f7d9a522da351e0
 //        Assert.assertTrue(StringUtils.isNotBlank(signedData));
 

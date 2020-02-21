@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.transaction;
 
+
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
@@ -306,6 +307,8 @@ public class TransService {
     public static TransactionReceipt execTransaction(Function function,
                                                      CommonContract commonContract) throws FrontException {
         TransactionReceipt transactionReceipt = null;
+        Instant startTime = Instant.now();
+        log.info("execTransaction start startTime:{}", startTime.toEpochMilli());
         try {
             transactionReceipt = commonContract.execTransaction(function);
         } catch (IOException | TransactionException | ContractCallException e) {
@@ -313,6 +316,8 @@ public class TransService {
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
                     e.getMessage());
         }
+        log.info("execTransaction end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
         return transactionReceipt;
     }
 
@@ -342,7 +347,7 @@ public class TransService {
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setUserId(userId);
             encodeInfo.setEncodedDataStr(encodedDataStr);
-            String signDataStr = keyStoreService.getSignDate(encodeInfo);
+            String signDataStr = keyStoreService.getSignData(encodeInfo);
             if (StringUtils.isBlank(signDataStr)) {
                 log.warn("deploySend get sign data error.");
                 return null;
@@ -367,7 +372,7 @@ public class TransService {
 
             Instant startTime = Instant.now();
 
-            String signDataStr = keyStoreService.getSignDate(encodeInfo);
+            String signDataStr = keyStoreService.getSignData(encodeInfo);
 
             log.info("get signdatastr cost time: {}", Duration.between(startTime, Instant.now()).toMillis());
 
