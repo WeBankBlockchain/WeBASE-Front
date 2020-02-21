@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.base.enums;
+package com.webank.webase.front.event.entity.message;
+
+import java.io.Serializable;
 
 /**
- * Enumeration of data status.
+ * @author marsli
  */
-public enum DataStatus {
-    /**
-     * normal status
-     */
-    NORMAL(1),
-    /**
-     * abnormal/invalid status
-     */
-    INVALID(2);
-
-    private int value;
-
-    DataStatus(Integer dataStatus) {
-        this.value = dataStatus;
-    }
-
-    public int getValue() {
-        return this.value;
-    }
+public interface MQObject extends Serializable {
 }

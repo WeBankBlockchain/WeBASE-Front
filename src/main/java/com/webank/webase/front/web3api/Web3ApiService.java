@@ -492,8 +492,8 @@ public class Web3ApiService {
 
     public List<String> getNodeIDList() {
         try {
-            Set<Integer> iset = web3jMap.keySet();
-            return web3jMap.get(iset.toArray()[0]).getNodeIDList().send().getNodeIDList();
+            Set<Integer> iSet = web3jMap.keySet();
+            return web3jMap.get(iSet.toArray()[0]).getNodeIDList().send().getNodeIDList();
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }

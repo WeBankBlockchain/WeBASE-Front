@@ -335,7 +335,7 @@ public class TransService {
         String signMsg = "";
         if (versionContent.contains("2.0.0-rc1") || versionContent.contains("release-2.0.1")) {
             RawTransaction rawTransaction = RawTransaction.createTransaction(randomid,
-                    constants.GAS_PRICE, constants.GAS_LIMIT, blockLimit, contractAddress,
+                    Constants.GAS_PRICE, Constants.GAS_LIMIT, blockLimit, contractAddress,
                     BigInteger.ZERO, data);
             byte[] encodedTransaction = TransactionEncoder.encode(rawTransaction);
             String encodedDataStr = Numeric.toHexString(encodedTransaction);
@@ -355,8 +355,8 @@ public class TransService {
         } else {
             String chainId = (String) JSONObject.parseObject(versionContent).get("Chain Id");
             ExtendedRawTransaction extendedRawTransaction =
-                    ExtendedRawTransaction.createTransaction(randomid, constants.GAS_PRICE,
-                            constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, data,
+                    ExtendedRawTransaction.createTransaction(randomid, Constants.GAS_PRICE,
+                            Constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, data,
                             new BigInteger(chainId), BigInteger.valueOf(groupId), "");
             byte[] encodedTransaction = ExtendedTransactionEncoder.encode(extendedRawTransaction);
             String encodedDataStr = Numeric.toHexString(encodedTransaction);

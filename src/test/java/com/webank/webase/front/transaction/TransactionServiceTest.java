@@ -34,20 +34,20 @@ public class TransactionServiceTest {
     @Autowired
     TransService transService;
 
-    @Test
-    public void testSignMessage() throws Exception {
-        String contractAddr = "0x76b52c5c0d5c4a2cf77e557bdd909d748eb95a4d";
-//        transService.signMessage(1, web3jHashMap.get(1), 100001, contractAddr, );
-        ReqTransHandleWithSign param = new ReqTransHandleWithSign();
-        String abi = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}]";
-        List<Object> abiList = JSON.parseArray(abi, Object.class);
-        param.setContractAbi(abiList);
-        param.setFuncName("set");
-        String funParam = " [\"22\"]";
-        List<Object> funParamList = JSON.parseArray(funParam, Object.class);
-        param.setFuncParam(funParamList);
-        param.setContractAddress(contractAddr);
-        Object res = transService.transHandleWithSign(param);
-        System.out.println(res);
-    }
+//    @Test
+//    public void testSignMessage() throws Exception {
+//        String contractAddr = "0x76b52c5c0d5c4a2cf77e557bdd909d748eb95a4d";
+////        transService.signMessage(1, web3jHashMap.get(1), 100001, contractAddr, );
+//        ReqTransHandleWithSign param = new ReqTransHandleWithSign();
+//        String abi = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}]";
+//        List<Object> abiList = JSON.parseArray(abi, Object.class);
+//        param.setContractAbi(abiList);
+//        param.setFuncName("set");
+//        String funParam = " [\"22\"]";
+//        List<Object> funParamList = JSON.parseArray(funParam, Object.class);
+//        param.setFuncParam(funParamList);
+//        param.setContractAddress(contractAddr);
+//        Object res = transService.transHandleWithSign(param);
+//        System.out.println(res);
+//    }
 }

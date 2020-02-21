@@ -22,7 +22,18 @@ package com.webank.webase.front.base.enums;
  * sdk: certs in sdk directory
  */
 public enum CertTypes {
-    CHAIN(1), NODE(2), OTHERS(3);
+    /**
+     * ca.crt
+     */
+    CHAIN(1),
+    /**
+     * node.crt(node cert)
+     */
+    NODE(2),
+    /**
+     * others: gm encrypt cert
+     */
+    OTHERS(3);
 
     private int value;
 
