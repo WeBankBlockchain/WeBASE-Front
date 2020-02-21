@@ -60,7 +60,6 @@ public class EventService {
 
     public List<BlockNotifyInfo> registerBlockNotify(String appId, int groupId,
                                     String exchangeName, String queueName, String routingKey) {
-        // TODO 如果exchange不存在，会发往死信队列
         log.debug("registerDecodedEventLogPush appId:{},groupId:{},exchangeNarme:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
