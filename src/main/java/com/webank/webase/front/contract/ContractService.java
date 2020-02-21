@@ -89,7 +89,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 public class ContractService {
-    private static final String BASE_FILE_PATH = File.separator + "temp" + File.separator;
+    private static final String BASE_FILE_PATH = "./temp" + File.separator;
     private static final String CONTRACT_FILE_TEMP = BASE_FILE_PATH + "%1s.sol";
 
     @Autowired
