@@ -21,25 +21,10 @@ import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.FrontUtils;
-import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
-import com.webank.webase.front.web3api.entity.NodeStatusInfo;
-import com.webank.webase.front.web3api.entity.PeerOfConsensusStatus;
-import com.webank.webase.front.web3api.entity.PeerOfSyncStatus;
+import com.webank.webase.front.web3api.entity.*;
 import com.webank.webase.front.web3api.entity.SyncStatus;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
@@ -50,18 +35,21 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
-import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
-import org.fisco.bcos.web3j.protocol.core.methods.response.GroupPeers;
+import org.fisco.bcos.web3j.protocol.core.methods.response.*;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+//import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
 
 
 /**
@@ -492,10 +480,15 @@ public class Web3ApiService {
     }
 
     public List<String> getGroupList() {
+        log.debug("getGroupList. ");
         try {
             Set<Integer> iset = web3jMap.keySet();
-            return web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
+            List<String> groupIdList = web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
+            // check web3jMap, if not match groupIdList, refresh web3jMap in front
+            refreshWeb3jMapService(groupIdList);
+            return groupIdList;
         } catch (IOException e) {
+            log.error("getGroupList error:[]", e);
             throw new FrontException(e.getMessage());
         }
     }
@@ -510,39 +503,42 @@ public class Web3ApiService {
     }
 
     @DependsOn("encryptType")
-    public void refreshServiceMap() throws FrontException {
-        List<String> groupList = getGroupList();
+    public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
+        log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
-
-        for (int i = 0; i < groupList.size(); i++) {
-            Integer groupId = new Integer(groupList.get(i));
-            Credentials credentials = GenCredential.create();
-            if (web3jMap.get(groupId) == null) {
-                ChannelConnections channelConnections = new ChannelConnections();
-                channelConnections
-                        .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
-                channelConnections.setGroupId(Integer.valueOf(groupList.get(i)));
-                channelConnectionsList.add(channelConnections);
-                org.fisco.bcos.channel.client.Service service =
-                        new org.fisco.bcos.channel.client.Service();
-                service.setOrgID(Web3Config.orgName);
-                service.setGroupId(Integer.valueOf(groupList.get(i)));
-                service.setThreadPool(threadPoolTaskExecutor);
-                service.setAllChannelConnections(groupChannelConnectionsConfig);
-                try {
-                    service.run();
-                } catch (Exception e) {
-                    new FrontException("refresh web3j failed");
-                }
-                ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-                channelEthereumService.setTimeout(constants.getTransMaxWait());
-                channelEthereumService.setChannelService(service);
-                Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
-                web3jMap.put(groupId, web3j);
-                cnsServiceMap.put(groupId, new CnsService(web3j, credentials));
+        groupIdList.forEach(gId -> {
+            Integer groupId = new Integer(gId);
+            if(web3jMap.get(groupId) == null) {
+                refreshWeb3jMap(groupId, channelConnectionsList);
             }
+        });
+    }
+
+    private void refreshWeb3jMap(int groupId, List<ChannelConnections> channelConnectionsList) {
+        Credentials credentials = GenCredential.create();
+        ChannelConnections channelConnections = new ChannelConnections();
+        channelConnections
+                .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
+        channelConnections.setGroupId(groupId);
+        channelConnectionsList.add(channelConnections);
+        org.fisco.bcos.channel.client.Service service =
+                new org.fisco.bcos.channel.client.Service();
+        service.setOrgID(Web3Config.orgName);
+        service.setGroupId(groupId);
+        service.setThreadPool(threadPoolTaskExecutor);
+        service.setAllChannelConnections(groupChannelConnectionsConfig);
+        try {
+            service.run();
+        } catch (Exception e) {
+            throw new FrontException("refresh web3j failed");
         }
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setTimeout(30000);
+        channelEthereumService.setChannelService(service);
+        Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
+        web3jMap.put(groupId, web3j);
+        cnsServiceMap.put(groupId, new CnsService(web3j, credentials));
     }
 
     // get all peers of chain
@@ -620,7 +616,7 @@ public class Web3ApiService {
 
     public Object generateGroup(GenerateGroupInfo generateGroupInfo) throws IOException {
         Set<Integer> iset = web3jMap.keySet();
-        Status status = web3jMap.get(iset.toArray()[0])
+        GenerateGroup.Status status = web3jMap.get(iset.toArray()[0])
                 .generateGroup(generateGroupInfo.getGenerateGroupId(),
                         generateGroupInfo.getTimestamp().intValue(),
                         generateGroupInfo.getNodeList())
@@ -632,6 +628,11 @@ public class Web3ApiService {
         Set<Integer> iset = web3jMap.keySet();
         org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
                 web3jMap.get(iset.toArray()[0]).startGroup(startGroupId).send().getStatus();
+        // if start group success, refresh web3jMap
+        if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+            refreshWeb3jMap(startGroupId,
+                    groupChannelConnectionsConfig.getAllChannelConnections());
+        }
         return status;
     }
 }

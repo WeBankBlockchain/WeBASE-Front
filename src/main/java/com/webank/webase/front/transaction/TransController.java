@@ -30,6 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
 
 /**
@@ -57,12 +60,19 @@ public class TransController extends BaseController {
     @PostMapping("/handle")
     public Object transHandle(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
+
+        Instant startTime = Instant.now();
+        log.info("transHandle start startTime:{}", startTime.toEpochMilli());
+
         checkParamResult(result);
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(reqTransHandle.getContractAddress())) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
 
-        return transServiceImpl.transHandle(reqTransHandle);
+        Object obj =  transServiceImpl.transHandle(reqTransHandle);
+        log.info("transHandle end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+         return obj;
     }
     
     /**

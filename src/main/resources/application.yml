@@ -28,6 +28,19 @@ spring:
       settings:
         web-allow-others: false
         trace: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username:
+    password:
+    virtual-host:
+    ssl:
+      enabled: false
+
+rabbitmq:
+  queue:
+    service-name: mq_webase
+    queue-name: block_exchange.block_queue_1
 
 server:
   port: 5002
@@ -52,7 +65,7 @@ logging:
   config: classpath:log4j2.xml
 
 constant:
-  keyServer: 127.0.0.1:5004 # webase-sign
+  keyServer: 127.0.0.1:5001,127.0.0.1:5004 # webase-node-mgr或webase-sign，英文逗号相隔（不带空格）
   transMaxWait: 30
   monitorDisk: /
   monitorEnabled: false
