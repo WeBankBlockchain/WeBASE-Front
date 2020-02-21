@@ -19,9 +19,9 @@ package com.webank.webase.front.event;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.event.callback.MQEventLogPushWithDecodedCallBack;
-import com.webank.webase.front.event.entity.BlockNotifyInfo;
-import com.webank.webase.front.event.entity.EventLogPushInfo;
+import com.webank.webase.front.event.callback.ContractEventCallback;
+import com.webank.webase.front.event.entity.NewBlockEventInfo;
+import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
@@ -38,7 +38,7 @@ import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 
 /**
  * event notify in message queue service
- * including block notify and contract's event log push notify
+ * including new block event and contract event log push notify
  * @author marsli
  */
 @Slf4j
@@ -49,33 +49,43 @@ public class EventService {
     Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
 
     @Autowired
-    EventLogPushInfoRepository eventLogPushInfoRepository;
+    ContractEventInfoRepository contractEventInfoRepository;
     @Autowired
-    BlockNotifyInfoRepository blockNotifyInfoRepository;
+    NewBlockEventInfoRepository newBlockEventInfoRepository;
     @Autowired
     private MQService mqService;
 
     @Autowired
     private MQPublisher mqPublisher;
 
-    public List<BlockNotifyInfo> registerBlockNotify(String appId, int groupId,
-                                    String exchangeName, String queueName, String routingKey) {
-        log.debug("registerDecodedEventLogPush appId:{},groupId:{},exchangeNarme:{},queueName:{}",
+    /**
+     * register NewBlockEventCallBack
+     * @param appId
+     * @param groupId
+     * @param exchangeName
+     * @param queueName
+     * @param routingKey
+     * @return
+     */
+    public List<NewBlockEventInfo> registerNewBlockEvent(String appId, int groupId,
+                                                         String exchangeName, String queueName,
+                                                         String routingKey) {
+        log.debug("registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // record groupId, exchange, routingKey for all block notify
         BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
         // save to db
-        addBlockNotifyInfo(EventTypes.BLOCK_NOTIFY.getValue(),
+        addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
                 appId, groupId, exchangeName, queueName, routingKey);
-        return blockNotifyInfoRepository.findByQueueName(queueName);
+        return newBlockEventInfoRepository.findByQueueName(queueName);
     }
 
 
     /**
      * 在org.fisco.bcos.channel.client.Service中注册EventLogPush不会持久化
      * 如果重启了则需要重新注册
-     * register DecodedEventLogPushCallback
+     * register ContractEventCallback
      * @param groupId
      * @param abi single one
      * @param fromBlock
@@ -85,34 +95,32 @@ public class EventService {
      * @param exchangeName
      * @param queueName
      */
-    public List<EventLogPushInfo> registerDecodedEventLogPush(String appId, int groupId,
-                                            String exchangeName, String queueName, String routingKey,
-                                            String abi, String fromBlock,
-                                            String toBlock, String contractAddress, List<String> topicList
-                                            ) {
+    public List<ContractEventInfo> registerContractEvent(String appId, int groupId, String exchangeName, String queueName,
+                                                         String routingKey, String abi, String fromBlock, String toBlock,
+                                                         String contractAddress, List<String> topicList) {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // 传入abi作decoder:
         TransactionDecoder decoder = new TransactionDecoder(abi);
         // init EventLogUserParams for register
         EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
                 toBlock, contractAddress, topicList);
-        MQEventLogPushWithDecodedCallBack callBack =
-                new MQEventLogPushWithDecodedCallBack(mqPublisher,
+        ContractEventCallback callBack =
+                new ContractEventCallback(mqPublisher,
                         exchangeName, routingKey, decoder, groupId, appId);
-        log.debug("registerDecodedEventLogPush appId:{},groupId:{},abi:{},params:{},exchangeNarme:{},queueName:{}",
+        log.debug("registerContractEvent appId:{},groupId:{},abi:{},params:{},exchangeName:{},queueName:{}",
                 appId, groupId, abi, params, exchangeName, queueName);
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         service.registerEventLogFilter(params, callBack);
         // save to db
-        addEventLogPushInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
+        addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
                 exchangeName, queueName, routingKey,
                 abi, fromBlock, toBlock, contractAddress, topicList);
-        return eventLogPushInfoRepository.findByQueueName(queueName);
+        return contractEventInfoRepository.findByQueueName(queueName);
     }
 
-    private void addBlockNotifyInfo(int eventType, String appId, int groupId,
+    private void addNewBlockEventInfo(int eventType, String appId, int groupId,
                                       String exchangeName, String queueName, String routingKey) {
-        BlockNotifyInfo registerInfo = new BlockNotifyInfo();
+        NewBlockEventInfo registerInfo = new NewBlockEventInfo();
         registerInfo.setEventType(eventType);
         registerInfo.setAppId(appId);
         registerInfo.setGroupId(groupId);
@@ -120,18 +128,18 @@ public class EventService {
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
         try{
-            blockNotifyInfoRepository.save(registerInfo);
+            newBlockEventInfoRepository.save(registerInfo);
         } catch (Exception e) {
             log.error("insert error:[]", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
         }
     }
 
-    private void addEventLogPushInfo(int eventType, String appId, int groupId,
+    private void addContractEventInfo(int eventType, String appId, int groupId,
                                  String exchangeName, String queueName, String routingKey,
                                  String abi, String fromBlock, String toBlock,
                                  String contractAddress, List<String> topicList) {
-        EventLogPushInfo registerInfo = new EventLogPushInfo();
+        ContractEventInfo registerInfo = new ContractEventInfo();
         registerInfo.setEventType(eventType);
         registerInfo.setAppId(appId);
         registerInfo.setGroupId(groupId);
@@ -145,7 +153,7 @@ public class EventService {
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
         try{
-            eventLogPushInfoRepository.save(registerInfo);
+            contractEventInfoRepository.save(registerInfo);
         } catch (Exception e) {
             log.error("insert error:[]", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);

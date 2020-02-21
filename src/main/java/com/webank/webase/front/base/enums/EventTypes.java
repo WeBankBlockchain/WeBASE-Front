@@ -19,12 +19,12 @@ package com.webank.webase.front.base.enums;
 public enum EventTypes {
 
 	/**
-	 * block notify type
+	 * new block event notify type
 	 */
 	BLOCK_NOTIFY(1),
 
 	/**
-	 * contract's event log push type
+	 * contract event notify type
 	 */
 	EVENT_LOG_PUSH(2),
 

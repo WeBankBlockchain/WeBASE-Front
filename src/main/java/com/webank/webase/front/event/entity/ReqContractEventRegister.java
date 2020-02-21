@@ -21,39 +21,65 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
-
+import java.util.List;
 
 /**
- * register request for block notify
+ * Based on EventLogUserParams
+ * handle request for registering contract event log push notify
  * @author marsli
  */
 @Data
 @NoArgsConstructor
-public class ReqBlockNotifyRegister {
+public class ReqContractEventRegister {
 
-	/**
-	 * application which register block notify
-	 */
+    /**
+     * application which register contract event
+     */
 	@NotEmpty(message = "appId cannot be empty")
 	private String appId;
 
-	/**
-	 * group id
-	 */
-	@NotNull(message = "groupId cannot be empty")
+    /**
+     * group id
+     */
+	@NotNull(message = "groupId cannot be null")
 	private Integer groupId;
 
-	/**
-	 * MQ info: exchange name
-	 */
+    /**
+     * MQ info: exchange name
+     */
 	@NotEmpty(message = "exchangeName cannot be empty")
 	private String exchangeName;
 
-	/**
-	 * username as queue name
-	 */
+    /**
+     * username as queue name
+     */
 	@NotEmpty(message = "queueName cannot be empty, usually use username")
 	private String queueName;
 
+	/**
+	 * contract abi for decoder
+	 */
+	@NotEmpty(message = "contractAbi cannot be empty")
+	private String contractAbi;
+
+    /**
+     * event log push info below
+     */
+
+	@NotEmpty(message = "fromBlock cannot be empty")
+	private String fromBlock;
+
+	@NotEmpty(message = "toBlock cannot be empty")
+	private String toBlock;
+
+    /**
+     * single contract address
+     */
+	private String contractAddress;
+
+    /**
+     * List of topics
+     */
+    private List<String> topicList;
 
 }

@@ -34,10 +34,10 @@ import java.util.List;
  * routingKey是exchange推送到queue的唯一标志, ex: username_event, username_block
  * @author marsli
  */
-public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCallback {
+public class ContractEventCallback extends EventLogPushWithDecodeCallback {
 
     private static final Logger logger =
-            LoggerFactory.getLogger(MQEventLogPushWithDecodedCallBack.class);
+            LoggerFactory.getLogger(ContractEventCallback.class);
 
     private MQPublisher MQPublisher;
     private String exchangeName;
@@ -45,9 +45,9 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
     private int groupId;
     private String appId;
 
-    public MQEventLogPushWithDecodedCallBack(MQPublisher mqPublisher,
-                                             String exchangeName, String routingKey,
-                                             TransactionDecoder decoder, int groupId, String appId) {
+    public ContractEventCallback(MQPublisher mqPublisher,
+                                 String exchangeName, String routingKey,
+                                 TransactionDecoder decoder, int groupId, String appId) {
         this.MQPublisher = mqPublisher;
         this.exchangeName = exchangeName;
         this.routingKey = routingKey;
@@ -65,8 +65,8 @@ public class MQEventLogPushWithDecodedCallBack extends EventLogPushWithDecodeCal
      */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
-        logger.debug(
-                "MQEventLogPushWithDecodedCallBack onPushEventLog" +
+        logger.info(
+                "ContractEventCallback onPushEventLog" +
                         " params: {}, status: {}, logs: {}",
                 getFilter().getParams(),
                 status,

@@ -30,10 +30,10 @@ import javax.persistence.*;
 @Entity
 @Data
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "unique_event_log", columnNames = {"appId", "exchangeName", "contractAddress",
+        @UniqueConstraint(name = "unique_contract_event", columnNames = {"appId", "exchangeName", "contractAddress",
                 "queueName"})
 })
-public class EventLogPushInfo {
+public class ContractEventInfo {
 
     @Id
     @GenericGenerator(name="idGenerator", strategy="uuid")
@@ -41,7 +41,7 @@ public class EventLogPushInfo {
     private String id;
 
     /**
-     * event type: 1: blockNotify, 2: eventLogPush, 3: others
+     * event type: 1: newBlockEvent, 2: contractEvent, 3: others
      */
     private Integer eventType;
 

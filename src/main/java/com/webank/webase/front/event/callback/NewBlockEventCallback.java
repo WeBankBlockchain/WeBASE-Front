@@ -19,7 +19,6 @@ package com.webank.webase.front.event.callback;
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.PublisherHelper;
-import com.webank.webase.front.event.entity.ReqBlockNotifyRegister;
 import com.webank.webase.front.event.entity.message.BlockPushMessage;
 import org.fisco.bcos.channel.client.BlockNotifyCallBack;
 import org.slf4j.Logger;
@@ -28,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
-import java.util.Map;
 
 import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 
@@ -37,16 +35,16 @@ import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
  * @author marsli
  */
 @Component
-public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
+public class NewBlockEventCallback implements BlockNotifyCallBack {
 
-    private static Logger logger = LoggerFactory.getLogger(MQBlockNotifyCallBack.class);
+    private static Logger logger = LoggerFactory.getLogger(NewBlockEventCallback.class);
 
     @Autowired
     private MQPublisher MQPublisher;
 
     @Override
     public void onBlockNotify(int groupID, BigInteger blockNumber) {
-        logger.info("MQBlockNotifyCallBack groupID:{}, blockNumber:{}",
+        logger.info("NewBlockEventCallBack groupID:{}, blockNumber:{}",
                 groupID, blockNumber);
         // register map
 		if (BLOCK_ROUTING_KEY_MAP.isEmpty()) {
@@ -77,7 +75,7 @@ public class MQBlockNotifyCallBack implements BlockNotifyCallBack {
 	 */
     private void pushMessage2MQ(String exchangeName, String routingKey,
 								BlockPushMessage blockPushMessage) {
-        logger.debug("MQBlockNotifyCallBack pushMessage2MQ blockPushMessage:{}",
+        logger.debug("NewBlockEventCallBack pushMessage2MQ blockPushMessage:{}",
                 blockPushMessage.toString());
         MQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
                 blockPushMessage.toString());
