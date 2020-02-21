@@ -13,23 +13,20 @@
  */
 package com.webank.webase.front.keystore;
 
-import java.io.ByteArrayInputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.enums.KeyTypes;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
+import com.webank.webase.front.util.AesUtils;
+import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.CredentialUtils;
-import com.webank.webase.front.util.PemUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.util.io.pem.PemObject;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
@@ -41,17 +38,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.client.RestTemplate;
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.util.AesUtils;
-import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.properties.Constants;
-import com.webank.webase.front.base.enums.KeyTypes;
-import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.util.CommonUtils;
-import lombok.extern.slf4j.Slf4j;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -72,7 +69,6 @@ public class KeyStoreService {
     KeystoreRepository keystoreRepository;
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
     private static Map<String, String> PRIVATE_KEY_MAP = new HashMap<>();
-
 
     /**
      * createKeyStore
@@ -283,7 +279,9 @@ public class KeyStoreService {
             return signInfo.getSignDataStr();
         } catch (Exception e) {
             log.error("getSignData exception", e);
+
         }
+
         return null;
     }
 
