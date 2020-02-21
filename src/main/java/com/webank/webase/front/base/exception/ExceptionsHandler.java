@@ -102,7 +102,7 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity exceptionHandler(Exception exc) {
-        log.info("catch  exception: "+ exc.getMessage(), exc);
+        log.info("catch  exception: ", exc);
         Map<String, Object> map = new HashMap<>();
         //  map.put("exception", frontException);
         map.put("errorMessage", exc.getMessage());
