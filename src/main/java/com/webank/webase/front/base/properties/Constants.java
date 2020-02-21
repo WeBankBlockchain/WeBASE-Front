@@ -57,8 +57,7 @@ public class Constants {
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI = "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
     public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
-  //  public static final String WEBASE_SIGN_URI_WEBSOCKET = "ws://%s/WeBASE-Sign/websocket/";
-    public static final String account1Path = "node.key";
+    public static final String ACCOUNT1_PATH = "node.key";
     public static final String CONSTANT_PREFIX = "constant";
     public static  String version;
     public static String chainId;
@@ -76,7 +75,5 @@ public class Constants {
     private int restTemplateMaxPerRoute = 100;
     private int keepAliveRequests = 100;
     private int KeepAliveTimeout = 10;
-
-
 
 }
