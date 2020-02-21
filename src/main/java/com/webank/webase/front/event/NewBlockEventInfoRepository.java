@@ -16,23 +16,23 @@
 
 package com.webank.webase.front.event;
 
-import com.webank.webase.front.event.entity.BlockNotifyInfo;
+import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface BlockNotifyInfoRepository extends CrudRepository<BlockNotifyInfo, Long>,
-		JpaSpecificationExecutor<BlockNotifyInfo> {
+public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEventInfo, Long>,
+		JpaSpecificationExecutor<NewBlockEventInfo> {
 
-	BlockNotifyInfo findById(Long id);
+	NewBlockEventInfo findById(Long id);
 
-	List<BlockNotifyInfo> findByAppId(String appId);
+	List<NewBlockEventInfo> findByAppId(String appId);
 
-	List<BlockNotifyInfo> findByGroupId(int groupId);
+	List<NewBlockEventInfo> findByGroupId(int groupId);
 
-	List<BlockNotifyInfo> findByQueueName(String queueName);
+	List<NewBlockEventInfo> findByQueueName(String queueName);
 
-	List<BlockNotifyInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
+	List<NewBlockEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
 
 }

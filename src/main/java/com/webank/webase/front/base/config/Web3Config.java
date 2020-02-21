@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
-import com.webank.webase.front.event.callback.MQBlockNotifyCallBack;
+import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
@@ -142,7 +142,7 @@ public class Web3Config {
     @DependsOn("encryptType")
     public Map<Integer, Service> serviceMap(Web3j web3j,
                                             GroupChannelConnectionsConfig groupChannelConnectionsConfig,
-                                            MQBlockNotifyCallBack mqBlockNotifyCallBack) throws Exception {
+                                            NewBlockEventCallback newBlockEventCallBack) throws Exception {
         // whether front' encrypt type matches with chain's
         isMatchEncryptType(web3j);
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
@@ -165,8 +165,8 @@ public class Web3Config {
             service.setGroupId(Integer.parseInt(groupIdList.get(i)));
             service.setThreadPool(sdkThreadPool());
             service.setAllChannelConnections(groupChannelConnectionsConfig);
-            // blockNotifyCallBack message enqueues in MQ
-            service.setBlockNotifyCallBack(mqBlockNotifyCallBack);
+            // newBlockEventCallBack message enqueues in MQ
+            service.setBlockNotifyCallBack(newBlockEventCallBack);
             service.run();
             serviceMap.put(Integer.valueOf(groupIdList.get(i)), service);
         }

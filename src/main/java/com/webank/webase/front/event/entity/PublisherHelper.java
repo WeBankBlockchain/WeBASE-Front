@@ -21,7 +21,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * used in block notify static map
+ * used in ne block event static map
  */
 @Data
 @NoArgsConstructor

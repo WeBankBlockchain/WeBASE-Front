@@ -17,8 +17,8 @@
 package com.webank.webase.front.event;
 
 import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.event.entity.ReqBlockNotifyRegister;
-import com.webank.webase.front.event.entity.ReqEventLogPushRegister;
+import com.webank.webase.front.event.entity.ReqNewBlockEventRegister;
+import com.webank.webase.front.event.entity.ReqContractEventRegister;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +54,8 @@ public class EventControllerTest extends BaseTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testRegisterEventLogPush() throws Exception {
-		ReqEventLogPushRegister param = new ReqEventLogPushRegister();
+	public void testRegisterContractEvent() throws Exception {
+		ReqContractEventRegister param = new ReqContractEventRegister();
 		param.setGroupId(groupId);
 		param.setAppId("app1");
 		param.setExchangeName("group001");
@@ -68,7 +68,7 @@ public class EventControllerTest extends BaseTest {
 		topics.add("SetName(string)");
 		param.setTopicList(topics);
 		ResultActions resultActions = mockMvc
-				.perform(MockMvcRequestBuilders.post("/event/eventLogPush").
+				.perform(MockMvcRequestBuilders.post("/event/contractEvent").
 						content(JSON.toJSONString(param)).
 						contentType(MediaType.APPLICATION_JSON)
 				);
@@ -84,14 +84,14 @@ public class EventControllerTest extends BaseTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testRegisterBlockNotify() throws Exception {
-		ReqBlockNotifyRegister param = new ReqBlockNotifyRegister();
+	public void testRegisterNewBlockEvent() throws Exception {
+		ReqNewBlockEventRegister param = new ReqNewBlockEventRegister();
 		param.setExchangeName("group001");
 		param.setQueueName("user1");
 		param.setAppId("app1");
 		param.setGroupId(1);
 		ResultActions resultActions = mockMvc
-				.perform(MockMvcRequestBuilders.post("/event/blockNotify").
+				.perform(MockMvcRequestBuilders.post("/event/newBlockEvent").
 						content(JSON.toJSONString(param)).
 						contentType(MediaType.APPLICATION_JSON)
 				);
