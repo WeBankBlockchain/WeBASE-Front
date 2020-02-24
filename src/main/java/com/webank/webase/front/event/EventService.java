@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
+import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
 
 /**
  * event notify in message queue service
@@ -112,13 +113,15 @@ public class EventService {
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         service.registerEventLogFilter(params, callBack);
         // save to db
-        addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
+        Long infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
                 exchangeName, queueName, routingKey,
                 abi, fromBlock, toBlock, contractAddress, topicList);
+        // mark this callback is on(true)
+        CONTRACT_EVENT_CALLBACK_MAP.put(infoId, callBack);
         return contractEventInfoRepository.findByQueueName(queueName);
     }
 
-    private void addNewBlockEventInfo(int eventType, String appId, int groupId,
+    private Long addNewBlockEventInfo(int eventType, String appId, int groupId,
                                       String exchangeName, String queueName, String routingKey) {
         NewBlockEventInfo registerInfo = new NewBlockEventInfo();
         registerInfo.setEventType(eventType);
@@ -128,14 +131,15 @@ public class EventService {
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
         try{
-            newBlockEventInfoRepository.save(registerInfo);
+            NewBlockEventInfo saved = newBlockEventInfoRepository.save(registerInfo);
+            return Long.valueOf(saved.getId());
         } catch (Exception e) {
             log.error("insert error:[]", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
         }
     }
 
-    private void addContractEventInfo(int eventType, String appId, int groupId,
+    private Long addContractEventInfo(int eventType, String appId, int groupId,
                                  String exchangeName, String queueName, String routingKey,
                                  String abi, String fromBlock, String toBlock,
                                  String contractAddress, List<String> topicList) {
@@ -153,7 +157,8 @@ public class EventService {
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
         try{
-            contractEventInfoRepository.save(registerInfo);
+            ContractEventInfo saved = contractEventInfoRepository.save(registerInfo);
+            return Long.valueOf(saved.getId());
         } catch (Exception e) {
             log.error("insert error:[]", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
@@ -161,6 +166,49 @@ public class EventService {
 
     }
 
+    /**
+     * return list of new block event register info
+     * @param appId
+     * @return left info
+     */
+    public List<NewBlockEventInfo> getNewBlockInfoList(String appId) {
+        return newBlockEventInfoRepository.findByAppId(appId);
+    }
 
+    public List<NewBlockEventInfo> unregisterNewBlock(String infoId, String appId, int groupId, String exchangeName,
+                                                      String queueName, String routingKey) {
+        log.debug("unregisterNewBlock appId:{},groupId:{},exchangeName:{},queueName:{},routingKey:{}",
+                appId, groupId, exchangeName, queueName, routingKey);
+        if (!newBlockEventInfoRepository.exists(infoId)) {
+            throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
+        }
+        BLOCK_ROUTING_KEY_MAP.remove(appId, new PublisherHelper(groupId, exchangeName, routingKey));
+        mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+        // remove from db
+        newBlockEventInfoRepository.delete(infoId);
+        return newBlockEventInfoRepository.findByQueueName(queueName);
+    }
 
+    /**
+     * return list of contract event register info
+     * @param appId
+     * @return
+     */
+    public List<ContractEventInfo> getContractEventInfo(String appId) {
+        return contractEventInfoRepository.findByAppId(appId);
+    }
+
+    public List<ContractEventInfo> unregisterContractEvent(String infoId, String appId, int groupId, String exchangeName,
+                                                      String queueName, String routingKey) {
+        log.debug("unregisterContractEvent infoId:{},appId:{},groupId:{},exchangeName:{},queueName:{},routingKey:{}",
+                infoId, appId, groupId, exchangeName, queueName, routingKey);
+        if (!contractEventInfoRepository.exists(infoId)) {
+            throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
+        }
+        CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
+        mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+        // remove from db
+        contractEventInfoRepository.delete(infoId);
+        return contractEventInfoRepository.findByQueueName(queueName);
+    }
 }

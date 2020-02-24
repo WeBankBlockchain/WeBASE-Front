@@ -9,10 +9,10 @@ import java.util.List;
 /**
  * @author marsli
  */
-public interface ContractEventInfoRepository extends CrudRepository<ContractEventInfo, Long>,
+public interface ContractEventInfoRepository extends CrudRepository<ContractEventInfo, String>,
         JpaSpecificationExecutor<ContractEventInfo> {
 
-    ContractEventInfo findById(Long id);
+    ContractEventInfo findById(String id);
 
     List<ContractEventInfo> findByAppId(String appId);
 
