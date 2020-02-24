@@ -127,5 +127,6 @@ public class ConstantCode {
     // mq error
     public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
     public static final RetCode DATA_REPEAT_IN_DB_ERROR = RetCode.mark(201242, "Database error: data already exists in db");
+    public static final RetCode DATA_NOT_EXIST_ERROR = RetCode.mark(201243, "Database error: data not exists in db, please check your params");
 
 }

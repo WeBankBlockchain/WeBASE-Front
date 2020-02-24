@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
+
 /**
  * 指定exchangeName和routingKey, callback后直接push到对应的mq中
  * routingKey是exchange推送到queue的唯一标志, ex: username_event, username_block
@@ -65,6 +67,9 @@ public class ContractEventCallback extends EventLogPushWithDecodeCallback {
      */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
+        if (!CONTRACT_EVENT_CALLBACK_MAP.containsValue(this)) {
+            return;
+        }
         logger.info(
                 "ContractEventCallback onPushEventLog" +
                         " params: {}, status: {}, logs: {}",

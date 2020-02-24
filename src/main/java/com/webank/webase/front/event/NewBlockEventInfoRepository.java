@@ -22,10 +22,10 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEventInfo, Long>,
+public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEventInfo, String>,
 		JpaSpecificationExecutor<NewBlockEventInfo> {
 
-	NewBlockEventInfo findById(Long id);
+	NewBlockEventInfo findById(String id);
 
 	List<NewBlockEventInfo> findByAppId(String appId);
 

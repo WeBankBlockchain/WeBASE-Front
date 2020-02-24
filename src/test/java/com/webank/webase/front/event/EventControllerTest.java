@@ -17,6 +17,9 @@
 package com.webank.webase.front.event;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.ReqNewBlockEventRegister;
 import com.webank.webase.front.event.entity.ReqContractEventRegister;
 import org.junit.Before;
@@ -40,6 +43,9 @@ public class EventControllerTest extends BaseTest {
 
 	private MockMvc mockMvc;
 	private Integer groupId = 1;
+	// TODO id needs to be set what it is in db
+	private String blockInfoId = "8aba82b57076ae09017076ae3f100000";
+	private String eventInfoId = "8aba82b570768afd0170768b2cc50001";
 
 	@Autowired
 	private WebApplicationContext webApplicationContext;
@@ -75,8 +81,6 @@ public class EventControllerTest extends BaseTest {
 		resultActions.
 				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
-		System.out
-				.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
 	}
 
 	/**
@@ -98,7 +102,70 @@ public class EventControllerTest extends BaseTest {
 		resultActions.
 				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
-		System.out
-				.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
+	}
+
+	@Test
+	public void testGetNewBlockEvent() throws Exception {
+		String appId = "app1";
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.get("/event/newBlockEvent/" + appId)
+						.contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	@Test
+	public void testGetContractEvent() throws Exception {
+		String appId = "app1";
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.get("/event/contractEvent/" + appId)
+						.contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	/**
+	 * unregister new block event
+	 * @throws Exception
+	 */
+	@Test
+	public void testUnregisterNewBlockEvent() throws Exception {
+		ReqNewBlockEventRegister param = new ReqNewBlockEventRegister();
+		param.setExchangeName("group001");
+		param.setQueueName("user1");
+		param.setAppId("app1");
+		param.setGroupId(1);
+		param.setInfoId(blockInfoId);
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.delete("/event/newBlockEvent").
+						content(JSON.toJSONString(param)).
+						contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	@Test
+	public void testUnregisterContractEvent() throws Exception {
+		ReqContractEventRegister param = new ReqContractEventRegister();
+		param.setExchangeName("group001");
+		param.setQueueName("user1");
+		param.setAppId("app1");
+		param.setGroupId(1);
+		param.setInfoId(eventInfoId);
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.delete("/event/contractEvent").
+						content(JSON.toJSONString(param)).
+						contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+
 	}
 }
