@@ -32,6 +32,11 @@ import javax.validation.constraints.NotNull;
 public class ReqNewBlockEventRegister {
 
 	/**
+	 * id in database
+	 */
+	private String infoId;
+
+	/**
 	 * application which register new block event
 	 */
 	@NotEmpty(message = "appId cannot be empty")
@@ -54,6 +59,5 @@ public class ReqNewBlockEventRegister {
 	 */
 	@NotEmpty(message = "queueName cannot be empty, usually use username")
 	private String queueName;
-
 
 }

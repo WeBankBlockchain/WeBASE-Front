@@ -16,6 +16,7 @@
 
 package com.webank.webase.front.util;
 
+import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.entity.PublisherHelper;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.channel.event.filter.TopicTools;
@@ -35,9 +36,15 @@ public class RabbitMQUtils {
     public static final String ROUTING_KEY_EVENT = "event";
     public static final String ROUTING_KEY_BLOCK = "block";
     /**
-     * map of (appId, "exchange_name,block_routing_key"), one app only needs one block notify
+     * map of (appId, "group_id,exchange_name,routing_key"), one app only needs one block notify
      */
     public static Map<String, PublisherHelper> BLOCK_ROUTING_KEY_MAP = new HashMap<>();
+
+    /**
+     * map of ("ContractEventInfo id", ContractEventCallback instance),
+     * one routingKey related to one contract event notify
+     */
+    public static Map<Long, ContractEventCallback> CONTRACT_EVENT_CALLBACK_MAP = new HashMap<>();
 
     /**
      * new exchange by rabbitAdmin

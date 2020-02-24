@@ -18,10 +18,7 @@ package com.webank.webase.front.event;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.event.entity.NewBlockEventInfo;
-import com.webank.webase.front.event.entity.ContractEventInfo;
-import com.webank.webase.front.event.entity.ReqNewBlockEventRegister;
-import com.webank.webase.front.event.entity.ReqContractEventRegister;
+import com.webank.webase.front.event.entity.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -66,7 +63,7 @@ public class EventController {
         String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
         List<NewBlockEventInfo> resList = eventService.registerNewBlockEvent(appId, groupId,
                 exchangeName, queueName, blockRoutingKey);
-
+        log.debug("end registerNewBlockEvent resList count. {}", resList.size());
         return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
     }
 
@@ -96,7 +93,77 @@ public class EventController {
         List<ContractEventInfo> resList = eventService.registerContractEvent(appId, groupId,
                 exchangeName, queueName, eventRoutingKey,
                 contractAbi, fromBlock, toBlock, contractAddress, topicList);
+        log.debug("end registerContractEvent resList count. {}", resList.size());
+        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+    }
 
+    @ApiOperation(value = "getNewBlockEventInfo",
+            notes = "get registered NewBlockEvent info")
+    @ApiImplicitParam(name = "appId", value = "应用编号",
+            required = true, dataType = "String")
+    @GetMapping("newBlockEvent/{appId}")
+    public BaseResponse getNewBlockEventInfo(@PathVariable("appId") String appId) {
+        log.debug("start getNewBlockEventInfo appId:{}", appId);
+        List<NewBlockEventInfo> resList = eventService.getNewBlockInfoList(appId);
+        log.debug("end getNewBlockEventInfo resList count. {}", resList.size());
+        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+    }
+
+
+    @ApiOperation(value = "unregisterNewBlockEvent",
+            notes = "unregister NewBlockEvent")
+    @ApiImplicitParam(name = "ReqNewBlockEventRegister", value = "注册出块通知所需配置与数据表的id值",
+            required = true, dataType = "ReqNewBlockEventRegister")
+    @DeleteMapping("newBlockEvent")
+    public BaseResponse unregisterNewBlockEvent(
+            @Valid @RequestBody ReqNewBlockEventRegister reqNewBlockEventRegister) {
+        log.debug("start unregisterNewBlockEvent reqNewBlockEventRegister. {}", reqNewBlockEventRegister);
+        String infoId = reqNewBlockEventRegister.getInfoId();
+        String appId = reqNewBlockEventRegister.getAppId();
+        int groupId = reqNewBlockEventRegister.getGroupId();
+        String exchangeName = reqNewBlockEventRegister.getExchangeName();
+        // username as queue name
+        String queueName = reqNewBlockEventRegister.getQueueName();
+        // "username_routingKey"
+        String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
+        List<NewBlockEventInfo> resList = eventService.unregisterNewBlock(infoId, appId, groupId,
+                exchangeName, queueName, blockRoutingKey);
+        log.debug("end unregisterNewBlockEvent resList count. {}", resList.size());
+        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+    }
+
+    @ApiOperation(value = "getContractEventInfo",
+            notes = "get registered contract event info")
+    @ApiImplicitParam(name = "appId", value = "应用编号",
+            required = true, dataType = "String")
+    @GetMapping("contractEvent/{appId}")
+    public BaseResponse getContractEventInfo(@PathVariable("appId") String appId) {
+        log.debug("start getContractEventInfo appId:{}", appId);
+        List<ContractEventInfo> resList = eventService.getContractEventInfo(appId);
+        log.debug("end getContractEventInfo resList count. {}", resList.size());
+        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+    }
+
+
+    @ApiOperation(value = "unregisterContractEvent",
+            notes = "unregister contract event")
+    @ApiImplicitParam(name = "ReqContractEventRegister", value = "注册出块通知所需配置与数据表的id值",
+            required = true, dataType = "ReqContractEventRegister")
+    @DeleteMapping("contractEvent")
+    public BaseResponse unregisterContractEvent(
+            @Valid @RequestBody ReqUnregister reqUnregister) {
+        log.debug("start unregisterContractEvent reqUnregister. {}", reqUnregister);
+        String infoId = reqUnregister.getInfoId();
+        String appId = reqUnregister.getAppId();
+        int groupId = reqUnregister.getGroupId();
+        String exchangeName = reqUnregister.getExchangeName();
+        // username as queue name
+        String queueName = reqUnregister.getQueueName();
+        // "username_routingKey"
+        String blockRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
+        List<ContractEventInfo> resList = eventService.unregisterContractEvent(infoId, appId, groupId,
+                exchangeName, queueName, blockRoutingKey);
+        log.debug("end unregisterContractEvent resList count. {}", resList.size());
         return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
     }
 
