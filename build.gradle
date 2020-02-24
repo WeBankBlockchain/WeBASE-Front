@@ -41,6 +41,8 @@ List spring_boot =[
 	"org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
 	"org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version",
 	//"org.springframework.boot:spring-boot-starter-log4j2:$spring_boot_version"
+
+    //	"org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version"
 	"org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version"
 ]
 
