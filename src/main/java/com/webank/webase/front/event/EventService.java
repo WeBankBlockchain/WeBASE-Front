@@ -79,7 +79,7 @@ public class EventService {
                 appId, groupId, exchangeName, queueName, routingKey);
         // record groupId, exchange, routingKey for all block notify
         BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
-        return newBlockEventInfoRepository.findByQueueName(queueName);
+        return newBlockEventInfoRepository.findByAppId(appId);
     }
 
 
@@ -119,7 +119,7 @@ public class EventService {
         // mark this callback is on(true)
         callBack.setId(infoId);
         CONTRACT_EVENT_CALLBACK_MAP.put(infoId, callBack);
-        return contractEventInfoRepository.findByQueueName(queueName);
+        return contractEventInfoRepository.findByAppId(appId);
     }
 
     private String addNewBlockEventInfo(int eventType, String appId, int groupId,
