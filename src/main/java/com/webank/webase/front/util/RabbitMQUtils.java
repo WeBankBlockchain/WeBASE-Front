@@ -41,10 +41,9 @@ public class RabbitMQUtils {
     public static Map<String, PublisherHelper> BLOCK_ROUTING_KEY_MAP = new HashMap<>();
 
     /**
-     * map of ("ContractEventInfo id", ContractEventCallback instance),
-     * one routingKey related to one contract event notify
+     * map of ("ContractEventInfo id", ContractEventCallback instance)
      */
-    public static Map<Long, ContractEventCallback> CONTRACT_EVENT_CALLBACK_MAP = new HashMap<>();
+    public static Map<String, ContractEventCallback> CONTRACT_EVENT_CALLBACK_MAP = new HashMap<>();
 
     /**
      * new exchange by rabbitAdmin
