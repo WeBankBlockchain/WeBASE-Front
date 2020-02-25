@@ -32,7 +32,7 @@ public class ReqUnregister {
 	/**
 	 * id in database
 	 */
-	private String infoId;
+	private String id;
 
 	/**
 	 * application which register new block event
