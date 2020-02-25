@@ -131,5 +131,7 @@ public class EventRegisterTask implements ApplicationRunner {
 						eventRoutingKey, decoder, groupId, appId);
 		org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
 		service.registerEventLogFilter(params, callBack);
+		callBack.setId(rInfo.getId());
+		CONTRACT_EVENT_CALLBACK_MAP.put(rInfo.getId(), callBack);
 	}
 }

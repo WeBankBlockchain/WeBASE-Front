@@ -116,14 +116,14 @@ public class EventController {
             required = true, dataType = "ReqNewBlockEventRegister")
     @DeleteMapping("newBlockEvent")
     public BaseResponse unregisterNewBlockEvent(
-            @Valid @RequestBody ReqNewBlockEventRegister reqNewBlockEventRegister) {
-        log.debug("start unregisterNewBlockEvent reqNewBlockEventRegister. {}", reqNewBlockEventRegister);
-        String infoId = reqNewBlockEventRegister.getInfoId();
-        String appId = reqNewBlockEventRegister.getAppId();
-        int groupId = reqNewBlockEventRegister.getGroupId();
-        String exchangeName = reqNewBlockEventRegister.getExchangeName();
+            @Valid @RequestBody ReqUnregister reqUnregister) {
+        log.debug("start unregisterNewBlockEvent reqUnregister. {}", reqUnregister);
+        String infoId = reqUnregister.getId();
+        String appId = reqUnregister.getAppId();
+        int groupId = reqUnregister.getGroupId();
+        String exchangeName = reqUnregister.getExchangeName();
         // username as queue name
-        String queueName = reqNewBlockEventRegister.getQueueName();
+        String queueName = reqUnregister.getQueueName();
         // "username_routingKey"
         String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
         List<NewBlockEventInfo> resList = eventService.unregisterNewBlock(infoId, appId, groupId,
@@ -153,7 +153,7 @@ public class EventController {
     public BaseResponse unregisterContractEvent(
             @Valid @RequestBody ReqUnregister reqUnregister) {
         log.debug("start unregisterContractEvent reqUnregister. {}", reqUnregister);
-        String infoId = reqUnregister.getInfoId();
+        String infoId = reqUnregister.getId();
         String appId = reqUnregister.getAppId();
         int groupId = reqUnregister.getGroupId();
         String exchangeName = reqUnregister.getExchangeName();
