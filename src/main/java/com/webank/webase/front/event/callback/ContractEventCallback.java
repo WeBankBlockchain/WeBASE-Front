@@ -19,6 +19,7 @@ package com.webank.webase.front.event.callback;
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.message.EventLogPushMessage;
+import lombok.Setter;
 import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
 import org.fisco.bcos.web3j.tx.txdecode.BaseException;
@@ -29,11 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
-
 /**
  * 指定exchangeName和routingKey, callback后直接push到对应的mq中
  * routingKey是exchange推送到queue的唯一标志, ex: username_event, username_block
+ * to start/stop this callback pushing message to mq, set id sth. / empty("")
  * @author marsli
  */
 public class ContractEventCallback extends EventLogPushWithDecodeCallback {
@@ -46,6 +46,12 @@ public class ContractEventCallback extends EventLogPushWithDecodeCallback {
     private String routingKey;
     private int groupId;
     private String appId;
+    /**
+     * cannot be callback before it's set
+     * @param id saved in db
+     */
+    @Setter
+    private String id = "";
 
     public ContractEventCallback(MQPublisher mqPublisher,
                                  String exchangeName, String routingKey,
@@ -67,7 +73,7 @@ public class ContractEventCallback extends EventLogPushWithDecodeCallback {
      */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
-        if (!CONTRACT_EVENT_CALLBACK_MAP.containsValue(this)) {
+        if ("".equals(id)) {
             return;
         }
         logger.info(

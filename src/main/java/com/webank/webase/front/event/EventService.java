@@ -113,15 +113,16 @@ public class EventService {
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         service.registerEventLogFilter(params, callBack);
         // save to db
-        Long infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
+        String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
                 exchangeName, queueName, routingKey,
                 abi, fromBlock, toBlock, contractAddress, topicList);
         // mark this callback is on(true)
+        callBack.setId(infoId);
         CONTRACT_EVENT_CALLBACK_MAP.put(infoId, callBack);
         return contractEventInfoRepository.findByQueueName(queueName);
     }
 
-    private Long addNewBlockEventInfo(int eventType, String appId, int groupId,
+    private String addNewBlockEventInfo(int eventType, String appId, int groupId,
                                       String exchangeName, String queueName, String routingKey) {
         NewBlockEventInfo registerInfo = new NewBlockEventInfo();
         registerInfo.setEventType(eventType);
@@ -132,14 +133,14 @@ public class EventService {
         registerInfo.setRoutingKey(routingKey);
         try{
             NewBlockEventInfo saved = newBlockEventInfoRepository.save(registerInfo);
-            return Long.valueOf(saved.getId());
+            return saved.getId();
         } catch (Exception e) {
             log.error("insert error:[]", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
         }
     }
 
-    private Long addContractEventInfo(int eventType, String appId, int groupId,
+    private String addContractEventInfo(int eventType, String appId, int groupId,
                                  String exchangeName, String queueName, String routingKey,
                                  String abi, String fromBlock, String toBlock,
                                  String contractAddress, List<String> topicList) {
@@ -158,7 +159,7 @@ public class EventService {
         registerInfo.setRoutingKey(routingKey);
         try{
             ContractEventInfo saved = contractEventInfoRepository.save(registerInfo);
-            return Long.valueOf(saved.getId());
+            return saved.getId();
         } catch (Exception e) {
             log.error("insert error:[]", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
@@ -169,12 +170,22 @@ public class EventService {
     /**
      * return list of new block event register info
      * @param appId
-     * @return left info
+     * @return
      */
     public List<NewBlockEventInfo> getNewBlockInfoList(String appId) {
         return newBlockEventInfoRepository.findByAppId(appId);
     }
 
+    /**
+     * remove from BLOCK_ROUTING_KEY_MAP to stop pushing message
+     * @param infoId
+     * @param appId
+     * @param groupId
+     * @param exchangeName
+     * @param queueName
+     * @param routingKey
+     * @return left info
+     */
     public List<NewBlockEventInfo> unregisterNewBlock(String infoId, String appId, int groupId, String exchangeName,
                                                       String queueName, String routingKey) {
         log.debug("unregisterNewBlock appId:{},groupId:{},exchangeName:{},queueName:{},routingKey:{}",
@@ -198,6 +209,16 @@ public class EventService {
         return contractEventInfoRepository.findByAppId(appId);
     }
 
+    /**
+     * set callback's id empty and remove from CONTRACT_EVENT_CALLBACK_MAP to stop pushing message
+     * @param infoId
+     * @param appId
+     * @param groupId
+     * @param exchangeName
+     * @param queueName
+     * @param routingKey
+     * @return left info
+     */
     public List<ContractEventInfo> unregisterContractEvent(String infoId, String appId, int groupId, String exchangeName,
                                                       String queueName, String routingKey) {
         log.debug("unregisterContractEvent infoId:{},appId:{},groupId:{},exchangeName:{},queueName:{},routingKey:{}",
@@ -205,7 +226,10 @@ public class EventService {
         if (!contractEventInfoRepository.exists(infoId)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
+        // set callback's id empty to stop callback pushing message
+        CONTRACT_EVENT_CALLBACK_MAP.get(infoId).setId("");
         CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
+
         mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
         // remove from db
         contractEventInfoRepository.delete(infoId);
