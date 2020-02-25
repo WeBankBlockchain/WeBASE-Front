@@ -74,11 +74,11 @@ public class EventService {
         log.debug("registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        // record groupId, exchange, routingKey for all block notify
-        BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
-        // save to db
+        // save to db 通过db来保证不重复注册
         addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
                 appId, groupId, exchangeName, queueName, routingKey);
+        // record groupId, exchange, routingKey for all block notify
+        BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
         return newBlockEventInfoRepository.findByQueueName(queueName);
     }
 
@@ -110,12 +110,12 @@ public class EventService {
                         exchangeName, routingKey, decoder, groupId, appId);
         log.debug("registerContractEvent appId:{},groupId:{},abi:{},params:{},exchangeName:{},queueName:{}",
                 appId, groupId, abi, params, exchangeName, queueName);
-        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
-        service.registerEventLogFilter(params, callBack);
-        // save to db
+        // save to db 通过db来保证不重复注册
         String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
                 exchangeName, queueName, routingKey,
                 abi, fromBlock, toBlock, contractAddress, topicList);
+        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
+        service.registerEventLogFilter(params, callBack);
         // mark this callback is on(true)
         callBack.setId(infoId);
         CONTRACT_EVENT_CALLBACK_MAP.put(infoId, callBack);
