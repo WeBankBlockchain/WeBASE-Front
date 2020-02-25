@@ -23,6 +23,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
+ * used to unregister
  * @author marsli
  */
 @Data
