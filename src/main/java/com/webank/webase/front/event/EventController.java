@@ -17,6 +17,7 @@
 package com.webank.webase.front.event;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.event.entity.*;
 import io.swagger.annotations.Api;
@@ -24,6 +25,9 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -61,10 +65,10 @@ public class EventController {
 
         // "username_routingKey"
         String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
-        List<NewBlockEventInfo> resList = eventService.registerNewBlockEvent(appId, groupId,
+        eventService.registerNewBlockEvent(appId, groupId,
                 exchangeName, queueName, blockRoutingKey);
-        log.debug("end registerNewBlockEvent resList count. {}", resList.size());
-        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+        log.debug("end registerNewBlockEvent. ");
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
 
@@ -90,23 +94,38 @@ public class EventController {
         // bind queue to exchange by routing key "username_event"
         String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
         // register contract event log push in service
-        List<ContractEventInfo> resList = eventService.registerContractEvent(appId, groupId,
+        eventService.registerContractEvent(appId, groupId,
                 exchangeName, queueName, eventRoutingKey,
                 contractAbi, fromBlock, toBlock, contractAddress, topicList);
-        log.debug("end registerContractEvent resList count. {}", resList.size());
+        log.debug("end registerContractEvent. ");
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
+    }
+
+    @ApiOperation(value = "getNewBlockEventInfo",
+            notes = "get registered NewBlockEvent info by app id")
+    @ApiImplicitParam(name = "appId", value = "应用编号",
+            required = true, dataType = "String")
+    @GetMapping("newBlockEvent/{groupId}/{appId}")
+    public BaseResponse getNewBlockEventByAppId(@PathVariable("groupId") int groupId,
+                                                @PathVariable("appId") String appId) {
+        log.debug("start getNewBlockEventInfo groupId:{},appId:{}", groupId, appId);
+        List<NewBlockEventInfo> resList = eventService.getNewBlockInfo(groupId, appId);
+        log.debug("end getNewBlockEventInfo resList count. {}", resList.size());
         return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
     }
 
     @ApiOperation(value = "getNewBlockEventInfo",
-            notes = "get registered NewBlockEvent info")
-    @ApiImplicitParam(name = "appId", value = "应用编号",
-            required = true, dataType = "String")
-    @GetMapping("newBlockEvent/{appId}")
-    public BaseResponse getNewBlockEventInfo(@PathVariable("appId") String appId) {
-        log.debug("start getNewBlockEventInfo appId:{}", appId);
-        List<NewBlockEventInfo> resList = eventService.getNewBlockInfoList(appId);
+            notes = "get registered NewBlockEvent info by page")
+    @GetMapping("newBlockEvent/list/{groupId}/{pageNumber}/{pageSize}")
+    public BasePageResponse getNewBlockEventInfo(@PathVariable("groupId") int groupId,
+                                                 @PathVariable("pageNumber") int pageNumber,
+                                                 @PathVariable("pageSize") int pageSize) {
+        log.debug("start getNewBlockEventInfo. groupId:{}", groupId);
+        Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
+                new Sort(Sort.Direction.DESC,"createTime"));
+        List<NewBlockEventInfo> resList = eventService.getNewBlockInfoList(groupId, pageable);
         log.debug("end getNewBlockEventInfo resList count. {}", resList.size());
-        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+        return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
     }
 
 
@@ -126,24 +145,38 @@ public class EventController {
         String queueName = reqUnregister.getQueueName();
         // "username_routingKey"
         String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
-        List<NewBlockEventInfo> resList = eventService.unregisterNewBlock(infoId, appId, groupId,
+        eventService.unregisterNewBlock(infoId, appId, groupId,
                 exchangeName, queueName, blockRoutingKey);
-        log.debug("end unregisterNewBlockEvent resList count. {}", resList.size());
-        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+        log.debug("end unregisterNewBlockEvent. ");
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
     @ApiOperation(value = "getContractEventInfo",
-            notes = "get registered contract event info")
+            notes = "get registered contract event info by app id")
     @ApiImplicitParam(name = "appId", value = "应用编号",
             required = true, dataType = "String")
-    @GetMapping("contractEvent/{appId}")
-    public BaseResponse getContractEventInfo(@PathVariable("appId") String appId) {
+    @GetMapping("contractEvent/{groupId}/{appId}")
+    public BaseResponse getContractEventByAppId(@PathVariable("groupId") int groupId,
+                                                @PathVariable("appId") String appId) {
         log.debug("start getContractEventInfo appId:{}", appId);
-        List<ContractEventInfo> resList = eventService.getContractEventInfo(appId);
+        List<ContractEventInfo> resList = eventService.getContractEventInfo(groupId, appId);
         log.debug("end getContractEventInfo resList count. {}", resList.size());
         return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
     }
 
+    @ApiOperation(value = "getContractEventInfo",
+            notes = "get registered contract event info by page")
+    @GetMapping("contractEvent/list/{groupId}/{pageNumber}/{pageSize}")
+    public BasePageResponse getContractEventInfo(@PathVariable("groupId") int groupId,
+                                                 @PathVariable("pageNumber") int pageNumber,
+                                                 @PathVariable("pageSize") int pageSize) {
+        log.debug("start getContractEventInfo.");
+        Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
+                new Sort(Sort.Direction.DESC,"createTime"));
+        List<ContractEventInfo> resList = eventService.getContractEventInfoList(groupId, pageable);
+        log.debug("end getContractEventInfo resList count. {}", resList.size());
+        return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
+    }
 
     @ApiOperation(value = "unregisterContractEvent",
             notes = "unregister contract event")
@@ -161,10 +194,10 @@ public class EventController {
         String queueName = reqUnregister.getQueueName();
         // "username_routingKey"
         String blockRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
-        List<ContractEventInfo> resList = eventService.unregisterContractEvent(infoId, appId, groupId,
+        eventService.unregisterContractEvent(infoId, appId, groupId,
                 exchangeName, queueName, blockRoutingKey);
-        log.debug("end unregisterContractEvent resList count. {}", resList.size());
-        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+        log.debug("end unregisterContractEvent. ");
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
 }
