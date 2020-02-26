@@ -17,6 +17,7 @@
 package com.webank.webase.front.event;
 
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
@@ -27,6 +28,8 @@ public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEven
 
 	NewBlockEventInfo findById(String id);
 
+	List<NewBlockEventInfo> findByGroupIdAndAppId(int groupId, String appId);
+
 	List<NewBlockEventInfo> findByAppId(String appId);
 
 	List<NewBlockEventInfo> findByGroupId(int groupId);
@@ -35,4 +38,5 @@ public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEven
 
 	List<NewBlockEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
 
+	List<NewBlockEventInfo> findByGroupId(int groupId, Pageable pageable);
 }

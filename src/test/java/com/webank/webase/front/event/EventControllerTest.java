@@ -46,6 +46,8 @@ public class EventControllerTest extends BaseTest {
 	// TODO id needs to be set what it is in db
 	private String blockInfoId = "8aba82b57076ae09017076ae3f100000";
 	private String eventInfoId = "8aba82b570768afd0170768b2cc50001";
+	private int pageNumber = 1;
+	private int pageSize = 5;
 
 	@Autowired
 	private WebApplicationContext webApplicationContext;
@@ -105,10 +107,10 @@ public class EventControllerTest extends BaseTest {
 	}
 
 	@Test
-	public void testGetNewBlockEvent() throws Exception {
-		String appId = "app1";
+	public void testGetNewBlockEventList() throws Exception {
 		ResultActions resultActions = mockMvc
-				.perform(MockMvcRequestBuilders.get("/event/newBlockEvent/" + appId)
+				.perform(MockMvcRequestBuilders.get("/event/newBlockEvent/list/"
+						+ groupId + "/" + pageNumber + "/" + pageSize)
 						.contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
@@ -117,10 +119,36 @@ public class EventControllerTest extends BaseTest {
 	}
 
 	@Test
-	public void testGetContractEvent() throws Exception {
+	public void testGetNewBlockEventByGroupIdAndAppId() throws Exception {
 		String appId = "app1";
 		ResultActions resultActions = mockMvc
-				.perform(MockMvcRequestBuilders.get("/event/contractEvent/" + appId)
+				.perform(MockMvcRequestBuilders.get("/event/newBlockEvent/"
+						+ groupId + "/" + appId)
+						.contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	@Test
+	public void testGetContractEventList() throws Exception {
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.get("/event/contractEvent/list/"
+						+ groupId + "/" + pageNumber + "/" + pageSize)
+						.contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	@Test
+	public void testGetContractEventByGroupIdAndAppId() throws Exception {
+		String appId = "app1";
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.get("/event/contractEvent/"
+						+ groupId + "/" + appId)
 						.contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
