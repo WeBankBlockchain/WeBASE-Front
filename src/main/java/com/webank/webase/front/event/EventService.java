@@ -29,8 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -61,12 +65,6 @@ public class EventService {
 
     /**
      * register NewBlockEventCallBack
-     * @param appId
-     * @param groupId
-     * @param exchangeName
-     * @param queueName
-     * @param routingKey
-     * @return
      */
     public List<NewBlockEventInfo> registerNewBlockEvent(String appId, int groupId,
                                                          String exchangeName, String queueName,
@@ -87,14 +85,8 @@ public class EventService {
      * 在org.fisco.bcos.channel.client.Service中注册EventLogPush不会持久化
      * 如果重启了则需要重新注册
      * register ContractEventCallback
-     * @param groupId
      * @param abi single one
-     * @param fromBlock
-     * @param toBlock
      * @param contractAddress single one
-     * @param topicList
-     * @param exchangeName
-     * @param queueName
      */
     public List<ContractEventInfo> registerContractEvent(String appId, int groupId, String exchangeName, String queueName,
                                                          String routingKey, String abi, String fromBlock, String toBlock,
@@ -131,6 +123,7 @@ public class EventService {
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
+        registerInfo.setCreateTime(LocalDateTime.now());
         try{
             NewBlockEventInfo saved = newBlockEventInfoRepository.save(registerInfo);
             return saved.getId();
@@ -157,6 +150,7 @@ public class EventService {
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
+        registerInfo.setCreateTime(LocalDateTime.now());
         try{
             ContractEventInfo saved = contractEventInfoRepository.save(registerInfo);
             return saved.getId();
@@ -168,22 +162,26 @@ public class EventService {
     }
 
     /**
-     * return list of new block event register info
-     * @param appId
-     * @return
+     * findByGroupId, return list of new block event register info
+     * @param groupId
+     * @param page 分页与按时间降序
      */
-    public List<NewBlockEventInfo> getNewBlockInfoList(String appId) {
-        return newBlockEventInfoRepository.findByAppId(appId);
+    public List<NewBlockEventInfo> getNewBlockInfoList(int groupId, Pageable page) {
+        return newBlockEventInfoRepository.findByGroupId(groupId, page);
+    }
+
+    /**
+     * findByGroupIdAndAppId
+     * @param groupId
+     * @param appId
+     */
+    public List<NewBlockEventInfo> getNewBlockInfo(int groupId, String appId) {
+        return newBlockEventInfoRepository.findByGroupIdAndAppId(groupId, appId);
     }
 
     /**
      * remove from BLOCK_ROUTING_KEY_MAP to stop pushing message
      * @param infoId
-     * @param appId
-     * @param groupId
-     * @param exchangeName
-     * @param queueName
-     * @param routingKey
      * @return left info
      */
     public List<NewBlockEventInfo> unregisterNewBlock(String infoId, String appId, int groupId, String exchangeName,
@@ -197,16 +195,20 @@ public class EventService {
         mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
         // remove from db
         newBlockEventInfoRepository.delete(infoId);
-        return newBlockEventInfoRepository.findByQueueName(queueName);
+        return newBlockEventInfoRepository.findByAppId(appId);
     }
 
     /**
      * return list of contract event register info
-     * @param appId
+     * @param page 分页与按时间降序
      * @return
      */
-    public List<ContractEventInfo> getContractEventInfo(String appId) {
-        return contractEventInfoRepository.findByAppId(appId);
+    public List<ContractEventInfo> getContractEventInfoList(int groupId, Pageable page) {
+        return contractEventInfoRepository.findByGroupId(groupId, page);
+    }
+
+    public List<ContractEventInfo> getContractEventInfo(int groupId, String appId) {
+        return contractEventInfoRepository.findByGroupIdAndAppId(groupId, appId);
     }
 
     /**
@@ -233,6 +235,6 @@ public class EventService {
         mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
         // remove from db
         contractEventInfoRepository.delete(infoId);
-        return contractEventInfoRepository.findByQueueName(queueName);
+        return contractEventInfoRepository.findByAppId(appId);
     }
 }

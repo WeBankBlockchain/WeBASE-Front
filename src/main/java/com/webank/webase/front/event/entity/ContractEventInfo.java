@@ -20,6 +20,7 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * entity to store EventLog push register info (not decoded)
@@ -89,5 +90,8 @@ public class ContractEventInfo {
      * List<String>
      */
     private String topicList;
+
+    private LocalDateTime createTime;
+
 
 }
