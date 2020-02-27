@@ -23,4 +23,5 @@ import lombok.Data;
 public class EncodeInfo {
     private Integer userId;
     private String encodedDataStr;
+    private Integer encryptType;
 }

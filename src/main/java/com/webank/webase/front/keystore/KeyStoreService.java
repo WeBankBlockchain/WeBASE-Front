@@ -265,12 +265,12 @@ public class KeyStoreService {
      */
     public String getSignData(EncodeInfo params) {
         try {
-            SignInfo signInfo = new SignInfo();
-            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             // webase-sign api support
             if (EncryptType.encryptType == 1) {
-                url = url.concat("/guomi");
+                params.setEncryptType(1);
             }
+            SignInfo signInfo = new SignInfo();
+            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             log.info("getSignData url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
             HttpEntity<String> formEntity =
