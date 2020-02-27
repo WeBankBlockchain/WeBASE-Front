@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.utils.Numeric;
@@ -266,6 +267,10 @@ public class KeyStoreService {
         try {
             SignInfo signInfo = new SignInfo();
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
+            // webase-sign api support
+            if (EncryptType.encryptType == 1) {
+                url = url.concat("/guomi");
+            }
             log.info("getSignData url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
             HttpEntity<String> formEntity =
@@ -279,7 +284,6 @@ public class KeyStoreService {
             return signInfo.getSignDataStr();
         } catch (Exception e) {
             log.error("getSignData exception", e);
-
         }
 
         return null;
