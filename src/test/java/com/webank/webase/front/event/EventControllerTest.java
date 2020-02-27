@@ -17,15 +17,13 @@
 package com.webank.webase.front.event;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.ReqNewBlockEventRegister;
 import com.webank.webase.front.event.entity.ReqContractEventRegister;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -33,19 +31,19 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @WebAppConfiguration
+@Transactional
+@Rollback
 public class EventControllerTest extends BaseTest {
 
 	private MockMvc mockMvc;
 	private Integer groupId = 1;
-	// TODO id needs to be set what it is in db
-	private String blockInfoId = "8aba82b57076ae09017076ae3f100000";
-	private String eventInfoId = "8aba82b570768afd0170768b2cc50001";
 	private int pageNumber = 1;
 	private int pageSize = 5;
 
@@ -162,6 +160,7 @@ public class EventControllerTest extends BaseTest {
 	 */
 	@Test
 	public void testUnregisterNewBlockEvent() throws Exception {
+		String blockInfoId = "8aba82b57076ae09017076ae3f100000";
 		ReqNewBlockEventRegister param = new ReqNewBlockEventRegister();
 		param.setExchangeName("group001");
 		param.setQueueName("user1");
@@ -180,6 +179,7 @@ public class EventControllerTest extends BaseTest {
 
 	@Test
 	public void testUnregisterContractEvent() throws Exception {
+		String eventInfoId = "8aba82b570768afd0170768b2cc50001";
 		ReqContractEventRegister param = new ReqContractEventRegister();
 		param.setExchangeName("group001");
 		param.setQueueName("user1");
