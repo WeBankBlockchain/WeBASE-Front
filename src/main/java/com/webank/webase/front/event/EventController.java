@@ -116,14 +116,23 @@ public class EventController {
 
     @ApiOperation(value = "getNewBlockEventInfo",
             notes = "get registered NewBlockEvent info by page")
-    @GetMapping("newBlockEvent/list/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse getNewBlockEventInfo(@PathVariable("groupId") int groupId,
-                                                 @PathVariable("pageNumber") int pageNumber,
-                                                 @PathVariable("pageSize") int pageSize) {
+    @GetMapping(value = {"newBlockEvent/list/{groupId}/{pageNumber}/{pageSize}",
+            "newBlockEvent/list/{groupId}"})
+    public BasePageResponse getNewBlockEventInfo(@PathVariable("groupId") Integer groupId,
+                                                 @PathVariable(value = "pageNumber", required = false) Integer pageNumber,
+                                                 @PathVariable(value = "pageSize", required = false) Integer pageSize) {
         log.debug("start getNewBlockEventInfo. groupId:{}", groupId);
-        Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
-                new Sort(Sort.Direction.DESC,"createTime"));
-        List<NewBlockEventInfo> resList = eventService.getNewBlockInfoList(groupId, pageable);
+        List<NewBlockEventInfo> resList;
+        if (pageNumber == null || pageSize == null) {
+             resList = eventService.getNewBlockInfoList(groupId);
+        } else {
+            if (pageNumber <= 1) {
+                return new BasePageResponse(ConstantCode.PARAM_ERROR, null, 0);
+            }
+            Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
+                    new Sort(Sort.Direction.DESC, "createTime"));
+            resList = eventService.getNewBlockInfoList(groupId, pageable);
+        }
         log.debug("end getNewBlockEventInfo resList count. {}", resList.size());
         return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
     }
@@ -166,14 +175,23 @@ public class EventController {
 
     @ApiOperation(value = "getContractEventInfo",
             notes = "get registered contract event info by page")
-    @GetMapping("contractEvent/list/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse getContractEventInfo(@PathVariable("groupId") int groupId,
-                                                 @PathVariable("pageNumber") int pageNumber,
-                                                 @PathVariable("pageSize") int pageSize) {
+    @GetMapping(value = {"contractEvent/list/{groupId}/{pageNumber}/{pageSize}",
+            "contractEvent/list/{groupId}"})
+    public BasePageResponse getContractEventInfo(@PathVariable("groupId") Integer groupId,
+                                                 @PathVariable(value = "pageNumber", required = false) Integer pageNumber,
+                                                 @PathVariable(value = "pageSize", required = false) Integer pageSize) {
         log.debug("start getContractEventInfo.");
-        Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
-                new Sort(Sort.Direction.DESC,"createTime"));
-        List<ContractEventInfo> resList = eventService.getContractEventInfoList(groupId, pageable);
+        List<ContractEventInfo> resList;
+        if (pageNumber == null || pageSize == null) {
+            resList = eventService.getContractEventInfoList(groupId);
+        } else {
+            if (pageNumber <= 1) {
+                return new BasePageResponse(ConstantCode.PARAM_ERROR, null, 0);
+            }
+            Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
+                    new Sort(Sort.Direction.DESC, "createTime"));
+            resList = eventService.getContractEventInfoList(groupId, pageable);
+        }
         log.debug("end getContractEventInfo resList count. {}", resList.size());
         return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
     }
