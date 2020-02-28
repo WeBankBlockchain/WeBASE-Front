@@ -15,12 +15,12 @@
  */
 package com.webank.webase.front.contract.entity;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
-import com.webank.webase.front.base.code.ConstantCode;
-import lombok.Data;
 
 /**
  * deployWithSign interface parameter.
@@ -30,8 +30,8 @@ import lombok.Data;
 public class ReqDeployWithSign {
     private int groupId = 1;
     private int signUserId = 100001;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
-    private String contractBin;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTECODEBIN_IS_EMPTY)
+    private String bytecodeBin;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<Object> contractAbi;
     private List<Object> funcParam = new ArrayList<>();

@@ -36,7 +36,7 @@ public class ReqDeploy {
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
+    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTECODEBIN_IS_EMPTY)
     private String bytecodeBin;
     private String contractBin;
     private String contractSource;
