@@ -108,7 +108,8 @@ public class EventControllerTest extends BaseTest {
 	public void testGetNewBlockEventList() throws Exception {
 		ResultActions resultActions = mockMvc
 				.perform(MockMvcRequestBuilders.get("/event/newBlockEvent/list/"
-						+ groupId + "/" + pageNumber + "/" + pageSize)
+//						+ groupId + "/" + pageNumber + "/" + pageSize)
+						+ groupId)
 						.contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
@@ -133,7 +134,8 @@ public class EventControllerTest extends BaseTest {
 	public void testGetContractEventList() throws Exception {
 		ResultActions resultActions = mockMvc
 				.perform(MockMvcRequestBuilders.get("/event/contractEvent/list/"
-						+ groupId + "/" + pageNumber + "/" + pageSize)
+//						+ groupId + "/" + pageNumber + "/" + pageSize)
+						+ groupId)
 						.contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
