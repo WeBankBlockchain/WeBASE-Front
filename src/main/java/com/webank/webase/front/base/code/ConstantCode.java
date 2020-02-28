@@ -32,7 +32,7 @@ public class ConstantCode {
     public static final String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"message\":\"version cannot be empty\"}";
     public static final String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"message\":\"funcName cannot be empty\"}";
     public static final String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"message\":\"abiInfo cannot be empty\"}";
-    public static final String PARAM_FAIL_CONTRACTBIN_IS_EMPTY = "{\"code\":201007,\"message\":\"contractBin cannot be empty\"}";
+    public static final String PARAM_FAIL_BYTECODEBIN_IS_EMPTY = "{\"code\":201007,\"message\":\"bytecodeBin cannot be empty\"}";
 
     /* general error */
     public static final RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");

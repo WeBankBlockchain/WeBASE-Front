@@ -15,6 +15,8 @@
  */
 package com.webank.webase.front.util;
 
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.exception.FrontException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,21 +25,25 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.exception.FrontException;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * CommonUtils.
@@ -304,5 +310,66 @@ public class CommonUtils {
             log.error("getCurrentIp error.");
         }
         return null;
+    }
+    
+    /**
+     * check connect.
+     */
+    public static boolean checkConnect(String host, int port) {
+        Socket socket = null;
+        try {
+            socket = new Socket();
+            socket.setReceiveBufferSize(8193);
+            socket.setSoTimeout(500);
+            SocketAddress address = new InetSocketAddress(host, port);
+            socket.connect(address, 1000);
+        } catch (Exception ex) {
+            log.info("fail checkConnect.");
+            return false;
+        } finally {
+            if (Objects.nonNull(socket)) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    log.error("fail close socket", e);
+                }
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * extractFigureFromStr.
+     * 
+     * @param str
+     * @return
+     */
+    public static int extractFigureFromStr(String str) {
+        if (StringUtils.isBlank(str)) {
+            return 0;
+        }
+        String regEx="[^0-9]"; 
+        Pattern p = Pattern.compile(regEx); 
+        Matcher m = p.matcher(str); 
+        return Integer.parseInt(m.replaceAll("").trim());
+    }
+    
+    /**
+     * getFolderSize.
+     * 
+     * @param file
+     * @return
+     */
+    public static long getFolderSize(File f) {
+        long size = 0;
+        File flist[] = f.listFiles();
+        for (int i = 0; i < flist.length; i++) {
+            if (flist[i].isDirectory()) {
+                size = size + getFolderSize(flist[i]);
+            } else {
+                size = size + flist[i].length();
+            }
+        }
+        return size;
     }
 }
