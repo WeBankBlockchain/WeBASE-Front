@@ -171,6 +171,13 @@ public class EventService {
     }
 
     /**
+     * full list
+     */
+    public List<NewBlockEventInfo> getNewBlockInfoList(int groupId) {
+        return newBlockEventInfoRepository.findByGroupId(groupId);
+    }
+
+    /**
      * findByGroupIdAndAppId
      * @param groupId
      * @param appId
@@ -205,6 +212,13 @@ public class EventService {
      */
     public List<ContractEventInfo> getContractEventInfoList(int groupId, Pageable page) {
         return contractEventInfoRepository.findByGroupId(groupId, page);
+    }
+
+    /**
+     * full list
+     */
+    public List<ContractEventInfo> getContractEventInfoList(int groupId) {
+        return contractEventInfoRepository.findByGroupId(groupId);
     }
 
     public List<ContractEventInfo> getContractEventInfo(int groupId, String appId) {
