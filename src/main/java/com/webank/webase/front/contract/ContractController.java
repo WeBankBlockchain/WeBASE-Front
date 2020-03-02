@@ -254,7 +254,7 @@ public class ContractController extends BaseController {
             BindingResult result) throws FrontException {
         log.info("contractCompile start. param:{}", JSON.toJSONString(req));
         checkParamResult(result);
-        return contractService.contractCompile(req.getSolidityName(), req.getSolidityBase64());
+        return contractService.contractCompile(req.getContractName(), req.getSolidityBase64());
     }
     
     @PostMapping(value = "/addContractPath")
