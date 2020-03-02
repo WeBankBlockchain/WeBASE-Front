@@ -252,7 +252,7 @@ public class ContractService {
     public String deployWithSign(ReqDeployWithSign req) throws Exception {
         int groupId = req.getGroupId();
         String contractAbi = JSON.toJSONString(req.getContractAbi());
-        String contractBin = req.getContractBin();
+        String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
 
         // check groupId
@@ -277,7 +277,7 @@ public class ContractService {
         }
 
         // data sign
-        String data = contractBin + encodedConstructor;
+        String data = bytecodeBin + encodedConstructor;
         String signMsg = transService.signMessage(groupId, web3j, req.getSignUserId(), "", data);
         if (StringUtils.isBlank(signMsg)) {
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
