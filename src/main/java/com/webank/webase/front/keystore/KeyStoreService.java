@@ -265,10 +265,8 @@ public class KeyStoreService {
      */
     public String getSignData(EncodeInfo params) {
         try {
-            // webase-sign api support
-            if (EncryptType.encryptType == 1) {
-                params.setEncryptType(1);
-            }
+            // webase-sign api(v1.3.0) support
+            params.setEncryptType(EncryptType.encryptType);
             SignInfo signInfo = new SignInfo();
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             log.info("getSignData url:{}", url);

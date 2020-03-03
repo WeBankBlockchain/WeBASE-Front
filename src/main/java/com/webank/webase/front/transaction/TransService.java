@@ -177,7 +177,7 @@ public class TransService {
         // encode function
         Function function = new Function(req.getFuncName(),
                 contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
-        return handleFunctionTrans(groupId, web3j, signUserId, contractAddress, function, contractFunction);
+        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
     }
 
     /**
@@ -189,10 +189,10 @@ public class TransService {
                                                    String funcName, List<Object> funcParams) throws Exception {
         // check groupId
         Web3j web3j = getWeb3j(groupId);
-        // get address and abi of precompiled contract TODO
+        // get address and abi of precompiled contract
         String contractAddress = PrecompiledCommonInfo.getAddress(precompiledType);
         String abiStr = PrecompiledCommonInfo.getAbi(precompiledType);
-        List<Object> contractAbi = Collections.singletonList(abiStr);
+        List<Object> contractAbi = JSON.parseArray(abiStr);
         // get function param from abi
         ContractFunction contractFunction = buildContractFunctionWithAbi(contractAbi, funcName, funcParams);
         //check function param
@@ -201,11 +201,11 @@ public class TransService {
         Function function = new Function(funcName, contractFunction.getFinalInputs(),
                 contractFunction.getFinalOutputs());
         // trans handle
-        return handleFunctionTrans(groupId, web3j, signUserId, contractAddress, function, contractFunction);
+        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
     }
 
 
-    private Object handleFunctionTrans(int groupId, Web3j web3j, int signUserId, String contractAddress,
+    private Object handleTransByFunction(int groupId, Web3j web3j, int signUserId, String contractAddress,
                                        Function function, ContractFunction cf)
             throws IOException, InterruptedException, ExecutionException, TimeoutException {
 
