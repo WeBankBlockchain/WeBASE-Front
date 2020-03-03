@@ -54,8 +54,7 @@ public class ExceptionsHandler {
 //
 //        BaseResponse rep = new BaseResponse(retCode);
 
-        //   log.warn("business exception return:{}", mapper.writeValueAsString(rep));
-
+        log.warn("catch frontException: {}",  frontException.getMessage());
         Map<String, Object> map = new HashMap<>();
         //  map.put("exception", frontException);
         map.put("errorMessage", frontException.getMessage());
@@ -103,7 +102,7 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity exceptionHandler(Exception exc) {
-        log.info("catch  exception", exc);
+        log.info("catch  exception: ", exc);
         Map<String, Object> map = new HashMap<>();
         //  map.put("exception", frontException);
         map.put("errorMessage", exc.getMessage());
