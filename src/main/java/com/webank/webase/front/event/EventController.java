@@ -89,6 +89,10 @@ public class EventController extends BaseController {
         String appId = reqContractEventRegister.getAppId();
         String fromBlock = reqContractEventRegister.getFromBlock();
         String toBlock = reqContractEventRegister.getToBlock();
+        if("0".equals(fromBlock) || "0".equals(toBlock)
+                || Integer.parseInt(toBlock) <= Integer.parseInt(fromBlock)) {
+            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+        }
         String contractAddress = reqContractEventRegister.getContractAddress();
         List<String> topicList = reqContractEventRegister.getTopicList();
         List<AbiDefinition> contractAbi = reqContractEventRegister.getContractAbi();
