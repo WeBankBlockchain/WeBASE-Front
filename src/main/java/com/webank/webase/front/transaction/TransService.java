@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
+import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.CommonContract;
@@ -26,6 +27,7 @@ import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
+import com.webank.webase.front.precompiledapi.PrecompiledCommonInfo;
 import com.webank.webase.front.transaction.entity.*;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
@@ -51,7 +53,6 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
-import org.fisco.bcos.web3j.tx.TransactionManager;
 import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
@@ -65,9 +66,7 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 
@@ -99,8 +98,9 @@ public class TransService {
     public Object transHandle(ReqTransHandle req) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(req));
 
-        //get function of abi
+        // init contract params
         ContractOfTrans cof = new ContractOfTrans(req);
+        // build function
         ContractFunction cf = buildContractFunction(cof);
         //check param
         checkParamOfTransaction(cf, cof.getFuncParam());
@@ -160,9 +160,9 @@ public class TransService {
      */
     public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
         //get function of abi
-        ContractFunction cf = buildContractFunction(new ContractOfTrans(req));
+        ContractFunction contractFunction = buildContractFunction(new ContractOfTrans(req));
         //check param
-        checkParamOfTransaction(cf, req.getFuncParam());
+        checkParamOfTransaction(contractFunction, req.getFuncParam());
 
         // check contractAddress
         String contractAddress = req.getContractAddress();
@@ -170,16 +170,47 @@ public class TransService {
             log.error("transHandleWithSign. contractAddress is empty");
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
         }
-
         // check groupId
-        Web3j web3j = getWeb3j(req.getGroupId());
-
+        int groupId = req.getGroupId();
+        Web3j web3j = getWeb3j(groupId);
+        int signUserId = req.getSignUserId();
         // encode function
-        Function function = new Function(req.getFuncName(), cf.getFinalInputs(), cf.getFinalOutputs());
-        String encodedFunction = FunctionEncoder.encode(function);
+        Function function = new Function(req.getFuncName(),
+                contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
+        return handleFunctionTrans(groupId, web3j, signUserId, contractAddress, function, contractFunction);
+    }
 
+    /**
+     * send tx with sign for precomnpiled contract
+     * @param precompiledType enum of precompiled contract
+     * @param funcName precompiled contract function name
+     */
+    public Object transHandleWithSignForPrecompile(int groupId, int signUserId, PrecompiledTypes precompiledType,
+                                                   String funcName, List<Object> funcParams) throws Exception {
+        // check groupId
+        Web3j web3j = getWeb3j(groupId);
+        // get address and abi of precompiled contract TODO
+        String contractAddress = PrecompiledCommonInfo.getAddress(precompiledType);
+        String abiStr = PrecompiledCommonInfo.getAbi(precompiledType);
+        List<Object> contractAbi = Collections.singletonList(abiStr);
+        // get function param from abi
+        ContractFunction contractFunction = buildContractFunctionWithAbi(contractAbi, funcName, funcParams);
+        //check function param
+        checkParamOfTransaction(contractFunction, funcParams);
+        // encode function
+        Function function = new Function(funcName, contractFunction.getFinalInputs(),
+                contractFunction.getFinalOutputs());
         // trans handle
-        Object response = "";
+        return handleFunctionTrans(groupId, web3j, signUserId, contractAddress, function, contractFunction);
+    }
+
+
+    private Object handleFunctionTrans(int groupId, Web3j web3j, int signUserId, String contractAddress,
+                                       Function function, ContractFunction cf)
+            throws IOException, InterruptedException, ExecutionException, TimeoutException {
+
+        String encodedFunction = FunctionEncoder.encode(function);
+        Object response;
         Instant startTime = Instant.now();
         if (cf.getConstant()) {
             KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
@@ -196,23 +227,21 @@ public class TransService {
             }
         } else {
             // data sign
-            String signMsg = signMessage(req.getGroupId(), web3j, req.getSignUserId(), contractAddress, encodedFunction);
+            String signMsg = signMessage(groupId, web3j, signUserId, contractAddress, encodedFunction);
             if (StringUtils.isBlank(signMsg)) {
                 throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
             }
-           Instant nodeStartTime = Instant.now();
+            Instant nodeStartTime = Instant.now();
             // send transaction
             final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
             sendMessage(web3j, signMsg, transFuture);
-            //todo
             TransactionReceipt receipt =
                     transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
             response = receipt;
             log.info("***node cost time***: {}", Duration.between(nodeStartTime, Instant.now()).toMillis());
-
         }
         log.info("***transaction total cost time***: {}", Duration.between(startTime, Instant.now()).toMillis());
-        log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(), JSON.toJSONString(response));
+        log.info("transHandleWithSign end. func:{} baseRsp:{}", cf.getFuncName(), JSON.toJSONString(response));
         return response;
     }
 
