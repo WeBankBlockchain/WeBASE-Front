@@ -17,14 +17,21 @@
 package com.webank.webase.front.precompiledapi;
 
 
+import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.transaction.TransService;
+import org.fisco.bcos.web3j.precompile.config.EnumKey;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
 
 /**
- * send raw transaction to call precompiled
+ * send raw transaction through webase-sign to call precompiled
  * @author marsli
  */
 @Service
@@ -34,10 +41,17 @@ public class PrecompiledWithSign {
 	TransService transService;
 
 	/**
-	 *
+	 * system config: setValueByKey through webase-sign
 	 */
-	public void setValueByKey(String key, String value) {
-//		String funcParam = FUNC_SETVALUEBYKEY;
-//		transService.transHandleWithSignForPrecompile()
+	public TransactionReceipt setValueByKey(int groupId, int signUserId, String key, String value)
+			throws Exception {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(key);
+		funcParams.add(value);
+		// execute set method
+		TransactionReceipt response = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
+				PrecompiledTypes.SYSTEM_CONFIG, FUNC_SETVALUEBYKEY, funcParams);
+		return response;
 	}
+
 }

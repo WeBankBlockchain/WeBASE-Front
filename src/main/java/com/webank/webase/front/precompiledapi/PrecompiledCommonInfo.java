@@ -21,7 +21,7 @@ import com.webank.webase.front.base.enums.PrecompiledTypes;
 
 /**
  * precompiled contract address, function name, abi
- * @link TransService-transHandleWithSignForPrecompile
+ * @link PrecompiledWithSign.java
  * @author marsli
  */
 public class PrecompiledCommonInfo {
