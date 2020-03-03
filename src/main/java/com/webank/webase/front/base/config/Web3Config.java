@@ -15,15 +15,7 @@ package com.webank.webase.front.base.config;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
-
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -36,11 +28,17 @@ import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
 /**
  * init web3sdk getService.
@@ -57,7 +55,7 @@ public class Web3Config {
     private int corePoolSize;
     private int maxPoolSize;
     private int queueCapacity;
-    public static int timeout = 30000;
+    public  int timeout = 30000;
     private int keepAlive;
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
@@ -198,9 +196,12 @@ public class Web3Config {
     public void isMatchEncryptType(Web3j web3j) throws IOException {
         boolean isMatch = true;
         // 1: guomi, 0: standard
-        String clientVersion = web3j.getNodeVersion().send().getNodeVersion().getVersion();
-        log.info("Chain's clientVersion:{}", clientVersion);
-        if (clientVersion.contains("gm")) {
+        NodeVersion version = web3j.getNodeVersion().send();
+
+        Constants.version = version.getNodeVersion().getVersion();
+        Constants.chainId = version.getNodeVersion().getChainID();
+        log.info("Chain's clientVersion:{}", Constants.version);
+        if (Constants.version.contains("gm")) {
             isMatch = EncryptType.encryptType == 1;
         } else {
             isMatch = EncryptType.encryptType == 0;
