@@ -18,6 +18,8 @@ package com.webank.webase.front.transaction;
 
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.Application;
+import com.webank.webase.front.base.enums.PrecompiledTypes;
+import com.webank.webase.front.precompiledapi.PrecompiledCommonInfo;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,4 +52,10 @@ public class TransactionServiceTest {
 //        Object res = transService.transHandleWithSign(param);
 //        System.out.println(res);
 //    }
+
+    @Test
+    public void testTransPrecompiledWithSign() {
+//        transService.transHandleWithSignForPrecompile(1, 100001,
+//        PrecompiledTypes.SYSTEM_CONFIG, PrecompiledCommonInfo.FUNC_SETVALUEBYKEY, )
+    }
 }
