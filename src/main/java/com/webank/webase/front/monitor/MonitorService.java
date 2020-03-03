@@ -16,6 +16,7 @@
 package com.webank.webase.front.monitor;
 
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.monitor.entity.Monitor;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
@@ -48,6 +49,8 @@ public class MonitorService {
     Map<Integer,Web3j> web3jMap;
     @Autowired
     MonitorRepository monitorRepository;
+    @Autowired
+    Constants constants;
 
     public List<PerformanceData> findContrastDataByTime(int groupId, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap)  {
 
@@ -139,7 +142,10 @@ public class MonitorService {
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncMonitorInfo() throws ExecutionException, InterruptedException {
         log.debug("begin sync chain data");
-
+        if (!constants.isMonitorEnabled())
+        {
+            return;
+        }
         Long currentTime = System.currentTimeMillis();
         //to do  add  more group
         for(Map.Entry<Integer,Web3j> entry : web3jMap.entrySet()) {
