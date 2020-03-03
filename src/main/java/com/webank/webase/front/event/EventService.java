@@ -73,11 +73,11 @@ public class EventService {
         log.debug("registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        // record groupId, exchange, routingKey for all block notify
-        BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
-        // save to db
+        // save to db 通过db来保证不重复注册
         addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
                 appId, groupId, exchangeName, queueName, routingKey);
+        // record groupId, exchange, routingKey for all block notify
+        BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
         return newBlockEventInfoRepository.findByQueueName(queueName);
     }
 
@@ -109,16 +109,16 @@ public class EventService {
                         exchangeName, routingKey, decoder, groupId, appId);
         log.debug("registerContractEvent appId:{},groupId:{},abi:{},params:{},exchangeName:{},queueName:{}",
                 appId, groupId, abi, params, exchangeName, queueName);
-        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
-        service.registerEventLogFilter(params, callBack);
-        // save to db
-        addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
+        // save to db 通过db来保证不重复注册
+        String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
                 exchangeName, queueName, routingKey,
                 abi, fromBlock, toBlock, contractAddress, topicList);
+        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
+        service.registerEventLogFilter(params, callBack);
         return contractEventInfoRepository.findByQueueName(queueName);
     }
 
-    private void addNewBlockEventInfo(int eventType, String appId, int groupId,
+    private String addNewBlockEventInfo(int eventType, String appId, int groupId,
                                       String exchangeName, String queueName, String routingKey) {
         NewBlockEventInfo registerInfo = new NewBlockEventInfo();
         registerInfo.setEventType(eventType);
@@ -128,14 +128,15 @@ public class EventService {
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
         try{
-            newBlockEventInfoRepository.save(registerInfo);
+            NewBlockEventInfo saved = newBlockEventInfoRepository.save(registerInfo);
+            return saved.getId();
         } catch (Exception e) {
             log.error("insert error:[]", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
         }
     }
 
-    private void addContractEventInfo(int eventType, String appId, int groupId,
+    private String addContractEventInfo(int eventType, String appId, int groupId,
                                  String exchangeName, String queueName, String routingKey,
                                  String abi, String fromBlock, String toBlock,
                                  String contractAddress, List<String> topicList) {
@@ -153,7 +154,8 @@ public class EventService {
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
         try{
-            contractEventInfoRepository.save(registerInfo);
+            ContractEventInfo saved = contractEventInfoRepository.save(registerInfo);
+            return saved.getId();
         } catch (Exception e) {
             log.error("insert error:[]", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
