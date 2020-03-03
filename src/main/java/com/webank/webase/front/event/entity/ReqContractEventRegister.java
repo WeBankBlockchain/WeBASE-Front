@@ -18,6 +18,7 @@ package com.webank.webase.front.event.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -60,7 +61,7 @@ public class ReqContractEventRegister {
 	 * contract abi for decoder
 	 */
 	@NotEmpty(message = "contractAbi cannot be empty")
-	private String contractAbi;
+	private List<AbiDefinition> contractAbi;
 
     /**
      * event log push info below
