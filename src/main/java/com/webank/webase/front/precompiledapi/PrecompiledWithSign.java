@@ -19,7 +19,9 @@ package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.transaction.TransService;
+import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.config.EnumKey;
+import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
 
@@ -39,19 +42,22 @@ public class PrecompiledWithSign {
 
 	@Autowired
 	TransService transService;
+	@Autowired
+	Map<Integer, Web3j> web3jMap;
 
 	/**
 	 * system config: setValueByKey through webase-sign
+	 * @return String result {"code":0,"msg":"success"}
 	 */
-	public TransactionReceipt setValueByKey(int groupId, int signUserId, String key, String value)
+	public String setValueByKey(int groupId, String address, String key, String value)
 			throws Exception {
 		List<Object> funcParams = new ArrayList<>();
 		funcParams.add(key);
 		funcParams.add(value);
 		// execute set method
-		TransactionReceipt response = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
+		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, address,
 				PrecompiledTypes.SYSTEM_CONFIG, FUNC_SETVALUEBYKEY, funcParams);
-		return response;
+		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
 	}
 
 }

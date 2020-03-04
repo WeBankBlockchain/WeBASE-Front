@@ -29,7 +29,8 @@ import lombok.Data;
 @Data
 public class ReqTransHandleWithSign {
     private int groupId = 1;
-    private int signUserId = 100001;
+//    private Integer signUserId = 100001;
+    private String signAddress;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<Object> contractAbi;
     private String contractAddress;

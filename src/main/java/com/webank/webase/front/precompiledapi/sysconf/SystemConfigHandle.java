@@ -36,6 +36,4 @@ public class SystemConfigHandle {
     private String configKey;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONFIG_VALUE_IS_EMPTY)
     private String configValue;
-    // 向后兼容 默认useAes为false
-    private Boolean useAes;
 }
