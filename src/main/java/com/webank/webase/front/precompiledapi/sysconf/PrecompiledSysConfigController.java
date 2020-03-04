@@ -15,6 +15,7 @@
  */
 package com.webank.webase.front.precompiledapi.sysconf;
 
+import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
@@ -42,7 +43,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(value = "sys")
-public class PrecompiledSysConfigController {
+public class PrecompiledSysConfigController extends BaseController {
     @Autowired
     private PrecompiledSysConfigService precompiledSysConfigService;
 
@@ -77,29 +78,26 @@ public class PrecompiledSysConfigController {
     @ApiImplicitParam(name = "sysConfigHandle", value = "system config info", required = true, dataType = "SysConfigHandle")
     @PostMapping("config")
     public Object setSysConfigValueByKey(@Valid @RequestBody SystemConfigHandle systemConfigHandle, BindingResult bindingResult)throws Exception {
+        checkParamResult(bindingResult);
         Instant startTime = Instant.now();
         log.info("start querySystemConfigByGroupId startTime:{}, systemConfigHandle:{}",
                 startTime.toEpochMilli(), systemConfigHandle);
         String key = systemConfigHandle.getConfigKey();
-        if(systemConfigHandle.getUseAes() == null) {
-            systemConfigHandle.setUseAes(false);
-        }
         // tx_count_limit, tx_gas_limit
-        if (PrecompiledUtils.TxCountLimit.equals(key) || PrecompiledUtils.TxGasLimit.equals(key)) {
-            // post返回透传
-            try {
-                Object res = precompiledSysConfigService.setSysConfigValueByKey(systemConfigHandle);
-                log.info("end querySystemConfigByGroupId useTime:{} res:{}",
-                        Duration.between(startTime, Instant.now()).toMillis(), res);
-                return res;
-            } catch (Exception e) { //parse error
-                log.error("end setSysConfigValueByKey. Exception:[]", e);
-                return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
-            }
-        }else {
+        if (!PrecompiledUtils.TxCountLimit.equals(key) && !PrecompiledUtils.TxGasLimit.equals(key)) {
             log.error("end setSysConfigValueByKey. Exception:{}",
                     ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY.getMessage());
             return ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY;
+        }
+        // post返回透传
+        try {
+            Object res = precompiledSysConfigService.setSysConfigValueByKey(systemConfigHandle);
+            log.info("end querySystemConfigByGroupId useTime:{} res:{}",
+                    Duration.between(startTime, Instant.now()).toMillis(), res);
+            return res;
+        } catch (Exception e) { //parse error
+            log.error("end setSysConfigValueByKey. Exception:[]", e);
+            return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
         }
     }
 
