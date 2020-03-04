@@ -61,7 +61,7 @@ public class ReqContractEventRegister {
 	 * contract abi for decoder
 	 */
 	@NotEmpty(message = "contractAbi cannot be empty")
-	private List<AbiDefinition> contractAbi;
+	private List<Object> contractAbi;
 
     /**
      * event log push info below

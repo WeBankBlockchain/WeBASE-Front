@@ -89,13 +89,19 @@ public class EventController extends BaseController {
         String appId = reqContractEventRegister.getAppId();
         String fromBlock = reqContractEventRegister.getFromBlock();
         String toBlock = reqContractEventRegister.getToBlock();
-        if("0".equals(fromBlock) || "0".equals(toBlock)
-                || Integer.parseInt(toBlock) <= Integer.parseInt(fromBlock)) {
+        if("0".equals(fromBlock) || "0".equals(toBlock)) {
+            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+        }
+        if ("latest".equals(fromBlock) && !"latest".equals(toBlock)) {
+            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+        }
+        if (!"latest".equals(fromBlock) && !"latest".equals(toBlock) &&
+                Integer.parseInt(toBlock) < Integer.parseInt(fromBlock)) {
             return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }
         String contractAddress = reqContractEventRegister.getContractAddress();
         List<String> topicList = reqContractEventRegister.getTopicList();
-        List<AbiDefinition> contractAbi = reqContractEventRegister.getContractAbi();
+        List<Object> contractAbi = reqContractEventRegister.getContractAbi();
         String abiStr = JSON.toJSONString(contractAbi);
         String exchangeName = reqContractEventRegister.getExchangeName();
         // username as queue name
