@@ -22,6 +22,7 @@ import lombok.Data;
 @Data
 public class EncodeInfo {
     private Integer userId;
+    private String address;
     private String encodedDataStr;
     private Integer encryptType;
 }

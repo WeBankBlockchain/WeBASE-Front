@@ -278,7 +278,7 @@ public class ContractService {
 
         // data sign
         String data = contractBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, web3j, req.getSignUserId(), "", data);
+        String signMsg = transService.signMessage(groupId, web3j, req.getSignAddress(), "", data);
         if (StringUtils.isBlank(signMsg)) {
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
         }

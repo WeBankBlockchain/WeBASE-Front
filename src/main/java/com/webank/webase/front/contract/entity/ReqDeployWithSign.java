@@ -29,7 +29,8 @@ import lombok.Data;
 @Data
 public class ReqDeployWithSign {
     private int groupId = 1;
-    private int signUserId = 100001;
+//    private int signUserId = 100001;
+    private String signAddress;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
     private String contractBin;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)

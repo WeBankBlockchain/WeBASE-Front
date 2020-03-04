@@ -19,6 +19,7 @@ package com.webank.webase.front.precompiledapi;
 import com.webank.webase.front.Application;
 import com.webank.webase.front.precompiledapi.sysconf.PrecompiledSysConfigService;
 import com.webank.webase.front.util.PrecompiledUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +35,7 @@ public class PrecompiledWithSignTest {
 	@Autowired
 	PrecompiledSysConfigService sysConfigService;
 	private int groupId = 1;
-	private int userId = 100001;
+	private String signAddress = "0xf16c0bf5a8bf4049ede4c3a070efcc1052095f63";
 
 	/**
 	 * need webase-sign is on
@@ -44,7 +45,8 @@ public class PrecompiledWithSignTest {
 		String txLimit = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
 		System.out.println("==========1 " + txLimit);
 		String value = "1024";
-		precompiledWithSign.setValueByKey(groupId, userId, PrecompiledUtils.TxCountLimit, value);
+		TransactionReceipt receipt = precompiledWithSign.setValueByKey(groupId, signAddress, PrecompiledUtils.TxCountLimit, value);
+		Assert.assertTrue("0x0".equals(receipt.getStatus()));
 		String txLimit2 = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
 		System.out.println("==========2 " + txLimit2);
 		Assert.assertNotEquals(txLimit, txLimit2);
