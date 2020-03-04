@@ -173,11 +173,11 @@ public class TransService {
         // check groupId
         int groupId = req.getGroupId();
         Web3j web3j = getWeb3j(groupId);
-        int signUserId = req.getSignUserId();
+        String signAddress = req.getSignAddress();
         // encode function
         Function function = new Function(req.getFuncName(),
                 contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
-        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
+        return handleTransByFunction(groupId, web3j, signAddress, contractAddress, function, contractFunction);
     }
 
     /**
@@ -185,7 +185,7 @@ public class TransService {
      * @param precompiledType enum of precompiled contract
      * @param funcName precompiled contract function name
      */
-    public Object transHandleWithSignForPrecompile(int groupId, int signUserId, PrecompiledTypes precompiledType,
+    public Object transHandleWithSignForPrecompile(int groupId, String address, PrecompiledTypes precompiledType,
                                                    String funcName, List<Object> funcParams) throws Exception {
         // check groupId
         Web3j web3j = getWeb3j(groupId);
@@ -201,11 +201,11 @@ public class TransService {
         Function function = new Function(funcName, contractFunction.getFinalInputs(),
                 contractFunction.getFinalOutputs());
         // trans handle
-        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
+        return handleTransByFunction(groupId, web3j, address, contractAddress, function, contractFunction);
     }
 
 
-    private Object handleTransByFunction(int groupId, Web3j web3j, int signUserId, String contractAddress,
+    private Object handleTransByFunction(int groupId, Web3j web3j, String address, String contractAddress,
                                        Function function, ContractFunction cf)
             throws IOException, InterruptedException, ExecutionException, TimeoutException {
 
@@ -227,7 +227,7 @@ public class TransService {
             }
         } else {
             // data sign
-            String signMsg = signMessage(groupId, web3j, signUserId, contractAddress, encodedFunction);
+            String signMsg = signMessage(groupId, web3j, address, contractAddress, encodedFunction);
             if (StringUtils.isBlank(signMsg)) {
                 throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
             }
@@ -358,7 +358,7 @@ public class TransService {
      * @param data            info
      * @return
      */
-    public String signMessage(int groupId, Web3j web3j, int userId, String contractAddress,
+    public String signMessage(int groupId, Web3j web3j, String address, String contractAddress,
                               String data) throws  FrontException {
         Random r = new Random();
         BigInteger randomid = new BigInteger(250, r);
@@ -374,7 +374,7 @@ public class TransService {
             String encodedDataStr = Numeric.toHexString(encodedTransaction);
 
             EncodeInfo encodeInfo = new EncodeInfo();
-            encodeInfo.setUserId(userId);
+            encodeInfo.setAddress(address);
             encodeInfo.setEncodedDataStr(encodedDataStr);
             String signDataStr = keyStoreService.getSignData(encodeInfo);
             if (StringUtils.isBlank(signDataStr)) {
@@ -396,7 +396,7 @@ public class TransService {
             String encodedDataStr = Numeric.toHexString(encodedTransaction);
 
             EncodeInfo encodeInfo = new EncodeInfo();
-            encodeInfo.setUserId(userId);
+            encodeInfo.setAddress(address);
             encodeInfo.setEncodedDataStr(encodedDataStr);
 
             Instant startTime = Instant.now();
