@@ -45,8 +45,7 @@ public class PrecompiledWithSignTest {
 		String txLimit = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
 		System.out.println("==========1 " + txLimit);
 		String value = "1024";
-		TransactionReceipt receipt = precompiledWithSign.setValueByKey(groupId, signAddress, PrecompiledUtils.TxCountLimit, value);
-		Assert.assertTrue("0x0".equals(receipt.getStatus()));
+		String result = precompiledWithSign.setValueByKey(groupId, signAddress, PrecompiledUtils.TxCountLimit, value);
 		String txLimit2 = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
 		System.out.println("==========2 " + txLimit2);
 		Assert.assertNotEquals(txLimit, txLimit2);
