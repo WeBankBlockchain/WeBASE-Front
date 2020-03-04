@@ -62,7 +62,7 @@ public class EventControllerTest extends BaseTest {
 		param.setExchangeName("group001");
 		param.setQueueName("user1");
 		String abiStr = "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"name\",\"type\":\"string\"}],\"name\":\"SetName\",\"type\":\"event\"}]";
-		List<AbiDefinition> abi = JSON.parseArray(abiStr, AbiDefinition.class);
+		List<Object> abi = JSON.parseArray(abiStr, Object.class);
 		param.setContractAbi(abi);
 		param.setFromBlock("latest");
 		param.setToBlock("latest");
