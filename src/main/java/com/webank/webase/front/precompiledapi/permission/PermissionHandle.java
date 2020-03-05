@@ -35,6 +35,4 @@ public class PermissionHandle {
     private String address;
     private String tableName;
     private PermissionState permissionState;
-    // 向后兼容 默认useAes为false
-    private Boolean useAes;
 }

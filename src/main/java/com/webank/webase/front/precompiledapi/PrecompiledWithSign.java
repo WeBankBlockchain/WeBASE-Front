@@ -20,18 +20,18 @@ package com.webank.webase.front.precompiledapi;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.transaction.TransService;
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
-import org.fisco.bcos.web3j.precompile.config.EnumKey;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
+import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
+import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 
 /**
  * send raw transaction through webase-sign to call precompiled
@@ -49,15 +49,40 @@ public class PrecompiledWithSign {
 	 * system config: setValueByKey through webase-sign
 	 * @return String result {"code":0,"msg":"success"}
 	 */
-	public String setValueByKey(int groupId, String address, String key, String value)
+	public String setValueByKey(int groupId, String fromAddress, String key, String value)
 			throws Exception {
 		List<Object> funcParams = new ArrayList<>();
 		funcParams.add(key);
 		funcParams.add(value);
 		// execute set method
-		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, address,
+		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, fromAddress,
 				PrecompiledTypes.SYSTEM_CONFIG, FUNC_SETVALUEBYKEY, funcParams);
 		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
 	}
 
+	/**
+	 * permission: grant through webase-sign
+	 * @return String result {"code":0,"msg":"success"}
+	 */
+	public String grant(int groupId, String fromAddress, String tableName, String toAddress) throws Exception {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(tableName);
+		funcParams.add(toAddress);
+		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, fromAddress,
+				PrecompiledTypes.PERMISSION, FUNC_INSERT, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+	}
+
+	/**
+	 * permission: revoke through webase-sign
+	 * @return String result {"code":0,"msg":"success"}
+	 */
+	public String revoke(int groupId, String fromAddress, String tableName, String toAddress) throws Exception {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(tableName);
+		funcParams.add(toAddress);
+		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, fromAddress,
+				PrecompiledTypes.PERMISSION, FUNC_REMOVE, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+	}
 }
