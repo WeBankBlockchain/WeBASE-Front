@@ -15,7 +15,6 @@
  */
 package com.webank.webase.front.precompiledapi.sysconf;
 
-import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
@@ -26,7 +25,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -43,7 +41,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(value = "sys")
-public class PrecompiledSysConfigController extends BaseController {
+public class PrecompiledSysConfigController{
     @Autowired
     private PrecompiledSysConfigService precompiledSysConfigService;
 
@@ -77,8 +75,7 @@ public class PrecompiledSysConfigController extends BaseController {
     @ApiOperation(value = "setSysConfigValueByKey", notes = "set system config value by key")
     @ApiImplicitParam(name = "sysConfigHandle", value = "system config info", required = true, dataType = "SysConfigHandle")
     @PostMapping("config")
-    public Object setSysConfigValueByKey(@Valid @RequestBody SystemConfigHandle systemConfigHandle, BindingResult bindingResult)throws Exception {
-        checkParamResult(bindingResult);
+    public Object setSysConfigValueByKey(@Valid @RequestBody SystemConfigHandle systemConfigHandle)throws Exception {
         Instant startTime = Instant.now();
         log.info("start querySystemConfigByGroupId startTime:{}, systemConfigHandle:{}",
                 startTime.toEpochMilli(), systemConfigHandle);

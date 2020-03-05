@@ -17,10 +17,9 @@ package com.webank.webase.front.precompiledapi.permission;
 
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.precompiledapi.PrecompiledWithSign;
+import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.CRUDService;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
@@ -43,7 +42,7 @@ public class PermissionManageService {
     @Autowired
     private KeyStoreService keyStoreService;
     @Autowired
-    private PrecompiledWithSign precompiledWithSign;
+    private PrecompiledWithSignService precompiledWithSignService;
     /**
      * permission state flag(enum)
      */
@@ -306,14 +305,14 @@ public class PermissionManageService {
      */
     public String grantPermissionManager(int groupId, String fromAddress, String userAddress)
             throws Exception {
-        String res = precompiledWithSign.grant(groupId, fromAddress,
+        String res = precompiledWithSignService.grant(groupId, fromAddress,
                 PrecompiledCommon.SYS_TABLE_ACCESS, userAddress);
         return res;
     }
 
     public String revokePermissionManager(int groupId, String fromAddress, String userAddress)
             throws Exception {
-        String res = precompiledWithSign.revoke(groupId, fromAddress,
+        String res = precompiledWithSignService.revoke(groupId, fromAddress,
                 PrecompiledCommon.SYS_TABLE_ACCESS, userAddress);
         return res;
     }
@@ -332,12 +331,12 @@ public class PermissionManageService {
      * manage deploy create Contract Manager related
      */
     public String grantDeployAndCreateManager(int groupId, String fromAddress, String userAddress) throws Exception {
-        String res = precompiledWithSign.grant(groupId, fromAddress, PrecompiledCommon.SYS_TABLE, userAddress);
+        String res = precompiledWithSignService.grant(groupId, fromAddress, PrecompiledCommon.SYS_TABLE, userAddress);
         return res;
     }
 
     public String revokeDeployAndCreateManager(int groupId, String fromAddress, String userAddress) throws Exception {
-        String res = precompiledWithSign.revoke(groupId, fromAddress, PrecompiledCommon.SYS_TABLE, userAddress);
+        String res = precompiledWithSignService.revoke(groupId, fromAddress, PrecompiledCommon.SYS_TABLE, userAddress);
         return res;
     }
 
@@ -353,14 +352,15 @@ public class PermissionManageService {
      */
     public Object grantUserTableManager(int groupId, String fromAddress, String tableName, String userAddress) throws Exception {
         // CRUD.desc to check table exists TODO rely on crud
-//        CRUDService crudSerivce = new CRUDService(web3j, credentials);
-//        crudSerivce.desc(tableName);
-        String res = precompiledWithSign.grant(groupId, fromAddress, tableName, userAddress);
+        CRUDService crudService = new CRUDService(web3jMap.get(groupId),
+                keyStoreService.getCredentialsForQuery());
+        crudService.desc(tableName);
+        String res = precompiledWithSignService.grant(groupId, fromAddress, tableName, userAddress);
         return res;
     }
 
     public Object revokeUserTableManager(int groupId, String fromAddress, String tableName, String userAddress) throws Exception {
-        String res = precompiledWithSign.revoke(groupId, fromAddress, tableName, userAddress);
+        String res = precompiledWithSignService.revoke(groupId, fromAddress, tableName, userAddress);
         return res;
     }
 
@@ -377,13 +377,13 @@ public class PermissionManageService {
      * @throws Exception
      */
     public String grantNodeManager(int groupId, String fromAddress, String userAddress) throws Exception {
-        String res = precompiledWithSign.grant(groupId, fromAddress,
+        String res = precompiledWithSignService.grant(groupId, fromAddress,
                 PrecompiledCommon.SYS_CONSENSUS, userAddress);
         return res;
     }
 
     public String revokeNodeManager(int groupId, String fromAddress, String userAddress) throws Exception {
-        String res = precompiledWithSign.revoke(groupId, fromAddress,
+        String res = precompiledWithSignService.revoke(groupId, fromAddress,
                 PrecompiledCommon.SYS_CONSENSUS, userAddress);
         return res;
     }
@@ -399,13 +399,13 @@ public class PermissionManageService {
      * @throws Exception
      */
     public String grantSysConfigManager(int groupId, String fromAddress, String userAddress) throws Exception {
-        String res = precompiledWithSign.grant(groupId, fromAddress,
+        String res = precompiledWithSignService.grant(groupId, fromAddress,
                 PrecompiledCommon.SYS_CONFIG, userAddress);
         return res;
     }
 
     public String revokeSysConfigManager(int groupId, String fromAddress, String userAddress) throws Exception {
-        String res = precompiledWithSign.revoke(groupId, fromAddress,
+        String res = precompiledWithSignService.revoke(groupId, fromAddress,
                 PrecompiledCommon.SYS_CONFIG, userAddress);
         return res;
     }
@@ -421,13 +421,13 @@ public class PermissionManageService {
      * @throws Exception
      */
     public String grantCNSManager(int groupId, String fromAddress, String userAddress) throws Exception {
-        String res = precompiledWithSign.grant(groupId, fromAddress,
+        String res = precompiledWithSignService.grant(groupId, fromAddress,
                 PrecompiledCommon.SYS_CNS, userAddress);
         return res;
     }
 
     public String revokeCNSManager(int groupId, String fromAddress, String userAddress) throws Exception {
-        String res = precompiledWithSign.revoke(groupId, fromAddress,
+        String res = precompiledWithSignService.revoke(groupId, fromAddress,
                 PrecompiledCommon.SYS_CNS, userAddress);
         return res;
     }
