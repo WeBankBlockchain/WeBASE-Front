@@ -53,7 +53,7 @@ List swagger = [
 ]
 
 
-def log4j_version="2.9.0"
+def log4j_version="2.13.1"
 List logger = [
 	"org.apache.logging.log4j:log4j-api:$log4j_version",
 	"org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -77,7 +77,7 @@ dependencies {
 //            exclude group:"org.ethereum"
 //        }
 //    compile fileTree(dir:'lib',includes:['solcJ-all-0.4.25-gm.jar'])
-	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8'
+	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
 	compile 'com.alibaba:fastjson:1.2.60'
 	compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
