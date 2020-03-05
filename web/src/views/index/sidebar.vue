@@ -119,6 +119,9 @@ export default {
                     case 'systemMonitoring':
                         item.name = this.$t('route.systemMonitoring')
                         break;
+                    case 'subscribeEvent':
+                    item.name = this.$t('route.subscribeEvent')
+                    break;
 
                 }
                 if (item.children) {
@@ -144,6 +147,12 @@ export default {
                                 break;
                             case 'privateKeyManagement':
                                 it.name = this.$t('route.privateKeyManagement')
+                                break;
+                            case 'blockEvent':
+                                it.name = this.$t('route.blockEvent')
+                                break;
+                            case 'contractEvent':
+                                it.name = this.$t('route.contractEvent')
                                 break;
                         }
                     })

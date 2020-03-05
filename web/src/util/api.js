@@ -626,3 +626,68 @@ export function encryption() {
         responseType: 'text'
     })
 }
+/*订阅事件*/
+
+export function blockEventList(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/newBlockEvent/list/${params.str}`,
+        method: 'get'
+    })
+}
+
+export function addBlockEvent(data) {
+    return post({
+        url: `${HANDLE}event/newBlockEvent`,
+        method: 'post',
+        data: data
+    })
+}
+
+export function deleteBlockEvent(data) {
+    return deleted({
+        url: `${HANDLE}event/newBlockEvent `,
+        method: 'delete',
+        data: data
+    })
+}
+export function checkBlockEvent(data, list){
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/newBlockEvent/${params.str}`,
+        method: 'get'
+    })
+}
+
+
+export function contractEventList(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/contractEvent/list/${params.str}`,
+        method: 'get',
+        data: data
+    })
+}
+
+export function addContractEvent(data) {
+    return post({
+        url: `${HANDLE}event/contractEvent`,
+        method: 'post',
+        data: data
+    })
+}
+
+export function deleteContractEvent(data) {
+    return deleted({
+        url: `${HANDLE}event/contractEvent `,
+        method: 'delete',
+        data: data
+    })
+}
+export function checkContractEvent(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/contractEvent/${params.str}`,
+        method: 'get'
+    })
+}

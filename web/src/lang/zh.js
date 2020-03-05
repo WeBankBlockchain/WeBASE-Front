@@ -19,6 +19,9 @@ export default {
         nodeMetrics: '节点指标',
         privateKeyManagement: '私钥管理',
         privateKeyManagementQ: '私钥管理',
+        subscribeEvent: '订阅事件',
+        blockEvent:'出块事件',
+        contractEvent:'合约Event事件',
     },
     navbar: {
         dashboard: '首页',
@@ -83,7 +86,19 @@ export default {
         contractAbi: '合约abi',
         contractBin: '合约bin',
         createdTime: '创建时间',
-        importPem: "导入pem私钥"
+        importPem: "导入pem私钥",
+        addBlockEvent: "新增出块事件",
+        addContractEvent: "新增合约Event事件",
+        blockEventInfo: "订阅详情",
+        appId: "应用编号",
+        exchangeName: "交换机",
+        queueName: "队列名",
+        routingKey: "routingKey",
+        groupId: "所属群组",
+        fromBlock: 'event起始区块',
+        toBlock: 'event末区块',
+        topicList: '合约event名列表'
+
     },
     errorLog: {
         tips: '请点击右上角bug小图标',
@@ -121,6 +136,15 @@ export default {
         folderNameIllegal: '文件名不符合规则',
         folderName: '文件夹名称',
         pleaseType: '请输入',
+        appId: "请输入应用编号",
+        exchangeName: "请输入交换名",
+        queueName: "请输入队列名",
+        groupId: "请选择群组",
+        contractAbi: "请输入合约Abi",
+        contractAddress: "请输入合约地址",
+        fromBlock: "请输入event起始区块",
+        toBlock: "请输入event末区块",
+        topicList: "请输入合约event名列表",
     },
     placeholder: {
         globalSearch: '请输入 Block 或 Txn Hash',
@@ -170,6 +194,8 @@ export default {
         detailsAbi: 'abi详情',
         detailsTxn: '交易内容',
         acquisitionSwitch: '采集数据开关',
+        check: '查询',
+        detele: '删除'
     },
     text: {
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
@@ -237,6 +263,14 @@ export default {
         privateKeyManagementInfo: "支持导出私钥，可以将私钥导出到本地",
         fileName: "私钥用户名",
         importFile: "导入文件",
-        pemName: "pem 文件名称"
+        pemName: "pem 文件名称",
+        appId: "注册事件通知的应用的唯一编号",
+        exchangeName: "队列所属交换机",
+        queueName: "队列名，一般以用户名作队列名",
+        contractAbi: "合约的ABI，用于合约event解析,如[HelloWorld(string)]",
+        contractAddress: "合约地址",
+        fromBlock: "最小值为0；默认值latest，表示监听最新区块",
+        toBlock: "最小值为0；默认值latest，表示监听最新区块",
+        topicList: "合约event事件名的list，以英文逗号相隔，不带空格；如 HelloWorld,Asset",
     }
 }
