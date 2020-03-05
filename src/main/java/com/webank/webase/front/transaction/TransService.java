@@ -114,7 +114,7 @@ public class TransService {
         //web3j
         Web3j web3j = getWeb3j(cof.getGroupId());
         // get privateKey
-        Credentials credentials = getCredentials(cf.getConstant(), req.getUser(), req.getUseAes());
+        Credentials credentials = getCredentials(cf.getConstant(), req.getUser());
         // contract load
         CommonContract commonContract;
         ContractGasProvider contractGasProvider = new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
@@ -142,13 +142,13 @@ public class TransService {
     /**
      * get Credentials by keyUser.
      */
-    private Credentials getCredentials(boolean constant, String keyUser, boolean useAes) {
+    private Credentials getCredentials(boolean constant, String keyUser) {
         // get privateKey
         Credentials credentials;
         if (constant) {
             credentials = keyStoreService.getCredentialsForQuery();
         } else {
-            credentials = keyStoreService.getCredentials(keyUser, useAes);
+            credentials = keyStoreService.getCredentials(keyUser);
         }
         return credentials;
     }
@@ -213,7 +213,7 @@ public class TransService {
         Object response;
         Instant startTime = Instant.now();
         if (cf.getConstant()) {
-            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
+            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore( KeyTypes.LOCALRANDOM.getValue(), "");
             String callOutput = web3j
                     .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
                             contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
