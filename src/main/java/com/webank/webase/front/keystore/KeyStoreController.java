@@ -44,15 +44,13 @@ public class KeyStoreController extends BaseController {
 
     @ApiOperation(value = "getKeyStore", notes = "get key store info")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "useAes", value = "Is encrypting the private key", dataType = "Boolean"),
         @ApiImplicitParam(name = "type", value = "private key type", dataType = "int"),
         @ApiImplicitParam(name = "userName", value = "user name", dataType = "String")
     })
     @RequestMapping(method = RequestMethod.GET)
-    public KeyStoreInfo getKeyStore(@RequestParam(required = true) boolean useAes, 
-            @RequestParam(required = false, defaultValue = "2") int type,
+    public KeyStoreInfo getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
             @RequestParam(required = false) String userName) {
-        return keyStoreService.createKeyStore(useAes, type, userName);
+        return keyStoreService.createKeyStore(type, userName);
     }
 
     @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
@@ -61,9 +59,8 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
     })
     @RequestMapping(method = RequestMethod.GET, value = "/import")
-    public KeyStoreInfo importPrivateKey(@RequestParam(required = true) String privateKey,
-        @RequestParam(required = true) String userName) {
-        return keyStoreService.getKeyStoreFromPrivateKey(privateKey, false, KeyTypes.LOCALUSER.getValue(), userName);
+    public KeyStoreInfo importPrivateKey(@RequestParam String privateKey, @RequestParam String userName) {
+        return keyStoreService.getKeyStoreFromPrivateKey(privateKey, KeyTypes.LOCALUSER.getValue(), userName);
     }
 
     @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
@@ -75,7 +72,7 @@ public class KeyStoreController extends BaseController {
         if(!pemContent.startsWith(PemUtils.crtContentHead)) {
             throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
         }
-        keyStoreService.importKeyStoreFromPem(pemContent, false, KeyTypes.LOCALUSER.getValue(), userName);
+        keyStoreService.importKeyStoreFromPem(pemContent, KeyTypes.LOCALUSER.getValue(), userName);
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
     
