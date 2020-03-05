@@ -146,7 +146,7 @@ public class ContractService {
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
         }
         if (StringUtils.isBlank(contractBin)) {
-            log.error("fail addressIsValid. contractBin is empty");
+            log.error("fail addressIsValid. bytecodeBin is empty");
             throw new FrontException(ConstantCode.CONTRACT_BIN_NULL);
         }
         String binOnChain;
@@ -252,7 +252,7 @@ public class ContractService {
     public String deployWithSign(ReqDeployWithSign req) throws Exception {
         int groupId = req.getGroupId();
         String contractAbi = JSON.toJSONString(req.getContractAbi());
-        String contractBin = req.getContractBin();
+        String contractBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
 
         // check groupId

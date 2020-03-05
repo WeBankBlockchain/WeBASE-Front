@@ -50,10 +50,10 @@ public class ContractTest {
         System.out.println(sourceBase64);
         RspContractCompile res = contractCompile(solidityName, sourceBase64);
         System.out.println(res.getContractName());
-        System.out.println(res.getContractBin());
+        System.out.println(res.getBytecodeBin());
         System.out.println(res.getContractAbi());
         System.out.println(res.getErrors());
-        assertNotNull(res.getContractBin());
+        assertNotNull(res.getBytecodeBin());
     }
 
 
