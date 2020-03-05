@@ -31,6 +31,4 @@ public class ConsensusHandle {
     private String fromAddress;
     @NotBlank(message = ConstantCode.PARAM_FAIL_NODE_ID_IS_EMPTY)
     private String nodeId;
-    // 向后兼容 默认useAes为false
-    private Boolean useAes;
 }

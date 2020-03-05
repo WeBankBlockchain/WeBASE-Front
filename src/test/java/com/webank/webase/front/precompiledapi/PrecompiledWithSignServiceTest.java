@@ -19,7 +19,6 @@ package com.webank.webase.front.precompiledapi;
 import com.webank.webase.front.Application;
 import com.webank.webase.front.precompiledapi.sysconf.PrecompiledSysConfigService;
 import com.webank.webase.front.util.PrecompiledUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,9 +28,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
-public class PrecompiledWithSignTest {
+public class PrecompiledWithSignServiceTest {
 	@Autowired
-	PrecompiledWithSign precompiledWithSign;
+	PrecompiledWithSignService precompiledWithSignService;
 	@Autowired
 	PrecompiledSysConfigService sysConfigService;
 	private int groupId = 1;
@@ -45,7 +44,7 @@ public class PrecompiledWithSignTest {
 		String txLimit = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
 		System.out.println("==========1 " + txLimit);
 		String value = "1024";
-		String result = precompiledWithSign.setValueByKey(groupId, signAddress, PrecompiledUtils.TxCountLimit, value);
+		String result = precompiledWithSignService.setValueByKey(groupId, signAddress, PrecompiledUtils.TxCountLimit, value);
 		String txLimit2 = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
 		System.out.println("==========2 " + txLimit2);
 		Assert.assertNotEquals(txLimit, txLimit2);

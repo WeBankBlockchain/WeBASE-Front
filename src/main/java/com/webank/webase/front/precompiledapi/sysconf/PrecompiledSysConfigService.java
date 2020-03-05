@@ -16,11 +16,9 @@
 package com.webank.webase.front.precompiledapi.sysconf;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.precompiledapi.PrecompiledWithSign;
+import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +38,7 @@ public class PrecompiledSysConfigService {
     @Autowired
     Map<Integer, Web3j> web3jMap;
     @Autowired
-    PrecompiledWithSign precompiledWithSign;
+    PrecompiledWithSignService precompiledWithSignService;
 
 
     /**
@@ -61,7 +59,7 @@ public class PrecompiledSysConfigService {
             }
         }
         // @param result {"code":0,"msg":"success"}
-        String result = precompiledWithSign.setValueByKey(groupId, fromAddress, key, value);
+        String result = precompiledWithSignService.setValueByKey(groupId, fromAddress, key, value);
         return result;
     }
 
