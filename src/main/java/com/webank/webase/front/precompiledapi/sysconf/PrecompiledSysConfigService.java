@@ -40,14 +40,8 @@ public class PrecompiledSysConfigService {
     @Autowired
     Map<Integer, Web3j> web3jMap;
     @Autowired
-    private KeyStoreService keyStoreService;
-    @Autowired
     PrecompiledWithSign precompiledWithSign;
 
-    // 根据前台传的user address获取私钥
-    private Credentials getCredentials(String fromAddress, Boolean useAes) throws Exception {
-        return keyStoreService.getCredentials(fromAddress, useAes);
-    }
 
     /**
      * System config related
