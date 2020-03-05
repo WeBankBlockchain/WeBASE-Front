@@ -226,7 +226,7 @@ public class ContractService {
         String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
 
         // get privateKey
-        Credentials credentials = keyStoreService.getCredentials(req.getUser(), req.getUseAes());
+        Credentials credentials = keyStoreService.getCredentials(req.getUser());
         // contract deploy
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);

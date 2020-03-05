@@ -74,8 +74,8 @@ public class KeyStoreService {
     /**
      * createKeyStore
      */
-    public KeyStoreInfo createKeyStore(boolean useAes, int type, String userName) {
-        log.info("start createKeyStore. useAes:{} type:{} userName:{}", useAes, type, userName);
+    public KeyStoreInfo createKeyStore(int type, String userName) {
+        log.info("start createKeyStore. type:{} userName:{}", type, userName);
         // check keyStoreInfoLocal
         if (type == KeyTypes.LOCALUSER.getValue()) {
             if (StringUtils.isBlank(userName)) {
@@ -92,7 +92,7 @@ public class KeyStoreService {
         try {
             // TODO upgrade in web3sdk 2.1.3+
             ECKeyPair keyPair = CredentialUtils.createKeyPair();
-            return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
+            return keyPair2KeyStoreInfo(keyPair, type, userName);
         } catch (Exception e) {
             log.error("fail createKeyStore.", e);
             throw new FrontException("create keyInfo failed");
@@ -102,7 +102,7 @@ public class KeyStoreService {
     /**
      * get KeyStoreInfo by privateKey to store keyStoreInfo
      */
-    public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey, boolean useAes, int type, String userName) {
+    public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey, int type, String userName) {
         log.info("start getKeyStoreFromPrivateKey. privateKey:{} userName:{}", privateKey, userName);
         if (StringUtils.isBlank(privateKey)) {
             log.error("fail getKeyStoreFromPrivateKey. private key is null");
@@ -124,7 +124,7 @@ public class KeyStoreService {
         }
         // support guomi
         ECKeyPair keyPair = CredentialUtils.createKeyPair(privateKey);
-        return keyPair2KeyStoreInfo(keyPair, useAes, type, userName);
+        return keyPair2KeyStoreInfo(keyPair, type, userName);
     }
 
     /**
@@ -152,8 +152,9 @@ public class KeyStoreService {
 
     /**
      * convert ECKeyPair to KeyStoreInfo.
+     * default aes true
      */
-    private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, boolean useAes, int type, String userName) {
+    private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, int type, String userName) {
         String publicKey = Numeric
                 .toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
         String privateKey = Numeric.toHexStringNoPrefix(keyPair.getPrivateKey());
@@ -169,11 +170,15 @@ public class KeyStoreService {
         keyStoreInfo.setType(type);
         if (type != KeyTypes.LOCALRANDOM.getValue()) {
             keystoreRepository.save(keyStoreInfo);
-        }
-
-        if (!useAes) {
+        } else {
+            // if local random keystore, return real private key
             keyStoreInfo.setPrivateKey(realPrivateKey);
+            return keyStoreInfo;
         }
+        // @deprecated: default true
+        // if (!useAes) {
+        //    keyStoreInfo.setPrivateKey(realPrivateKey);
+        // }
         return keyStoreInfo;
     }
 
@@ -182,8 +187,8 @@ public class KeyStoreService {
      * get credential to send transaction
      * 2019/11/26 support guomi
      */
-    public Credentials getCredentials(String user, boolean useAes) throws FrontException {
-        String privateKey = Optional.ofNullable(getPrivateKey(user, useAes)).orElse(null);
+    public Credentials getCredentials(String user) throws FrontException {
+        String privateKey = Optional.ofNullable(getPrivateKey(user)).orElse(null);
         if (StringUtils.isBlank(privateKey)) {
             log.warn("fail getCredentials. user:{} privateKey is null", user);
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
@@ -199,17 +204,17 @@ public class KeyStoreService {
     // 直接用一个固定的credential，不用每次都新建
     public Credentials getCredentialsForQuery() {
         log.debug("start getCredentialsForQuery. ");
-        KeyStoreInfo keyStoreInfo = createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
+        KeyStoreInfo keyStoreInfo = createKeyStore(KeyTypes.LOCALRANDOM.getValue(), "");
         return GenCredential.create(keyStoreInfo.getPrivateKey());
     }
 
     /**
      * get PrivateKey.
-     *
+     * default use aes encrypt
      * @param user userId or userAddress.
      */
-    public String getPrivateKey(String user, boolean useAes) {
-
+    public String getPrivateKey(String user) {
+        boolean useAes = true;
         // get privateKey from map (in memory, not db)
         String key_of_user = user + "_" + useAes;
         if (PRIVATE_KEY_MAP.containsKey(key_of_user)) {
@@ -244,12 +249,12 @@ public class KeyStoreService {
             }
         }
 
-        String private_key;
-        if (useAes) {
-            private_key = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
-        } else {
-            private_key = keyStoreInfo.getPrivateKey();
-        }
+        String private_key = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+//        if (useAes) {
+//            private_key = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+//        } else {
+//            private_key = keyStoreInfo.getPrivateKey();
+//        }
 
         if (StringUtils.isNotBlank(private_key)) {
             PRIVATE_KEY_MAP.put(key_of_user, private_key);
@@ -290,12 +295,11 @@ public class KeyStoreService {
     /**
      * import keystore info from pem file's content
      * @param pemContent
-     * @param useAes false
      * @param userType local
      * @param userName
      * @return
      */
-    public KeyStoreInfo importKeyStoreFromPem(String pemContent, boolean useAes, int userType,  String userName) {
+    public KeyStoreInfo importKeyStoreFromPem(String pemContent, int userType,  String userName) {
         PEMManager pemManager = new PEMManager();
         String privateKey;
         try {
@@ -305,7 +309,8 @@ public class KeyStoreService {
             log.error("importKeyStoreFromPem error:[]", e);
             throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
         }
-        getKeyStoreFromPrivateKey(privateKey, useAes, userType, userName);
+        // to store
+        getKeyStoreFromPrivateKey(privateKey, userType, userName);
         return null;
     }
 
