@@ -36,8 +36,14 @@ public class ReqDeploy {
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
+    /**
+     * 合约编译的bytecode(bin)，用于部署合约
+     */
+    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTECODE_BIN_IS_EMPTY)
     private String bytecodeBin;
+    /**
+     * 合约编译的runtime-bytecode(runtime-bin)，用于交易解析
+     */
     private String contractBin;
     private String contractSource;
     private String contractPath;
