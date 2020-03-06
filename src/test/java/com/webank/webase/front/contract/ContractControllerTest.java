@@ -161,7 +161,7 @@ public class ContractControllerTest {
      * test deploy contract with webase-sign
      * @throws Exception
      */
-    @Test
+/*    @Test
     public void testDeployWithSign() throws Exception {
         ReqDeployWithSign param = new ReqDeployWithSign();
         param.setSignAddress("0xf16c0bf5a8bf4049ede4c3a070efcc1052095f63");
@@ -181,7 +181,7 @@ public class ContractControllerTest {
                 andExpect(MockMvcResultMatchers.status().isOk()).
                 andDo(MockMvcResultHandlers.print());
     }
-/*
+
 
     @Test
     public void tesSendTransaction() throws Exception {
