@@ -28,6 +28,9 @@ import org.hibernate.validator.constraints.NotBlank;
  */
 @Data
 public class ReqTransHandle {
+    /**
+     * user address
+     */
     @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
     private String user;
     private String contractName;

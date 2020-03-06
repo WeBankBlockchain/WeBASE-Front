@@ -37,7 +37,7 @@ import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS
 
 /**
  * TransController.
- * handle transactions of deploy/call contract
+ * handle transactions with sign to deploy/call contract
  */
 @Api(value = "/trans", tags = "transaction interface")
 @Slf4j
@@ -69,7 +69,7 @@ public class TransController extends BaseController {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
 
-        Object obj =  transServiceImpl.transHandle(reqTransHandle);
+        Object obj =  transServiceImpl.transHandleWithSign(reqTransHandle);
         log.info("transHandle end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
          return obj;
@@ -82,12 +82,12 @@ public class TransController extends BaseController {
      * @param result checkResult
      * @return
      */
-    @ApiOperation(value = "transaction handing", notes = "transaction handing with sign")
-    @ApiImplicitParam(name = "req", value = "transaction info", required = true, dataType = "ReqTransHandleWithSign")
-    @PostMapping("/handleWithSign")
-    public Object transHandleWithSign(@Valid @RequestBody ReqTransHandleWithSign req, BindingResult result) throws Exception {
-        log.info("transHandleWithSign start. req:[{}]", JSON.toJSONString(req));
-        checkParamResult(result);
-        return transServiceImpl.transHandleWithSign(req);
-    }
+//    @ApiOperation(value = "transaction handing", notes = "transaction handing with sign")
+//    @ApiImplicitParam(name = "req", value = "transaction info", required = true, dataType = "ReqTransHandleWithSign")
+//    @PostMapping("/handleWithSign")
+//    public Object transHandleWithSign(@Valid @RequestBody ReqTransHandleWithSign req, BindingResult result) throws Exception {
+//        log.info("transHandleWithSign start. req:[{}]", JSON.toJSONString(req));
+//        checkParamResult(result);
+//        return transServiceImpl.transHandleWithSign(req);
+//    }
 }

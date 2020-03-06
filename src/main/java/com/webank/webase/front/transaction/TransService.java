@@ -28,6 +28,7 @@ import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.precompiledapi.PrecompiledCommonInfo;
+import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.transaction.entity.*;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
@@ -91,91 +92,31 @@ public class TransService {
     private Constants constants;
     @Autowired
     private ContractRepository contractRepository;
+    @Autowired
+    private PrecompiledService precompiledService;
 
 
-    /**
-     * send transaction.
-     */
-    @Deprecated
-    public Object transHandle(ReqTransHandle req) throws Exception {
-        log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(req));
-
-        // init contract params
-        ContractOfTrans cof = new ContractOfTrans(req);
-        // build function
-        ContractFunction cf = buildContractFunction(cof);
-        //check param
-        checkParamOfTransaction(cf, cof.getFuncParam());
-
-        //address
-        String address = cof.getContractAddress();
-        if (address == null) {
-            address = cnsMap.get(req.getContractName() + ":" + cof.getVersion());
-        }
-
-        //web3j
-        Web3j web3j = getWeb3j(cof.getGroupId());
-        // get privateKey
-        Credentials credentials = getCredentials(cf.getConstant(), req.getUser());
-        // contract load
-        CommonContract commonContract;
-        ContractGasProvider contractGasProvider = new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
-        if (address != null) {
-            commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
-        } else {
-            commonContract = CommonContract.loadByName(cof.getContractName() + Constants.SYMPOL + cof.getVersion(),
-                    web3j, credentials, contractGasProvider);
-        }
-
-        // request
-        Object result;
-        Function function = new Function(cof.getFuncName(), cf.getFinalInputs(), cf.getFinalOutputs());
-        if (cf.getConstant()) {
-            result = execCall(cf.getOutputList(), function, commonContract);
-        } else {
-            result = execTransaction(function, commonContract);
-        }
-
-        log.info("transHandle end. name:{} func:{} result:{}", cof.getContractName(),
-                cof.getFuncName(), JSON.toJSONString(result));
-        return result;
-    }
-
-    /**
-     * get Credentials by keyUser.
-     */
-    private Credentials getCredentials(boolean constant, String keyUser) {
-        // get privateKey
-        Credentials credentials;
-        if (constant) {
-            credentials = keyStoreService.getCredentialsForQuery();
-        } else {
-            credentials = keyStoreService.getCredentials(keyUser);
-        }
-        return credentials;
-    }
 
     /**
      * transHandleWithSign.
      *
      * @param req request
      */
-    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
+    public Object transHandleWithSign(ReqTransHandle req) throws Exception {
+        ContractOfTrans contractOfTrans = new ContractOfTrans(req);
         //get function of abi
-        ContractFunction contractFunction = buildContractFunction(new ContractOfTrans(req));
+        ContractFunction contractFunction = buildContractFunction(contractOfTrans);
         //check param
         checkParamOfTransaction(contractFunction, req.getFuncParam());
-
-        // check contractAddress
-        String contractAddress = req.getContractAddress();
-        if (StringUtils.isBlank(contractAddress)) {
-            log.error("transHandleWithSign. contractAddress is empty");
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
-        }
         // check groupId
-        int groupId = req.getGroupId();
+        int groupId = contractOfTrans.getGroupId();
         Web3j web3j = getWeb3j(groupId);
-        String signAddress = req.getSignAddress();
+        // check contractAddress
+        String contractAddress = checkContractAddress(contractOfTrans.getContractAddress(),
+                groupId, contractOfTrans.getContractName(), contractOfTrans.getVersion());
+
+        // user as signAddress
+        String signAddress = req.getUser();
         // encode function
         Function function = new Function(req.getFuncName(),
                 contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
@@ -206,15 +147,17 @@ public class TransService {
         return handleTransByFunction(groupId, web3j, fromAddress, contractAddress, function, contractFunction);
     }
 
-
+    /**
+     * handleTransByFunction by whether is constant
+     */
     private Object handleTransByFunction(int groupId, Web3j web3j, String fromAddress, String contractAddress,
-                                       Function function, ContractFunction cf)
+                                       Function function, ContractFunction contractFunction)
             throws IOException, InterruptedException, ExecutionException, TimeoutException {
 
         String encodedFunction = FunctionEncoder.encode(function);
         Object response;
         Instant startTime = Instant.now();
-        if (cf.getConstant()) {
+        if (contractFunction.getConstant()) {
             KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
             String callOutput = web3j
                     .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
@@ -223,7 +166,7 @@ public class TransService {
             List<Type> typeList =
                     FunctionReturnDecoder.decode(callOutput, function.getOutputParameters());
             if (typeList.size() > 0) {
-                response = AbiUtil.callResultParse(cf.getOutputList(), typeList);
+                response = AbiUtil.callResultParse(contractFunction.getOutputList(), typeList);
             } else {
                 response = typeList;
             }
@@ -243,7 +186,7 @@ public class TransService {
             log.info("***node cost time***: {}", Duration.between(nodeStartTime, Instant.now()).toMillis());
         }
         log.info("***transaction total cost time***: {}", Duration.between(startTime, Instant.now()).toMillis());
-        log.info("transHandleWithSign end. func:{} baseRsp:{}", cf.getFuncName(), JSON.toJSONString(response));
+        log.info("transHandleWithSign end. func:{} baseRsp:{}", contractFunction.getFuncName(), JSON.toJSONString(response));
         return response;
     }
 
@@ -448,6 +391,7 @@ public class TransService {
      * build ContractFunction.
      */
     private ContractFunction buildContractFunction(ContractOfTrans cot) throws Exception {
+        log.debug("start buildContractFunction");
         if (CollectionUtils.isEmpty(cot.getContractAbi())) {
             checkContractAbiInCnsOrDb(cot);
             return buildContractFunctionWithCns(cot.getContractName(), cot.getFuncName(), cot.getVersion(), cot.getFuncParam());
@@ -459,6 +403,7 @@ public class TransService {
      * build Function with cns.
      */
     private ContractFunction buildContractFunctionWithCns(String contractName, String funcName, String version, List<Object> params) throws Exception {
+        log.debug("start buildContractFunctionWithCns");
         // if function is constant
         boolean constant = ContractAbiUtil.getConstant(contractName, funcName, version);
         // inputs format
@@ -484,6 +429,7 @@ public class TransService {
      * build Function with abi.
      */
     private ContractFunction buildContractFunctionWithAbi(List<Object> contractAbi, String funcName, List<Object> params) {
+        log.debug("start buildContractFunctionWithAbi");
         // check function name
         AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(funcName, JSON.toJSONString(contractAbi));
         if (Objects.isNull(abiDefinition)) {
@@ -514,6 +460,7 @@ public class TransService {
      * does abi exist in cns or db.
      */
     private void checkContractAbiInCnsOrDb(ContractOfTrans contract) throws Exception {
+        log.debug("start checkContractAbiInCnsOrDb");
         boolean ifExisted;
         // check if contractAbi existed in cache
         if (contract.getVersion() != null) {
@@ -563,7 +510,98 @@ public class TransService {
         return web3j;
     }
 
+    /**
+     * check address from cnsMap, CnsService
+     */
+    public String checkContractAddress(String contractAddress, int groupId,
+                                       String contractName, String version) throws Exception {
+        // not blank
+        if (StringUtils.isNotBlank(contractAddress)) {
+            return contractAddress;
+        } else {
+            // try to get from cnsMap
+            contractAddress = cnsMap.get(contractName + Constants.SYMPOL + version);
+            if (StringUtils.isNotBlank(contractAddress)) {
+                return contractAddress;
+            } else {
+                // try to get from cnsService
+                contractAddress = precompiledService.getAddressByContractNameAndVersion(groupId,
+                        contractName, version);
+                if (StringUtils.isNotBlank(contractAddress)) {
+                    return contractAddress;
+                } else {
+                    // address cannot be found
+                    log.error("checkContractAddress. contractAddress is empty " +
+                            "after get from cnsMap and cnsService");
+                    throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
+                }
+            }
+        }
+    }
 
+    /**
+     * send transaction.
+     */
+    @Deprecated
+    public Object transHandle(ReqTransHandle req) throws Exception {
+        log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(req));
+
+        // init contract params
+        ContractOfTrans cof = new ContractOfTrans(req);
+        // build function
+        ContractFunction contractFunction = buildContractFunction(cof);
+        //check param
+        checkParamOfTransaction(contractFunction, cof.getFuncParam());
+
+        //address
+        String address = cof.getContractAddress();
+        if (address == null) {
+            //try to get address from map
+            address = cnsMap.get(req.getContractName() + ":" + cof.getVersion());
+        }
+
+        //web3j
+        Web3j web3j = getWeb3j(cof.getGroupId());
+        // get privateKey
+        Credentials credentials = getCredentials(contractFunction.getConstant(), req.getUser());
+        // contract load
+        CommonContract commonContract;
+        ContractGasProvider contractGasProvider = new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
+        if (address != null) {
+            commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
+        } else {
+            commonContract = CommonContract.loadByName(cof.getContractName() + Constants.SYMPOL + cof.getVersion(),
+                    web3j, credentials, contractGasProvider);
+        }
+
+        // request
+        Object result;
+        Function function = new Function(cof.getFuncName(), contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
+        if (contractFunction.getConstant()) {
+            result = execCall(contractFunction.getOutputList(), function, commonContract);
+        } else {
+            result = execTransaction(function, commonContract);
+        }
+
+        log.info("transHandle end. name:{} func:{} result:{}", cof.getContractName(),
+                cof.getFuncName(), JSON.toJSONString(result));
+        return result;
+    }
+
+    /**
+     * get Credentials by keyUser.
+     */
+    @Deprecated
+    private Credentials getCredentials(boolean constant, String keyUser) {
+        // get privateKey
+        Credentials credentials;
+        if (constant) {
+            credentials = keyStoreService.getCredentialsForQuery();
+        } else {
+            credentials = keyStoreService.getCredentials(keyUser);
+        }
+        return credentials;
+    }
 }
 
 

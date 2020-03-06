@@ -15,6 +15,7 @@
  */
 package com.webank.webase.front.precompiledapi;
 
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -64,12 +65,21 @@ public class PrecompiledService{
 
         return cnsService.queryCnsByName(contractName);
     }
+
     public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName,
                                                   String version) throws Exception {
         CnsService cnsService = new CnsService(web3jMap.get(groupId),
                 keyStoreService.getCredentialsForQuery());
 
         return cnsService.queryCnsByNameAndVersion(contractName, version);
+    }
+
+    public String getAddressByContractNameAndVersion(int groupId, String contractName,
+                                                  String version) throws Exception {
+        CnsService cnsService = new CnsService(web3jMap.get(groupId),
+                keyStoreService.getCredentialsForQuery());
+        String contractNameAndVersion = contractName + Constants.SYMPOL + version;
+        return cnsService.getAddressByContractNameAndVersion(contractNameAndVersion);
     }
 
     /**
