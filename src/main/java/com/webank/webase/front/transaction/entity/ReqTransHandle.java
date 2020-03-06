@@ -42,4 +42,6 @@ public class ReqTransHandle {
     private int groupId = 1;
     private List<Object> contractAbi = new ArrayList<>();
     private List<Object> funcParam = new ArrayList<>();
+    @Deprecated
+    private boolean useAes;
 }
