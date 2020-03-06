@@ -37,6 +37,7 @@ public class ContractOfTrans {
         this.funcParam = req.getFuncParam();
     }
 
+    @Deprecated
     public ContractOfTrans(ReqTransHandleWithSign req) {
         this.contractAddress = req.getContractAddress();
         this.groupId = req.getGroupId();

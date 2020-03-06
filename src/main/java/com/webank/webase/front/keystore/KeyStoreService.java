@@ -83,6 +83,8 @@ public class KeyStoreService {
                     Predicate predicate = criteriaBuilder.equal(root.get("type"), KeyTypes.LOCALUSER.getValue());
                     return criteriaBuilder.and(predicate);
                 }, sort);
+        // make sure not transport private key
+        keyStores.forEach(keyStoreInfo -> keyStoreInfo.setPrivateKey(null));
         return keyStores;
     }
 

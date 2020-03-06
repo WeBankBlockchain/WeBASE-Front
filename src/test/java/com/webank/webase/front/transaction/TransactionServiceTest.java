@@ -53,9 +53,4 @@ public class TransactionServiceTest {
 //        System.out.println(res);
 //    }
 
-    @Test
-    public void testTransPrecompiledWithSign() {
-//        transService.transHandleWithSignForPrecompile(1, 100001,
-//        PrecompiledTypes.SYSTEM_CONFIG, PrecompiledCommonInfo.FUNC_SETVALUEBYKEY, )
-    }
 }
