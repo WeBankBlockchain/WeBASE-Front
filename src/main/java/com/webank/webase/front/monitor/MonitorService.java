@@ -205,10 +205,10 @@ public class MonitorService {
         List<GroupSizeInfo> data = new ArrayList<>();
         File f = new File(constants.getNodePath() + PATH_DATA);
         File[] fs = f.listFiles();
-
         if (fs == null) {
             return data;
         }
+        // get info
         for (File file : fs) {
             if (file.isDirectory()) {
                 String name = file.getName();
@@ -216,6 +216,10 @@ public class MonitorService {
                 data.add(new GroupSizeInfo(groupId, name, file.getAbsolutePath(),
                         CommonUtils.getFolderSize(file)));
             }
+        }
+        // set unit: KB
+        for (GroupSizeInfo groupSizeInfo : data) {
+            groupSizeInfo.setSize(groupSizeInfo.getSize() / 1024L);
         }
         return data;
     }
