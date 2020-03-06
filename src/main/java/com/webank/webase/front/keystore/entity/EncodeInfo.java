@@ -21,7 +21,12 @@ import lombok.Data;
  */
 @Data
 public class EncodeInfo {
+    /**
+     * userId deprecated, use address instead
+     */
+    @Deprecated
     private Integer userId;
+
     private String address;
     private String encodedDataStr;
     private Integer encryptType;
