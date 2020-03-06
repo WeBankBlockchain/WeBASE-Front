@@ -25,7 +25,9 @@ import lombok.Data;
 /**
  * transHandleWithSign interface parameter.
  * handle transactions of deploy/call contract
+ * v1.3.0+ default with sign
  */
+@Deprecated
 @Data
 public class ReqTransHandleWithSign {
     private int groupId = 1;

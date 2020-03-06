@@ -51,7 +51,9 @@ public class ReqDeploy {
     private String contractBin;
     private String contractSource;
     private String contractPath;
-    private  int groupId = 1;
-    private  Long contractId;
+    private int groupId;
+    private Long contractId;
     private List<Object> funcParam = new ArrayList<>();
+    @Deprecated
+    private boolean useAes;
 }
