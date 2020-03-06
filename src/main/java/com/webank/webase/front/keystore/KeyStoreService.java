@@ -220,7 +220,7 @@ public class KeyStoreService {
         try {
             // webase-sign api(v1.3.0) support
             RspUserInfo rspUserInfo = new RspUserInfo();
-            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
+            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(), EncryptType.encryptType);
             log.info("getSignUserEntity url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
             HttpEntity<String> formEntity =
@@ -229,7 +229,7 @@ public class KeyStoreService {
             BaseResponse baseResponse = response.getBody();
             log.info("getSignUserEntity response:{}", JSON.toJSONString(baseResponse));
             if (baseResponse.getCode() == 0) {
-                rspUserInfo = CommonUtils.object2JavaBean(baseResponse, RspUserInfo.class);
+                rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
             }
             return rspUserInfo;
         } catch (ResourceAccessException ex) {
