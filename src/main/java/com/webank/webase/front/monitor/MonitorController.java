@@ -87,7 +87,11 @@ public class MonitorController {
     @ApiOperation(value = "获取群组大小信息")
     @GetMapping("/getGroupSizeInfos")
     public List<GroupSizeInfo> getGroupSizeInfos() {
-        log.info("getGroupSizeInfos start.");
-        return monitorService.getGroupSizeInfos();
+        Instant startTime = Instant.now();
+        log.info("getGroupSizeInfos start startTime:{}", startTime.toEpochMilli());
+        List<GroupSizeInfo> groupSizeInfos = monitorService.getGroupSizeInfos();
+        log.info("getGroupSizeInfos end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return groupSizeInfos;
     }
 }
