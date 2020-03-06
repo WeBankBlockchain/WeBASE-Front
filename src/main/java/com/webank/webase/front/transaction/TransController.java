@@ -76,8 +76,8 @@ public class TransController extends BaseController {
     }
     
     /**
+     * @Deprecated: default with sign
      * transHandleWithSign.
-     * 
      * @param req request
      * @param result checkResult
      * @return
