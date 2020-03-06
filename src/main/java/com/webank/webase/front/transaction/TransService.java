@@ -17,7 +17,6 @@ package com.webank.webase.front.transaction;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
@@ -43,7 +42,6 @@ import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.*;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -107,7 +105,7 @@ public class TransService {
         //get function of abi
         ContractFunction contractFunction = buildContractFunction(contractOfTrans);
         //check param
-        checkParamOfTransaction(contractFunction, req.getFuncParam());
+        checkParamOfTransaction(contractFunction, contractOfTrans.getFuncParam());
         // check groupId
         int groupId = contractOfTrans.getGroupId();
         Web3j web3j = getWeb3j(groupId);
@@ -320,6 +318,7 @@ public class TransService {
 
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setAddress(address);
+            encodeInfo.setEncryptType(EncryptType.encryptType);
             encodeInfo.setEncodedDataStr(encodedDataStr);
             String signDataStr = keyStoreService.getSignData(encodeInfo);
             if (StringUtils.isBlank(signDataStr)) {
@@ -342,6 +341,7 @@ public class TransService {
 
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setAddress(address);
+            encodeInfo.setEncryptType(EncryptType.encryptType);
             encodeInfo.setEncodedDataStr(encodedDataStr);
 
             Instant startTime = Instant.now();
@@ -388,7 +388,9 @@ public class TransService {
 
 
     /**
-     * build ContractFunction.
+     * build ContractFunction
+     * if abi is empty, check in db or file: conf/*.abi
+     * else build directly
      */
     private ContractFunction buildContractFunction(ContractOfTrans cot) throws Exception {
         log.debug("start buildContractFunction");
@@ -601,6 +603,70 @@ public class TransService {
             credentials = keyStoreService.getCredentials(keyUser);
         }
         return credentials;
+    }
+
+    /**
+     * transHandleWithSign.
+     *
+     * @param req request
+     */
+    @Deprecated
+    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
+        //get function of abi
+        ContractFunction cf = buildContractFunction(new ContractOfTrans(req));
+        //check param
+        checkParamOfTransaction(cf, req.getFuncParam());
+
+        // check contractAddress
+        String contractAddress = req.getContractAddress();
+        if (StringUtils.isBlank(contractAddress)) {
+            log.error("transHandleWithSign. contractAddress is empty");
+            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
+        }
+
+        // check groupId
+        Web3j web3j = getWeb3j(req.getGroupId());
+
+        // encode function
+        Function function = new Function(req.getFuncName(), cf.getFinalInputs(), cf.getFinalOutputs());
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        // trans handle
+        Object response = "";
+        Instant startTime = Instant.now();
+        if (cf.getConstant()) {
+            KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
+            String callOutput = web3j
+                    .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
+                            contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
+                    .send().getValue().getOutput();
+            List<Type> typeList =
+                    FunctionReturnDecoder.decode(callOutput, function.getOutputParameters());
+            if (typeList.size() > 0) {
+                response = AbiUtil.callResultParse(cf.getOutputList(), typeList);
+            } else {
+                response = typeList;
+            }
+        } else {
+            // data sign
+            String signMsg = signMessage(req.getGroupId(), web3j, req.getSignAddress(), contractAddress, encodedFunction);
+            if (StringUtils.isBlank(signMsg)) {
+                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            }
+            Instant nodeStartTime = Instant.now();
+            // send transaction
+            final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+            sendMessage(web3j, signMsg, transFuture);
+            //todo
+            TransactionReceipt receipt =
+                    transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+            response = receipt;
+            log.info("***node cost time***: {}", Duration.between(nodeStartTime, Instant.now()).toMillis());
+
+        }
+        log.info("***transaction total cost time***: {}", Duration.between(startTime, Instant.now()).toMillis());
+        log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(), JSON.toJSONString(response));
+        return response;
     }
 }
 
