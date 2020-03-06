@@ -14,6 +14,7 @@
 package com.webank.webase.front.keystore;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
@@ -21,13 +22,12 @@ import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
+import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
 import com.webank.webase.front.util.AesUtils;
 import com.webank.webase.front.util.CommonUtils;
-import com.webank.webase.front.util.CredentialUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.EncryptType;
@@ -38,18 +38,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.io.ByteArrayInputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 /**
@@ -71,76 +71,41 @@ public class KeyStoreService {
     static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
     private static Map<String, String> PRIVATE_KEY_MAP = new HashMap<>();
 
-    /**
-     * createKeyStore
-     */
-    public KeyStoreInfo createKeyStore(int type, String userName) {
-        log.info("start createKeyStore. type:{} userName:{}", type, userName);
-        // check keyStoreInfoLocal
-        if (type == KeyTypes.LOCALUSER.getValue()) {
-            if (StringUtils.isBlank(userName)) {
-                log.error("fail createKeyStore. user name is null.");
-                throw new FrontException(ConstantCode.USER_NAME_NULL);
-            }
-            KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByUserNameAndType(userName, type);
-            if (keyStoreInfoLocal != null) {
-                log.error("fail createKeyStore. user name already exists.");
-                throw new FrontException(ConstantCode.USER_NAME_EXISTS);
-            }
-        }
-        // create keyPair(support guomi)
-        try {
-            // TODO upgrade in web3sdk 2.1.3+
-            ECKeyPair keyPair = CredentialUtils.createKeyPair();
-            return keyPair2KeyStoreInfo(keyPair, type, userName);
-        } catch (Exception e) {
-            log.error("fail createKeyStore.", e);
-            throw new FrontException("create keyInfo failed");
-        }
-    }
-
-    /**
-     * get KeyStoreInfo by privateKey to store keyStoreInfo
-     */
-    public KeyStoreInfo getKeyStoreFromPrivateKey(String privateKey, int type, String userName) {
-        log.info("start getKeyStoreFromPrivateKey. privateKey:{} userName:{}", privateKey, userName);
-        if (StringUtils.isBlank(privateKey)) {
-            log.error("fail getKeyStoreFromPrivateKey. private key is null");
-            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
-        }
-        if (StringUtils.isBlank(userName)) {
-            log.error("fail createKeyStore. user name is null.");
-            throw new FrontException(ConstantCode.USER_NAME_NULL);
-        }
-        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByPrivateKey(privateKey);
-        if (keyStoreInfoLocal != null) {
-            log.error("fail getKeyStoreFromPrivateKey. private key already exists");
-            throw new FrontException(ConstantCode.PRIVATEKEY_EXISTS);
-        }
-        KeyStoreInfo userInfo = keystoreRepository.findByUserNameAndType(userName, type);
-        if (userInfo != null) {
-            log.error("fail getKeyStoreFromPrivateKey. user name already exists.");
-            throw new FrontException(ConstantCode.USER_NAME_EXISTS);
-        }
-        // support guomi
-        ECKeyPair keyPair = CredentialUtils.createKeyPair(privateKey);
-        return keyPair2KeyStoreInfo(keyPair, type, userName);
-    }
 
     /**
      * getLocalKeyStores.
+     * v1.3.0+: no private key stored
      */
-    public List<KeyStoreInfo> getLocalKeyStores() {
+    public List<KeyStoreInfo> getLocalKeyStoreList() {
         Sort sort = new Sort(Sort.Direction.ASC, "userName");
         List<KeyStoreInfo> keyStores = keystoreRepository.findAll(
                 (Root<KeyStoreInfo> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                     Predicate predicate = criteriaBuilder.equal(root.get("type"), KeyTypes.LOCALUSER.getValue());
                     return criteriaBuilder.and(predicate);
                 }, sort);
-        for (KeyStoreInfo keyStoreInfo : keyStores) {
-            keyStoreInfo.setPrivateKey(aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey()));
-        }
         return keyStores;
+    }
+
+    /**
+     * create key store and save
+     */
+    public KeyStoreInfo createKeyStore(String userName) {
+        RspUserInfo rspUserInfo = getSignUserEntity();
+        String address = rspUserInfo.getAddress();
+        KeyStoreInfo checkAddressExist = keystoreRepository.findByAddress(address);
+        if(Objects.nonNull(checkAddressExist)) {
+            throw new FrontException(ConstantCode.KEYSTORE_EXISTS);
+        }
+        KeyStoreInfo checkUserNameExist = keystoreRepository.findByUserName(userName);
+        if(Objects.nonNull(checkUserNameExist)) {
+            throw new FrontException(ConstantCode.USER_NAME_EXISTS);
+        }
+        KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
+        keyStoreInfo.setAddress(address);
+        keyStoreInfo.setPublicKey(rspUserInfo.getPublicKey());
+        keyStoreInfo.setUserName(userName);
+        keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
+        return keystoreRepository.save(keyStoreInfo);
     }
 
     /**
@@ -154,39 +119,142 @@ public class KeyStoreService {
      * convert ECKeyPair to KeyStoreInfo.
      * default aes true
      */
-    private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, int type, String userName) {
+    private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, String userName) {
         String publicKey = Numeric
                 .toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
         String privateKey = Numeric.toHexStringNoPrefix(keyPair.getPrivateKey());
         String address = "0x" + Keys.getAddress(keyPair.getPublicKey());
         log.debug("publicKey:{} privateKey:{} address:{}", publicKey, privateKey, address);
-
-        String realPrivateKey = privateKey;
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setPublicKey(publicKey);
         keyStoreInfo.setAddress(address);
-        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
         keyStoreInfo.setUserName(userName);
-        keyStoreInfo.setType(type);
-        if (type != KeyTypes.LOCALRANDOM.getValue()) {
-            keystoreRepository.save(keyStoreInfo);
-        } else {
-            // if local random keystore, return real private key
-            keyStoreInfo.setPrivateKey(realPrivateKey);
-            return keyStoreInfo;
-        }
-        // @deprecated: default true
-        // if (!useAes) {
-        //    keyStoreInfo.setPrivateKey(realPrivateKey);
-        // }
+        keyStoreInfo.setPrivateKey(privateKey);
         return keyStoreInfo;
     }
 
+    /**
+     * get random credential to call transaction(not execute)
+     * 2019/11/26 support guomi
+     */
+    public Credentials getCredentialsForQuery() {
+        log.debug("start getCredentialsForQuery. ");
+        // create keyPair(support guomi)
+        KeyStoreInfo keyStoreInfo;
+        try {
+            ECKeyPair keyPair = GenCredential.createKeyPair();
+            keyStoreInfo = keyPair2KeyStoreInfo(keyPair, "");
+        } catch (Exception e) {
+            log.error("fail getCredentialsForQuery.", e);
+            throw new FrontException("create random Credentials for query failed");
+        }
+        return GenCredential.create(keyStoreInfo.getPrivateKey());
+    }
+
+    public KeyStoreInfo getKeyStoreInfoForQuery() {
+        log.debug("start getKeyStoreInfoForQuery. ");
+        // create keyPair(support guomi)
+        KeyStoreInfo keyStoreInfo;
+        try {
+            ECKeyPair keyPair = GenCredential.createKeyPair();
+            return keyPair2KeyStoreInfo(keyPair, "");
+        } catch (Exception e) {
+            log.error("fail getKeyStoreInfoForQuery.", e);
+            throw new FrontException("create random keyInfo for query failed");
+        }
+    }
+
+    /**
+     * getSignData from sign service. (webase-sign)
+     * @param params params
+     * @return
+     */
+    public String getSignData(EncodeInfo params) {
+        try {
+            // webase-sign api(v1.3.0) support
+            params.setEncryptType(EncryptType.encryptType);
+            SignInfo signInfo = new SignInfo();
+            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
+            log.info("getSignData url:{}", url);
+            HttpHeaders headers = CommonUtils.buildHeaders();
+            HttpEntity<String> formEntity =
+                    new HttpEntity<String>(JSON.toJSONString(params), headers);
+            BaseResponse response =
+                    restTemplate.postForObject(url, formEntity, BaseResponse.class);
+            log.info("getSignData response:{}", JSON.toJSONString(response));
+            if (response.getCode() == 0) {
+                signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
+            }
+            return signInfo.getSignDataStr();
+        } catch (Exception e) {
+            log.error("getSignData exception", e);
+        }
+
+        return null;
+    }
+
+    /**
+     * get user from webase-sign api(v1.3.0+)
+     * @return
+     */
+    public RspUserInfo getSignUser() {
+        try {
+            RspUserInfo rspUserInfo = new RspUserInfo();
+            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
+                    EncryptType.encryptType);
+            log.info("getSignData url:{}", url);
+            BaseResponse response =
+                    restTemplate.getForObject(url, BaseResponse.class);
+            log.info("getSignData response:{}", JSON.toJSONString(response));
+            if (response.getCode() == 0) {
+                rspUserInfo = CommonUtils.object2JavaBean(response.getData(), RspUserInfo.class);
+            }
+            return rspUserInfo;
+        } catch (Exception e) {
+            log.error("getSignData exception", e);
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+    }
+
+    public RspUserInfo getSignUserEntity() {
+        try {
+            // webase-sign api(v1.3.0) support
+            RspUserInfo rspUserInfo = new RspUserInfo();
+            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
+            log.info("getSignUserEntity url:{}", url);
+            HttpHeaders headers = CommonUtils.buildHeaders();
+            HttpEntity<String> formEntity =
+                    new HttpEntity<String>(null, headers);
+            ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.GET, formEntity, BaseResponse.class);
+            BaseResponse baseResponse = response.getBody();
+            log.info("getSignUserEntity response:{}", JSON.toJSONString(baseResponse));
+            if (baseResponse.getCode() == 0) {
+                rspUserInfo = CommonUtils.object2JavaBean(baseResponse, RspUserInfo.class);
+            }
+            return rspUserInfo;
+        } catch (ResourceAccessException ex) {
+            log.error("fail restTemplateExchange", ex);
+            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+        } catch (HttpStatusCodeException e) {
+            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
+            log.error("http request fail. error:{}", JSON.toJSONString(error));
+            throw new FrontException(error.getInteger("code"),
+                    error.getString("errorMessage"));
+        } catch (Exception e) {
+            log.error("getSignUserEntity exception", e);
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+    }
+
+    /**
+     * ===================== deprecated ==============
+     */
 
     /**
      * get credential to send transaction
      * 2019/11/26 support guomi
      */
+    @Deprecated
     public Credentials getCredentials(String user) throws FrontException {
         String privateKey = Optional.ofNullable(getPrivateKey(user)).orElse(null);
         if (StringUtils.isBlank(privateKey)) {
@@ -195,24 +263,12 @@ public class KeyStoreService {
         }
         return GenCredential.create(privateKey);
     }
-
-    /**
-     * get credential to send transaction
-     * 2019/11/26 support guomi
-     * @return
-     */
-    // 直接用一个固定的credential，不用每次都新建
-    public Credentials getCredentialsForQuery() {
-        log.debug("start getCredentialsForQuery. ");
-        KeyStoreInfo keyStoreInfo = createKeyStore(KeyTypes.LOCALRANDOM.getValue(), "");
-        return GenCredential.create(keyStoreInfo.getPrivateKey());
-    }
-
     /**
      * get PrivateKey.
      * default use aes encrypt
      * @param user userId or userAddress.
      */
+    @Deprecated
     public String getPrivateKey(String user) {
         boolean useAes = true;
         // get privateKey from map (in memory, not db)
@@ -250,11 +306,6 @@ public class KeyStoreService {
         }
 
         String private_key = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
-//        if (useAes) {
-//            private_key = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
-//        } else {
-//            private_key = keyStoreInfo.getPrivateKey();
-//        }
 
         if (StringUtils.isNotBlank(private_key)) {
             PRIVATE_KEY_MAP.put(key_of_user, private_key);
@@ -264,55 +315,27 @@ public class KeyStoreService {
     }
 
     /**
-     * getSignData from sign service. (webase-sign)
-     * @param params params
-     * @return
-     */
-    public String getSignData(EncodeInfo params) {
-        try {
-            // webase-sign api(v1.3.0) support
-            params.setEncryptType(EncryptType.encryptType);
-            SignInfo signInfo = new SignInfo();
-            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
-            log.info("getSignData url:{}", url);
-            HttpHeaders headers = CommonUtils.buildHeaders();
-            HttpEntity<String> formEntity =
-                    new HttpEntity<String>(JSON.toJSONString(params), headers);
-            BaseResponse response =
-                    restTemplate.postForObject(url, formEntity, BaseResponse.class);
-            log.info("getSignData response:{}", JSON.toJSONString(response));
-            if (response.getCode() == 0) {
-                signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
-            }
-            return signInfo.getSignDataStr();
-        } catch (Exception e) {
-            log.error("getSignData exception", e);
-        }
-
-        return null;
-    }
-
-    /**
      * import keystore info from pem file's content
      * @param pemContent
      * @param userType local
      * @param userName
      * @return
      */
-    public KeyStoreInfo importKeyStoreFromPem(String pemContent, int userType,  String userName) {
-        PEMManager pemManager = new PEMManager();
-        String privateKey;
-        try {
-            pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
-            privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
-        }catch (Exception e) {
-            log.error("importKeyStoreFromPem error:[]", e);
-            throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
-        }
-        // to store
-        getKeyStoreFromPrivateKey(privateKey, userType, userName);
-        return null;
-    }
+//    @Deprecated
+//    public KeyStoreInfo importKeyStoreFromPem(String pemContent, int userType,  String userName) {
+//        PEMManager pemManager = new PEMManager();
+//        String privateKey;
+//        try {
+//            pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
+//            privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
+//        }catch (Exception e) {
+//            log.error("importKeyStoreFromPem error:[]", e);
+//            throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
+//        }
+//        // to store
+//        getKeyStoreFromPrivateKey(privateKey, userType, userName);
+//        return null;
+//    }
 
 }
 

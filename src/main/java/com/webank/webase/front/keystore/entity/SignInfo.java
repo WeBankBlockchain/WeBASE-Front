@@ -17,7 +17,7 @@ package com.webank.webase.front.keystore.entity;
 import lombok.Data;
 
 /**
- * SignInfo.
+ * SignInfo. get from webase-sign
  * 
  */
 @Data

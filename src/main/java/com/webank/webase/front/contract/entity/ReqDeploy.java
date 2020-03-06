@@ -30,8 +30,12 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 @Data
 public class ReqDeploy {
+    /**
+     * address
+     */
     @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
     private String  user;
+
     private String contractName;
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
