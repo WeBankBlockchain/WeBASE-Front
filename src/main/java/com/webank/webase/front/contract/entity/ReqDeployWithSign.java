@@ -24,8 +24,9 @@ import lombok.Data;
 
 /**
  * deployWithSign interface parameter.
- * 
+ * v1.3.0+ default with sign
  */
+@Deprecated
 @Data
 public class ReqDeployWithSign {
     private int groupId = 1;
