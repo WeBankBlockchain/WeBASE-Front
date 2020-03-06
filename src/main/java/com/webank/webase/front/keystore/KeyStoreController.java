@@ -20,6 +20,7 @@ import java.util.List;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.ReqImportPem;
+import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.util.PemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -47,42 +48,20 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "type", value = "private key type", dataType = "int"),
         @ApiImplicitParam(name = "userName", value = "user name", dataType = "String")
     })
-    @RequestMapping(method = RequestMethod.GET)
+    @GetMapping
     public KeyStoreInfo getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
-            @RequestParam(required = false) String userName) {
-        return keyStoreService.createKeyStore(type, userName);
+            @RequestParam String userName) {
+        KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(userName);
+        return keyStoreInfo;
     }
 
-    @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "privateKey", value = "private key", required = true, dataType = "String"),
-        @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
-    })
-    @RequestMapping(method = RequestMethod.GET, value = "/import")
-    public KeyStoreInfo importPrivateKey(@RequestParam String privateKey, @RequestParam String userName) {
-        return keyStoreService.getKeyStoreFromPrivateKey(privateKey, KeyTypes.LOCALUSER.getValue(), userName);
-    }
-
-    @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
-    @ApiImplicitParam(name = "reqImportPem", value = "import pem info", required = true, dataType = "ReqImportPem")
-    @PostMapping("/importPem")
-    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
-        String pemContent = reqImportPem.getPemContent();
-        String userName = reqImportPem.getUserName();
-        if(!pemContent.startsWith(PemUtils.crtContentHead)) {
-            throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
-        }
-        keyStoreService.importKeyStoreFromPem(pemContent, KeyTypes.LOCALUSER.getValue(), userName);
-        return new BaseResponse(ConstantCode.RET_SUCCESS);
-    }
-    
-    @ApiOperation(value = "getKeyStores", notes = "get local KeyStore lists")
-    @RequestMapping(method = RequestMethod.GET, value = "/localKeyStores")
-    public List<KeyStoreInfo> getLocalKeyStores() {
+    @ApiOperation(value = "getKeyStoreList", notes = "get local KeyStore lists")
+    @GetMapping("localKeyStores")
+    public List<KeyStoreInfo> getLocalKeyStoreList() {
         log.info("start getLocalKeyStores.");
-        return keyStoreService.getLocalKeyStores();
+        return keyStoreService.getLocalKeyStoreList();
     }
-    
+
     @ApiOperation(value = "delete", notes = "delete local KeyStore by address")
     @ApiImplicitParam(name = "address", value = "user address", required = true, dataType = "String")
     @DeleteMapping("/{address}")
@@ -91,4 +70,32 @@ public class KeyStoreController extends BaseController {
         keyStoreService.deleteKeyStore(address);
         return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
+
+    /*
+    @Deprecated import api
+     */
+
+//    @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
+//    @ApiImplicitParams({
+//        @ApiImplicitParam(name = "privateKey", value = "private key", required = true, dataType = "String"),
+//        @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
+//    })
+//    @RequestMapping(method = RequestMethod.GET, value = "/import")
+//    public KeyStoreInfo importPrivateKey(@RequestParam String privateKey, @RequestParam String userName) {
+//        return keyStoreService.getKeyStoreFromPrivateKey(privateKey, KeyTypes.LOCALUSER.getValue(), userName);
+//    }
+//
+//    @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
+//    @ApiImplicitParam(name = "reqImportPem", value = "import pem info", required = true, dataType = "ReqImportPem")
+//    @PostMapping("/importPem")
+//    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
+//        String pemContent = reqImportPem.getPemContent();
+//        String userName = reqImportPem.getUserName();
+//        if(!pemContent.startsWith(PemUtils.crtContentHead)) {
+//            throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
+//        }
+//        keyStoreService.importKeyStoreFromPem(pemContent, KeyTypes.LOCALUSER.getValue(), userName);
+//        return new BaseResponse(ConstantCode.RET_SUCCESS);
+//    }
+
 }

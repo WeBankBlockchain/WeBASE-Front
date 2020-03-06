@@ -42,6 +42,7 @@ import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.*;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
@@ -95,6 +96,7 @@ public class TransService {
     /**
      * send transaction.
      */
+    @Deprecated
     public Object transHandle(ReqTransHandle req) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(req));
 
@@ -213,7 +215,7 @@ public class TransService {
         Object response;
         Instant startTime = Instant.now();
         if (cf.getConstant()) {
-            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore( KeyTypes.LOCALRANDOM.getValue(), "");
+            KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
             String callOutput = web3j
                     .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
                             contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)

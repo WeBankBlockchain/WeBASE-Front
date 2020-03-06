@@ -17,16 +17,11 @@
 package com.webank.webase.front.keystore.entity;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.NotBlank;
 
-/**
- * @deprecated not support import
- */
 @Data
-@NoArgsConstructor
-public class ReqImportPem {
-    @NotBlank
-    private String pemContent;
-    private String userName;
+public class RspUserInfo {
+	private String address;
+	private String publicKey;
+	private String description;
+	private Integer encryptType;
 }

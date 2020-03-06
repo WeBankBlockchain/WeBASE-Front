@@ -61,12 +61,13 @@ public class ConstantCode {
     public static final RetCode PRIVATE_KEY_DECODE_FAIL = RetCode.mark(201031, "privateKey decode fail");
     public static final RetCode NO_CONFIG_KEY_SERVER = RetCode.mark(201032, "not found config of keyServer");
     public static final RetCode DATA_SIGN_ERROR = RetCode.mark(201033, "data request sign error");
+    public static final RetCode DATA_SIGN_NOT_ACCESSIBLE = RetCode.mark(201033, "data request sign not accessible");
     public static final RetCode GROUPID_NOT_EXIST = RetCode.mark(201034, "groupId not exist");
     public static final RetCode VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL = RetCode.mark(201035, "version and address cannot all be null");
     public static final RetCode CONTRACT_COMPILE_FAIL = RetCode.mark(201036, "compile fail");
     public static final RetCode USER_NAME_NULL = RetCode.mark(201037, "user name is null");
     public static final RetCode USER_NAME_EXISTS = RetCode.mark(201038, "user name already exists");
-    public static final RetCode PRIVATEKEY_EXISTS = RetCode.mark(201039, "private key already exists");
+    public static final RetCode KEYSTORE_EXISTS = RetCode.mark(201039, "address already exists");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
@@ -129,5 +130,6 @@ public class ConstantCode {
     public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
     public static final RetCode DATA_REPEAT_IN_DB_ERROR = RetCode.mark(201242, "Database error: data already exists in db");
     public static final RetCode DATA_NOT_EXIST_ERROR = RetCode.mark(201243, "Database error: data not exists in db, please check your params");
+
 
 }

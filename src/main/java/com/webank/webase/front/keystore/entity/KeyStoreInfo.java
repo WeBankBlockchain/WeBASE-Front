@@ -29,6 +29,10 @@ public class KeyStoreInfo {
     @Id
     private String address;
     private String publicKey;
+    /**
+     * not store private key in db
+     * only use to query
+     */
     private String privateKey;
     private String userName;
     private int type;
