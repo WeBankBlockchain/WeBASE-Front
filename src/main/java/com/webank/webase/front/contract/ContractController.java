@@ -90,22 +90,23 @@ public class ContractController extends BaseController {
     }
     
     /**
+     * @Deprecated, default with sign
      * deployWithSign.
      *
      * @param reqDeploy request data
      * @param result checkResult
      */
-    @ApiOperation(value = "contract deploy", notes = "contract deploy with WeBASE-Sign")
-    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeployWithSign")
-    @PostMapping("/deployWithSign")
-    public String deployWithSign(@Valid @RequestBody ReqDeployWithSign reqDeploy, BindingResult result)
-            throws Exception {
-        log.info("contract deployWithSign start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
-        checkParamResult(result);
-        String contractAddress = contractService.deployWithSign(reqDeploy);
-        log.info("success deployWithSign. result:{}", contractAddress);
-        return contractAddress;
-    }
+//    @ApiOperation(value = "contract deploy", notes = "contract deploy with WeBASE-Sign")
+//    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeployWithSign")
+//    @PostMapping("/deployWithSign")
+//    public String deployWithSign(@Valid @RequestBody ReqDeployWithSign reqDeploy, BindingResult result)
+//            throws Exception {
+//        log.info("contract deployWithSign start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
+//        checkParamResult(result);
+//        String contractAddress = contractService.deployWithSign(reqDeploy);
+//        log.info("success deployWithSign. result:{}", contractAddress);
+//        return contractAddress;
+//    }
 
 
     /**
