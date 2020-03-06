@@ -181,7 +181,7 @@ public class ContractService {
         if (Objects.nonNull(req.getContractId())) {
             return deployLocalContract(req);
         } else {
-            return deploy(req);
+            return deployWithSign(req);
         }
     }
 
@@ -197,7 +197,7 @@ public class ContractService {
         Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
 
         // deploy
-        String contractAddress = deploy(req);
+        String contractAddress = deployWithSign(req);
         if (StringUtils.isNotBlank(contractAddress)) {
             // save address
             BeanUtils.copyProperties(req, contract);
@@ -213,6 +213,7 @@ public class ContractService {
     /**
      * contract deploy.
      */
+    @Deprecated
     public String deploy(ReqDeploy req) throws Exception {
         String contractName = req.getContractName();
         String version = req.getVersion();
@@ -246,13 +247,10 @@ public class ContractService {
         return contractAddress;
     }
 
-    /**
-     * contract deploy.
-     */
-    public String deployWithSign(ReqDeployWithSign req) throws Exception {
+    public String deployWithSign(ReqDeploy req) throws Exception {
         int groupId = req.getGroupId();
-        String contractAbi = JSON.toJSONString(req.getContractAbi());
-        String contractBin = req.getBytecodeBin();
+        String contractAbiStr = JSON.toJSONString(req.getAbiInfo());
+        String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
 
         // check groupId
@@ -261,7 +259,45 @@ public class ContractService {
             new FrontException(GROUPID_NOT_EXIST);
         }
 
-        // check parameters
+        String contractName = req.getContractName();
+        ContractAbiUtil.VersionEvent versionEvent =
+                ContractAbiUtil.getVersionEventFromAbi(contractName, req.getAbiInfo());
+        String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
+
+
+        // data sign
+        String data = bytecodeBin + encodedConstructor;
+        String signMsg = transService.signMessage(groupId, web3j, req.getUser(), "", data);
+        if (StringUtils.isBlank(signMsg)) {
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+        // send transaction
+        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+        transService.sendMessage(web3j, signMsg, transFuture);
+        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+        String contractAddress = receipt.getContractAddress();
+
+        log.info("success deploy. contractAddress:{}", contractAddress);
+        return contractAddress;
+    }
+
+    /**
+     * contract deploy through webase-sign by raw transaction
+     */
+    @Deprecated
+    public String deployWithSign(ReqDeployWithSign req) throws Exception {
+        int groupId = req.getGroupId();
+        String contractAbi = JSON.toJSONString(req.getContractAbi());
+        String bytecodeBin = req.getBytecodeBin();
+        List<Object> params = req.getFuncParam();
+
+        // check groupId
+        Web3j web3j = web3jMap.get(groupId);
+        if (web3j == null) {
+            new FrontException(GROUPID_NOT_EXIST);
+        }
+
+        // check parameters and get input types
         AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(contractAbi);
         List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
         if (funcInputTypes.size() != params.size()) {
@@ -277,12 +313,12 @@ public class ContractService {
         }
 
         // data sign
-        String data = contractBin + encodedConstructor;
+        String data = bytecodeBin + encodedConstructor;
         String signMsg = transService.signMessage(groupId, web3j, req.getSignAddress(), "", data);
         if (StringUtils.isBlank(signMsg)) {
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
         }
-        // send transaction
+        // send transaction (future callback)
         final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
         transService.sendMessage(web3j, signMsg, transFuture);
         TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
@@ -314,8 +350,11 @@ public class ContractService {
         return encodedConstructor;
     }
 
-    public static String constructorEncoded(String contractName,
-            ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
+    /**
+     * encode constructor function
+     */
+    private static String constructorEncoded(String contractName,
+                                             ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
         // Constructor encoded
         String encodedConstructor = "";
         String functionName = contractName;
