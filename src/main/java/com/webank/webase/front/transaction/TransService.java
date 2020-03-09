@@ -543,6 +543,7 @@ public class TransService {
 
     /**
      * send transaction.
+     * v1.3.0+ default with sign
      */
     @Deprecated
     public Object transHandle(ReqTransHandle req) throws Exception {
@@ -592,6 +593,7 @@ public class TransService {
 
     /**
      * get Credentials by keyUser.
+     * v1.3.0+ default with sign
      */
     @Deprecated
     private Credentials getCredentials(boolean constant, String keyUser) {
@@ -607,7 +609,7 @@ public class TransService {
 
     /**
      * transHandleWithSign.
-     *
+     * v1.3.0+ default with sign
      * @param req request
      */
     @Deprecated
