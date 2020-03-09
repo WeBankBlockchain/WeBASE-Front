@@ -283,6 +283,7 @@ public class ContractService {
 
     /**
      * contract deploy through webase-sign by raw transaction
+     * v1.3.0+ default with sign
      */
     @Deprecated
     public String deployWithSign(ReqDeployWithSign req) throws Exception {
