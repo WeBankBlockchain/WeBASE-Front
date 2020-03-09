@@ -84,7 +84,7 @@ public class KeyStoreService {
                     return criteriaBuilder.and(predicate);
                 }, sort);
         // make sure not transport private key
-        keyStores.forEach(keyStoreInfo -> keyStoreInfo.setPrivateKey(""));
+        keyStores.forEach(keyStoreInfo -> keyStoreInfo.setPrivateKey(null));
         return keyStores;
     }
 
