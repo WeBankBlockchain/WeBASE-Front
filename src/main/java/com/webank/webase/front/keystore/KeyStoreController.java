@@ -22,6 +22,7 @@ import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.ReqImportPem;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.util.PemUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.webank.webase.front.base.controller.BaseController;
@@ -51,6 +52,10 @@ public class KeyStoreController extends BaseController {
     @GetMapping
     public KeyStoreInfo getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
             @RequestParam String userName) {
+        if (StringUtils.isBlank(userName)) {
+            log.error("fail createKeyStore. user name is null.");
+            throw new FrontException(ConstantCode.USER_NAME_NULL);
+        }
         KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(userName);
         return keyStoreInfo;
     }
