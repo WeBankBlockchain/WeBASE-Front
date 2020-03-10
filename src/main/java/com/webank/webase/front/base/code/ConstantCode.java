@@ -55,7 +55,7 @@ public class ConstantCode {
     public static final RetCode INVALID_CONTRACT_ID = RetCode.mark(201025, "invalid contract id");
     public static final RetCode CONTRACT_HAS_BEAN_DEPLOYED = RetCode.mark(201026, "contract has been deployed");
     public static final RetCode SEND_ABI_INFO_FAIL = RetCode.mark(201027, "send abiInfo fail");
-    public static final RetCode CONTRACT_BIN_NULL = RetCode.mark(201028, "contractBin is null");
+    public static final RetCode CONTRACT_BIN_NULL = RetCode.mark(201028, "bytecodeBin is null");
     public static final RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(201029, "contractAddress is null");
     public static final RetCode CONTRACT_ADDRESS_INVALID = RetCode.mark(201030, "contractAddress invalid");
     public static final RetCode PRIVATE_KEY_DECODE_FAIL = RetCode.mark(201031, "privateKey decode fail");
