@@ -19,7 +19,6 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
-import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
