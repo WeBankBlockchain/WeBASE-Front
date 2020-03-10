@@ -210,6 +210,54 @@ public class ContractService {
         return contractAddress;
     }
 
+    public String deployWithSign(ReqDeploy req) throws Exception {
+        int groupId = req.getGroupId();
+        String version = req.getVersion();
+        List<AbiDefinition> abiInfos = req.getAbiInfo();
+        String bytecodeBin = req.getBytecodeBin();
+        List<Object> params = req.getFuncParam();
+
+        // check groupId
+        Web3j web3j = web3jMap.get(groupId);
+        if (web3j == null) {
+            new FrontException(GROUPID_NOT_EXIST);
+        }
+
+        String contractName = req.getContractName();
+        ContractAbiUtil.VersionEvent versionEvent =
+                ContractAbiUtil.getVersionEventFromAbi(contractName, req.getAbiInfo());
+        String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
+
+
+        // data sign
+        String data = bytecodeBin + encodedConstructor;
+        String signMsg = transService.signMessage(groupId, web3j, req.getUser(), "", data);
+        if (StringUtils.isBlank(signMsg)) {
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+        // send transaction
+        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+        transService.sendMessage(web3j, signMsg, transFuture);
+        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+        String contractAddress = receipt.getContractAddress();
+
+        // save to cns
+        if (version != null) {
+            checkContractAbiExistedAndSave(contractName, version, abiInfos);
+            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
+                    JSON.toJSONString(abiInfos));
+            cnsMap.put(contractName + ":" + version, contractAddress);
+        } else {
+            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
+            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
+                    contractAddress, JSON.toJSONString(abiInfos));
+            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
+        }
+
+        log.info("success deploy. contractAddress:{}", contractAddress);
+        return contractAddress;
+    }
+
     /**
      * contract deploy.
      */
@@ -243,40 +291,6 @@ public class ContractService {
                     contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
         }
-        log.info("success deploy. contractAddress:{}", contractAddress);
-        return contractAddress;
-    }
-
-    public String deployWithSign(ReqDeploy req) throws Exception {
-        int groupId = req.getGroupId();
-        String contractAbiStr = JSON.toJSONString(req.getAbiInfo());
-        String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam();
-
-        // check groupId
-        Web3j web3j = web3jMap.get(groupId);
-        if (web3j == null) {
-            new FrontException(GROUPID_NOT_EXIST);
-        }
-
-        String contractName = req.getContractName();
-        ContractAbiUtil.VersionEvent versionEvent =
-                ContractAbiUtil.getVersionEventFromAbi(contractName, req.getAbiInfo());
-        String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
-
-
-        // data sign
-        String data = bytecodeBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, web3j, req.getUser(), "", data);
-        if (StringUtils.isBlank(signMsg)) {
-            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-        }
-        // send transaction
-        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-        transService.sendMessage(web3j, signMsg, transFuture);
-        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-        String contractAddress = receipt.getContractAddress();
-
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }
