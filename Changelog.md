@@ -1,12 +1,13 @@
 ### v1.2.3 (2020-03-11)
 
 **Add**
-- 支持通过RabbitMQ订阅出块事件通知、合约Event事件通知
-- 新增事件通知订阅接口`/event/newBlockEvent`, `/event/contractEvent`
+- 可搭建RabbitMQ连接WeBASE-Front，接收链上事件通知
+- 支持应用层订阅出块事件、合约Event事件
+- WeBASE-Front新增事件通知订阅接口`/event/newBlockEvent`, `/event/contractEvent`
+- 新增[WeBASE-Event-Client](https://github.com/WeBankFinTech/WeBASE-Event-Client)工程，可测试链上事件通知。
 
 **Fix**
-- 优化：优化并发性能
-- bugfix：设置群组接口GroupSize为KB(1024B)
+- 优化：优化了WeBASE-Sign的国密签名性能，子系统间通过长连接，提升了交易链路的整体性能
 - bugifx: 升级jackson与log4j包
 - bugifx: 修复接口`deployWithSign`的`contractBin`字段，改为`bytecodeBin`
 
