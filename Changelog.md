@@ -1,3 +1,28 @@
+### v1.2.3 (2020-03-11)
+
+**Add**
+- 支持通过RabbitMQ订阅出块事件通知、合约Event事件通知
+- 新增事件通知订阅接口`/event/newBlockEvent`, `/event/contractEvent`
+
+**Fix**
+- 优化：优化并发性能
+- bugfix：设置群组接口GroupSize为KB(1024B)
+- bugifx: 升级jackson与log4j包
+- bugifx: 修复接口`deployWithSign`的`contractBin`字段，改为`bytecodeBin`
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 及以上版本
+- WeBASE-Web v1.2.2+
+- WeBASE-Node-Manager v1.2.2+
+- WeBASE-Sign v1.2.2+
+- WeBASE-Transaction v1.2.2+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 ### v1.2.2 (2020-01-02)
 
 **Add**
