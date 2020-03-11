@@ -65,7 +65,7 @@ constant:
   keyServer: 127.0.0.1:5001,127.0.0.1:5004 # webase-node-mgr或webase-sign，英文逗号相隔（不带空格）
   transMaxWait: 30
   monitorDisk: /
-  monitorEnabled: false
+  monitorEnabled: true
   aesKey: EfdsW23D23d3df43
   nodePath: /fisco/nodes/127.0.0.1/node0
   http_read_timeOut: 100000
