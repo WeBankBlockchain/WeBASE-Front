@@ -240,7 +240,7 @@ export default {
 
         },
         addUser: function () {
-            queryCreatePrivateKey({ useAes: false, type: 0, userName: this.userForm.userName })
+            queryCreatePrivateKey({ type: 0, userName: this.userForm.userName })
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {

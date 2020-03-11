@@ -759,8 +759,7 @@ export default {
                 user: val.userId,
                 contractName: this.contractName,
                 contractId: this.data.id,
-                contractPath: this.data.contractPath,
-                useAes: false
+                contractPath: this.data.contractPath
             };
             this.version = val.version;
             if (val.params.length) {

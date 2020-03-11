@@ -234,8 +234,7 @@ export default {
                 version: this.contractVersion,
                 funcName: functionName || "",
                 funcParam: this.transation.funcValue,
-                contractAddress: this.contractAddress,
-                useAes: false
+                contractAddress: this.contractAddress
             };
             sendTransation(data)
                 .then(res => {

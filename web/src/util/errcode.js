@@ -36,10 +36,6 @@ let errCode = {
         en: "user cannot be empty",
         zh: '用户编号不能为空'
     },
-    "201003": {
-        en: "useAes cannot be empty",
-        zh: 'useAes不能为空'
-    },
     "201004": {
         en: "version cannot be empty",
         zh: '版本号不能为空'
@@ -157,8 +153,8 @@ let errCode = {
         zh: '找不到keyServer的配置'
     },
     "201033": {
-        en: "cloud sign fail",
-        zh: '云标志失败'
+        en: "data request sign not accessible",
+        zh: '数据请求标志不可访问'
     },
     "201034": {
         en: "groupId not exist",
@@ -177,8 +173,8 @@ let errCode = {
         zh: '用户名已经存在'
     },
     "201039": {
-        en: "private key already exists",
-        zh: '私钥已经存在'
+        en: "address already exists",
+        zh: '地址已经存在'
     }, 
     "201100": {
         en: "Params not fit",

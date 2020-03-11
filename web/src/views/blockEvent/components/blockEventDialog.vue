@@ -21,7 +21,7 @@
             </el-form-item>
             <el-form-item :label="$t('table.groupId')" prop="groupId">
                 <el-select v-model="blockEventForm.groupId" :placeholder="$t('placeholder.selected')">
-                    <el-option v-for=" item in groupList" :label="item.groupName" :value="item.group"></el-option>
+                    <el-option v-for=" item in groupList" :key="item.group" :label="item.groupName" :value="item.group"></el-option>
                 </el-select>
             </el-form-item>
         </el-form>
