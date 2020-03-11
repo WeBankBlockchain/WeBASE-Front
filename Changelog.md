@@ -1,3 +1,29 @@
+### v1.2.3 (2020-03-11)
+
+**Add**
+- 可搭建RabbitMQ连接WeBASE-Front，接收链上事件通知
+- 支持应用层订阅出块事件、合约Event事件
+- WeBASE-Front新增事件通知订阅接口`/event/newBlockEvent`, `/event/contractEvent`
+- 新增[WeBASE-Event-Client](https://github.com/WeBankFinTech/WeBASE-Event-Client)工程，可测试链上事件通知。
+
+**Fix**
+- 优化：优化了WeBASE-Sign的国密签名性能，子系统间通过长连接，提升了交易链路的整体性能
+- bugifx: 升级jackson与log4j包
+- bugifx: 修复接口`deployWithSign`的`contractBin`字段，改为`bytecodeBin`
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 及以上版本
+- WeBASE-Web v1.2.2+
+- WeBASE-Node-Manager v1.2.2+
+- WeBASE-Sign v1.2.2+
+- WeBASE-Transaction v1.2.2+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 ### v1.2.2 (2020-01-02)
 
 **Add**
