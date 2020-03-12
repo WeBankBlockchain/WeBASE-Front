@@ -38,8 +38,11 @@ public class CredentialUtils extends GenCredential {
     }
     public static ECKeyPair createKeyPair() {
         // use guomi
-        if (EncryptType.encryptType == 1) return createGuomiKeyPair();
-        return createECDSAKeyPair(); // default use ECDSA
+        if (EncryptType.encryptType == 1) {
+            return createGuomiKeyPair();
+        }
+        // default use ECDSA
+        return createECDSAKeyPair();
     }
 
     private static ECKeyPair createECDSAKeyPair() {
@@ -55,7 +58,9 @@ public class CredentialUtils extends GenCredential {
     private static ECKeyPair createGuomiKeyPair(String privKey) {
         SM2KeyGenerator generator = new SM2KeyGenerator();
         final KeyPair keyPairData = generator.generateKeyPair(privKey);
-        if (keyPairData != null) return genEcPairFromKeyPair(keyPairData);
+        if (keyPairData != null) {
+            return genEcPairFromKeyPair(keyPairData);
+        }
         return null;
     }
 

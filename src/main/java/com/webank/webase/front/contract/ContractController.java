@@ -122,7 +122,7 @@ public class ContractController extends BaseController {
         BindingResult result) throws FrontException, IOException {
         log.info("compileJavaFile start. reqSendAbi:{}", JSON.toJSONString(param));
         checkParamResult(result);
-        FileContentHandle fileContentHandle = contractService
+        FileContentHandle fileContentHandle = ContractService
             .compileToJavaFile(param.getContractName(), param.getAbiInfo(), param.getContractBin(),
                 param.getPackageName());
         return ResponseEntity.ok().headers(headers(fileContentHandle.getFileName()))

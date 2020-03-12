@@ -13,8 +13,8 @@
  */
 package com.webank.webase.front.transaction;
 
+
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
@@ -26,10 +26,7 @@ import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
-import com.webank.webase.front.transaction.entity.ContractFunction;
-import com.webank.webase.front.transaction.entity.ContractOfTrans;
-import com.webank.webase.front.transaction.entity.ReqTransHandle;
-import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
+import com.webank.webase.front.transaction.entity.*;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
@@ -54,6 +51,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
+import org.fisco.bcos.web3j.tx.TransactionManager;
 import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
@@ -64,8 +62,11 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
@@ -90,6 +91,7 @@ public class TransService {
     private Constants constants;
     @Autowired
     private ContractRepository contractRepository;
+
 
     /**
      * send transaction.
@@ -178,6 +180,7 @@ public class TransService {
 
         // trans handle
         Object response = "";
+        Instant startTime = Instant.now();
         if (cf.getConstant()) {
             KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(false, KeyTypes.LOCALRANDOM.getValue(), "");
             String callOutput = web3j
@@ -197,16 +200,19 @@ public class TransService {
             if (StringUtils.isBlank(signMsg)) {
                 throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
             }
+           Instant nodeStartTime = Instant.now();
             // send transaction
             final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
             sendMessage(web3j, signMsg, transFuture);
+            //todo
             TransactionReceipt receipt =
                     transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
             response = receipt;
-        }
+            log.info("***node cost time***: {}", Duration.between(nodeStartTime, Instant.now()).toMillis());
 
-        log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(),
-                JSON.toJSONString(response));
+        }
+        log.info("***transaction total cost time***: {}", Duration.between(startTime, Instant.now()).toMillis());
+        log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(), JSON.toJSONString(response));
         return response;
     }
 
@@ -301,6 +307,8 @@ public class TransService {
     public static TransactionReceipt execTransaction(Function function,
                                                      CommonContract commonContract) throws FrontException {
         TransactionReceipt transactionReceipt = null;
+        Instant startTime = Instant.now();
+        log.info("execTransaction start startTime:{}", startTime.toEpochMilli());
         try {
             transactionReceipt = commonContract.execTransaction(function);
         } catch (IOException | TransactionException | ContractCallException e) {
@@ -308,6 +316,8 @@ public class TransService {
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
                     e.getMessage());
         }
+        log.info("execTransaction end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
         return transactionReceipt;
     }
 
@@ -320,15 +330,16 @@ public class TransService {
      * @return
      */
     public String signMessage(int groupId, Web3j web3j, int userId, String contractAddress,
-                              String data) throws IOException, FrontException {
+                              String data) throws  FrontException {
         Random r = new Random();
         BigInteger randomid = new BigInteger(250, r);
+
         BigInteger blockLimit = web3j.getBlockNumberCache();
-        String versionContent = web3j.getNodeVersion().sendForReturnString();
-        String signMsg = "";
+        String versionContent = Constants.version;
+        String signMsg ;
         if (versionContent.contains("2.0.0-rc1") || versionContent.contains("release-2.0.1")) {
             RawTransaction rawTransaction = RawTransaction.createTransaction(randomid,
-                    constants.GAS_PRICE, constants.GAS_LIMIT, blockLimit, contractAddress,
+                    Constants.GAS_PRICE, Constants.GAS_LIMIT, blockLimit, contractAddress,
                     BigInteger.ZERO, data);
             byte[] encodedTransaction = TransactionEncoder.encode(rawTransaction);
             String encodedDataStr = Numeric.toHexString(encodedTransaction);
@@ -336,7 +347,7 @@ public class TransService {
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setUserId(userId);
             encodeInfo.setEncodedDataStr(encodedDataStr);
-            String signDataStr = keyStoreService.getSignDate(encodeInfo);
+            String signDataStr = keyStoreService.getSignData(encodeInfo);
             if (StringUtils.isBlank(signDataStr)) {
                 log.warn("deploySend get sign data error.");
                 return null;
@@ -346,10 +357,11 @@ public class TransService {
             byte[] signedMessage = TransactionEncoder.encode(rawTransaction, signData);
             signMsg = Numeric.toHexString(signedMessage);
         } else {
-            String chainId = (String) JSONObject.parseObject(versionContent).get("Chain Id");
+            //String chainId = versionContent.get("Chain Id");
+            String chainId = Constants.chainId;
             ExtendedRawTransaction extendedRawTransaction =
-                    ExtendedRawTransaction.createTransaction(randomid, constants.GAS_PRICE,
-                            constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, data,
+                    ExtendedRawTransaction.createTransaction(randomid, Constants.GAS_PRICE,
+                            Constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, data,
                             new BigInteger(chainId), BigInteger.valueOf(groupId), "");
             byte[] encodedTransaction = ExtendedTransactionEncoder.encode(extendedRawTransaction);
             String encodedDataStr = Numeric.toHexString(encodedTransaction);
@@ -357,7 +369,13 @@ public class TransService {
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setUserId(userId);
             encodeInfo.setEncodedDataStr(encodedDataStr);
-            String signDataStr = keyStoreService.getSignDate(encodeInfo);
+
+            Instant startTime = Instant.now();
+
+            String signDataStr = keyStoreService.getSignData(encodeInfo);
+
+            log.info("get signdatastr cost time: {}", Duration.between(startTime, Instant.now()).toMillis());
+
             if (StringUtils.isBlank(signDataStr)) {
                 log.warn("deploySend get sign data error.");
                 return null;
@@ -368,7 +386,8 @@ public class TransService {
                     ExtendedTransactionEncoder.encode(extendedRawTransaction, signData);
             signMsg = Numeric.toHexString(signedMessage);
         }
-        return signMsg;
+            return signMsg;
+
     }
 
 
@@ -512,4 +531,9 @@ public class TransService {
         }
         return web3j;
     }
+
+
 }
+
+
+
