@@ -124,5 +124,9 @@ public class ConstantCode {
     public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
     public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201233, "Pem file content error");
 
+    // mq error
+    public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
+    public static final RetCode DATA_REPEAT_IN_DB_ERROR = RetCode.mark(201242, "Database error: data already exists in db(appId, address repeat)");
+    public static final RetCode BLOCK_RANGE_PARAM_INVALID = RetCode.mark(201243, "Block range error, from/toBlock must greater than 0, toBlock must be greater than fromBlock");
 
 }

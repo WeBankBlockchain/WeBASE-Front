@@ -20,7 +20,18 @@ package com.webank.webase.front.base.enums;
  */
 public enum KeyTypes {
 
-    LOCALUSER(0), LOCALRANDOM(1), EXTERNALUSER(2);
+    /**
+     * local db's user
+     */
+    LOCALUSER(0),
+    /**
+     * created random user for query
+     */
+    LOCALRANDOM(1),
+    /**
+     * external user
+     */
+    EXTERNALUSER(2);
 
     private int value;
 

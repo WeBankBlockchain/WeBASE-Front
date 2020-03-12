@@ -16,6 +16,9 @@
 package com.webank.webase.front.base.properties;
 
 import java.math.BigInteger;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -54,9 +57,10 @@ public class Constants {
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI = "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
     public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
-    public static final String account1Path = "node.key";
-
+    public static final String ACCOUNT1_PATH = "node.key";
     public static final String CONSTANT_PREFIX = "constant";
+    public static  String version;
+    public static String chainId;
     private String nodeDir = "";
     private String keyServer = "127.0.0.1:8080";
     private int transMaxWait = 30;
@@ -64,5 +68,12 @@ public class Constants {
     private boolean monitorEnabled = true;
     private String aesKey = "4d5dFr4fG446GBde";
     private String nodePath = "/fisco/nodes/127.0.0.1/node0";
+
+    private int http_read_timeOut = 10000;
+    private int http_connect_timeOut = 10000;
+    private int restTemplateMaxTotal = 1000;
+    private int restTemplateMaxPerRoute = 100;
+    private int keepAliveRequests = 100;
+    private int KeepAliveTimeout = 10;
 
 }
