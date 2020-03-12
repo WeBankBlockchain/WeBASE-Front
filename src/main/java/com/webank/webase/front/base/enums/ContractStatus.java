@@ -20,7 +20,18 @@ package com.webank.webase.front.base.enums;
  */
 public enum ContractStatus {
 
-    NOTDEPLOYED(1), DEPLOYED(2), DEPLOYMENTFAILED(3);
+    /**
+     * not deployed
+     */
+    NOTDEPLOYED(1),
+    /**
+     * deployed
+     */
+    DEPLOYED(2),
+    /**
+     * fail to deploy
+     */
+    DEPLOYMENTFAILED(3);
 
     private int value;
 
