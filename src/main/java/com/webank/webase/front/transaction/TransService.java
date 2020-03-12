@@ -308,6 +308,8 @@ public class TransService {
 
         BigInteger blockLimit = web3j.getBlockNumberCache();
         String versionContent = Constants.version;
+        // get user's uuidUser
+        String uuidUser = keyStoreService.getUuidUserByAddress(address);
         String signMsg ;
         if (versionContent.contains("2.0.0-rc1") || versionContent.contains("release-2.0.1")) {
             RawTransaction rawTransaction = RawTransaction.createTransaction(randomid,
@@ -317,7 +319,7 @@ public class TransService {
             String encodedDataStr = Numeric.toHexString(encodedTransaction);
 
             EncodeInfo encodeInfo = new EncodeInfo();
-            encodeInfo.setAddress(address);
+            encodeInfo.setUuidUser(uuidUser);
             encodeInfo.setEncryptType(EncryptType.encryptType);
             encodeInfo.setEncodedDataStr(encodedDataStr);
             String signDataStr = keyStoreService.getSignData(encodeInfo);
@@ -340,7 +342,7 @@ public class TransService {
             String encodedDataStr = Numeric.toHexString(encodedTransaction);
 
             EncodeInfo encodeInfo = new EncodeInfo();
-            encodeInfo.setAddress(address);
+            encodeInfo.setUuidUser(uuidUser);
             encodeInfo.setEncryptType(EncryptType.encryptType);
             encodeInfo.setEncodedDataStr(encodedDataStr);
 

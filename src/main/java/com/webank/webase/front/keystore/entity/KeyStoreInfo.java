@@ -36,4 +36,8 @@ public class KeyStoreInfo {
     private String privateKey;
     private String userName;
     private int type;
+    /**
+     * webase-sign uuidUser
+     */
+    private String uuidUser;
 }
