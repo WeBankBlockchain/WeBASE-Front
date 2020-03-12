@@ -92,7 +92,8 @@ public class KeyStoreService {
      * create key store and save
      */
     public KeyStoreInfo createKeyStore(String userName) {
-        RspUserInfo rspUserInfo = getSignUserEntity();
+        String uuidUser = UUID.randomUUID().toString().replaceAll("-","");
+        RspUserInfo rspUserInfo = getSignUserEntity(uuidUser);
         String address = rspUserInfo.getAddress();
         KeyStoreInfo checkAddressExist = keystoreRepository.findByAddress(address);
         if(Objects.nonNull(checkAddressExist)) {
@@ -106,6 +107,7 @@ public class KeyStoreService {
         keyStoreInfo.setAddress(address);
         keyStoreInfo.setPublicKey(rspUserInfo.getPublicKey());
         keyStoreInfo.setUserName(userName);
+        keyStoreInfo.setUuidUser(uuidUser);
         keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
         return keystoreRepository.save(keyStoreInfo);
     }
@@ -173,8 +175,6 @@ public class KeyStoreService {
      */
     public String getSignData(EncodeInfo params) {
         try {
-            // webase-sign api(v1.3.0) support
-            params.setEncryptType(EncryptType.encryptType);
             SignInfo signInfo = new SignInfo();
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             log.info("getSignData url:{}", url);
@@ -197,32 +197,15 @@ public class KeyStoreService {
 
     /**
      * get user from webase-sign api(v1.3.0+)
+     * @param uuidUser unique user id to call webase-sign
      * @return
      */
-    public RspUserInfo getSignUser() {
-        try {
-            RspUserInfo rspUserInfo = new RspUserInfo();
-            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
-                    EncryptType.encryptType);
-            log.info("getSignData url:{}", url);
-            BaseResponse response =
-                    restTemplate.getForObject(url, BaseResponse.class);
-            log.info("getSignData response:{}", JSON.toJSONString(response));
-            if (response.getCode() == 0) {
-                rspUserInfo = CommonUtils.object2JavaBean(response.getData(), RspUserInfo.class);
-            }
-            return rspUserInfo;
-        } catch (Exception e) {
-            log.error("getSignData exception", e);
-            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-        }
-    }
-
-    public RspUserInfo getSignUserEntity() {
+    public RspUserInfo getSignUserEntity(String uuidUser) {
         try {
             // webase-sign api(v1.3.0) support
             RspUserInfo rspUserInfo = new RspUserInfo();
-            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(), EncryptType.encryptType);
+            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
+                    EncryptType.encryptType, uuidUser);
             log.info("getSignUserEntity url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
             HttpEntity<String> formEntity =
@@ -246,6 +229,14 @@ public class KeyStoreService {
             log.error("getSignUserEntity exception", e);
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
         }
+    }
+
+    public String getUuidUserByAddress(String address) {
+        KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
+        if (Objects.isNull(keyStoreInfo)) {
+            throw new FrontException(ConstantCode.KEYSTORE_NOT_EXIST);
+        }
+        return keyStoreInfo.getUuidUser();
     }
 
     /**

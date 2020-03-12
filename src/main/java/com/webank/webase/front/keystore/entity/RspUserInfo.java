@@ -20,6 +20,7 @@ import lombok.Data;
 
 @Data
 public class RspUserInfo {
+	private String uuidUser;
 	private String address;
 	private String publicKey;
 	private String description;
