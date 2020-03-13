@@ -126,7 +126,7 @@ public class EventController {
         if (pageNumber == null || pageSize == null) {
              resList = eventService.getNewBlockInfoList(groupId);
         } else {
-            if (pageNumber <= 1) {
+            if (pageNumber < 1) {
                 return new BasePageResponse(ConstantCode.PARAM_ERROR, null, 0);
             }
             Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
@@ -185,7 +185,7 @@ public class EventController {
         if (pageNumber == null || pageSize == null) {
             resList = eventService.getContractEventInfoList(groupId);
         } else {
-            if (pageNumber <= 1) {
+            if (pageNumber < 1) {
                 return new BasePageResponse(ConstantCode.PARAM_ERROR, null, 0);
             }
             Pageable pageable = new PageRequest(pageNumber - 1, pageSize,

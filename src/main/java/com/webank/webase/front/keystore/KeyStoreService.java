@@ -116,7 +116,7 @@ public class KeyStoreService {
      * deleteKeyStore.
      */
     public void deleteKeyStore(String address) {
-        keystoreRepository.delete(address);;
+        keystoreRepository.delete(address);
     }
 
     /**
