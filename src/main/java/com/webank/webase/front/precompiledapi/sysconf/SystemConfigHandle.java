@@ -36,4 +36,6 @@ public class SystemConfigHandle {
     private String configKey;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONFIG_VALUE_IS_EMPTY)
     private String configValue;
+    @Deprecated
+    private String fromAddress;
 }

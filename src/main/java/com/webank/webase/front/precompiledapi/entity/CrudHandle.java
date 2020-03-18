@@ -28,4 +28,6 @@ public class CrudHandle {
     @NotBlank(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String signUserId;
     private String sql;
+    @Deprecated
+    private String fromAddress;
 }
