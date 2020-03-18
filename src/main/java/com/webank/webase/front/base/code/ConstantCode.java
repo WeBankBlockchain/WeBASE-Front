@@ -26,7 +26,8 @@ public class ConstantCode {
 
     /* paramaters check */
     public static final RetCode PARAM_FAIL_GROUP_ID_IS_EMPTY =  RetCode.mark(201001, "groupId cannot be empty");
-    public static final String PARAM_FAIL_USER_IS_EMPTY = "{\"code\":201002,\"message\":\"user cannot be empty\"}";
+    public static final String PARAM_FAIL_USER_IS_EMPTY_STRING = "{\"code\":201002,\"message\":\"user cannot be empty\"}";
+    public static final RetCode PARAM_FAIL_USER_IS_EMPTY = RetCode.mark(201002, "user cannot be empty");
     public static final String PARAM_FAIL_USEAES_IS_EMPTY =
         "{\"code\":201003,\"message\":\"useAes cannot be empty\"}";
     public static final String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"message\":\"version cannot be empty\"}";
