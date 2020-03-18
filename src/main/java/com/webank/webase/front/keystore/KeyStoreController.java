@@ -47,17 +47,34 @@ public class KeyStoreController extends BaseController {
     @ApiOperation(value = "getKeyStore", notes = "get key store info")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "type", value = "private key type", dataType = "int"),
-        @ApiImplicitParam(name = "userName", value = "user name", dataType = "String")
+        @ApiImplicitParam(name = "appId", value = "app that user belong to", dataType = "String"),
+        @ApiImplicitParam(name = "signUserId", value = "user id of webase-sign", dataType = "String"),
+        @ApiImplicitParam(name = "userName", value = "user name", dataType = "String"),
     })
     @GetMapping
     public KeyStoreInfo getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
-            @RequestParam String userName) {
-        if (StringUtils.isBlank(userName)) {
-            log.error("fail createKeyStore. user name is null.");
-            throw new FrontException(ConstantCode.USER_NAME_NULL);
+                                    @RequestParam(required = false) String appId,
+                                    @RequestParam(required = false) String signUserId,
+                                    @RequestParam String userName) {
+        // external key store (2)
+        if (KeyTypes.EXTERNALUSER.getValue() == type) {
+            if (StringUtils.isBlank(signUserId) || StringUtils.isBlank(appId)) {
+                throw new FrontException(ConstantCode.PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY);
+            }
+            // create from webase-sign
+            return keyStoreService.createKeyStore(signUserId, appId);
+        } else if (KeyTypes.LOCALUSER.getValue() == type){
+            // local key store (0)
+            if (StringUtils.isBlank(userName)) {
+                log.error("fail createKeyStore. user name is null.");
+                throw new FrontException(ConstantCode.USER_NAME_NULL);
+            }
+            // create locally
+            return keyStoreService.createKeyStore(userName);
+        } else {
+            log.error("fail createKeyStore. key store type invalid");
+            throw new FrontException(ConstantCode.PARAM_VAILD_FAIL);
         }
-        KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStore(userName);
-        return keyStoreInfo;
     }
 
     @ApiOperation(value = "getKeyStoreList", notes = "get local KeyStore lists")

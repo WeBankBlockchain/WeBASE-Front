@@ -22,9 +22,9 @@ import lombok.Data;
 @Data
 public class EncodeInfo {
     /**
-     * userId deprecated, use uuidUser instead
+     * userId deprecated, use signUserId instead
      */
-    private String uuidUser;
+    private String signUserId;
     private String encodedDataStr;
     private Integer encryptType;
 }
