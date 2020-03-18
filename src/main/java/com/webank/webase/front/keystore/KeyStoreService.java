@@ -89,26 +89,48 @@ public class KeyStoreService {
     }
 
     /**
-     * create key store and save
+     * create key store locally and save
      */
     public KeyStoreInfo createKeyStore(String userName) {
-        String uuidUser = UUID.randomUUID().toString().replaceAll("-","");
-        RspUserInfo rspUserInfo = getSignUserEntity(uuidUser);
-        String address = rspUserInfo.getAddress();
-        KeyStoreInfo checkAddressExist = keystoreRepository.findByAddress(address);
-        if(Objects.nonNull(checkAddressExist)) {
-            throw new FrontException(ConstantCode.KEYSTORE_EXISTS);
-        }
-        KeyStoreInfo checkUserNameExist = keystoreRepository.findByUserName(userName);
-        if(Objects.nonNull(checkUserNameExist)) {
+        log.info("start createKeyStore. userName:{}", userName);
+        // check keyStoreInfoLocal
+        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByUserNameAndType(userName,
+                KeyTypes.LOCALUSER.getValue());
+        if (Objects.nonNull(keyStoreInfoLocal)) {
+            log.error("fail createKeyStore. user name already exists.");
             throw new FrontException(ConstantCode.USER_NAME_EXISTS);
         }
+        // create keyPair(support guomi)
+        KeyStoreInfo keyStoreInfo;
+        try {
+            ECKeyPair keyPair = GenCredential.createKeyPair();
+            keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
+            keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
+        } catch (Exception e) {
+            log.error("fail createKeyStore.", e);
+            throw new FrontException("create keyInfo failed");
+        }
+        return keystoreRepository.save(keyStoreInfo);
+    }
+
+
+    /**
+     * create keystore by webase-sign and not save
+     * @param signUserId
+     * @param appId
+     * @return
+     */
+    public KeyStoreInfo createKeyStore(String signUserId, String appId) {
+        // String signUserId = UUID.randomUUID().toString().replaceAll("-","");
+        // String appId = UUID.randomUUID().toString().replaceAll("-","");
+        RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId);
+        String address = rspUserInfo.getAddress();
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setAddress(address);
         keyStoreInfo.setPublicKey(rspUserInfo.getPublicKey());
-        keyStoreInfo.setUserName(userName);
-        keyStoreInfo.setUuidUser(uuidUser);
-        keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
+        keyStoreInfo.setSignUserId(rspUserInfo.getSignUserId());
+        keyStoreInfo.setAppId(rspUserInfo.getAppId());
+        keyStoreInfo.setType(KeyTypes.EXTERNALUSER.getValue());
         return keystoreRepository.save(keyStoreInfo);
     }
 
@@ -132,8 +154,8 @@ public class KeyStoreService {
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setPublicKey(publicKey);
         keyStoreInfo.setAddress(address);
+        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
         keyStoreInfo.setUserName(userName);
-        keyStoreInfo.setPrivateKey(privateKey);
         return keyStoreInfo;
     }
 
@@ -197,15 +219,15 @@ public class KeyStoreService {
 
     /**
      * get user from webase-sign api(v1.3.0+)
-     * @param uuidUser unique user id to call webase-sign
+     * @param signUserId unique user id to call webase-sign
      * @return
      */
-    public RspUserInfo getSignUserEntity(String uuidUser) {
+    public RspUserInfo getSignUserEntity(String signUserId, String appId) {
         try {
             // webase-sign api(v1.3.0) support
             RspUserInfo rspUserInfo = new RspUserInfo();
             String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
-                    EncryptType.encryptType, uuidUser);
+                    EncryptType.encryptType, signUserId, appId);
             log.info("getSignUserEntity url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
             HttpEntity<String> formEntity =
@@ -231,12 +253,17 @@ public class KeyStoreService {
         }
     }
 
-    public String getUuidUserByAddress(String address) {
+    /**
+     * get signUserId by address
+     * @param address
+     * @return signUserId
+     */
+    public String getSignUserIdByAddress(String address) {
         KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
         if (Objects.isNull(keyStoreInfo)) {
             throw new FrontException(ConstantCode.KEYSTORE_NOT_EXIST);
         }
-        return keyStoreInfo.getUuidUser();
+        return keyStoreInfo.getSignUserId();
     }
 
     /**
