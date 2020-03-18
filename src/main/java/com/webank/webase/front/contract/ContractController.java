@@ -20,6 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
+
+import com.webank.webase.front.contract.entity.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -41,16 +44,6 @@ import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ContractPath;
-import com.webank.webase.front.contract.entity.ReqContractCompile;
-import com.webank.webase.front.contract.entity.ReqContractPath;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
-import com.webank.webase.front.contract.entity.RspContractCompile;
-import com.webank.webase.front.contract.entity.FileContentHandle;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -81,10 +74,14 @@ public class ContractController extends BaseController {
     @PostMapping("/deployWithSign")
     public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
         throws Exception {
-        log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
+        log.info("contract deployWithSign start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
+        if (StringUtils.isBlank(reqDeploy.getSignUserId())) {
+            log.error("contract deployWithSign error: signUserId is empty");
+            throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
+        }
         String contractAddress = contractService.caseDeploy(reqDeploy, false);
-        log.info("success deploy. result:{}", contractAddress);
+        log.info("success deployWithSign. result:{}", contractAddress);
         return contractAddress;
     }
     
@@ -98,6 +95,10 @@ public class ContractController extends BaseController {
             throws Exception {
         log.info("contract deployLocal start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
+        if (StringUtils.isBlank(reqDeploy.getUser())) {
+            log.error("contract deployLocal error: user(address) is empty");
+            throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
+        }
         String contractAddress = contractService.caseDeploy(reqDeploy, true);
         log.info("success deployLocal. result:{}", contractAddress);
         return contractAddress;

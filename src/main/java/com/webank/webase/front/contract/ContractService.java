@@ -31,7 +31,6 @@ import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.contract.entity.ReqContractPath;
 import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqDeployWithSign;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
@@ -244,7 +243,7 @@ public class ContractService {
 
         // data sign
         String data = bytecodeBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, web3j, req.getUser(), "", data);
+        String signMsg = transService.signMessage(groupId, web3j, req.getSignUserId(), "", data);
         if (StringUtils.isBlank(signMsg)) {
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
         }
@@ -714,49 +713,49 @@ public class ContractService {
     }
 
     /**
-     * old contract deploy through webase-sign by raw transaction
+     * @Deprecated old contract deploy through webase-sign by raw transaction
      */
-    @Deprecated
-    public String deployWithSign(ReqDeployWithSign req) throws Exception {
-        int groupId = req.getGroupId();
-        String contractAbi = JSON.toJSONString(req.getContractAbi());
-        String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam();
-
-        // check groupId
-        Web3j web3j = web3jMap.get(groupId);
-        if (web3j == null) {
-            new FrontException(GROUPID_NOT_EXIST);
-        }
-
-        // check parameters and get input types
-        AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(contractAbi);
-        List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
-        if (funcInputTypes.size() != params.size()) {
-            log.warn("deployWithSign fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-        }
-
-        // Constructor encode
-        String encodedConstructor = "";
-        if (funcInputTypes.size() > 0) {
-            List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-            encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-        }
-
-        // data sign
-        String data = bytecodeBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, web3j, req.getSignAddress(), "", data);
-        if (StringUtils.isBlank(signMsg)) {
-            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-        }
-        // send transaction (future callback)
-        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-        transService.sendMessage(web3j, signMsg, transFuture);
-        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-        String contractAddress = receipt.getContractAddress();
-
-        log.info("success deploy. contractAddress:{}", contractAddress);
-        return contractAddress;
-    }
+//
+//    public String deployWithSign(ReqDeployWithSign req) throws Exception {
+//        int groupId = req.getGroupId();
+//        String contractAbi = JSON.toJSONString(req.getContractAbi());
+//        String bytecodeBin = req.getBytecodeBin();
+//        List<Object> params = req.getFuncParam();
+//
+//        // check groupId
+//        Web3j web3j = web3jMap.get(groupId);
+//        if (web3j == null) {
+//            new FrontException(GROUPID_NOT_EXIST);
+//        }
+//
+//        // check parameters and get input types
+//        AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(contractAbi);
+//        List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
+//        if (funcInputTypes.size() != params.size()) {
+//            log.warn("deployWithSign fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+//            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+//        }
+//
+//        // Constructor encode
+//        String encodedConstructor = "";
+//        if (funcInputTypes.size() > 0) {
+//            List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
+//            encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
+//        }
+//
+//        // data sign
+//        String data = bytecodeBin + encodedConstructor;
+//        String signMsg = transService.signMessage(groupId, web3j, req.getSignAddress(), "", data);
+//        if (StringUtils.isBlank(signMsg)) {
+//            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+//        }
+//        // send transaction (future callback)
+//        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+//        transService.sendMessage(web3j, signMsg, transFuture);
+//        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+//        String contractAddress = receipt.getContractAddress();
+//
+//        log.info("success deploy. contractAddress:{}", contractAddress);
+//        return contractAddress;
+//    }
 }
