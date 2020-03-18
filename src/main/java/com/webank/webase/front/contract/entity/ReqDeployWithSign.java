@@ -26,12 +26,11 @@ import lombok.Data;
  * deployWithSign interface parameter.
  * v1.3.0+ default with sign
  */
-@Deprecated
 @Data
+@Deprecated
 public class ReqDeployWithSign {
     private int groupId = 1;
-//    private int signUserId = 100001;
-    private String signAddress;
+    private int signUserId = 100001;
     /**
      * 合约编译的bytecode(bin)，用于部署合约
      */
