@@ -47,7 +47,6 @@ import com.webank.webase.front.contract.entity.ReqContractCompile;
 import com.webank.webase.front.contract.entity.ReqContractPath;
 import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqDeployWithSign;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
@@ -84,29 +83,25 @@ public class ContractController extends BaseController {
         throws Exception {
         log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
-        String contractAddress = contractService.caseDeploy(reqDeploy);
+        String contractAddress = contractService.caseDeploy(reqDeploy, false);
         log.info("success deploy. result:{}", contractAddress);
         return contractAddress;
     }
     
     /**
-     * @Deprecated, default with sign
-     * deployWithSign.
-     *
-     * @param reqDeploy request data
-     * @param result checkResult
+     * deploy locally not through sign
      */
-//    @ApiOperation(value = "contract deploy", notes = "contract deploy with WeBASE-Sign")
-//    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeployWithSign")
-//    @PostMapping("/deployWithSign")
-//    public String deployWithSign(@Valid @RequestBody ReqDeployWithSign reqDeploy, BindingResult result)
-//            throws Exception {
-//        log.info("contract deployWithSign start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
-//        checkParamResult(result);
-//        String contractAddress = contractService.deployWithSign(reqDeploy);
-//        log.info("success deployWithSign. result:{}", contractAddress);
-//        return contractAddress;
-//    }
+    @ApiOperation(value = "contract deploy locally", notes = "contract deploy")
+    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
+    @PostMapping("/deployLocal")
+    public String deployLocal(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
+            throws Exception {
+        log.info("contract deployLocal start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
+        checkParamResult(result);
+        String contractAddress = contractService.caseDeploy(reqDeploy, true);
+        log.info("success deployLocal. result:{}", contractAddress);
+        return contractAddress;
+    }
 
 
     /**

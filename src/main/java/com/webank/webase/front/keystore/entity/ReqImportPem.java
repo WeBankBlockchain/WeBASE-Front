@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
- * @deprecated not support import
+ * import pem private key
  */
 @Data
 @NoArgsConstructor

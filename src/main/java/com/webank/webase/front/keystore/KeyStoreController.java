@@ -62,7 +62,7 @@ public class KeyStoreController extends BaseController {
                 throw new FrontException(ConstantCode.PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY);
             }
             // create from webase-sign
-            return keyStoreService.createKeyStore(signUserId, appId);
+            return keyStoreService.createKeyStoreWithSign(signUserId, appId);
         } else if (KeyTypes.LOCALUSER.getValue() == type){
             // local key store (0)
             if (StringUtils.isBlank(userName)) {
@@ -70,7 +70,7 @@ public class KeyStoreController extends BaseController {
                 throw new FrontException(ConstantCode.USER_NAME_NULL);
             }
             // create locally
-            return keyStoreService.createKeyStore(userName);
+            return keyStoreService.createKeyStoreLocally(userName);
         } else {
             log.error("fail createKeyStore. key store type invalid");
             throw new FrontException(ConstantCode.PARAM_VAILD_FAIL);
@@ -93,31 +93,27 @@ public class KeyStoreController extends BaseController {
         return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 
-    /*
-    @Deprecated import api
-     */
+    @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "privateKey", value = "private key", required = true, dataType = "String"),
+        @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
+    })
+    @RequestMapping(method = RequestMethod.GET, value = "/import")
+    public KeyStoreInfo importPrivateKey(@RequestParam String privateKey, @RequestParam String userName) {
+        return keyStoreService.importFromPrivateKey(privateKey, userName);
+    }
 
-//    @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
-//    @ApiImplicitParams({
-//        @ApiImplicitParam(name = "privateKey", value = "private key", required = true, dataType = "String"),
-//        @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
-//    })
-//    @RequestMapping(method = RequestMethod.GET, value = "/import")
-//    public KeyStoreInfo importPrivateKey(@RequestParam String privateKey, @RequestParam String userName) {
-//        return keyStoreService.getKeyStoreFromPrivateKey(privateKey, KeyTypes.LOCALUSER.getValue(), userName);
-//    }
-//
-//    @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
-//    @ApiImplicitParam(name = "reqImportPem", value = "import pem info", required = true, dataType = "ReqImportPem")
-//    @PostMapping("/importPem")
-//    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
-//        String pemContent = reqImportPem.getPemContent();
-//        String userName = reqImportPem.getUserName();
-//        if(!pemContent.startsWith(PemUtils.crtContentHead)) {
-//            throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
-//        }
-//        keyStoreService.importKeyStoreFromPem(pemContent, KeyTypes.LOCALUSER.getValue(), userName);
-//        return new BaseResponse(ConstantCode.RET_SUCCESS);
-//    }
+    @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
+    @ApiImplicitParam(name = "reqImportPem", value = "import pem info", required = true, dataType = "ReqImportPem")
+    @PostMapping("/importPem")
+    public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
+        String pemContent = reqImportPem.getPemContent();
+        String userName = reqImportPem.getUserName();
+        if(!pemContent.startsWith(PemUtils.crtContentHead)) {
+            throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
+        }
+        keyStoreService.importKeyStoreFromPem(pemContent, userName);
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
+    }
 
 }
