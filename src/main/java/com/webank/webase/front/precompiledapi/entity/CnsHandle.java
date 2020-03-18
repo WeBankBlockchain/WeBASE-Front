@@ -36,4 +36,6 @@ public class CnsHandle {
     // register
     private String contractAddress;
     private String abi;
+    @Deprecated
+    private String fromAddress;
 }

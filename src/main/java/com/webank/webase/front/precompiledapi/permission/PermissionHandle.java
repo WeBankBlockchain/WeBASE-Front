@@ -31,8 +31,10 @@ public class PermissionHandle {
     private String permissionType;
     @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String signUserId;
-    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
+    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
     private String address;
     private String tableName;
     private PermissionState permissionState;
+    @Deprecated
+    private String fromAddress;
 }
