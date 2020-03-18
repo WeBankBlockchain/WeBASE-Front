@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
+import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -53,8 +54,8 @@ public class TransController extends BaseController {
      */
     @ApiOperation(value = "transaction handing", notes = "transaction handing")
     @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
-    @PostMapping("/handle")
-    public Object transHandle(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
+    @PostMapping("/handleWithSign")
+    public Object transHandle(@Valid @RequestBody ReqTransHandleWithSign reqTransHandle, BindingResult result) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
 
         Instant startTime = Instant.now();
@@ -73,7 +74,7 @@ public class TransController extends BaseController {
 
     @ApiOperation(value = "transaction handle locally", notes = "transaction locally")
     @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
-    @PostMapping("/handleLocal")
+    @PostMapping("/handle")
     public Object transHandleLocal(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
         log.info("transHandleLocal start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
 

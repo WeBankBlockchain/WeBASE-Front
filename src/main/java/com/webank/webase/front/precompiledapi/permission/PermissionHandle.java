@@ -30,7 +30,7 @@ public class PermissionHandle {
     private int groupId;
     private String permissionType;
     @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
-    private String fromAddress;
+    private String signUserId;
     @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
     private String address;
     private String tableName;
