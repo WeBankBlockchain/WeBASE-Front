@@ -19,10 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.front.Application;
 import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqDeployWithSign;
 import com.webank.webase.front.contract.entity.ReqPageContract;
-
-import java.util.ArrayList;
 import java.util.List;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.junit.Before;
