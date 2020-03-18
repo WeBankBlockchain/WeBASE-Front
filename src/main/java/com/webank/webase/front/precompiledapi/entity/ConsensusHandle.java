@@ -28,7 +28,7 @@ public class ConsensusHandle {
     @NotBlank(message = ConstantCode.PARAM_FAIL_NODE_TYPE_IS_EMPTY)
     private String nodeType;
     @NotBlank(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
-    private String fromAddress;
+    private String signUserId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_NODE_ID_IS_EMPTY)
     private String nodeId;
 }

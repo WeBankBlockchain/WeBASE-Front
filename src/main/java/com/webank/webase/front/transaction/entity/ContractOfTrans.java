@@ -37,12 +37,23 @@ public class ContractOfTrans {
         this.funcParam = req.getFuncParam();
     }
 
-    @Deprecated
     public ContractOfTrans(ReqTransHandleWithSign req) {
+        this.contractName = req.getContractName();
+        this.version = req.getVersion();
         this.contractAddress = req.getContractAddress();
         this.groupId = req.getGroupId();
+        this.contractPath = req.getContractPath();
         this.funcName = req.getFuncName();
         this.contractAbi = req.getContractAbi();
         this.funcParam = req.getFuncParam();
     }
+
+//    @Deprecated
+//    public ContractOfTrans(ReqTransHandleWithSign req) {
+//        this.contractAddress = req.getContractAddress();
+//        this.groupId = req.getGroupId();
+//        this.funcName = req.getFuncName();
+//        this.contractAbi = req.getContractAbi();
+//        this.funcParam = req.getFuncParam();
+//    }
 }

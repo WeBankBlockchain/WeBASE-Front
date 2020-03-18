@@ -142,7 +142,7 @@ public class PrecompiledController {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();
         int groupId = consensusHandle.getGroupId();
-        String from = consensusHandle.getFromAddress();
+        String from = consensusHandle.getSignUserId();
         String nodeId = consensusHandle.getNodeId();
         if (!PrecompiledUtils.checkNodeId(nodeId)) {
             return ConstantCode.INVALID_NODE_ID;
@@ -216,7 +216,7 @@ public class PrecompiledController {
     public Object crudManageControl(@Valid @RequestBody CrudHandle crudHandle)throws Exception {
         log.info("start crudManageControl. crudHandle:{}", crudHandle);
         int groupId = crudHandle.getGroupId();
-        String from = crudHandle.getFromAddress();
+        String from = crudHandle.getSignUserId();
         String sql = crudHandle.getSql();
         // to lower case
         String[] sqlParams = sql.trim().split(" ");
