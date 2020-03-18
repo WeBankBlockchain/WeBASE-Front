@@ -108,11 +108,13 @@ public class KeyStoreService {
         try {
             ECKeyPair keyPair = GenCredential.createKeyPair();
             keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
-            keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
         } catch (Exception e) {
             log.error("fail createKeyStore.", e);
             throw new FrontException("create keyInfo failed");
         }
+        keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
+        String realPrivateKey = keyStoreInfo.getPrivateKey();
+        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(realPrivateKey));
         return keystoreRepository.save(keyStoreInfo);
     }
 
@@ -124,8 +126,6 @@ public class KeyStoreService {
      * @return
      */
     public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId) {
-        // String signUserId = UUID.randomUUID().toString().replaceAll("-","");
-        // String appId = UUID.randomUUID().toString().replaceAll("-","");
         RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId);
         String address = rspUserInfo.getAddress();
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
@@ -157,7 +157,7 @@ public class KeyStoreService {
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setPublicKey(publicKey);
         keyStoreInfo.setAddress(address);
-        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(privateKey));
+        keyStoreInfo.setPrivateKey(privateKey);
         keyStoreInfo.setUserName(userName);
         return keyStoreInfo;
     }
@@ -326,6 +326,8 @@ public class KeyStoreService {
         ECKeyPair keyPair = GenCredential.createKeyPair(privateKey);
         KeyStoreInfo keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
         keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
+        String realPrivateKey = keyStoreInfo.getPrivateKey();
+        keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(realPrivateKey));
         return keystoreRepository.save(keyStoreInfo);
     }
 
