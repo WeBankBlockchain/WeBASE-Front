@@ -544,11 +544,9 @@ public class TransService {
     }
 
     /**
-     * send transaction.
-     * v1.3.0+ default with sign
+     * send transaction locally
      */
-    @Deprecated
-    public Object transHandle(ReqTransHandle req) throws Exception {
+    public Object transHandleLocal(ReqTransHandle req) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(req));
 
         // init contract params
@@ -594,10 +592,8 @@ public class TransService {
     }
 
     /**
-     * get Credentials by keyUser.
-     * v1.3.0+ default with sign
+     * get Credentials by keyUser locally
      */
-    @Deprecated
     private Credentials getCredentials(boolean constant, String keyUser) {
         // get privateKey
         Credentials credentials;
@@ -610,8 +606,7 @@ public class TransService {
     }
 
     /**
-     * transHandleWithSign.
-     * v1.3.0+ default with sign
+     * old transHandleWithSign.
      * @param req request
      */
     @Deprecated
