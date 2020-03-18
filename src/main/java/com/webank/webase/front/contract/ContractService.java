@@ -173,15 +173,20 @@ public class ContractService {
     }
 
     /**
-     * case deploy type
-     * 
-     * @param: ReqDeploy-contractId -> deployLocalContract / deploy
+     * case deploy type: deploy by abi or deploy by local contract
+     *
+     * @param: ReqDeploy'scontractId
+     * @param: doLocally deploy contract locally or through webase-sign
      */
-    public String caseDeploy(ReqDeploy req) throws Exception {
+    public String caseDeploy(ReqDeploy req, boolean doLocally) throws Exception {
         if (Objects.nonNull(req.getContractId())) {
-            return deployLocalContract(req);
+            return deployByLocalContract(req, doLocally);
         } else {
-            return deployWithSign(req);
+            if (doLocally) {
+                return deployLocally(req);
+            } else {
+                return deployWithSign(req);
+            }
         }
     }
 
@@ -189,15 +194,20 @@ public class ContractService {
      * check contract exists before deploy
      * 
      * @param req
-     * @return
-     * @throws Exception
+     * @param doLocally deploy contract locally or through webase-sign
      */
-    private String deployLocalContract(ReqDeploy req) throws Exception {
+    private String deployByLocalContract(ReqDeploy req, boolean doLocally) throws Exception {
         // check contract status
         Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
 
         // deploy
-        String contractAddress = deployWithSign(req);
+        String contractAddress;
+        // deploy locally or webase-sign
+        if (doLocally) {
+            contractAddress = deployLocally(req);
+        } else {
+            contractAddress = deployWithSign(req);
+        }
         if (StringUtils.isNotBlank(contractAddress)) {
             // save address
             BeanUtils.copyProperties(req, contract);
@@ -210,6 +220,9 @@ public class ContractService {
         return contractAddress;
     }
 
+    /**
+     * deploy through webase-sign
+     */
     public String deployWithSign(ReqDeploy req) throws Exception {
         int groupId = req.getGroupId();
         String version = req.getVersion();
@@ -259,10 +272,9 @@ public class ContractService {
     }
 
     /**
-     * contract deploy.
+     * deploy locally, not through webase-sign
      */
-    @Deprecated
-    public String deploy(ReqDeploy req) throws Exception {
+    public String deployLocally(ReqDeploy req) throws Exception {
         String contractName = req.getContractName();
         String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
@@ -291,55 +303,7 @@ public class ContractService {
                     contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
         }
-        log.info("success deploy. contractAddress:{}", contractAddress);
-        return contractAddress;
-    }
-
-    /**
-     * contract deploy through webase-sign by raw transaction
-     * v1.3.0+ default with sign
-     */
-    @Deprecated
-    public String deployWithSign(ReqDeployWithSign req) throws Exception {
-        int groupId = req.getGroupId();
-        String contractAbi = JSON.toJSONString(req.getContractAbi());
-        String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam();
-
-        // check groupId
-        Web3j web3j = web3jMap.get(groupId);
-        if (web3j == null) {
-            new FrontException(GROUPID_NOT_EXIST);
-        }
-
-        // check parameters and get input types
-        AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(contractAbi);
-        List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
-        if (funcInputTypes.size() != params.size()) {
-            log.warn("deployWithSign fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-        }
-
-        // Constructor encode
-        String encodedConstructor = "";
-        if (funcInputTypes.size() > 0) {
-            List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-            encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-        }
-
-        // data sign
-        String data = bytecodeBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, web3j, req.getSignAddress(), "", data);
-        if (StringUtils.isBlank(signMsg)) {
-            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-        }
-        // send transaction (future callback)
-        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-        transService.sendMessage(web3j, signMsg, transFuture);
-        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-        String contractAddress = receipt.getContractAddress();
-
-        log.info("success deploy. contractAddress:{}", contractAddress);
+        log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
     }
 
@@ -493,9 +457,11 @@ public class ContractService {
     public Contract saveContract(ReqContractSave contractReq) {
         log.debug("start saveContract contractReq:{}", JSON.toJSONString(contractReq));
         if (contractReq.getContractId() == null) {
-            return newContract(contractReq);// new
+            // new
+            return newContract(contractReq);
         } else {
-            return updateContract(contractReq);// update
+            // update
+            return updateContract(contractReq);
         }
     }
 
@@ -745,5 +711,52 @@ public class ContractService {
         contractPathKey.setGroupId(groupId);
         contractPathKey.setContractPath(contractPath);
         contractPathRepository.delete(contractPathKey);
+    }
+
+    /**
+     * old contract deploy through webase-sign by raw transaction
+     */
+    @Deprecated
+    public String deployWithSign(ReqDeployWithSign req) throws Exception {
+        int groupId = req.getGroupId();
+        String contractAbi = JSON.toJSONString(req.getContractAbi());
+        String bytecodeBin = req.getBytecodeBin();
+        List<Object> params = req.getFuncParam();
+
+        // check groupId
+        Web3j web3j = web3jMap.get(groupId);
+        if (web3j == null) {
+            new FrontException(GROUPID_NOT_EXIST);
+        }
+
+        // check parameters and get input types
+        AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(contractAbi);
+        List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
+        if (funcInputTypes.size() != params.size()) {
+            log.warn("deployWithSign fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+        }
+
+        // Constructor encode
+        String encodedConstructor = "";
+        if (funcInputTypes.size() > 0) {
+            List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
+            encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
+        }
+
+        // data sign
+        String data = bytecodeBin + encodedConstructor;
+        String signMsg = transService.signMessage(groupId, web3j, req.getSignAddress(), "", data);
+        if (StringUtils.isBlank(signMsg)) {
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+        // send transaction (future callback)
+        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+        transService.sendMessage(web3j, signMsg, transFuture);
+        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+        String contractAddress = receipt.getContractAddress();
+
+        log.info("success deploy. contractAddress:{}", contractAddress);
+        return contractAddress;
     }
 }

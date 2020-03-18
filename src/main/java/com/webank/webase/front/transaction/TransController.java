@@ -48,10 +48,7 @@ public class TransController extends BaseController {
     TransService transServiceImpl;
 
     /**
-     * transHandle.
-     * 
-     * @param reqTransHandle request
-     * @param result checkResult
+     * transHandle through webase-sign
      * @return
      */
     @ApiOperation(value = "transaction handing", notes = "transaction handing")
@@ -71,22 +68,27 @@ public class TransController extends BaseController {
         Object obj =  transServiceImpl.transHandleWithSign(reqTransHandle);
         log.info("transHandle end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
-         return obj;
+        return obj;
     }
-    
-    /**
-     * @Deprecated: default with sign
-     * transHandleWithSign.
-     * @param req request
-     * @param result checkResult
-     * @return
-     */
-//    @ApiOperation(value = "transaction handing", notes = "transaction handing with sign")
-//    @ApiImplicitParam(name = "req", value = "transaction info", required = true, dataType = "ReqTransHandleWithSign")
-//    @PostMapping("/handleWithSign")
-//    public Object transHandleWithSign(@Valid @RequestBody ReqTransHandleWithSign req, BindingResult result) throws Exception {
-//        log.info("transHandleWithSign start. req:[{}]", JSON.toJSONString(req));
-//        checkParamResult(result);
-//        return transServiceImpl.transHandleWithSign(req);
-//    }
+
+    @ApiOperation(value = "transaction handle locally", notes = "transaction locally")
+    @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
+    @PostMapping("/handleLocal")
+    public Object transHandleLocal(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
+        log.info("transHandleLocal start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
+
+        Instant startTime = Instant.now();
+        log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
+
+        checkParamResult(result);
+        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(reqTransHandle.getContractAddress())) {
+            throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
+        }
+
+        Object obj =  transServiceImpl.transHandleLocal(reqTransHandle);
+        log.info("transHandleLocal end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return obj;
+    }
+
 }

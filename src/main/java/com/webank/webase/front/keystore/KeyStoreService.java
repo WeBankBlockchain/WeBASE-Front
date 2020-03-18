@@ -28,6 +28,7 @@ import com.webank.webase.front.util.AesUtils;
 import com.webank.webase.front.util.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.EncryptType;
@@ -49,6 +50,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.io.ByteArrayInputStream;
+import java.security.KeyPair;
 import java.util.*;
 
 
@@ -91,7 +94,7 @@ public class KeyStoreService {
     /**
      * create key store locally and save
      */
-    public KeyStoreInfo createKeyStore(String userName) {
+    public KeyStoreInfo createKeyStoreLocally(String userName) {
         log.info("start createKeyStore. userName:{}", userName);
         // check keyStoreInfoLocal
         KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByUserNameAndType(userName,
@@ -120,7 +123,7 @@ public class KeyStoreService {
      * @param appId
      * @return
      */
-    public KeyStoreInfo createKeyStore(String signUserId, String appId) {
+    public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId) {
         // String signUserId = UUID.randomUUID().toString().replaceAll("-","");
         // String appId = UUID.randomUUID().toString().replaceAll("-","");
         RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId);
@@ -267,20 +270,11 @@ public class KeyStoreService {
     }
 
     /**
-     * ===================== deprecated ==============
-     */
-
-    /**
      * get credential to send transaction
      * 2019/11/26 support guomi
      */
-    @Deprecated
     public Credentials getCredentials(String user) throws FrontException {
-        String privateKey = Optional.ofNullable(getPrivateKey(user)).orElse(null);
-        if (StringUtils.isBlank(privateKey)) {
-            log.warn("fail getCredentials. user:{} privateKey is null", user);
-            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
-        }
+        String privateKey = getPrivateKey(user);
         return GenCredential.create(privateKey);
     }
     /**
@@ -288,74 +282,52 @@ public class KeyStoreService {
      * default use aes encrypt
      * @param user userId or userAddress.
      */
-    @Deprecated
     public String getPrivateKey(String user) {
-        boolean useAes = true;
-        // get privateKey from map (in memory, not db)
-        String key_of_user = user + "_" + useAes;
-        if (PRIVATE_KEY_MAP.containsKey(key_of_user)) {
-            return PRIVATE_KEY_MAP.get(key_of_user);
-        }
 
         // get from local db
         KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByAddress(user);
-        // no need for if(useAes), default aesDecrypt before saving in front db
-        if (keyStoreInfoLocal != null) {
-            //get privateKey by address
-            return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
+        if (Objects.isNull(keyStoreInfoLocal)) {
+            log.warn("fail getPrivateKey. user:{} privateKey is null", user);
+            throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
         }
+        //get privateKey by address
+        return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
 
-        //get privateKey by userId from nodemgr or webase-sign
-        KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
-        String[] ipPortArr = constants.getKeyServer().split(",");
-        for (String ipPort : ipPortArr) {
-            try {
-                String url = String.format(Constants.MGR_PRIVATE_KEY_URI, ipPort.trim(), user);
-                log.info("getPrivateKey url:{}", url);
-                BaseResponse response = restTemplate.getForObject(url, BaseResponse.class);
-                log.info("getPrivateKey response:{}", JSON.toJSONString(response));
-                if (response.getCode() == 0) {
-                    keyStoreInfo =
-                            CommonUtils.object2JavaBean(response.getData(), KeyStoreInfo.class);
-                    break;
-                }
-            } catch (Exception e) {
-                log.warn("user:{} getPrivateKey from ipPort:{} exception", user, ipPort, e);
-                continue;
-            }
-        }
-
-        String private_key = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
-
-        if (StringUtils.isNotBlank(private_key)) {
-            PRIVATE_KEY_MAP.put(key_of_user, private_key);
-        }
-
-        return private_key;
     }
 
     /**
      * import keystore info from pem file's content
      * @param pemContent
-     * @param userType local
      * @param userName
      * @return
      */
-//    @Deprecated
-//    public KeyStoreInfo importKeyStoreFromPem(String pemContent, int userType,  String userName) {
-//        PEMManager pemManager = new PEMManager();
-//        String privateKey;
-//        try {
-//            pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
-//            privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
-//        }catch (Exception e) {
-//            log.error("importKeyStoreFromPem error:[]", e);
-//            throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
-//        }
-//        // to store
-//        getKeyStoreFromPrivateKey(privateKey, userType, userName);
-//        return null;
-//    }
+    public KeyStoreInfo importKeyStoreFromPem(String pemContent, String userName) {
+        PEMManager pemManager = new PEMManager();
+        String privateKey;
+        try {
+            pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
+            privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
+        }catch (Exception e) {
+            log.error("importKeyStoreFromPem error:[]", e);
+            throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
+        }
+        // to store
+        return importFromPrivateKey(privateKey, userName);
+    }
+
+    /**
+     * save LOCAL_USER key store by private key
+     * @param privateKey
+     * @param userName
+     * @return KeyStoreInfo local user
+     */
+    public KeyStoreInfo importFromPrivateKey(String privateKey, String userName) {
+        // to store
+        ECKeyPair keyPair = GenCredential.createKeyPair(privateKey);
+        KeyStoreInfo keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
+        keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
+        return keystoreRepository.save(keyStoreInfo);
+    }
 
 }
 
