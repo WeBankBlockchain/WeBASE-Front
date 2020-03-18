@@ -31,7 +31,7 @@ public class ReqTransHandle {
     /**
      * user address
      */
-    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
+    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
     private String user;
     private String contractName;
     private String version;
