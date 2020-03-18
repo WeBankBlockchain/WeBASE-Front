@@ -78,7 +78,7 @@ public class ContractController extends BaseController {
      */
     @ApiOperation(value = "contract deploy", notes = "contract deploy")
     @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
-    @PostMapping("/deploy")
+    @PostMapping("/deployWithSign")
     public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
         throws Exception {
         log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
@@ -93,7 +93,7 @@ public class ContractController extends BaseController {
      */
     @ApiOperation(value = "contract deploy locally", notes = "contract deploy")
     @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
-    @PostMapping("/deployLocal")
+    @PostMapping("/deploy")
     public String deployLocal(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
             throws Exception {
         log.info("contract deployLocal start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));

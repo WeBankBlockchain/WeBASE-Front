@@ -165,7 +165,7 @@ public class PermissionManageController extends BaseController {
         log.info("start updateUserPermissionStateAfterCheck startTime:{}, permissionHandle:{}",
                 startTime.toEpochMilli(), permissionHandle);
         int groupId = permissionHandle.getGroupId();
-        String fromAddress = permissionHandle.getFromAddress();
+        String fromAddress = permissionHandle.getSignUserId();
         String userAddress = permissionHandle.getAddress();
         PermissionState permissionState = permissionHandle.getPermissionState();
         try {
@@ -204,7 +204,7 @@ public class PermissionManageController extends BaseController {
         log.info("start permissionPostControl permissionHandle:{}", permissionHandle);
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
-        String from = permissionHandle.getFromAddress();
+        String from = permissionHandle.getSignUserId();
         String address = permissionHandle.getAddress();
         String tableName = permissionHandle.getTableName();
         // validate address
@@ -249,7 +249,7 @@ public class PermissionManageController extends BaseController {
         log.info("start permissionDeleteControl permissionHandle:{}", permissionHandle);
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
-        String from = permissionHandle.getFromAddress();
+        String from = permissionHandle.getSignUserId();
         String address = permissionHandle.getAddress();
         String tableName = permissionHandle.getTableName();
         // validate address

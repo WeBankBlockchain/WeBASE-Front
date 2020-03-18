@@ -100,7 +100,7 @@ public class TransService {
      *
      * @param req request
      */
-    public Object transHandleWithSign(ReqTransHandle req) throws Exception {
+    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
         ContractOfTrans contractOfTrans = new ContractOfTrans(req);
         //get function of abi
         ContractFunction contractFunction = buildContractFunction(contractOfTrans);
@@ -113,12 +113,12 @@ public class TransService {
         String contractAddress = checkContractAddress(contractOfTrans.getContractAddress(),
                 groupId, contractOfTrans.getContractName(), contractOfTrans.getVersion());
 
-        // user as signAddress
-        String signAddress = req.getUser();
+        // user as signUserId
+        String signUserId = req.getSignUserId();
         // encode function
         Function function = new Function(req.getFuncName(),
                 contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
-        return handleTransByFunction(groupId, web3j, signAddress, contractAddress, function, contractFunction);
+        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
     }
 
     /**
@@ -126,7 +126,7 @@ public class TransService {
      * @param precompiledType enum of precompiled contract
      * @param funcName precompiled contract function name
      */
-    public Object transHandleWithSignForPrecompile(int groupId, String fromAddress, PrecompiledTypes precompiledType,
+    public Object transHandleWithSignForPrecompile(int groupId, String signUserId, PrecompiledTypes precompiledType,
                                                    String funcName, List<Object> funcParams) throws Exception {
         // check groupId
         Web3j web3j = getWeb3j(groupId);
@@ -142,13 +142,13 @@ public class TransService {
         Function function = new Function(funcName, contractFunction.getFinalInputs(),
                 contractFunction.getFinalOutputs());
         // trans handle
-        return handleTransByFunction(groupId, web3j, fromAddress, contractAddress, function, contractFunction);
+        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
     }
 
     /**
      * handleTransByFunction by whether is constant
      */
-    private Object handleTransByFunction(int groupId, Web3j web3j, String fromAddress, String contractAddress,
+    private Object handleTransByFunction(int groupId, Web3j web3j, String signUserId, String contractAddress,
                                        Function function, ContractFunction contractFunction)
             throws IOException, InterruptedException, ExecutionException, TimeoutException {
 
@@ -170,7 +170,7 @@ public class TransService {
             }
         } else {
             // data sign
-            String signMsg = signMessage(groupId, web3j, fromAddress, contractAddress, encodedFunction);
+            String signMsg = signMessage(groupId, web3j, signUserId, contractAddress, encodedFunction);
             if (StringUtils.isBlank(signMsg)) {
                 throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
             }
@@ -301,7 +301,7 @@ public class TransService {
      * @param data            info
      * @return
      */
-    public String signMessage(int groupId, Web3j web3j, String address, String contractAddress,
+    public String signMessage(int groupId, Web3j web3j, String signUserId, String contractAddress,
                               String data) throws  FrontException {
         Random r = new Random();
         BigInteger randomid = new BigInteger(250, r);
@@ -309,8 +309,8 @@ public class TransService {
         BigInteger blockLimit = web3j.getBlockNumberCache();
         String versionContent = Constants.version;
         // get user's signUserId
-        String signUserId = keyStoreService.getSignUserIdByAddress(address);
-        String signMsg ;
+//        String signUserId = keyStoreService.getSignUserIdByAddress(address);
+        String signMsg;
         if (versionContent.contains("2.0.0-rc1") || versionContent.contains("release-2.0.1")) {
             RawTransaction rawTransaction = RawTransaction.createTransaction(randomid,
                     Constants.GAS_PRICE, Constants.GAS_LIMIT, blockLimit, contractAddress,
@@ -606,67 +606,67 @@ public class TransService {
     }
 
     /**
-     * old transHandleWithSign.
+     * @Deprecated old transHandleWithSign.
      * @param req request
      */
-    @Deprecated
-    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
-        //get function of abi
-        ContractFunction cf = buildContractFunction(new ContractOfTrans(req));
-        //check param
-        checkParamOfTransaction(cf, req.getFuncParam());
 
-        // check contractAddress
-        String contractAddress = req.getContractAddress();
-        if (StringUtils.isBlank(contractAddress)) {
-            log.error("transHandleWithSign. contractAddress is empty");
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
-        }
-
-        // check groupId
-        Web3j web3j = getWeb3j(req.getGroupId());
-
-        // encode function
-        Function function = new Function(req.getFuncName(), cf.getFinalInputs(), cf.getFinalOutputs());
-        String encodedFunction = FunctionEncoder.encode(function);
-
-        // trans handle
-        Object response = "";
-        Instant startTime = Instant.now();
-        if (cf.getConstant()) {
-            KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
-            String callOutput = web3j
-                    .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
-                            contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
-                    .send().getValue().getOutput();
-            List<Type> typeList =
-                    FunctionReturnDecoder.decode(callOutput, function.getOutputParameters());
-            if (typeList.size() > 0) {
-                response = AbiUtil.callResultParse(cf.getOutputList(), typeList);
-            } else {
-                response = typeList;
-            }
-        } else {
-            // data sign
-            String signMsg = signMessage(req.getGroupId(), web3j, req.getSignAddress(), contractAddress, encodedFunction);
-            if (StringUtils.isBlank(signMsg)) {
-                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-            }
-            Instant nodeStartTime = Instant.now();
-            // send transaction
-            final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-            sendMessage(web3j, signMsg, transFuture);
-            //todo
-            TransactionReceipt receipt =
-                    transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-            response = receipt;
-            log.info("***node cost time***: {}", Duration.between(nodeStartTime, Instant.now()).toMillis());
-
-        }
-        log.info("***transaction total cost time***: {}", Duration.between(startTime, Instant.now()).toMillis());
-        log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(), JSON.toJSONString(response));
-        return response;
-    }
+//    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
+//        //get function of abi
+//        ContractFunction cf = buildContractFunction(new ContractOfTrans(req));
+//        //check param
+//        checkParamOfTransaction(cf, req.getFuncParam());
+//
+//        // check contractAddress
+//        String contractAddress = req.getContractAddress();
+//        if (StringUtils.isBlank(contractAddress)) {
+//            log.error("transHandleWithSign. contractAddress is empty");
+//            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
+//        }
+//
+//        // check groupId
+//        Web3j web3j = getWeb3j(req.getGroupId());
+//
+//        // encode function
+//        Function function = new Function(req.getFuncName(), cf.getFinalInputs(), cf.getFinalOutputs());
+//        String encodedFunction = FunctionEncoder.encode(function);
+//
+//        // trans handle
+//        Object response = "";
+//        Instant startTime = Instant.now();
+//        if (cf.getConstant()) {
+//            KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
+//            String callOutput = web3j
+//                    .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
+//                            contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
+//                    .send().getValue().getOutput();
+//            List<Type> typeList =
+//                    FunctionReturnDecoder.decode(callOutput, function.getOutputParameters());
+//            if (typeList.size() > 0) {
+//                response = AbiUtil.callResultParse(cf.getOutputList(), typeList);
+//            } else {
+//                response = typeList;
+//            }
+//        } else {
+//            // data sign
+//            String signMsg = signMessage(req.getGroupId(), web3j, req.getSignAddress(), contractAddress, encodedFunction);
+//            if (StringUtils.isBlank(signMsg)) {
+//                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+//            }
+//            Instant nodeStartTime = Instant.now();
+//            // send transaction
+//            final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+//            sendMessage(web3j, signMsg, transFuture);
+//            //todo
+//            TransactionReceipt receipt =
+//                    transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+//            response = receipt;
+//            log.info("***node cost time***: {}", Duration.between(nodeStartTime, Instant.now()).toMillis());
+//
+//        }
+//        log.info("***transaction total cost time***: {}", Duration.between(startTime, Instant.now()).toMillis());
+//        log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(), JSON.toJSONString(response));
+//        return response;
+//    }
 }
 
 

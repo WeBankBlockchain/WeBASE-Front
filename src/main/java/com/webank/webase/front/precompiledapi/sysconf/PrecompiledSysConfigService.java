@@ -48,7 +48,7 @@ public class PrecompiledSysConfigService {
      */
     public Object setSysConfigValueByKey(SystemConfigHandle systemConfigHandle) throws Exception {
         int groupId = systemConfigHandle.getGroupId();
-        String fromAddress = systemConfigHandle.getFromAddress();
+        String signUserId = systemConfigHandle.getSignUserId();
         String key = systemConfigHandle.getConfigKey();
         String value = systemConfigHandle.getConfigValue();
 
@@ -59,7 +59,7 @@ public class PrecompiledSysConfigService {
             }
         }
         // @param result {"code":0,"msg":"success"}
-        String result = precompiledWithSignService.setValueByKey(groupId, fromAddress, key, value);
+        String result = precompiledWithSignService.setValueByKey(groupId, signUserId, key, value);
         return result;
     }
 

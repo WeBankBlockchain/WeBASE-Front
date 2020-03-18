@@ -41,6 +41,7 @@ import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 /**
  * Precompiled common service
  * including management of CNS, node consensus status, CRUD
+ * based on PrecompiledWithSignService
  */
 @Slf4j
 @Service
@@ -85,17 +86,17 @@ public class PrecompiledService{
     /**
      * Consensus config related
      */
-    public String addSealer(int groupId, String fromAddress, String nodeId) throws Exception {
-        String res = precompiledWithSignService.addSealer(groupId, fromAddress, nodeId);
+    public String addSealer(int groupId, String signUserId, String nodeId) throws Exception {
+        String res = precompiledWithSignService.addSealer(groupId, signUserId, nodeId);
         return res;
     }
 
-    public String addObserver(int groupId, String fromAddress, String nodeId) throws Exception {
-        String res = precompiledWithSignService.addObserver(groupId, fromAddress, nodeId);
+    public String addObserver(int groupId, String signUserId, String nodeId) throws Exception {
+        String res = precompiledWithSignService.addObserver(groupId, signUserId, nodeId);
         return res;
     }
-    public String removeNode(int groupId, String fromAddress, String nodeId) throws Exception {
-        String res = precompiledWithSignService.removeNode(groupId, fromAddress, nodeId);
+    public String removeNode(int groupId, String signUserId, String nodeId) throws Exception {
+        String res = precompiledWithSignService.removeNode(groupId, signUserId, nodeId);
         return res;
     }
 
@@ -124,35 +125,35 @@ public class PrecompiledService{
      * CRUD related
      * Table table - validation in controller
      */
-    public int createTable(int groupId, String fromAddress, Table table) throws Exception {
-        int res = precompiledWithSignService.createTable(groupId, fromAddress, table);
+    public int createTable(int groupId, String signUserId, Table table) throws Exception {
+        int res = precompiledWithSignService.createTable(groupId, signUserId, table);
         return res;
     }
 
     /**
      * insert 校验tableName等操作放在controller
      */
-    public int insert(int groupId, String fromAddress, Table table,
+    public int insert(int groupId, String signUserId, Table table,
                       Entry entry) throws Exception {
-        int res = precompiledWithSignService.insert(groupId, fromAddress, table, entry);
+        int res = precompiledWithSignService.insert(groupId, signUserId, table, entry);
         return res;
     }
 
     /**
      * update
      */
-    public int update(int groupId, String fromAddress, Table table,
+    public int update(int groupId, String signUserId, Table table,
                       Entry entry, Condition condition) throws Exception {
-        int res = precompiledWithSignService.update(groupId, fromAddress, table, entry, condition);
+        int res = precompiledWithSignService.update(groupId, signUserId, table, entry, condition);
         return res;
     }
 
     /**
      * remove
       */
-    public int remove(int groupId, String fromAddress, Table table,
+    public int remove(int groupId, String signUserId, Table table,
                       Condition condition) throws Exception {
-        int res = precompiledWithSignService.remove(groupId, fromAddress, table, condition);
+        int res = precompiledWithSignService.remove(groupId, signUserId, table, condition);
         return res;
     }
 
