@@ -26,4 +26,6 @@ public interface KeystoreRepository extends CrudRepository<KeyStoreInfo, String>
     KeyStoreInfo findByAddress(String address);
 
     KeyStoreInfo findByUserName(String userName);
+
+    KeyStoreInfo findByUserNameAndType(String userName, int type);
 }

@@ -31,13 +31,13 @@ public class KeyStoreInfo {
     private String publicKey;
     /**
      * not store private key in db
-     * only use to query
      */
     private String privateKey;
     private String userName;
     private int type;
     /**
-     * webase-sign uuidUser
+     * webase-sign signUserId
      */
-    private String uuidUser;
+    private String signUserId;
+    private String appId;
 }

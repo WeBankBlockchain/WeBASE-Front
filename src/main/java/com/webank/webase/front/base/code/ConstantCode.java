@@ -69,6 +69,7 @@ public class ConstantCode {
     public static final RetCode USER_NAME_EXISTS = RetCode.mark(201038, "user name already exists");
     public static final RetCode KEYSTORE_EXISTS = RetCode.mark(201039, "address already exists");
     public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201034, "address not exists");
+    public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(2010035, "external user's appId and signUserId cannot be empty");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
@@ -90,7 +91,7 @@ public class ConstantCode {
     public static final String PARAM_FAIL_NODE_ID_IS_EMPTY = "{\"code\":2011109,\"message\":\"node id cannot be empty\"}";
     public static final String PARAM_FAIL_NODE_TYPE_IS_EMPTY = "{\"code\":201110,\"message\":\"node type cannot be empty\"}";
     public static final String PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY = "{\"code\":201111,\"message\":\"Permission state cannot be all empty\"}";
-    public static final String PARAM_FAIL_SIGN_USER_ID_CONNOT_BE_EMPTY = "{\"code\":201111,\"message\":\"Permission state cannot be all empty\"}";
+
     /* precompiled runtime check or error */
 
     // param
