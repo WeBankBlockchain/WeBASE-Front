@@ -235,6 +235,7 @@ export default {
                 funcName: functionName || "",
                 funcParam: this.transation.funcValue,
                 contractAddress: this.contractAddress,
+                contractAbi: [this.pramasObj],
                 useAes: false
             };
             sendTransation(data)
