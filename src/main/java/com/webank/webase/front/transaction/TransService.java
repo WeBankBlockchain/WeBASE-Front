@@ -155,6 +155,7 @@ public class TransService {
         String encodedFunction = FunctionEncoder.encode(function);
         Object response;
         Instant startTime = Instant.now();
+        // if constant, signUserId can be ""
         if (contractFunction.getConstant()) {
             KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
             String callOutput = web3j
