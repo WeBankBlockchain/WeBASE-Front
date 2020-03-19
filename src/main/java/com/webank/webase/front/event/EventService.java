@@ -114,7 +114,7 @@ public class EventService {
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         service.registerEventLogFilter(params, callBack);
         // mark this callback is on(true)
-        callBack.setId(infoId);
+        callBack.setRunning(true);
         CONTRACT_EVENT_CALLBACK_MAP.put(infoId, callBack);
         log.info("end registerContractEvent infoId:{}", infoId);
         return contractEventInfoRepository.findByAppId(appId);
@@ -249,7 +249,7 @@ public class EventService {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
         // set callback's id empty to stop callback pushing message
-        CONTRACT_EVENT_CALLBACK_MAP.get(infoId).setId("");
+        CONTRACT_EVENT_CALLBACK_MAP.get(infoId).setRunning(false);
         CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
 
         mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
