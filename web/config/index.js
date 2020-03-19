@@ -12,7 +12,7 @@ module.exports = {
         assetsPublicPath: '/',
         proxyTable: {
             '/handle':{
-                target:'http://10.107.105.138:5902',
+                target:'http://127.0.0.1',
                 changeOrigin:true,
                 pathRewrite:{
                     '^/handle':'WeBASE-Front/'
