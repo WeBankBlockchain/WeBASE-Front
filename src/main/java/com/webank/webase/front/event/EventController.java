@@ -65,7 +65,7 @@ public class EventController {
         String queueName = reqNewBlockEventRegister.getQueueName();
 
         // String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
-        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 3);
+        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4);
         String blockRoutingKey = appId + "_" + ROUTING_KEY_BLOCK + "_" + randomStr;
         eventService.registerNewBlockEvent(appId, groupId,
                 exchangeName, queueName, blockRoutingKey);
@@ -94,7 +94,7 @@ public class EventController {
         String queueName = reqContractEventRegister.getQueueName();
 
         // String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
-        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 3);
+        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4);
         String eventRoutingKey = appId + "_" + ROUTING_KEY_EVENT + "_" + randomStr;
         // register contract event log push in service
         eventService.registerContractEvent(appId, groupId,
