@@ -70,14 +70,16 @@ public class EventService {
     public List<NewBlockEventInfo> registerNewBlockEvent(String appId, int groupId,
                                                          String exchangeName, String queueName,
                                                          String routingKey) {
-        log.debug("registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
+        log.info("start registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // save to db 通过db来保证不重复注册
-        addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
+        String infoId = addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
                 appId, groupId, exchangeName, queueName, routingKey);
+        log.info("registerNewBlockEvent saved to db successfully");
         // record groupId, exchange, routingKey for all block notify
         BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
+        log.info("end registerNewBlockEvent, infoId:{}", infoId);
         return newBlockEventInfoRepository.findByAppId(appId);
     }
 
@@ -92,8 +94,16 @@ public class EventService {
     public List<ContractEventInfo> registerContractEvent(String appId, int groupId, String exchangeName, String queueName,
                                                          String routingKey, String abi, String fromBlock, String toBlock,
                                                          String contractAddress, List<String> topicList) {
+        log.info("start registerContractEvent appId:{},groupId:{},contractAddress:{},params:{},exchangeName:{},queueName:{}",
+                appId, groupId, abi, contractAddress , exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        // 传入abi作decoder:
+        // save to db first, 通过db来保证不重复注册
+        String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
+                exchangeName, queueName, routingKey,
+                abi, fromBlock, toBlock, contractAddress, topicList);
+        log.info("registerContractEvent saved to db successfully");
+
+        // 传入abi作decoder
         TransactionDecoder decoder = new TransactionDecoder(abi);
         // init EventLogUserParams for register
         EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
@@ -101,17 +111,12 @@ public class EventService {
         ContractEventCallback callBack =
                 new ContractEventCallback(mqPublisher,
                         exchangeName, routingKey, decoder, groupId, appId);
-        log.debug("registerContractEvent appId:{},groupId:{},abi:{},params:{},exchangeName:{},queueName:{}",
-                appId, groupId, abi, params, exchangeName, queueName);
-        // save to db 通过db来保证不重复注册
-        String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
-                exchangeName, queueName, routingKey,
-                abi, fromBlock, toBlock, contractAddress, topicList);
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         service.registerEventLogFilter(params, callBack);
         // mark this callback is on(true)
         callBack.setId(infoId);
         CONTRACT_EVENT_CALLBACK_MAP.put(infoId, callBack);
+        log.info("end registerContractEvent infoId:{}", infoId);
         return contractEventInfoRepository.findByAppId(appId);
     }
 
