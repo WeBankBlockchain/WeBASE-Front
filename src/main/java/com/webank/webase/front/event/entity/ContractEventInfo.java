@@ -62,12 +62,12 @@ public class ContractEventInfo {
     private String exchangeName;
 
     /**
-     * @username as queue name
+     * @appId as queue name
      */
     private String queueName;
 
     /**
-     * concat queueName + "_" + event/block + "_" + "appId" as routing key
+     * concat appId + "_" + event/block + "_" + randomStr as routing key
      */
     private String routingKey;
 

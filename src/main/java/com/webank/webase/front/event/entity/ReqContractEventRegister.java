@@ -56,9 +56,9 @@ public class ReqContractEventRegister {
 	private String exchangeName;
 
     /**
-     * username as queue name
+     * appId as queue name
      */
-	@NotEmpty(message = "queueName cannot be empty, usually use username")
+	@NotEmpty(message = "queueName cannot be empty(usually use appId as queueName)")
 	private String queueName;
 
 	/**
