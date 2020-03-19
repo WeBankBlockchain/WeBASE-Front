@@ -238,7 +238,6 @@ export default {
                 contractAbi: [this.pramasObj],
                 useAes: false
             };
-            console.log(this.pramasObj)
             sendTransation(data)
                 .then(res => {
                     this.buttonClick = false;
