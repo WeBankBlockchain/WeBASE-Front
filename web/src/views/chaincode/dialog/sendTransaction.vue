@@ -235,8 +235,10 @@ export default {
                 funcName: functionName || "",
                 funcParam: this.transation.funcValue,
                 contractAddress: this.contractAddress,
+                contractAbi: [this.pramasObj],
                 useAes: false
             };
+            console.log(this.pramasObj)
             sendTransation(data)
                 .then(res => {
                     this.buttonClick = false;
