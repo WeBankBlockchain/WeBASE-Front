@@ -22,10 +22,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class RegisterTaskTest extends BaseTest {
 	@Autowired
-	EventRegisterTask task;
+	EventRegisterInitTask eventRegisterInitTask;
+	@Autowired
+	SyncEventMapTask mapTask;
 
 	@Test
 	public void testRegisterEventLogPushTask() {
-		task.registerStart();
+		eventRegisterInitTask.syncEventRegisterTask();
+	}
+
+	@Test
+	public void testSyncMapTask() {
+		mapTask.syncEventMapTask();
 	}
 }
