@@ -46,12 +46,8 @@ public class ContractEventCallback extends EventLogPushWithDecodeCallback {
     private String routingKey;
     private int groupId;
     private String appId;
-    /**
-     * cannot be callback before it's set
-     * @param id saved in db
-     */
     @Setter
-    private String id = "";
+    private boolean running = false;
 
     public ContractEventCallback(MQPublisher mqPublisher,
                                  String exchangeName, String routingKey,
@@ -73,7 +69,7 @@ public class ContractEventCallback extends EventLogPushWithDecodeCallback {
      */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
-        if ("".equals(id)) {
+        if (!running) {
             return;
         }
         logger.info(

@@ -19,6 +19,7 @@ package com.webank.webase.front.task;
 import com.google.common.collect.Lists;
 import com.webank.webase.front.event.ContractEventInfoRepository;
 import com.webank.webase.front.event.NewBlockEventInfoRepository;
+import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -86,6 +87,8 @@ public class SyncEventMapTask {
 					.count();
 			// remove from map that not in db's list
 			if(equalCount == 0) {
+				ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(infoId);
+				callback.setRunning(false);
 				CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
 				removeCount++;
 			}
