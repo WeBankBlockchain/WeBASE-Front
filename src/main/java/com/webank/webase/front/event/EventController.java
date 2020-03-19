@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 
 import static com.webank.webase.front.util.RabbitMQUtils.*;
 
@@ -63,8 +64,9 @@ public class EventController {
         // username as queue name
         String queueName = reqNewBlockEventRegister.getQueueName();
 
-        // "username_routingKey"
-        String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
+        // String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
+        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 3);
+        String blockRoutingKey = appId + "_" + ROUTING_KEY_BLOCK + "_" + randomStr;
         eventService.registerNewBlockEvent(appId, groupId,
                 exchangeName, queueName, blockRoutingKey);
         log.debug("end registerNewBlockEvent. ");
@@ -91,8 +93,9 @@ public class EventController {
         // username as queue name
         String queueName = reqContractEventRegister.getQueueName();
 
-        // bind queue to exchange by routing key "username_event"
-        String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
+        // String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
+        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 3);
+        String eventRoutingKey = appId + "_" + ROUTING_KEY_EVENT + "_" + randomStr;
         // register contract event log push in service
         eventService.registerContractEvent(appId, groupId,
                 exchangeName, queueName, eventRoutingKey,
