@@ -80,13 +80,13 @@ public class SyncEventMapTask {
 		log.debug("start cleanContractEventMap. ");
 		int removeCount = 0;
 		List<ContractEventInfo> contractEventInfoList = Lists.newArrayList(contractEventInfoRepository.findAll());
-		for(String infoId : BLOCK_ROUTING_KEY_MAP.keySet()){
+		for (String infoId : CONTRACT_EVENT_CALLBACK_MAP.keySet()) {
 			long equalCount = 0;
 			equalCount = contractEventInfoList.stream()
 					.filter(info -> infoId.equals(info.getId()))
 					.count();
 			// remove from map that not in db's list
-			if(equalCount == 0) {
+			if (equalCount == 0) {
 				ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(infoId);
 				callback.setRunning(false);
 				CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
