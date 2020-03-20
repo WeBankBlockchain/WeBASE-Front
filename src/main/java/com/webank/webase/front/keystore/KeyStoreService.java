@@ -76,8 +76,8 @@ public class KeyStoreService {
 
 
     /**
-     * getLocalKeyStores.
-     * v1.3.0+: no private key stored
+     * get local user KeyStores with privateKey
+     * without external user
      */
     public List<KeyStoreInfo> getLocalKeyStoreList() {
         Sort sort = new Sort(Sort.Direction.ASC, "userName");
@@ -86,13 +86,17 @@ public class KeyStoreService {
                     Predicate predicate = criteriaBuilder.equal(root.get("type"), KeyTypes.LOCALUSER.getValue());
                     return criteriaBuilder.and(predicate);
                 }, sort);
-        // make sure not transport private key
-        keyStores.forEach(keyStoreInfo -> keyStoreInfo.setPrivateKey(null));
+        // return local KeyStore with decrypted privateKey
+        keyStores.forEach(info -> {
+            String realPrivateKey = aesUtils.aesDecrypt(info.getPrivateKey());
+            info.setPrivateKey(realPrivateKey);
+        });
         return keyStores;
     }
 
     /**
      * create key store locally and save
+     * with private key
      */
     public KeyStoreInfo createKeyStoreLocally(String userName) {
         log.info("start createKeyStore. userName:{}", userName);
@@ -120,7 +124,8 @@ public class KeyStoreService {
 
 
     /**
-     * create keystore by webase-sign and not save
+     * create keystore by webase-sign
+     * without private key
      * @param signUserId
      * @param appId
      * @return

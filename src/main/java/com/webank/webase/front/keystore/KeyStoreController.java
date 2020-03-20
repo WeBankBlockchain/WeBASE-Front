@@ -98,7 +98,7 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "privateKey", value = "private key", required = true, dataType = "String"),
         @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
     })
-    @RequestMapping(method = RequestMethod.GET, value = "/import")
+    @GetMapping("/import")
     public KeyStoreInfo importPrivateKey(@RequestParam String privateKey, @RequestParam String userName) {
         return keyStoreService.importFromPrivateKey(privateKey, userName);
     }
