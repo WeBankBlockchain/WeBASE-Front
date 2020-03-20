@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-content-head :headTitle="$t('route.blockEvent')" @changeGroup="changeGroup"></v-content-head>
+        <v-content-head :headTitle="$t('route.subscribeEvent')" :headSubTitle="$t('route.blockEvent')" @changeGroup="changeGroup"></v-content-head>
         <div class="module-wrapper">
             <div class="search-part">
                 <div style="display: flex;">
@@ -85,13 +85,14 @@ export default {
                     name: this.$t('table.exchangeName')
                 },
                 {
-                    enName: 'queueName',
-                    name: this.$t('table.queueName')
-                },
-                {
                     enName: 'routingKey',
                     name: this.$t('table.routingKey')
                 },
+                {
+                    enName: 'queueName',
+                    name: this.$t('table.queueName')
+                },
+                
             ]
             return arr
         }

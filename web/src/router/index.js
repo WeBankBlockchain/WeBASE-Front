@@ -85,6 +85,7 @@ const routes = [
         children: [
             { path: '/contract', component: contract, name: '合约IDE', enName: 'contractIDE', menuShow: true, meta: { requireAuth: false } },
             { path: '/contractList', component: oldContract, name: '合约列表', enName: 'contractList', menuShow: true, meta: { requireAuth: false } },
+            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '测试用户', enName: 'privateKeyManagement', menuShow: true, meta: { requireAuth: false } }
         ]
     },
     {
@@ -100,18 +101,18 @@ const routes = [
             { path: '/nodesMetric', component: nodesMetric, name: '节点指标', enName: 'nodeMetrics',menuShow: true, meta: { requireAuth: false } },
         ]
     },
-    {
-        path: '/',
-        component: main,
-        name: '私钥管理',
-        enName: 'privateKeyManagement',
-        leaf: true,
-        menuShow: true,
-        iconCls: 'wbs-icon-lock sidebar-icon',
-        children: [
-            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '私钥管理', enName: 'privateKeyManagement', menuShow: true, meta: { requireAuth: false } }
-        ]
-    }, 
+    // {
+    //     path: '/',
+    //     component: main,
+    //     name: '私钥管理',
+    //     enName: 'privateKeyManagement',
+    //     leaf: true,
+    //     menuShow: true,
+    //     iconCls: 'wbs-icon-lock sidebar-icon',
+    //     children: [
+    //         { path: '/privateKeyManagement', component: rivateKeyManagement, name: '私钥管理', enName: 'privateKeyManagement', menuShow: true, meta: { requireAuth: false } }
+    //     ]
+    // }, 
     {
         path: '/',
         component: main,

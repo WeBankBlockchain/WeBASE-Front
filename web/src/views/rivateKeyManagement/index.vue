@@ -15,7 +15,7 @@
  */
 <template>
     <div class="rivate-key-management-wrapper">
-        <v-contentHead :headTitle="$t('route.privateKeyManagementQ')"></v-contentHead>
+        <v-contentHead :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.testUserList')"></v-contentHead>
         <div class="module-wrapper" style="padding-bottom: 20px;">
             <div class="search-part">
                 <div style="display: flex;">
@@ -335,6 +335,7 @@ export default {
             let _this = this;
             reader.onload = function (evt) {
                 _this.fileString = evt.target.result; // 读取文件内容
+                console.log(_this.fileString)
                 try {
                     let reqQuery = {
                         privateKey: JSON.parse(_this.fileString).privateKey,

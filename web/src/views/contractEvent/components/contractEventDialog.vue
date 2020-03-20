@@ -19,12 +19,7 @@
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
-            <el-form-item :label="$t('table.contractAbi')" prop="contractAbi">
-                <el-input v-model="contractEventForm.contractAbi" style="width: 210px;"></el-input>
-                <el-tooltip class="item" effect="dark" :content="$t('text.contractAbi')" placement="right">
-                    <i class="el-icon-info"></i>
-                </el-tooltip>
-            </el-form-item>
+            
             <el-form-item :label="$t('table.contractAddress')" prop="contractAddress">
                 <el-input v-model="contractEventForm.contractAddress" style="width: 210px;"></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.contractAddress')" placement="right">
@@ -49,10 +44,11 @@
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
-            <el-form-item :label="$t('table.groupId')" prop="groupId">
-                <el-select v-model="contractEventForm.groupId" :placeholder="$t('placeholder.selected')">
-                    <el-option v-for=" item in groupList" :key="item.group" :label="item.groupName" :value="item.group"></el-option>
-                </el-select>
+            <el-form-item :label="$t('table.contractAbi')" prop="contractAbi">
+                <el-input type="textarea" v-model="contractEventForm.contractAbi" style="width: 210px;"></el-input>
+                <el-tooltip class="item" effect="dark" :content="$t('text.contractAbi')" placement="right">
+                    <i class="el-icon-info"></i>
+                </el-tooltip>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -83,13 +79,14 @@ export default {
                 groupId: '',
                 contractAbi: '',
                 contractAddress: '',
-                fromBlock: '',
-                toBlock: '',
+                fromBlock: 'lastest',
+                toBlock: 'lastest',
                 topicList: '',
             },
             groupList: localStorage.getItem("cluster")
                 ? JSON.parse(localStorage.getItem("cluster"))
                 : [],
+            groupId: localStorage.getItem("groupId")
         }
     },
 
@@ -177,7 +174,14 @@ export default {
         submit(formName) {
             this.$refs[formName].validate(valid => {
                 if (valid) {
-                    this.queryAdd()
+                    if(this.contractEventForm.toBlock <= this.contractEventForm.fromBlock){
+                        this.$message({
+                            type: 'error',
+                            message: 'toBlock greater than fromBlock'
+                        })
+                    } else {
+                        this.queryAdd()
+                    }
 
                 } else {
                     return false;
@@ -185,10 +189,10 @@ export default {
             })
         },
         queryAdd() {
-            console.log(this.contractEventForm)
             let param = Object.assign({},this.contractEventForm, {
                 contractAbi: new Array(this.contractEventForm.contractAbi),
                 topicList: new Array(this.contractEventForm.topicList),
+                groupId: this.groupId
             })
             addContractEvent(param)
                 .then(res => {

@@ -145,8 +145,8 @@ export default {
                             case 'nodeMetrics':
                                 it.name = this.$t('route.nodeMetrics')
                                 break;
-                            case 'privateKeyManagement':
-                                it.name = this.$t('route.privateKeyManagement')
+                            case 'testUserList':
+                                it.name = this.$t('route.testUserList')
                                 break;
                             case 'blockEvent':
                                 it.name = this.$t('route.blockEvent')

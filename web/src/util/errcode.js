@@ -153,8 +153,8 @@ let errCode = {
         zh: '找不到keyServer的配置'
     },
     "201033": {
-        en: "data request sign not accessible",
-        zh: '数据请求标志不可访问'
+        en: "data request sign error",
+        zh: '访问webase-sign失败'
     },
     "201034": {
         en: "groupId not exist",
@@ -192,6 +192,10 @@ let errCode = {
     "201213": {
         en: "address is invalid",
         zh: '地址无效'
+    },
+    "201200": {
+        en: "Params not fit",
+        zh: '参数不合适'
     },
     "201201": {
         en: "create system config in db fail for already exist",
@@ -277,6 +281,18 @@ let errCode = {
     "201231": {
         en: "Cert file not found, please check cert path in config",
         zh: '找不到证书文件，请检查配置中的证书路径'
+    },
+    "201241": {
+        en: "Exchange or message queue not exists, please check mq server or mq configuration",
+        zh: 'Exchange或消息队列不存在，请检查mq服务器或mq配置'
+    },
+    "201242": {
+        en: "Database error: data already exists in db",
+        zh: '数据库错误：数据库中已存在数据'
+    },
+    "201243": {
+        en: "Database error: data not exists in db, please check your params",
+        zh: '数据库错误：数据库中不存在数据，请检查参数'
     },
     "202000": {
         en: "invalid node info",

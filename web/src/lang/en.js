@@ -22,6 +22,7 @@ export default {
         subscribeEvent: 'Subscribe Event',
         blockEvent: 'Block Event',
         contractEvent:'Contract Event',
+        testUserList: 'Test User'
     },
     navbar: {
         dashboard: 'Dashboard',
@@ -91,7 +92,7 @@ export default {
         addContractEvent: "add contract Event",
         blockEventInfo: "Event Info",
         appId: "App Id",
-        exchangeName: "Exchange Name",
+        exchangeName: "Exchange",
         queueName: "Queue Name",
         routingKey: "RoutingKey",
         groupId: "Group Id",
