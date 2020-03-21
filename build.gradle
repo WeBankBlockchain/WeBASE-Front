@@ -11,10 +11,11 @@ targetCompatibility = 1.8
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-	mavenCentral()
+
     maven {
         url "http://maven.aliyun.com/nexus/content/groups/public/"
     }
+	mavenCentral()
 	maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 	maven { url 'https://dl.bintray.com/ethereum/maven/' }
 	maven { url 'http://repo.typesafe.com/typesafe/maven-releases/' }
@@ -69,7 +70,7 @@ List jaxb = [
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb
 	// guomi contract compile: USE 'socJ-all-0.4.25-gm' to REPLACE 'ethereum:solcJ-all'
-	compile ('org.fisco-bcos:web3sdk:2.2.0-bsn-SNAPSHOT')
+	compile ('org.fisco-bcos:web3sdk:2.2.0-bsn-0321-SNAPSHOT')
 	//compile ('org.fisco-bcos:web3sdk:2.2.0')
 //        {
 //            exclude group:"org.ethereum"
