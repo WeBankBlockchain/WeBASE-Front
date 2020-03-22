@@ -20,7 +20,10 @@ import com.webank.webase.front.Application;
 import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
 import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.util.CommonUtils;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.junit.Before;
 import org.junit.Test;
@@ -187,6 +190,20 @@ public class ContractControllerTest {
             .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
     }
 */
-
-
+    @Test
+    public void testMultiContractCompile() throws Exception {
+        String filePath = "D:\\project\\sol\\HelloWorld.zip";
+        String base64 = CommonUtils.fileToBase64(filePath);
+        
+        Map<String, String> param = new HashMap<>();
+        param.put("contractZipBase64", base64);
+        
+        ResultActions resultActions =
+                mockMvc.perform(MockMvcRequestBuilders.post("/contract/multiContractCompile")
+                        .content(JSON.toJSONString(param)).contentType(MediaType.APPLICATION_JSON));
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk())
+        .andDo(MockMvcResultHandlers.print());
+        System.out.println(
+                "response:" + resultActions.andReturn().getResponse().getContentAsString());
+    }
 }

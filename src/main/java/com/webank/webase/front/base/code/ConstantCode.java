@@ -67,6 +67,7 @@ public class ConstantCode {
     public static final RetCode USER_NAME_NULL = RetCode.mark(201037, "user name is null");
     public static final RetCode USER_NAME_EXISTS = RetCode.mark(201038, "user name already exists");
     public static final RetCode PRIVATEKEY_EXISTS = RetCode.mark(201039, "private key already exists");
+    public static final RetCode NO_SOL_FILES = RetCode.mark(201040, "There is no sol files in source");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
