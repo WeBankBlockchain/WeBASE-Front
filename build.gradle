@@ -18,7 +18,6 @@ repositories {
 	maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 	maven { url 'https://dl.bintray.com/ethereum/maven/' }
 	maven { url 'http://repo.typesafe.com/typesafe/maven-releases/' }
-
     mavenLocal()
 
 }
