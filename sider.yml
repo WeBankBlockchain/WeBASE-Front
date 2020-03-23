@@ -6,3 +6,8 @@ linter:
   eslint:
     dir: web/src
     ext: ".js,.vue"
+  checkstyle:
+    dir: src
+    ignore:
+      - warning
+      - info
