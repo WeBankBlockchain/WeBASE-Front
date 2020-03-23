@@ -266,6 +266,11 @@
     border-color: #252f43 !important;
     color:#70889e !important;
 }
+.el-textarea__inner {
+    background: #252f43;
+    color: #70889e;
+    border-color: #252f43 !important;
+}
 .el-input__inner:hover{
     border-color: #1f8efa !important;
 }
