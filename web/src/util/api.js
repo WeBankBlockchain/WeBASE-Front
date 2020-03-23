@@ -19,9 +19,9 @@ import { reviseParam } from './util'
 import qs from 'qs'
 
 var HANDLE = null;
-if(process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development') {
     HANDLE = '/handle/'
-}else {
+} else {
     HANDLE = '';
 }
 //login
@@ -360,17 +360,17 @@ export function nodesHealth(data, list) {
         params: params.querys
     })
 }
-  
+
 
 //group
-export function queryGroup(){
+export function queryGroup() {
     return get({
         url: `${HANDLE}1/web3/groupList`,
         method: 'get'
     })
 }
 //create privateKey 
-export function queryCreatePrivateKey(data){
+export function queryCreatePrivateKey(data) {
     return get({
         url: `${HANDLE}privateKey`,
         method: 'get',
@@ -378,7 +378,7 @@ export function queryCreatePrivateKey(data){
     })
 }
 //import privateKey 
-export function queryImportPrivateKey(data){
+export function queryImportPrivateKey(data) {
     return get({
         url: `${HANDLE}privateKey/import`,
         method: 'get',
@@ -386,7 +386,7 @@ export function queryImportPrivateKey(data){
     })
 }
 //import pem privateKey 
-export function ImportPemPrivateKey(data){
+export function ImportPemPrivateKey(data) {
     return post({
         url: `${HANDLE}privateKey/importPem`,
         method: 'post',
@@ -409,7 +409,7 @@ export function queryDeletePrivateKey(data) {
     })
 }
 //overview block number
-export function queryBlockNumber(data){
+export function queryBlockNumber(data) {
     return get({
         url: `${HANDLE}${data}/web3/blockNumber`,
         method: 'get'
@@ -417,7 +417,7 @@ export function queryBlockNumber(data){
 }
 
 //overview group nodes number
-export function queryNodesNumber(data){
+export function queryNodesNumber(data) {
     return get({
         url: `${HANDLE}${data}/web3/groupPeers`,
         method: 'get'
@@ -425,21 +425,21 @@ export function queryNodesNumber(data){
 }
 
 //overview group TX number
-export function queryTxNumber(data){
+export function queryTxNumber(data) {
     return get({
         url: `${HANDLE}${data}/web3/transaction-total`,
         method: 'get'
     })
 }
 //overview pending  transactions count
-export function queryPendingTxNumber(group){
+export function queryPendingTxNumber(group) {
     return get({
         url: `${HANDLE}${group}/web3/pending-transactions-count`,
         method: 'get'
     })
 }
 //home search 
-export function queryHomeSearch(data,list){
+export function queryHomeSearch(data, list) {
     const params = reviseParam(data, list);
     return get({
         url: `${HANDLE}${data}/web3/search`,
@@ -449,7 +449,7 @@ export function queryHomeSearch(data,list){
     })
 }
 // nodes info 
-export function queryNodesInfo(group){
+export function queryNodesInfo(group) {
     return get({
         url: `${HANDLE}${group}/web3/peers`,
         method: 'get'
@@ -457,14 +457,14 @@ export function queryNodesInfo(group){
 }
 
 // nodes info 
-export function querySyncStatus(group){
+export function querySyncStatus(group) {
     return get({
         url: `${HANDLE}${group}/web3/syncStatus`,
         method: 'get'
     })
 }
 //nodes status info 
-export function queryNodesStatusInfo(group){
+export function queryNodesStatusInfo(group) {
     return get({
         url: `${HANDLE}${group}/web3/getNodeStatusList`,
         method: 'get'
@@ -472,7 +472,7 @@ export function queryNodesStatusInfo(group){
 }
 //tx info 
 
-export function queryTxInfo(group, txHash){
+export function queryTxInfo(group, txHash) {
     return get({
         url: `${HANDLE}${group}/web3/transaction/${txHash}`,
         method: 'get'
@@ -480,7 +480,7 @@ export function queryTxInfo(group, txHash){
 }
 
 // tx receipt info 
-export function queryTxReceiptInfo(group, txHash){
+export function queryTxReceiptInfo(group, txHash) {
     return get({
         url: `${HANDLE}${group}/web3/transactionReceipt/${txHash}`,
         method: 'get'
@@ -488,7 +488,7 @@ export function queryTxReceiptInfo(group, txHash){
 }
 
 // block info 
-export function queryBlockInfo(group, blockNumber){
+export function queryBlockInfo(group, blockNumber) {
     return get({
         url: `${HANDLE}${group}/web3/blockByNumber/${blockNumber}`,
         method: 'get'
@@ -612,7 +612,7 @@ export function postPerformanceSwitch(data) {
 }
 
 /* Background compilation*/
-export function backgroundCompile(data){
+export function backgroundCompile(data) {
     return post({
         url: `${HANDLE}contract/contractCompile `,
         method: 'post',
@@ -624,5 +624,70 @@ export function encryption() {
         url: `${HANDLE}encrypt`,
         method: 'get',
         responseType: 'text'
+    })
+}
+/*订阅事件*/
+
+export function blockEventList(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/newBlockEvent/list/${params.str}`,
+        method: 'get'
+    })
+}
+
+export function addBlockEvent(data) {
+    return post({
+        url: `${HANDLE}event/newBlockEvent`,
+        method: 'post',
+        data: data
+    })
+}
+
+export function deleteBlockEvent(data) {
+    return deleted({
+        url: `${HANDLE}event/newBlockEvent `,
+        method: 'delete',
+        data: data
+    })
+}
+export function checkBlockEvent(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/newBlockEvent/${params.str}`,
+        method: 'get'
+    })
+}
+
+
+export function contractEventList(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/contractEvent/list/${params.str}`,
+        method: 'get',
+        data: data
+    })
+}
+
+export function addContractEvent(data) {
+    return post({
+        url: `${HANDLE}event/contractEvent`,
+        method: 'post',
+        data: data
+    })
+}
+
+export function deleteContractEvent(data) {
+    return deleted({
+        url: `${HANDLE}event/contractEvent `,
+        method: 'delete',
+        data: data
+    })
+}
+export function checkContractEvent(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/contractEvent/${params.str}`,
+        method: 'get'
     })
 }
