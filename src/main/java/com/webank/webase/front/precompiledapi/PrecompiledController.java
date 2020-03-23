@@ -36,7 +36,6 @@ import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -143,35 +142,30 @@ public class PrecompiledController {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();
         int groupId = consensusHandle.getGroupId();
-        String from = consensusHandle.getFromAddress();
+        String from = consensusHandle.getSignUserId();
         String nodeId = consensusHandle.getNodeId();
         if (!PrecompiledUtils.checkNodeId(nodeId)) {
             return ConstantCode.INVALID_NODE_ID;
         }
-        if(consensusHandle.getUseAes() == null){
-            consensusHandle.setUseAes(false);
-        }
-        Boolean useAes = consensusHandle.getUseAes();
         switch (nodeType) {
             case PrecompiledUtils.NODE_TYPE_SEALER:
-                return addSealer(groupId, from, nodeId, useAes);
+                return addSealer(groupId, from, nodeId);
             case PrecompiledUtils.NODE_TYPE_OBSERVER:
-                return addObserver(groupId, from, nodeId, useAes);
+                return addObserver(groupId, from, nodeId);
             case PrecompiledUtils.NODE_TYPE_REMOVE:
-                return removeNode(groupId, from, nodeId, useAes);
+                return removeNode(groupId, from, nodeId);
             default:
                 log.debug("end nodeManageControl invalid node type");
                 return ConstantCode.INVALID_NODE_TYPE;
         }
     }
 
-    public Object addSealer(int groupId, String fromAddress, String nodeId,
-                            Boolean useAes) throws Exception {
+    public Object addSealer(int groupId, String fromAddress, String nodeId) throws Exception {
         Instant startTime = Instant.now();
         log.info("start addSealer startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
         try{
-            Object res = precompiledService.addSealer(groupId, fromAddress, nodeId, useAes);
+            Object res = precompiledService.addSealer(groupId, fromAddress, nodeId);
             log.info("end addSealer useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), res);
             return res;
@@ -181,13 +175,12 @@ public class PrecompiledController {
         }
     }
 
-    public Object addObserver(int groupId, String fromAddress, String nodeId,
-                              Boolean useAes) throws Exception {
+    public Object addObserver(int groupId, String fromAddress, String nodeId) throws Exception {
         Instant startTime = Instant.now();
         log.info("start addObserver startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
         try{
-            Object res = precompiledService.addObserver(groupId, fromAddress, nodeId, useAes);
+            Object res = precompiledService.addObserver(groupId, fromAddress, nodeId);
             log.info("end addObserver useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), res);
             return res;
@@ -197,13 +190,12 @@ public class PrecompiledController {
         }
     }
 
-    public Object removeNode(int groupId, String fromAddress, String nodeId,
-                             Boolean useAes) throws Exception {
+    public Object removeNode(int groupId, String fromAddress, String nodeId) throws Exception {
         Instant startTime = Instant.now();
         log.info("start addSealer startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
         try{
-            Object res = precompiledService.removeNode(groupId, fromAddress, nodeId, useAes);
+            Object res = precompiledService.removeNode(groupId, fromAddress, nodeId);
             log.info("end addSealer useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), res);
             return res;
@@ -221,30 +213,26 @@ public class PrecompiledController {
     @ApiOperation(value = "crudManage", notes = "operate table by crud")
     @ApiImplicitParam(name = "crudHandle", value = "crud operation info", required = true, dataType = "CrudHandle")
     @PostMapping("crud")
-    public Object crudManageControl(@Valid @RequestBody CrudHandle crudHandle, BindingResult bindingResult)throws Exception {
+    public Object crudManageControl(@Valid @RequestBody CrudHandle crudHandle)throws Exception {
         log.info("start crudManageControl. crudHandle:{}", crudHandle);
         int groupId = crudHandle.getGroupId();
-        String from = crudHandle.getFromAddress();
+        String from = crudHandle.getSignUserId();
         String sql = crudHandle.getSql();
-        if(crudHandle.getUseAes() == null){
-            crudHandle.setUseAes(false);
-        }
-        Boolean useAes = crudHandle.getUseAes();
         // to lower case
         String[] sqlParams = sql.trim().split(" ");
         switch (sqlParams[0].toLowerCase()) {
             case "create":
-                return createTable(groupId, from, sql, useAes);
+                return createTable(groupId, from, sql);
             case "desc":
                 return desc(groupId, sql);
             case "select":
-                return select(groupId, from, sql, useAes);
+                return select(groupId, sql);
             case "insert":
-                return insert(groupId, from, sql, useAes);
+                return insert(groupId, from, sql);
             case "update":
-                return update(groupId, from, sql, useAes);
+                return update(groupId, from, sql);
             case "delete":
-                return remove(groupId, from, sql, useAes);
+                return remove(groupId, from, sql);
             default:
                 log.debug("end crudManageControl no such crud operation");
                 return new BaseResponse(ConstantCode.PARAM_FAIL_SQL_ERROR,
@@ -253,7 +241,7 @@ public class PrecompiledController {
     }
 
 
-    public Object createTable(int groupId, String fromAddress, String sql, Boolean useAes) throws Exception {
+    public Object createTable(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
         log.info("start createTable startTime:{}, groupId:{},fromAddress:{},sql:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, sql);
@@ -269,7 +257,7 @@ public class PrecompiledController {
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
         }
         CRUDParseUtils.checkTableParams(table);
-        int result = precompiledService.createTable(groupId, fromAddress, table, useAes);
+        int result = precompiledService.createTable(groupId, fromAddress, table);
         log.info("end createTable useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), result);
 
@@ -320,10 +308,10 @@ public class PrecompiledController {
         }
     }
 
-    public Object select(int groupId, String fromAddress, String sql, Boolean useAes) throws Exception {
+    public Object select(int groupId, String sql) throws Exception {
         Instant startTime = Instant.now();
-        log.info("start select startTime:{}, groupId:{},fromAddress:{},sql:{}",
-                startTime.toEpochMilli(), groupId, fromAddress, sql);
+        log.info("start select startTime:{}, groupId:{},sql:{}",
+                startTime.toEpochMilli(), groupId, sql);
         Table table = new Table();
         Condition conditions = table.getCondition();
         List<String> selectColumns = new ArrayList<>();
@@ -361,7 +349,7 @@ public class PrecompiledController {
         }
         List<Map<String, String>> result = new ArrayList<>();
 
-        result = precompiledService.select(groupId, fromAddress, table, conditions, useAes);
+        result = precompiledService.select(groupId, table, conditions);
         log.info("end select useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), result);
         int rows = 0;
@@ -386,7 +374,7 @@ public class PrecompiledController {
         //return new BaseResponse(ConstantCode.RET_SUCCESS, rows + " row(s) in set.");
     }
 
-    public Object insert(int groupId, String fromAddress, String sql, Boolean useAes) throws Exception {
+    public Object insert(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
         log.info("start insert startTime:{}, groupId:{},fromAddress:{},sql:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, sql);        Table table = new Table();
@@ -476,7 +464,7 @@ public class PrecompiledController {
             table.setKey(keyValue);
         }
         CRUDParseUtils.checkUserTableParam(entry, descTable);
-        int insertResult = precompiledService.insert(groupId, fromAddress, table, entry, useAes);
+        int insertResult = precompiledService.insert(groupId, fromAddress, table, entry);
         log.info("end insert useTime:{} insertResult:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), insertResult);
         if (insertResult >= 0) {
@@ -487,7 +475,7 @@ public class PrecompiledController {
         }
     }
 
-    public Object update(int groupId, String fromAddress, String sql, Boolean useAes) throws Exception {
+    public Object update(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
         log.info("start update startTime:{}, groupId:{},fromAddress:{},sql:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, sql);        Table table = new Table();
@@ -539,7 +527,7 @@ public class PrecompiledController {
         }
         CRUDParseUtils.checkUserTableParam(entry, descTable);
         int updateResult = precompiledService.update(groupId, fromAddress,
-                table, entry, conditions, useAes);
+                table, entry, conditions);
         log.info("end update useTime:{} updateResult:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), updateResult);
         if (updateResult >= 0) {
@@ -551,7 +539,7 @@ public class PrecompiledController {
 
     }
 
-    public Object remove(int groupId, String fromAddress, String sql, Boolean useAes) throws Exception {
+    public Object remove(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
         log.info("start remove startTime:{}, groupId:{},fromAddress:{},sql:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, sql);        Table table = new Table();
@@ -581,7 +569,7 @@ public class PrecompiledController {
         table.setKey(descTable.getKey());
         CRUDParseUtils.handleKey(table, conditions);
         int removeResult = precompiledService.remove(groupId, fromAddress,
-                table, conditions, useAes);
+                table, conditions);
         log.info("end remove useTime:{} removeResult:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), removeResult);
         if (removeResult >= 0) {

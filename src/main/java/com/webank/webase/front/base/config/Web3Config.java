@@ -232,6 +232,10 @@ public class Web3Config {
         return cnsServiceMap;
     }
 
+    /**
+     * store contractName:version or contractName:addressWithoutPrefix in map
+     * when contract is deployed in @link ContractService
+     */
     @Bean
     public HashMap<String, String> cnsMap() {
         HashMap cnsMap = new HashMap<String, String>();
