@@ -3,6 +3,8 @@ linter:
     dir: src/main/java
     encoding: Shift_JIS
     min_priority: 2
+  misspell:
+    dir: src/main/java
   eslint:
     dir: web/src
     ext: ".js,.vue"
