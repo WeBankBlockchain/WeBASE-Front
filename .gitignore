@@ -30,7 +30,14 @@ gradle.properties
 
 /target
 /out
+/h2
+/conf
 /log
 /dist
 /bin
+*.crt
+*.key
+h2
+
+
 

@@ -25,6 +25,9 @@ import lombok.NoArgsConstructor;
 public class RspContractCompile {
     private String contractName;
     private String contractAbi;
+    /**
+     * 合约编译的bytecode(bin)，用于部署合约
+     */
     private String bytecodeBin;
     private String errors;
 }

@@ -49,7 +49,7 @@ public class PerformanceController {
 
     /**
      * query performance data.
-     * 
+     *
      * @param beginDate beginDate
      * @param endDate endDate
      * @param contrastBeginDate contrastBeginDate

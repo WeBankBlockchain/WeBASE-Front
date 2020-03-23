@@ -51,8 +51,8 @@ public class ContractAbiUtil {
     }
 
     public static HashMap<String, List<VersionEvent>> contractEventMap = new HashMap<>();
-    private static final String regex = "(\\w+)(?:\\[(.*?)\\])(?:\\[(.*?)\\])?";
-    private static final Pattern pattern = Pattern.compile(regex);
+    private static final String REGEX = "(\\w+)(?:\\[(.*?)\\])(?:\\[(.*?)\\])?";
+    private static final Pattern PATTERN = Pattern.compile(REGEX);
 
     @Data
     public static class VersionEvent {
@@ -68,7 +68,7 @@ public class ContractAbiUtil {
          *
          * @param version     contract version
          * @param events      events
-         * @param functions   functions
+         * @param functions   functions // constant or not
          * @param funcInputs  funcInputs
          * @param funcOutputs funcOutputs
          */
@@ -367,7 +367,7 @@ public class ContractAbiUtil {
 
     static TypeName buildTypeName(String typeDeclaration) {
         String type = trimStorageDeclaration(typeDeclaration);
-        Matcher matcher = pattern.matcher(type);
+        Matcher matcher = PATTERN.matcher(type);
         if (matcher.find()) {
             Class<?> baseType = org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes
                     .getType(matcher.group(1));

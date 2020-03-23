@@ -58,7 +58,7 @@ import org.springframework.http.MediaType;
 @Slf4j
 public class CommonUtils {
 
-    public static final int publicKeyLength_64 = 64;
+    public static final int PUBLIC_KEY_LENGTH_64 = 64;
 
     private CommonUtils() {
         throw new IllegalStateException("Utility class");
@@ -266,8 +266,7 @@ public class CommonUtils {
      */
     public static HttpHeaders buildHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
-        headers.setContentType(type);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         headers.add("Accept", MediaType.APPLICATION_JSON.toString());
         return headers;
     }
@@ -511,5 +510,16 @@ public class CommonUtils {
                 log.error("closeable IOException:[{}]", e.toString());
             }
         }
+    /**
+     * parseHexStr2Int.
+     *
+     * @param str str
+     * @return
+     */
+    public static int parseHexStr2Int(String str) {
+        if (StringUtils.isBlank(str)) {
+            return 0;
+        }
+        return Integer.parseInt(str.substring(2), 16);
     }
 }

@@ -40,10 +40,10 @@ public class ContractTest {
         // "cHJhZ21hIHNvbGlkaXR5IF4wLjQuMjQ7DQoNCmNvbnRyYWN0IEhlbGxvV29ybGRHTXsNCiAgIHN0cmluZyBuYW1lOw0KDQogICBjb25zdHJ1Y3RvcigpIHB1YmxpY3sNCiAgICAgIG5hbWUgPSAiSGVsbG8sIFdvcmxkISI7DQogICB9DQogIGZ1bmN0aW9uIGdldCgpIGNvbnN0YW50IHB1YmxpYyByZXR1cm5zKHN0cmluZyl7DQogICAgICByZXR1cm4gbmFtZTsNCiAgfQ0KDQogIGZ1bmN0aW9uIHNldChzdHJpbmcgbikgcHVibGljew0KICAgICAgbmFtZSA9IG47DQogIH0NCn0";
         System.out.println(sourceBase64);
         RspContractCompile res = contractCompile(solidityName, sourceBase64);
-        System.out.println(res.getContractName());
-        System.out.println(res.getBytecodeBin());
-        System.out.println(res.getContractAbi());
-        System.out.println(res.getErrors());
+//        System.out.println(res.getContractName());
+//        System.out.println(res.getBytecodeBin());
+//        System.out.println(res.getContractAbi());
+//        System.out.println(res.getErrors());
         assertNotNull(res.getBytecodeBin());
     }
 
