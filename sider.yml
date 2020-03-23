@@ -11,3 +11,8 @@ linter:
     ignore:
       - warning
       - info
+  misspell:
+    targets:
+      - src/main/java
+      - src/test/java
+    locale: US
