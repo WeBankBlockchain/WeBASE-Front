@@ -18,7 +18,6 @@ package com.webank.webase.front.event.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -32,6 +31,11 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class ReqContractEventRegister {
+
+	/**
+	 * id in database
+	 */
+	private String infoId;
 
     /**
      * application which register contract event
@@ -52,9 +56,9 @@ public class ReqContractEventRegister {
 	private String exchangeName;
 
     /**
-     * username as queue name
+     * appId as queue name
      */
-	@NotEmpty(message = "queueName cannot be empty, usually use username")
+	@NotEmpty(message = "queueName cannot be empty(usually use appId as queueName)")
 	private String queueName;
 
 	/**
