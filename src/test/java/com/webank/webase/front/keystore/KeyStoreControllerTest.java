@@ -50,7 +50,9 @@ public class KeyStoreControllerTest {
     @Test
     public void testGetPrivateKey() throws Exception {
         //{"publicKey":"0x1a532eba008787e5d16584eb40a0e3ddf1d8fa33fcef64c14d58aabbb1b191935ce540cdd4d3cbbe4779f558185cf4cea1be266cc46ee9b3903f1a819662c1b7","privateKey":"95d1ff9e42c70bf460490404a9b35a6618e711a51c0ec829d7401667cd6ad1d5","address":"0x58415e44c664af1eab071da728a8405afa1991f3"}
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/privateKey"));
+        String uri = "/privateKey?" + "userName=";
+        String username = "test2";
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get(uri+username));
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).
             andDo(MockMvcResultHandlers.print());
