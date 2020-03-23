@@ -15,7 +15,6 @@
  */
 package com.webank.webase.front.keystore;
 
-import java.util.List;
 
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -24,11 +23,9 @@ import org.springframework.data.repository.CrudRepository;
 public interface KeystoreRepository extends CrudRepository<KeyStoreInfo, String>,
     JpaSpecificationExecutor<KeyStoreInfo> {
 
-    public KeyStoreInfo findByAddress(String address);
-    
-    public KeyStoreInfo findByPrivateKey(String privateKey);
-    
-    public KeyStoreInfo findByUserNameAndType(String userName, int type);
-    
-    public List<KeyStoreInfo> findListByType(int type);
+    KeyStoreInfo findByAddress(String address);
+
+    KeyStoreInfo findByUserName(String userName);
+
+    KeyStoreInfo findByUserNameAndType(String userName, int type);
 }

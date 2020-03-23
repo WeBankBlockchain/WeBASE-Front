@@ -20,7 +20,9 @@ import java.util.List;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.ReqImportPem;
+import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.util.PemUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.webank.webase.front.base.controller.BaseController;
@@ -44,15 +46,51 @@ public class KeyStoreController extends BaseController {
 
     @ApiOperation(value = "getKeyStore", notes = "get key store info")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "useAes", value = "Is encrypting the private key", dataType = "Boolean"),
         @ApiImplicitParam(name = "type", value = "private key type", dataType = "int"),
-        @ApiImplicitParam(name = "userName", value = "user name", dataType = "String")
+        @ApiImplicitParam(name = "appId", value = "app that user belong to", dataType = "String"),
+        @ApiImplicitParam(name = "signUserId", value = "user id of webase-sign", dataType = "String"),
+        @ApiImplicitParam(name = "userName", value = "user name", dataType = "String"),
     })
-    @RequestMapping(method = RequestMethod.GET)
-    public KeyStoreInfo getKeyStore(@RequestParam(required = true) boolean useAes, 
-            @RequestParam(required = false, defaultValue = "2") int type,
-            @RequestParam(required = false) String userName) {
-        return keyStoreService.createKeyStore(useAes, type, userName);
+    @GetMapping
+    public KeyStoreInfo getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
+                                    @RequestParam(required = false) String appId,
+                                    @RequestParam(required = false) String signUserId,
+                                    @RequestParam String userName) {
+        // external key store (2)
+        if (KeyTypes.EXTERNALUSER.getValue() == type) {
+            if (StringUtils.isBlank(signUserId) || StringUtils.isBlank(appId)) {
+                throw new FrontException(ConstantCode.PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY);
+            }
+            // create from webase-sign
+            return keyStoreService.createKeyStoreWithSign(signUserId, appId);
+        } else if (KeyTypes.LOCALUSER.getValue() == type){
+            // local key store (0)
+            if (StringUtils.isBlank(userName)) {
+                log.error("fail createKeyStore. user name is null.");
+                throw new FrontException(ConstantCode.USER_NAME_NULL);
+            }
+            // create locally
+            return keyStoreService.createKeyStoreLocally(userName);
+        } else {
+            log.error("fail createKeyStore. key store type invalid");
+            throw new FrontException(ConstantCode.PARAM_VAILD_FAIL);
+        }
+    }
+
+    @ApiOperation(value = "getKeyStoreList", notes = "get local KeyStore lists")
+    @GetMapping("localKeyStores")
+    public List<KeyStoreInfo> getLocalKeyStoreList() {
+        log.info("start getLocalKeyStores.");
+        return keyStoreService.getLocalKeyStoreList();
+    }
+
+    @ApiOperation(value = "delete", notes = "delete local KeyStore by address")
+    @ApiImplicitParam(name = "address", value = "user address", required = true, dataType = "String")
+    @DeleteMapping("/{address}")
+    public BaseResponse deleteKeyStore(@PathVariable String address) {
+        log.info("start deleteKeyStores. address:{}", address);
+        keyStoreService.deleteKeyStore(address);
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 
     @ApiOperation(value = "import PrivateKey", notes = "import PrivateKey")
@@ -60,10 +98,9 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "privateKey", value = "private key", required = true, dataType = "String"),
         @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
     })
-    @RequestMapping(method = RequestMethod.GET, value = "/import")
-    public KeyStoreInfo importPrivateKey(@RequestParam(required = true) String privateKey,
-        @RequestParam(required = true) String userName) {
-        return keyStoreService.getKeyStoreFromPrivateKey(privateKey, false, KeyTypes.LOCALUSER.getValue(), userName);
+    @GetMapping("/import")
+    public KeyStoreInfo importPrivateKey(@RequestParam String privateKey, @RequestParam String userName) {
+        return keyStoreService.importFromPrivateKey(privateKey, userName);
     }
 
     @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
@@ -75,23 +112,8 @@ public class KeyStoreController extends BaseController {
         if(!pemContent.startsWith(PemUtils.crtContentHead)) {
             throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
         }
-        keyStoreService.importKeyStoreFromPem(pemContent, false, KeyTypes.LOCALUSER.getValue(), userName);
+        keyStoreService.importKeyStoreFromPem(pemContent, userName);
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
-    
-    @ApiOperation(value = "getKeyStores", notes = "get local KeyStore lists")
-    @RequestMapping(method = RequestMethod.GET, value = "/localKeyStores")
-    public List<KeyStoreInfo> getLocalKeyStores() {
-        log.info("start getLocalKeyStores.");
-        return keyStoreService.getLocalKeyStores();
-    }
-    
-    @ApiOperation(value = "delete", notes = "delete local KeyStore by address")
-    @ApiImplicitParam(name = "address", value = "user address", required = true, dataType = "String")
-    @DeleteMapping("/{address}")
-    public BaseResponse deleteKeyStore(@PathVariable String address) {
-        log.info("start deleteKeyStores. address:{}", address);
-        keyStoreService.deleteKeyStore(address);
-        return new BaseResponse(ConstantCode.RET_SUCCEED);
-    }
+
 }
