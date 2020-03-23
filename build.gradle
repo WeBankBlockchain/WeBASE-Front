@@ -23,18 +23,18 @@ repositories {
 }
 
 def spring_version="4.3.25.RELEASE"
-List spring =[ 
-	"org.springframework:spring-core:$spring_version", 
-	"org.springframework:spring-beans:$spring_version", 
-	"org.springframework:spring-context:$spring_version", 
-	"org.springframework:spring-tx:$spring_version", 
-	"org.springframework:spring-web:$spring_version", 
-	"org.springframework:spring-webmvc:$spring_version", 
+List spring =[
+	"org.springframework:spring-core:$spring_version",
+	"org.springframework:spring-beans:$spring_version",
+	"org.springframework:spring-context:$spring_version",
+	"org.springframework:spring-tx:$spring_version",
+	"org.springframework:spring-web:$spring_version",
+	"org.springframework:spring-webmvc:$spring_version",
 	"org.springframework:spring-jdbc:$spring_version"
 ]
 
 def spring_boot_version="1.5.9.RELEASE"
-List spring_boot =[ 
+List spring_boot =[
 	"org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
 	"org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
 	"org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
