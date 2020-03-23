@@ -1,13 +1,13 @@
 linter:
   pmd_java:
-    dir: src
+    dir: src/main/java
     encoding: Shift_JIS
     min_priority: 2
   eslint:
     dir: web/src
     ext: ".js,.vue"
   checkstyle:
-    dir: src
+    dir: src/main/java
     ignore:
       - warning
       - info
