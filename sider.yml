@@ -16,3 +16,7 @@ linter:
       - src/main/java
       - src/test/java
     locale: US
+  goodcheck:
+    target:
+      - src/main/java
+      - src/test/java
