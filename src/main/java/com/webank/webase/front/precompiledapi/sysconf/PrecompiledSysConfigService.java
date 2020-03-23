@@ -16,17 +16,14 @@
 package com.webank.webase.front.precompiledapi.sysconf;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.util.PrecompiledUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.precompile.config.SystemConfigService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +38,8 @@ public class PrecompiledSysConfigService {
     @Autowired
     Map<Integer, Web3j> web3jMap;
     @Autowired
-    private KeyStoreService keyStoreService;
+    PrecompiledWithSignService precompiledWithSignService;
 
-    // 根据前台传的user address获取私钥
-    private Credentials getCredentials(String fromAddress, Boolean useAes) throws Exception {
-        return keyStoreService.getCredentials(fromAddress, useAes);
-    }
 
     /**
      * System config related
@@ -55,22 +48,18 @@ public class PrecompiledSysConfigService {
      */
     public Object setSysConfigValueByKey(SystemConfigHandle systemConfigHandle) throws Exception {
         int groupId = systemConfigHandle.getGroupId();
-        String fromAddress = systemConfigHandle.getFromAddress();
+        String signUserId = systemConfigHandle.getSignUserId();
         String key = systemConfigHandle.getConfigKey();
         String value = systemConfigHandle.getConfigValue();
-        Boolean useAes = systemConfigHandle.getUseAes();
 
         // check system value
         if(PrecompiledUtils.TxGasLimit.equals(key)) {
-            if (Integer.valueOf(value) < PrecompiledUtils.TxGasLimitMin) {
+            if (Integer.parseInt(value) < PrecompiledUtils.TxGasLimitMin) {
                 return ConstantCode.FAIL_SET_SYSTEM_CONFIG_TOO_SMALL;
             }
         }
-        SystemConfigService systemConfigService = new SystemConfigService(
-                web3jMap.get(groupId), getCredentials(fromAddress, useAes));
-
         // @param result {"code":0,"msg":"success"}
-        String result = systemConfigService.setValueByKey(key, value);
+        String result = precompiledWithSignService.setValueByKey(groupId, signUserId, key, value);
         return result;
     }
 
