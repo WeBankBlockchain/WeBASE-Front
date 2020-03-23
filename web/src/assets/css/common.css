@@ -19,13 +19,13 @@
 }
 .module-wrapper {
     min-width: 540px;
-    margin: 20px 20px 0 20px;
+    margin: 20px 20px 0;
     background-color: #2f3b52;
     /* box-shadow: 0 4px 12px 0 #dfe2e9; */
     border-radius: 10px;
 }
 .module-wrapper-small {
-    margin: 0px 20px 0 20px;
+    margin: 0 20px;
     background-color: #2f3b52;
     /* box-shadow: 0 4px 12px 0 #dfe2e9; */
     border-radius: 2px;
@@ -43,7 +43,7 @@
     border-radius: 20px;
     background: #f6f6f6;
     margin-left: 41px;
-    margin-top: 8px;   
+    margin-top: 8px;
 }
 .copy-key {
     margin-right: 5px;
@@ -151,7 +151,7 @@
     cursor: pointer;
 }
 .page {
-    padding: 18px 0 20px 0;
+    padding: 18px 0 20px;
     text-align: center;
 }
 .link{
@@ -189,13 +189,13 @@
     float: right;
 }
 .date-select-32 {
-    padding: 0px 10px !important;
+    padding: 0 10px !important;
     height: 32px;
     line-height: 32px;
     width: 374px !important;
 }
 .time-select-32 {
-    padding: 0px 10px !important;
+    padding: 0 10px !important;
     height: 32px;
     line-height: 32px;
 }
@@ -253,7 +253,7 @@
 .el-button--text:active,
 .el-button--text:focus,
 .el-button--text:hover {
-    color: #1f83e7 !important;;
+    color: #1f83e7 !important;
 }
 /* element-ui input*/
 .el-input__inner{
@@ -325,7 +325,7 @@
     color:#9da2ab;
 }
 .el-step__title.is-process {
-    font-weight: 500; 
+    font-weight: 500;
     color:#2956a3;
 }
 .el-step__title.is-success {
@@ -434,7 +434,7 @@ td {
     margin-left: 83px;
 }
 .el-date-range-picker__content {
-    padding-top: 0px;
+    padding-top: 0;
     padding-bottom: 8px;
 }
 .el-picker-panel__footer {
@@ -460,7 +460,7 @@ td {
 }
 
 /* el-tooltip*/
-.el-tooltip__popper{ 
+.el-tooltip__popper{
     /* max-width:90% !important; */
 }
 
