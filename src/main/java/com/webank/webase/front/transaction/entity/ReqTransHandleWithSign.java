@@ -22,18 +22,24 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * transHandleWithSign interface parameter.
  * handle transactions of deploy/call contract
+ * v1.3.0+ default with sign
  */
 @Data
 public class ReqTransHandleWithSign {
     private int groupId = 1;
-    private int signUserId = 100001;
-    @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
-    private List<Object> contractAbi;
+    @NotNull(message = ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY)
+    private String signUserId;
+    private String contractName;
+    private String version;
     private String contractAddress;
+    private String contractPath;
     @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
     private String funcName;
+    private List<Object> contractAbi = new ArrayList<>();
     private List<Object> funcParam = new ArrayList<>();
 }

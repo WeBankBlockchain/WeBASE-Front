@@ -30,20 +30,32 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 @Data
 public class ReqDeploy {
-    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
-    private String  user;
+    /**
+     * address
+     */
+    private String user;
+    /**
+     * sign user Id
+     */
+    private String signUserId;
     private String contractName;
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
+    /**
+     * 合约编译的bytecode(bin)，用于部署合约
+     */
+    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTECODE_BIN_IS_EMPTY)
     private String bytecodeBin;
+    /**
+     * 合约编译的runtime-bytecode(runtime-bin)，用于交易解析
+     */
     private String contractBin;
     private String contractSource;
     private String contractPath;
-    private  int groupId = 1;
-    private  Long contractId;
-    @NotNull(message = ConstantCode.PARAM_FAIL_USEAES_IS_EMPTY)
-    private Boolean useAes;
+    private int groupId;
+    private Long contractId;
     private List<Object> funcParam = new ArrayList<>();
+    @Deprecated
+    private boolean useAes;
 }

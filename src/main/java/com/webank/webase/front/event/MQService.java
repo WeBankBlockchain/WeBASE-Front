@@ -43,7 +43,7 @@ public class MQService {
      * @param routingKey
      */
     public void bindQueue2Exchange(String exchangeName, String queueName, String routingKey){
-        log.info("bindQueue2Exchange exchangeName:{},queueName:{}, routingKey:{}",
+        log.info("bindQueue2Exchange exchangeName:{},queueName:{},routingKey:{}",
                 exchangeName, queueName, routingKey);
         Binding binding = BindingBuilder
                 .bind(new Queue(queueName))
@@ -57,14 +57,14 @@ public class MQService {
         }
     }
 
-//    public void unbindQueue2Exchange(String exchangeName, String queueName, String routingKey){
-//        log.info("unbindQueue2Exchange exchangeName:{},queueName:{}, routingKey:{}",
-//                exchangeName, queueName, routingKey);
-//        Binding binding = BindingBuilder
-//                .bind(new Queue(queueName))
-//                .to(new DirectExchange(exchangeName))
-//                .with(routingKey);
-//        rabbitAdmin.removeBinding(binding);
-//    }
+    public void unbindQueueFromExchange(String exchangeName, String queueName, String routingKey){
+        log.info("unbindQueueFromExchange exchangeName:{},queueName:{},routingKey:{}",
+                exchangeName, queueName, routingKey);
+        Binding binding = BindingBuilder
+                .bind(new Queue(queueName))
+                .to(new DirectExchange(exchangeName))
+                .with(routingKey);
+        rabbitAdmin.removeBinding(binding);
+    }
 
 }

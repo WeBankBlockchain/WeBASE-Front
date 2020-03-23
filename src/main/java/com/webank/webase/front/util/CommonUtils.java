@@ -258,8 +258,7 @@ public class CommonUtils {
      */
     public static HttpHeaders buildHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
-        headers.setContentType(type);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         headers.add("Accept", MediaType.APPLICATION_JSON.toString());
         return headers;
     }
