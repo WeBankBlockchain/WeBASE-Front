@@ -42,11 +42,11 @@ public class PrecompiledWithSignServiceTest {
 	@Test
 	public void testSysConf() throws Exception {
 		String txLimit = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
-		System.out.println("==========1 " + txLimit);
+//		System.out.println("==========1 " + txLimit);
 		String value = "1024";
 		String result = precompiledWithSignService.setValueByKey(groupId, signAddress, PrecompiledUtils.TxCountLimit, value);
 		String txLimit2 = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
-		System.out.println("==========2 " + txLimit2);
+//		System.out.println("==========2 " + txLimit2);
 		Assert.assertNotEquals(txLimit, txLimit2);
 	}
 
