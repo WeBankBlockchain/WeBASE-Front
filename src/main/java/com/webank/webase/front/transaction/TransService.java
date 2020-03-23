@@ -520,20 +520,21 @@ public class TransService {
      */
     public String checkContractAddress(String contractAddress, int groupId,
                                        String contractName, String version) throws Exception {
+        String address = contractAddress;
         // not blank
-        if (StringUtils.isNotBlank(contractAddress)) {
-            return contractAddress;
+        if (StringUtils.isNotBlank(address)) {
+            return address;
         } else {
             // try to get from cnsMap
-            contractAddress = cnsMap.get(contractName + Constants.SYMPOL + version);
-            if (StringUtils.isNotBlank(contractAddress)) {
-                return contractAddress;
+            address = cnsMap.get(contractName + Constants.SYMPOL + version);
+            if (StringUtils.isNotBlank(address)) {
+                return address;
             } else {
                 // try to get from cnsService
-                contractAddress = precompiledService.getAddressByContractNameAndVersion(groupId,
+                address = precompiledService.getAddressByContractNameAndVersion(groupId,
                         contractName, version);
-                if (StringUtils.isNotBlank(contractAddress)) {
-                    return contractAddress;
+                if (StringUtils.isNotBlank(address)) {
+                    return address;
                 } else {
                     // address cannot be found
                     log.error("checkContractAddress. contractAddress is empty " +
