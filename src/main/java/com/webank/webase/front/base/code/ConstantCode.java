@@ -28,13 +28,10 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_GROUP_ID_IS_EMPTY =  RetCode.mark(201001, "groupId cannot be empty");
     public static final String PARAM_FAIL_USER_IS_EMPTY_STRING = "{\"code\":201002,\"message\":\"user cannot be empty\"}";
     public static final RetCode PARAM_FAIL_USER_IS_EMPTY = RetCode.mark(201002, "user cannot be empty");
-    public static final String PARAM_FAIL_USEAES_IS_EMPTY =
-        "{\"code\":201003,\"message\":\"useAes cannot be empty\"}";
     public static final String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"message\":\"version cannot be empty\"}";
     public static final String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"message\":\"funcName cannot be empty\"}";
     public static final String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"message\":\"abiInfo cannot be empty\"}";
     public static final String PARAM_FAIL_BYTECODE_BIN_IS_EMPTY = "{\"code\":201007,\"message\":\"bytecodeBin cannot be empty\"}";
-    public static final String PARAM_FAIL_SIGN_USER_ID_IS_EMPTY = "{\"code\":201002,\"message\":\"signUserId cannot be empty\"}";
 
     /* general error */
     public static final RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");
@@ -94,14 +91,15 @@ public class ConstantCode {
     public static final String PARAM_FAIL_NODE_TYPE_IS_EMPTY = "{\"code\":201110,\"message\":\"node type cannot be empty\"}";
     public static final String PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY = "{\"code\":201111,\"message\":\"Permission state cannot be all empty\"}";
 
-    /* precompiled runtime check or error */
+    /* sign error code */
+    public static final String PARAM_FAIL_SIGN_USER_ID_IS_EMPTY = "{\"code\":201130,\"message\":\"signUserId cannot be empty\"}";
 
+    /* precompiled runtime check or error */
     // param
     public static final RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
     public static final RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
     // permission
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied, please check chain administrator permission");
-
     // sys config
     public static final RetCode SYSTEM_CONFIG_EXIST = RetCode.mark(201206, "create system config in db fail for already exist");
     public static final RetCode INVALID_SYSTEM_CONFIG_KEY = RetCode.mark(201207, "system config key is invalid");
@@ -117,7 +115,6 @@ public class ConstantCode {
     // cns
     public static final RetCode INVALID_VERSION = RetCode.mark(201221,"Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ");
     public static final RetCode INVALID_VERSION_EXCEED_LENGTH = RetCode.mark(201222,"version of contract is out of length");
-
     // crud
     public static int CODE_CRUD_SQL_ERROR = -51503;
     public static final RetCode PARAM_FAIL_SQL_ERROR = RetCode.mark(201226, "sql syntax error");
