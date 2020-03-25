@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:./h2/webasefront;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:../h2/webasefront;DB_CLOSE_ON_EXIT=FALSE
     databaseName: db
     driverClassName: org.h2.Driver
     serverName:
@@ -28,10 +28,24 @@ spring:
       settings:
         web-allow-others: false
         trace: true
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username:
+    password:
+    virtual-host:
+    publisher-confirm: true
+    ssl:
+      enabled: false
+
 
 server:
   port: 5002
   context-path: /WeBASE-Front
+  connection-timeout: 30000
+  tomcat:
+    max-threads: 200
+    max-connections: 10000
 
 sdk:
   orgName: orgTest
@@ -42,16 +56,20 @@ sdk:
   keepAlive: 60
   ip: 127.0.0.1
   channelPort: 20200
-  encryptType: 0 #0:standard, 1:guomi
+  encryptType: 0 # 0:standard, 1:guomi
 
 logging:
   config: classpath:log4j2.xml
 
 constant:
-  keyServer: 127.0.0.1:5001 # webase-sign
+  keyServer: 127.0.0.1:5004 # webase-sign的IP端口，英文逗号相隔（不带空格）
   transMaxWait: 30
   monitorDisk: /
   monitorEnabled: true
   aesKey: EfdsW23D23d3df43
   nodePath: /fisco/nodes/127.0.0.1/node0
-
+  http_read_timeOut: 100000
+  http_connect_timeOut: 100000
+  # event sync map task (unit: ms)
+  eventRegisterTaskFixedDelay: 5000
+  syncEventMapTaskFixedDelay: 60000

@@ -1,20 +1,19 @@
 /*
  * Copyright 2014-2019 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.front.util;
 
+import static org.fisco.bcos.web3j.abi.datatypes.Type.MAX_BYTE_LENGTH;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import java.io.UnsupportedEncodingException;
@@ -25,12 +24,108 @@ import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.abi.datatypes.Bool;
 import org.fisco.bcos.web3j.abi.datatypes.Bytes;
+import org.fisco.bcos.web3j.abi.datatypes.BytesType;
 import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
 import org.fisco.bcos.web3j.abi.datatypes.DynamicBytes;
 import org.fisco.bcos.web3j.abi.datatypes.NumericType;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.abi.datatypes.Utf8String;
-import org.fisco.bcos.web3j.abi.datatypes.generated.*;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes1;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes10;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes11;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes12;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes13;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes14;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes15;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes16;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes17;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes18;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes19;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes2;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes20;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes21;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes22;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes23;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes24;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes25;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes26;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes27;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes28;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes29;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes3;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes30;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes31;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes4;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes5;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes6;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes7;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes8;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes9;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int104;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int112;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int120;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int128;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int136;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int144;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int16;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int160;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int168;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int176;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int184;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int192;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int200;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int208;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int216;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int224;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int232;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int24;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int240;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int248;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int32;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int40;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int48;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int56;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int64;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int72;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int8;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int80;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int88;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int96;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint104;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint112;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint120;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint128;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint136;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint144;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint152;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint16;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint160;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint168;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint176;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint184;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint192;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint200;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint208;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint216;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint224;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint232;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint24;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint240;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint248;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint32;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint40;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint48;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint56;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint64;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint72;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint8;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint80;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint88;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint96;
+import org.fisco.bcos.web3j.utils.Numeric;
 
 /**
  * ContractTypeUtil.
@@ -62,7 +157,6 @@ public class ContractTypeUtil {
                 return (T) encodeBytes(input, (Class<Bytes>) type);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
                 return (T) new DynamicBytes(input.getBytes());
-                //todo static
             } else {
                 throw new FrontException(201201,
                         String.format("type:%s unsupported encoding", type.getName()));
@@ -93,7 +187,7 @@ public class ContractTypeUtil {
             } else if (Utf8String.class.isAssignableFrom(type)) {
                 return result.getValue().toString();
             } else if (Bytes.class.isAssignableFrom(type)) {
-                return decodeBytes((byte[]) result.getValue());
+                return decodeBytes((Bytes) result);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
                 return decodeBytes((byte[]) result.getValue());
             } else {
@@ -123,23 +217,11 @@ public class ContractTypeUtil {
 
     static <T extends Bytes> T encodeBytes(String input, Class<T> type) throws FrontException {
         try {
-            String simpleName = type.getSimpleName();
-            String[] splitName = simpleName.split(Bytes.class.getSimpleName());
-            int length = Integer.parseInt(splitName[1]);
-
-            byte[] byteValue = null;
-            if (input.length() > length) {
-                byteValue = input.substring(0, length).getBytes();
-            } else {
-                byteValue = input.getBytes();
-            }
-            byte[] byteValueLength = new byte[length];
-            System.arraycopy(byteValue, 0, byteValueLength, 0, byteValue.length);
-
-            return type.getConstructor(byte[].class).newInstance(byteValueLength);
+            byte[] bytes = Numeric.hexStringToByteArray(input);
+            return type.getConstructor(byte[].class).newInstance(bytes);
         } catch (NoSuchMethodException | SecurityException | InstantiationException
                 | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            log.error("encodeBytes failed.");
+            log.error("encodeBytes failed.", e);
             throw new FrontException(201203,
                     String.format("unable to create instance of type:%s", type.getName()));
         }
@@ -164,6 +246,22 @@ public class ContractTypeUtil {
             throw new FrontException(201202,
                     String.format("type:byte%s unsupported decoding", data.length));
         }
+    }
+
+    static String decodeBytes(BytesType bytesType) {
+        byte[] value = bytesType.getValue();
+        int length = value.length;
+        int mod = length % MAX_BYTE_LENGTH;
+
+        byte[] dest;
+        if (mod != 0) {
+            int padding = MAX_BYTE_LENGTH - mod;
+            dest = new byte[length + padding];
+            System.arraycopy(value, 0, dest, 0, length);
+        } else {
+            dest = value;
+        }
+        return Numeric.toHexString(dest);
     }
 
     /**

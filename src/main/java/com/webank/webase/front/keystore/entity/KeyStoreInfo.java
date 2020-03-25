@@ -29,7 +29,15 @@ public class KeyStoreInfo {
     @Id
     private String address;
     private String publicKey;
+    /**
+     * not store private key in db
+     */
     private String privateKey;
     private String userName;
     private int type;
+    /**
+     * webase-sign signUserId
+     */
+    private String signUserId;
+    private String appId;
 }

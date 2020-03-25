@@ -37,14 +37,16 @@ public class List2Page<T> {
         List<T> resList = null; // 结果记录列表
         Integer size = data.size(); // 总记录数
         Integer pages = size / pageSize; // 总页数
-        if (size - pages * pageSize > 0)
+        if (size - pages * pageSize > 0) {
             ++pages;
-        if (pageIndex < pages)
+        }
+        if (pageIndex < pages) {
             resList = data.subList((pageIndex - 1) * pageSize, pageSize * pageIndex);
-        else if (pageIndex == pages)
+        } else if (pageIndex == pages) {
             resList = data.subList((pageIndex - 1) * pageSize, size);
-        else
+        } else {
             resList = new ArrayList<T>();
+        }
         return new PageData<T>(resList, pageIndex, pageSize, resList.size(), size, pages);
     }
 
@@ -52,14 +54,16 @@ public class List2Page<T> {
         List<T> resList = null; // 结果记录列表
         Integer size = data.size(); // 总记录数
         Integer pages = size / pageSize; // 总页数
-        if (size - pages * pageSize > 0)
+        if (size - pages * pageSize > 0) {
             ++pages;
-        if (pageIndex < pages)
+        }
+        if (pageIndex < pages) {
             resList = data.subList((pageIndex - 1) * pageSize, pageSize * pageIndex);
-        else if (pageIndex == pages)
+        } else if (pageIndex.equals(pages)) {
             resList = data.subList((pageIndex - 1) * pageSize, size);
-        else
+        } else {
             resList = new ArrayList<T>();
+        }
         PageData<T> list = new PageData<T>(resList, pageIndex, pageSize, resList.size(), size, pages);
         return list.getList();
     }

@@ -21,7 +21,14 @@ package com.webank.webase.front.base.enums;
  * 1: guomi, 0: standard
  */
 public enum GMStatus {
-    STANDARD(0), GUOMI(1);
+    /**
+     * not guomi status
+     */
+    STANDARD(0),
+    /**
+     * guomi status
+     */
+    GUOMI(1);
 
     private int value;
 
