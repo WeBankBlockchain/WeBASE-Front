@@ -19,29 +19,31 @@ repositories {
 	maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 	maven { url 'https://dl.bintray.com/ethereum/maven/' }
 	maven { url 'http://repo.typesafe.com/typesafe/maven-releases/' }
-
     mavenLocal()
 
 }
 
 def spring_version="4.3.25.RELEASE"
-List spring =[ 
-	"org.springframework:spring-core:$spring_version", 
-	"org.springframework:spring-beans:$spring_version", 
-	"org.springframework:spring-context:$spring_version", 
-	"org.springframework:spring-tx:$spring_version", 
-	"org.springframework:spring-web:$spring_version", 
-	"org.springframework:spring-webmvc:$spring_version", 
+List spring =[
+	"org.springframework:spring-core:$spring_version",
+	"org.springframework:spring-beans:$spring_version",
+	"org.springframework:spring-context:$spring_version",
+	"org.springframework:spring-tx:$spring_version",
+	"org.springframework:spring-web:$spring_version",
+	"org.springframework:spring-webmvc:$spring_version",
 	"org.springframework:spring-jdbc:$spring_version"
 ]
 
 def spring_boot_version="1.5.9.RELEASE"
-List spring_boot =[ 
+List spring_boot =[
 	"org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
 	"org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
 	"org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
 	"org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version",
 	//"org.springframework.boot:spring-boot-starter-log4j2:$spring_boot_version"
+
+    //	"org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version"
+	"org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version"
 ]
 
 
@@ -51,7 +53,7 @@ List swagger = [
 ]
 
 
-def log4j_version="2.9.0"
+def log4j_version="2.13.1"
 List logger = [
 	"org.apache.logging.log4j:log4j-api:$log4j_version",
 	"org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -76,7 +78,7 @@ dependencies {
 //            exclude group:"org.ethereum"
 //        }
 //    compile fileTree(dir:'lib',includes:['solcJ-all-0.4.25-gm.jar'])
-	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8'
+	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
 	compile 'com.alibaba:fastjson:1.2.60'
 	compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
@@ -84,10 +86,14 @@ dependencies {
 	compile 'org.projectlombok:lombok:1.18.2'
 	compile 'com.github.jsqlparser:jsqlparser:2.0'
 
+	testCompile('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
 	testCompile 'junit:junit:4.12',
 				'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
 				'com.github.macdao:moscow:0.1.0',
 				'com.squareup.okhttp3:okhttp:3.1.2'
+				'org.springframework.amqp:spring-rabbit-test'
 }
 
 configurations {

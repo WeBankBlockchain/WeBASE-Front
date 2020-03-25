@@ -16,11 +16,13 @@
 
 package com.webank.webase.front.keystore.entity;
 
-import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotBlank;
 
+/**
+ * import pem private key
+ */
 @Data
 @NoArgsConstructor
 public class ReqImportPem {
