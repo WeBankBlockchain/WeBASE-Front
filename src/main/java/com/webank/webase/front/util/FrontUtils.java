@@ -134,4 +134,28 @@ public class FrontUtils {
             }
         }
     }
+
+    /**
+     * convert list of String to String
+     * @param list
+     * @return
+     */
+    public static String listStr2String(List<String> list) {
+        if(list == null) {
+            return null;
+        }
+        return String.join(",", list);
+    }
+
+    /**
+     * list of String recover from String
+     * @param str
+     * @return
+     */
+    public static List<String> string2ListStr(String str) {
+        if(str == null) {
+            return null;
+        }
+        return Arrays.asList(str.split(","));
+    }
 }

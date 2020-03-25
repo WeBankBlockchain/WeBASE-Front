@@ -15,22 +15,26 @@
  */
 package com.webank.webase.front.contract.entity;
 
-import com.webank.webase.front.base.code.ConstantCode;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
+import com.webank.webase.front.base.code.ConstantCode;
+import lombok.Data;
 
 /**
  * deployWithSign interface parameter.
- * 
+ * v1.3.0+ default with sign
  */
 @Data
+@Deprecated
 public class ReqDeployWithSign {
     private int groupId = 1;
     private int signUserId = 100001;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTECODEBIN_IS_EMPTY)
+    /**
+     * 合约编译的bytecode(bin)，用于部署合约
+     */
+    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTECODE_BIN_IS_EMPTY)
     private String bytecodeBin;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<Object> contractAbi;
