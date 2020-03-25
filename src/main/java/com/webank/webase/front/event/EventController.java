@@ -17,6 +17,8 @@
 package com.webank.webase.front.event;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
@@ -96,6 +98,7 @@ public class EventController extends BaseController {
         String appId = reqContractEventRegister.getAppId();
         String fromBlock = reqContractEventRegister.getFromBlock();
         String toBlock = reqContractEventRegister.getToBlock();
+        // 0 < fromBlock <= toBlock, latest means latest block
         if("0".equals(fromBlock) || "0".equals(toBlock)) {
             return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }

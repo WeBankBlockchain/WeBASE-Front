@@ -133,4 +133,5 @@ public class ConstantCode {
     public static final RetCode BLOCK_RANGE_PARAM_INVALID = RetCode.mark(201243, "Block range error, from/toBlock must greater than 0, toBlock must be greater than fromBlock");
     public static final RetCode DATA_NOT_EXIST_ERROR = RetCode.mark(201244, "Database error: data not exists in db, please check your params");
     public static final RetCode PARAM_INVALID = RetCode.mark(201245, "Only support letter and digit, please check your params");
+    public static final RetCode REGISTER_FAILED_ERROR = RetCode.mark(201246, "Register contractEvent failed, please check your param");
 }
