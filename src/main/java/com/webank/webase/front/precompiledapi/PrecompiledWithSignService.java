@@ -17,9 +17,23 @@
 package com.webank.webase.front.precompiledapi;
 
 
+import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
+import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
+import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
+import static org.fisco.bcos.web3j.precompile.crud.CRUD.FUNC_UPDATE;
+import static org.fisco.bcos.web3j.precompile.crud.TableFactory.FUNC_CREATETABLE;
+import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_FREEZE;
+import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_GRANTMANAGER;
+import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_UNFREEZE;
+import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
+import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.transaction.TransService;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
@@ -30,19 +44,6 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
-import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
-import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
-import static org.fisco.bcos.web3j.precompile.crud.CRUD.FUNC_UPDATE;
-import static org.fisco.bcos.web3j.precompile.crud.TableFactory.FUNC_CREATETABLE;
-import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
-import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 
 /**
  * send raw transaction through webase-sign to call precompiled
@@ -259,4 +260,33 @@ public class PrecompiledWithSignService {
 							+ ").");
 		}
 	}
+	
+    public String contractFreeze(int groupId, String signUserId, String contractAddress) throws Exception {
+        // trans
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(contractAddress);
+        TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
+                PrecompiledTypes.CSM, FUNC_FREEZE, funcParams);
+        return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+    }
+    
+    public String contractUnfreeze(int groupId, String signUserId, String contractAddress) throws Exception {
+        // trans
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(contractAddress);
+        TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
+                PrecompiledTypes.CSM, FUNC_UNFREEZE, funcParams);
+        return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+    }
+    
+    public String contractGrantManager(int groupId, String signUserId, String contractAddress,
+            String grantAddress) throws Exception {
+        // trans
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(contractAddress);
+        funcParams.add(grantAddress);
+        TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
+                PrecompiledTypes.CSM, FUNC_GRANTMANAGER, funcParams);
+        return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+    }
 }
