@@ -14,29 +14,127 @@
 
 package com.webank.webase.front.logparse;
 
+import com.webank.webase.front.logparse.entity.LogData;
 import com.webank.webase.front.logparse.entity.NetWorkData;
 import com.webank.webase.front.logparse.entity.TxGasData;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
- * FileUtil.
- * format abi types from String
+ * LogParseUtil.
+ * format log
  */
+@Slf4j
 public class LogParseUtil {
 
-    public static LogTypes getLogType(String log) {
-        return LogTypes.UNKNOWN;
+
+    public static LogData getLogData(String logMsg)
+    {
+        String[] sArray = logMsg.split("\\|");
+        if(sArray.length > 3)
+        {
+            Long timestamp = 0L;
+            String[] sArray2 = sArray[1].split("\\.");
+            if(sArray2.length > 0)
+            {
+                try {
+                    Date parse = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(sArray2[0]);
+                    timestamp = parse.getTime();
+                }
+                catch (Exception e)
+                {
+                    log.error("getBlockNumber fail.", e);
+                }
+            }
+
+            if (sArray[2].equals("Total"))
+            {
+                return  new LogData(timestamp, LogTypes.NETWORK, sArray[3]);
+            }
+            else if (sArray[2].equals("TxsGasUsed"))
+            {
+                return  new LogData(timestamp, LogTypes.TxGAS, sArray[3]);
+            }
+        }
+        return new LogData(0L, LogTypes.UNKNOWN, null);
     }
 
-    public static NetWorkData parseNetworkLog(String log) {
-        return null;
+    public static HashMap<String , String> parseLogValue(String logMsg) {
+        HashMap<String , String> logValue = new HashMap<>();
+        String[] sArray = logMsg.split(",");
+        for (String str: sArray)
+        {
+            String[] sValue = str.split("=");
+            if(sValue.length >= 2)
+            {
+                logValue.put(sValue[0],sValue[1]);
+            }
+        }
+        return logValue;
     }
 
-    public static TxGasData parseTxGasUsedLog(String log) {
-        return null;
+    public static NetWorkData parseNetworkLog(LogData logData) {
+        HashMap<String , String> logValue = parseLogValue(logData.getLogData());
+        NetWorkData netWorkData = new NetWorkData();
+        if(logValue.containsKey("Total_In"))
+        {
+            String str  = logValue.get("Total_In");
+            Long total_in = Long.parseLong(str);
+            netWorkData.setTotalIn(total_in);
+        }
+        if(logValue.containsKey("g"))
+        {
+            netWorkData.setGroupId(Integer.parseInt(logValue.get("g")));
+        }
+        if(logValue.containsKey("Total_Out"))
+        {
+            String str  = logValue.get("Total_Out");
+            Long total_out = Long.parseLong(str);
+            netWorkData.setTotalOut(total_out);
+        }
+        netWorkData.setTimestamp(logData.getTimestamp());
+        return netWorkData;
+    }
+
+    public static TxGasData parseTxGasUsedLog(LogData logData) {
+        HashMap<String , String> logValue = parseLogValue(logData.getLogData());
+        TxGasData txGasData = new TxGasData();
+        if(logValue.containsKey("gasUsed"))
+        {
+            txGasData.setGasUsed(Long.parseLong(logValue.get("gasUsed")));
+        }
+        if(logValue.containsKey("g"))
+        {
+            txGasData.setGroupId(Integer.parseInt(logValue.get("g")));
+        }
+        if(logValue.containsKey("txHash"))
+        {
+            txGasData.setTransHash(logValue.get("txHash"));
+        }
+        txGasData.setTimestamp(logData.getTimestamp());
+        return txGasData;
+    }
+
+    public static void main(String args[]) {
+        String logMsg = "info|2020-03-23 09:01:53.699992|Total|,g=11,Total_In=73153,Total_Out=32322";
+        LogData logData = getLogData(logMsg);
+        System.out.println("___________");
+        System.out.println(logData.getLogData()+" " + logData.getLogType() + " " +logData.getTimestamp());
+        if(logData.getLogType() == LogTypes.NETWORK)
+        {
+            NetWorkData netWorkData = parseNetworkLog(logData);
+            System.out.println(netWorkData);
+        }
+
+        logMsg = "info|2020-03-23 09:10:23.078979|TxsGasUsed|,g=2,txHash=f8c2bce773e58591a30bb03dbdf0789a3037e5b76a6118d0c7d02562b617048f,gasUsed=22744";
+        logData = getLogData(logMsg);
+        System.out.println("___________");
+        System.out.println(logData.getLogData()+" " + logData.getLogType() + " " +logData.getTimestamp());
+        if(logData.getLogType() == LogTypes.TxGAS) {
+            TxGasData t = parseTxGasUsedLog(logData);
+            System.out.println(t);
+        }
     }
 }
