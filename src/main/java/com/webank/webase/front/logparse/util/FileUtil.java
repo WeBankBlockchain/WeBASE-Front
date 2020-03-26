@@ -12,14 +12,13 @@
  * the License.
  */
 
-package com.webank.webase.front.logparse;
+package com.webank.webase.front.logparse.util;
 
 import java.io.File;
 import java.util.*;
 
 /**
- * FileUtil.
- * format abi types from String
+ * FileUtil. format abi types from String
  */
 public class FileUtil {
 
@@ -39,10 +38,9 @@ public class FileUtil {
     public static TreeMap<Long, String> getStatFiles(List<String> logNames) {
         TreeMap<Long, String> treeMap = new TreeMap<>();
         for (String name : logNames) {
-            if(name.startsWith("stat_"))
-            {
+            if (name.startsWith("stat_")) {
                 long statFileNameNumber = getStatFileNameNumber(name);
-                treeMap.put(statFileNameNumber,name);
+                treeMap.put(statFileNameNumber, name);
             }
         }
         return treeMap;
@@ -50,10 +48,9 @@ public class FileUtil {
 
     public static Long getStatFileNameNumber(String name) {
         String[] sArray = name.split("\\.|_");
-        Long statFileNameNumber = (long)0;
-        if (sArray.length > 3)
-        {
-            statFileNameNumber = Long.valueOf(sArray[1])*100 +  Long.valueOf(sArray[2]);
+        Long statFileNameNumber = (long) 0;
+        if (sArray.length > 3) {
+            statFileNameNumber = Long.valueOf(sArray[1]) * 100 + Long.valueOf(sArray[2]);
 
         }
         return statFileNameNumber;
@@ -64,10 +61,10 @@ public class FileUtil {
         Iterator iter = treeMap.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry entry = (Map.Entry) iter.next();
-            if((Long)entry.getKey() < statFileNameNumber )
+            if ((Long) entry.getKey() < statFileNameNumber)
                 iter.remove();
         }
-        return ;
+        return;
     }
 
     public static void clearCurrentStatFile(TreeMap<Long, String> treeMap, String name) {
@@ -75,10 +72,10 @@ public class FileUtil {
         Iterator iter = treeMap.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry entry = (Map.Entry) iter.next();
-            if(0 == Long.compare((Long)entry.getKey(), statFileNameNumber))
+            if (0 == Long.compare((Long) entry.getKey(), statFileNameNumber))
                 iter.remove();
         }
-        return ;
+        return;
     }
 
 
@@ -86,8 +83,7 @@ public class FileUtil {
         Long statFileNameNumber = getStatFileNameNumber("log_2020031819.00.log");
         System.out.println("Hello World!" + statFileNameNumber);
         List<String> files = getFiles("C:\\nodelog");
-        for (String s:files
-             ) {
+        for (String s : files) {
             System.out.println("0 " + s);
         }
         List<String> logNames = new ArrayList<String>();

@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright 2014-2019 the original author or authors.
  *
@@ -11,23 +13,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.front.logparse.entity;
+package com.webank.webase.front.logparse.repository;
 
-import com.webank.webase.front.logparse.util.LogTypes;
-import lombok.Data;
+import com.webank.webase.front.logparse.entity.CurrentState;
+import org.springframework.data.repository.CrudRepository;
 
 
-@Data
-public class LogData {
+public interface CurrentStateRepository extends CrudRepository<CurrentState, Integer> {
 
-    private LogTypes logType;
-    private String logData;
-    private Long timestamp;
-
-    public LogData(Long timestamp, LogTypes logType, String logData) {
-        super();
-        this.logType = logType;
-        this.logData = logData;
-        this.timestamp = timestamp;
-    }
 }
