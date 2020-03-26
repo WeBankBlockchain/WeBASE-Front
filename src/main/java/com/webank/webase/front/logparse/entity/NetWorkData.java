@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.logparse.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,19 +21,22 @@ import javax.persistence.Id;
 import lombok.Data;
 
 @Data
-@Entity
+@Entity(name="t_network_data")
 public class NetWorkData {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(name = "total_in")
     private Long totalIn;
+    @Column(name = "total_out")
     private Long totalOut;
-    private int groupId;
+    @Column(name = "group_id")
+    private Integer groupId;
     private Long timestamp;
     
     public NetWorkData() {}
 
-    public NetWorkData(Long totalIn, Long totalOut, Long timestamp, int groupId) {
+    public NetWorkData(Long totalIn, Long totalOut, Long timestamp, Integer groupId) {
         super();
         this.totalIn = totalIn;
         this.totalOut = totalOut;
