@@ -74,13 +74,13 @@ public class EventRegisterInitTask {
 	 */
 	public synchronized void syncEventRegisterTask() {
 		try{
-			log.info("Register task starts.");
+			log.debug("Register task starts.");
 			for (Integer groupId: serviceMap.keySet()) {
 				List<NewBlockEventInfo> newBlockEventInfoList =
 						newBlockEventInfoRepository.findByGroupId(groupId);
 				List<ContractEventInfo> contractEventInfoList =
 						contractEventInfoRepository.findByGroupId(groupId);
-				log.info("Register task groupId:{},newBlockEventInfoList count:{},contractEventInfoList count:{}",
+				log.debug("Register task groupId:{},newBlockEventInfoList count:{},contractEventInfoList count:{}",
 						groupId, newBlockEventInfoList.size(), contractEventInfoList.size());
 				// foreach register
 				newBlockEventInfoList.stream()
@@ -90,7 +90,7 @@ public class EventRegisterInitTask {
 						.filter(info -> !CONTRACT_EVENT_CALLBACK_MAP.containsKey(info.getId()))
 						.forEach(this::registerContractEvent);
 			}
-			log.info("Register task finish.");
+			log.debug("Register task finish.");
 		}catch (Exception ex) {
 			log.error("Register task error: ", ex);
 		}

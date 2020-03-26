@@ -76,6 +76,7 @@ public class ConstantCode {
 	public static final RetCode PRIVATEKEY_EXISTS = RetCode.mark(201042, "private key already exists");
     public static final RetCode NO_SOL_FILES = RetCode.mark(201043, "There is no sol files in source");
     public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201044, "invalid group operate type");
+    public static final RetCode INVALID_DATA_TYPE = RetCode.mark(201045, "invalid data type");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
