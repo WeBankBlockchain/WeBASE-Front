@@ -66,8 +66,8 @@ public class ConstantCode {
     public static final RetCode CONTRACT_COMPILE_FAIL = RetCode.mark(201036, "compile fail");
     public static final RetCode USER_NAME_NULL = RetCode.mark(201037, "user name is null");
     public static final RetCode USER_NAME_EXISTS = RetCode.mark(201038, "user name already exists");
-    public static final RetCode KEYSTORE_EXISTS = RetCode.mark(201039, "address already exists");
-    public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201040, "address not exists");
+    public static final RetCode KEYSTORE_EXISTS = RetCode.mark(201039, "private key already exists");
+    public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201040, "private key not exists");
     public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(201041, "external user's appId and signUserId cannot be empty");
 
     /* system error */
