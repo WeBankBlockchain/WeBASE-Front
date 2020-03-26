@@ -11,23 +11,38 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.front.logparse.entity;
 
-import com.webank.webase.front.logparse.util.LogTypes;
-import lombok.Data;
+package com.webank.webase.front.logparse.util;
 
+/**
+ * log type enums
+ */
+public enum LogTypes {
 
-@Data
-public class LogData {
+    UNKNOWN(0),
 
-    private LogTypes logType;
-    private String logData;
-    private Long timestamp;
+    NETWORK(1),
 
-    public LogData(Long timestamp, LogTypes logType, String logData) {
-        super();
-        this.logType = logType;
-        this.logData = logData;
-        this.timestamp = timestamp;
+    TxGAS(2);
+
+    private int value;
+
+    LogTypes(Integer logTypes) {
+        this.value = logTypes;
+    }
+
+    public int getValue() {
+        return this.value;
+    }
+
+    public static boolean isInclude(int key) {
+        boolean include = false;
+        for (LogTypes e : LogTypes.values()) {
+            if (e.getValue() == key) {
+                include = true;
+                break;
+            }
+        }
+        return include;
     }
 }

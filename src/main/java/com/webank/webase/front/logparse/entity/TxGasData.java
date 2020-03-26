@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.logparse.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,19 +21,22 @@ import javax.persistence.Id;
 import lombok.Data;
 
 @Data
-@Entity
+@Entity(name="t_tx_gas_data")
 public class TxGasData {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(name = "trans_hash")
     private String transHash;
+    @Column(name = "gas_used")
     private Long gasUsed;
-    private int groupId;
+    @Column(name = "group_id")
+    private Integer groupId;
     private Long timestamp;
     
     public TxGasData() {}
 
-    public TxGasData(String transHash, Long gasUsed, Long timestamp, int groupId) {
+    public TxGasData(String transHash, Long gasUsed, Long timestamp, Integer groupId) {
         super();
         this.transHash = transHash;
         this.gasUsed = gasUsed;

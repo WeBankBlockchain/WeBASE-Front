@@ -13,21 +13,24 @@
  */
 package com.webank.webase.front.logparse.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import lombok.Data;
 
 @Data
-@Entity
+@Entity(name="t_current_state")
 public class CurrentState {
     @Id
     private Integer id;
+    @Column(name = "file_name")
     private String fileName;
-    private long currentSize;
+    @Column(name = "current_size")
+    private Long currentSize;
 
     public CurrentState() {}
             
-    public CurrentState(Integer id, String fileName, long currentSize) {
+    public CurrentState(Integer id, String fileName, Long currentSize) {
         super();
         this.id = id;
         this.fileName = fileName;
