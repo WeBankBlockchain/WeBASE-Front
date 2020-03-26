@@ -282,6 +282,15 @@ let errCode = {
         en: "Cert file not found, please check cert path in config",
         zh: '找不到证书文件，请检查配置中的证书路径'
     },
+
+    "201243": {
+        en: "Block range error, from/toBlock must greater than 0, toBlock must be greater than fromBlock",
+        zh: '块范围错误，from/toBlock必须大于0，toBlock必须大于fromBlock'
+    },
+    "201244": {
+        en: "Database error: data not exists in db, please check your params",
+        zh: '数据库错误：数据库中不存在数据，请检查参数'
+    },
     "202000": {
         en: "invalid node info",
         zh: '无效的节点信息'
