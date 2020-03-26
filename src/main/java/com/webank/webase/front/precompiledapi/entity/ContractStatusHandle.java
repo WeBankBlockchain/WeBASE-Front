@@ -13,31 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.transaction.entity;
+package com.webank.webase.front.precompiledapi.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 
-/**
- * transHandleWithSign interface parameter.
- * handle transactions of deploy/call contract
- * v1.3.0+ default with sign
- */
+import javax.validation.constraints.NotNull;
+
 @Data
-public class ReqTransHandleWithSign {
-    private int groupId = 1;
-    @NotNull(message = ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY_STRING)
-    private String signUserId;
-    private String contractName;
-    private String version;
+public class ContractStatusHandle {
+    @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
+    private int groupId;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_ADDRESS_EMPTY)
     private String contractAddress;
-    private String contractPath;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
-    private String funcName;
-    private List<Object> contractAbi = new ArrayList<>();
-    private List<Object> funcParam = new ArrayList<>();
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_HANDLE_TYPE_EMPTY)
+    private String handleType;
+    private String signUserId;
+    private String grantAddress;
 }

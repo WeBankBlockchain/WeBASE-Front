@@ -252,9 +252,9 @@ public class Web3ApiController {
         return web3ApiService.generateGroup(req);
     }
 
-    @GetMapping("/startGroup/{startGroupId}")
-    public Object startGroup(@PathVariable int startGroupId)
+    @GetMapping("/operateGroup/{type}")
+    public Object operateGroup(@PathVariable int groupId, @PathVariable String type)
             throws IOException {
-        return web3ApiService.startGroup(startGroupId);
+        return web3ApiService.operateGroup(groupId, type);
     }
 }
