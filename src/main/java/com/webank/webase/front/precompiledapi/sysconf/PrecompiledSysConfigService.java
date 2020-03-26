@@ -1,37 +1,33 @@
 /*
  * Copyright 2014-2019 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.front.precompiledapi.sysconf;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.util.PrecompiledUtils;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * System config service
  */
-@Slf4j
 @Service
 public class PrecompiledSysConfigService {
 
@@ -42,9 +38,7 @@ public class PrecompiledSysConfigService {
 
 
     /**
-     * System config related
-     * 启动项目时，检查是否已有table
-     * 否则Create table sysconfig(groupId, from key, value)
+     * System config related 启动项目时，检查是否已有table 否则Create table sysconfig(groupId, from key, value)
      */
     public Object setSysConfigValueByKey(SystemConfigHandle systemConfigHandle) throws Exception {
         int groupId = systemConfigHandle.getGroupId();
@@ -53,7 +47,7 @@ public class PrecompiledSysConfigService {
         String value = systemConfigHandle.getConfigValue();
 
         // check system value
-        if(PrecompiledUtils.TxGasLimit.equals(key)) {
+        if (PrecompiledUtils.TxGasLimit.equals(key)) {
             if (Integer.parseInt(value) < PrecompiledUtils.TxGasLimitMin) {
                 return ConstantCode.FAIL_SET_SYSTEM_CONFIG_TOO_SMALL;
             }
@@ -63,33 +57,33 @@ public class PrecompiledSysConfigService {
         return result;
     }
 
-    public List<SystemConfigHandle> querySysConfigByGroupId(int groupId) throws Exception {
+    public List<ResSystemConfig> querySysConfigByGroupId(int groupId) throws Exception {
 
-        List<SystemConfigHandle> list = getConfigList(groupId);
+        List<ResSystemConfig> list = getConfigList(groupId);
 
         return list;
     }
 
     /**
-     * get system config list by groupId
-     * directory through web3j instead of Precompiled instance
+     * get system config list by groupId directory through web3j instead of Precompiled instance
+     * 
      * @param groupId
      * @return
      * @throws IOException
      */
-    private List<SystemConfigHandle> getConfigList(int groupId) throws IOException {
-        List<SystemConfigHandle> list = new ArrayList<>();
+    private List<ResSystemConfig> getConfigList(int groupId) throws IOException {
+        List<ResSystemConfig> list = new ArrayList<>();
 
         String txCountLimit = web3jMap.get(groupId)
                 .getSystemConfigByKey(PrecompiledUtils.TxCountLimit).sendForReturnString();
-        SystemConfigHandle systemConfigCount = new SystemConfigHandle();
+        ResSystemConfig systemConfigCount = new ResSystemConfig();
         systemConfigCount.setConfigKey(PrecompiledUtils.TxCountLimit);
         systemConfigCount.setConfigValue(txCountLimit);
         systemConfigCount.setGroupId(groupId);
 
-        String txGasLimit = web3jMap.get(groupId)
-                .getSystemConfigByKey(PrecompiledUtils.TxGasLimit).sendForReturnString();
-        SystemConfigHandle systemConfigGas = new SystemConfigHandle();
+        String txGasLimit = web3jMap.get(groupId).getSystemConfigByKey(PrecompiledUtils.TxGasLimit)
+                .sendForReturnString();
+        ResSystemConfig systemConfigGas = new ResSystemConfig();
         systemConfigGas.setConfigKey(PrecompiledUtils.TxGasLimit);
         systemConfigGas.setConfigValue(txGasLimit);
         systemConfigGas.setGroupId(groupId);

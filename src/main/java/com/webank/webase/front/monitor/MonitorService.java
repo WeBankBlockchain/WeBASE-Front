@@ -17,10 +17,21 @@ package com.webank.webase.front.monitor;
 
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.monitor.entity.GroupSizeInfo;
 import com.webank.webase.front.monitor.entity.Monitor;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
+import com.webank.webase.front.util.CommonUtils;
+import java.io.File;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
@@ -29,13 +40,6 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.PendingTxSize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Node monitor service
@@ -51,6 +55,8 @@ public class MonitorService {
     MonitorRepository monitorRepository;
     @Autowired
     Constants constants;
+    
+    private static final String PATH_DATA = "/data";
 
     public List<PerformanceData> findContrastDataByTime(int groupId, LocalDateTime startTime, LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime, int gap)  {
 
@@ -174,5 +180,28 @@ public class MonitorService {
         Long aWeekAgo = currentTime - 3600 * 24 * 7 * 1000;
         int i = monitorRepository.deleteTimeAgo(aWeekAgo);
         log.debug("delete record count = " + i);
+    }
+
+    public List<GroupSizeInfo> getGroupSizeInfos() {
+        List<GroupSizeInfo> data = new ArrayList<>();
+        File f = new File(constants.getNodePath() + PATH_DATA);
+        File[] fs = f.listFiles();
+        if (fs == null) {
+            return data;
+        }
+        // get info
+        for (File file : fs) {
+            if (file.isDirectory()) {
+                String name = file.getName();
+                int groupId = CommonUtils.extractFigureFromStr(name);
+                data.add(new GroupSizeInfo(groupId, name, file.getAbsolutePath(),
+                        CommonUtils.getFolderSize(file)));
+            }
+        }
+        // set unit: KB
+        for (GroupSizeInfo groupSizeInfo : data) {
+            groupSizeInfo.setSize(groupSizeInfo.getSize() / 1024L);
+        }
+        return data;
     }
 }
