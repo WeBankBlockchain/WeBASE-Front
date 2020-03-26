@@ -23,8 +23,24 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.FrontUtils;
-import com.webank.webase.front.web3api.entity.*;
+import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
+import com.webank.webase.front.web3api.entity.NodeStatusInfo;
+import com.webank.webase.front.web3api.entity.PeerOfConsensusStatus;
+import com.webank.webase.front.web3api.entity.PeerOfSyncStatus;
 import com.webank.webase.front.web3api.entity.SyncStatus;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
@@ -35,21 +51,20 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
-import org.fisco.bcos.web3j.protocol.core.methods.response.*;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
+import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup;
+import org.fisco.bcos.web3j.protocol.core.methods.response.GroupPeers;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
-//import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
+// import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
 
 
 /**
@@ -485,7 +500,8 @@ public class Web3ApiService {
         log.debug("getGroupList. ");
         try {
             Set<Integer> iset = web3jMap.keySet();
-            List<String> groupIdList = web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
+            List<String> groupIdList =
+                    web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
             refreshWeb3jMapService(groupIdList);
             return groupIdList;
@@ -511,7 +527,7 @@ public class Web3ApiService {
                 groupChannelConnectionsConfig.getAllChannelConnections();
         groupIdList.forEach(gId -> {
             Integer groupId = new Integer(gId);
-            if(web3jMap.get(groupId) == null) {
+            if (web3jMap.get(groupId) == null) {
                 refreshWeb3jMap(groupId, channelConnectionsList);
             }
         });
@@ -520,12 +536,10 @@ public class Web3ApiService {
     private void refreshWeb3jMap(int groupId, List<ChannelConnections> channelConnectionsList) {
         Credentials credentials = GenCredential.create();
         ChannelConnections channelConnections = new ChannelConnections();
-        channelConnections
-                .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
+        channelConnections.setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
         channelConnections.setGroupId(groupId);
         channelConnectionsList.add(channelConnections);
-        org.fisco.bcos.channel.client.Service service =
-                new org.fisco.bcos.channel.client.Service();
+        org.fisco.bcos.channel.client.Service service = new org.fisco.bcos.channel.client.Service();
         service.setOrgID(Web3Config.orgName);
         service.setGroupId(groupId);
         service.setThreadPool(threadPoolTaskExecutor);
@@ -617,6 +631,7 @@ public class Web3ApiService {
     }
 
     public Object generateGroup(GenerateGroupInfo generateGroupInfo) throws IOException {
+        log.info("start generateGroup. groupId:{}", generateGroupInfo.getGenerateGroupId());
         Set<Integer> iset = web3jMap.keySet();
         GenerateGroup.Status status = web3jMap.get(iset.toArray()[0])
                 .generateGroup(generateGroupInfo.getGenerateGroupId(),
@@ -626,15 +641,68 @@ public class Web3ApiService {
         return status;
     }
 
-    public Object startGroup(int startGroupId) throws IOException {
+    public Object operateGroup(int groupId, String type) throws IOException {
+        log.info("start operateGroup. groupId:{} type:{}", type);
+        switch (type) {
+            case Constants.OPERATE_GROUP_START:
+                return startGroup(groupId);
+            case Constants.OPERATE_GROUP_STOP:
+                return stopGroup(groupId);
+            case Constants.OPERATE_GROUP_REMOVE:
+                return removeGroup(groupId);
+            case Constants.OPERATE_GROUP_RECOVER:
+                return recoverGroup(groupId);
+            case Constants.OPERATE_GROUP_GETSTATUS:
+                return queryGroupStatus(groupId);
+            default:
+                log.error("end operateGroup. invalid operate type");
+                throw new FrontException(ConstantCode.INVALID_GROUP_OPERATE_TYPE);
+        }
+    }
+
+    private Object startGroup(int groupId) throws IOException {
         Set<Integer> iset = web3jMap.keySet();
         org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
-                web3jMap.get(iset.toArray()[0]).startGroup(startGroupId).send().getStatus();
-        // if start group success, refresh web3jMap
+                web3jMap.get(iset.toArray()[0]).startGroup(groupId).send().getStatus();
+        log.info("startGroup. groupId:{} status:{}", status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            refreshWeb3jMap(startGroupId,
-                    groupChannelConnectionsConfig.getAllChannelConnections());
+            getGroupList();
         }
+        return status;
+    }
+
+    private Object stopGroup(int groupId) throws IOException {
+        Set<Integer> iset = web3jMap.keySet();
+        org.fisco.bcos.web3j.protocol.core.methods.response.StopGroup.Status status =
+                web3jMap.get(iset.toArray()[0]).stopGroup(groupId).send().getStatus();
+        log.info("stopGroup. groupId:{} status:{}", status);
+        if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+            getGroupList();
+        }
+        return status;
+    }
+
+    private Object removeGroup(int groupId) throws IOException {
+        Set<Integer> iset = web3jMap.keySet();
+        org.fisco.bcos.web3j.protocol.core.methods.response.RemoveGroup.Status status =
+                web3jMap.get(iset.toArray()[0]).removeGroup(groupId).send().getStatus();
+        log.info("removeGroup. groupId:{} status:{}", status);
+        return status;
+    }
+
+    private Object recoverGroup(int groupId) throws IOException {
+        Set<Integer> iset = web3jMap.keySet();
+        org.fisco.bcos.web3j.protocol.core.methods.response.RecoverGroup.Status status =
+                web3jMap.get(iset.toArray()[0]).recoverGroup(groupId).send().getStatus();
+        log.info("recoverGroup. groupId:{} status:{}", status);
+        return status;
+    }
+
+    private Object queryGroupStatus(int groupId) throws IOException {
+        Set<Integer> iset = web3jMap.keySet();
+        org.fisco.bcos.web3j.protocol.core.methods.response.QueryGroupStatus.Status status =
+                web3jMap.get(iset.toArray()[0]).queryGroupStatus(groupId).send().getStatus();
+        log.info("queryGroupStatus. groupId:{} status:{}", status);
         return status;
     }
 }

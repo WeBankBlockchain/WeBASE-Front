@@ -15,9 +15,15 @@
  */
 package com.webank.webase.front.precompiledapi;
 
+import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
+import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
+import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
@@ -25,17 +31,10 @@ import org.fisco.bcos.web3j.precompile.crud.CRUDService;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
+import org.fisco.bcos.web3j.precompile.csm.ContractStatusService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
-import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
-import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 
 
 /**
@@ -177,5 +176,29 @@ public class PrecompiledService{
         List<Map<String, String>> selectRes = crudService.select(table, conditions);
         return selectRes;
     }
+	
+	public String contractFreeze(int groupId, String signUserId, String contractAddress) throws Exception {
+        return precompiledWithSignService.contractFreeze(groupId, signUserId, contractAddress);
+    }
+	
+	public String contractUnfreeze(int groupId, String signUserId, String contractAddress) throws Exception {
+	    return precompiledWithSignService.contractUnfreeze(groupId, signUserId, contractAddress);
+	}
+	
+	public String contractGrantManager(int groupId, String signUserId, String contractAddress,
+          String grantAddress) throws Exception {
+	    return precompiledWithSignService.contractGrantManager(groupId, signUserId, contractAddress, grantAddress);
+	}
+	
+	public String contractStatus(int groupId, String contractAddress) throws Exception {
+        ContractStatusService contractStatusService = new ContractStatusService(
+                web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
+        return contractStatusService.getStatus(contractAddress);
+    }
 
+    public String contractManagerList(int groupId, String contractAddress) throws Exception {
+        ContractStatusService contractStatusService = new ContractStatusService(
+                web3jMap.get(groupId), keyStoreService.getCredentialsForQuery());
+        return contractStatusService.listManager(contractAddress);
+    }
 }
