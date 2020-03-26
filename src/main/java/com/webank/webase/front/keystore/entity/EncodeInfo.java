@@ -26,5 +26,4 @@ public class EncodeInfo {
      */
     private String signUserId;
     private String encodedDataStr;
-    private Integer encryptType;
 }
