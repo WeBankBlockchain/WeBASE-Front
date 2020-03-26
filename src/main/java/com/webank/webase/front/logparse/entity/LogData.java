@@ -13,24 +13,21 @@
  */
 package com.webank.webase.front.logparse.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import com.webank.webase.front.logparse.LogTypes;
 import lombok.Data;
 
-@Data
-@Entity
-public class CurrentState {
-    @Id
-    private Integer id;
-    private String fileName;
-    private long currentSize;
 
-    public CurrentState() {}
-            
-    public CurrentState(Integer id, String fileName, long currentSize) {
+@Data
+public class LogData {
+
+    private LogTypes logType;
+    private String logData;
+    private Long timestamp;
+
+    public LogData(Long timestamp, LogTypes logType, String logData) {
         super();
-        this.id = id;
-        this.fileName = fileName;
-        this.currentSize = currentSize;
+        this.logType = logType;
+        this.logData = logData;
+        this.timestamp = timestamp;
     }
 }

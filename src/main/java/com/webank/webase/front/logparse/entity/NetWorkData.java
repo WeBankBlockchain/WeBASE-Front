@@ -13,21 +13,24 @@
  */
 package com.webank.webase.front.logparse.entity;
 
-import lombok.Data;
-
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import lombok.Data;
 
 @Data
+@Entity
 public class NetWorkData {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Long totalIn;
     private Long totalOut;
-    private int groupId=1;
+    private int groupId;
     private Long timestamp;
+    
+    public NetWorkData() {}
 
     public NetWorkData(Long totalIn, Long totalOut, Long timestamp, int groupId) {
         super();
