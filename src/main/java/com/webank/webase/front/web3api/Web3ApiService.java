@@ -642,7 +642,7 @@ public class Web3ApiService {
     }
 
     public Object operateGroup(int groupId, String type) throws IOException {
-        log.info("start operateGroup. groupId:{} type:{}", type);
+        log.info("start operateGroup. groupId:{} type:{}", groupId, type);
         switch (type) {
             case Constants.OPERATE_GROUP_START:
                 return startGroup(groupId);
@@ -664,7 +664,7 @@ public class Web3ApiService {
         Set<Integer> iset = web3jMap.keySet();
         org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
                 web3jMap.get(iset.toArray()[0]).startGroup(groupId).send().getStatus();
-        log.info("startGroup. groupId:{} status:{}", status);
+        log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             getGroupList();
         }
@@ -675,7 +675,7 @@ public class Web3ApiService {
         Set<Integer> iset = web3jMap.keySet();
         org.fisco.bcos.web3j.protocol.core.methods.response.StopGroup.Status status =
                 web3jMap.get(iset.toArray()[0]).stopGroup(groupId).send().getStatus();
-        log.info("stopGroup. groupId:{} status:{}", status);
+        log.info("stopGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             getGroupList();
         }
@@ -686,7 +686,7 @@ public class Web3ApiService {
         Set<Integer> iset = web3jMap.keySet();
         org.fisco.bcos.web3j.protocol.core.methods.response.RemoveGroup.Status status =
                 web3jMap.get(iset.toArray()[0]).removeGroup(groupId).send().getStatus();
-        log.info("removeGroup. groupId:{} status:{}", status);
+        log.info("removeGroup. groupId:{} status:{}", groupId, status);
         return status;
     }
 
@@ -694,7 +694,7 @@ public class Web3ApiService {
         Set<Integer> iset = web3jMap.keySet();
         org.fisco.bcos.web3j.protocol.core.methods.response.RecoverGroup.Status status =
                 web3jMap.get(iset.toArray()[0]).recoverGroup(groupId).send().getStatus();
-        log.info("recoverGroup. groupId:{} status:{}", status);
+        log.info("recoverGroup. groupId:{} status:{}", groupId, status);
         return status;
     }
 
@@ -702,7 +702,7 @@ public class Web3ApiService {
         Set<Integer> iset = web3jMap.keySet();
         org.fisco.bcos.web3j.protocol.core.methods.response.QueryGroupStatus.Status status =
                 web3jMap.get(iset.toArray()[0]).queryGroupStatus(groupId).send().getStatus();
-        log.info("queryGroupStatus. groupId:{} status:{}", status);
+        log.info("queryGroupStatus. groupId:{} status:{}", groupId, status);
         return status;
     }
 }
