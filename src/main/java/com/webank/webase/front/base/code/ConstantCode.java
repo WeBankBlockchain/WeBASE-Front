@@ -34,7 +34,8 @@ public class ConstantCode {
     public static final String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"message\":\"funcName cannot be empty\"}";
     public static final String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"message\":\"abiInfo cannot be empty\"}";
     public static final String PARAM_FAIL_BYTECODE_BIN_IS_EMPTY = "{\"code\":201007,\"message\":\"bytecodeBin cannot be empty\"}";
-    public static final String PARAM_FAIL_SIGN_USER_ID_IS_EMPTY = "{\"code\":201002,\"message\":\"signUserId cannot be empty\"}";
+    public static final String PARAM_FAIL_SIGN_USER_ID_IS_EMPTY_STRING = "{\"code\":201008,\"message\":\"signUserId cannot be empty\"}";
+    public static final RetCode PARAM_FAIL_SIGN_USER_ID_IS_EMPTY = RetCode.mark(201008, "signUserId cannot be empty");
 
     /* general error */
     public static final RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");
@@ -70,8 +71,11 @@ public class ConstantCode {
     public static final RetCode USER_NAME_NULL = RetCode.mark(201037, "user name is null");
     public static final RetCode USER_NAME_EXISTS = RetCode.mark(201038, "user name already exists");
     public static final RetCode KEYSTORE_EXISTS = RetCode.mark(201039, "address already exists");
-    public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201034, "address not exists");
-    public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(2010035, "external user's appId and signUserId cannot be empty");
+    public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201040, "address not exists");
+    public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(2010041, "external user's appId and signUserId cannot be empty");
+	public static final RetCode PRIVATEKEY_EXISTS = RetCode.mark(201042, "private key already exists");
+    public static final RetCode NO_SOL_FILES = RetCode.mark(201043, "There is no sol files in source");
+    public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201044, "invalid group operate type");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
@@ -93,7 +97,11 @@ public class ConstantCode {
     public static final String PARAM_FAIL_NODE_ID_IS_EMPTY = "{\"code\":2011109,\"message\":\"node id cannot be empty\"}";
     public static final String PARAM_FAIL_NODE_TYPE_IS_EMPTY = "{\"code\":201110,\"message\":\"node type cannot be empty\"}";
     public static final String PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY = "{\"code\":201111,\"message\":\"Permission state cannot be all empty\"}";
-
+    public static final String PARAM_FAIL_CONTRACT_ADDRESS_EMPTY = "{\"code\":201112,\"message\":\"contract address cannot be empty\"}";
+    public static final String PARAM_FAIL_CONTRACT_HANDLE_TYPE_EMPTY = "{\"code\":201113,\"message\":\"contract handle type cannot be empty\"}";
+    public static final RetCode PARAM_FAIL_GRANT_ADDRESS_EMPTY = RetCode.mark(201114, "grantAddress cannot be empty");
+    public static final RetCode INVALID_CONTRACT_HANDLE_TYPE = RetCode.mark(201115, "invalid contract handle type");
+    public static final RetCode FAIL_CONTRACT_HANDLE = RetCode.mark(201116, "contract status handle fail");
     /* precompiled runtime check or error */
 
     // param
@@ -108,11 +116,11 @@ public class ConstantCode {
     public static final RetCode UNSUPPORTED_SYSTEM_CONFIG_KEY = RetCode.mark(201208, "unsupported for this system config key");
     public static final RetCode FAIL_SET_SYSTEM_CONFIG_TOO_SMALL =  RetCode.mark(201209,
             "provide value by positive integer mode, from 100000 to 2147483647");
-    public static final RetCode FAIL_SET_SYSTEM_CONFIG = RetCode.mark(201210, "set system config value fail for params error or permission denied ");
+    public static final RetCode FAIL_SET_SYSTEM_CONFIG = RetCode.mark(201210, "set system config value fail for params error or permission denied");
     public static final RetCode FAIL_QUERY_SYSTEM_CONFIG = RetCode.mark(201211, "query system config value list fail");
     // consensus (node manager)
     public static final RetCode INVALID_NODE_ID = RetCode.mark(201216,"node id is invalid");
-    public static final RetCode INVALID_NODE_TYPE = RetCode.mark(201217,"invalid node type: sealer, observer, remove ");
+    public static final RetCode INVALID_NODE_TYPE = RetCode.mark(201217,"invalid node type: sealer, observer, remove");
     public static final RetCode FAIL_CHANGE_NODE_TYPE = RetCode.mark(201218,"set node consensus type fail, check permission or node's group config file");
     // cns
     public static final RetCode INVALID_VERSION = RetCode.mark(201221,"Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ");

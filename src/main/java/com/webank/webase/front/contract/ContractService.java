@@ -31,9 +31,11 @@ import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.contract.entity.ReqContractPath;
 import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
+import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.AbiUtil;
@@ -43,10 +45,12 @@ import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -71,7 +75,9 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.fisco.bcos.web3j.solidity.compiler.CompilationResult;
+import org.fisco.bcos.web3j.solidity.compiler.CompilationResult.ContractMetadata;
 import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler;
+import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -332,7 +338,7 @@ public class ContractService {
      * encode constructor function
      */
     private static String constructorEncoded(String contractName,
-                                             ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
+            ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
         // Constructor encoded
         String encodedConstructor = "";
         String functionName = contractName;
@@ -672,7 +678,61 @@ public class ContractService {
                 contractFile.deleteOnExit();
             }
         }
+    }
 
+    public List<RspMultiContractCompile> multiContractCompile(ReqMultiContractCompile inputParam)
+            throws IOException {
+        // clear temp folder
+        CommonUtils.deleteFiles(BASE_FILE_PATH);
+
+        // unzip
+        CommonUtils.zipBase64ToFile(inputParam.getContractZipBase64(), BASE_FILE_PATH);
+
+        // get sol files
+        File solFileList = new File(BASE_FILE_PATH);
+        File[] solFiles = solFileList.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String fileName) {
+                if (!fileName.toLowerCase().endsWith(".sol")) {
+                    return false;
+                }
+                return true;
+            }
+        });
+        if (solFiles == null || solFiles.length == 0) {
+            log.error("There is no sol files in source.");
+            throw new FrontException(ConstantCode.NO_SOL_FILES);
+        }
+
+        List<RspMultiContractCompile> compileInfos = new ArrayList<>();
+        for (File solFile : solFiles) {
+            String contractName =
+                    solFile.getName().substring(0, solFile.getName().lastIndexOf("."));
+            // compile
+            SolidityCompiler.Result res =
+                    SolidityCompiler.compile(solFile, true, Options.ABI, Options.BIN);
+            // check result
+            if (res.isFailed()) {
+                log.error("multiContractCompile fail. contract:{} compile error. {}", contractName,
+                        res.errors);
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.errors);
+            }
+            // parse result
+            CompilationResult result = CompilationResult.parse(res.output);
+            List<ContractMetadata> contracts = result.getContracts();
+            if (contracts.size() > 0) {
+                RspMultiContractCompile compileInfo = new RspMultiContractCompile();
+                compileInfo.setContractName(contractName);
+                compileInfo.setBytecodeBin(result.getContract(contractName).bin);
+                compileInfo.setContractAbi(result.getContract(contractName).abi);
+                compileInfo.setContractSource(
+                        CommonUtils.fileToBase64(BASE_FILE_PATH + solFile.getName()));
+                compileInfos.add(compileInfo);
+            }
+        }
+
+        log.debug("end multiContractCompile.");
+        return compileInfos;
     }
 
     /**

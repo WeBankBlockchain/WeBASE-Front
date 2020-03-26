@@ -72,7 +72,7 @@ List jaxb = [
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb
 	// guomi contract compile: USE 'socJ-all-0.4.25-gm' to REPLACE 'ethereum:solcJ-all'
-	compile ('org.fisco-bcos:web3sdk:2.2.0-bsn-0321-SNAPSHOT')
+	compile ('org.fisco-bcos:web3sdk:2.2.0-bsn-0324-SNAPSHOT')
 	//compile ('org.fisco-bcos:web3sdk:2.2.0')
 //        {
 //            exclude group:"org.ethereum"
