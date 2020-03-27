@@ -22,7 +22,7 @@ export default {
         subscribeEvent: 'Subscribe Event',
         blockEvent: 'Block Event',
         contractEvent: 'Contract Event',
-        testUserList: 'Test User'
+        testUserList: 'Test User List'
     },
     navbar: {
         dashboard: 'Dashboard',
@@ -271,7 +271,7 @@ export default {
         appId: "Unique number of the application that registered the event notification",
         exchangeName: "Switch to which the queue belongs",
         queueName: "User name is usually used as the queue name",
-        contractAbi: "ABI of contract, used for contract event analysis;for example, [HelloWorld (string)]",
+        contractAbi: "ABI of contract, used for contract event analysis,list type;for example, [HelloWorld (string)]",
         contractAddress: "Contract address",
         fromBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
         toBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
