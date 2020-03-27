@@ -20,6 +20,7 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * @author marsli
@@ -58,12 +59,15 @@ public class NewBlockEventInfo {
 	private String exchangeName;
 
 	/**
-	 * @username as queue name
+	 * @appId as queue name
 	 */
 	private String queueName;
 
 	/**
-	 * concat queueName + "_" + event/block as routing key
+	 * concat appId + "_" + event/block + "_" + randomStr as routing key
 	 */
 	private String routingKey;
+
+	private LocalDateTime createTime;
+
 }

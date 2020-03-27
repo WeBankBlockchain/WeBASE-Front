@@ -28,7 +28,10 @@ import org.hibernate.validator.constraints.NotBlank;
  */
 @Data
 public class ReqTransHandle {
-    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
+    /**
+     * user address
+     */
+    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
     private String user;
     private String contractName;
     private String version;
@@ -37,8 +40,8 @@ public class ReqTransHandle {
     @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
     private String funcName;
     private int groupId = 1;
-    @NotNull(message = ConstantCode.PARAM_FAIL_USEAES_IS_EMPTY)
-    private Boolean useAes;
     private List<Object> contractAbi = new ArrayList<>();
     private List<Object> funcParam = new ArrayList<>();
+    @Deprecated
+    private boolean useAes;
 }
