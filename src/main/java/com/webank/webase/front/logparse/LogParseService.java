@@ -67,13 +67,17 @@ public class LogParseService {
 
     private static final String PATH_STAT = "/stat/";
 
-    @Scheduled(fixedDelayString = "${constant.syncNodeLogData}")
+    @Scheduled(fixedDelayString = "${constant.syncStatLogTime}")
     public void taskStart() {
         syncLogData();
     }
 
     public synchronized void syncLogData() {
         log.debug("begin sync log data");
+        if(!constants.isStatLogEnabled())
+        {
+            return;
+        }
         RandomAccessFile randomFile = null;
         try {
             String statPath = constants.getNodePath() + PATH_STAT;
