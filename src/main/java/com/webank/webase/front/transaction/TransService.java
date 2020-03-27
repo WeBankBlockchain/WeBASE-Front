@@ -321,7 +321,6 @@ public class TransService {
 
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setSignUserId(signUserId);
-            encodeInfo.setEncryptType(EncryptType.encryptType);
             encodeInfo.setEncodedDataStr(encodedDataStr);
             String signDataStr = keyStoreService.getSignData(encodeInfo);
             if (StringUtils.isBlank(signDataStr)) {
@@ -344,7 +343,6 @@ public class TransService {
 
             EncodeInfo encodeInfo = new EncodeInfo();
             encodeInfo.setSignUserId(signUserId);
-            encodeInfo.setEncryptType(EncryptType.encryptType);
             encodeInfo.setEncodedDataStr(encodedDataStr);
 
             Instant startTime = Instant.now();
