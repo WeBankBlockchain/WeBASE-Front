@@ -2,19 +2,19 @@
     <div>
         <el-form :model="blockEventForm" :rules="rules" ref="blockEventForm" label-width="125px" class="demo-ruleForm">
             <el-form-item :label="$t('table.appId')" prop="appId">
-                <el-input v-model="blockEventForm.appId" style="width: 210px;"></el-input>
+                <el-input v-model="blockEventForm.appId" style="width: 210px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.appId')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.exchangeName')" prop="exchangeName">
-                <el-input v-model="blockEventForm.exchangeName" style="width: 210px;"></el-input>
+                <el-input v-model="blockEventForm.exchangeName" style="width: 210px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.exchangeName')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.queueName')" prop="queueName">
-                <el-input v-model="blockEventForm.queueName" style="width: 210px;"></el-input>
+                <el-input v-model="blockEventForm.queueName" style="width: 210px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.queueName')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
@@ -117,7 +117,6 @@ export default {
                         this.modelClose()
                         this.$emit("success")
                     } else {
-                        this.modelClose()
                         this.$message({
                             type: "error",
                             message: this.$chooseLang(res.data.code)

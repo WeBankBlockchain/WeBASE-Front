@@ -268,7 +268,7 @@ export default {
         appId: "注册事件通知的应用的唯一编号",
         exchangeName: "队列所属交换机",
         queueName: "队列名，一般以用户名作队列名",
-        contractAbi: "合约的ABI，用于合约event解析,如[HelloWorld(string)]",
+        contractAbi: "合约的ABI，用于合约event解析,list类型,如[HelloWorld(string)]",
         contractAddress: "合约地址",
         fromBlock: "最小值为0；默认值latest，表示监听最新区块",
         toBlock: "最小值为0；默认值latest，表示监听最新区块",
