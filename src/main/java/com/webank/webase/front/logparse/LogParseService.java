@@ -15,17 +15,25 @@ package com.webank.webase.front.logparse;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.logparse.entity.CurrentState;
+import com.webank.webase.front.logparse.entity.LogData;
 import com.webank.webase.front.logparse.entity.NetWorkData;
 import com.webank.webase.front.logparse.entity.TxGasData;
 import com.webank.webase.front.logparse.repository.CurrentStateRepository;
 import com.webank.webase.front.logparse.repository.NetWorkDataRepository;
 import com.webank.webase.front.logparse.repository.TxGasDataRepository;
+import com.webank.webase.front.logparse.util.FileUtil;
+import com.webank.webase.front.logparse.util.LogParseUtil;
 import com.webank.webase.front.logparse.util.LogTypes;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -37,6 +45,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 
@@ -53,25 +62,73 @@ public class LogParseService {
     TxGasDataRepository txGasDataRepository;
     @Autowired
     CurrentStateRepository currentStateRepository;
-    
-    public CurrentState getCurrentState() {
-        return currentStateRepository.findOne(1);
+    @Autowired
+    Constants constants;
+
+    private static final String PATH_STAT = "/stat/";
+
+    @Scheduled(fixedDelayString = "${constant.syncNodeLogData}")
+    public void taskStart() {
+        syncLogData();
     }
 
-    public Boolean updateCurrentState(String name, Long currentSize) {
-        CurrentState currentState = new CurrentState(1, name, currentSize);
-        currentStateRepository.save(currentState);
-        return true;
-    }
-
-    public Boolean insertNetworkLog(NetWorkData netWorkData) {
-        netWorkDataRepository.save(netWorkData);
-        return true;
-    }
-
-    public Boolean insertTxGasUsedLog(TxGasData txGasData) {
-        txGasDataRepository.save(txGasData);
-        return true;
+    public synchronized void syncLogData() {
+        log.debug("begin sync log data");
+        RandomAccessFile randomFile = null;
+        try {
+            String statPath = constants.getNodePath() + PATH_STAT;
+            // get all files
+            TreeMap<Long, String> treeMap = FileUtil.getStatFiles(FileUtil.getFiles(statPath));
+            // get currentState
+            CurrentState currentState = getCurrentState();
+            String currentFileName;
+            long lastTimeFileSize = Long.valueOf(0);
+            if (currentState == null) {
+                currentFileName = treeMap.get(treeMap.firstKey());
+            } else {
+                currentFileName = currentState.getFileName();
+                lastTimeFileSize = currentState.getCurrentSize();
+            }
+            // clear old files
+            FileUtil.clearOldStatFiles(treeMap, currentFileName);
+            // read current file
+            File logFile = new File(statPath + currentFileName);
+            long fileLength = logFile.length();
+            if (fileLength < lastTimeFileSize) {
+                return;
+            } else {
+                randomFile = new RandomAccessFile(logFile, "r");
+                randomFile.seek(lastTimeFileSize);
+                String tmp = null;
+                while ((tmp = randomFile.readLine()) != null) {
+                    LogData logData = LogParseUtil.getLogData(tmp);
+                    if (logData.getLogType() == LogTypes.NETWORK) {
+                        NetWorkData netWorkData = LogParseUtil.parseNetworkLog(logData);
+                        insertNetworkLog(netWorkData);
+                    }
+                    if (logData.getLogType() == LogTypes.TxGAS) {
+                        TxGasData txGasData = LogParseUtil.parseTxGasUsedLog(logData);
+                        insertTxGasUsedLog(txGasData);
+                    }
+                    lastTimeFileSize = randomFile.getFilePointer();
+                    updateCurrentState(currentFileName, lastTimeFileSize);
+                }
+                if (treeMap.size() > 1) {
+                    FileUtil.clearCurrentStatFile(treeMap, currentFileName);
+                    updateCurrentState(treeMap.get(treeMap.firstKey()), Long.valueOf(0));
+                }
+            }
+        } catch (IOException e) {
+            log.error("get LogData failed.", e);
+        } finally {
+            if (randomFile != null) {
+                try {
+                    randomFile.close();
+                } catch (IOException e) {
+                    log.error("LogData IOException:[{}]", e.toString());
+                }
+            }
+        }
     }
 
     public Page<NetWorkData> getNetWorkData(Integer groupId, Integer pageNumber, Integer pageSize,
@@ -136,6 +193,27 @@ public class LogParseService {
             log.error("deleteData. type:{} not support", type);
             throw new FrontException(ConstantCode.INVALID_DATA_TYPE);
         }
+    }
+
+    private CurrentState getCurrentState() {
+        CurrentState currentState = currentStateRepository.findOne(1);
+        return currentState;
+    }
+
+    private Boolean updateCurrentState(String name, Long currentSize) {
+        CurrentState currentState = new CurrentState(1, name, currentSize);
+        currentStateRepository.save(currentState);
+        return true;
+    }
+
+    private Boolean insertNetworkLog(NetWorkData netWorkData) {
+        netWorkDataRepository.save(netWorkData);
+        return true;
+    }
+
+    private Boolean insertTxGasUsedLog(TxGasData txGasData) {
+        txGasDataRepository.save(txGasData);
+        return true;
     }
 }
 
