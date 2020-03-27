@@ -76,6 +76,8 @@ public class Constants {
     private String nodePath = "/fisco/nodes/127.0.0.1/node0";
     private Integer eventRegisterTaskFixedDelay;
     private Integer syncEventMapTaskFixedDelay;
+    private Integer syncStatLogTime = 5000;
+    private boolean statLogEnabled = true;
 
     private int http_read_timeOut = 10000;
     private int http_connect_timeOut = 10000;
