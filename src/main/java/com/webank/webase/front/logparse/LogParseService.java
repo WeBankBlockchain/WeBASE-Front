@@ -149,7 +149,7 @@ public class LogParseService {
                     predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
                             beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
                 }
-                if (beginDate != null) {
+                if (endDate != null) {
                     predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
                             endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
                 }
@@ -173,7 +173,7 @@ public class LogParseService {
                     predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
                             beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
                 }
-                if (beginDate != null) {
+                if (endDate != null) {
                     predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
                             endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
                 }
