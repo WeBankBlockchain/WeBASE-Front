@@ -26,13 +26,12 @@ public class ConstantCode {
 
     /* paramaters check */
     public static final RetCode PARAM_FAIL_GROUP_ID_IS_EMPTY =  RetCode.mark(201001, "groupId cannot be empty");
-    public static final String PARAM_FAIL_USER_IS_EMPTY = "{\"code\":201002,\"message\":\"user cannot be empty\"}";
-    public static final String PARAM_FAIL_USEAES_IS_EMPTY =
-        "{\"code\":201003,\"message\":\"useAes cannot be empty\"}";
+    public static final String PARAM_FAIL_USER_IS_EMPTY_STRING = "{\"code\":201002,\"message\":\"user cannot be empty\"}";
+    public static final RetCode PARAM_FAIL_USER_IS_EMPTY = RetCode.mark(201002, "user cannot be empty");
     public static final String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"message\":\"version cannot be empty\"}";
     public static final String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"message\":\"funcName cannot be empty\"}";
     public static final String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"message\":\"abiInfo cannot be empty\"}";
-    public static final String PARAM_FAIL_CONTRACTBIN_IS_EMPTY = "{\"code\":201007,\"message\":\"contractBin cannot be empty\"}";
+    public static final String PARAM_FAIL_BYTECODE_BIN_IS_EMPTY = "{\"code\":201007,\"message\":\"bytecodeBin cannot be empty\"}";
 
     /* general error */
     public static final RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");
@@ -55,18 +54,21 @@ public class ConstantCode {
     public static final RetCode INVALID_CONTRACT_ID = RetCode.mark(201025, "invalid contract id");
     public static final RetCode CONTRACT_HAS_BEAN_DEPLOYED = RetCode.mark(201026, "contract has been deployed");
     public static final RetCode SEND_ABI_INFO_FAIL = RetCode.mark(201027, "send abiInfo fail");
-    public static final RetCode CONTRACT_BIN_NULL = RetCode.mark(201028, "contractbin is null");
+    public static final RetCode CONTRACT_BIN_NULL = RetCode.mark(201028, "bytecodeBin is null");
     public static final RetCode CONTRACT_ADDRESS_NULL = RetCode.mark(201029, "contractAddress is null");
     public static final RetCode CONTRACT_ADDRESS_INVALID = RetCode.mark(201030, "contractAddress invalid");
     public static final RetCode PRIVATE_KEY_DECODE_FAIL = RetCode.mark(201031, "privateKey decode fail");
     public static final RetCode NO_CONFIG_KEY_SERVER = RetCode.mark(201032, "not found config of keyServer");
     public static final RetCode DATA_SIGN_ERROR = RetCode.mark(201033, "data request sign error");
+    public static final RetCode DATA_SIGN_NOT_ACCESSIBLE = RetCode.mark(201033, "data request sign not accessible");
     public static final RetCode GROUPID_NOT_EXIST = RetCode.mark(201034, "groupId not exist");
     public static final RetCode VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL = RetCode.mark(201035, "version and address cannot all be null");
     public static final RetCode CONTRACT_COMPILE_FAIL = RetCode.mark(201036, "compile fail");
     public static final RetCode USER_NAME_NULL = RetCode.mark(201037, "user name is null");
     public static final RetCode USER_NAME_EXISTS = RetCode.mark(201038, "user name already exists");
-    public static final RetCode PRIVATEKEY_EXISTS = RetCode.mark(201039, "private key already exists");
+    public static final RetCode KEYSTORE_EXISTS = RetCode.mark(201039, "address already exists");
+    public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201034, "address not exists");
+    public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(2010035, "external user's appId and signUserId cannot be empty");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
@@ -88,14 +90,16 @@ public class ConstantCode {
     public static final String PARAM_FAIL_NODE_ID_IS_EMPTY = "{\"code\":2011109,\"message\":\"node id cannot be empty\"}";
     public static final String PARAM_FAIL_NODE_TYPE_IS_EMPTY = "{\"code\":201110,\"message\":\"node type cannot be empty\"}";
     public static final String PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY = "{\"code\":201111,\"message\":\"Permission state cannot be all empty\"}";
-    /* precompiled runtime check or error */
 
+    /* sign error code */
+    public static final String PARAM_FAIL_SIGN_USER_ID_IS_EMPTY = "{\"code\":201130,\"message\":\"signUserId cannot be empty\"}";
+
+    /* precompiled runtime check or error */
     // param
     public static final RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
     public static final RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
     // permission
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied, please check chain administrator permission");
-
     // sys config
     public static final RetCode SYSTEM_CONFIG_EXIST = RetCode.mark(201206, "create system config in db fail for already exist");
     public static final RetCode INVALID_SYSTEM_CONFIG_KEY = RetCode.mark(201207, "system config key is invalid");
@@ -111,7 +115,6 @@ public class ConstantCode {
     // cns
     public static final RetCode INVALID_VERSION = RetCode.mark(201221,"Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ");
     public static final RetCode INVALID_VERSION_EXCEED_LENGTH = RetCode.mark(201222,"version of contract is out of length");
-
     // crud
     public static int CODE_CRUD_SQL_ERROR = -51503;
     public static final RetCode PARAM_FAIL_SQL_ERROR = RetCode.mark(201226, "sql syntax error");
@@ -128,5 +131,7 @@ public class ConstantCode {
     public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
     public static final RetCode DATA_REPEAT_IN_DB_ERROR = RetCode.mark(201242, "Database error: data already exists in db(appId, address repeat)");
     public static final RetCode BLOCK_RANGE_PARAM_INVALID = RetCode.mark(201243, "Block range error, from/toBlock must greater than 0, toBlock must be greater than fromBlock");
-
+    public static final RetCode DATA_NOT_EXIST_ERROR = RetCode.mark(201244, "Database error: data not exists in db, please check your params");
+    public static final RetCode PARAM_INVALID = RetCode.mark(201245, "Only support letter and digit, please check your params");
+    public static final RetCode REGISTER_FAILED_ERROR = RetCode.mark(201246, "Register contractEvent failed, please check your param");
 }

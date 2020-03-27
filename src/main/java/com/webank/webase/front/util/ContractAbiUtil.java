@@ -68,7 +68,7 @@ public class ContractAbiUtil {
          *
          * @param version     contract version
          * @param events      events
-         * @param functions   functions
+         * @param functions   functions // constant or not
          * @param funcInputs  funcInputs
          * @param funcOutputs funcOutputs
          */

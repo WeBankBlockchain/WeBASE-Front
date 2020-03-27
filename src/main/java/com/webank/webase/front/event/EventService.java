@@ -29,12 +29,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
+import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
 
 /**
  * event notify in message queue service
@@ -46,39 +52,40 @@ import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 public class EventService {
 
     @Autowired
-    Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
-
+    private Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
     @Autowired
-    ContractEventInfoRepository contractEventInfoRepository;
+    private ContractEventInfoRepository contractEventInfoRepository;
     @Autowired
-    NewBlockEventInfoRepository newBlockEventInfoRepository;
+    private NewBlockEventInfoRepository newBlockEventInfoRepository;
     @Autowired
     private MQService mqService;
-
     @Autowired
     private MQPublisher mqPublisher;
 
     /**
      * register NewBlockEventCallBack
-     * @param appId
-     * @param groupId
-     * @param exchangeName
-     * @param queueName
-     * @param routingKey
-     * @return
      */
+    @Transactional
     public List<NewBlockEventInfo> registerNewBlockEvent(String appId, int groupId,
                                                          String exchangeName, String queueName,
                                                          String routingKey) {
-        log.debug("registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
+        log.info("start registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        // save to db 通过db来保证不重复注册
-        addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
-                appId, groupId, exchangeName, queueName, routingKey);
-        // record groupId, exchange, routingKey for all block notify
-        BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
-        return newBlockEventInfoRepository.findByQueueName(queueName);
+        try {
+            // save to db 通过db来保证不重复注册
+            String infoId = addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
+                    appId, groupId, exchangeName, queueName, routingKey);
+            log.info("registerNewBlockEvent saved to db successfully");
+            // record groupId, exchange, routingKey for all block notify
+            BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
+            log.info("end registerNewBlockEvent, infoId:{}", infoId);
+        } catch (Exception e) {
+            log.error("register newBlocnEvent error:[]", e);
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+            throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
+        }
+        return newBlockEventInfoRepository.findByAppId(appId);
     }
 
 
@@ -86,36 +93,47 @@ public class EventService {
      * 在org.fisco.bcos.channel.client.Service中注册EventLogPush不会持久化
      * 如果重启了则需要重新注册
      * register ContractEventCallback
-     * @param groupId
      * @param abi single one
-     * @param fromBlock
-     * @param toBlock
      * @param contractAddress single one
-     * @param topicList
-     * @param exchangeName
-     * @param queueName
      */
+    @Transactional
     public List<ContractEventInfo> registerContractEvent(String appId, int groupId, String exchangeName, String queueName,
                                                          String routingKey, String abi, String fromBlock, String toBlock,
                                                          String contractAddress, List<String> topicList) {
+        log.info("start registerContractEvent appId:{},groupId:{},contractAddress:{},params:{},exchangeName:{},queueName:{}",
+                appId, groupId, abi, contractAddress , exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        // 传入abi作decoder:
-        TransactionDecoder decoder = new TransactionDecoder(abi);
-        // init EventLogUserParams for register
-        EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
-                toBlock, contractAddress, topicList);
-        ContractEventCallback callBack =
-                new ContractEventCallback(mqPublisher,
-                        exchangeName, routingKey, decoder, groupId, appId);
-        log.debug("registerContractEvent appId:{},groupId:{},abi:{},params:{},exchangeName:{},queueName:{}",
-                appId, groupId, abi, params, exchangeName, queueName);
-        // save to db 通过db来保证不重复注册
-        String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
-                exchangeName, queueName, routingKey,
-                abi, fromBlock, toBlock, contractAddress, topicList);
-        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
-        service.registerEventLogFilter(params, callBack);
-        return contractEventInfoRepository.findByQueueName(queueName);
+        try {
+            // save to db first
+            String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
+                    exchangeName, queueName, routingKey,
+                    abi, fromBlock, toBlock, contractAddress, topicList);
+            log.info("registerContractEvent saved to db successfully");
+            // 传入abi作decoder
+            TransactionDecoder decoder = new TransactionDecoder(abi);
+            // init EventLogUserParams for register
+            EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
+                    toBlock, contractAddress, topicList);
+            ContractEventCallback callBack =
+                    new ContractEventCallback(mqPublisher,
+                            exchangeName, routingKey, decoder, groupId, appId);
+            org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
+            service.registerEventLogFilter(params, callBack);
+            // mark this callback is on(true)
+            callBack.setRunning(true);
+            CONTRACT_EVENT_CALLBACK_MAP.put(infoId, callBack);
+            log.info("end registerContractEvent infoId:{}", infoId);
+        } catch (FrontException frontEx) {
+            log.error("Register contractEvent failed: ", frontEx);
+            // make transactional
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+        } catch (Exception e) {
+            log.error("Register contractEvent failed: ", e);
+            // make transactional
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+            throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
+        }
+        return contractEventInfoRepository.findByAppId(appId);
     }
 
     private String addNewBlockEventInfo(int eventType, String appId, int groupId,
@@ -127,13 +145,9 @@ public class EventService {
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
-        try{
-            NewBlockEventInfo saved = newBlockEventInfoRepository.save(registerInfo);
-            return saved.getId();
-        } catch (Exception e) {
-            log.error("insert error:[]", e);
-            throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
-        }
+        registerInfo.setCreateTime(LocalDateTime.now());
+        NewBlockEventInfo saved = newBlockEventInfoRepository.save(registerInfo);
+        return saved.getId();
     }
 
     private String addContractEventInfo(int eventType, String appId, int groupId,
@@ -153,6 +167,7 @@ public class EventService {
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
+        registerInfo.setCreateTime(LocalDateTime.now());
         try{
             ContractEventInfo saved = contractEventInfoRepository.save(registerInfo);
             return saved.getId();
@@ -163,6 +178,94 @@ public class EventService {
 
     }
 
+    /**
+     * findByGroupId, return list of new block event register info
+     * @param groupId
+     * @param page 分页与按时间降序
+     */
+    public List<NewBlockEventInfo> getNewBlockInfoList(int groupId, Pageable page) {
+        return newBlockEventInfoRepository.findByGroupId(groupId, page);
+    }
 
+    /**
+     * full list
+     */
+    public List<NewBlockEventInfo> getNewBlockInfoList(int groupId) {
+        return newBlockEventInfoRepository.findByGroupId(groupId);
+    }
 
+    /**
+     * findByGroupIdAndAppId
+     * @param groupId
+     * @param appId
+     */
+    public List<NewBlockEventInfo> getNewBlockInfo(int groupId, String appId) {
+        return newBlockEventInfoRepository.findByGroupIdAndAppId(groupId, appId);
+    }
+
+    /**
+     * remove from BLOCK_ROUTING_KEY_MAP to stop pushing message
+     * @param infoId
+     * @return left info
+     */
+    public List<NewBlockEventInfo> unregisterNewBlock(String infoId, String appId, int groupId, String exchangeName,
+                                                      String queueName, String routingKey) {
+        log.debug("unregisterNewBlock appId:{},groupId:{},exchangeName:{},queueName:{},routingKey:{}",
+                appId, groupId, exchangeName, queueName, routingKey);
+        if (!newBlockEventInfoRepository.exists(infoId)) {
+            throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
+        }
+        BLOCK_ROUTING_KEY_MAP.remove(appId, new PublisherHelper(groupId, exchangeName, routingKey));
+        mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+        // remove from db
+        newBlockEventInfoRepository.delete(infoId);
+        return newBlockEventInfoRepository.findByAppId(appId);
+    }
+
+    /**
+     * return list of contract event register info
+     * @param page 分页与按时间降序
+     * @return
+     */
+    public List<ContractEventInfo> getContractEventInfoList(int groupId, Pageable page) {
+        return contractEventInfoRepository.findByGroupId(groupId, page);
+    }
+
+    /**
+     * full list
+     */
+    public List<ContractEventInfo> getContractEventInfoList(int groupId) {
+        return contractEventInfoRepository.findByGroupId(groupId);
+    }
+
+    public List<ContractEventInfo> getContractEventInfo(int groupId, String appId) {
+        return contractEventInfoRepository.findByGroupIdAndAppId(groupId, appId);
+    }
+
+    /**
+     * set callback's id empty and remove from CONTRACT_EVENT_CALLBACK_MAP to stop pushing message
+     * @param infoId
+     * @param appId
+     * @param groupId
+     * @param exchangeName
+     * @param queueName
+     * @param routingKey
+     * @return left info
+     */
+    public List<ContractEventInfo> unregisterContractEvent(String infoId, String appId, int groupId, String exchangeName,
+                                                      String queueName, String routingKey) {
+        log.debug("unregisterContractEvent infoId:{},appId:{},groupId:{},exchangeName:{},queueName:{},routingKey:{}",
+                infoId, appId, groupId, exchangeName, queueName, routingKey);
+        if (!contractEventInfoRepository.exists(infoId)) {
+            throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
+        }
+        // set callback's id empty to stop callback pushing message
+        CONTRACT_EVENT_CALLBACK_MAP.get(infoId).setRunning(false);
+        CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
+
+        mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+        // remove from db
+        contractEventInfoRepository.delete(infoId);
+        return contractEventInfoRepository.findByAppId(appId);
+    }
 }
