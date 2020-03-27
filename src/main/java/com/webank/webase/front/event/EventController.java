@@ -17,11 +17,15 @@
 package com.webank.webase.front.event;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.event.entity.*;
+import com.webank.webase.front.util.CommonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -63,6 +67,9 @@ public class EventController extends BaseController {
         log.debug("start registerNewBlockEvent. {}", reqNewBlockEventRegister);
         checkParamResult(result);
         String appId = reqNewBlockEventRegister.getAppId();
+        if (CommonUtils.isLetterDigit(appId)) {
+            throw new FrontException(ConstantCode.PARAM_INVALID);
+        }
         int groupId = reqNewBlockEventRegister.getGroupId();
         String exchangeName = reqNewBlockEventRegister.getExchangeName();
         // username as queue name
@@ -91,6 +98,7 @@ public class EventController extends BaseController {
         String appId = reqContractEventRegister.getAppId();
         String fromBlock = reqContractEventRegister.getFromBlock();
         String toBlock = reqContractEventRegister.getToBlock();
+        // 0 < fromBlock <= toBlock, latest means latest block
         if("0".equals(fromBlock) || "0".equals(toBlock)) {
             return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }
