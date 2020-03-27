@@ -24,14 +24,18 @@ import lombok.Data;
 
 /**
  * deployWithSign interface parameter.
- * 
+ * v1.3.0+ default with sign
  */
 @Data
+@Deprecated
 public class ReqDeployWithSign {
     private int groupId = 1;
     private int signUserId = 100001;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
-    private String contractBin;
+    /**
+     * 合约编译的bytecode(bin)，用于部署合约
+     */
+    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTECODE_BIN_IS_EMPTY)
+    private String bytecodeBin;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<Object> contractAbi;
     private List<Object> funcParam = new ArrayList<>();

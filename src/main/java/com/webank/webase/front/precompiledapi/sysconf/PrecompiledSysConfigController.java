@@ -25,7 +25,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -42,7 +41,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(value = "sys")
-public class PrecompiledSysConfigController {
+public class PrecompiledSysConfigController{
     @Autowired
     private PrecompiledSysConfigService precompiledSysConfigService;
 
@@ -76,30 +75,26 @@ public class PrecompiledSysConfigController {
     @ApiOperation(value = "setSysConfigValueByKey", notes = "set system config value by key")
     @ApiImplicitParam(name = "sysConfigHandle", value = "system config info", required = true, dataType = "SysConfigHandle")
     @PostMapping("config")
-    public Object setSysConfigValueByKey(@Valid @RequestBody SystemConfigHandle systemConfigHandle, BindingResult bindingResult)throws Exception {
+    public Object setSysConfigValueByKey(@Valid @RequestBody SystemConfigHandle systemConfigHandle)throws Exception {
         Instant startTime = Instant.now();
         log.info("start querySystemConfigByGroupId startTime:{}, systemConfigHandle:{}",
                 startTime.toEpochMilli(), systemConfigHandle);
         String key = systemConfigHandle.getConfigKey();
-        if(systemConfigHandle.getUseAes() == null) {
-            systemConfigHandle.setUseAes(false);
-        }
         // tx_count_limit, tx_gas_limit
-        if (PrecompiledUtils.TxCountLimit.equals(key) || PrecompiledUtils.TxGasLimit.equals(key)) {
-            // post返回透传
-            try {
-                Object res = precompiledSysConfigService.setSysConfigValueByKey(systemConfigHandle);
-                log.info("end querySystemConfigByGroupId useTime:{} res:{}",
-                        Duration.between(startTime, Instant.now()).toMillis(), res);
-                return res;
-            } catch (Exception e) { //parse error
-                log.error("end setSysConfigValueByKey. Exception:[]", e);
-                return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
-            }
-        }else {
+        if (!PrecompiledUtils.TxCountLimit.equals(key) && !PrecompiledUtils.TxGasLimit.equals(key)) {
             log.error("end setSysConfigValueByKey. Exception:{}",
                     ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY.getMessage());
             return ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY;
+        }
+        // post返回透传
+        try {
+            Object res = precompiledSysConfigService.setSysConfigValueByKey(systemConfigHandle);
+            log.info("end querySystemConfigByGroupId useTime:{} res:{}",
+                    Duration.between(startTime, Instant.now()).toMillis(), res);
+            return res;
+        } catch (Exception e) { //parse error
+            log.error("end setSysConfigValueByKey. Exception:[]", e);
+            return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
         }
     }
 
