@@ -26,12 +26,9 @@ import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.bcel.Const;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +39,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.webank.webase.front.util.RabbitMQUtils.*;
+import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
+import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
+import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_BLOCK;
+import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_EVENT;
 
 /**
  * event notify in message queue service
