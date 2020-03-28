@@ -26,6 +26,7 @@ import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.bcel.Const;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
-import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
-import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
+import static com.webank.webase.front.util.RabbitMQUtils.*;
 
 /**
  * event notify in message queue service
@@ -67,10 +69,12 @@ public class EventService {
      */
     @Transactional
     public List<NewBlockEventInfo> registerNewBlockEvent(String appId, int groupId,
-                                                         String exchangeName, String queueName,
-                                                         String routingKey) {
+                                                         String exchangeName, String queueName) {
         log.info("start registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
+        // String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
+        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4);
+        String routingKey = appId + "_" + ROUTING_KEY_BLOCK + "_" + randomStr;
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         try {
             // save to db 通过db来保证不重复注册
@@ -80,10 +84,14 @@ public class EventService {
             // record groupId, exchange, routingKey for all block notify
             BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
             log.info("end registerNewBlockEvent, infoId:{}", infoId);
+        } catch (FrontException frontException) {
+            log.error("register newBlocnEvent error:[]", frontException);
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+            throw frontException;
         } catch (Exception e) {
             log.error("register newBlocnEvent error:[]", e);
             mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
-            throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR);
         }
         return newBlockEventInfoRepository.findByAppId(appId);
     }
@@ -98,10 +106,13 @@ public class EventService {
      */
     @Transactional
     public List<ContractEventInfo> registerContractEvent(String appId, int groupId, String exchangeName, String queueName,
-                                                         String routingKey, String abi, String fromBlock, String toBlock,
+                                                         String abi, String fromBlock, String toBlock,
                                                          String contractAddress, List<String> topicList) {
         log.info("start registerContractEvent appId:{},groupId:{},contractAddress:{},params:{},exchangeName:{},queueName:{}",
                 appId, groupId, abi, contractAddress , exchangeName, queueName);
+        // String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
+        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4);
+        String routingKey = appId + "_" + ROUTING_KEY_EVENT + "_" + randomStr;
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         try {
             // save to db first
@@ -123,10 +134,11 @@ public class EventService {
             callBack.setRunning(true);
             CONTRACT_EVENT_CALLBACK_MAP.put(infoId, callBack);
             log.info("end registerContractEvent infoId:{}", infoId);
-        } catch (FrontException frontEx) {
-            log.error("Register contractEvent failed: ", frontEx);
+        } catch (FrontException frontException) {
+            log.error("Register contractEvent failed: ", frontException);
             // make transactional
             mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+            throw frontException;
         } catch (Exception e) {
             log.error("Register contractEvent failed: ", e);
             // make transactional
@@ -138,22 +150,35 @@ public class EventService {
 
     private String addNewBlockEventInfo(int eventType, String appId, int groupId,
                                       String exchangeName, String queueName, String routingKey) {
+        checkNewBlockEventExist(appId, exchangeName, queueName);
         NewBlockEventInfo registerInfo = new NewBlockEventInfo();
-        registerInfo.setEventType(eventType);
         registerInfo.setAppId(appId);
-        registerInfo.setGroupId(groupId);
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
+        registerInfo.setGroupId(groupId);
         registerInfo.setRoutingKey(routingKey);
+        registerInfo.setEventType(eventType);
         registerInfo.setCreateTime(LocalDateTime.now());
         NewBlockEventInfo saved = newBlockEventInfoRepository.save(registerInfo);
         return saved.getId();
+
+    }
+
+    public void checkNewBlockEventExist(String appId, String exchangeName, String queueName) {
+        NewBlockEventInfo eventRow = newBlockEventInfoRepository
+                .findByAppIdAndExchangeNameAndQueueName(appId,
+                        exchangeName, queueName);
+        if (Objects.nonNull(eventRow)) {
+            log.warn("insert NewBlockEventInfo error for already exist. ");
+            throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
+        }
     }
 
     private String addContractEventInfo(int eventType, String appId, int groupId,
                                  String exchangeName, String queueName, String routingKey,
                                  String abi, String fromBlock, String toBlock,
-                                 String contractAddress, List<String> topicList) {
+                                 String contractAddress, List<String> topicList) throws FrontException {
+        checkContractEventExist(appId, exchangeName, queueName, contractAddress);
         ContractEventInfo registerInfo = new ContractEventInfo();
         registerInfo.setEventType(eventType);
         registerInfo.setAppId(appId);
@@ -175,9 +200,18 @@ public class EventService {
             log.error("insert error:[]", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
         }
-
     }
 
+    public void checkContractEventExist(String appId, String exchangeName,
+                                        String queueName, String contractAddress) {
+        ContractEventInfo eventRow = contractEventInfoRepository
+                .findByAppIdAndExchangeNameAndQueueNameAndContractAddress(appId,
+                        exchangeName, queueName, contractAddress);
+        if (Objects.nonNull(eventRow)) {
+            log.warn("insert ContractEventInfo error for already exist. ");
+            throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
+        }
+    }
     /**
      * findByGroupId, return list of new block event register info
      * @param groupId
@@ -209,14 +243,21 @@ public class EventService {
      * @return left info
      */
     public List<NewBlockEventInfo> unregisterNewBlock(String infoId, String appId, int groupId, String exchangeName,
-                                                      String queueName, String routingKey) {
-        log.debug("unregisterNewBlock appId:{},groupId:{},exchangeName:{},queueName:{},routingKey:{}",
-                appId, groupId, exchangeName, queueName, routingKey);
-        if (!newBlockEventInfoRepository.exists(infoId)) {
+                                                      String queueName) {
+        log.debug("unregisterNewBlock appId:{},groupId:{},exchangeName:{},queueName:{}",
+                appId, groupId, exchangeName, queueName);
+        NewBlockEventInfo eventInfo = newBlockEventInfoRepository.findById(infoId);
+        if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-        BLOCK_ROUTING_KEY_MAP.remove(appId, new PublisherHelper(groupId, exchangeName, routingKey));
-        mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+        try {
+            String routingKey = eventInfo.getRoutingKey();
+            BLOCK_ROUTING_KEY_MAP.remove(appId);
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+        } catch (Exception e) {
+            log.error("unregisterNewBlock error: ", e);
+            throw new FrontException(ConstantCode.UNREGISTER_FAILED_ERROR);
+        }
         // remove from db
         newBlockEventInfoRepository.delete(infoId);
         return newBlockEventInfoRepository.findByAppId(appId);
@@ -249,21 +290,29 @@ public class EventService {
      * @param groupId
      * @param exchangeName
      * @param queueName
-     * @param routingKey
      * @return left info
      */
     public List<ContractEventInfo> unregisterContractEvent(String infoId, String appId, int groupId, String exchangeName,
-                                                      String queueName, String routingKey) {
-        log.debug("unregisterContractEvent infoId:{},appId:{},groupId:{},exchangeName:{},queueName:{},routingKey:{}",
-                infoId, appId, groupId, exchangeName, queueName, routingKey);
-        if (!contractEventInfoRepository.exists(infoId)) {
+                                                      String queueName) {
+        log.debug("unregisterContractEvent infoId:{},appId:{},groupId:{},exchangeName:{},queueName:{}",
+                infoId, appId, groupId, exchangeName, queueName);
+        ContractEventInfo eventInfo = contractEventInfoRepository.findById(infoId);
+        if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-        // set callback's id empty to stop callback pushing message
-        CONTRACT_EVENT_CALLBACK_MAP.get(infoId).setRunning(false);
-        CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
-
-        mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+        try {
+            // set callback's id empty to stop callback pushing message
+            ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(infoId);
+            if (Objects.isNull(callback)) {
+                log.warn("unregister failed for it's unregistered in map");
+            }
+            CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
+            String routingKey = eventInfo.getRoutingKey();
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+        } catch (Exception e) {
+            log.error("unregisterNewBlock error: ", e);
+            throw new FrontException(ConstantCode.UNREGISTER_FAILED_ERROR);
+        }
         // remove from db
         contractEventInfoRepository.delete(infoId);
         return contractEventInfoRepository.findByAppId(appId);
