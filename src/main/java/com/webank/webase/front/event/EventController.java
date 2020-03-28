@@ -17,8 +17,6 @@
 package com.webank.webase.front.event;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
@@ -39,9 +37,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 
-import static com.webank.webase.front.util.RabbitMQUtils.*;
 
 /**
  * 虽然mq-server限制了用户读取队列权限，但是用户可以无节制发送订阅请求
@@ -67,19 +63,14 @@ public class EventController extends BaseController {
         log.debug("start registerNewBlockEvent. {}", reqNewBlockEventRegister);
         checkParamResult(result);
         String appId = reqNewBlockEventRegister.getAppId();
-        if (CommonUtils.isLetterDigit(appId)) {
+        if (!CommonUtils.isLetterDigit(appId)) {
             throw new FrontException(ConstantCode.PARAM_INVALID);
         }
         int groupId = reqNewBlockEventRegister.getGroupId();
         String exchangeName = reqNewBlockEventRegister.getExchangeName();
         // username as queue name
         String queueName = reqNewBlockEventRegister.getQueueName();
-
-        // String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
-        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4);
-        String blockRoutingKey = appId + "_" + ROUTING_KEY_BLOCK + "_" + randomStr;
-        eventService.registerNewBlockEvent(appId, groupId,
-                exchangeName, queueName, blockRoutingKey);
+        eventService.registerNewBlockEvent(appId, groupId, exchangeName, queueName);
         log.debug("end registerNewBlockEvent. ");
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
@@ -91,15 +82,18 @@ public class EventController extends BaseController {
             required = true, dataType = "ReqContractEventRegister")
     @PostMapping("contractEvent")
     public BaseResponse registerContractEvent(
-            @Valid @RequestBody ReqContractEventRegister reqContractEventRegister, BindingResult result) {
+            @Valid @RequestBody ReqContractEventRegister reqContractEventRegister, BindingResult result){
         log.debug("start registerContractEvent. {}", reqContractEventRegister);
         checkParamResult(result);
         int groupId = reqContractEventRegister.getGroupId();
         String appId = reqContractEventRegister.getAppId();
-        String fromBlock = reqContractEventRegister.getFromBlock();
+		if (!CommonUtils.isLetterDigit(appId)) {
+			throw new FrontException(ConstantCode.PARAM_INVALID);
+		}
+		String fromBlock = reqContractEventRegister.getFromBlock();
         String toBlock = reqContractEventRegister.getToBlock();
         // 0 < fromBlock <= toBlock, latest means latest block
-        if("0".equals(fromBlock) || "0".equals(toBlock)) {
+        if ("0".equals(fromBlock) || "0".equals(toBlock)) {
             return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }
         if ("latest".equals(fromBlock) && !"latest".equals(toBlock)) {
@@ -116,14 +110,10 @@ public class EventController extends BaseController {
         String exchangeName = reqContractEventRegister.getExchangeName();
         // username as queue name
         String queueName = reqContractEventRegister.getQueueName();
-
-        // String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
-        String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4);
-        String eventRoutingKey = appId + "_" + ROUTING_KEY_EVENT + "_" + randomStr;
         // register contract event log push in service
         eventService.registerContractEvent(appId, groupId,
-                exchangeName, queueName, eventRoutingKey,
-                abiStr, fromBlock, toBlock, contractAddress, topicList);
+                exchangeName, queueName, abiStr, fromBlock, toBlock,
+                contractAddress, topicList);
         log.debug("end registerContractEvent. ");
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
@@ -179,10 +169,8 @@ public class EventController extends BaseController {
         String exchangeName = reqUnregister.getExchangeName();
         // username as queue name
         String queueName = reqUnregister.getQueueName();
-        // "username_routingKey"
-        String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
         eventService.unregisterNewBlock(infoId, appId, groupId,
-                exchangeName, queueName, blockRoutingKey);
+                exchangeName, queueName);
         log.debug("end unregisterNewBlockEvent. ");
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
@@ -237,10 +225,8 @@ public class EventController extends BaseController {
         String exchangeName = reqUnregister.getExchangeName();
         // username as queue name
         String queueName = reqUnregister.getQueueName();
-        // "username_routingKey"
-        String blockRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
         eventService.unregisterContractEvent(infoId, appId, groupId,
-                exchangeName, queueName, blockRoutingKey);
+                exchangeName, queueName);
         log.debug("end unregisterContractEvent. ");
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
