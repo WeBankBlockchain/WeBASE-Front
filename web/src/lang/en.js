@@ -18,7 +18,11 @@ export default {
         hostMetrics: 'Host Metrics',
         nodeMetrics: 'Node Metrics',
         privateKeyManagement: 'Private Key Mgmt',
-        privateKeyManagementQ: 'Private Key Management'
+        privateKeyManagementQ: 'Private Key Management',
+        subscribeEvent: 'Subscribe Event',
+        blockEvent: 'Block Event',
+        contractEvent: 'Contract Event',
+        testUserList: 'Test User'
     },
     navbar: {
         dashboard: 'Dashboard',
@@ -83,7 +87,18 @@ export default {
         contractAbi: 'Abi',
         contractBin: 'Bin',
         createdTime: 'Created Time',
-        importPem: "Import Pem Private Key"
+        importPem: "Import Pem Private Key",
+        addBlockEvent: "Add Block Event",
+        addContractEvent: "add contract Event",
+        blockEventInfo: "Event Info",
+        appId: "App Id",
+        exchangeName: "Exchange",
+        queueName: "Queue Name",
+        routingKey: "RoutingKey",
+        groupId: "Group Id",
+        fromBlock: 'From Block',
+        toBlock: 'To Block',
+        topicList: 'Topic List'
     },
     errorLog: {
         tips: 'Please click the bug icon in the upper right corner',
@@ -125,6 +140,15 @@ export default {
         folderNameIllegal: 'Folder name illegal',
         folderName: 'Folder Name',
         pleaseType: 'Please type in',
+        appId: "Please enter the application number",
+        exchangeName: "Please enter the exchange name",
+        queueName: "Please enter the queue name",
+        groupId: "Please enter the group id",
+        contractAbi: "Please enter contract Abi",
+        contractAddress: "Please enter contract address",
+        fromBlock: "Please enter from block",
+        toBlock: "Please enter to block",
+        topicList: "Please enter topic List",
     },
     placeholder: {
         globalSearch: 'Search by Block / Txn Hash',
@@ -174,6 +198,8 @@ export default {
         detailsAbi: 'Details Abi',
         detailsTxn: 'Transactions Details',
         acquisitionSwitch: 'Acquisition switch',
+        check: 'check',
+        detele: 'detele'
     },
     text: {
         noContract: 'Please create a new contract',
@@ -227,10 +253,10 @@ export default {
         noData: 'No Data',
         importSuccessed: 'Import Successed',
         importFailed: 'Import Failed',
-        addUserSuccessed: 'Create successed', 
+        addUserSuccessed: 'Create successed',
         deleteUserSuccessed: 'Delete successed',
         nameNoSame: 'User names cannot be the same',
-        uploadSol: 'Please upload contract files(extension: .sol)', 
+        uploadSol: 'Please upload contract files(extension: .sol)',
         fileExceeds: 'File size exceeds 400k, please upload files smaller than 400k',
         txnDecodeBtn: 'Decode',
         txnEncodeBtn: 'Restore',
@@ -241,6 +267,14 @@ export default {
         privateKeyManagementInfo: "Support for exporting private keys, you can export private keys to local.",
         FileName: "privateKey Name",
         importFile: "Import File",
-        pemName: "Pem File Name"
+        pemName: "Pem File Name",
+        appId: "Unique number of the application that registered the event notification",
+        exchangeName: "Switch to which the queue belongs",
+        queueName: "User name is usually used as the queue name",
+        contractAbi: "ABI of contract, used for contract event analysis;for example, [HelloWorld (string)]",
+        contractAddress: "Contract address",
+        fromBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
+        toBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
+        topicList: "List of contract event names, separated by English commas without spaces; for example, HelloWorld, asset",
     }
 }
