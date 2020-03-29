@@ -16,9 +16,6 @@
 package com.webank.webase.front.base.properties;
 
 import java.math.BigInteger;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -67,7 +64,6 @@ public class Constants {
     public static final String CONSTANT_PREFIX = "constant";
     public static  String version;
     public static String chainId;
-    private String nodeDir = "";
     private String keyServer = "127.0.0.1:8080";
     private int transMaxWait = 30;
     private String monitorDisk = "/";
