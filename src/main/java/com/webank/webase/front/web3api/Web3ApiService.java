@@ -485,6 +485,10 @@ public class Web3ApiService {
         log.debug("getGroupList. ");
         try {
             Set<Integer> iset = web3jMap.keySet();
+            if (iset.isEmpty()) {
+                log.error("getGroupList error for no group, web3jMap is empty!");
+                throw new FrontException("getGroupList error for no group, web3jMap is empty!");
+            }
             List<String> groupIdList = web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
             refreshWeb3jMapService(groupIdList);
