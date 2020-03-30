@@ -26,6 +26,10 @@ public class FileUtil {
         List<String> files = new ArrayList<String>();
         File file = new File(path);
         File[] tempList = file.listFiles();
+        
+        if (tempList == null) {
+            return files;
+        }
 
         for (int i = 0; i < tempList.length; i++) {
             if (tempList[i].isFile()) {

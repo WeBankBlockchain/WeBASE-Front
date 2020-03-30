@@ -73,16 +73,20 @@ public class LogParseService {
     }
 
     public synchronized void syncLogData() {
-        log.debug("begin sync log data");
-        if(!constants.isStatLogEnabled())
-        {
+        log.debug("begin syncLogData.");
+        if (!constants.isStatLogEnabled()) {
             return;
         }
         RandomAccessFile randomFile = null;
         try {
             String statPath = constants.getNodePath() + PATH_STAT;
             // get all files
-            TreeMap<Long, String> treeMap = FileUtil.getStatFiles(FileUtil.getFiles(statPath));
+            List<String> files = FileUtil.getFiles(statPath);
+            if (files.isEmpty()) {
+                log.warn("syncLogData. There is no stat log files under path:{}", statPath);
+                return;
+            }
+            TreeMap<Long, String> treeMap = FileUtil.getStatFiles(files);
             // get currentState
             CurrentState currentState = getCurrentState();
             String currentFileName;
