@@ -25,7 +25,7 @@
                 </el-pagination>
             </div>
         </div>
-        <el-dialog :title="$t('table.addBlockEvent')" :visible.sync="creatBlockEventVisible" width="550px" v-if="creatBlockEventVisible" center class="send-dialog">
+        <el-dialog :title="$t('table.addBlockEvent')" :visible.sync="creatBlockEventVisible" width="550px" center class="send-dialog">
 
             <block-event-dialog @success="success" @close="close"></block-event-dialog>
         </el-dialog>
