@@ -1,17 +1,15 @@
 /*
  * Copyright 2014-2019 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.front.util;
 
@@ -52,9 +50,6 @@ import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.exception.FrontException;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * CommonUtils.
@@ -70,8 +65,8 @@ public class CommonUtils {
     }
 
     /**
-     * stringToSignatureData.
-     * 19/12/24 support guomi： add byte[] pub in signatureData
+     * stringToSignatureData. 19/12/24 support guomi： add byte[] pub in signatureData
+     * 
      * @param signatureData signatureData
      * @return
      */
@@ -91,14 +86,15 @@ public class CommonUtils {
     }
 
     /**
-     * signatureDataToString.
-     * 19/12/24 support guomi： add byte[] pub in signatureData
+     * signatureDataToString. 19/12/24 support guomi： add byte[] pub in signatureData
+     * 
      * @param signatureData signatureData
      */
     public static String signatureDataToString(SignatureData signatureData) {
         byte[] byteArr;
-        if(EncryptType.encryptType == 1) {
-            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length + PUBLIC_KEY_LENGTH_64];
+        if (EncryptType.encryptType == 1) {
+            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length
+                    + PUBLIC_KEY_LENGTH_64];
             byteArr[0] = signatureData.getV();
             System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
             System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
@@ -115,7 +111,7 @@ public class CommonUtils {
         }
         return Numeric.toHexString(byteArr, 0, byteArr.length, false);
     }
-    
+
     /**
      * parse Byte to HexStr.
      * 
@@ -146,7 +142,7 @@ public class CommonUtils {
         if (StringUtils.isBlank(str)) {
             return "0x0";
         }
-        return  "0x" + Integer.toHexString(Integer.valueOf(str));
+        return "0x" + Integer.toHexString(Integer.valueOf(str));
     }
 
     /**
@@ -157,7 +153,7 @@ public class CommonUtils {
      */
     public static byte[] base64Decode(String str) {
         if (str == null) {
-          return  new byte[0];
+            return new byte[0];
         }
         return Base64.getDecoder().decode(str);
     }
@@ -175,10 +171,8 @@ public class CommonUtils {
             return null;
         }
         StringBuilder result = new StringBuilder();
-        try(
-                InputStream inputStream = new FileInputStream(dirFile);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
-        ) {
+        try (InputStream inputStream = new FileInputStream(dirFile);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result.append(line);
@@ -188,7 +182,7 @@ public class CommonUtils {
         }
         return result.toString();
     }
-    
+
     /**
      * read File.
      * 
@@ -196,25 +190,22 @@ public class CommonUtils {
      * @return
      */
     public static List<String> readFileToList(String filePath) throws IOException {
-    	log.debug("readFile dir:{}", filePath);
-    	File dirFile = new File(filePath);
-    	if (!dirFile.exists()) {
-    		return null;
-    	}
-    	List<String> result = new ArrayList<String>();
-        try (
-                InputStream inputStream = new FileInputStream(dirFile);
-                BufferedReader  reader = new BufferedReader(new InputStreamReader(inputStream));
-        )
-        {
-            String line ;
+        log.debug("readFile dir:{}", filePath);
+        File dirFile = new File(filePath);
+        if (!dirFile.exists()) {
+            return null;
+        }
+        List<String> result = new ArrayList<String>();
+        try (InputStream inputStream = new FileInputStream(dirFile);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));) {
+            String line;
             while ((line = reader.readLine()) != null) {
                 result.add(line);
             }
         } catch (Exception e) {
             throw new FrontException(e.getMessage());
         }
-    	return result;
+        return result;
     }
 
     /**
@@ -265,7 +256,7 @@ public class CommonUtils {
                 }
             }
         }
-     return flag;
+        return flag;
     }
 
     /**
@@ -306,10 +297,10 @@ public class CommonUtils {
             Enumeration<NetworkInterface> networkInterfaces =
                     NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
-                NetworkInterface ni =  networkInterfaces.nextElement();
+                NetworkInterface ni = networkInterfaces.nextElement();
                 Enumeration<InetAddress> nias = ni.getInetAddresses();
                 while (nias.hasMoreElements()) {
-                    InetAddress ia =  nias.nextElement();
+                    InetAddress ia = nias.nextElement();
                     if (!ia.isLinkLocalAddress() && !ia.isLoopbackAddress()
                             && ia instanceof Inet4Address) {
                         return ia.getHostAddress();
@@ -337,6 +328,7 @@ public class CommonUtils {
 
     /**
      * 支持数字，字母与下划线"_"
+     * 
      * @param str
      * @return
      */
@@ -345,7 +337,7 @@ public class CommonUtils {
         return str.matches(regex);
     }
 
-/**
+    /**
      * check connect.
      */
     public static boolean checkConnect(String host, int port) {

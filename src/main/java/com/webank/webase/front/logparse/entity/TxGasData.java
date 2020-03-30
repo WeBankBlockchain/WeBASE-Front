@@ -18,10 +18,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import lombok.Data;
 
 @Data
-@Entity(name="t_tx_gas_data")
+@Entity
+@Table(name="t_tx_gas_data", 
+       indexes = {@Index(columnList="trans_hash", unique = true),
+                  @Index(columnList="group_id", unique = false)})
 public class TxGasData {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
