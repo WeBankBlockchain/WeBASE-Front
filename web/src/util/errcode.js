@@ -296,8 +296,8 @@ let errCode = {
         zh: 'Exchange或消息队列不存在，请检查mq服务器或mq配置'
     },
     "201242": {
-        en: "Database error: data already exists in db(appId, address repeat)",
-        zh: '数据库错误：数据库中已存在数据（appId，address repeat）'
+        en: "Database error: data already exists in db",
+        zh: '数据库错误：数据库中已存在数据'
     },
     "201243": {
         en: "Block range error, from/toBlock must greater than 0, toBlock must be greater than fromBlock",
@@ -314,6 +314,10 @@ let errCode = {
     "201246": {
         en: "Register contractEvent failed, please check your param",
         zh: '注册contractEvent失败，请检查您的参数'
+    },
+    "201248": {
+        en: "Contract abi invalid, please check abi",
+        zh: '合约ABI校验错误，请检查ABI参数格式'
     },
     "202000": {
         en: "invalid node info",

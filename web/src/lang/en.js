@@ -270,11 +270,11 @@ export default {
         pemName: "Pem File Name",
         appId: "Unique number of the application that registered the event notification",
         exchangeName: "Switch to which the queue belongs",
-        queueName: "User name is usually used as the queue name",
+        queueName: "Queue name, usually appid",
         contractAbi: "ABI of contract, used for contract event analysis,list type;for example, [HelloWorld (string)]",
         contractAddress: "Contract address",
         fromBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
         toBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
-        topicList: "List of contract event names, separated by English commas without spaces; for example, HelloWorld, asset",
+        topicList: "There is no space between the list and event parameters of contract event, and multiple events are separated by English semicolons (;); for example, setevent (string, string); transferevent (address, uint)",
     }
 }
