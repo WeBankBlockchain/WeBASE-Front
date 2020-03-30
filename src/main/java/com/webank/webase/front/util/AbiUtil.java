@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONException;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.webank.webase.front.base.code.ConstantCode;
 import org.fisco.bcos.web3j.abi.EventValues;
 import org.fisco.bcos.web3j.abi.TypeReference;
