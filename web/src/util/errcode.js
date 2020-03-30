@@ -22,6 +22,14 @@ let errCode = {
         en: "param valid fail",
         zh: '参数校验异常'
     },
+    "101003": {
+        en: "web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh",
+        zh: '连接当前群组失败，请调用/{groupId}/web3/refresh刷新群组'
+    },
+    "101004": {
+        en: "getGroupList error for no group, web3jMap is empty!",
+        zh: '群组列表为空，请检查节点共识状态'
+    },
     "102000": {
         en: "system exception",
         zh: '系统异常'
@@ -35,10 +43,6 @@ let errCode = {
     "201002": {
         en: "user cannot be empty",
         zh: '用户编号不能为空'
-    },
-    "201003": {
-        en: "useAes cannot be empty",
-        zh: 'useAes不能为空'
     },
     "201004": {
         en: "version cannot be empty",
@@ -157,8 +161,8 @@ let errCode = {
         zh: '找不到keyServer的配置'
     },
     "201033": {
-        en: "cloud sign fail",
-        zh: '云标志失败'
+        en: "data request sign error",
+        zh: '访问webase-sign失败'
     },
     "201034": {
         en: "groupId not exist",
@@ -177,9 +181,17 @@ let errCode = {
         zh: '用户名已经存在'
     },
     "201039": {
-        en: "private key already exists",
-        zh: '私钥已经存在'
-    }, 
+        en: "private already exists",
+        zh: '私钥已存在'
+    },
+    "201040": {
+        en: "private not exists",
+        zh: '私钥不存在'
+    },
+    "201041": {
+        en: "external user's appId and signUserId cannot be empty",
+        zh: '外部用户的appId和signUserId不能为空'
+    },
     "201100": {
         en: "Params not fit",
         zh: '参数不合适'
@@ -196,6 +208,10 @@ let errCode = {
     "201213": {
         en: "address is invalid",
         zh: '地址无效'
+    },
+    "201200": {
+        en: "Params not fit",
+        zh: '参数不合适'
     },
     "201201": {
         en: "create system config in db fail for already exist",
@@ -283,6 +299,14 @@ let errCode = {
         zh: '找不到证书文件，请检查配置中的证书路径'
     },
 
+    "201241": {
+        en: "Exchange or message queue not exists, please check mq server or mq configuration",
+        zh: 'Exchange或消息队列不存在，请检查mq服务器或mq配置'
+    },
+    "201242": {
+        en: "Database error: data already exists in db",
+        zh: '数据库错误：数据库中已存在数据'
+    },
     "201243": {
         en: "Block range error, from/toBlock must greater than 0, toBlock must be greater than fromBlock",
         zh: '块范围错误，from/toBlock必须大于0，toBlock必须大于fromBlock'
@@ -290,6 +314,18 @@ let errCode = {
     "201244": {
         en: "Database error: data not exists in db, please check your params",
         zh: '数据库错误：数据库中不存在数据，请检查参数'
+    },
+    "201245": {
+        en: "Only support letter and digit, please check your params",
+        zh: '仅支持字母和数字，请检查您的参数'
+    },
+    "201246": {
+        en: "Register contractEvent failed, please check your param",
+        zh: '注册contractEvent失败，请检查您的参数'
+    },
+    "201248": {
+        en: "Contract abi invalid, please check abi",
+        zh: '合约ABI校验错误，请检查ABI参数格式'
     },
     "202000": {
         en: "invalid node info",
