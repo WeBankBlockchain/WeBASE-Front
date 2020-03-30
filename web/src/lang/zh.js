@@ -267,11 +267,11 @@ export default {
         pemName: "pem 文件名称",
         appId: "注册事件通知的应用的唯一编号",
         exchangeName: "队列所属交换机",
-        queueName: "队列名，一般以用户名作队列名",
+        queueName: "队列名，一般以appId作队列名",
         contractAbi: "合约的ABI，用于合约event解析,list类型,如[HelloWorld(string)]",
         contractAddress: "合约地址",
         fromBlock: "最小值为0；默认值latest，表示监听最新区块",
         toBlock: "最小值为0；默认值latest，表示监听最新区块",
-        topicList: "合约event事件名的list，以英文逗号相隔，不带空格；如 HelloWorld,Asset",
+        topicList: "合约Event事件的List，Event参数之间不带空格，且多个Event以英文分号(;)相隔；如 SetEvent(string,string);TransferEvent(address,uint)",
     }
 }
