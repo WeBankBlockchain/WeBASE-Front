@@ -22,6 +22,14 @@ let errCode = {
         en: "param valid fail",
         zh: '参数校验异常'
     },
+    "101003": {
+        en: "web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh",
+        zh: '连接当前群组失败，请调用/{groupId}/web3/refresh刷新群组'
+    },
+    "101004": {
+        en: "getGroupList error for no group, web3jMap is empty!",
+        zh: '群组列表为空，请检查节点共识状态'
+    },
     "102000": {
         en: "system exception",
         zh: '系统异常'
