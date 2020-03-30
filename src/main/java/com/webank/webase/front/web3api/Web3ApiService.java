@@ -246,7 +246,7 @@ public class Web3ApiService {
         try {
             Set<Integer> iset = web3jMap.keySet();
             if (iset.isEmpty()) {
-                log.error("getGroupList error for no group, web3jMap is empty!");
+                log.error("getClientVersion error for no group, web3jMap is empty!");
                 throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
             }
             version = web3jMap.get(iset.toArray()[0]).getNodeVersion().send().getNodeVersion();
@@ -565,7 +565,7 @@ public class Web3ApiService {
         try {
             Set<Integer> iSet = web3jMap.keySet();
             if (iSet.isEmpty()) {
-                log.error("getGroupList error for no group, web3jMap is empty!");
+                log.error("getNodeIDList error for no group, web3jMap is empty!");
                 throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
             }
             return web3jMap.get(iSet.toArray()[0]).getNodeIDList().send().getNodeIDList();
@@ -757,7 +757,7 @@ public class Web3ApiService {
         try {
             Set<Integer> iset = web3jMap.keySet();
             if (iset.isEmpty()) {
-                log.error("generateGroup error for no group, web3jMap is empty!");
+                log.error("startGroup error for no group, web3jMap is empty!");
                 throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
             }
             org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
