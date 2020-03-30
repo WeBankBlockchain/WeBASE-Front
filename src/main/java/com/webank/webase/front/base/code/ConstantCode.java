@@ -135,4 +135,5 @@ public class ConstantCode {
     public static final RetCode PARAM_INVALID = RetCode.mark(201245, "Only support letter and digit, please check your params");
     public static final RetCode REGISTER_FAILED_ERROR = RetCode.mark(201246, "Register contractEvent failed, please check your param");
     public static final RetCode UNREGISTER_FAILED_ERROR = RetCode.mark(201247, "Unregister event failed, please check mq server exchange");
+    public static final RetCode PARAM_FAIL_ABI_INVALID = RetCode.mark(201248, "Contract abi invalid, please check abi");
 }
