@@ -23,6 +23,7 @@ import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.event.entity.*;
+import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -107,6 +108,7 @@ public class EventController extends BaseController {
         List<String> topicList = reqContractEventRegister.getTopicList();
         List<Object> contractAbi = reqContractEventRegister.getContractAbi();
         String abiStr = JSON.toJSONString(contractAbi);
+        AbiUtil.checkAbi(abiStr);
         String exchangeName = reqContractEventRegister.getExchangeName();
         // username as queue name
         String queueName = reqContractEventRegister.getQueueName();
