@@ -18,10 +18,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import lombok.Data;
 
 @Data
-@Entity(name="t_network_data")
+@Entity
+@Table(name="t_network_data", 
+       indexes = {@Index(columnList="group_id", unique = false)})
 public class NetWorkData {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
