@@ -66,9 +66,9 @@ public class ConstantCode {
     public static final RetCode CONTRACT_COMPILE_FAIL = RetCode.mark(201036, "compile fail");
     public static final RetCode USER_NAME_NULL = RetCode.mark(201037, "user name is null");
     public static final RetCode USER_NAME_EXISTS = RetCode.mark(201038, "user name already exists");
-    public static final RetCode KEYSTORE_EXISTS = RetCode.mark(201039, "address already exists");
-    public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201034, "address not exists");
-    public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(2010035, "external user's appId and signUserId cannot be empty");
+    public static final RetCode KEYSTORE_EXISTS = RetCode.mark(201039, "private key already exists");
+    public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201040, "private key not exists");
+    public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(201041, "external user's appId and signUserId cannot be empty");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
@@ -129,9 +129,11 @@ public class ConstantCode {
 
     // mq error
     public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
-    public static final RetCode DATA_REPEAT_IN_DB_ERROR = RetCode.mark(201242, "Database error: data already exists in db(appId, address repeat)");
+    public static final RetCode DATA_REPEAT_IN_DB_ERROR = RetCode.mark(201242, "Database error: data already exists in db");
     public static final RetCode BLOCK_RANGE_PARAM_INVALID = RetCode.mark(201243, "Block range error, from/toBlock must greater than 0, toBlock must be greater than fromBlock");
     public static final RetCode DATA_NOT_EXIST_ERROR = RetCode.mark(201244, "Database error: data not exists in db, please check your params");
     public static final RetCode PARAM_INVALID = RetCode.mark(201245, "Only support letter and digit, please check your params");
     public static final RetCode REGISTER_FAILED_ERROR = RetCode.mark(201246, "Register contractEvent failed, please check your param");
+    public static final RetCode UNREGISTER_FAILED_ERROR = RetCode.mark(201247, "Unregister event failed, please check mq server exchange");
+    public static final RetCode PARAM_FAIL_ABI_INVALID = RetCode.mark(201248, "Contract abi invalid, please check abi");
 }
