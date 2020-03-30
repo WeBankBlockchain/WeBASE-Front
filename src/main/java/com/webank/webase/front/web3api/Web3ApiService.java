@@ -86,6 +86,10 @@ public class Web3ApiService {
         BigInteger blockNumber;
         try {
             blockNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getBlockNumber fail.", e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -102,8 +106,12 @@ public class Web3ApiService {
         BcosBlock.Block block;
         try {
             block = web3jMap.get(groupId)
-                    .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send()
+                    .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
+                    .send()
                     .getBlock();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh", groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (Exception e) {
             log.info("get blocknumber failed" + e.getMessage());
             log.error("getBlockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
@@ -120,8 +128,13 @@ public class Web3ApiService {
     public BcosBlock.Block getBlockByHash(int groupId, String blockHash) {
         BcosBlock.Block block;
         try {
-            block = web3jMap.get(groupId).getBlockByHash(blockHash, true).send().getBlock();
-
+            block = web3jMap.get(groupId).getBlockByHash(blockHash, true)
+                    .send()
+                    .getBlock();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getBlockByHash fail. blockHash:{} ", blockHash);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -141,10 +154,14 @@ public class Web3ApiService {
                 throw new FrontException("ConstantCode.NODE_REQUEST_FAILED");
             }
             BcosBlock.Block block = web3jMap.get(groupId)
-                    .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).send()
+                    .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
+                    .send()
                     .getBlock();
             transCnt = block.getTransactions().size();
-
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getBlockTransCntByNumber fail. blockNumber:{} ", blockNumber);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -160,6 +177,10 @@ public class Web3ApiService {
         BigInteger result;
         try {
             result = web3jMap.get(groupId).getPbftView().send().getPbftView();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getPbftView fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -181,6 +202,10 @@ public class Web3ApiService {
             if (opt.isPresent()) {
                 transactionReceipt = opt.get();
             }
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getTransactionReceipt fail. transHash:{} ", transHash);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -202,6 +227,10 @@ public class Web3ApiService {
             if (opt.isPresent()) {
                 transaction = opt.get();
             }
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getTransactionByHash fail. transHash:{} ", transHash);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -216,7 +245,14 @@ public class Web3ApiService {
         Version version;
         try {
             Set<Integer> iset = web3jMap.keySet();
+            if (iset.isEmpty()) {
+                log.error("getClientVersion error for no group, web3jMap is empty!");
+                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+            }
             version = web3jMap.get(iset.toArray()[0]).getNodeVersion().send().getNodeVersion();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh");
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getClientVersion fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -238,6 +274,9 @@ public class Web3ApiService {
             }
             code = web3jMap.get(groupId)
                     .getCode(address, DefaultBlockParameter.valueOf(blockNumber)).send().getCode();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh");
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getCode fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -253,6 +292,10 @@ public class Web3ApiService {
         try {
             transactionCount = web3jMap.get(groupId).getTotalTransactionCount().send()
                     .getTotalTransactionCount();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getTransCnt fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -277,6 +320,10 @@ public class Web3ApiService {
             if (opt.isPresent()) {
                 transaction = opt.get();
             }
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getTransByBlockHashAndIndex fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -305,6 +352,10 @@ public class Web3ApiService {
             if (opt.isPresent()) {
                 transaction = opt.get();
             }
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getTransByBlockNumberAndIndex fail.");
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -316,6 +367,10 @@ public class Web3ApiService {
         BigInteger currentNumber = null;
         try {
             currentNumber = web3jMap.get(groupId).getBlockNumber().send().getBlockNumber();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -475,6 +530,10 @@ public class Web3ApiService {
         GroupPeers groupPeers = null;
         try {
             groupPeers = web3jMap.get(groupId).getGroupPeers().send();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }
@@ -487,12 +546,15 @@ public class Web3ApiService {
             Set<Integer> iset = web3jMap.keySet();
             if (iset.isEmpty()) {
                 log.error("getGroupList error for no group, web3jMap is empty!");
-                throw new FrontException("getGroupList error for no group, web3jMap is empty!");
+                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
             }
             List<String> groupIdList = web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
             refreshWeb3jMapService(groupIdList);
             return groupIdList;
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh");
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             log.error("getGroupList error:[]", e);
             throw new FrontException(e.getMessage());
@@ -502,7 +564,14 @@ public class Web3ApiService {
     public List<String> getNodeIDList() {
         try {
             Set<Integer> iSet = web3jMap.keySet();
+            if (iSet.isEmpty()) {
+                log.error("getNodeIDList error for no group, web3jMap is empty!");
+                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+            }
             return web3jMap.get(iSet.toArray()[0]).getNodeIDList().send().getNodeIDList();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh");
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }
@@ -551,6 +620,10 @@ public class Web3ApiService {
     public List<Peers.Peer> getPeers(int groupId) {
         try {
             return web3jMap.get(groupId).getPeers().send().getPeers();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }
@@ -559,6 +632,10 @@ public class Web3ApiService {
     public String getConsensusStatus(int groupId) {
         try {
             return web3jMap.get(groupId).getConsensusStatus().sendForReturnString();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }
@@ -567,6 +644,10 @@ public class Web3ApiService {
     public String getSyncStatus(int groupId) {
         try {
             return web3jMap.get(groupId).getSyncStatus().sendForReturnString();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }
@@ -575,6 +656,10 @@ public class Web3ApiService {
     public String getSystemConfigByKey(int groupId, String key) {
         try {
             return web3jMap.get(groupId).getSystemConfigByKey(key).send().getSystemConfigByKey();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         } catch (IOException e) {
             throw new FrontException(e.getMessage());
         }
@@ -588,19 +673,45 @@ public class Web3ApiService {
     }
 
     public int getPendingTransactions(int groupId) throws IOException {
-        return web3jMap.get(groupId).getPendingTransaction().send().getPendingTransactions().size();
+        try {
+            return web3jMap.get(groupId).getPendingTransaction()
+                    .send()
+                    .getPendingTransactions().size();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+        }
     }
 
     public BigInteger getPendingTransactionsSize(int groupId) throws IOException {
-        return web3jMap.get(groupId).getPendingTxSize().send().getPendingTxSize();
+        try {
+            return web3jMap.get(groupId).getPendingTxSize().send().getPendingTxSize();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+        }
     }
 
     public List<String> getSealerList(int groupId) throws IOException {
-        return web3jMap.get(groupId).getSealerList().send().getSealerList();
+        try {
+            return web3jMap.get(groupId).getSealerList().send().getSealerList();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+        }
     }
 
     public List<String> getObserverList(int groupId) throws IOException {
-        return web3jMap.get(groupId).getObserverList().send().getObserverList();
+        try {
+            return web3jMap.get(groupId).getObserverList().send().getObserverList();
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
+                    groupId, groupId);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+        }
     }
 
     /**
@@ -621,24 +732,48 @@ public class Web3ApiService {
     }
 
     public Object generateGroup(GenerateGroupInfo generateGroupInfo) throws IOException {
-        Set<Integer> iset = web3jMap.keySet();
-        GenerateGroup.Status status = web3jMap.get(iset.toArray()[0])
-                .generateGroup(generateGroupInfo.getGenerateGroupId(),
-                        generateGroupInfo.getTimestamp().intValue(),
-                        generateGroupInfo.getNodeList())
-                .send().getStatus();
-        return status;
+        try {
+            Set<Integer> iset = web3jMap.keySet();
+            if (iset.isEmpty()) {
+                log.error("generateGroup error for no group, web3jMap is empty!");
+                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+            }
+            GenerateGroup.Status status = web3jMap.get(iset.toArray()[0])
+                    .generateGroup(generateGroupInfo.getGenerateGroupId(),
+                            generateGroupInfo.getTimestamp().intValue(),
+                            generateGroupInfo.getNodeList())
+                    .send().getStatus();
+            return status;
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh");
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+        } catch (IOException e) {
+            log.error("generateGroup error:[]", e);
+            throw new FrontException(e.getMessage());
+        }
     }
 
     public Object startGroup(int startGroupId) throws IOException {
-        Set<Integer> iset = web3jMap.keySet();
-        org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
-                web3jMap.get(iset.toArray()[0]).startGroup(startGroupId).send().getStatus();
-        // if start group success, refresh web3jMap
-        if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            refreshWeb3jMap(startGroupId,
-                    groupChannelConnectionsConfig.getAllChannelConnections());
+        try {
+            Set<Integer> iset = web3jMap.keySet();
+            if (iset.isEmpty()) {
+                log.error("startGroup error for no group, web3jMap is empty!");
+                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+            }
+            org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
+                    web3jMap.get(iset.toArray()[0]).startGroup(startGroupId).send().getStatus();
+            // if start group success, refresh web3jMap
+            if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+                refreshWeb3jMap(startGroupId,
+                        groupChannelConnectionsConfig.getAllChannelConnections());
+            }
+            return status;
+        } catch (NullPointerException e) {
+            log.error("web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh");
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+        } catch (IOException e) {
+            log.error("generateGroup error:[]", e);
+            throw new FrontException(e.getMessage());
         }
-        return status;
     }
 }
