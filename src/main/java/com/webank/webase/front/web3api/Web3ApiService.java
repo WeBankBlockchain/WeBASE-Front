@@ -635,7 +635,7 @@ public class Web3ApiService {
         Set<Integer> iset = web3jMap.keySet();
         GenerateGroup.Status status = web3jMap.get(iset.toArray()[0])
                 .generateGroup(generateGroupInfo.getGenerateGroupId(),
-                        generateGroupInfo.getTimestamp().longValue(),
+                        generateGroupInfo.getTimestamp().longValue(), true,
                         generateGroupInfo.getNodeList())
                 .send().getStatus();
         return status;
