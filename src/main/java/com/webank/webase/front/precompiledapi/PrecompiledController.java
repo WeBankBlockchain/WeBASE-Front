@@ -149,7 +149,7 @@ public class PrecompiledController {
             return ConstantCode.INVALID_NODE_ID;
         }
         if(consensusHandle.getUseAes() == null){
-            consensusHandle.setUseAes(false);
+            consensusHandle.setUseAes(true);
         }
         Boolean useAes = consensusHandle.getUseAes();
         switch (nodeType) {
@@ -227,7 +227,7 @@ public class PrecompiledController {
         String from = crudHandle.getFromAddress();
         String sql = crudHandle.getSql();
         if(crudHandle.getUseAes() == null){
-            crudHandle.setUseAes(false);
+            crudHandle.setUseAes(true);
         }
         Boolean useAes = crudHandle.getUseAes();
         // to lower case
