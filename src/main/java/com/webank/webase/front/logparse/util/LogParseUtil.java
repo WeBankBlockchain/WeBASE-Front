@@ -93,7 +93,7 @@ public class LogParseUtil {
             txGasData.setGroupId(Integer.parseInt(logValue.get("g")));
         }
         if (logValue.containsKey("txHash")) {
-            txGasData.setTransHash(logValue.get("txHash"));
+            txGasData.setTransHash("0x" + logValue.get("txHash"));
         }
         txGasData.setTimestamp(logData.getTimestamp());
         return txGasData;
