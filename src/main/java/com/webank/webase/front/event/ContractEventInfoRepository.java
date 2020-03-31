@@ -24,4 +24,9 @@ public interface ContractEventInfoRepository extends CrudRepository<ContractEven
 
     List<ContractEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
 
+    /**
+     * check unique by appId exchangeName queueName and contractAddress
+     */
+    ContractEventInfo findByAppIdAndExchangeNameAndQueueNameAndContractAddress(
+            String appId, String exchangeName, String queueName, String contractAddress);
 }
