@@ -109,17 +109,22 @@ public class LogParseService {
                 randomFile.seek(lastTimeFileSize);
                 String tmp = null;
                 while ((tmp = randomFile.readLine()) != null) {
-                    LogData logData = LogParseUtil.getLogData(tmp);
-                    if (logData.getLogType() == LogTypes.NETWORK) {
-                        NetWorkData netWorkData = LogParseUtil.parseNetworkLog(logData);
-                        insertNetworkLog(netWorkData);
+                    try {
+                        LogData logData = LogParseUtil.getLogData(tmp);
+                        if (logData.getLogType() == LogTypes.NETWORK) {
+                            NetWorkData netWorkData = LogParseUtil.parseNetworkLog(logData);
+                            insertNetworkLog(netWorkData);
+                        }
+                        if (logData.getLogType() == LogTypes.TxGAS) {
+                            TxGasData txGasData = LogParseUtil.parseTxGasUsedLog(logData);
+                            insertTxGasUsedLog(txGasData);
+                        }
+                        lastTimeFileSize = randomFile.getFilePointer();
+                        updateCurrentState(currentFileName, lastTimeFileSize);
+                    } catch (Exception e) {
+                        log.error("syncLogData readLine Exception.", e);
+                        continue;
                     }
-                    if (logData.getLogType() == LogTypes.TxGAS) {
-                        TxGasData txGasData = LogParseUtil.parseTxGasUsedLog(logData);
-                        insertTxGasUsedLog(txGasData);
-                    }
-                    lastTimeFileSize = randomFile.getFilePointer();
-                    updateCurrentState(currentFileName, lastTimeFileSize);
                 }
                 if (treeMap.size() > 1) {
                     FileUtil.clearCurrentStatFile(treeMap, currentFileName);
@@ -127,13 +132,13 @@ public class LogParseService {
                 }
             }
         } catch (IOException e) {
-            log.error("get LogData failed.", e);
+            log.error("syncLogData IOException.", e);
         } finally {
             if (randomFile != null) {
                 try {
                     randomFile.close();
                 } catch (IOException e) {
-                    log.error("LogData IOException:[{}]", e.toString());
+                    log.error("syncLogData IOException.", e);
                 }
             }
         }
