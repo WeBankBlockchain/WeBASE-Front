@@ -523,17 +523,17 @@ public class Web3ApiService {
     @DependsOn("encryptType")
     public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
         log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
-        List<ChannelConnections> channelConnectionsList =
-                groupChannelConnectionsConfig.getAllChannelConnections();
         groupIdList.forEach(gId -> {
             Integer groupId = new Integer(gId);
             if (web3jMap.get(groupId) == null) {
-                refreshWeb3jMap(groupId, channelConnectionsList);
+                refreshWeb3jMap(groupId);
             }
         });
     }
 
-    private void refreshWeb3jMap(int groupId, List<ChannelConnections> channelConnectionsList) {
+    private void refreshWeb3jMap(int groupId) {
+        List<ChannelConnections> channelConnectionsList =
+                groupChannelConnectionsConfig.getAllChannelConnections();
         Credentials credentials = GenCredential.create();
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections.setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
@@ -666,7 +666,7 @@ public class Web3ApiService {
                 web3jMap.get(iset.toArray()[0]).startGroup(groupId).send().getStatus();
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            getGroupList();
+            refreshWeb3jMap(groupId);
         }
         return status;
     }
@@ -677,7 +677,7 @@ public class Web3ApiService {
                 web3jMap.get(iset.toArray()[0]).stopGroup(groupId).send().getStatus();
         log.info("stopGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            getGroupList();
+            web3jMap.remove(groupId);
         }
         return status;
     }
