@@ -521,12 +521,14 @@ public class Web3ApiService {
         groupIdList.forEach(gId -> {
             Integer groupId = new Integer(gId);
             if(web3jMap.get(groupId) == null) {
-                refreshWeb3jMap(groupId, channelConnectionsList);
+                refreshWeb3jMap(groupId);
             }
         });
     }
 
-    private void refreshWeb3jMap(int groupId, List<ChannelConnections> channelConnectionsList) {
+    private void refreshWeb3jMap(int groupId) {
+        List<ChannelConnections> channelConnectionsList =
+                groupChannelConnectionsConfig.getAllChannelConnections();
         Credentials credentials = GenCredential.create();
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections
