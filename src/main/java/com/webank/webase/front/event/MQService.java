@@ -64,7 +64,12 @@ public class MQService {
                 .bind(new Queue(queueName))
                 .to(new DirectExchange(exchangeName))
                 .with(routingKey);
-        rabbitAdmin.removeBinding(binding);
+        try {
+            rabbitAdmin.removeBinding(binding);
+        } catch (AmqpException ex) {
+            log.error("Exchange or message queue not exists. ex:[]", ex);
+            throw new FrontException(ConstantCode.EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR);
+        }
     }
 
 }
