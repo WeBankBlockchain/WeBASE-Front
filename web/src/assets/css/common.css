@@ -537,16 +537,23 @@ td {
 ::-webkit-input-placeholder {
     /*Webkit browsers*/
     font-size: 13px;
+    opacity: 0.3;
 }
 :-moz-placeholder {
     /*Mozilla Firefox 4 to 8*/
     font-size: 13px;
+    opacity: 0.3;
 }
 ::moz-placeholder {
     /*Mozilla Firefox 19+*/
     font-size: 13px;
+    opacity: 0.3;
 }
 :-ms-input-placeholder {
     /*Internet Explorer 10+*/
     font-size: 13px;
+    opacity: 0.3;
+}
+.el-switch__label {
+    color: #fff;
 }
