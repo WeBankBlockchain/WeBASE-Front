@@ -1,51 +1,51 @@
 <template>
     <div>
-        <el-form :model="contractEventForm" :rules="rules" ref="contractEventForm" label-width="125px" class="demo-ruleForm">
+        <el-form :model="contractEventForm" :rules="rules" ref="contractEventForm" label-width="135px" class="demo-ruleForm">
             <el-form-item :label="$t('table.appId')" prop="appId">
-                <el-input v-model="contractEventForm.appId" style="width: 210px;"></el-input>
+                <el-input v-model.trim="contractEventForm.appId" :placeholder="$t('text.appId')" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.appId')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.exchangeName')" prop="exchangeName">
-                <el-input v-model="contractEventForm.exchangeName" style="width: 210px;"></el-input>
+                <el-input v-model.trim="contractEventForm.exchangeName" :placeholder="$t('text.exchangeName')" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.exchangeName')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.queueName')" prop="queueName">
-                <el-input v-model="contractEventForm.queueName" style="width: 210px;"></el-input>
+                <el-input v-model.trim="contractEventForm.queueName" :placeholder="$t('text.queueName')" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.queueName')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             
             <el-form-item :label="$t('table.contractAddress')" prop="contractAddress">
-                <el-input v-model="contractEventForm.contractAddress" style="width: 210px;"></el-input>
+                <el-input v-model.trim="contractEventForm.contractAddress" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.contractAddress')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.fromBlock')" prop="fromBlock">
-                <el-input v-model="contractEventForm.fromBlock" style="width: 210px;"></el-input>
+                <el-input v-model.trim="contractEventForm.fromBlock" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.fromBlock')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.toBlock')" prop="toBlock">
-                <el-input v-model="contractEventForm.toBlock" style="width: 210px;"></el-input>
+                <el-input v-model.trim="contractEventForm.toBlock" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.toBlock')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.topicList')" prop="topicList">
-                <el-input v-model="contractEventForm.topicList" style="width: 210px;"></el-input>
+                <el-input v-model.trim="contractEventForm.topicList" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.topicList')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.contractAbi')" prop="contractAbi">
-                <el-input type="textarea" v-model="contractEventForm.contractAbi" style="width: 210px;"></el-input>
+                <el-input type="textarea" v-model.trim="contractEventForm.contractAbi" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.contractAbi')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
@@ -54,7 +54,7 @@
         <div slot="footer" class="dialog-footer">
 
             <el-button @click="modelClose">{{$t('dialog.cancel')}}</el-button>
-            <el-button type="primary" @click="submit('contractEventForm')">{{$t('dialog.confirm')}}</el-button>
+            <el-button type="primary" @click="submit('contractEventForm')" :loading="loading">{{$t('dialog.confirm')}}</el-button>
         </div>
     </div>
 </template>
@@ -72,6 +72,7 @@ export default {
 
     data() {
         return {
+            loading: false,
             contractEventForm: {
                 appId: '',
                 exchangeName: '',
@@ -79,8 +80,8 @@ export default {
                 groupId: '',
                 contractAbi: '',
                 contractAddress: '',
-                fromBlock: 'lastest',
-                toBlock: 'lastest',
+                fromBlock: 'latest',
+                toBlock: 'latest',
                 topicList: '',
             },
             groupList: localStorage.getItem("cluster")
@@ -120,6 +121,11 @@ export default {
                         message: this.$t('dialog.contractAbi'),
                         trigger: "blur"
                     },
+                    // {
+                    //     pattern: /[.*]/,
+                    //     message: "请正确输入Abi",
+                    //     trigger: "blur"
+                    // }
                 ],
                 contractAddress: [
                     {
@@ -174,33 +180,36 @@ export default {
         submit(formName) {
             this.$refs[formName].validate(valid => {
                 if (valid) {
-                    if(this.contractEventForm.toBlock <= this.contractEventForm.fromBlock){
-                        this.$message({
-                            type: 'error',
-                            message: 'toBlock greater than fromBlock'
-                        })
-                    } else {
                         this.queryAdd()
-                    }
-
                 } else {
                     return false;
                 }
             })
         },
         queryAdd() {
+            try {
+                JSON.parse(this.contractEventForm.contractAbi)
+            } catch (error) {
+                this.$message({
+                    type: 'error',
+                    message: error
+                })
+                return
+            }
+            var list = this.contractEventForm.topicList.split(';')
+            this.loading = true;
             let param = Object.assign({},this.contractEventForm, {
-                contractAbi: new Array(this.contractEventForm.contractAbi),
-                topicList: new Array(this.contractEventForm.topicList),
+                contractAbi: JSON.parse(this.contractEventForm.contractAbi),
+                topicList: list,
                 groupId: this.groupId
             })
             addContractEvent(param)
                 .then(res => {
+                    this.loading = false;
                     if (res.data.code === 0) {
                         this.modelClose()
                         this.$emit("success")
                     } else {
-                        this.modelClose()
                         this.$message({
                             type: "error",
                             message: this.$chooseLang(res.data.code)
