@@ -2,19 +2,19 @@
     <div>
         <el-form :model="blockEventForm" :rules="rules" ref="blockEventForm" label-width="125px" class="demo-ruleForm">
             <el-form-item :label="$t('table.appId')" prop="appId">
-                <el-input v-model="blockEventForm.appId" style="width: 210px;"></el-input>
+                <el-input v-model.trim="blockEventForm.appId" :placeholder="$t('text.appId')" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.appId')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.exchangeName')" prop="exchangeName">
-                <el-input v-model="blockEventForm.exchangeName" style="width: 210px;"></el-input>
+                <el-input v-model.trim="blockEventForm.exchangeName" :placeholder="$t('text.exchangeName')" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.exchangeName')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.queueName')" prop="queueName">
-                <el-input v-model="blockEventForm.queueName" style="width: 210px;"></el-input>
+                <el-input v-model.trim="blockEventForm.queueName" :placeholder="$t('text.queueName')" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.queueName')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
@@ -23,7 +23,7 @@
         <div slot="footer" class="dialog-footer">
 
             <el-button @click="modelClose">{{$t('dialog.cancel')}}</el-button>
-            <el-button type="primary" @click="submit('blockEventForm')">{{$t('dialog.confirm')}}</el-button>
+            <el-button type="primary" @click="submit('blockEventForm')" :loading="loading">{{$t('dialog.confirm')}}</el-button>
         </div>
     </div>
 </template>
@@ -41,6 +41,7 @@ export default {
 
     data() {
         return {
+            loading: false,
             blockEventForm: {
                 appId: '',
                 exchangeName: '',
@@ -110,14 +111,14 @@ export default {
             })
         },
         queryAdd() {
-
+            this.loading = true;
             addBlockEvent(this.blockEventForm)
                 .then(res => {
+                    this.loading = false;
                     if (res.data.code === 0) {
                         this.modelClose()
                         this.$emit("success")
                     } else {
-                        this.modelClose()
                         this.$message({
                             type: "error",
                             message: this.$chooseLang(res.data.code)
