@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author marsli
@@ -37,7 +38,7 @@ public class RabbitMQUtils {
     /**
      * map of (appId, "exchange_name,block_routing_key"), one app only needs one block notify
      */
-    public static Map<String, PublisherHelper> BLOCK_ROUTING_KEY_MAP = new HashMap<>();
+    public static Map<String, PublisherHelper> BLOCK_ROUTING_KEY_MAP = new ConcurrentHashMap<>();
 
     /**
      * new exchange by rabbitAdmin

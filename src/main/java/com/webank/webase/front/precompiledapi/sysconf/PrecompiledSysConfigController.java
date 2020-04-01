@@ -82,7 +82,7 @@ public class PrecompiledSysConfigController {
                 startTime.toEpochMilli(), systemConfigHandle);
         String key = systemConfigHandle.getConfigKey();
         if(systemConfigHandle.getUseAes() == null) {
-            systemConfigHandle.setUseAes(false);
+            systemConfigHandle.setUseAes(true);
         }
         // tx_count_limit, tx_gas_limit
         if (PrecompiledUtils.TxCountLimit.equals(key) || PrecompiledUtils.TxGasLimit.equals(key)) {
