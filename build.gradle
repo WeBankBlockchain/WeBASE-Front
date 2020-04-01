@@ -79,7 +79,7 @@ dependencies {
 //        }
 //    compile fileTree(dir:'lib',includes:['solcJ-all-0.4.25-gm.jar'])
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
-	compile 'com.alibaba:fastjson:1.2.60'
+	compile 'com.alibaba:fastjson:1.2.67'
 	compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
