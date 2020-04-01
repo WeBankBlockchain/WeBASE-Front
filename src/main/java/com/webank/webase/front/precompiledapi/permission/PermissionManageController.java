@@ -174,7 +174,7 @@ public class PermissionManageController extends BaseController {
         String userAddress = permissionHandle.getAddress();
         PermissionState permissionState = permissionHandle.getPermissionState();
         if(permissionHandle.getUseAes() == null){
-            permissionHandle.setUseAes(false);
+            permissionHandle.setUseAes(true);
         }
         Boolean useAes = permissionHandle.getUseAes();
         try {
@@ -219,7 +219,7 @@ public class PermissionManageController extends BaseController {
         // validate address
         Address converAddr = AddressUtils.convertAddress(address);
         if(permissionHandle.getUseAes() == null){
-            permissionHandle.setUseAes(false);
+            permissionHandle.setUseAes(true);
         }
         Boolean useAes = permissionHandle.getUseAes();
         if(!converAddr.isValid()){
@@ -274,7 +274,7 @@ public class PermissionManageController extends BaseController {
         // validate address
         Address convertAddress = AddressUtils.convertAddress(address);
         if(permissionHandle.getUseAes() == null){
-            permissionHandle.setUseAes(false);
+            permissionHandle.setUseAes(true);
         }
         Boolean useAes = permissionHandle.getUseAes();
         if(!convertAddress.isValid()){
