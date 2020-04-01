@@ -25,7 +25,7 @@
                 </el-pagination>
             </div>
         </div>
-        <el-dialog :title="$t('table.addContractEvent')" :visible.sync="creatContractEventVisible" width="550px" v-if="creatContractEventVisible" center class="send-dialog">
+        <el-dialog :title="$t('table.addContractEvent')" :visible.sync="creatContractEventVisible" width="550px" center class="send-dialog">
 
             <contract-event-dialog @success="success" @close="close"></contract-event-dialog>
         </el-dialog>
