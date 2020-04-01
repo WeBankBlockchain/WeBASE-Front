@@ -217,8 +217,6 @@ public class Web3ApiService {
     public Version getClientVersion() {
         Version version;
         try {
-            Set<Integer> iSet = web3jMap.keySet();
-            checkWeb3jMapEmpty(iSet);
             version = getWeb3j().getNodeVersion().send().getNodeVersion();
        } catch (IOException e) {
             log.error("getClientVersion fail.", e);
@@ -635,10 +633,9 @@ public class Web3ApiService {
     public List<String> getObserverList(int groupId) throws IOException {
         try {
             return getWeb3j(groupId).getObserverList().send().getObserverList();
-        } catch (NullPointerException e) {
-            log.error("web3jMap of groupId:{} is null, please call /{}/web3/refresh to refresh",
-                    groupId, groupId);
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+        } catch (IOException e) {
+            log.error("getObserverList error:[]", e);
+            throw new FrontException(e.getMessage());
         }
     }
 
@@ -690,12 +687,6 @@ public class Web3ApiService {
         }
     }
 
-    private void checkWeb3jMapEmpty(Set<Integer> iSet) {
-        if (iSet.isEmpty()) {
-            log.error("web3jMap is empty, groupList empty! please check your node status");
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-        }
-    }
 
     /**
      * get first web3j in web3jMap
