@@ -244,12 +244,9 @@ public class Web3ApiService {
     public Version getClientVersion() {
         Version version;
         try {
-            Set<Integer> iset = web3jMap.keySet();
-            if (iset.isEmpty()) {
-                log.error("getClientVersion error for no group, web3jMap is empty!");
-                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-            }
-            version = web3jMap.get(iset.toArray()[0]).getNodeVersion().send().getNodeVersion();
+            Set<Integer> iSet = web3jMap.keySet();
+            checkWeb3jMapEmpty(iSet);
+            version = web3jMap.get(iSet.toArray()[0]).getNodeVersion().send().getNodeVersion();
         } catch (NullPointerException e) {
             log.error("web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
@@ -543,12 +540,9 @@ public class Web3ApiService {
     public List<String> getGroupList() {
         log.debug("getGroupList. ");
         try {
-            Set<Integer> iset = web3jMap.keySet();
-            if (iset.isEmpty()) {
-                log.error("getGroupList error for no group, web3jMap is empty!");
-                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-            }
-            List<String> groupIdList = web3jMap.get(iset.toArray()[0]).getGroupList().send().getGroupList();
+            Set<Integer> iSet = web3jMap.keySet();
+            checkWeb3jMapEmpty(iSet);
+            List<String> groupIdList = web3jMap.get(iSet.toArray()[0]).getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
             refreshWeb3jMapService(groupIdList);
             return groupIdList;
@@ -564,10 +558,7 @@ public class Web3ApiService {
     public List<String> getNodeIDList() {
         try {
             Set<Integer> iSet = web3jMap.keySet();
-            if (iSet.isEmpty()) {
-                log.error("getNodeIDList error for no group, web3jMap is empty!");
-                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-            }
+            checkWeb3jMapEmpty(iSet);
             return web3jMap.get(iSet.toArray()[0]).getNodeIDList().send().getNodeIDList();
         } catch (NullPointerException e) {
             log.error("web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh");
@@ -733,12 +724,9 @@ public class Web3ApiService {
 
     public Object generateGroup(GenerateGroupInfo generateGroupInfo) throws IOException {
         try {
-            Set<Integer> iset = web3jMap.keySet();
-            if (iset.isEmpty()) {
-                log.error("generateGroup error for no group, web3jMap is empty!");
-                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-            }
-            GenerateGroup.Status status = web3jMap.get(iset.toArray()[0])
+            Set<Integer> iSet = web3jMap.keySet();
+            checkWeb3jMapEmpty(iSet);
+            GenerateGroup.Status status = web3jMap.get(iSet.toArray()[0])
                     .generateGroup(generateGroupInfo.getGenerateGroupId(),
                             generateGroupInfo.getTimestamp().intValue(),
                             generateGroupInfo.getNodeList())
@@ -755,13 +743,10 @@ public class Web3ApiService {
 
     public Object startGroup(int startGroupId) throws IOException {
         try {
-            Set<Integer> iset = web3jMap.keySet();
-            if (iset.isEmpty()) {
-                log.error("startGroup error for no group, web3jMap is empty!");
-                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-            }
+            Set<Integer> iSet = web3jMap.keySet();
+            checkWeb3jMapEmpty(iSet);
             org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status status =
-                    web3jMap.get(iset.toArray()[0]).startGroup(startGroupId).send().getStatus();
+                    web3jMap.get(iSet.toArray()[0]).startGroup(startGroupId).send().getStatus();
             // if start group success, refresh web3jMap
             if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
                 refreshWeb3jMap(startGroupId,
@@ -774,6 +759,13 @@ public class Web3ApiService {
         } catch (IOException e) {
             log.error("generateGroup error:[]", e);
             throw new FrontException(e.getMessage());
+        }
+    }
+
+    private void checkWeb3jMapEmpty(Set<Integer> iSet) {
+        if (iSet.isEmpty()) {
+            log.error("web3jMap is empty, groupList empty! please check your node status");
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
         }
     }
 }
