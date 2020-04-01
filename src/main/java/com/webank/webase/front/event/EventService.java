@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 
@@ -73,12 +74,22 @@ public class EventService {
         log.debug("registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        // save to db 通过db来保证不重复注册
-        addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
-                appId, groupId, exchangeName, queueName, routingKey);
-        // record groupId, exchange, routingKey for all block notify
-        BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
-        return newBlockEventInfoRepository.findByQueueName(queueName);
+        try {
+            // save to db 通过db来保证不重复注册
+            addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
+                    appId, groupId, exchangeName, queueName, routingKey);
+            // record groupId, exchange, routingKey for all block notify
+            BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
+            return newBlockEventInfoRepository.findByQueueName(queueName);
+        } catch (FrontException frontException) {
+            log.error("register newBlockEvent error:[]", frontException);
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+            throw frontException;
+        } catch (Exception e) {
+            log.error("register newBlockEvent error:[]", e);
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR);
+        }
     }
 
 
@@ -99,27 +110,40 @@ public class EventService {
                                                          String routingKey, String abi, String fromBlock, String toBlock,
                                                          String contractAddress, List<String> topicList) {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        // 传入abi作decoder:
-        TransactionDecoder decoder = new TransactionDecoder(abi);
-        // init EventLogUserParams for register
-        EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
-                toBlock, contractAddress, topicList);
-        ContractEventCallback callBack =
-                new ContractEventCallback(mqPublisher,
-                        exchangeName, routingKey, decoder, groupId, appId);
-        log.debug("registerContractEvent appId:{},groupId:{},abi:{},params:{},exchangeName:{},queueName:{}",
-                appId, groupId, abi, params, exchangeName, queueName);
-        // save to db 通过db来保证不重复注册
-        String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
-                exchangeName, queueName, routingKey,
-                abi, fromBlock, toBlock, contractAddress, topicList);
-        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
-        service.registerEventLogFilter(params, callBack);
-        return contractEventInfoRepository.findByQueueName(queueName);
+        try {
+            // 传入abi作decoder:
+            TransactionDecoder decoder = new TransactionDecoder(abi);
+            // init EventLogUserParams for register
+            EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
+                    toBlock, contractAddress, topicList);
+            ContractEventCallback callBack =
+                    new ContractEventCallback(mqPublisher,
+                            exchangeName, routingKey, decoder, groupId, appId);
+            log.debug("registerContractEvent appId:{},groupId:{},abi:{},params:{},exchangeName:{},queueName:{}",
+                    appId, groupId, abi, params, exchangeName, queueName);
+            // save to db 通过db来保证不重复注册
+            String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
+                    exchangeName, queueName, routingKey,
+                    abi, fromBlock, toBlock, contractAddress, topicList);
+            org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
+            service.registerEventLogFilter(params, callBack);
+            return contractEventInfoRepository.findByQueueName(queueName);
+        } catch (FrontException frontException) {
+            log.error("Register contractEvent failed: ", frontException);
+            // make transactional
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+            throw frontException;
+        } catch (Exception e) {
+            log.error("Register contractEvent failed: ", e);
+            // make transactional
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+            throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
+        }
     }
 
     private String addNewBlockEventInfo(int eventType, String appId, int groupId,
                                       String exchangeName, String queueName, String routingKey) {
+        checkNewBlockEventExist(appId, exchangeName, queueName);
         NewBlockEventInfo registerInfo = new NewBlockEventInfo();
         registerInfo.setEventType(eventType);
         registerInfo.setAppId(appId);
@@ -127,11 +151,16 @@ public class EventService {
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
-        try{
-            NewBlockEventInfo saved = newBlockEventInfoRepository.save(registerInfo);
-            return saved.getId();
-        } catch (Exception e) {
-            log.error("insert error:[]", e);
+        NewBlockEventInfo saved = newBlockEventInfoRepository.save(registerInfo);
+        return saved.getId();
+    }
+
+    public void checkNewBlockEventExist(String appId, String exchangeName, String queueName) {
+        NewBlockEventInfo eventRow = newBlockEventInfoRepository
+                .findByAppIdAndExchangeNameAndQueueName(appId,
+                        exchangeName, queueName);
+        if (Objects.nonNull(eventRow)) {
+            log.warn("insert NewBlockEventInfo error for already exist. ");
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
         }
     }
@@ -140,6 +169,7 @@ public class EventService {
                                  String exchangeName, String queueName, String routingKey,
                                  String abi, String fromBlock, String toBlock,
                                  String contractAddress, List<String> topicList) {
+        checkContractEventExist(appId, exchangeName, queueName, contractAddress);
         ContractEventInfo registerInfo = new ContractEventInfo();
         registerInfo.setEventType(eventType);
         registerInfo.setAppId(appId);
@@ -153,16 +183,20 @@ public class EventService {
         registerInfo.setExchangeName(exchangeName);
         registerInfo.setQueueName(queueName);
         registerInfo.setRoutingKey(routingKey);
-        try{
-            ContractEventInfo saved = contractEventInfoRepository.save(registerInfo);
-            return saved.getId();
-        } catch (Exception e) {
-            log.error("insert error:[]", e);
-            throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
-        }
-
+        ContractEventInfo saved = contractEventInfoRepository.save(registerInfo);
+        return saved.getId();
     }
 
+    public void checkContractEventExist(String appId, String exchangeName,
+                                        String queueName, String contractAddress) {
+        ContractEventInfo eventRow = contractEventInfoRepository
+                .findByAppIdAndExchangeNameAndQueueNameAndContractAddress(appId,
+                        exchangeName, queueName, contractAddress);
+        if (Objects.nonNull(eventRow)) {
+            log.warn("insert ContractEventInfo error for already exist. ");
+            throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
+        }
+    }
 
 
 }

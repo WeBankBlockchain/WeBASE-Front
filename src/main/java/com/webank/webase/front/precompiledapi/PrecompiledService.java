@@ -154,9 +154,9 @@ public class PrecompiledService{
 
     //select
     public List<Map<String, String>> select(int groupId, String fromAddress, Table table,
-                                            Condition conditions, Boolean useAes) throws Exception {
+                                            Condition conditions) throws Exception {
         CRUDService crudService = new CRUDService(web3jMap.get(groupId),
-                getCredentials(fromAddress, useAes));
+                keyStoreService.getCredentialsForQuery());
 
         List<Map<String, String>> selectRes = crudService.select(table, conditions);
         return selectRes;
