@@ -85,7 +85,7 @@ const routes = [
         children: [
             { path: '/contract', component: contract, name: '合约IDE', enName: 'contractIDE', menuShow: true, meta: { requireAuth: false } },
             { path: '/contractList', component: oldContract, name: '合约列表', enName: 'contractList', menuShow: true, meta: { requireAuth: false } },
-            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '测试用户', enName: 'privateKeyManagement', menuShow: true, meta: { requireAuth: false } }
+            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '测试用户', enName: 'testUserList', menuShow: true, meta: { requireAuth: false } }
         ]
     },
     {
