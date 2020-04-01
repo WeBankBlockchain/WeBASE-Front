@@ -20,9 +20,11 @@ import java.util.List;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.ReqImportPem;
+import com.webank.webase.front.keystore.entity.RspKeyStoreInfo;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.util.PemUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.webank.webase.front.base.controller.BaseController;
@@ -52,7 +54,7 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "userName", value = "user name", dataType = "String"),
     })
     @GetMapping
-    public KeyStoreInfo getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
+    public Object getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
                                     @RequestParam(required = false) String appId,
                                     @RequestParam(required = false) String signUserId,
                                     @RequestParam String userName) {
@@ -61,15 +63,18 @@ public class KeyStoreController extends BaseController {
             if (StringUtils.isBlank(signUserId) || StringUtils.isBlank(appId)) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY);
             }
-            // create from webase-sign
-            return keyStoreService.createKeyStoreWithSign(signUserId, appId);
+            // create from webase-sign , return keystoreInfo without private key
+            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStoreWithSign(signUserId, appId);
+            RspKeyStoreInfo response = new RspKeyStoreInfo();
+            BeanUtils.copyProperties(keyStoreInfo, response);
+            return response;
         } else if (KeyTypes.LOCALUSER.getValue() == type){
             // local key store (0)
             if (StringUtils.isBlank(userName)) {
                 log.error("fail createKeyStore. user name is null.");
                 throw new FrontException(ConstantCode.USER_NAME_NULL);
             }
-            // create locally
+            // create locally, return keystoreInfo with private key
             return keyStoreService.createKeyStoreLocally(userName);
         } else {
             log.error("fail createKeyStore. key store type invalid");
