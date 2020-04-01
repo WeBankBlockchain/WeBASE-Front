@@ -681,8 +681,7 @@ public class Web3ApiService {
                             .send().getStatus();
             // if start group success, refresh web3jMap
             if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-                refreshWeb3jMap(startGroupId,
-                        groupChannelConnectionsConfig.getAllChannelConnections());
+                refreshWeb3jMap(startGroupId);
             }
             return status;
         } catch (IOException e) {
