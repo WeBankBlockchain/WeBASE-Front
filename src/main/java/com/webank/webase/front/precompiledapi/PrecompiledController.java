@@ -13,12 +13,13 @@
  */
 package com.webank.webase.front.precompiledapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precompiledapi.entity.ConsensusHandle;
+import com.webank.webase.front.precompiledapi.entity.ContractManageResult;
 import com.webank.webase.front.precompiledapi.entity.ContractStatusHandle;
 import com.webank.webase.front.precompiledapi.entity.CrudHandle;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
@@ -32,7 +33,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +45,6 @@ import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -333,7 +332,6 @@ public class PrecompiledController {
         Condition conditions = table.getCondition();
         List<String> selectColumns = new ArrayList<>();
 
-        ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
         try { // 转化select语句
             log.debug("start parseSelect. sql:{}", sql);
             CRUDParseUtils.parseSelect(sql, table, conditions, selectColumns);
@@ -369,7 +367,6 @@ public class PrecompiledController {
         result = precompiledService.select(groupId, table, conditions);
         log.info("end select useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), result);
-        int rows = 0;
         if (result.size() == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST,
                     ConstantCode.CRUD_EMPTY_SET);
@@ -567,9 +564,6 @@ public class PrecompiledController {
         Table table = new Table();
         Condition conditions = new Condition();
 
-        int code;
-        String msg;
-        ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
         try {
             log.debug("start parseRemove. sql:{}", sql);
             CRUDParseUtils.parseRemove(sql, table, conditions);
@@ -605,7 +599,7 @@ public class PrecompiledController {
     @PostMapping("contractStatusManage")
     public Object contractStatusManage(
             @Valid @RequestBody ContractStatusHandle contractStatusHandle) throws Exception {
-        log.info("start contractStatusManage. contractStatusHandle:{}", contractStatusHandle);
+        log.debug("start contractStatusManage. contractStatusHandle:{}", contractStatusHandle);
         switch (contractStatusHandle.getHandleType()) {
             case PrecompiledUtils.CONTRACT_MANAGE_FREEZE:
                 return contractFreeze(contractStatusHandle);
@@ -619,11 +613,11 @@ public class PrecompiledController {
                 return contractManagerList(contractStatusHandle);
             default:
                 log.error("end contractStatusManage. invalid contract handle type");
-                return ConstantCode.INVALID_CONTRACT_HANDLE_TYPE;
+                throw new FrontException(ConstantCode.INVALID_CONTRACT_HANDLE_TYPE);
         }
     }
 
-    private Object contractFreeze(ContractStatusHandle contractStatusHandle) throws Exception {
+    private Object contractFreeze(ContractStatusHandle contractStatusHandle) {
         Instant startTime = Instant.now();
         log.info("start contractFreeze startTime:{}", startTime.toEpochMilli());
         try {
@@ -631,15 +625,23 @@ public class PrecompiledController {
                 log.error("signUserId is empty");
                 throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
             }
-            Object res = precompiledService.contractFreeze(contractStatusHandle.getGroupId(),
+            String res = precompiledService.contractFreeze(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getSignUserId(),
                     contractStatusHandle.getContractAddress());
-            log.info("end contractFreeze useTime:{} res:{}",
-                    Duration.between(startTime, Instant.now()).toMillis(), res);
-            return res;
+            ContractManageResult contractManageResult =
+                    JSON.parseObject(res, ContractManageResult.class);
+            if (contractManageResult.getCode() == 0) {
+                log.info("end contractFreeze useTime:{} contractManageResult:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(),
+                        contractManageResult);
+                return new BaseResponse(ConstantCode.RET_SUCCEED);
+            } else {
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            }
         } catch (Exception e) {
             log.error("contractFreeze exception:", e);
-            return new BaseResponse(ConstantCode.FAIL_CONTRACT_HANDLE, e.getMessage());
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
 
@@ -651,20 +653,27 @@ public class PrecompiledController {
                 log.error("signUserId is empty");
                 throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
             }
-            Object res = precompiledService.contractUnfreeze(contractStatusHandle.getGroupId(),
+            String res = precompiledService.contractUnfreeze(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getSignUserId(),
                     contractStatusHandle.getContractAddress());
-            log.info("end contractUnfreeze useTime:{} res:{}",
-                    Duration.between(startTime, Instant.now()).toMillis(), res);
-            return res;
+            ContractManageResult contractManageResult =
+                    JSON.parseObject(res, ContractManageResult.class);
+            if (contractManageResult.getCode() == 0) {
+                log.info("end contractUnfreeze useTime:{} contractManageResult:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(),
+                        contractManageResult);
+                return new BaseResponse(ConstantCode.RET_SUCCEED);
+            } else {
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            }
         } catch (Exception e) {
             log.error("contractUnfreeze exception:", e);
-            return new BaseResponse(ConstantCode.FAIL_CONTRACT_HANDLE, e.getMessage());
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
 
-    private Object contractGrantManager(ContractStatusHandle contractStatusHandle)
-            throws Exception {
+    private Object contractGrantManager(ContractStatusHandle contractStatusHandle) {
         Instant startTime = Instant.now();
         log.info("start contractGrantManager startTime:{}", startTime.toEpochMilli());
         try {
@@ -674,55 +683,73 @@ public class PrecompiledController {
             }
             if (StringUtils.isBlank(contractStatusHandle.getGrantAddress())) {
                 log.error("grantAddress cannot be empty");
-                return new BaseResponse(ConstantCode.PARAM_FAIL_GRANT_ADDRESS_EMPTY);
+                throw new FrontException(ConstantCode.PARAM_FAIL_GRANT_ADDRESS_EMPTY);
             }
-            Object res = precompiledService.contractGrantManager(contractStatusHandle.getGroupId(),
+            String res = precompiledService.contractGrantManager(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getSignUserId(), contractStatusHandle.getContractAddress(),
                     contractStatusHandle.getGrantAddress());
-            log.info("end contractGrantManager useTime:{} res:{}",
-                    Duration.between(startTime, Instant.now()).toMillis(), res);
-            return res;
+            ContractManageResult contractManageResult =
+                    JSON.parseObject(res, ContractManageResult.class);
+            if (contractManageResult.getCode() == 0) {
+                log.info("end contractGrantManager useTime:{} contractManageResult:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(),
+                        contractManageResult);
+                return new BaseResponse(ConstantCode.RET_SUCCEED);
+            } else {
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            }
         } catch (Exception e) {
             log.error("contractGrantManager exception:", e);
-            return new BaseResponse(ConstantCode.FAIL_CONTRACT_HANDLE, e.getMessage());
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
 
-    private Object contractStatus(ContractStatusHandle contractStatusHandle) throws Exception {
+    private Object contractStatus(ContractStatusHandle contractStatusHandle) {
         Instant startTime = Instant.now();
         log.info("start contractStatus startTime:{}", startTime.toEpochMilli());
         try {
-            String status = precompiledService.contractStatus(contractStatusHandle.getGroupId(),
+            String res = precompiledService.contractStatus(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getContractAddress());
-            Map<String, Object> res = new HashMap<>();
-            res.put("code", ConstantCode.RET_SUCCEED.getCode());
-            res.put("msg", ConstantCode.RET_SUCCEED.getMessage());
-            res.put("data", status);
-            log.info("end contractStatus useTime:{} res:{}",
-                    Duration.between(startTime, Instant.now()).toMillis(), res);
-            return res;
+            if (res.contains("code")) {
+                ContractManageResult contractManageResult =
+                        JSON.parseObject(res, ContractManageResult.class);
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            } else {
+                BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+                response.setData(res);
+                log.info("end contractStatus useTime:{} response:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(), response);
+                return response;
+            }
         } catch (Exception e) {
             log.error("contractStatus exception:", e);
-            return new BaseResponse(ConstantCode.FAIL_CONTRACT_HANDLE, e.getMessage());
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
 
-    private Object contractManagerList(ContractStatusHandle contractStatusHandle) throws Exception {
+    private Object contractManagerList(ContractStatusHandle contractStatusHandle) {
         Instant startTime = Instant.now();
         log.info("start contractManagerList startTime:{}", startTime.toEpochMilli());
         try {
-            String managerList = precompiledService.contractManagerList(
-                    contractStatusHandle.getGroupId(), contractStatusHandle.getContractAddress());
-            Map<String, Object> res = new HashMap<>();
-            res.put("code", ConstantCode.RET_SUCCEED.getCode());
-            res.put("msg", ConstantCode.RET_SUCCEED.getMessage());
-            res.put("data", managerList);
-            log.info("end contractManagerList useTime:{} res:{}",
-                    Duration.between(startTime, Instant.now()).toMillis(), res);
-            return res;
+            String res = precompiledService.contractManagerList(contractStatusHandle.getGroupId(),
+                    contractStatusHandle.getContractAddress());
+            if (res.contains("code")) {
+                ContractManageResult contractManageResult =
+                        JSON.parseObject(res, ContractManageResult.class);
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            } else {
+                BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+                response.setData(res);
+                log.info("end contractManagerList useTime:{} response:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(), response);
+                return response;
+            }
         } catch (Exception e) {
             log.error("contractManagerList exception:", e);
-            return new BaseResponse(ConstantCode.FAIL_CONTRACT_HANDLE, e.getMessage());
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
 
