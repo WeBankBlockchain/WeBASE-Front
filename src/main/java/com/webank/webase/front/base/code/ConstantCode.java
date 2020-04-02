@@ -76,6 +76,7 @@ public class ConstantCode {
     public static final RetCode NO_SOL_FILES = RetCode.mark(201042, "There is no sol files in source");
     public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201043, "invalid group operate type");
     public static final RetCode INVALID_DATA_TYPE = RetCode.mark(201044, "invalid data type");
+    public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201045, "group operate fail");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
