@@ -31,8 +31,8 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "unique_contract_event", columnNames = {"appId", "exchangeName", "contractAddress",
-                "queueName"})
+        @UniqueConstraint(name = "unique_contract_event", columnNames = {"appId", "exchangeName",
+                "queueName", "contractAddress"})
 })
 public class ContractEventInfo {
 
