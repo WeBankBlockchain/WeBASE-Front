@@ -85,13 +85,13 @@ public class EventService {
             BLOCK_ROUTING_KEY_MAP.put(appId, new PublisherHelper(groupId, exchangeName, routingKey));
             log.info("end registerNewBlockEvent, infoId:{}", infoId);
         } catch (FrontException frontException) {
-            log.error("register newBlocnEvent error:[]", frontException);
+            log.error("register newBlockEvent error:[]", frontException);
             mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
             throw frontException;
         } catch (Exception e) {
-            log.error("register newBlocnEvent error:[]", e);
+            log.error("register newBlockEvent error:[]", e);
             mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
-            throw new FrontException(ConstantCode.SYSTEM_ERROR);
+            throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
         }
         return newBlockEventInfoRepository.findByAppId(appId);
     }
