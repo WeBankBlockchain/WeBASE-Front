@@ -18,11 +18,11 @@ package com.webank.webase.front.precompiledapi.permission;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.PrecompiledUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.precompile.permission.PermissionService;
-import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +36,7 @@ import java.util.*;
 @Service
 public class PermissionManageService {
     @Autowired
-    Map<Integer, Web3j> web3jMap;
+    private Web3ApiService web3ApiService;
     @Autowired
     private KeyStoreService keyStoreService;
 
@@ -311,7 +311,7 @@ public class PermissionManageService {
     public String grantPermissionManager(int groupId, String fromAddress, String userAddress,
                                          Boolean useAes) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
         return permissionService.grantPermissionManager(userAddress);
     }
@@ -319,7 +319,7 @@ public class PermissionManageService {
     public String  revokePermissionManager(int groupId, String fromAddress, String userAddress,
                                            Boolean useAes) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.revokePermissionManager(userAddress);
@@ -330,7 +330,7 @@ public class PermissionManageService {
      */
     public List<PermissionInfo> listPermissionManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
 
         return permissionService.listPermissionManager();
@@ -341,7 +341,7 @@ public class PermissionManageService {
      */
     public String grantDeployAndCreateManager(int groupId, String fromAddress, String userAddress,
                                               Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.grantDeployAndCreateManager(userAddress);
@@ -350,14 +350,14 @@ public class PermissionManageService {
     public String revokeDeployAndCreateManager(int groupId, String fromAddress, String userAddress,
                                                Boolean useAes) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
         return permissionService.revokeDeployAndCreateManager(userAddress);
     }
 
     public List<PermissionInfo> listDeployAndCreateManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         return permissionService.listDeployAndCreateManager();
     }
@@ -372,7 +372,7 @@ public class PermissionManageService {
      */
     public Object grantUserTableManager(int groupId, String fromAddress, String tableName, String userAddress,
                                         Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.grantUserTableManager(tableName, userAddress);
@@ -381,7 +381,7 @@ public class PermissionManageService {
 
     public Object revokeUserTableManager(int groupId, String fromAddress, String tableName, String userAddress,
                                          Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.revokeUserTableManager(tableName, userAddress);
@@ -389,7 +389,7 @@ public class PermissionManageService {
 
     public List<PermissionInfo> listUserTableManager(int groupId, String tableName) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         return permissionService.listUserTableManager(tableName);
 
@@ -404,7 +404,7 @@ public class PermissionManageService {
      */
     public String grantNodeManager(int groupId, String fromAddress, String userAddress,
                                    Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.grantNodeManager(userAddress);
@@ -412,7 +412,7 @@ public class PermissionManageService {
 
     public String revokeNodeManager(int groupId, String fromAddress, String userAddress,
                                     Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.revokeNodeManager(userAddress);
@@ -420,7 +420,7 @@ public class PermissionManageService {
 
     public List<PermissionInfo> listNodeManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         return permissionService.listNodeManager();
     }
@@ -434,7 +434,7 @@ public class PermissionManageService {
      */
     public String grantSysConfigManager(int groupId, String fromAddress, String userAddress,
                                         Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.grantSysConfigManager(userAddress);
@@ -442,7 +442,7 @@ public class PermissionManageService {
 
     public String revokeSysConfigManager(int groupId, String fromAddress, String userAddress,
                                          Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.revokeSysConfigManager(userAddress);
@@ -450,7 +450,7 @@ public class PermissionManageService {
 
     public List<PermissionInfo> listSysConfigManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         return permissionService.listSysConfigManager();
     }
@@ -464,7 +464,7 @@ public class PermissionManageService {
      */
     public String grantCNSManager(int groupId, String fromAddress, String userAddress,
                                   Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.grantCNSManager(userAddress);
@@ -472,7 +472,7 @@ public class PermissionManageService {
 
     public String revokeCNSManager(int groupId, String fromAddress, String userAddress,
                                    Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 getCredentials(fromAddress, useAes));
 
         return permissionService.revokeCNSManager(userAddress);
@@ -480,7 +480,7 @@ public class PermissionManageService {
 
     public List<PermissionInfo> listCNSManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(web3jMap.get(groupId),
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         return permissionService.listCNSManager();
     }
