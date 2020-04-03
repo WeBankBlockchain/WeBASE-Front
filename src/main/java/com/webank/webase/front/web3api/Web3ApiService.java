@@ -715,6 +715,8 @@ public class Web3ApiService {
         Web3j web3j = web3jMap.get(groupId);
         if (Objects.isNull(web3j)) {
             log.error("web3j of {} is null, please call /{}/web3/refresh to refresh", groupId, groupId);
+            // refresh group list
+            getGroupList();
             throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         }
         return web3j;
