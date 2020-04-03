@@ -162,7 +162,7 @@ export default {
                                 item.metricUint = this.$t('text.bandwidth');
                                 item.metricU = "KB/s";
                             } else if (item.metricType === "rxbps") {
-                                item.metricName = this.$t('text.uplink');;
+                                item.metricName = this.$t('text.downlink');;
                                 item.metricUint = this.$t('text.bandwidth');;
                                 item.metricU = "KB/s";
                             }
