@@ -708,7 +708,7 @@ public class Web3ApiService {
      * @param groupId
      * @return
      */
-    private Web3j getWeb3j(Integer groupId) {
+    public Web3j getWeb3j(Integer groupId) {
         if (web3jMap.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
@@ -716,6 +716,8 @@ public class Web3ApiService {
         Web3j web3j = web3jMap.get(groupId);
         if (Objects.isNull(web3j)) {
             log.error("web3j of {} is null, please call /{}/web3/refresh to refresh", groupId, groupId);
+            // refresh group list
+            getGroupList();
             throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         }
         return web3j;
