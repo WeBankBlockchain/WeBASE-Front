@@ -65,8 +65,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-// import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
-
 
 /**
  * Web3Api manage.
@@ -768,7 +766,7 @@ public class Web3ApiService {
      * 
      * @return
      */
-    private Web3j getWeb3j() {
+    public Web3j getWeb3j() {
         Set<Integer> iSet = web3jMap.keySet();
         if (iSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
@@ -785,17 +783,37 @@ public class Web3ApiService {
      * @param groupId
      * @return
      */
-    private Web3j getWeb3j(Integer groupId) {
+    public Web3j getWeb3j(Integer groupId) {
         if (web3jMap.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
         }
         Web3j web3j = web3jMap.get(groupId);
         if (Objects.isNull(web3j)) {
-            log.error("web3j of {} is null, please call /{}/web3/refresh to refresh", groupId,
-                    groupId);
+            log.error("web3j of {} is null, please try again", groupId);
+            getGroupList();
             throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         }
         return web3j;
+    }
+
+    /**
+     * get target group's CnsService
+     * 
+     * @param groupId
+     * @return
+     */
+    public CnsService getCnsService(Integer groupId) {
+        if (cnsServiceMap.isEmpty()) {
+            log.error("cnsServiceMap is empty, groupList empty! please check your node status");
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+        }
+        CnsService cnsService = cnsServiceMap.get(groupId);
+        if (Objects.isNull(cnsService)) {
+            log.error("cnsService of {} is null, please try again", groupId);
+            getGroupList();
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_CNSSERVICE_NULL);
+        }
+        return cnsService;
     }
 }
