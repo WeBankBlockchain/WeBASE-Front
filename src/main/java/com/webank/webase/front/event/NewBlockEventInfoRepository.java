@@ -39,4 +39,10 @@ public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEven
 	List<NewBlockEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
 
 	List<NewBlockEventInfo> findByGroupId(int groupId, Pageable pageable);
+
+	/**
+	 * check unique by appId exchangeName queueName
+	 */
+	NewBlockEventInfo findByAppIdAndExchangeNameAndQueueName(
+			String appId, String exchangeName, String queueName);
 }
