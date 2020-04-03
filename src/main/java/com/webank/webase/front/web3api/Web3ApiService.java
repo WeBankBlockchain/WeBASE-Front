@@ -707,7 +707,7 @@ public class Web3ApiService {
      * @param groupId
      * @return
      */
-    private Web3j getWeb3j(Integer groupId) {
+    public Web3j getWeb3j(Integer groupId) {
         if (web3jMap.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);

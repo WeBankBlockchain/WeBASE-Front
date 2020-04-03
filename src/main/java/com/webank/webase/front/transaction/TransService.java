@@ -32,6 +32,7 @@ import com.webank.webase.front.transaction.entity.*;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
@@ -79,7 +80,7 @@ import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 public class TransService {
 
     @Autowired
-    private Map<Integer, Web3j> web3jMap;
+    private Web3ApiService web3ApiService;
     @Autowired
     private Map<Integer, CnsService> cnsServiceMap;
     @Autowired
@@ -513,7 +514,7 @@ public class TransService {
      * get web3j by groupId.
      */
     private Web3j getWeb3j(int groupId) {
-        Web3j web3j = web3jMap.get(groupId);
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
         if (web3j == null) {
             new FrontException(GROUPID_NOT_EXIST);
         }
