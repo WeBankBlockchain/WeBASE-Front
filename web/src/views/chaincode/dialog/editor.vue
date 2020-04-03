@@ -80,8 +80,7 @@
                                 </div>
                                 <div>
                                     <span class="transation-title">transactionIndex:</span>
-                                    <span v-if='typeof(item.transactionIndex) == "string"' class="transation-content string-color">{{item.transactionIndex}}</span>
-                                    <span v-else-if='item.transactionIndex === null' class="transation-content null-color">{{item.transactionIndex}}null</span>
+                                    <span v-if='item.transactionIndex === null' class="transation-content null-color">{{item.transactionIndex}}null</span>
                                     <span v-else class="transation-content">{{item.transactionIndex}}</span>
                                 </div>
                                 <div>
@@ -98,8 +97,7 @@
                                 </div>
                                 <div>
                                     <span class="transation-title">blockNumber:</span>
-                                    <span v-if='typeof(item.blockNumber) == "string"' class="transation-content string-color">{{item.blockNumber}}</span>
-                                    <span v-else-if='item.blockNumber === null' class="transation-content null-color">{{item.blockNumber}}null</span>
+                                    <span v-if='item.blockNumber === null' class="transation-content null-color">{{item.blockNumber}}null</span>
                                     <span v-else class="transation-content">{{item.blockNumber}}</span>
                                 </div>
                                 <div>
@@ -148,18 +146,6 @@
                                     <span v-if='typeof(item.logIndexRaw) == "string"' class="transation-content string-color">{{item.logIndexRaw}}</span>
                                     <span v-else-if='item.logIndexRaw === null' class="transation-content null-color">{{item.logIndexRaw}}null</span>
                                     <span v-else class="transation-content">{{item.logIndexRaw}}</span>
-                                </div>
-                                <div>
-                                    <span class="transation-title">transactionIndexRaw:</span>
-                                    <span v-if='typeof(item.transactionIndexRaw) == "string"' class="transation-content string-color">{{item.transactionIndexRaw}}</span>
-                                    <span v-else-if='item.transactionIndexRaw === null' class="transation-content null-color">{{item.transactionIndexRaw}}null</span>
-                                    <span v-else class="transation-content">{{item.transactionIndexRaw}}</span>
-                                </div>
-                                <div>
-                                    <span class="transation-title">blockNumberRaw:</span>
-                                    <span v-if='typeof(item.blockNumberRaw) == "string"' class="transation-content string-color">{{item.blockNumberRaw}}</span>
-                                    <span v-else-if='item.blockNumberRaw === null' class="transation-content null-color">{{item.blockNumberRaw}}null</span>
-                                    <span v-else class="transation-content">{{item.blockNumberRaw}}</span>
                                 </div>
                             </div>
                             <div>}</div>
