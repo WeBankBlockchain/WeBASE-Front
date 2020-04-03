@@ -29,6 +29,8 @@ import com.webank.webase.front.logparse.util.LogTypes;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -73,8 +75,9 @@ public class LogParseService {
     }
 
     public synchronized void syncLogData() {
-        log.debug("begin syncLogData.");
-        if (!constants.isStatLogEnabled()) {
+        Instant startTime = Instant.now();
+        log.debug("syncLogData start. startTime:{}", startTime.toEpochMilli());
+        if (!constants.isStatLogEnabled() || checkCountLimit()) {
             return;
         }
         RandomAccessFile randomFile = null;
@@ -83,7 +86,7 @@ public class LogParseService {
             // get all files
             List<String> files = FileUtil.getFiles(statPath);
             if (files.isEmpty()) {
-                log.warn("syncLogData. There is no stat log files under path:{}", statPath);
+                log.warn("syncLogData. stat log files not exist, please check node's config.ini");
                 return;
             }
             TreeMap<Long, String> treeMap = FileUtil.getStatFiles(files);
@@ -131,6 +134,8 @@ public class LogParseService {
                     updateCurrentState(treeMap.get(treeMap.firstKey()), Long.valueOf(0));
                 }
             }
+            log.debug("syncLogData end useTime:{}",
+                    Duration.between(startTime, Instant.now()).toMillis());
         } catch (IOException e) {
             log.error("syncLogData IOException.", e);
         } finally {
@@ -217,6 +222,16 @@ public class LogParseService {
         CurrentState currentState = new CurrentState(1, name, currentSize);
         currentStateRepository.save(currentState);
         return true;
+    }
+
+    private Boolean checkCountLimit() {
+        Long netWorkDataCount = netWorkDataRepository.count();
+        Long txGasDataCount = txGasDataRepository.count();
+        if (netWorkDataCount.longValue() > constants.getSyncStatLogCountLimit()
+                || txGasDataCount > constants.getSyncStatLogCountLimit()) {
+            return true;
+        }
+        return false;
     }
 
     private Boolean insertNetworkLog(NetWorkData netWorkData) {
