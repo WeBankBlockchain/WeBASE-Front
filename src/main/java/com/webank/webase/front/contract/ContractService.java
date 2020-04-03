@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.contract;
 
-import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.ABI;
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.BIN;
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.INTERFACE;
@@ -69,7 +68,6 @@ import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -98,11 +96,7 @@ public class ContractService {
     private static final String CONTRACT_FILE_TEMP = BASE_FILE_PATH + "%1s.sol";
 
     @Autowired
-    private Map<Integer, Web3j> web3jMap;
-    @Autowired
     private Map<String, String> cnsMap;
-    @Autowired
-    private Map<Integer, CnsService> cnsServiceMap;
     @Autowired
     private ContractRepository contractRepository;
     @Autowired
@@ -132,8 +126,8 @@ public class ContractService {
         // Check if it has been deployed based on the contract name and version number
         checkContractAbiExistedAndSave(contractName, address.substring(2), abiInfos);
         try {
-            cnsServiceMap.get(req.getGroupId()).registerCns(contractName, address.substring(2),
-                    address, JSON.toJSONString(abiInfos));
+            web3ApiService.getCnsService(req.getGroupId()).registerCns(contractName,
+                    address.substring(2), address, JSON.toJSONString(abiInfos));
         } catch (Exception ex) {
             log.error("fail sendAbi.", ex);
             throw new FrontException(ConstantCode.SEND_ABI_INFO_FAIL);
@@ -236,10 +230,7 @@ public class ContractService {
         List<Object> params = req.getFuncParam();
 
         // check groupId
-        Web3j web3j = web3jMap.get(groupId);
-        if (web3j == null) {
-            new FrontException(GROUPID_NOT_EXIST);
-        }
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
 
         String contractName = req.getContractName();
         ContractAbiUtil.VersionEvent versionEvent =
@@ -262,13 +253,13 @@ public class ContractService {
         // save to cns
         if (version != null) {
             checkContractAbiExistedAndSave(contractName, version, abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
-                    JSON.toJSONString(abiInfos));
+            web3ApiService.getCnsService(groupId).registerCns(contractName, version,
+                    contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + version, contractAddress);
         } else {
             checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
-                    contractAddress, JSON.toJSONString(abiInfos));
+            web3ApiService.getCnsService(groupId).registerCns(contractName,
+                    contractAddress.substring(2), contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
         }
 
@@ -299,13 +290,13 @@ public class ContractService {
 
         if (version != null) {
             checkContractAbiExistedAndSave(contractName, version, abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
-                    JSON.toJSONString(abiInfos));
+            web3ApiService.getCnsService(groupId).registerCns(contractName, version,
+                    contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + version, contractAddress);
         } else {
             checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
-                    contractAddress, JSON.toJSONString(abiInfos));
+            web3ApiService.getCnsService(groupId).registerCns(contractName,
+                    contractAddress.substring(2), contractAddress, JSON.toJSONString(abiInfos));
             cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
         }
         log.info("success deployLocally. contractAddress:{}", contractAddress);
@@ -370,7 +361,7 @@ public class ContractService {
     private String deployContract(int groupId, String bytecodeBin, String encodedConstructor,
             Credentials credentials) throws FrontException {
         CommonContract commonContract = null;
-        Web3j web3j = web3jMap.get(groupId);
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
         if (web3j == null) {
             new FrontException(ConstantCode.GROUPID_NOT_EXIST);
         }
@@ -411,7 +402,8 @@ public class ContractService {
     }
 
     public String getAddressByContractNameAndVersion(int groupId, String name, String version) {
-        return cnsServiceMap.get(groupId).getAddressByContractNameAndVersion(name + ":" + version);
+        return web3ApiService.getCnsService(groupId)
+                .getAddressByContractNameAndVersion(name + ":" + version);
     }
 
     public static FileContentHandle compileToJavaFile(String contractName,
