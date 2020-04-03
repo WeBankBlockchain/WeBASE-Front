@@ -92,8 +92,6 @@ public class ContractService {
     private static final String CONTRACT_FILE_TEMP = BASE_FILE_PATH + "%1s.sol";
 
     @Autowired
-    private Map<Integer, Web3j> web3jMap;
-    @Autowired
     private Map<String, String> cnsMap;
     @Autowired
     private Map<Integer, CnsService> cnsServiceMap;
@@ -230,7 +228,7 @@ public class ContractService {
         List<Object> params = req.getFuncParam();
 
         // check groupId
-        Web3j web3j = web3jMap.get(groupId);
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
         if (web3j == null) {
             new FrontException(GROUPID_NOT_EXIST);
         }
@@ -364,7 +362,7 @@ public class ContractService {
     private String deployContract(int groupId, String bytecodeBin, String encodedConstructor,
             Credentials credentials) throws FrontException {
         CommonContract commonContract = null;
-        Web3j web3j = web3jMap.get(groupId);
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
         if (web3j == null) {
             new FrontException(ConstantCode.GROUPID_NOT_EXIST);
         }

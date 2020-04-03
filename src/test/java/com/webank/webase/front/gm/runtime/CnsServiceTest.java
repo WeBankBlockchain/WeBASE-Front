@@ -16,10 +16,8 @@
 
 package com.webank.webase.front.gm.runtime;
 
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import com.webank.webase.front.web3api.Web3ApiService;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
-import org.fisco.bcos.web3j.protocol.Web3j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +32,7 @@ public class CnsServiceTest extends BaseTest{
     @Autowired
     private HashMap<Integer, CnsService> cnsServiceMap;
     @Autowired
-    HashMap<Integer, Web3j> web3jMap;
+    private Web3ApiService web3ApiService;
 
     @Test
     public void testCnsRegister() throws Exception {
@@ -49,7 +47,7 @@ public class CnsServiceTest extends BaseTest{
 
         int groupId = 1;
 
-//        CnsService cnsService = new CnsService(web3jMap.get(groupId), credentialsTest);
+//        CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId), credentialsTest);
 //        cnsService.registerCns(contractName, version, address, abi);
 //        String res0 = cnsService.getAddressByContractNameAndVersion(contractNameAndVersion);
 //        Assert.assertNotNull(res0);
