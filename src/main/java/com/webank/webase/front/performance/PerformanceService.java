@@ -358,6 +358,7 @@ public class PerformanceService {
             InetAddress addr = InetAddress.getLocalHost();
             return addr.getHostAddress();
         } catch (Exception e) {
+            log.info("get ip fail, return '127.0.0.1'");
             return "127.0.0.1";
         }
     }
