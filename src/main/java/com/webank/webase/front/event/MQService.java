@@ -57,14 +57,19 @@ public class MQService {
         }
     }
 
-//    public void unbindQueue2Exchange(String exchangeName, String queueName, String routingKey){
-//        log.info("unbindQueue2Exchange exchangeName:{},queueName:{}, routingKey:{}",
-//                exchangeName, queueName, routingKey);
-//        Binding binding = BindingBuilder
-//                .bind(new Queue(queueName))
-//                .to(new DirectExchange(exchangeName))
-//                .with(routingKey);
-//        rabbitAdmin.removeBinding(binding);
-//    }
+    public void unbindQueueFromExchange(String exchangeName, String queueName, String routingKey){
+        log.info("unbindQueueFromExchange exchangeName:{},queueName:{},routingKey:{}",
+                exchangeName, queueName, routingKey);
+        Binding binding = BindingBuilder
+                .bind(new Queue(queueName))
+                .to(new DirectExchange(exchangeName))
+                .with(routingKey);
+        try {
+            rabbitAdmin.removeBinding(binding);
+        } catch (AmqpException ex) {
+            log.error("Exchange or message queue not exists. ex:[]", ex);
+            throw new FrontException(ConstantCode.EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR);
+        }
+    }
 
 }
