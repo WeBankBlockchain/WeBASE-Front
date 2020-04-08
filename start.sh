@@ -2,7 +2,7 @@
 
 APP_MAIN=com.webank.webase.front.Application
 CLASSPATH='conf/:apps/*:lib/*'
-CURRENT_DIR=`pwd`/
+CURRENT_DIR=$(pwd)/
 LOG_DIR=${CURRENT_DIR}log
 CONF_DIR=${CURRENT_DIR}conf
 
@@ -23,7 +23,7 @@ startWaitTime=30
 processPid=0
 processStatus=0
 checkProcess(){
-    server_pid=`ps aux | grep java | grep $CURRENT_DIR | grep $APP_MAIN | awk '{print $2}'`
+    server_pid=$(ps aux | grep java | grep $CURRENT_DIR | grep $APP_MAIN | awk '{print $2}')
     if [ -n "$server_pid" ]; then
         processPid=$server_pid
         processStatus=1
