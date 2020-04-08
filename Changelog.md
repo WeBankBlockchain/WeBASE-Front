@@ -5,7 +5,6 @@
 - bugifx: Precompiled预编译相关接口中的useAes默认为false，改为默认true
 - bugifx: 链上事件通知中修复内存与数据库的数据一致性问题，增加try-catch的异常处理、出块事件HashMap改为ConcurrentHashMap
 - 优化: 修复Web3jMap的空指针问题，修复获取groupList失败的数组越界问题
-- 优化: 发交易接口在前后端增加contractAbi字段，修复合约重载函数的问题
 
 **兼容性**
 - 支持FISCO-BCOS v2.0.0-rc1 版本
