@@ -18,18 +18,16 @@ package com.webank.webase.front.precompiledapi.sysconf;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.util.PrecompiledUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.config.SystemConfigService;
-import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * System config service
@@ -39,9 +37,9 @@ import java.util.Map;
 public class PrecompiledSysConfigService {
 
     @Autowired
-    Map<Integer, Web3j> web3jMap;
-    @Autowired
     private KeyStoreService keyStoreService;
+    @Autowired
+    private Web3ApiService web3ApiService;
 
     // 根据前台传的user address获取私钥
     private Credentials getCredentials(String fromAddress, Boolean useAes) throws Exception {
@@ -67,7 +65,7 @@ public class PrecompiledSysConfigService {
             }
         }
         SystemConfigService systemConfigService = new SystemConfigService(
-                web3jMap.get(groupId), getCredentials(fromAddress, useAes));
+                web3ApiService.getWeb3j(groupId), getCredentials(fromAddress, useAes));
 
         // @param result {"code":0,"msg":"success"}
         String result = systemConfigService.setValueByKey(key, value);
@@ -91,14 +89,14 @@ public class PrecompiledSysConfigService {
     private List<SystemConfigHandle> getConfigList(int groupId) throws IOException {
         List<SystemConfigHandle> list = new ArrayList<>();
 
-        String txCountLimit = web3jMap.get(groupId)
+        String txCountLimit = web3ApiService.getWeb3j(groupId)
                 .getSystemConfigByKey(PrecompiledUtils.TxCountLimit).sendForReturnString();
         SystemConfigHandle systemConfigCount = new SystemConfigHandle();
         systemConfigCount.setConfigKey(PrecompiledUtils.TxCountLimit);
         systemConfigCount.setConfigValue(txCountLimit);
         systemConfigCount.setGroupId(groupId);
 
-        String txGasLimit = web3jMap.get(groupId)
+        String txGasLimit = web3ApiService.getWeb3j(groupId)
                 .getSystemConfigByKey(PrecompiledUtils.TxGasLimit).sendForReturnString();
         SystemConfigHandle systemConfigGas = new SystemConfigHandle();
         systemConfigGas.setConfigKey(PrecompiledUtils.TxGasLimit);
@@ -112,7 +110,7 @@ public class PrecompiledSysConfigService {
 
     public String getSysConfigByKey(int groupId, String key) throws Exception {
         // 校验
-        String result = web3jMap.get(groupId).getSystemConfigByKey(key).sendForReturnString();
+        String result = web3ApiService.getWeb3j(groupId).getSystemConfigByKey(key).sendForReturnString();
         return result;
 
     }
