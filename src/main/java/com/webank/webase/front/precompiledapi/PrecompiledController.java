@@ -149,7 +149,7 @@ public class PrecompiledController {
             return ConstantCode.INVALID_NODE_ID;
         }
         if(consensusHandle.getUseAes() == null){
-            consensusHandle.setUseAes(false);
+            consensusHandle.setUseAes(true);
         }
         Boolean useAes = consensusHandle.getUseAes();
         switch (nodeType) {
@@ -227,7 +227,7 @@ public class PrecompiledController {
         String from = crudHandle.getFromAddress();
         String sql = crudHandle.getSql();
         if(crudHandle.getUseAes() == null){
-            crudHandle.setUseAes(false);
+            crudHandle.setUseAes(true);
         }
         Boolean useAes = crudHandle.getUseAes();
         // to lower case
@@ -238,7 +238,7 @@ public class PrecompiledController {
             case "desc":
                 return desc(groupId, sql);
             case "select":
-                return select(groupId, from, sql, useAes);
+                return select(groupId, from, sql);
             case "insert":
                 return insert(groupId, from, sql, useAes);
             case "update":
@@ -320,7 +320,7 @@ public class PrecompiledController {
         }
     }
 
-    public Object select(int groupId, String fromAddress, String sql, Boolean useAes) throws Exception {
+    public Object select(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
         log.info("start select startTime:{}, groupId:{},fromAddress:{},sql:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, sql);
@@ -361,7 +361,7 @@ public class PrecompiledController {
         }
         List<Map<String, String>> result = new ArrayList<>();
 
-        result = precompiledService.select(groupId, fromAddress, table, conditions, useAes);
+        result = precompiledService.select(groupId, fromAddress, table, conditions);
         log.info("end select useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), result);
         int rows = 0;

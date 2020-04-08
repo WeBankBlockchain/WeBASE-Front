@@ -20,7 +20,7 @@ public class ContractOfTrans {
     private String contractName;
     private String version;
     private String contractAddress;
-    private int groupId = 1;
+    private int groupId;
     private String contractPath;
     private String funcName;
     private List<Object> contractAbi;

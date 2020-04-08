@@ -99,11 +99,11 @@ public class TransService {
     public Object transHandle(ReqTransHandle req) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(req));
 
-        //get function of abi
+        // check param get function of abi
         ContractOfTrans cof = new ContractOfTrans(req);
         ContractFunction cf = buildContractFunction(cof);
         //check param
-        checkParamOfTransaction(cf, cof.getFuncParam());
+        // checkParamOfTransaction(cf, cof.getFuncParam());
 
         //address
         String address = cof.getContractAddress();
@@ -159,10 +159,10 @@ public class TransService {
      * @param req request
      */
     public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
-        //get function of abi
+        // check param get function of abi
         ContractFunction cf = buildContractFunction(new ContractOfTrans(req));
-        //check param
-        checkParamOfTransaction(cf, req.getFuncParam());
+        // check param
+        // checkParamOfTransaction(cf, req.getFuncParam());
 
         // check contractAddress
         String contractAddress = req.getContractAddress();
@@ -432,6 +432,11 @@ public class TransService {
         boolean constant = ContractAbiUtil.getConstant(contractName, funcName, version);
         // inputs format
         List<String> funcInputTypes = ContractAbiUtil.getFuncInputType(contractName, funcName, version);
+        // check param match inputs
+        if (funcInputTypes.size() != params.size()) {
+            log.error("load contract function error for function params not fit");
+            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+        }
         List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
         // outputs format
         List<String> funOutputTypes = ContractAbiUtil.getFuncOutputType(contractName, funcName, version);
@@ -462,6 +467,11 @@ public class TransService {
 
         // input format
         List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
+        // check param match inputs
+        if (funcInputTypes.size() != params.size()) {
+            log.error("load contract function error for function params not fit");
+            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+        }
         List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
         // output format
         List<String> funOutputTypes = AbiUtil.getFuncOutputType(abiDefinition);
@@ -511,6 +521,7 @@ public class TransService {
     /**
      * Check transaction parameters.
      */
+    @Deprecated
     private void checkParamOfTransaction(ContractFunction cf, List<Object> params) {
         // inputs format
         List<String> funcInputTypes = cf.getInputList();
