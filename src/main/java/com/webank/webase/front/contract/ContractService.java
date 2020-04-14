@@ -19,6 +19,7 @@ import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.IN
 import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.METADATA;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
@@ -417,10 +418,7 @@ public class ContractService {
         FrontUtils.createFileIfNotExist(binFile, true);
         FileUtils.writeStringToFile(binFile, contractBin);
 
-        SolidityFunctionWrapperGenerator
-                .main(Arrays.asList("-a", abiFile.getPath(), "-b", binFile.getPath(), "-p",
-                        packageName, "-o", Constants.JAVA_DIR).toArray(new String[0]));
-
+        generateJavaFile(packageName, abiFile, binFile);
         String outputDirectory = "";
         if (!packageName.isEmpty()) {
             outputDirectory = packageName.replace(".", File.separator);
@@ -433,6 +431,18 @@ public class ContractService {
         FrontUtils.createFileIfNotExist(file, true);
         InputStream targetStream = new FileInputStream(file);
         return new FileContentHandle(contractName + ".java", targetStream);
+    }
+
+
+    private static synchronized void generateJavaFile(String packageName, File abiFile, File binFile) {
+        try {
+            MySecurityManagerConfig.forbidSystemExitCall();
+            SolidityFunctionWrapperGenerator
+                    .main(Arrays.asList("-a", abiFile.getPath(), "-b", binFile.getPath(), "-p",
+                            packageName, "-o", Constants.JAVA_DIR).toArray(new String[0]));
+        } finally {
+            MySecurityManagerConfig.enableSystemExitCall();
+        }
     }
 
 
