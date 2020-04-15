@@ -15,6 +15,7 @@
  */
 package com.webank.webase.front.cert;
 
+import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
@@ -74,7 +75,9 @@ public class FrontCertService {
         log.debug("start getNodeCerts in {}" + nodePath);
         getCertListByPathAndType(nodePath, CertTypes.NODE.getValue(), resList);
         // gm cert added to resList
-        getCertListByPathAndType(nodePath, CertTypes.OTHERS.getValue(), resList);
+        if (EncryptType.encryptType == GMStatus.GUOMI.getValue()) {
+            getCertListByPathAndType(nodePath, CertTypes.OTHERS.getValue(), resList);
+        }
         log.debug("end getNodeCerts in {}" + nodePath);
         return resList;
     }
