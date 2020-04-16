@@ -89,6 +89,9 @@ public class FrontCertService {
         log.debug("start getChainCert in {}" + nodePath);
         getCertListByPathAndType(nodePath, CertTypes.CHAIN.getValue(), resList);
         log.debug("end getChainCert in {}" + nodePath);
+        if (resList.isEmpty()) {
+            return "";
+        }
         return resList.get(0);
     }
 
@@ -141,9 +144,12 @@ public class FrontCertService {
                 }
             }
             log.debug("end tools: loadCrtContentByPath resultList:{}", targetList);
-        }catch (IOException e) {
+        } catch (IOException e) {
             log.error("FrontCertService loadCrtContentByPath, cert(.crt) path prefix error, Exception:[]", e);
             throw (FrontException)new FrontException("FileNotFound, cert(.crt) path error").initCause(e);
+        } catch (Exception e) {
+            log.error("FrontCertService loadCrtContentByPath error:[]", e);
+            throw (FrontException)new FrontException("loadCrtContentByPath error").initCause(e);
         }
     }
 
@@ -168,9 +174,12 @@ public class FrontCertService {
                 }
             }
             log.debug("end tools: loadCrtContentByPath resultList:{}", targetList);
-        }catch (IOException e) {
-            log.error("FrontCertService getCertList, cert(.crt) path prefix error, Exception:[]", e);
+        } catch (IOException e) {
+            log.error("FrontCertService loadCrtContentByStringPath, cert(.crt) path prefix error, Exception:[]", e);
             throw (FrontException)new FrontException("FileNotFound, cert(.crt) path error").initCause(e);
+        } catch (Exception e) {
+            log.error("FrontCertService loadCrtContentByStringPath error:[]", e);
+            throw (FrontException)new FrontException("loadCrtContentByStringPath error").initCause(e);
         }
     }
 
@@ -210,8 +219,14 @@ public class FrontCertService {
         }
     }
 
-    // remove the last character: "\n"
+    /**
+     * remove the last character: "\n"
+     * @param string
+     */
     public String formatStr(String string) {
+        if (string.isEmpty()) {
+            return string;
+        }
         return string.substring(0, string.length() - 1);
     }
 }
