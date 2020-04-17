@@ -16,8 +16,6 @@
 package com.webank.webase.front.base.properties;
 
 import java.math.BigInteger;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
