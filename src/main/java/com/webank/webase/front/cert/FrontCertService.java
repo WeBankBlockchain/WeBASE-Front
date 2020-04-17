@@ -221,12 +221,12 @@ public class FrontCertService {
 
     /**
      * remove the last character: "\n"
-     * @param string
+     * @param input
      */
-    public String formatStr(String string) {
-        if (string.isEmpty()) {
-            return string;
+    public String formatStr(String input) {
+        if (input.isEmpty()) {
+            return input;
         }
-        return string.substring(0, string.length() - 1);
+        return input.substring(0, input.length() - 1);
     }
 }
