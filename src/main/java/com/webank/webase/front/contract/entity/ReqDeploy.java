@@ -39,6 +39,7 @@ public class ReqDeploy {
      */
     private String signUserId;
     private String contractName;
+    @Deprecated
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
