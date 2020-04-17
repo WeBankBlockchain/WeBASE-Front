@@ -196,6 +196,7 @@ export default {
             }
         },
         changeFunc: function () {
+            this.transation.funcValue = [];
             this.constant = false;
             this.funcList.forEach(value => {
                 if (value.funcId === this.transation.funcName) {
@@ -260,7 +261,7 @@ export default {
                                 message: this.$t('text.searchSucceeded')
                             });
                         } else {
-                            if (resData.status == '0x0') {
+                            if (resData.statusOK) {
                                 this.$message({
                                     type: "success",
                                     message: this.$t('text.txnSucceeded')
