@@ -30,6 +30,7 @@
 import menu from "./components/contractCatalog";
 import codes from "./components/code";
 import contentHead from "@/components/contentHead";
+import { encryption } from "@/util/api";
 import Bus from "@/bus"
 export default {
     name: "contract",
@@ -70,17 +71,50 @@ export default {
             }
         }
     },
-    beforeDestroy: function(){
+    beforeDestroy: function () {
         Bus.$off("changeGroup")
     },
     mounted: function () {
-        Bus.$on("changeGroup",data => {
+        Bus.$on("changeGroup", data => {
             this.changeGroup()
         })
-     },
+        this.getEncryption(this.initSolc)
+    },
     methods: {
         changeGroup: function () {
             this.$refs.menu.getContracts()
+        },
+        initSolc() {
+            var head = document.head;
+            var script = document.createElement("script");
+            if (localStorage.getItem("encryptionId") == 0) {
+                script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+            } else {
+                script.src = "./static/js/soljson-v0.4.25-gm.js";
+            }
+            script.setAttribute('id', 'soljson');
+            if (!document.getElementById('soljson')) {
+                head.append(script)
+            }
+        },
+        getEncryption: function (callback) {
+            encryption().then(res => {
+                if (res.status == 200) {
+                    localStorage.setItem("encryptionId", res.data)
+                    callback();
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
         },
         dragDetailWeight: function (e) {
             let startX = e.clientX,
