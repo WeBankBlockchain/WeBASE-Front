@@ -511,11 +511,8 @@ public class Web3ApiService {
         }
     }
 
-    @DependsOn("encryptType")
     public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
         log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
-        List<ChannelConnections> channelConnectionsList =
-                groupChannelConnectionsConfig.getAllChannelConnections();
         groupIdList.forEach(gId -> {
             Integer groupId = new Integer(gId);
             if(web3jMap.get(groupId) == null) {
