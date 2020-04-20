@@ -14,7 +14,6 @@
 package com.webank.webase.front.monitor;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
-import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.monitor.entity.GroupSizeInfo;
 import com.webank.webase.front.performance.result.PerformanceData;
@@ -46,8 +45,6 @@ public class MonitorController {
     private MonitorService monitorService;
     @Autowired
     private Web3Config web3Config;
-    @Autowired
-    private NodeConfig nodeConfig;
 
     @ApiOperation(value = "查询链上数据", notes = "查询链上数据")
     @ApiImplicitParams({@ApiImplicitParam(name = "beginDate", value = "开始时间"),
@@ -84,7 +81,7 @@ public class MonitorController {
     public boolean checkNodeProcess() {
         log.info("checkNodeProcess start.");
         return CommonUtils.checkConnect(web3Config.getIp(),
-                Integer.valueOf(nodeConfig.getChannelPort()));
+                Integer.valueOf(web3Config.getChannelPort()));
     }
 
     @ApiOperation(value = "获取群组大小信息")
