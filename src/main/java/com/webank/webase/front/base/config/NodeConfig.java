@@ -14,12 +14,10 @@
 package com.webank.webase.front.base.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.util.CommonUtils;
-import java.util.List;
 import lombok.Data;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +35,7 @@ public class NodeConfig implements InitializingBean {
     private Constants constants;
 
     private String orgName;
+    private String p2pip;
     private String listenip;
     private String rpcport;
     private String p2pport;
@@ -46,14 +45,19 @@ public class NodeConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        String configPath = constants.getNodePath() + Constants.CONFIG_FILE;
-        List<String> nodeInfos = CommonUtils.readFileToList(configPath);
+        if (constants.getNodePath() == "") {
+            return;
+        }
+        List<String> nodeInfos =
+                CommonUtils.readFileToList(constants.getNodePath() + Constants.CONFIG_FILE);
 
         if (nodeInfos == null || nodeInfos.size() == 0) {
-            log.error("cannot read config.ini, please check path:{}", configPath);
-            throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
+            // throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
+            log.warn("cannot read config.ini");
+            return;
         }
 
+        this.p2pip = CommonUtils.getCurrentIp();
         for (String str : nodeInfos) {
             if (str.contains(" listen_ip")) {
                 this.listenip = str.substring(str.indexOf("=") + 1);
@@ -85,6 +89,7 @@ public class NodeConfig implements InitializingBean {
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
         sb.append("\"orgName\":\"").append(orgName).append('\"');
+        sb.append(",\"p2pip\":\"").append(p2pip).append('\"');
         sb.append(",\"listenip\":\"").append(listenip).append('\"');
         sb.append(",\"rpcport\":\"").append(rpcport).append('\"');
         sb.append(",\"p2pport\":\"").append(p2pport).append('\"');
