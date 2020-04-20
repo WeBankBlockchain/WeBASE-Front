@@ -55,6 +55,8 @@ sdk:
   timeout: 10000
   keepAlive: 60
   ip: 127.0.0.1
+  channelPort: 20200
+  encryptType: 0 # 0:standard, 1:guomi
 
 logging:
   config: classpath:log4j2.xml
@@ -65,7 +67,7 @@ constant:
   monitorDisk: /
   monitorEnabled: true
   aesKey: EfdsW23D23d3df43
-  nodePath: /data
+  nodePath: /fisco/nodes/127.0.0.1/node0
   http_read_timeOut: 100000
   http_connect_timeOut: 100000
   # event sync map task (unit: ms)
