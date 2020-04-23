@@ -191,6 +191,7 @@ public class TransService {
      *
      * @param req request
      */
+    @Deprecated
     public boolean checkAndSaveAbiFromCns(ContractOfTrans req) throws Exception {
         log.info("checkAndSaveAbiFromCns start.");
         List<CnsInfo> cnsInfoList = null;
@@ -481,9 +482,10 @@ public class TransService {
             contract.setVersion(contract.getContractAddress().substring(2));
         }
         // check if contractAbi existed in cns
-        if (!ifExisted) {
-            ifExisted = checkAndSaveAbiFromCns(contract);
-        }
+        // deprecated cns in front
+//        if (!ifExisted) {
+//            ifExisted = checkAndSaveAbiFromCns(contract);
+//        }
         // check if contractAbi existed in db
         if (!ifExisted) {
             ifExisted = checkAndSaveAbiFromDb(contract);
