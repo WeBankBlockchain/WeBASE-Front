@@ -46,10 +46,10 @@ public class NodeConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if(constants.getNodeDir()=="") {
+        if(constants.getNodePath()=="") {
             return ;
         }
-        List<String> nodeInfos = CommonUtils.readFileToList(constants.getNodeDir() + Constants.CONFIG_FILE);
+        List<String> nodeInfos = CommonUtils.readFileToList(constants.getNodePath() + Constants.CONFIG_FILE);
 
         if (nodeInfos == null || nodeInfos.size() == 0) {
           //  throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);

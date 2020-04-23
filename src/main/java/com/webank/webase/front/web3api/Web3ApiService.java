@@ -546,7 +546,7 @@ public class Web3ApiService {
         channelEthereumService.setChannelService(service);
         Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
         web3jMap.put(groupId, web3j);
-        cnsServiceMap.put(groupId, new CnsService(web3j, credentials));
+        no'd.put(groupId, new CnsService(web3j, credentials));
     }
 
     // get all peers of chain
