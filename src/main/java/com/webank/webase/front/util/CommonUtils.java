@@ -195,7 +195,6 @@ public class CommonUtils {
                 result.add(line);
             }
         } catch (Exception e) {
-            log.error("readFileToList error:{}", e);
             throw new FrontException(e.getMessage());
         }
     	return result;
