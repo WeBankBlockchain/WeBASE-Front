@@ -60,7 +60,6 @@ public class Constants {
     public static final String CONSTANT_PREFIX = "constant";
     public static  String version;
     public static String chainId;
-    private String nodeDir = "";
     private String keyServer = "127.0.0.1:8080";
     private int transMaxWait = 30;
     private String monitorDisk = "/";
