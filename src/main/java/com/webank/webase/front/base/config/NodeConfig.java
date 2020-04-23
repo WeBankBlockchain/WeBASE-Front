@@ -22,6 +22,7 @@ import lombok.Data;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +47,7 @@ public class NodeConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if(constants.getNodePath()=="") {
+        if(StringUtils.isBlank(constants.getNodePath())) {
             return ;
         }
         List<String> nodeInfos = CommonUtils.readFileToList(constants.getNodePath() + Constants.CONFIG_FILE);
