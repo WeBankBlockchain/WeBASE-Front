@@ -53,7 +53,7 @@ public class NodeConfig implements InitializingBean {
         List<String> nodeInfos = CommonUtils.readFileToList(constants.getNodePath() + Constants.CONFIG_FILE);
 
         this.p2pip = CommonUtils.getCurrentIp();
-        if (nodeInfos == null || nodeInfos.size() == 0) {
+        if (nodeInfos == null || nodeInfos.isEmpty() ) {
           //  throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
             log.info("cannot read config.ini");
             return;
