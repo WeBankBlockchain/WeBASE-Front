@@ -48,16 +48,17 @@ public class NodeConfig implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         if(StringUtils.isBlank(constants.getNodePath())) {
-            return ;
+            return;
         }
         List<String> nodeInfos = CommonUtils.readFileToList(constants.getNodePath() + Constants.CONFIG_FILE);
 
+        this.p2pip = CommonUtils.getCurrentIp();
         if (nodeInfos == null || nodeInfos.size() == 0) {
           //  throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
             log.info("cannot read config.ini");
+            return;
         }
-        
-        this.p2pip = CommonUtils.getCurrentIp();
+
         for (String str : nodeInfos) {
             if (str.contains("listen_ip")) {
                 this.listenip = str.substring(str.indexOf("=")+1);
