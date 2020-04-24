@@ -135,11 +135,9 @@ public class Web3ApiController {
      */
     @ApiOperation(value = "getTotalTransactionCount",
             notes = "Get the  total number of execution transactions count ")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "address", value = "address", required = true,
-                    dataType = "String", paramType = "path"),
-            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-                    dataType = "BigInteger", paramType = "path")})
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
+                    dataType = "int", paramType = "path"))
     @GetMapping("/transaction-total")
     public TotalTransactionCount.TransactionCount getTransTotalCnt(@PathVariable int groupId) {
         return web3ApiService.getTransCnt(groupId);
