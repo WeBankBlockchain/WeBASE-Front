@@ -13,6 +13,10 @@
  */
 package com.webank.webase.front.web3api;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.util.Address;
+import com.webank.webase.front.util.AddressUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import io.swagger.annotations.Api;
@@ -126,6 +130,9 @@ public class Web3ApiController {
     @GetMapping("/code/{address}/{blockNumber}")
     public String getCode(@PathVariable int groupId, @PathVariable String address,
             @PathVariable BigInteger blockNumber) {
+        if (address.length() != Address.ValidLen) {
+            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
+        }
         return web3ApiService.getCode(groupId, address, blockNumber);
     }
 

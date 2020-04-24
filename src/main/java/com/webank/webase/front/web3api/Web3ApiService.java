@@ -235,7 +235,7 @@ public class Web3ApiService {
         String code;
         try {
             if (blockNumberCheck(groupId, blockNumber)) {
-                throw new FrontException("requst blockNumber is greater than latest");
+                throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
             }
             code = getWeb3j(groupId)
                     .getCode(address, DefaultBlockParameter.valueOf(blockNumber)).send().getCode();
@@ -321,7 +321,7 @@ public class Web3ApiService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("****" + currentNumber);
+        log.info("**** currentNumber:{}", currentNumber);
         return (blockNumber.compareTo(currentNumber) > 0);
 
     }
