@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "/web3", tags = "web3j interface")
 @RestController
 @RequestMapping(value = "/{groupId}/web3")
+@ApiImplicitParams(@ApiImplicitParam(name = "groupId", value = "groupId",required = true,dataType = "Integer", paramType = "path"))
 public class Web3ApiController {
 
     @Autowired
