@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,6 +13,10 @@
  */
 package com.webank.webase.front.web3api;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.util.Address;
+import com.webank.webase.front.util.AddressUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import io.swagger.annotations.Api;
@@ -44,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "/web3", tags = "web3j interface")
 @RestController
 @RequestMapping(value = "/{groupId}/web3")
+@ApiImplicitParams(@ApiImplicitParam(name = "groupId", value = "groupId",required = true,dataType = "Integer", paramType = "path"))
 public class Web3ApiController {
 
     @Autowired
@@ -125,6 +130,9 @@ public class Web3ApiController {
     @GetMapping("/code/{address}/{blockNumber}")
     public String getCode(@PathVariable int groupId, @PathVariable String address,
             @PathVariable BigInteger blockNumber) {
+        if (address.length() != Address.ValidLen) {
+            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
+        }
         return web3ApiService.getCode(groupId, address, blockNumber);
     }
 
@@ -135,11 +143,9 @@ public class Web3ApiController {
      */
     @ApiOperation(value = "getTotalTransactionCount",
             notes = "Get the  total number of execution transactions count ")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "address", value = "address", required = true,
-                    dataType = "String", paramType = "path"),
-            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-                    dataType = "BigInteger", paramType = "path")})
+    @ApiImplicitParams(
+            @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
+                    dataType = "int", paramType = "path"))
     @GetMapping("/transaction-total")
     public TotalTransactionCount.TransactionCount getTransTotalCnt(@PathVariable int groupId) {
         return web3ApiService.getTransCnt(groupId);

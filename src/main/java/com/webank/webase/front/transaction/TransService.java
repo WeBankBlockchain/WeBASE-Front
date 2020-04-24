@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -191,6 +191,7 @@ public class TransService {
      *
      * @param req request
      */
+    @Deprecated
     public boolean checkAndSaveAbiFromCns(ContractOfTrans req) throws Exception {
         log.info("checkAndSaveAbiFromCns start.");
         List<CnsInfo> cnsInfoList = null;
@@ -481,9 +482,10 @@ public class TransService {
             contract.setVersion(contract.getContractAddress().substring(2));
         }
         // check if contractAbi existed in cns
-        if (!ifExisted) {
-            ifExisted = checkAndSaveAbiFromCns(contract);
-        }
+        // deprecated cns in front
+//        if (!ifExisted) {
+//            ifExisted = checkAndSaveAbiFromCns(contract);
+//        }
         // check if contractAbi existed in db
         if (!ifExisted) {
             ifExisted = checkAndSaveAbiFromDb(contract);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -110,13 +110,13 @@ public class ContractService {
         addressIsValid(req.getGroupId(), req.getAddress(), req.getContractBin());
         // Check if it has been deployed based on the contract name and version number
         checkContractAbiExistedAndSave(contractName, address.substring(2), abiInfos);
-        try {
-            cnsServiceMap.get(req.getGroupId()).registerCns(contractName, address.substring(2),
-                    address, JSON.toJSONString(abiInfos));
-        } catch (Exception ex) {
-            log.error("fail sendAbi.", ex);
-            throw new FrontException(ConstantCode.SEND_ABI_INFO_FAIL);
-        }
+//        try {
+//            cnsServiceMap.get(req.getGroupId()).registerCns(contractName, address.substring(2),
+//                    address, JSON.toJSONString(abiInfos));
+//        } catch (Exception ex) {
+//            log.error("fail sendAbi.", ex);
+//            throw new FrontException(ConstantCode.SEND_ABI_INFO_FAIL);
+//        }
 
         log.info("sendAbi end. contractname:{} ,version:{}", contractName, address);
     }
@@ -209,7 +209,7 @@ public class ContractService {
      */
     public String deployWithSign(ReqDeploy req) throws Exception {
         int groupId = req.getGroupId();
-        String version = req.getVersion();
+//        String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
@@ -239,17 +239,17 @@ public class ContractService {
         String contractAddress = receipt.getContractAddress();
 
         // save to cns
-        if (version != null) {
-            checkContractAbiExistedAndSave(contractName, version, abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
-                    JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName + ":" + version, contractAddress);
-        } else {
-            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
-                    contractAddress, JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
-        }
+//        if (version != null) {
+//            checkContractAbiExistedAndSave(contractName, version, abiInfos);
+//            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
+//                    JSON.toJSONString(abiInfos));
+//            cnsMap.put(contractName + ":" + version, contractAddress);
+//        } else {
+//            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
+//            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
+//                    contractAddress, JSON.toJSONString(abiInfos));
+//            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
+//        }
 
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
@@ -260,7 +260,7 @@ public class ContractService {
      */
     public String deployLocally(ReqDeploy req) throws Exception {
         String contractName = req.getContractName();
-        String version = req.getVersion();
+//        String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
@@ -276,17 +276,17 @@ public class ContractService {
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
-        if (version != null) {
-            checkContractAbiExistedAndSave(contractName, version, abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
-                    JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName + ":" + version, contractAddress);
-        } else {
-            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
-                    contractAddress, JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
-        }
+//        if (version != null) {
+//            checkContractAbiExistedAndSave(contractName, version, abiInfos);
+//            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
+//                    JSON.toJSONString(abiInfos));
+//            cnsMap.put(contractName + ":" + version, contractAddress);
+//        } else {
+//            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
+//            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
+//                    contractAddress, JSON.toJSONString(abiInfos));
+//            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
+//        }
         log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -351,7 +351,7 @@ public class ContractService {
         CommonContract commonContract = null;
         Web3j web3j = web3ApiService.getWeb3j(groupId);
         if (web3j == null) {
-            new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+            throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
         }
         try {
             commonContract =
@@ -389,6 +389,7 @@ public class ContractService {
         return baseRsp;
     }
 
+    @Deprecated
     public String getAddressByContractNameAndVersion(int groupId, String name, String version) {
         return cnsServiceMap.get(groupId).getAddressByContractNameAndVersion(name + ":" + version);
     }
