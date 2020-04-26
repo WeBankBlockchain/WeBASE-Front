@@ -60,6 +60,21 @@ public class Web3Config {
     private int keepAlive;
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
+    /**
+     * 0:standard, 1:guomi
+     */
+    private int encryptType;
+
+    /**
+     * 覆盖EncryptType构造函数
+     * 放在web3sdk初始化前，否则当前类里的CnsServiceMap的credential为非国密的
+     * @return
+     */
+    @Bean(name = "encryptType")
+    public EncryptType EncryptType() {
+        log.info("*****init EncrytType:" + encryptType);
+        return new EncryptType(encryptType);
+    }
 
     @Bean
     public GroupChannelConnectionsConfig getGroupChannelConnectionsConfig() {
@@ -81,7 +96,7 @@ public class Web3Config {
 
     /**
      * init getWeb3j.
-     * 
+     *
      * @return
      */
     @Bean
@@ -101,7 +116,7 @@ public class Web3Config {
 
     /**
      * set sdk threadPool.
-     * 
+     *
      * @return
      */
     @Bean
@@ -123,11 +138,12 @@ public class Web3Config {
      * @return
      */
     @Bean(name = "serviceMap")
+    @DependsOn("encryptType")
     public Map<Integer, Service> serviceMap(Web3j web3j,
                                             GroupChannelConnectionsConfig groupChannelConnectionsConfig,
                                             NewBlockEventCallback newBlockEventCallBack) throws Exception {
-        // configure encrypt type by chain's node version
-        configEncryptType(web3j);
+        // whether front' encrypt type matches with chain's
+        isMatchEncryptType(web3j);
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
@@ -162,6 +178,7 @@ public class Web3Config {
      * @return
      */
     @Bean
+    @DependsOn("encryptType")
     public Map<Integer, Web3j> web3jMap(Map<Integer, Service> serviceMap){
         Map web3jMap = new ConcurrentHashMap<Integer, Web3j>(serviceMap.size());
         for(Integer i: serviceMap.keySet()){
@@ -177,7 +194,8 @@ public class Web3Config {
         return web3jMap;
     }
 
-    public void configEncryptType(Web3j web3j) throws IOException {
+    public void isMatchEncryptType(Web3j web3j) throws IOException {
+        boolean isMatch = true;
         // 1: guomi, 0: standard
         NodeVersion version = web3j.getNodeVersion().send();
 
@@ -185,14 +203,21 @@ public class Web3Config {
         Constants.chainId = version.getNodeVersion().getChainID();
         log.info("Chain's clientVersion:{}", Constants.version);
         if (Constants.version.contains("gm")) {
-            EncryptType.encryptType = GMStatus.GUOMI.getValue();
+            isMatch = EncryptType.encryptType == GMStatus.GUOMI.getValue();
         } else {
-            EncryptType.encryptType = GMStatus.STANDARD.getValue();
+            isMatch = EncryptType.encryptType == GMStatus.STANDARD.getValue();
         }
-        log.info("Sdk's encryptType:{}", EncryptType.encryptType);
+        if (!isMatch) {
+            log.error("Chain's version not matches with Front's  encryptType:{}",
+                    EncryptType.encryptType);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR.getCode(),
+                    "Chain's version not matches with Front's" + " encryptType: "
+                            + EncryptType.encryptType);
+        }
     }
 
     @Bean
+    @DependsOn("encryptType")
     public Map<Integer, CnsService> cnsServiceMap(Map<Integer, Web3j> web3jMap) {
         // support guomi
         Credentials credentials = GenCredential.create();
@@ -208,10 +233,6 @@ public class Web3Config {
         return cnsServiceMap;
     }
 
-    /**
-     * store contractName:version or contractName:addressWithoutPrefix in map
-     * when contract is deployed in @link ContractService
-     */
     @Bean
     public HashMap<String, String> cnsMap() {
         HashMap cnsMap = new HashMap<String, String>();
