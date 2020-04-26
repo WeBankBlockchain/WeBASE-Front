@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ package com.webank.webase.front.precompiledapi;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.transaction.TransService;
+import com.webank.webase.front.web3api.Web3ApiService;
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
 import org.fisco.bcos.web3j.precompile.exception.PrecompileMessageException;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
-import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
 import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
@@ -54,7 +53,7 @@ public class PrecompiledWithSignService {
 	@Autowired
 	TransService transService;
 	@Autowired
-	Map<Integer, Web3j> web3jMap;
+	private Web3ApiService web3ApiService;
 
 	/**
 	 * system config: setValueByKey through webase-sign
@@ -68,7 +67,7 @@ public class PrecompiledWithSignService {
 		// execute set method
 		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
 				PrecompiledTypes.SYSTEM_CONFIG, FUNC_SETVALUEBYKEY, funcParams);
-		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+		return PrecompiledCommon.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
 	}
 
 	/**
@@ -81,7 +80,7 @@ public class PrecompiledWithSignService {
 		funcParams.add(toAddress);
 		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
 				PrecompiledTypes.PERMISSION, FUNC_INSERT, funcParams);
-		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+		return PrecompiledCommon.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
 	}
 
 	/**
@@ -94,7 +93,7 @@ public class PrecompiledWithSignService {
 		funcParams.add(toAddress);
 		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
 				PrecompiledTypes.PERMISSION, FUNC_REMOVE, funcParams);
-		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+		return PrecompiledCommon.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
 	}
 
 	/**
@@ -105,7 +104,7 @@ public class PrecompiledWithSignService {
 		if (!isValidNodeID(groupId, nodeId)) {
 			return PrecompiledCommon.transferToJson(PrecompiledCommon.P2pNetwork);
 		}
-		List<String> sealerList = web3jMap.get(groupId).getSealerList().send().getResult();
+		List<String> sealerList = web3ApiService.getWeb3j(groupId).getSealerList().send().getResult();
 		if (sealerList.contains(nodeId)) {
 			return PrecompiledCommon.transferToJson(PrecompiledCommon.SealerList);
 		}
@@ -114,7 +113,7 @@ public class PrecompiledWithSignService {
 		funcParams.add(nodeId);
 		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
 				PrecompiledTypes.CONSENSUS, FUNC_ADDSEALER, funcParams);
-		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+		return PrecompiledCommon.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
 	}
 
 	/**
@@ -125,7 +124,7 @@ public class PrecompiledWithSignService {
 		if (!isValidNodeID(groupId, nodeId)) {
 			return PrecompiledCommon.transferToJson(PrecompiledCommon.P2pNetwork);
 		}
-		List<String> observerList = web3jMap.get(groupId).getObserverList().send().getResult();
+		List<String> observerList = web3ApiService.getWeb3j(groupId).getObserverList().send().getResult();
 		if (observerList.contains(nodeId)) {
 			return PrecompiledCommon.transferToJson(PrecompiledCommon.ObserverList);
 		}
@@ -134,14 +133,14 @@ public class PrecompiledWithSignService {
 		funcParams.add(nodeId);
 		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId, signUserId,
 				PrecompiledTypes.CONSENSUS, FUNC_ADDOBSERVER, funcParams);
-		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+		return PrecompiledCommon.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
 	}
 
 	/**
 	 * consensus: remove node from list through webase-sign
 	 */
 	public String removeNode(int groupId, String signUserId, String nodeId) throws Exception {
-		List<String> groupPeers = web3jMap.get(groupId).getGroupPeers().send().getResult();
+		List<String> groupPeers = web3ApiService.getWeb3j(groupId).getGroupPeers().send().getResult();
 		if (!groupPeers.contains(nodeId)) {
 			return PrecompiledCommon.transferToJson(PrecompiledCommon.GroupPeers);
 		}
@@ -162,7 +161,7 @@ public class PrecompiledWithSignService {
 				throw e;
 			}
 		}
-		return PrecompiledCommon.handleTransactionReceipt(receipt, web3jMap.get(groupId));
+		return PrecompiledCommon.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
 	}
 
 	/**
@@ -170,7 +169,7 @@ public class PrecompiledWithSignService {
 	 */
 	private boolean isValidNodeID(int groupId, String _nodeID) throws IOException, JsonProcessingException {
 		boolean flag = false;
-		List<String> nodeIDs = web3jMap.get(groupId).getNodeIDList().send().getResult();
+		List<String> nodeIDs = web3ApiService.getWeb3j(groupId).getNodeIDList().send().getResult();
 		for (String nodeID : nodeIDs) {
 			if (_nodeID.equals(nodeID)) {
 				flag = true;

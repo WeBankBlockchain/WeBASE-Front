@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -235,7 +235,7 @@ public class Web3ApiService {
         String code;
         try {
             if (blockNumberCheck(groupId, blockNumber)) {
-                throw new FrontException("requst blockNumber is greater than latest");
+                throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
             }
             code = getWeb3j(groupId)
                     .getCode(address, DefaultBlockParameter.valueOf(blockNumber)).send().getCode();
@@ -321,7 +321,7 @@ public class Web3ApiService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("****" + currentNumber);
+        log.info("**** currentNumber:{}", currentNumber);
         return (blockNumber.compareTo(currentNumber) > 0);
 
     }
@@ -511,11 +511,8 @@ public class Web3ApiService {
         }
     }
 
-    @DependsOn("encryptType")
     public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
         log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
-        List<ChannelConnections> channelConnectionsList =
-                groupChannelConnectionsConfig.getAllChannelConnections();
         groupIdList.forEach(gId -> {
             Integer groupId = new Integer(gId);
             if(web3jMap.get(groupId) == null) {
@@ -707,7 +704,7 @@ public class Web3ApiService {
      * @param groupId
      * @return
      */
-    private Web3j getWeb3j(Integer groupId) {
+    public Web3j getWeb3j(Integer groupId) {
         if (web3jMap.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
@@ -715,6 +712,8 @@ public class Web3ApiService {
         Web3j web3j = web3jMap.get(groupId);
         if (Objects.isNull(web3j)) {
             log.error("web3j of {} is null, please call /{}/web3/refresh to refresh", groupId, groupId);
+            // refresh group list
+            getGroupList();
             throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
         }
         return web3j;
