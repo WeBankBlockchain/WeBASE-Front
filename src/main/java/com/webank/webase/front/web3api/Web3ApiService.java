@@ -511,6 +511,7 @@ public class Web3ApiService {
         }
     }
 
+    @DependsOn("encryptType")
     public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
         log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
         groupIdList.forEach(gId -> {
