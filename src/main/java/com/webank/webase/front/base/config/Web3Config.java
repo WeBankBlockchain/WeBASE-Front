@@ -14,6 +14,7 @@
 package com.webank.webase.front.base.config;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
@@ -202,9 +203,9 @@ public class Web3Config {
         Constants.chainId = version.getNodeVersion().getChainID();
         log.info("Chain's clientVersion:{}", Constants.version);
         if (Constants.version.contains("gm")) {
-            isMatch = EncryptType.encryptType == 1;
+            isMatch = EncryptType.encryptType == GMStatus.GUOMI.getValue();
         } else {
-            isMatch = EncryptType.encryptType == 0;
+            isMatch = EncryptType.encryptType == GMStatus.STANDARD.getValue();
         }
         if (!isMatch) {
             log.error("Chain's version not matches with Front's  encryptType:{}",
