@@ -62,7 +62,7 @@ let errCode = {
     },
     "201008": {
         en: "contract's current version has been deployed",
-        zh: '合同的当前版本已部署'
+        zh: '合约的当前版本已部署'
     },
     "201009": {
         en: "contract is not deployed",
@@ -122,19 +122,19 @@ let errCode = {
     },
     "201023": {
         en: "contract already exists",
-        zh: '合同已存在'
+        zh: '合约已存在'
     },
     "201024": {
         en: "contract name cannot be repeated",
-        zh: '合同名称不能重复'
+        zh: '合约名称不能重复'
     },
     "201025": {
         en: "invalid contract id",
-        zh: '合同ID无效'
+        zh: '合约ID无效'
     },
     "201026": {
         en: "contract has been deployed",
-        zh: '合同已部署'
+        zh: '合约已部署'
     },
     "201027": {
         en: "send abiInfo fail",
@@ -247,7 +247,7 @@ let errCode = {
     },
     "201208": {
         en: "Unsupported for this system config key",
-        zh: '不支持此系统配置密钥'
+        zh: '不支持修改该系统配置'
     },
     "201209": {
         en: "Provide value by positive integer mode, from 100000 to 2147483647",
@@ -295,7 +295,7 @@ let errCode = {
     },
     "201106": {
         en: "Contract name cannot be empty",
-        zh: '合同名称不能为空'
+        zh: '合约名称不能为空'
     },
     "201107": {
         en: "System config key cannot be empty",
@@ -327,11 +327,11 @@ let errCode = {
     },
     "201221": {
         en: "Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ",
-        zh: '合同版本应仅包含“A-Z”或“A-Z”或“0-9”或点标记'
+        zh: '合约版本应仅包含“A-Z”或“A-Z”或“0-9”或点标记'
     },
     "201222": {
         en: "Version of contract is out of length",
-        zh: '合同版本过长'
+        zh: '合约版本过长'
     },
 
     "201226": {
@@ -354,7 +354,7 @@ let errCode = {
 
     "201232": {
         en: "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----",
-        zh: 'Pem文件格式错误，必须由--XXXXX私钥包围---'
+        zh: 'Pem文件格式错误，必须由"--XXXXX PRIVATE KEY---"包围'
     },
     "201233": {
         en: "Pem file content error",
