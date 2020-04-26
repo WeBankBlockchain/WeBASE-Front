@@ -34,6 +34,9 @@ public class KeyStoreInfo {
      */
     private String privateKey;
     private String userName;
+    /**
+     * 0:local, 1:random, 2:external
+     */
     private int type;
     /**
      * webase-sign signUserId
