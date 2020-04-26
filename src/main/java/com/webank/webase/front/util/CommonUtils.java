@@ -493,9 +493,9 @@ public class CommonUtils {
                         subdirectory.mkdirs();
                     }
                 } else {
-                    log.info("zipBase64ToFile file name:[{}]",
-                            path + File.separator + entry.getName());
-                    fout = new File(path, entry.getName());
+                    log.info("zipBase64ToFile file name:[{}]", entry.getName());
+                    String outPath = (path + entry.getName()).replaceAll("\\*", "/");
+                    fout = new File(cleanString(outPath));
                     BufferedOutputStream bos = null;
                     try {
                         bos = new BufferedOutputStream(new FileOutputStream(fout));
@@ -518,6 +518,55 @@ public class CommonUtils {
         } finally {
             close(zis);
             close(bais);
+        }
+    }
+
+    private static String cleanString(String str) {
+        if (str == null) {
+            return null;
+        }
+        String cleanString = "";
+        for (int i = 0; i < str.length(); ++i) {
+            cleanString += cleanChar(str.charAt(i));
+        }
+        return cleanString;
+    }
+
+    private static char cleanChar(char value) {
+        // 0 - 9
+        for (int i = 48; i < 58; ++i) {
+            if (value == i) {
+                return (char) i;
+            }
+        }
+        // 'A' - 'Z'
+        for (int i = 65; i < 91; ++i) {
+            if (value == i) {
+                return (char) i;
+            }
+        }
+        // 'a' - 'z'
+        for (int i = 97; i < 123; ++i) {
+            if (value == i) {
+                return (char) i;
+            }
+        }
+        // other valid characters
+        switch (value) {
+            case '\\':
+                return '\\';
+            case '/':
+                return '/';
+            case ':':
+                return ':';
+            case '.':
+                return '.';
+            case '-':
+                return '-';
+            case '_':
+                return '_';
+            default:
+                return ' ';
         }
     }
 
