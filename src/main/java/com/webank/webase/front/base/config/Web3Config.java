@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -152,7 +152,7 @@ public class Web3Config {
             connectionsList.add(ip + ":" + channelPort);
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setConnectionsStr(connectionsList);
-            channelConnections.setGroupId(Integer.valueOf(groupIdList.get(i)));
+            channelConnections.setGroupId(Integer.parseInt(groupIdList.get(i)));
             log.info("*** groupId " + groupIdList.get(i));
             channelConnectionsList.add(channelConnections);
         }
