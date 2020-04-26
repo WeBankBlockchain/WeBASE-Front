@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -32,6 +32,7 @@ import com.webank.webase.front.transaction.entity.*;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
@@ -79,7 +80,7 @@ import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 public class TransService {
 
     @Autowired
-    private Map<Integer, Web3j> web3jMap;
+    private Web3ApiService web3ApiService;
     @Autowired
     private Map<Integer, CnsService> cnsServiceMap;
     @Autowired
@@ -190,6 +191,7 @@ public class TransService {
      *
      * @param req request
      */
+    @Deprecated
     public boolean checkAndSaveAbiFromCns(ContractOfTrans req) throws Exception {
         log.info("checkAndSaveAbiFromCns start.");
         List<CnsInfo> cnsInfoList = null;
@@ -480,9 +482,10 @@ public class TransService {
             contract.setVersion(contract.getContractAddress().substring(2));
         }
         // check if contractAbi existed in cns
-        if (!ifExisted) {
-            ifExisted = checkAndSaveAbiFromCns(contract);
-        }
+        // deprecated cns in front
+//        if (!ifExisted) {
+//            ifExisted = checkAndSaveAbiFromCns(contract);
+//        }
         // check if contractAbi existed in db
         if (!ifExisted) {
             ifExisted = checkAndSaveAbiFromDb(contract);
@@ -513,7 +516,7 @@ public class TransService {
      * get web3j by groupId.
      */
     private Web3j getWeb3j(int groupId) {
-        Web3j web3j = web3jMap.get(groupId);
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
         if (web3j == null) {
             new FrontException(GROUPID_NOT_EXIST);
         }

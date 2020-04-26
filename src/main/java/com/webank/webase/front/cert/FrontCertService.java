@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.webank.webase.front.cert;
 
+import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
@@ -74,7 +75,9 @@ public class FrontCertService {
         log.debug("start getNodeCerts in {}" + nodePath);
         getCertListByPathAndType(nodePath, CertTypes.NODE.getValue(), resList);
         // gm cert added to resList
-        getCertListByPathAndType(nodePath, CertTypes.OTHERS.getValue(), resList);
+        if (EncryptType.encryptType == GMStatus.GUOMI.getValue()) {
+            getCertListByPathAndType(nodePath, CertTypes.OTHERS.getValue(), resList);
+        }
         log.debug("end getNodeCerts in {}" + nodePath);
         return resList;
     }
@@ -86,6 +89,9 @@ public class FrontCertService {
         log.debug("start getChainCert in {}" + nodePath);
         getCertListByPathAndType(nodePath, CertTypes.CHAIN.getValue(), resList);
         log.debug("end getChainCert in {}" + nodePath);
+        if (resList.isEmpty()) {
+            return "";
+        }
         return resList.get(0);
     }
 
@@ -138,9 +144,12 @@ public class FrontCertService {
                 }
             }
             log.debug("end tools: loadCrtContentByPath resultList:{}", targetList);
-        }catch (IOException e) {
+        } catch (IOException e) {
             log.error("FrontCertService loadCrtContentByPath, cert(.crt) path prefix error, Exception:[]", e);
-            throw (FrontException)new FrontException("FileNotFound, cert(.crt) path error").initCause(e);
+            throw new FrontException("loadCrtContentByPath error:" + e.getMessage());
+        } catch (Exception e) {
+            log.error("FrontCertService loadCrtContentByPath error:[]", e);
+            throw new FrontException("loadCrtContentByPath error:" + e.getMessage());
         }
     }
 
@@ -165,9 +174,12 @@ public class FrontCertService {
                 }
             }
             log.debug("end tools: loadCrtContentByPath resultList:{}", targetList);
-        }catch (IOException e) {
-            log.error("FrontCertService getCertList, cert(.crt) path prefix error, Exception:[]", e);
-            throw (FrontException)new FrontException("FileNotFound, cert(.crt) path error").initCause(e);
+        } catch (IOException e) {
+            log.error("FrontCertService loadCrtContentByStringPath, cert(.crt) path prefix error, Exception:[]", e);
+            throw new FrontException("loadCrtContentByStringPath error:" + e.getMessage());
+        } catch (Exception e) {
+            log.error("FrontCertService loadCrtContentByStringPath error:[]", e);
+            throw new FrontException("loadCrtContentByStringPath error:" + e.getMessage());
         }
     }
 
@@ -207,8 +219,14 @@ public class FrontCertService {
         }
     }
 
-    // remove the last character: "\n"
+    /**
+     * remove the last character: "\n"
+     * @param string
+     */
     public String formatStr(String string) {
+        if (string.isEmpty()) {
+            return string;
+        }
         return string.substring(0, string.length() - 1);
     }
 }
