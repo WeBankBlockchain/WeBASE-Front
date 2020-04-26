@@ -189,7 +189,7 @@ public class Web3Config {
             Web3j web3jSync = Web3j.build(channelEthereumService, service.getGroupId());
             // for getClockNumber local
             web3jSync.getBlockNumberCache();
-            web3jMap.put(Integer.valueOf(i), web3jSync);
+            web3jMap.put(i, web3jSync);
         }
         return web3jMap;
     }
