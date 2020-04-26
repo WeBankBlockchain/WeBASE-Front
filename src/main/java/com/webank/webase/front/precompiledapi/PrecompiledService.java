@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.webank.webase.front.precompiledapi;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
+import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
@@ -25,7 +26,6 @@ import org.fisco.bcos.web3j.precompile.crud.CRUDService;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
-import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +48,7 @@ import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 public class PrecompiledService{
 
     @Autowired
-    Map<Integer, Web3j> web3jMap;
+    private Web3ApiService web3ApiService;
     @Autowired
     private KeyStoreService keyStoreService;
     @Autowired
@@ -61,7 +61,7 @@ public class PrecompiledService{
      */
 
     public List<CnsInfo> queryCnsByName(int groupId, String contractName) throws Exception {
-        CnsService cnsService = new CnsService(web3jMap.get(groupId),
+        CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
 
         return cnsService.queryCnsByName(contractName);
@@ -69,7 +69,7 @@ public class PrecompiledService{
 
     public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName,
                                                   String version) throws Exception {
-        CnsService cnsService = new CnsService(web3jMap.get(groupId),
+        CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
 
         return cnsService.queryCnsByNameAndVersion(contractName, version);
@@ -77,7 +77,7 @@ public class PrecompiledService{
 
     public String getAddressByContractNameAndVersion(int groupId, String contractName,
                                                   String version) throws Exception {
-        CnsService cnsService = new CnsService(web3jMap.get(groupId),
+        CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         String contractNameAndVersion = contractName + Constants.SYMPOL + version;
         return cnsService.getAddressByContractNameAndVersion(contractNameAndVersion);
@@ -102,9 +102,9 @@ public class PrecompiledService{
 
     public List<NodeInfo> getNodeList(int groupId) throws Exception {
         // nodeListWithType 组合多个带有类型的nodeid list
-        List<String> sealerList = web3jMap.get(groupId).getSealerList().send().getResult();
-        List<String> observerList = web3jMap.get(groupId).getObserverList().send().getResult();
-        List<String> peerList = web3jMap.get(groupId).getNodeIDList().send().getResult();
+        List<String> sealerList = web3ApiService.getWeb3j(groupId).getSealerList().send().getResult();
+        List<String> observerList = web3ApiService.getWeb3j(groupId).getObserverList().send().getResult();
+        List<String> peerList = web3ApiService.getWeb3j(groupId).getNodeIDList().send().getResult();
         // process nodeList
         List<NodeInfo> nodeListWithType = new ArrayList<>();
 
@@ -161,7 +161,7 @@ public class PrecompiledService{
      * desc
      */
     public Table desc(int groupId, String tableName) throws Exception {
-        CRUDService crudService = new CRUDService(web3jMap.get(groupId),
+        CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         Table descRes = crudService.desc(tableName);
         return descRes;
@@ -172,7 +172,7 @@ public class PrecompiledService{
      */
     public List<Map<String, String>> select(int groupId, Table table,
                                             Condition conditions) throws Exception {
-        CRUDService crudService = new CRUDService(web3jMap.get(groupId),
+        CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         List<Map<String, String>> selectRes = crudService.select(table, conditions);
         return selectRes;
