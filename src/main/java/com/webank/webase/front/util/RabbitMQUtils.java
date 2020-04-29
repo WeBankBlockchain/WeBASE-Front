@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.webank.webase.front.util;
 
+import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.entity.PublisherHelper;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.channel.event.filter.TopicTools;
@@ -36,9 +37,14 @@ public class RabbitMQUtils {
     public static final String ROUTING_KEY_EVENT = "event";
     public static final String ROUTING_KEY_BLOCK = "block";
     /**
-     * map of (appId, "exchange_name,block_routing_key"), one app only needs one block notify
+     * map of (appId, "group_id,exchange_name,routing_key"), one app only needs one block notify
      */
     public static Map<String, PublisherHelper> BLOCK_ROUTING_KEY_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * map of ("ContractEventInfo id", ContractEventCallback instance)
+     */
+    public static Map<String, ContractEventCallback> CONTRACT_EVENT_CALLBACK_MAP = new ConcurrentHashMap<>();
 
     /**
      * new exchange by rabbitAdmin

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,8 +258,7 @@ public class CommonUtils {
      */
     public static HttpHeaders buildHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
-        headers.setContentType(type);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         headers.add("Accept", MediaType.APPLICATION_JSON.toString());
         return headers;
     }
@@ -317,5 +316,15 @@ public class CommonUtils {
             return 0;
         }
         return Integer.parseInt(str.substring(2), 16);
+    }
+
+    /**
+     * 支持数字，字母与下划线"_"
+     * @param str
+     * @return
+     */
+    public static boolean isLetterDigit(String str) {
+        String regex = "^[a-z0-9A-Z_]+$";
+        return str.matches(regex);
     }
 }

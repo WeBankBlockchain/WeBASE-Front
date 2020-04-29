@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import lombok.Data;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -46,17 +47,18 @@ public class NodeConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if(constants.getNodeDir()=="") {
-            return ;
+        if(StringUtils.isBlank(constants.getNodePath())) {
+            return;
         }
-        List<String> nodeInfos = CommonUtils.readFileToList(constants.getNodeDir() + Constants.CONFIG_FILE);
+        List<String> nodeInfos = CommonUtils.readFileToList(constants.getNodePath() + Constants.CONFIG_FILE);
 
-        if (nodeInfos == null || nodeInfos.size() == 0) {
+        this.p2pip = CommonUtils.getCurrentIp();
+        if (nodeInfos == null || nodeInfos.isEmpty() ) {
           //  throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
             log.info("cannot read config.ini");
+            return;
         }
-        
-        this.p2pip = CommonUtils.getCurrentIp();
+
         for (String str : nodeInfos) {
             if (str.contains("listen_ip")) {
                 this.listenip = str.substring(str.indexOf("=")+1);

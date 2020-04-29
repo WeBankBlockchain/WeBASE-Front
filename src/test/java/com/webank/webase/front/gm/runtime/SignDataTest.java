@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,20 +47,6 @@ public class SignDataTest extends BaseTest {
 
 
     private static final String rawData = "123";
-    /**
-     * private key from webase-sign:
-     {
-         "code": 0,
-         "message": "success",
-         "data": {
-             "userId": 100001,
-             "address": "0xf7a8f5e7d6a1771e49d13c25e84c15597f3e9476",
-             "publicKey": "0x08dc7e0fb482f0b413c559ca1a7968b43ae7ce315f7fb95ec9e3f26dadfc1776fef5e35ae1c8a65322d2460374d3ba37af6d76ed9e32c7bafb1edb7f5078d06f",
-             "privateKey": "2247924b56a54870429a28fe7c356f730fb721ae12fd3f5c0f2765fa3afad961",
-             "description": null
-         }
-     }
-     */
 
     /**
      * test guomi webase-sign
@@ -69,7 +55,8 @@ public class SignDataTest extends BaseTest {
     @Test
     public void testSignData() throws SignatureException {
         EncodeInfo encodeInfo = new EncodeInfo();
-        encodeInfo.setUserId(100001);
+        // uuid to set uuid of webase-sign's keystoreInfo
+        encodeInfo.setSignUserId("uuid");
         encodeInfo.setEncodedDataStr(Hash.sha3String(rawData));
         String signedData = keyStoreService.getSignData(encodeInfo);// from webase-sign
         System.out.println(signedData); // 00fd8bbc86faa0cf9216886e15118862ef5469c5283ab43b727ebaee93d866ced346c6eea89aac11be598de5ad8b3711791594651a3a3e44df2f7d9a522da351e0

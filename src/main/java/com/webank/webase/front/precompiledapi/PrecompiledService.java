@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
  */
 package com.webank.webase.front.precompiledapi;
 
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
-import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
-import org.fisco.bcos.web3j.precompile.consensus.ConsensusService;
 import org.fisco.bcos.web3j.precompile.crud.CRUDService;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
@@ -35,10 +33,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
+import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
+import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
+
 
 /**
  * Precompiled common service
  * including management of CNS, node consensus status, CRUD
+ * based on PrecompiledWithSignService
  */
 @Slf4j
 @Service
@@ -48,23 +51,14 @@ public class PrecompiledService{
     private Web3ApiService web3ApiService;
     @Autowired
     private KeyStoreService keyStoreService;
+    @Autowired
+    private PrecompiledWithSignService precompiledWithSignService;
 
 
-    // 根据前台传的user address获取私钥
-    private Credentials getCredentials(String fromAddress, Boolean useAes) throws Exception {
-        return keyStoreService.getCredentials(fromAddress, useAes);
-    }
 
     /**
      * CNS config related
-     * TODO registerCns
      */
-//    get single cns is not necessary
-//    public Object getAddressByContractNameAndVersion(int groupId, String contractNameAndVersion) throws Exception {
-//        CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
-//
-//        return cnsService.getAddressByContractNameAndVersion(contractNameAndVersion);
-//    }
 
     public List<CnsInfo> queryCnsByName(int groupId, String contractName) throws Exception {
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
@@ -72,6 +66,7 @@ public class PrecompiledService{
 
         return cnsService.queryCnsByName(contractName);
     }
+
     public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName,
                                                   String version) throws Exception {
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
@@ -80,32 +75,29 @@ public class PrecompiledService{
         return cnsService.queryCnsByNameAndVersion(contractName, version);
     }
 
-
-
+    public String getAddressByContractNameAndVersion(int groupId, String contractName,
+                                                  String version) throws Exception {
+        CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
+        String contractNameAndVersion = contractName + Constants.SYMPOL + version;
+        return cnsService.getAddressByContractNameAndVersion(contractNameAndVersion);
+    }
 
     /**
      * Consensus config related
      */
-    public Object addSealer(int groupId, String fromAddress, String nodeId,
-                            Boolean useAes) throws Exception {
-        ConsensusService consensusService =
-                new ConsensusService(web3ApiService.getWeb3j(groupId), getCredentials(fromAddress, useAes));
-
-        return consensusService.addSealer(nodeId);
+    public String addSealer(int groupId, String signUserId, String nodeId) throws Exception {
+        String res = precompiledWithSignService.addSealer(groupId, signUserId, nodeId);
+        return res;
     }
-    public Object addObserver(int groupId, String fromAddress, String nodeId,
-                              Boolean useAes) throws Exception {
-        ConsensusService consensusService =
-                new ConsensusService(web3ApiService.getWeb3j(groupId), getCredentials(fromAddress, useAes));
 
-        return consensusService.addObserver(nodeId);
+    public String addObserver(int groupId, String signUserId, String nodeId) throws Exception {
+        String res = precompiledWithSignService.addObserver(groupId, signUserId, nodeId);
+        return res;
     }
-    public Object removeNode(int groupId, String fromAddress, String nodeId,
-                             Boolean useAes) throws Exception {
-        ConsensusService consensusService =
-                new ConsensusService(web3ApiService.getWeb3j(groupId), getCredentials(fromAddress, useAes));
-
-        return consensusService.removeNode(nodeId);
+    public String removeNode(int groupId, String signUserId, String nodeId) throws Exception {
+        String res = precompiledWithSignService.removeNode(groupId, signUserId, nodeId);
+        return res;
     }
 
     public List<NodeInfo> getNodeList(int groupId) throws Exception {
@@ -118,13 +110,13 @@ public class PrecompiledService{
 
         // add all sealer and observer in List
         sealerList.stream().forEach(sealer ->
-                nodeListWithType.add(new NodeInfo(sealer, PrecompiledUtils.NODE_TYPE_SEALER)));
+                nodeListWithType.add(new NodeInfo(sealer, NODE_TYPE_SEALER)));
         observerList.stream().forEach(observer ->
-                nodeListWithType.add(new NodeInfo(observer, PrecompiledUtils.NODE_TYPE_OBSERVER)));
+                nodeListWithType.add(new NodeInfo(observer, NODE_TYPE_OBSERVER)));
         // peer not in sealer/observer but connected is remove node(游离节点)
         peerList.stream().filter(peer -> !sealerList.contains(peer) && !observerList.contains(peer))
                 .forEach(peerToAdd ->
-                        nodeListWithType.add(new NodeInfo(peerToAdd, PrecompiledUtils.NODE_TYPE_REMOVE)));
+                        nodeListWithType.add(new NodeInfo(peerToAdd, NODE_TYPE_REMOVE)));
 
         return nodeListWithType;
     }
@@ -133,61 +125,57 @@ public class PrecompiledService{
      * CRUD related
      * Table table - validation in controller
      */
-    public int createTable(int groupId, String fromAddress, Table table,
-                           Boolean useAes) throws Exception {
-        CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return crudService.createTable(table);
-
-
+    public int createTable(int groupId, String signUserId, Table table) throws Exception {
+        int res = precompiledWithSignService.createTable(groupId, signUserId, table);
+        return res;
     }
 
+    /**
+     * insert 校验tableName等操作放在controller
+     */
+    public int insert(int groupId, String signUserId, Table table,
+                      Entry entry) throws Exception {
+        int res = precompiledWithSignService.insert(groupId, signUserId, table, entry);
+        return res;
+    }
+
+    /**
+     * update
+     */
+    public int update(int groupId, String signUserId, Table table,
+                      Entry entry, Condition condition) throws Exception {
+        int res = precompiledWithSignService.update(groupId, signUserId, table, entry, condition);
+        return res;
+    }
+
+    /**
+     * remove
+      */
+    public int remove(int groupId, String signUserId, Table table,
+                      Condition condition) throws Exception {
+        int res = precompiledWithSignService.remove(groupId, signUserId, table, condition);
+        return res;
+    }
+
+    /**
+     * desc
+     */
     public Table desc(int groupId, String tableName) throws Exception {
         CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
-
         Table descRes = crudService.desc(tableName);
         return descRes;
-
     }
 
-    //select
-    public List<Map<String, String>> select(int groupId, String fromAddress, Table table,
+    /**
+     * select
+     */
+    public List<Map<String, String>> select(int groupId, Table table,
                                             Condition conditions) throws Exception {
         CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
-
         List<Map<String, String>> selectRes = crudService.select(table, conditions);
         return selectRes;
     }
-
-    // insert 校验tableName等操作放在controller
-    public int insert(int groupId, String fromAddress, Table table,
-                      Entry entry, Boolean useAes) throws Exception {
-        CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId), getCredentials(fromAddress, useAes));
-
-        int insertRes = crudService.insert(table, entry);
-        return insertRes;
-    }
-
-    // update
-    public int update(int groupId, String fromAddress, Table table,
-                      Entry entry, Condition conditions, Boolean useAes) throws Exception {
-        CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId), getCredentials(fromAddress, useAes));
-
-        int updateRes = crudService.update(table, entry, conditions);
-        return updateRes;
-    }
-
-    // remove
-    public int remove(int groupId, String fromAddress, Table table,
-                      Condition conditions, Boolean useAes) throws Exception {
-        CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId), getCredentials(fromAddress, useAes));
-
-        int removeRes = crudService.remove(table, conditions);
-        return removeRes;
-    }
-
 
 }

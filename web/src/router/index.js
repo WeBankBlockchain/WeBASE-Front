@@ -35,6 +35,8 @@ const transactionCharts = resolve => require(['@/views/transactionCharts/transac
 // const unusualUser = resolve => require(['@/views/unusualUser/unusualUser'], resolve);
 // const unusualContract = resolve => require(['@/views/unusualContract/unusualContract'], resolve);
 // const helpDoc = resolve => require(['@/components/helpDoc'], resolve);
+const blockEvent = resolve => require(['@/views/blockEvent'], resolve);
+const contractEvent = resolve => require(['@/views/contractEvent'], resolve);
 Vue.use(Router);
 const routes = [
     {
@@ -60,17 +62,6 @@ const routes = [
             }
         ]
     },
-    // {
-    //     path: '/',
-    //     component: main,
-    //     name: '区块浏览',
-    //     menuShow: false,
-    //     iconCls: 'wbs-icon-overview sidebar-icon',
-    //     children: [
-    //         { path: '/blockInfo', component: blockInfo, name: '区块信息', menuShow: true, meta: { requireAuth: false } },
-    //         { path: '/transactionInfo', component: transactionInfo, name: '交易信息', menuShow: true, meta: { requireAuth: false } },
-    //     ]
-    // },
     {
         path: '/',
         component: main,
@@ -94,6 +85,7 @@ const routes = [
         children: [
             { path: '/contract', component: contract, name: '合约IDE', enName: 'contractIDE', menuShow: true, meta: { requireAuth: false } },
             { path: '/contractList', component: oldContract, name: '合约列表', enName: 'contractList', menuShow: true, meta: { requireAuth: false } },
+            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '测试用户', enName: 'testUserList', menuShow: true, meta: { requireAuth: false } }
         ]
     },
     {
@@ -106,21 +98,34 @@ const routes = [
         children: [
             // { path: '/errorLogExport', component: errorLogExport, name: '错误日志', menuShow: true, meta: { requireAuth: false } },
             { path: '/hostMetric', component: hostMetric, name: '主机指标', enName: 'hostMetrics', menuShow: true, meta: { requireAuth: false } },
-            { path: '/nodesMetric', component: nodesMetric, name: '节点指标', enName: 'nodeMetrics',menuShow: true, meta: { requireAuth: false } },
+            { path: '/nodesMetric', component: nodesMetric, name: '节点指标', enName: 'nodeMetrics', menuShow: true, meta: { requireAuth: false } },
         ]
     },
+    // {
+    //     path: '/',
+    //     component: main,
+    //     name: '私钥管理',
+    //     enName: 'privateKeyManagement',
+    //     leaf: true,
+    //     menuShow: true,
+    //     iconCls: 'wbs-icon-lock sidebar-icon',
+    //     children: [
+    //         { path: '/privateKeyManagement', component: rivateKeyManagement, name: '私钥管理', enName: 'privateKeyManagement', menuShow: true, meta: { requireAuth: false } }
+    //     ]
+    // }, 
     {
         path: '/',
         component: main,
-        name: '私钥管理',
-        enName: 'privateKeyManagement',
-        leaf: true,
+        name: '订阅事件',
+        enName: 'subscribeEvent',
+        // leaf: true,
         menuShow: true,
-        iconCls: 'wbs-icon-lock sidebar-icon',
+        iconCls: 'wbs-icon-dingyue sidebar-icon',
         children: [
-            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '私钥管理', enName: 'privateKeyManagement', menuShow: true, meta: { requireAuth: false } }
+            { path: '/blockEvent', component: blockEvent, name: '出块事件', enName: 'blockEvent', menuShow: true, meta: { requireAuth: false } },
+            { path: '/contractEvent', component: contractEvent, name: '合约Event事件', enName: 'contractEvent', menuShow: true, meta: { requireAuth: false } }
         ]
-    }
+    },
 ]
 const router = new Router({
     routes

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -19,6 +19,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.alibaba.fastjson.JSONException;
+import com.webank.webase.front.base.code.ConstantCode;
 import org.fisco.bcos.web3j.abi.EventValues;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
@@ -257,5 +260,20 @@ public class AbiUtil {
             }
         }
         return resultMap;
+    }
+
+    /**
+     * check abi valid
+     * @param contractAbi
+     */
+    public static void checkAbi(String contractAbi) {
+        try {
+            JSONArray abiArr = JSONArray.parseArray(contractAbi);
+            for (Object object : abiArr) {
+                AbiDefinition a = JSON.parseObject(object.toString(), AbiDefinition.class);
+            }
+        } catch (JSONException ex) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_ABI_INVALID);
+        }
     }
 }
