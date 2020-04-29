@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ public class PermissionHandle {
     private int groupId;
     private String permissionType;
     @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
-    private String fromAddress;
-    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY)
+    private String signUserId;
+    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
     private String address;
     private String tableName;
     private PermissionState permissionState;
-    // 向后兼容 默认useAes为false
-    private Boolean useAes;
+    @Deprecated
+    private String fromAddress;
 }

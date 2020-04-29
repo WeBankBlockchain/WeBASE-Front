@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ public class CnsHandle {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private int groupId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
-    private String fromAddress;
+    private String signUserId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_NAME_IS_EMPTY)
     private String contractName;
     private String contractNameAndVersion;
@@ -36,6 +36,6 @@ public class CnsHandle {
     // register
     private String contractAddress;
     private String abi;
-    // 向后兼容 默认useAes为false
-    private Boolean useAes;
+    @Deprecated
+    private String fromAddress;
 }

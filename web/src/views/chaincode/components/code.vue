@@ -279,17 +279,7 @@ export default {
 
     },
     beforeMount() {
-        var head = document.head;
-        var script = document.createElement("script");
-        if(localStorage.getItem("encryptionId") == 0){
-            script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
-        }else{
-            script.src = "./static/js/soljson-v0.4.25-gm.js";
-        }
-        script.setAttribute('id', 'soljson');
-        if (!document.getElementById('soljson')) {
-            head.append(script)
-        }
+        
     },
     mounted: function () {
         this.initEditor();
@@ -319,19 +309,19 @@ export default {
             this.version = data.version;
             this.complieAbiTextHeight = false;
             this.complieBinTextHeight = false;
-            this.$refs['showAbiText'].style.overflow = 'hidden'
-            this.$refs['showBinText'].style.overflow = 'hidden'
-            if (data.contractAbi) {
-                this.$nextTick(() => {
-                    if (this.$refs['showAbiText'].offsetHeight >= 72) {
-                        this.complieAbiTextHeight = true
-                    }
-                    if (this.$refs['showBinText'].offsetHeight >= 72) {
-                        this.complieBinTextHeight = true
-                    }
+            // this.$refs['showAbiText'].style.overflow = 'hidden'
+            // this.$refs['showBinText'].style.overflow = 'hidden'
+            // if (data.contractAbi) {
+            //     this.$nextTick(() => {
+            //         if (this.$refs['showAbiText'].offsetHeight >= 72) {
+            //             this.complieAbiTextHeight = true
+            //         }
+            //         if (this.$refs['showBinText'].offsetHeight >= 72) {
+            //             this.complieBinTextHeight = true
+            //         }
 
-                })
-            }
+            //     })
+            // }
             this.$nextTick(() => {
                 if (this.contractName === 'Asset'&&data.contractPath==="template" || this.contractName === 'Evidence'&&data.contractPath==="template" || this.contractName === 'EvidenceFactory'&&data.contractPath==="template") {
                     this.aceEditor.setReadOnly(true);

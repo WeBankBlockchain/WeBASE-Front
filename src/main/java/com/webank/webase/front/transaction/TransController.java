@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS
 
 /**
  * TransController.
- * handle transactions of deploy/call contract
+ * handle transactions with sign to deploy/call contract
  */
 @Api(value = "/trans", tags = "transaction interface")
 @Slf4j
@@ -49,16 +49,13 @@ public class TransController extends BaseController {
     TransService transServiceImpl;
 
     /**
-     * transHandle.
-     * 
-     * @param reqTransHandle request
-     * @param result checkResult
+     * transHandle through webase-sign
      * @return
      */
     @ApiOperation(value = "transaction handing", notes = "transaction handing")
     @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
-    @PostMapping("/handle")
-    public Object transHandle(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
+    @PostMapping("/handleWithSign")
+    public Object transHandle(@Valid @RequestBody ReqTransHandleWithSign reqTransHandle, BindingResult result) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
 
         Instant startTime = Instant.now();
@@ -69,25 +66,30 @@ public class TransController extends BaseController {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
 
-        Object obj =  transServiceImpl.transHandle(reqTransHandle);
+        Object obj =  transServiceImpl.transHandleWithSign(reqTransHandle);
         log.info("transHandle end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
-         return obj;
+        return obj;
     }
-    
-    /**
-     * transHandleWithSign.
-     * 
-     * @param req request
-     * @param result checkResult
-     * @return
-     */
-    @ApiOperation(value = "transaction handing", notes = "transaction handing with sign")
-    @ApiImplicitParam(name = "req", value = "transaction info", required = true, dataType = "ReqTransHandleWithSign")
-    @PostMapping("/handleWithSign")
-    public Object transHandleWithSign(@Valid @RequestBody ReqTransHandleWithSign req, BindingResult result) throws Exception {
-        log.info("transHandleWithSign start. req:[{}]", JSON.toJSONString(req));
+
+    @ApiOperation(value = "transaction handle locally", notes = "transaction locally")
+    @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
+    @PostMapping("/handle")
+    public Object transHandleLocal(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
+        log.info("transHandleLocal start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
+
+        Instant startTime = Instant.now();
+        log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
+
         checkParamResult(result);
-        return transServiceImpl.transHandleWithSign(req);
+        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(reqTransHandle.getContractAddress())) {
+            throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
+        }
+
+        Object obj =  transServiceImpl.transHandleLocal(reqTransHandle);
+        log.info("transHandleLocal end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return obj;
     }
+
 }

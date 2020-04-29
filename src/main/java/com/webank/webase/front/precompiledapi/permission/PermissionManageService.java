@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@ package com.webank.webase.front.precompiledapi.permission;
 
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
+import org.fisco.bcos.web3j.precompile.crud.CRUDService;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.precompile.permission.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import java.util.*;
 /**
  * Permission manage service
  * grant or revoke administrator and get administrators on chain
+ * based on PrecompiledWithSignService
  */
 @Slf4j
 @Service
@@ -39,7 +42,8 @@ public class PermissionManageService {
     private Web3ApiService web3ApiService;
     @Autowired
     private KeyStoreService keyStoreService;
-
+    @Autowired
+    private PrecompiledWithSignService precompiledWithSignService;
     /**
      * permission state flag(enum)
      */
@@ -50,11 +54,6 @@ public class PermissionManageService {
     // permission state is already revoked
     private static final int FLAG_REVOKED = 0;
 
-
-    // get credentials from user address
-    private Credentials getCredentials(String fromAddress, Boolean useAes) throws Exception {
-        return keyStoreService.getCredentials(fromAddress, useAes);
-    }
 
     /**
      * 获取所有权限的list
@@ -147,8 +146,8 @@ public class PermissionManageService {
      * 先getList(约1秒），XOR异或(权限状态有修改的)才需要发交易。
      * 直接发四个交易
      */
-    public Object updatePermissionStateAfterCheck(int groupId, String fromAddress, String userAddress,
-                                                  PermissionState permissionState, Boolean useAes) throws Exception {
+    public Object updatePermissionStateAfterCheck(int groupId, String signUserId, String userAddress,
+                                                  PermissionState permissionState) throws Exception {
         Map<String, Integer> resultList = new HashMap<>();
         Map<String, PermissionState> checkList = getPermissionStateList(groupId);
         int cnsMgrState = permissionState.getCns();
@@ -159,30 +158,30 @@ public class PermissionManageService {
         if(checkList.containsKey(userAddress)){ //checkList包含address拥有的权限，不包含未拥有的权限有部分权限
             //不执行的状况： get: 1, deployAndCreateMgrState: 1， get: 0, deployAndCreateMgrState: 0
             if(checkList.get(userAddress).getDeployAndCreate() != deployAndCreateMgrState) {
-                deployAndCreateMgrState = deployAndCreateMgrHandle(groupId, fromAddress, userAddress,
-                        deployAndCreateMgrState, useAes);
+                deployAndCreateMgrState = deployAndCreateMgrHandle(groupId, signUserId, userAddress,
+                        deployAndCreateMgrState);
             }
             if(checkList.get(userAddress).getCns() != cnsMgrState) {
-                cnsMgrState = cnsMgrHandle(groupId, fromAddress, userAddress,
-                        cnsMgrState, useAes);
+                cnsMgrState = cnsMgrHandle(groupId, signUserId, userAddress,
+                        cnsMgrState);
             }
             if(checkList.get(userAddress).getNode() != nodeMgrState) {
-                nodeMgrState = nodeMgrHandle(groupId, fromAddress, userAddress,
-                        nodeMgrState, useAes);
+                nodeMgrState = nodeMgrHandle(groupId, signUserId, userAddress,
+                        nodeMgrState);
             }
             if(checkList.get(userAddress).getSysConfig() != sysConfigMgrState) {
-                sysConfigMgrState = sysConfigMgrHandle(groupId, fromAddress, userAddress,
-                        sysConfigMgrState, useAes);
+                sysConfigMgrState = sysConfigMgrHandle(groupId, signUserId, userAddress,
+                        sysConfigMgrState);
             }
         }else { // 全部权限都没有
-            deployAndCreateMgrState = deployAndCreateMgrHandle(groupId, fromAddress, userAddress,
-                    deployAndCreateMgrState, useAes);
-            cnsMgrState = cnsMgrHandle(groupId, fromAddress, userAddress,
-                    cnsMgrState, useAes);
-            nodeMgrState = nodeMgrHandle(groupId, fromAddress, userAddress,
-                    nodeMgrState, useAes);
-            sysConfigMgrState = sysConfigMgrHandle(groupId, fromAddress, userAddress,
-                    sysConfigMgrState, useAes);
+            deployAndCreateMgrState = deployAndCreateMgrHandle(groupId, signUserId, userAddress,
+                    deployAndCreateMgrState);
+            cnsMgrState = cnsMgrHandle(groupId, signUserId, userAddress,
+                    cnsMgrState);
+            nodeMgrState = nodeMgrHandle(groupId, signUserId, userAddress,
+                    nodeMgrState);
+            sysConfigMgrState = sysConfigMgrHandle(groupId, signUserId, userAddress,
+                    sysConfigMgrState);
         }
 
         if(cnsMgrState == FLAG_FAIL || deployAndCreateMgrState == FLAG_FAIL
@@ -198,11 +197,11 @@ public class PermissionManageService {
     }
 
     // deploy and create handle
-    public int deployAndCreateMgrHandle(int groupId, String fromAddress, String userAddress,
-                                        int deployAndCreateState, Boolean useAes) throws Exception {
+    public int deployAndCreateMgrHandle(int groupId, String signUserId, String userAddress,
+                                        int deployAndCreateState) throws Exception {
         int resState = FLAG_FAIL;
         if(deployAndCreateState == FLAG_GRANTED) {
-            String result = grantDeployAndCreateManager(groupId, fromAddress, userAddress, useAes);
+            String result = grantDeployAndCreateManager(groupId, signUserId, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
             if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS ||
                     resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
@@ -211,7 +210,7 @@ public class PermissionManageService {
                 throw new FrontException("Update permission state fail for permission denied");
             }
         }else if(deployAndCreateState == FLAG_REVOKED) {
-            String result = revokeDeployAndCreateManager(groupId, fromAddress, userAddress, useAes);
+            String result = revokeDeployAndCreateManager(groupId, signUserId, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
             if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS ||
                     resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
@@ -224,20 +223,21 @@ public class PermissionManageService {
     }
 
     // cns handle
-    public int cnsMgrHandle(int groupId, String fromAddress, String userAddress,
-                            int cnsState, Boolean useAes) throws Exception {
+    public int cnsMgrHandle(int groupId, String signUserId, String userAddress,
+                            int cnsState) throws Exception {
         int resState = FLAG_FAIL;
         if(cnsState == FLAG_GRANTED) {
-            String result = grantCNSManager(groupId, fromAddress, userAddress, useAes);
+            String result = grantCNSManager(groupId, signUserId, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
             if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS ||
                     resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
                 resState = FLAG_GRANTED;
-            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){  // permission denied
+            }else if(resCode == PrecompiledUtils.PERMISSION_DENIED){
+                // permission denied
                 throw new FrontException("Update permission state fail for permission denied");
             }
         }else if(cnsState == FLAG_REVOKED) {
-            String result = revokeCNSManager(groupId, fromAddress, userAddress, useAes);
+            String result = revokeCNSManager(groupId, signUserId, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
             if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS ||
                     resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
@@ -250,11 +250,11 @@ public class PermissionManageService {
     }
 
     // node handle
-    public int nodeMgrHandle(int groupId, String fromAddress, String userAddress,
-                             int nodeState, Boolean useAes) throws Exception {
+    public int nodeMgrHandle(int groupId, String signUserId, String userAddress,
+                             int nodeState) throws Exception {
         int resState = FLAG_FAIL;
         if(nodeState == FLAG_GRANTED) {
-            String result = grantNodeManager(groupId, fromAddress, userAddress, useAes);
+            String result = grantNodeManager(groupId, signUserId, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
             if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS ||
                     resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
@@ -263,7 +263,7 @@ public class PermissionManageService {
                 throw new FrontException("Update permission state fail for permission denied");
             }
         }else if(nodeState == FLAG_REVOKED) {
-            String result = revokeNodeManager(groupId, fromAddress, userAddress, useAes);
+            String result = revokeNodeManager(groupId, signUserId, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
             if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS ||
                     resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
@@ -276,11 +276,11 @@ public class PermissionManageService {
     }
 
     // system config handle
-    public int sysConfigMgrHandle(int groupId, String fromAddress, String userAddress,
-                                  int sysConfigState, Boolean useAes) throws Exception {
+    public int sysConfigMgrHandle(int groupId, String signUserId, String userAddress,
+                                  int sysConfigState) throws Exception {
         int resState = FLAG_FAIL;
         if(sysConfigState == FLAG_GRANTED) {
-            String result = grantSysConfigManager(groupId, fromAddress, userAddress, useAes);
+            String result = grantSysConfigManager(groupId, signUserId, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
             if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS ||
                     resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
@@ -289,7 +289,7 @@ public class PermissionManageService {
                 throw new FrontException("Update permission state fail for permission denied");
             }
         }else if(sysConfigState == FLAG_REVOKED) {
-            String result = revokeSysConfigManager(groupId, fromAddress, userAddress, useAes);
+            String result = revokeSysConfigManager(groupId, signUserId, userAddress);
             int resCode = PrecompiledUtils.string2Json(result).get("code").intValue();
             if( resCode == PrecompiledUtils.PRECOMPILED_SUCCESS ||
                     resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
@@ -303,26 +303,20 @@ public class PermissionManageService {
 
     /**
      * manage chain admin related
-     * @param groupId
-     * @param userAddress
-     * @return
      * @throws Exception
      */
-    public String grantPermissionManager(int groupId, String fromAddress, String userAddress,
-                                         Boolean useAes) throws Exception {
-
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-        return permissionService.grantPermissionManager(userAddress);
+    public String grantPermissionManager(int groupId, String signUserId, String userAddress)
+            throws Exception {
+        String res = precompiledWithSignService.grant(groupId, signUserId,
+                PrecompiledCommon.SYS_TABLE_ACCESS, userAddress);
+        return res;
     }
 
-    public String  revokePermissionManager(int groupId, String fromAddress, String userAddress,
-                                           Boolean useAes) throws Exception {
-
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.revokePermissionManager(userAddress);
+    public String revokePermissionManager(int groupId, String signUserId, String userAddress)
+            throws Exception {
+        String res = precompiledWithSignService.revoke(groupId, signUserId,
+                PrecompiledCommon.SYS_TABLE_ACCESS, userAddress);
+        return res;
     }
 
     /**
@@ -332,31 +326,23 @@ public class PermissionManageService {
 
         PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
-
         return permissionService.listPermissionManager();
     }
 
     /**
      * manage deploy create Contract Manager related
      */
-    public String grantDeployAndCreateManager(int groupId, String fromAddress, String userAddress,
-                                              Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.grantDeployAndCreateManager(userAddress);
+    public String grantDeployAndCreateManager(int groupId, String signUserId, String userAddress) throws Exception {
+        String res = precompiledWithSignService.grant(groupId, signUserId, PrecompiledCommon.SYS_TABLE, userAddress);
+        return res;
     }
 
-    public String revokeDeployAndCreateManager(int groupId, String fromAddress, String userAddress,
-                                               Boolean useAes) throws Exception {
-
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-        return permissionService.revokeDeployAndCreateManager(userAddress);
+    public String revokeDeployAndCreateManager(int groupId, String signUserId, String userAddress) throws Exception {
+        String res = precompiledWithSignService.revoke(groupId, signUserId, PrecompiledCommon.SYS_TABLE, userAddress);
+        return res;
     }
 
     public List<PermissionInfo> listDeployAndCreateManager(int groupId) throws Exception {
-
         PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         return permissionService.listDeployAndCreateManager();
@@ -364,27 +350,20 @@ public class PermissionManageService {
 
     /**
      * manage userTableManager related
-     * @param groupId
-     * @param tableName
-     * @param userAddress
-     * @return
      * @throws Exception
      */
-    public Object grantUserTableManager(int groupId, String fromAddress, String tableName, String userAddress,
-                                        Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.grantUserTableManager(tableName, userAddress);
-
+    public Object grantUserTableManager(int groupId, String signUserId, String tableName, String userAddress) throws Exception {
+        // CRUD.desc to check table exists TODO rely on crud
+        CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
+        crudService.desc(tableName);
+        String res = precompiledWithSignService.grant(groupId, signUserId, tableName, userAddress);
+        return res;
     }
 
-    public Object revokeUserTableManager(int groupId, String fromAddress, String tableName, String userAddress,
-                                         Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.revokeUserTableManager(tableName, userAddress);
+    public Object revokeUserTableManager(int groupId, String signUserId, String tableName, String userAddress) throws Exception {
+        String res = precompiledWithSignService.revoke(groupId, signUserId, tableName, userAddress);
+        return res;
     }
 
     public List<PermissionInfo> listUserTableManager(int groupId, String tableName) throws Exception {
@@ -397,29 +376,21 @@ public class PermissionManageService {
 
     /**
      * manage NodeManager related
-     * @param groupId
-     * @param userAddress
-     * @return
      * @throws Exception
      */
-    public String grantNodeManager(int groupId, String fromAddress, String userAddress,
-                                   Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.grantNodeManager(userAddress);
+    public String grantNodeManager(int groupId, String signUserId, String userAddress) throws Exception {
+        String res = precompiledWithSignService.grant(groupId, signUserId,
+                PrecompiledCommon.SYS_CONSENSUS, userAddress);
+        return res;
     }
 
-    public String revokeNodeManager(int groupId, String fromAddress, String userAddress,
-                                    Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.revokeNodeManager(userAddress);
+    public String revokeNodeManager(int groupId, String signUserId, String userAddress) throws Exception {
+        String res = precompiledWithSignService.revoke(groupId, signUserId,
+                PrecompiledCommon.SYS_CONSENSUS, userAddress);
+        return res;
     }
 
     public List<PermissionInfo> listNodeManager(int groupId) throws Exception {
-
         PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         return permissionService.listNodeManager();
@@ -427,29 +398,21 @@ public class PermissionManageService {
 
     /**
      * manage system config Manager related
-     * @param groupId
-     * @param userAddress
-     * @return
      * @throws Exception
      */
-    public String grantSysConfigManager(int groupId, String fromAddress, String userAddress,
-                                        Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.grantSysConfigManager(userAddress);
+    public String grantSysConfigManager(int groupId, String signUserId, String userAddress) throws Exception {
+        String res = precompiledWithSignService.grant(groupId, signUserId,
+                PrecompiledCommon.SYS_CONFIG, userAddress);
+        return res;
     }
 
-    public String revokeSysConfigManager(int groupId, String fromAddress, String userAddress,
-                                         Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.revokeSysConfigManager(userAddress);
+    public String revokeSysConfigManager(int groupId, String signUserId, String userAddress) throws Exception {
+        String res = precompiledWithSignService.revoke(groupId, signUserId,
+                PrecompiledCommon.SYS_CONFIG, userAddress);
+        return res;
     }
 
     public List<PermissionInfo> listSysConfigManager(int groupId) throws Exception {
-
         PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         return permissionService.listSysConfigManager();
@@ -457,25 +420,18 @@ public class PermissionManageService {
 
     /**
      * manage CNS Manager related
-     * @param groupId
-     * @param userAddress
-     * @return
      * @throws Exception
      */
-    public String grantCNSManager(int groupId, String fromAddress, String userAddress,
-                                  Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.grantCNSManager(userAddress);
+    public String grantCNSManager(int groupId, String signUserId, String userAddress) throws Exception {
+        String res = precompiledWithSignService.grant(groupId, signUserId,
+                PrecompiledCommon.SYS_CNS, userAddress);
+        return res;
     }
 
-    public String revokeCNSManager(int groupId, String fromAddress, String userAddress,
-                                   Boolean useAes) throws Exception {
-        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
-                getCredentials(fromAddress, useAes));
-
-        return permissionService.revokeCNSManager(userAddress);
+    public String revokeCNSManager(int groupId, String signUserId, String userAddress) throws Exception {
+        String res = precompiledWithSignService.revoke(groupId, signUserId,
+                PrecompiledCommon.SYS_CNS, userAddress);
+        return res;
     }
 
     public List<PermissionInfo> listCNSManager(int groupId) throws Exception {

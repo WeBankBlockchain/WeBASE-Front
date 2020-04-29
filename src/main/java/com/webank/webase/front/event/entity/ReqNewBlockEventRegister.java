@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,11 @@ import javax.validation.constraints.NotNull;
 public class ReqNewBlockEventRegister {
 
 	/**
+	 * id in database
+	 */
+	private String infoId;
+
+	/**
 	 * application which register new block event
 	 */
 	@NotEmpty(message = "appId cannot be empty")
@@ -50,10 +55,9 @@ public class ReqNewBlockEventRegister {
 	private String exchangeName;
 
 	/**
-	 * username as queue name
+	 * appId as queue name
 	 */
-	@NotEmpty(message = "queueName cannot be empty, usually use username")
+	@NotEmpty(message = "queueName cannot be empty, usually use appId as queueName")
 	private String queueName;
-
 
 }

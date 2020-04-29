@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 package com.webank.webase.front.base.config;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
@@ -95,7 +96,7 @@ public class Web3Config {
 
     /**
      * init getWeb3j.
-     * 
+     *
      * @return
      */
     @Bean
@@ -115,7 +116,7 @@ public class Web3Config {
 
     /**
      * set sdk threadPool.
-     * 
+     *
      * @return
      */
     @Bean
@@ -152,7 +153,7 @@ public class Web3Config {
             connectionsList.add(ip + ":" + channelPort);
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setConnectionsStr(connectionsList);
-            channelConnections.setGroupId(Integer.valueOf(groupIdList.get(i)));
+            channelConnections.setGroupId(Integer.parseInt(groupIdList.get(i)));
             log.info("*** groupId " + groupIdList.get(i));
             channelConnectionsList.add(channelConnections);
         }
@@ -188,7 +189,7 @@ public class Web3Config {
             Web3j web3jSync = Web3j.build(channelEthereumService, service.getGroupId());
             // for getClockNumber local
             web3jSync.getBlockNumberCache();
-            web3jMap.put(Integer.valueOf(i), web3jSync);
+            web3jMap.put(i, web3jSync);
         }
         return web3jMap;
     }
@@ -202,9 +203,9 @@ public class Web3Config {
         Constants.chainId = version.getNodeVersion().getChainID();
         log.info("Chain's clientVersion:{}", Constants.version);
         if (Constants.version.contains("gm")) {
-            isMatch = EncryptType.encryptType == 1;
+            isMatch = EncryptType.encryptType == GMStatus.GUOMI.getValue();
         } else {
-            isMatch = EncryptType.encryptType == 0;
+            isMatch = EncryptType.encryptType == GMStatus.STANDARD.getValue();
         }
         if (!isMatch) {
             log.error("Chain's version not matches with Front's  encryptType:{}",

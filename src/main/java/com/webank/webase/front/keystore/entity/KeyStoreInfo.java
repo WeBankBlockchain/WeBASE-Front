@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,18 @@ public class KeyStoreInfo {
     @Id
     private String address;
     private String publicKey;
+    /**
+     * not store private key in db
+     */
     private String privateKey;
     private String userName;
+    /**
+     * 0:local, 1:random, 2:external
+     */
     private int type;
+    /**
+     * webase-sign signUserId
+     */
+    private String signUserId;
+    private String appId;
 }
