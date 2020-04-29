@@ -21,6 +21,7 @@ import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.web3api.entity.*;
@@ -48,8 +49,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
-//import org.fisco.bcos.web3j.protocol.core.methods.response.GenerateGroup.Status;
 
 
 /**
@@ -654,34 +653,117 @@ public class Web3ApiService {
         return null;
     }
 
-    public Object generateGroup(GenerateGroupInfo generateGroupInfo) throws IOException {
+    /**
+     * dynamic group management
+     */
+
+    public Object generateGroup(GenerateGroupInfo generateGroupInfo) {
+        log.debug("start generateGroup. groupId:{}", generateGroupInfo.getGenerateGroupId());
         try {
-            GenerateGroup.Status status = getWeb3j()
-                    .generateGroup(generateGroupInfo.getGenerateGroupId(),
-                            generateGroupInfo.getTimestamp().intValue(),
-                            generateGroupInfo.getNodeList())
-                    .send().getStatus();
-            return status;
+            GroupOperateStatus status = CommonUtils.object2JavaBean(
+                    getWeb3j().generateGroup(generateGroupInfo.getGenerateGroupId(),
+                            generateGroupInfo.getTimestamp().longValue(), true,
+                            generateGroupInfo.getNodeList()).send().getStatus(),
+                    GroupOperateStatus.class);
+            log.info("generateGroup. groupId:{} status:{}", generateGroupInfo.getGenerateGroupId(),
+                    status);
+            if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+                return new BaseResponse(ConstantCode.RET_SUCCEED);
+            } else {
+                throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
+                        status.getMessage());
+            }
         } catch (IOException e) {
-            log.error("generateGroup error:[]", e);
-            throw new FrontException(e.getMessage());
+            log.error("generateGroup fail.");
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
     }
 
-    public Object startGroup(int startGroupId) throws IOException {
+    public Object operateGroup(int groupId, String type) {
+        log.debug("start operateGroup. groupId:{} type:{}", groupId, type);
         try {
-            org.fisco.bcos.web3j.protocol.core.methods.response.StartGroup.Status
-                    status = getWeb3j()
-                    .startGroup(startGroupId)
-                    .send().getStatus();
-            // if start group success, refresh web3jMap
-            if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-                refreshWeb3jMap(startGroupId);
+            switch (type) {
+                case Constants.OPERATE_GROUP_START:
+                    return startGroup(groupId);
+                case Constants.OPERATE_GROUP_STOP:
+                    return stopGroup(groupId);
+                case Constants.OPERATE_GROUP_REMOVE:
+                    return removeGroup(groupId);
+                case Constants.OPERATE_GROUP_RECOVER:
+                    return recoverGroup(groupId);
+                case Constants.OPERATE_GROUP_GETSTATUS:
+                    return queryGroupStatus(groupId);
+                default:
+                    log.error("end operateGroup. invalid operate type");
+                    throw new FrontException(ConstantCode.INVALID_GROUP_OPERATE_TYPE);
             }
-            return status;
         } catch (IOException e) {
-            log.error("generateGroup error:[]", e);
-            throw new FrontException(e.getMessage());
+            log.error("operateGroup fail.");
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
+    }
+
+    private Object startGroup(int groupId) throws IOException {
+        GroupOperateStatus status = CommonUtils.object2JavaBean(
+                getWeb3j().startGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        log.info("startGroup. groupId:{} status:{}", groupId, status);
+        if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+            refreshWeb3jMap(groupId);
+            return new BaseResponse(ConstantCode.RET_SUCCEED);
+        } else {
+            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
+                    status.getMessage());
+        }
+    }
+
+    private Object stopGroup(int groupId) throws IOException {
+        GroupOperateStatus status = CommonUtils.object2JavaBean(
+                getWeb3j().stopGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        log.info("stopGroup. groupId:{} status:{}", groupId, status);
+        if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+            web3jMap.remove(groupId);
+            return new BaseResponse(ConstantCode.RET_SUCCEED);
+        } else {
+            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
+                    status.getMessage());
+        }
+    }
+
+    private Object removeGroup(int groupId) throws IOException {
+        GroupOperateStatus status = CommonUtils.object2JavaBean(
+                getWeb3j().removeGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        log.info("removeGroup. groupId:{} status:{}", groupId, status);
+        if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+            return new BaseResponse(ConstantCode.RET_SUCCEED);
+        } else {
+            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
+                    status.getMessage());
+        }
+    }
+
+    private Object recoverGroup(int groupId) throws IOException {
+        GroupOperateStatus status = CommonUtils.object2JavaBean(
+                getWeb3j().recoverGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        log.info("recoverGroup. groupId:{} status:{}", groupId, status);
+        if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+            return new BaseResponse(ConstantCode.RET_SUCCEED);
+        } else {
+            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
+                    status.getMessage());
+        }
+    }
+
+    private Object queryGroupStatus(int groupId) throws IOException {
+        GroupOperateStatus status = CommonUtils.object2JavaBean(
+                getWeb3j().queryGroupStatus(groupId).send().getStatus(), GroupOperateStatus.class);
+        log.info("queryGroupStatus. groupId:{} status:{}", groupId, status);
+        if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
+            BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+            response.setData(status.getStatus());
+            return response;
+        } else {
+            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
+                    status.getMessage());
         }
     }
 
