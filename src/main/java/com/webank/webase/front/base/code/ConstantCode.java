@@ -69,6 +69,10 @@ public class ConstantCode {
     public static final RetCode KEYSTORE_EXISTS = RetCode.mark(201039, "private key already exists");
     public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201040, "private key not exists");
     public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(201041, "external user's appId and signUserId cannot be empty");
+    public static final RetCode NO_SOL_FILES = RetCode.mark(201042, "There is no sol files in source");
+    public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201043, "invalid group operate type");
+    public static final RetCode INVALID_DATA_TYPE = RetCode.mark(201044, "invalid data type");
+    public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201045, "group operate fail");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
@@ -138,4 +142,8 @@ public class ConstantCode {
     public static final RetCode REGISTER_FAILED_ERROR = RetCode.mark(201246, "Register contractEvent failed, please check your param");
     public static final RetCode UNREGISTER_FAILED_ERROR = RetCode.mark(201247, "Unregister event failed, please check mq server exchange");
     public static final RetCode PARAM_FAIL_ABI_INVALID = RetCode.mark(201248, "Contract abi invalid, please check abi");
+
+    // dynamic group manage
+//    public static final RetCode GENERATE_GROUP = RetCode.mark(201260, "Exchange or message queue not exists, please check mq server or mq configuration");
+
 }
