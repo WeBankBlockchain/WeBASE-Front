@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019  the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 package com.webank.webase.front.base.properties;
 
 import java.math.BigInteger;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -57,17 +55,19 @@ public class Constants {
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI = "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
     public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
+    public static final String WEBASE_SIGN_USER_URI = "http://%s/WeBASE-Sign/user/newUser?encryptType=%s&signUserId=%s&appId=%s";
     public static final String ACCOUNT1_PATH = "node.key";
     public static final String CONSTANT_PREFIX = "constant";
     public static  String version;
     public static String chainId;
-    private String nodeDir = "";
     private String keyServer = "127.0.0.1:8080";
     private int transMaxWait = 30;
     private String monitorDisk = "/";
     private boolean monitorEnabled = true;
     private String aesKey = "4d5dFr4fG446GBde";
     private String nodePath = "/fisco/nodes/127.0.0.1/node0";
+    private Integer eventRegisterTaskFixedDelay;
+    private Integer syncEventMapTaskFixedDelay;
 
     private int http_read_timeOut = 10000;
     private int http_connect_timeOut = 10000;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -39,12 +40,14 @@ import static com.webank.webase.front.util.RabbitMQUtils.*;
 
 /**
  * initialize contract event and new block event notify
- * when start the program
+ * sync registered callback and map with db's data per 5s
+ * @case1: if map contains event that db not have, rm it from map;
+ * @case2: if map not contains that db have, put it in map;
  * @author marsli
  */
 @Slf4j
 @Component
-public class EventRegisterTask implements ApplicationRunner {
+public class EventRegisterInitTask {
 
 	@Autowired
 	MQService mqService;
@@ -60,18 +63,16 @@ public class EventRegisterTask implements ApplicationRunner {
 
 	/**
 	 * Callback used to run the bean.
-	 *
-	 * @param args incoming application arguments
-	 * @throws Exception on error
 	 */
-	@Override
-	public void run(ApplicationArguments args) throws Exception {
-		log.info("ApplicationRunner for event start. ");
-		registerStart();
+	@Scheduled(fixedDelayString = "${constant.eventRegisterTaskFixedDelay}")
+	public void taskStart() {
+		syncEventRegisterTask();
 	}
 
-	public void registerStart() {
-		// after front restart, register only one time
+	/**
+	 * after front restart, re-register
+	 */
+	public synchronized void syncEventRegisterTask() {
 		try{
 			log.info("Register task starts.");
 			for (Integer groupId: serviceMap.keySet()) {
@@ -82,8 +83,12 @@ public class EventRegisterTask implements ApplicationRunner {
 				log.info("Register task groupId:{},newBlockEventInfoList count:{},contractEventInfoList count:{}",
 						groupId, newBlockEventInfoList.size(), contractEventInfoList.size());
 				// foreach register
-				newBlockEventInfoList.forEach(this::registerNewBlockEvent);
-				contractEventInfoList.forEach(this::registerContractEvent);
+				newBlockEventInfoList.stream()
+						.filter(info -> !BLOCK_ROUTING_KEY_MAP.containsKey(info.getAppId()))
+						.forEach(this::registerNewBlockEvent);
+				contractEventInfoList.stream()
+						.filter(info -> !CONTRACT_EVENT_CALLBACK_MAP.containsKey(info.getId()))
+						.forEach(this::registerContractEvent);
 			}
 			log.info("Register task finish.");
 		}catch (Exception ex) {
@@ -93,21 +98,23 @@ public class EventRegisterTask implements ApplicationRunner {
 
 
 	private void registerNewBlockEvent(NewBlockEventInfo registerInfo) {
-		String queueName = registerInfo.getQueueName();
+		log.debug("start registerNewBlockEvent appId:{}", registerInfo.getAppId());
 		String appId = registerInfo.getAppId();
 		String exchangeName = registerInfo.getExchangeName();
+		String queueName = registerInfo.getQueueName();
 		int groupId = registerInfo.getGroupId();
 		String blockRoutingKey = registerInfo.getRoutingKey();
-		log.debug("registerNewBlockEvent task  NewBlockEventInfo:{}", registerInfo);
 		mqService.bindQueue2Exchange(exchangeName,
 				queueName, blockRoutingKey);
 		// record groupId, exchange, routingKey for all block notify
 		PublisherHelper blockPublishInfo = new PublisherHelper(groupId,
 				exchangeName, blockRoutingKey);
 		BLOCK_ROUTING_KEY_MAP.put(appId, blockPublishInfo);
+		log.debug("end registerNewBlockEvent successful appId:{}", appId);
 	}
 
 	private void registerContractEvent(ContractEventInfo rInfo) {
+		log.debug("start registerContractEvent infoId:{}", rInfo.getId());
 		List<String> topicList = FrontUtils.string2ListStr(rInfo.getTopicList());
 		String exchangeName = rInfo.getExchangeName();
 		String queueName = rInfo.getQueueName();
@@ -123,7 +130,6 @@ public class EventRegisterTask implements ApplicationRunner {
 		// init EventLogUserParams for register
 		EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(
 				fromBlock, toBlock, contractAddress, topicList);
-		log.debug("registerContractEvent task ContractEventInfo:{}", rInfo);
 		// bind queue to exchange by routing key "queueName_event"
 		mqService.bindQueue2Exchange(exchangeName, queueName, eventRoutingKey);
 		ContractEventCallback callBack =
@@ -131,5 +137,8 @@ public class EventRegisterTask implements ApplicationRunner {
 						eventRoutingKey, decoder, groupId, appId);
 		org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
 		service.registerEventLogFilter(params, callBack);
+		callBack.setRunning(true);
+		CONTRACT_EVENT_CALLBACK_MAP.put(rInfo.getId(), callBack);
+		log.debug("end registerContractEvent successful infoId:{}", rInfo.getId());
 	}
 }

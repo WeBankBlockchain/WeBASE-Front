@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package com.webank.webase.front.event;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.event.entity.ReqNewBlockEventRegister;
 import com.webank.webase.front.event.entity.ReqContractEventRegister;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -31,16 +31,21 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @WebAppConfiguration
+@Transactional
+@Rollback
 public class EventControllerTest extends BaseTest {
 
 	private MockMvc mockMvc;
 	private Integer groupId = 1;
+	private int pageNumber = 1;
+	private int pageSize = 5;
 
 	@Autowired
 	private WebApplicationContext webApplicationContext;
@@ -78,8 +83,6 @@ public class EventControllerTest extends BaseTest {
 		resultActions.
 //				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
-		System.out
-				.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
 	}
 
 	/**
@@ -101,7 +104,100 @@ public class EventControllerTest extends BaseTest {
 		resultActions.
 				andExpect(MockMvcResultMatchers.status().isOk()).
 				andDo(MockMvcResultHandlers.print());
-		System.out
-				.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
+	}
+
+	@Test
+	public void testGetNewBlockEventList() throws Exception {
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.get("/event/newBlockEvent/list/"
+//						+ groupId + "/" + pageNumber + "/" + pageSize)
+						+ groupId)
+						.contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	@Test
+	public void testGetNewBlockEventByGroupIdAndAppId() throws Exception {
+		String appId = "app1";
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.get("/event/newBlockEvent/"
+						+ groupId + "/" + appId)
+						.contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	@Test
+	public void testGetContractEventList() throws Exception {
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.get("/event/contractEvent/list/"
+//						+ groupId + "/" + pageNumber + "/" + pageSize)
+						+ groupId)
+						.contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	@Test
+	public void testGetContractEventByGroupIdAndAppId() throws Exception {
+		String appId = "app1";
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.get("/event/contractEvent/"
+						+ groupId + "/" + appId)
+						.contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	/**
+	 * unregister new block event
+	 * @throws Exception
+	 */
+	@Test
+	public void testUnregisterNewBlockEvent() throws Exception {
+		String blockInfoId = "8aba82b57076ae09017076ae3f100000";
+		ReqNewBlockEventRegister param = new ReqNewBlockEventRegister();
+		param.setExchangeName("group001");
+		param.setQueueName("user1");
+		param.setAppId("app1");
+		param.setGroupId(1);
+		param.setInfoId(blockInfoId);
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.delete("/event/newBlockEvent").
+						content(JSON.toJSONString(param)).
+						contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+	}
+
+	@Test
+	public void testUnregisterContractEvent() throws Exception {
+		String eventInfoId = "8aba82b570768afd0170768b2cc50001";
+		ReqContractEventRegister param = new ReqContractEventRegister();
+		param.setExchangeName("group001");
+		param.setQueueName("user1");
+		param.setAppId("app1");
+		param.setGroupId(1);
+		param.setInfoId(eventInfoId);
+		ResultActions resultActions = mockMvc
+				.perform(MockMvcRequestBuilders.delete("/event/contractEvent").
+						content(JSON.toJSONString(param)).
+						contentType(MediaType.APPLICATION_JSON)
+				);
+		resultActions.
+				andExpect(MockMvcResultMatchers.status().isOk()).
+				andDo(MockMvcResultHandlers.print());
+
 	}
 }

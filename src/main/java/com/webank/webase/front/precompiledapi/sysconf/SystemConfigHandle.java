@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ public class SystemConfigHandle {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private int groupId;
     @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
-    private String fromAddress;
+    private String signUserId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONFIG_KEY_IS_EMPTY)
     private String configKey;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONFIG_VALUE_IS_EMPTY)
     private String configValue;
-    // 向后兼容 默认useAes为false
-    private Boolean useAes;
+    @Deprecated
+    private String fromAddress;
 }

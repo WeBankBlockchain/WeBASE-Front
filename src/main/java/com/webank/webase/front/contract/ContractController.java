@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -20,6 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
+
+import com.webank.webase.front.contract.entity.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -41,17 +44,6 @@ import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ContractPath;
-import com.webank.webase.front.contract.entity.ReqContractCompile;
-import com.webank.webase.front.contract.entity.ReqContractPath;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqDeployWithSign;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
-import com.webank.webase.front.contract.entity.RspContractCompile;
-import com.webank.webase.front.contract.entity.FileContentHandle;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -79,31 +71,36 @@ public class ContractController extends BaseController {
      */
     @ApiOperation(value = "contract deploy", notes = "contract deploy")
     @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
-    @PostMapping("/deploy")
+    @PostMapping("/deployWithSign")
     public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
         throws Exception {
-        log.info("contract deploy start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
+        log.info("contract deployWithSign start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
-        String contractAddress = contractService.caseDeploy(reqDeploy);
-        log.info("success deploy. result:{}", contractAddress);
+        if (StringUtils.isBlank(reqDeploy.getSignUserId())) {
+            log.error("contract deployWithSign error: signUserId is empty");
+            throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
+        }
+        String contractAddress = contractService.caseDeploy(reqDeploy, false);
+        log.info("success deployWithSign. result:{}", contractAddress);
         return contractAddress;
     }
     
     /**
-     * deployWithSign.
-     *
-     * @param reqDeploy request data
-     * @param result checkResult
+     * deploy locally not through sign
      */
-    @ApiOperation(value = "contract deploy", notes = "contract deploy with WeBASE-Sign")
-    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeployWithSign")
-    @PostMapping("/deployWithSign")
-    public String deployWithSign(@Valid @RequestBody ReqDeployWithSign reqDeploy, BindingResult result)
+    @ApiOperation(value = "contract deploy locally", notes = "contract deploy")
+    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
+    @PostMapping("/deploy")
+    public String deployLocal(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
             throws Exception {
-        log.info("contract deployWithSign start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
+        log.info("contract deployLocal start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
-        String contractAddress = contractService.deployWithSign(reqDeploy);
-        log.info("success deployWithSign. result:{}", contractAddress);
+        if (StringUtils.isBlank(reqDeploy.getUser())) {
+            log.error("contract deployLocal error: user(address) is empty");
+            throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
+        }
+        String contractAddress = contractService.caseDeploy(reqDeploy, true);
+        log.info("success deployLocal. result:{}", contractAddress);
         return contractAddress;
     }
 

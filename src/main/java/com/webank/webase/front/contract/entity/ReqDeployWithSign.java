@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,18 @@ import lombok.Data;
 
 /**
  * deployWithSign interface parameter.
- * 
+ * v1.3.0+ default with sign
  */
 @Data
+@Deprecated
 public class ReqDeployWithSign {
     private int groupId = 1;
     private int signUserId = 100001;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACTBIN_IS_EMPTY)
-    private String contractBin;
+    /**
+     * 合约编译的bytecode(bin)，用于部署合约
+     */
+    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTECODE_BIN_IS_EMPTY)
+    private String bytecodeBin;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<Object> contractAbi;
     private List<Object> funcParam = new ArrayList<>();

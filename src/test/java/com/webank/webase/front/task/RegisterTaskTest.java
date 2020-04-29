@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class RegisterTaskTest extends BaseTest {
 	@Autowired
-	EventRegisterTask task;
+	EventRegisterInitTask eventRegisterInitTask;
+	@Autowired
+	SyncEventMapTask mapTask;
 
 	@Test
 	public void testRegisterEventLogPushTask() {
-		task.registerStart();
+		eventRegisterInitTask.syncEventRegisterTask();
+	}
+
+	@Test
+	public void testSyncMapTask() {
+		mapTask.syncEventMapTask();
 	}
 }

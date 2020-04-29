@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,18 @@
 package com.webank.webase.front.event;
 
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEventInfo, Long>,
+public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEventInfo, String>,
 		JpaSpecificationExecutor<NewBlockEventInfo> {
 
-	NewBlockEventInfo findById(Long id);
+	NewBlockEventInfo findById(String id);
+
+	List<NewBlockEventInfo> findByGroupIdAndAppId(int groupId, String appId);
 
 	List<NewBlockEventInfo> findByAppId(String appId);
 
@@ -34,6 +37,8 @@ public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEven
 	List<NewBlockEventInfo> findByQueueName(String queueName);
 
 	List<NewBlockEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
+
+	List<NewBlockEventInfo> findByGroupId(int groupId, Pageable pageable);
 
 	/**
 	 * check unique by appId exchangeName queueName

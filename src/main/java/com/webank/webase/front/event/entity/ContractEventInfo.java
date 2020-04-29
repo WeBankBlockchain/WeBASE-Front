@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * entity to store EventLog push register info (not decoded)
@@ -30,8 +31,8 @@ import javax.persistence.*;
 @Entity
 @Data
 @Table(uniqueConstraints = {
-        @UniqueConstraint(name = "unique_contract_event", columnNames = {"appId", "exchangeName", "contractAddress",
-                "queueName"})
+        @UniqueConstraint(name = "unique_contract_event", columnNames = {"appId", "exchangeName",
+                "queueName", "contractAddress"})
 })
 public class ContractEventInfo {
 
@@ -61,12 +62,12 @@ public class ContractEventInfo {
     private String exchangeName;
 
     /**
-     * @username as queue name
+     * @appId as queue name
      */
     private String queueName;
 
     /**
-     * concat queueName + "_" + event/block + "_" + "appId" as routing key
+     * concat appId + "_" + event/block + "_" + randomStr as routing key
      */
     private String routingKey;
 
@@ -89,5 +90,8 @@ public class ContractEventInfo {
      * List<String>
      */
     private String topicList;
+
+    private LocalDateTime createTime;
+
 
 }
