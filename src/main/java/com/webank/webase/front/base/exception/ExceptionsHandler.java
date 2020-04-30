@@ -56,7 +56,7 @@ public class ExceptionsHandler {
 
         log.warn("catch frontException: {}",  frontException.getMessage());
         Map<String, Object> map = new HashMap<>();
-        //  map.put("exception", frontException);
+        map.put("data", frontException.getDetail());
         map.put("errorMessage", frontException.getMessage());
         map.put("code", frontException.getRetCode().getCode());
         return ResponseEntity.status(422).body(map);
