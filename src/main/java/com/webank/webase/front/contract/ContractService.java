@@ -110,13 +110,6 @@ public class ContractService {
         addressIsValid(req.getGroupId(), req.getAddress(), req.getContractBin());
         // Check if it has been deployed based on the contract name and version number
         checkContractAbiExistedAndSave(contractName, address.substring(2), abiInfos);
-//        try {
-//            cnsServiceMap.get(req.getGroupId()).registerCns(contractName, address.substring(2),
-//                    address, JSON.toJSONString(abiInfos));
-//        } catch (Exception ex) {
-//            log.error("fail sendAbi.", ex);
-//            throw new FrontException(ConstantCode.SEND_ABI_INFO_FAIL);
-//        }
 
         log.info("sendAbi end. contractname:{} ,version:{}", contractName, address);
     }
