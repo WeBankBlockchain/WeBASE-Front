@@ -76,7 +76,7 @@ dependencies {
 //            exclude group:"org.ethereum"
 //        }
 //    compile fileTree(dir:'lib',includes:['solcJ-all-0.4.25-gm.jar'])
-	compile ('org.fisco-bcos:web3sdk:2.4.0-0417-SNAPSHOT')
+	compile ('org.fisco-bcos:web3sdk:2.4.0')
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
 	compile 'com.alibaba:fastjson:1.2.67'
 	compile 'com.h2database:h2:1.4.197'
