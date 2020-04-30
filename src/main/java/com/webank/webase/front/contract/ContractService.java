@@ -361,10 +361,10 @@ public class ContractService {
                             .send();
         } catch (TransactionException e) {
             log.error("commonContract deploy failed.", e);
-            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
+            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED, e.getMessage());
         } catch (Exception e) {
             log.error("commonContract deploy failed.", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR, e.getMessage());
         }
         log.info("commonContract deploy success. contractAddress:{}",
                 commonContract.getContractAddress());
