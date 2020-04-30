@@ -71,18 +71,20 @@ List jaxb = [
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb
 	// guomi contract compile: USE 'socJ-all-0.4.25-gm' to REPLACE 'ethereum:solcJ-all'
-	compile ('org.fisco-bcos:web3sdk:2.2.0')
+//	compile ('org.fisco-bcos:web3sdk:2.3.0')
 //        {
 //            exclude group:"org.ethereum"
 //        }
 //    compile fileTree(dir:'lib',includes:['solcJ-all-0.4.25-gm.jar'])
+	compile ('org.fisco-bcos:web3sdk:2.4.0-0417-SNAPSHOT')
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
 	compile 'com.alibaba:fastjson:1.2.67'
 	compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
-	compile 'org.projectlombok:lombok:1.18.2'
+	compile 'org.projectlombok:lombok:1.18.6'
 	compile 'com.github.jsqlparser:jsqlparser:2.0'
+	compile "org.apache.commons:commons-lang3:3.8.1"
 
 	testCompile('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
