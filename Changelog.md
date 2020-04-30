@@ -1,3 +1,51 @@
+### v1.3.0(2020-04-29)
+
+**Add**
+- 新增链上事件通知的GET接口
+- WeBASE-Node-Manager的私钥管理与交易由节点前置通过**WeBASE-Sign**进行私钥创建与交易签名
+- 节点前置的web页面中，私钥管理移入合约管理中，改为“测试用户管理”；
+- 私钥接口中，除节点前置的本地私钥用户外，其他类型的私钥用户不再保存与返回私钥
+- 预编译合约接口由WeBASE-Sign签名后调用
+- 签名服务的`userId`改为`signUserId`, 接口中的`useAes`默认为true，不再需要传入值
+
+**Fix**
+- 修复链上事件通知的数据一致性bug
+- 升级依赖包log4j, fastjson, jackson
+- 优化web3ApiService的异常捕获
+- 修复可为空的合约`funcParam`不可为空的bug
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 及以上版本
+- WeBASE-Web v1.2.2+
+- WeBASE-Node-Manager v1.2.2+
+- WeBASE-Sign v1.2.2+
+- WeBASE-Transaction v1.2.2+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+### v1.2.4 (2020-04-08)
+
+**Fix**
+- bugifx: 升级fastjson v1.2.67
+- bugifx: Precompiled预编译相关接口中的useAes默认为false，改为默认true
+- bugifx: 链上事件通知中修复内存与数据库的数据一致性问题，增加try-catch的异常处理、出块事件HashMap改为ConcurrentHashMap
+- 优化: 修复Web3jMap的空指针问题，修复获取groupList失败的数组越界问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.0.0-rc1 版本
+- 支持FISCO-BCOS v2.0.0-rc2 版本
+- 支持FISCO-BCOS v2.0.0-rc3 版本
+- 支持FISCO-BCOS v2.0.0 及以上版本
+- WeBASE-Web v1.2.2+
+- WeBASE-Node-Manager v1.2.2+
+- WeBASE-Sign v1.2.2+
+- WeBASE-Transaction v1.2.2+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.2.3 (2020-03-11)
 
 **Add**
