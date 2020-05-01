@@ -27,6 +27,7 @@ import com.webank.webase.front.keystore.entity.SignInfo;
 import com.webank.webase.front.util.AesUtils;
 import com.webank.webase.front.util.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -133,6 +134,9 @@ public class KeyStoreService {
     public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId) {
         RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId);
         String address = rspUserInfo.getAddress();
+        if (StringUtils.isEmpty(address)) {
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setAddress(address);
         keyStoreInfo.setPublicKey(rspUserInfo.getPublicKey());
