@@ -41,7 +41,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class AbiControllerTest {
 	private MockMvc mockMvc;
 	private Integer groupId = 1;
-	private Integer pageNumer = 1;
+	private Integer pageNumber = 1;
 	private Integer pageSize = 5;
 
 	@Autowired
@@ -95,7 +95,7 @@ public class AbiControllerTest {
 	@Test
 	public void testGetAbi() throws Exception {
 		// post action
-		String url = String.format("/abi/list/%1s/%2s/%3s", groupId, pageNumer, pageSize);
+		String url = String.format("/abi/list/%1s/%2s/%3s", groupId, pageNumber, pageSize);
 		ResultActions resultActions = mockMvc.perform(
 			MockMvcRequestBuilders.get(url)
 				.contentType(MediaType.APPLICATION_JSON)
