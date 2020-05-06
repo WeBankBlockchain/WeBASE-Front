@@ -157,7 +157,7 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return (T) encodeBytes(input, (Class<Bytes>) type);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return (T) new DynamicBytes(Hex.decodeHex(input.toCharArray()));
+                return (T) new DynamicBytes(Numeric.hexStringToByteArray(input));
             } else {
                 throw new FrontException(201201,
                         String.format("type:%s unsupported encoding", type.getName()));
@@ -190,7 +190,7 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return decodeBytes((Bytes) result);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return "0x"+Hex.encodeHexString((byte[]) result.getValue());
+                return "0x" + Hex.encodeHexString((byte[]) result.getValue());
             } else {
                 throw new FrontException(201202,
                         String.format("type:%s unsupported decoding", type.getName()));
