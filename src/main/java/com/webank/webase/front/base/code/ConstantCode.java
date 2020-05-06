@@ -148,4 +148,6 @@ public class ConstantCode {
     // abi import
     public static final RetCode CONTRACT_ADDRESS_ALREADY_EXISTS = RetCode.mark(201255, "contract address already exists");
     public static final RetCode ABI_INFO_NOT_EXISTS = RetCode.mark(201256, "abi info of this id not exists");
+    public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(201257, "Abi Id cannot be empty");
+
 }
