@@ -529,6 +529,7 @@ public class Web3ApiService {
     }
 
     private void refreshWeb3jMap(int groupId) {
+        log.info("refreshWeb3jMap groupId:{}", groupId);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
         Credentials credentials = GenCredential.create();
@@ -544,6 +545,7 @@ public class Web3ApiService {
         try {
             service.run();
         } catch (Exception e) {
+            log.error("refreshWeb3jMap fail. groupId:{} error:[]", groupId, e);
             throw new FrontException("refresh web3j failed");
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();

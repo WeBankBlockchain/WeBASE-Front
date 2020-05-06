@@ -28,6 +28,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.CpuPerc;
@@ -38,6 +42,10 @@ import org.hyperic.sigar.NetInterfaceStat;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -103,7 +111,28 @@ public class PerformanceService {
         }
         return transferToPerformanceData(transferListByGap(performanceList, gap),
                 transferListByGap(contrastPerformanceList, gap));
+    }
 
+    public Page<Performance> pagingQuery(Integer pageNumber, Integer pageSize,
+            LocalDateTime beginDate, LocalDateTime endDate) {
+        Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
+        Specification<Performance> queryParam = new Specification<Performance>() {
+            @Override
+            public Predicate toPredicate(Root<Performance> root, CriteriaQuery<?> criteriaQuery,
+                    CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates = new ArrayList<>();
+                if (beginDate != null) {
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                            beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                }
+                if (endDate != null) {
+                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                            endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                }
+                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+            }
+        };
+        return performanceRepository.findAll(queryParam, pageable);
     }
 
     private List<PerformanceData> transferToPerformanceData(List<Performance> performanceList,
@@ -283,29 +312,30 @@ public class PerformanceService {
      * @return
      */
     public Map<String, String> getConfigInfo() throws UnknownHostException, SigarException {
+        log.info("getConfigInfo.");
         Map<String, String> configMap = new HashMap<>();
         String ip = getIp();
-        log.info("本地ip地址:    " + ip);
+        log.debug("本地ip地址:    " + ip);
         configMap.put("ip", ip);
         Mem mem = sigar.getMem();
-        log.info("内存总量:    " + mem.getTotal() / 1024L + "K av");
-        log.info("当前内存使用量:    " + mem.getUsed() / 1024L + "K used");
+        log.debug("内存总量:    " + mem.getTotal() / 1024L + "K av");
+        log.debug("当前内存使用量:    " + mem.getUsed() / 1024L + "K used");
         configMap.put("memoryTotalSize", Long.toString(mem.getTotal() / 1024L));
         configMap.put("memoryUsedSize", Long.toString(mem.getUsed() / 1024L));
         CpuPerc cpu = sigar.getCpuPerc();
         CpuInfo[] infos = sigar.getCpuInfoList();
-        log.info("CPU的大小:    " + infos[0].getMhz());
-        log.info("CPU的核数:    " + infos.length);
+        log.debug("CPU的大小:    " + infos[0].getMhz());
+        log.debug("CPU的核数:    " + infos.length);
         configMap.put("cpuSize", Integer.toString(infos[0].getMhz()));
         configMap.put("cpuAmount", Integer.toString(infos.length));
         long total;
         long use;
         FileSystem[] fslist = sigar.getFileSystemList();
-        log.info("****fs " + fslist.length);
+        log.debug("****fs " + fslist.length);
         use = sigar.getFileSystemUsage(constants.getMonitorDisk()).getUsed();
         total = sigar.getFileSystemUsage(constants.getMonitorDisk()).getTotal();
-        log.info("文件系统总量:    " + total);
-        log.info("文件系统已使用量:    " + use);
+        log.debug("文件系统总量:    " + total);
+        log.debug("文件系统已使用量:    " + use);
         configMap.put("diskTotalSize", Long.toString(total));
         configMap.put("diskUsedSize", Long.toString(use));
         return configMap;
@@ -337,13 +367,13 @@ public class PerformanceService {
             Long startTime = performanceList.get(i).getTimestamp();
             Long endTime = performanceList.get(i + 1).getTimestamp();
             if (endTime - startTime > 10000) {
-                log.info("****startTime" + startTime);
-                log.info("****endTime" + endTime);
+                log.debug("****startTime" + startTime);
+                log.debug("****endTime" + endTime);
                 while (endTime - startTime > 5000) {
                     Performance emptyPerformance = new Performance();
                     emptyPerformance.setTimestamp(startTime + 5000);
                     newPerformanceList.add(emptyPerformance);
-                    log.info("****insert" + startTime);
+                    log.debug("****insert" + startTime);
                     startTime = startTime + 5000;
                 }
             } else {
