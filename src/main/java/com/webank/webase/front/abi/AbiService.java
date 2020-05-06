@@ -126,6 +126,13 @@ public class AbiService {
 			throw new FrontException(ConstantCode.ABI_INFO_NOT_EXISTS);
 		}
 	}
+
+	/**
+	 * check (groupId,contractName), (groupId,address) unique
+	 * @param groupId
+	 * @param contractName
+	 * @param address
+	 */
 	private void checkAbiExist(int groupId, String contractName, String address) {
 		AbiInfo checkAbiName = abiRepository.findByGroupIdAndContractName(groupId, contractName);
 		if (Objects.nonNull(checkAbiName)) {
