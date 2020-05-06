@@ -102,6 +102,8 @@ public class TransService {
      * @param req request
      */
     public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
+        // get signUserId
+        String signUserId = req.getSignUserId();
         ContractOfTrans contractOfTrans = new ContractOfTrans(req);
         // check param get function of abi
         ContractFunction contractFunction = buildContractFunction(contractOfTrans);
@@ -109,14 +111,11 @@ public class TransService {
         int groupId = contractOfTrans.getGroupId();
         Web3j web3j = getWeb3j(groupId);
         // check contractAddress
-        String contractAddress = checkContractAddress(contractOfTrans.getContractAddress(),
-                groupId, contractOfTrans.getContractName(), contractOfTrans.getVersion());
-
-        // user as signUserId
-        String signUserId = req.getSignUserId();
+        String contractAddress = contractOfTrans.getContractAddress();
         // encode function
         Function function = new Function(req.getFuncName(),
                 contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
+
         return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
     }
 
@@ -524,8 +523,10 @@ public class TransService {
     }
 
     /**
-     * check address from cnsMap, CnsService
+     * if address blank, check address from cnsMap, CnsService
+     * 2020/05/06, not use cns anymore
      */
+    @Deprecated
     public String checkContractAddress(String contractAddress, int groupId,
                                        String contractName, String version) throws Exception {
         String address = contractAddress;
@@ -566,10 +567,6 @@ public class TransService {
 
         //address
         String address = cof.getContractAddress();
-        if (address == null) {
-            //try to get address from map
-            address = cnsMap.get(req.getContractName() + ":" + cof.getVersion());
-        }
 
         //web3j
         Web3j web3j = getWeb3j(cof.getGroupId());
@@ -581,6 +578,7 @@ public class TransService {
         if (address != null) {
             commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
         } else {
+            // deprecated cns in front
             commonContract = CommonContract.loadByName(cof.getContractName() + Constants.SYMPOL + cof.getVersion(),
                     web3j, credentials, contractGasProvider);
         }
