@@ -25,9 +25,11 @@ import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -52,6 +54,15 @@ public class AbiService {
 		return abiList;
 	}
 
+	public void saveAbi(ReqImportAbi param) {
+		if (Objects.isNull(param.getAbiId())) {
+			insertAbiInfo(param);
+		} else {
+			updateAbiInfo(param);
+		}
+	}
+
+	@Transactional
 	public void insertAbiInfo(ReqImportAbi param) {
 		int groupId = param.getGroupId();
 		String contractName = param.getContractName();
@@ -65,35 +76,61 @@ public class AbiService {
 		}
 		// check address
 		String contractBin = getAddressRuntimeBin(groupId, contractAddress);
-		// check exist
-		checkAbiExisted(groupId, contractName, contractAddress);
+		// check name and address of abi not exist
+		checkAbiExist(groupId, contractName, contractAddress);
 
-		AbiInfo abiInfo = new AbiInfo();
-		abiInfo.setGroupId(groupId);
-		abiInfo.setContractName(contractName);
-		abiInfo.setContractAddress(contractAddress);
-		abiInfo.setContractAbi(contractAbiStr);
-		abiInfo.setContractBin(contractBin);
-		abiInfo.setCreateTime(LocalDateTime.now());
-		abiRepository.save(abiInfo);
+		AbiInfo saveAbi = new AbiInfo();
+		BeanUtils.copyProperties(param, saveAbi);
+		saveAbi.setContractAbi(contractAbiStr);
+		saveAbi.setContractBin(contractBin);
+		saveAbi.setCreateTime(LocalDateTime.now());
+		saveAbi.setModifyTime(LocalDateTime.now());
+		abiRepository.save(saveAbi);
+	}
+
+	@Transactional
+	public void updateAbiInfo(ReqImportAbi param) {
+		Long abiId = param.getAbiId();
+		// check id exists
+		checkAbiIdExist(abiId);
+		// update
+		AbiInfo updateAbi = new AbiInfo();
+		BeanUtils.copyProperties(param, updateAbi);
+		String contractAbiStr;
+		try {
+			contractAbiStr = JSON.toJSONString(param.getContractAbi());
+		} catch (Exception e) {
+			log.warn("abi parse string error:{}", param.getContractAbi());
+			throw new FrontException(ConstantCode.PARAM_FAIL_ABI_INVALID);
+		}
+		// check address
+		String contractBin = getAddressRuntimeBin(param.getGroupId(), param.getContractAddress());
+		updateAbi.setContractAbi(contractAbiStr);
+		updateAbi.setContractBin(contractBin);
+		updateAbi.setModifyTime(LocalDateTime.now());
+		abiRepository.save(updateAbi);
 	}
 
 	public void delete(Long id) {
-		AbiInfo abiInfo = abiRepository.findByAbiId(id);
-		if (Objects.isNull(abiInfo)) {
-			throw new FrontException(ConstantCode.ABI_INFO_NOT_EXISTS);
-		}
+		checkAbiIdExist(id);
 		abiRepository.delete(id);
 	}
 
-	private void checkAbiExisted(int groupId, String contractName, String address) {
+	private void checkAbiExist(int groupId, String contractName, String address) {
 		AbiInfo checkAbiName = abiRepository.findByGroupIdAndContractName(groupId, contractName);
 		if (Objects.nonNull(checkAbiName)) {
 			throw new FrontException(ConstantCode.CONTRACT_NAME_REPEAT);
 		}
-		AbiInfo checkAbiAddress = abiRepository.findByGroupIdAndContractAddress(groupId, address);
-		if (Objects.nonNull(checkAbiAddress)) {
+		AbiInfo checkAbiAddressExist = abiRepository.findByGroupIdAndContractAddress(groupId, address);
+		if (Objects.nonNull(checkAbiAddressExist)) {
 			throw new FrontException(ConstantCode.CONTRACT_ADDRESS_ALREADY_EXISTS);
+		}
+	}
+
+	private void checkAbiIdExist(Long abiId) {
+		AbiInfo checkAbiId = abiRepository.findByAbiId(abiId);
+		if (Objects.isNull(checkAbiId)) {
+			throw new FrontException(ConstantCode.ABI_INFO_NOT_EXISTS);
 		}
 	}
 

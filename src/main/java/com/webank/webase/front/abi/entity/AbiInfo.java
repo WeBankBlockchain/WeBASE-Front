@@ -48,4 +48,5 @@ public class AbiInfo {
 	 */
 	// private Integer contractStatus;
 	private LocalDateTime createTime;
+	private LocalDateTime modifyTime;
 }

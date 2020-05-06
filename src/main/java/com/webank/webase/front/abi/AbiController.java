@@ -75,7 +75,7 @@ public class AbiController extends BaseController {
 	public BaseResponse importAbi(@Valid @RequestBody ReqImportAbi importAbi, BindingResult result) {
 		checkParamResult(result);
 		log.debug("start importAbi. importAbi:{}", importAbi);
-		abiService.insertAbiInfo(importAbi);
+		abiService.saveAbi(importAbi);
 		log.debug("end importAbi");
 		return new BaseResponse(ConstantCode.RET_SUCCESS);
 	}
