@@ -14,7 +14,7 @@ LOG_INFO()
 
 if [[ $# -lt 1 ]] ; then
     LOG_WARN "USAGE: $0 bcos_sdk_dir"
-    LOG_WARN "       bcos_sdk_dir    : bcos nodes sdk directory, like /xxx/xxx/nodes/${ip}/sdk."
+    LOG_WARN "       bcos_sdk_dir    : bcos nodes sdk directory, like /xxx/xxx/nodes/[IP]/sdk."
     exit 1;
 fi
 
@@ -33,7 +33,7 @@ trap 'echo -e "Aborted, error $? in command: $BASH_COMMAND"; trap ERR; exit 1' E
 # Set magic variables for current file & dir
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
-__base="$(basename ${__file} .sh)"
+#__base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 
 ###### Read user input value.
@@ -62,7 +62,7 @@ gradle_guomi_param=""
 encrypt_type="0"
 
 readValue "是否使用国密 (Yy/Nn), 默认: Nn ? " "^([Yy]|[Nn])$" "n"
-guomi=$(echo ${read_value} | tr [A-Z]  [a-z])
+guomi=$(echo "${read_value}" | tr [A-Z]  [a-z])
 LOG_INFO "params: 是否使用国密:[${guomi}], bcos_sdk_dir:[${bcos_sdk_dir}]"
 
 if [[ "${guomi}"x == "y"x ]] ; then
@@ -94,7 +94,7 @@ if [[ "${guomi}"x == "y"x ]] ; then
 fi
 
 # change directory
-cd ${__root}
+cd "${__root}"
 
 # check gradle installed
 rm -rf ${__root}/dist/*
@@ -109,8 +109,8 @@ cp -rf conf_template conf
 sed -i "s/encryptType.*#/encryptType: ${encrypt_type} #/g" conf/application.yml
 
 # cp certifications from sdk dir
-cp -frv ${bcos_sdk_dir}/node.* ./conf
-cp -frv ${bcos_sdk_dir}/ca.crt ./conf
+cp -frv "${bcos_sdk_dir}"/node.* ./conf
+cp -frv "${bcos_sdk_dir}"/ca.crt ./conf
 
 # start service
 LOG_INFO "Starting WeBASE-Front......."
