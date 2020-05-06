@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * import abi info to send transaction directly
@@ -69,8 +70,16 @@ public class AbiController extends BaseController {
 		return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
 	}
 
-	@ApiOperation(value = "importAbi",
-			notes = "import abi info")
+	@ApiOperation(value = "get abi by id", notes = "get abi by id")
+	@GetMapping("/{abiId}")
+	public BaseResponse getAbiById(@PathVariable("abiId") Long abiId) {
+		log.debug("start getAbiById. abiId:{}", abiId);
+		AbiInfo res = abiService.getAbiById(abiId);
+		log.debug("end getAbiById");
+		return new BaseResponse(ConstantCode.RET_SUCCESS, res);
+	}
+
+	@ApiOperation(value = "importAbi", notes = "import abi info")
 	@PostMapping("")
 	public BaseResponse importAbi(@Valid @RequestBody ReqImportAbi importAbi, BindingResult result) {
 		checkParamResult(result);
@@ -80,8 +89,20 @@ public class AbiController extends BaseController {
 		return new BaseResponse(ConstantCode.RET_SUCCESS);
 	}
 
-	@ApiOperation(value = "deleteAbi",
-			notes = "delete imported abi info")
+	@ApiOperation(value = "update imported abi", notes = "update abi info")
+	@PutMapping("")
+	public BaseResponse updateAbi(@Valid @RequestBody ReqImportAbi updateAbi, BindingResult result) {
+		checkParamResult(result);
+		if (Objects.isNull(updateAbi.getAbiId())) {
+			throw new FrontException(ConstantCode.PARAM_FAIL_ABI_ID_EMPTY);
+		}
+		log.debug("start updateAbi. updateAbi:{}", updateAbi);
+		abiService.saveAbi(updateAbi);
+		log.debug("end updateAbi");
+		return new BaseResponse(ConstantCode.RET_SUCCESS);
+	}
+
+	@ApiOperation(value = "deleteAbi", notes = "delete imported abi info")
 	@DeleteMapping("")
 	public BaseResponse deleteAbi(@Valid @RequestBody ReqDelAbi param, BindingResult result) {
 		checkParamResult(result);

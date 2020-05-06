@@ -116,6 +116,16 @@ public class AbiService {
 		abiRepository.delete(id);
 	}
 
+	public AbiInfo getAbiById(Long abiId) {
+		return abiRepository.findByAbiId(abiId);
+	}
+
+	private void checkAbiIdExist(Long abiId) {
+		AbiInfo checkAbiId = getAbiById(abiId);
+		if (Objects.isNull(checkAbiId)) {
+			throw new FrontException(ConstantCode.ABI_INFO_NOT_EXISTS);
+		}
+	}
 	private void checkAbiExist(int groupId, String contractName, String address) {
 		AbiInfo checkAbiName = abiRepository.findByGroupIdAndContractName(groupId, contractName);
 		if (Objects.nonNull(checkAbiName)) {
@@ -124,13 +134,6 @@ public class AbiService {
 		AbiInfo checkAbiAddressExist = abiRepository.findByGroupIdAndContractAddress(groupId, address);
 		if (Objects.nonNull(checkAbiAddressExist)) {
 			throw new FrontException(ConstantCode.CONTRACT_ADDRESS_ALREADY_EXISTS);
-		}
-	}
-
-	private void checkAbiIdExist(Long abiId) {
-		AbiInfo checkAbiId = abiRepository.findByAbiId(abiId);
-		if (Objects.isNull(checkAbiId)) {
-			throw new FrontException(ConstantCode.ABI_INFO_NOT_EXISTS);
 		}
 	}
 
