@@ -28,6 +28,7 @@ import java.util.List;
  */
 @Data
 public class ReqImportAbi {
+	private Long abiId;
 	@NotNull
 	private Integer groupId;
 	@NotBlank
