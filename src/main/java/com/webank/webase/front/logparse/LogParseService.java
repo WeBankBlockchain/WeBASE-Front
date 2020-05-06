@@ -35,12 +35,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.web3j.protocol.Web3j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -65,6 +67,8 @@ public class LogParseService {
     @Autowired
     CurrentStateRepository currentStateRepository;
     @Autowired
+    Map<Integer, Web3j> web3jMap;
+    @Autowired
     Constants constants;
 
     private static final String PATH_STAT = "/stat/";
@@ -76,8 +80,11 @@ public class LogParseService {
 
     public synchronized void syncLogData() {
         Instant startTime = Instant.now();
-        log.debug("syncLogData start. startTime:{}", startTime.toEpochMilli());
-        if (!constants.isStatLogEnabled() || checkCountLimit()) {
+        log.debug("syncLogData start.", startTime.toEpochMilli());
+        boolean checkLimit = checkCountLimit();
+        if (!constants.isStatLogEnabled() || checkLimit) {
+            log.debug("syncLogData enabled:{} checkLimit:{}", constants.isStatLogEnabled(),
+                    checkLimit);
             return;
         }
         RandomAccessFile randomFile = null;
@@ -151,7 +158,7 @@ public class LogParseService {
 
     public Page<NetWorkData> getNetWorkData(Integer groupId, Integer pageNumber, Integer pageSize,
             LocalDateTime beginDate, LocalDateTime endDate) {
-        Sort sort = new Sort(Sort.Direction.DESC, "timestamp");
+        Sort sort = new Sort(Sort.Direction.ASC, "id");
         Pageable pageable = new PageRequest(pageNumber - 1, pageSize, sort);
         Specification<NetWorkData> queryParam = new Specification<NetWorkData>() {
             @Override
@@ -175,7 +182,7 @@ public class LogParseService {
 
     public Page<TxGasData> getTxGasData(int groupId, Integer pageNumber, Integer pageSize,
             LocalDateTime beginDate, LocalDateTime endDate, String transHash) {
-        Sort sort = new Sort(Sort.Direction.DESC, "timestamp");
+        Sort sort = new Sort(Sort.Direction.ASC, "id");
         Pageable pageable = new PageRequest(pageNumber - 1, pageSize, sort);
         Specification<TxGasData> queryParam = new Specification<TxGasData>() {
             @Override
@@ -225,11 +232,22 @@ public class LogParseService {
     }
 
     private Boolean checkCountLimit() {
-        Long netWorkDataCount = netWorkDataRepository.count();
-        Long txGasDataCount = txGasDataRepository.count();
-        if (netWorkDataCount.longValue() > constants.getSyncStatLogCountLimit()
-                || txGasDataCount > constants.getSyncStatLogCountLimit()) {
-            return true;
+        for (Map.Entry<Integer, Web3j> entry : web3jMap.entrySet()) {
+            Integer groupId = entry.getKey();
+            long netWorkDataCount = netWorkDataRepository.count((Root<NetWorkData> root,
+                    CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
+                return criteriaBuilder.and(predicate);
+            });
+            long txGasDataCount = txGasDataRepository.count((Root<TxGasData> root,
+                    CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
+                return criteriaBuilder.and(predicate);
+            });
+            if (netWorkDataCount > constants.getSyncStatLogCountLimit()
+                    || txGasDataCount > constants.getSyncStatLogCountLimit()) {
+                return true;
+            }
         }
         return false;
     }

@@ -31,12 +31,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
 import org.fisco.bcos.web3j.protocol.core.methods.response.PendingTxSize;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -76,7 +84,29 @@ public class MonitorService {
         }
         return transferToPerformanceData(transferListByGap(monitorList, gap),
                 transferListByGap(contrastMonitorList, gap));
+    }
 
+    public Page<Monitor> pagingQuery(int groupId, Integer pageNumber, Integer pageSize,
+            LocalDateTime beginDate, LocalDateTime endDate) {
+        Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
+        Specification<Monitor> queryParam = new Specification<Monitor>() {
+            @Override
+            public Predicate toPredicate(Root<Monitor> root, CriteriaQuery<?> criteriaQuery,
+                    CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates = new ArrayList<>();
+                predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
+                if (beginDate != null) {
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                            beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                }
+                if (endDate != null) {
+                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                            endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                }
+                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+            }
+        };
+        return monitorRepository.findAll(queryParam, pageable);
     }
 
     private List<PerformanceData> transferToPerformanceData(List<Monitor> monitorList,
@@ -142,13 +172,13 @@ public class MonitorService {
             Long startTime = monitorList.get(i).getTimestamp();
             Long endTime = monitorList.get(i + 1).getTimestamp();
             if (endTime - startTime > 10000) {
-                log.info("****startTime" + startTime);
-                log.info("****endTime" + endTime);
+                log.debug("****startTime" + startTime);
+                log.debug("****endTime" + endTime);
                 while (endTime - startTime > 5000) {
                     Monitor emptyMonitor = new Monitor();
                     emptyMonitor.setTimestamp(startTime + 5000);
                     newMonitorList.add(emptyMonitor);
-                    log.info("****insert" + startTime);
+                    log.debug("****insert" + startTime);
                     startTime = startTime + 5000;
                 }
             } else {
