@@ -100,6 +100,7 @@ dependencies {
 			if(! destDir.exists()) {
 				destDir.mkdirs()
 			}
+			delete fileTree(destDir){include 'solcJ-all-*-gm.jar'}
 			download {
 				src String.format("https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/solcj/solcJ-all-%s-gm.jar", solcGmJarVersion)
 				dest destDir
@@ -160,7 +161,7 @@ jar {
 			exclude '**/static'
         }
 		copy {
-			from file('src/main/resources/static')
+			from file('src/main/resources/stamic')
 			into 'dist/static'
 		}
         copy {
