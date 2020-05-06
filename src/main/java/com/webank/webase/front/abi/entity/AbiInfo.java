@@ -42,6 +42,7 @@ public class AbiInfo {
 	/**
 	 * runtime bin
 	 */
+	@Column(columnDefinition = "text")
 	private String contractBin;
 	/**
 	 * 1-normal, 2-invalid
