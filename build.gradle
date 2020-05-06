@@ -40,9 +40,6 @@ List spring_boot =[
 	"org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
 	"org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
 	"org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version",
-	//"org.springframework.boot:spring-boot-starter-log4j2:$spring_boot_version"
-
-    //	"org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version"
 	"org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version"
 ]
 
@@ -72,7 +69,7 @@ List jaxb = [
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb
 	// guomi contract compile: USE 'socJ-all-0.4.25-gm' to REPLACE 'ethereum:solcJ-all'
-	compile ('org.fisco-bcos:web3sdk:2.4.0-0417-SNAPSHOT')
+	compile ('org.fisco-bcos:web3sdk:2.4.0')
 //        {
 //            exclude group:"org.ethereum"
 //        }
