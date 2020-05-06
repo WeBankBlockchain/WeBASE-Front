@@ -53,7 +53,7 @@ public class LogParseController extends BaseController {
                     iso = DATE_TIME) LocalDateTime endDate) {
 
         Instant startTime = Instant.now();
-        log.info("getNetWorkData start. groupId:{} startTime:{}", groupId,
+        log.info("getNetWorkData start. groupId:{}", groupId,
                 startTime.toEpochMilli());
 
         Page<NetWorkData> page =
@@ -79,7 +79,7 @@ public class LogParseController extends BaseController {
             @RequestParam(required = false) String transHash) {
 
         Instant startTime = Instant.now();
-        log.info("getTxGasData start. groupId:{} startTime:{}", groupId, startTime.toEpochMilli());
+        log.info("getTxGasData start. groupId:{}", groupId, startTime.toEpochMilli());
 
         Page<TxGasData> page = logParseService.getTxGasData(groupId, pageNumber, pageSize,
                 beginDate, endDate, transHash);
@@ -100,7 +100,7 @@ public class LogParseController extends BaseController {
             @RequestParam @DateTimeFormat(iso = DATE_TIME) LocalDateTime keepEndDate) {
 
         Instant startTime = Instant.now();
-        log.info("deleteData start. groupId:{} type:{} startTime:{}", groupId, type,
+        log.info("deleteData start. groupId:{} type:{}", groupId, type,
                 startTime.toEpochMilli());
 
         int count = logParseService.deleteData(groupId, type, keepEndDate);
