@@ -14,8 +14,11 @@
 package com.webank.webase.front.monitor;
 
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
+import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.monitor.entity.GroupSizeInfo;
+import com.webank.webase.front.monitor.entity.Monitor;
 import com.webank.webase.front.performance.result.PerformanceData;
 import com.webank.webase.front.util.CommonUtils;
 import io.swagger.annotations.ApiImplicitParam;
@@ -27,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,23 +67,46 @@ public class MonitorController {
                     iso = DATE_TIME) LocalDateTime contrastEndDate,
             @RequestParam(required = false, defaultValue = "1") int gap,
             @RequestParam(defaultValue = "1") int groupId) {
-        log.info("getChainMonitor start. groupId:[{}]", groupId);
-
         Instant startTime = Instant.now();
-        log.info("getChainMonitor start startTime:{}", startTime.toEpochMilli());
+        log.info("getChainMonitor start. groupId:[{}]", groupId,
+                startTime.toEpochMilli());
 
         List<PerformanceData> performanceList = monitorService.findContrastDataByTime(groupId,
                 beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
 
-        log.info("getChainMonitor end  useTime:{}",
+        log.info("getChainMonitor end. useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return performanceList;
+    }
+
+    @ApiOperation(value = "分页查询", notes = "分页查询")
+    @GetMapping("/pagingQuery")
+    public BasePageResponse pagingQuery(@RequestParam(defaultValue = "1") int groupId,
+            @RequestParam(defaultValue = "1") Integer pageNumber,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) @DateTimeFormat(
+                    iso = DATE_TIME) LocalDateTime beginDate,
+            @RequestParam(required = false) @DateTimeFormat(
+                    iso = DATE_TIME) LocalDateTime endDate) {
+        Instant startTime = Instant.now();
+        log.info("pagingQuery start. groupId:{}", groupId, startTime.toEpochMilli());
+
+        Page<Monitor> page =
+                monitorService.pagingQuery(groupId, pageNumber, pageSize, beginDate, endDate);
+
+        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
+        response.setTotalCount(page.getTotalElements());
+        response.setData(page.getContent());
+
+        log.info("pagingQuery end. useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return response;
     }
 
     @ApiOperation(value = "检查节点进程连接")
     @GetMapping("/checkNodeProcess")
     public boolean checkNodeProcess() {
-        log.info("checkNodeProcess start.");
+        log.info("checkNodeProcess.");
         return CommonUtils.checkConnect(web3Config.getIp(),
                 Integer.valueOf(web3Config.getChannelPort()));
     }
@@ -88,7 +115,7 @@ public class MonitorController {
     @GetMapping("/getGroupSizeInfos")
     public List<GroupSizeInfo> getGroupSizeInfos() {
         Instant startTime = Instant.now();
-        log.info("getGroupSizeInfos start startTime:{}", startTime.toEpochMilli());
+        log.info("getGroupSizeInfos start", startTime.toEpochMilli());
         List<GroupSizeInfo> groupSizeInfos = monitorService.getGroupSizeInfos();
         log.info("getGroupSizeInfos end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
