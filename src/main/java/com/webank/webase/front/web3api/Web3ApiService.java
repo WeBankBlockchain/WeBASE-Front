@@ -522,6 +522,7 @@ public class Web3ApiService {
     }
 
     private void refreshWeb3jMap(int groupId) {
+        log.info("refreshWeb3jMap groupId:{}", groupId);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
         Credentials credentials = GenCredential.create();
@@ -539,7 +540,8 @@ public class Web3ApiService {
         try {
             service.run();
         } catch (Exception e) {
-            throw new FrontException("refresh web3j failed");
+            log.error("refreshWeb3jMap failed:{}", e);
+            throw new FrontException("refresh Web3jMap failed");
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(web3Config.getTimeout());
@@ -587,6 +589,7 @@ public class Web3ApiService {
                     .getSystemConfigByKey(key).send()
                     .getSystemConfigByKey();
         } catch (IOException e) {
+            log.error("getSystemConfigByKey error:[]", e);
             throw new FrontException(e.getMessage());
         }
     }
@@ -670,11 +673,12 @@ public class Web3ApiService {
             if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
                 return new BaseResponse(ConstantCode.RET_SUCCEED);
             } else {
+                log.error("generateGroup failed:{}", status.getMessage());
                 throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
                         status.getMessage());
             }
         } catch (IOException e) {
-            log.error("generateGroup fail.");
+            log.error("generateGroup fail:[]", e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
     }
@@ -691,14 +695,14 @@ public class Web3ApiService {
                     return removeGroup(groupId);
                 case Constants.OPERATE_GROUP_RECOVER:
                     return recoverGroup(groupId);
-                case Constants.OPERATE_GROUP_GETSTATUS:
+                case Constants.OPERATE_GROUP_GET_STATUS:
                     return queryGroupStatus(groupId);
                 default:
                     log.error("end operateGroup. invalid operate type");
                     throw new FrontException(ConstantCode.INVALID_GROUP_OPERATE_TYPE);
             }
         } catch (IOException e) {
-            log.error("operateGroup fail.");
+            log.error("operateGroup fail:[]", e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
     }
@@ -711,6 +715,7 @@ public class Web3ApiService {
             refreshWeb3jMap(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
+            log.error("startGroup fail:{}", status.getMessage());
             throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
                     status.getMessage());
         }
@@ -724,6 +729,7 @@ public class Web3ApiService {
             web3jMap.remove(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
+            log.error("stopGroup fail:{}", status.getMessage());
             throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
                     status.getMessage());
         }
@@ -736,6 +742,7 @@ public class Web3ApiService {
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
+            log.error("removeGroup fail:{}", status.getMessage());
             throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
                     status.getMessage());
         }
@@ -748,6 +755,7 @@ public class Web3ApiService {
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
+            log.error("recoverGroup fail:{}", status.getMessage());
             throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
                     status.getMessage());
         }
@@ -762,6 +770,7 @@ public class Web3ApiService {
             response.setData(status.getStatus());
             return response;
         } else {
+            log.error("queryGroupStatus fail:{}", status.getMessage());
             throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
                     status.getMessage());
         }
