@@ -32,7 +32,7 @@ trap 'echo -e "Aborted, error $? in command: $BASH_COMMAND"; trap ERR; exit 1' E
 
 # Set magic variables for current file & dir
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-__file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
+#__file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 #__base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 
@@ -62,6 +62,7 @@ gradle_guomi_param=""
 encrypt_type="0"
 
 readValue "是否使用国密 (Yy/Nn), 默认: Nn ? " "^([Yy]|[Nn])$" "n"
+# shellcheck disable=SC2060
 guomi=$(echo "${read_value}" | tr [A-Z]  [a-z])
 LOG_INFO "params: 是否使用国密:[${guomi}], bcos_sdk_dir:[${bcos_sdk_dir}]"
 
@@ -97,13 +98,14 @@ fi
 cd "${__root}"
 
 # check gradle installed
-rm -rf ${__root}/dist/*
+rm -rf "${__root}"/dist/*
 rm -rf lib/*
+# shellcheck disable=SC2086
 bash gradlew clean build -x test ${gradle_guomi_param} && cd ..
 
 # update yml config
 LOG_INFO "Updating  yml config....."
-cd ${__root}/dist
+cd "${__root}"/dist
 cp -rf conf_template conf
 # upate application.yml file
 sed -i "s/encryptType.*#/encryptType: ${encrypt_type} #/g" conf/application.yml
