@@ -1,25 +1,26 @@
 /*
  * Copyright 2014-2020 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.front.precompiledapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.precompiledapi.entity.ConsensusHandle;
+import com.webank.webase.front.precompiledapi.entity.ContractManageResult;
+import com.webank.webase.front.precompiledapi.entity.ContractStatusHandle;
 import com.webank.webase.front.precompiledapi.entity.CrudHandle;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
 import com.webank.webase.front.util.CRUDParseUtils;
@@ -28,24 +29,32 @@ import com.webank.webase.front.util.pageutils.List2Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Precompiled common controller
- * including management of CNS, node consensus status, CRUD
+ * Precompiled common controller including management of CNS, node consensus status, CRUD
  */
 @Api(value = "/precompiled", tags = "precompiled manage interface")
 @Slf4j
@@ -59,8 +68,7 @@ public class PrecompiledController {
      * Cns manage
      */
     @GetMapping("cns/list")
-    public Object queryCns(
-            @RequestParam(defaultValue = "1") int groupId,
+    public Object queryCns(@RequestParam(defaultValue = "1") int groupId,
             @RequestParam String contractNameAndVersion,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
@@ -70,13 +78,14 @@ public class PrecompiledController {
         List<CnsInfo> resList = new ArrayList<>();
         // get "name:version"
         String[] params = contractNameAndVersion.split(":");
-        if(params.length == 1) {
+        if (params.length == 1) {
             String name = params[0];
-            resList =  precompiledService.queryCnsByName(groupId, name);
+            resList = precompiledService.queryCnsByName(groupId, name);
             log.info("end queryCns useTime:{} resList:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), resList);
-            if(resList.size() != 0){
-                List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
+            if (resList.size() != 0) {
+                List2Page<CnsInfo> list2Page =
+                        new List2Page<CnsInfo>(resList, pageSize, pageNumber);
                 List<CnsInfo> finalList = list2Page.getPagedList();
                 long totalCount = (long) resList.size();
                 log.debug("end queryCns. Contract Name finalList:{}", finalList);
@@ -84,18 +93,19 @@ public class PrecompiledController {
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
             }
-        }else if(params.length == 2) {
+        } else if (params.length == 2) {
             String name = params[0];
             String version = params[1];
-            if(!PrecompiledUtils.checkVersion(version)) {
+            if (!PrecompiledUtils.checkVersion(version)) {
                 return ConstantCode.INVALID_VERSION;
             }
             // check return list size
             resList = precompiledService.queryCnsByNameAndVersion(groupId, name, version);
             log.info("end queryCns useTime:{} resList:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), resList);
-            if(resList.size() != 0) {
-                List2Page<CnsInfo> list2Page = new List2Page<CnsInfo>(resList, pageSize, pageNumber);
+            if (resList.size() != 0) {
+                List2Page<CnsInfo> list2Page =
+                        new List2Page<CnsInfo>(resList, pageSize, pageNumber);
                 List<CnsInfo> finalList = list2Page.getPagedList();
                 long totalCount = (long) resList.size();
                 log.debug("in queryCns case: Contract Name And Version. finalList:{}", finalList);
@@ -103,7 +113,7 @@ public class PrecompiledController {
             } else {
                 return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
             }
-        }else {
+        } else {
             return ConstantCode.PARAM_ERROR;
         }
     }
@@ -115,8 +125,7 @@ public class PrecompiledController {
      */
 
     @GetMapping("consensus/list")
-    public Object getNodeList(
-            @RequestParam(defaultValue = "1") int groupId,
+    public Object getNodeList(@RequestParam(defaultValue = "1") int groupId,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
         Instant startTime = Instant.now();
@@ -124,7 +133,7 @@ public class PrecompiledController {
         List<NodeInfo> resList = precompiledService.getNodeList(groupId);
         log.info("end getNodeList useTime:{} resList:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), resList);
-        if(resList.size() != 0) {
+        if (resList.size() != 0) {
             List2Page<NodeInfo> list2Page = new List2Page<NodeInfo>(resList, pageSize, pageNumber);
             List<NodeInfo> finalList = list2Page.getPagedList();
             long totalCount = (long) resList.size();
@@ -136,9 +145,11 @@ public class PrecompiledController {
     }
 
     @ApiOperation(value = "nodeManageControl", notes = "set system config value by key")
-    @ApiImplicitParam(name = "consensusHandle", value = "node consensus status control", required = true, dataType = "ConsensusHandle")
-    @PostMapping("consensus") //TODO url change to node
-    public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle)throws Exception {
+    @ApiImplicitParam(name = "consensusHandle", value = "node consensus status control",
+            required = true, dataType = "ConsensusHandle")
+    @PostMapping("consensus") // TODO url change to node
+    public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle)
+            throws Exception {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();
         int groupId = consensusHandle.getGroupId();
@@ -164,7 +175,7 @@ public class PrecompiledController {
         Instant startTime = Instant.now();
         log.info("start addSealer startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
-        try{
+        try {
             Object res = precompiledService.addSealer(groupId, fromAddress, nodeId);
             log.info("end addSealer useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), res);
@@ -179,7 +190,7 @@ public class PrecompiledController {
         Instant startTime = Instant.now();
         log.info("start addObserver startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
-        try{
+        try {
             Object res = precompiledService.addObserver(groupId, fromAddress, nodeId);
             log.info("end addObserver useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), res);
@@ -194,7 +205,7 @@ public class PrecompiledController {
         Instant startTime = Instant.now();
         log.info("start addSealer startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
-        try{
+        try {
             Object res = precompiledService.removeNode(groupId, fromAddress, nodeId);
             log.info("end addSealer useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), res);
@@ -206,14 +217,14 @@ public class PrecompiledController {
     }
 
     /**
-     * CRUD operation
-     * checkVersionForCRUD();
-     * TODO exception for "bcos's version above of 2.0.0-rc3 support crud operation"
+     * CRUD operation checkVersionForCRUD(); TODO exception for
+     * "bcos's version above of 2.0.0-rc3 support crud operation"
      */
     @ApiOperation(value = "crudManage", notes = "operate table by crud")
-    @ApiImplicitParam(name = "crudHandle", value = "crud operation info", required = true, dataType = "CrudHandle")
+    @ApiImplicitParam(name = "crudHandle", value = "crud operation info", required = true,
+            dataType = "CrudHandle")
     @PostMapping("crud")
-    public Object crudManageControl(@Valid @RequestBody CrudHandle crudHandle)throws Exception {
+    public Object crudManageControl(@Valid @RequestBody CrudHandle crudHandle) throws Exception {
         log.info("start crudManageControl. crudHandle:{}", crudHandle);
         int groupId = crudHandle.getGroupId();
         String from = crudHandle.getSignUserId();
@@ -262,16 +273,21 @@ public class PrecompiledController {
                 Duration.between(startTime, Instant.now()).toMillis(), result);
 
         if (result == 0) {
-            return new BaseResponse(ConstantCode.RET_SUCCESS,"Create '" + table.getTableName() + "' Ok.");
+            return new BaseResponse(ConstantCode.RET_SUCCESS,
+                    "Create '" + table.getTableName() + "' Ok.");
         } else if (result == PrecompiledCommon.TableExist_RC3) {
             log.debug("createTable " + "Table already exists");
-            return new BaseResponse(PrecompiledCommon.TableExist_RC3, "Table already exists", "Table already exists");
+            return new BaseResponse(PrecompiledCommon.TableExist_RC3, "Table already exists",
+                    "Table already exists");
         } else if (result == PrecompiledCommon.PermissionDenied_RC3) {
             log.debug("createTable " + "Permission denied");
-            return new BaseResponse(PrecompiledCommon.PermissionDenied_RC3, "Permission denied", "Permission denied");
+            return new BaseResponse(PrecompiledCommon.PermissionDenied_RC3, "Permission denied",
+                    "Permission denied");
         } else {
-            log.debug("createTable " + "code: " + result + "Create '" + table.getTableName() + "' failed.");
-            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR, "code: " + result + "Create '" + table.getTableName() + "' failed.",
+            log.debug("createTable " + "code: " + result + "Create '" + table.getTableName()
+                    + "' failed.");
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+                    "code: " + result + "Create '" + table.getTableName() + "' failed.",
                     "code: " + result + "Create '" + table.getTableName() + "' failed.");
         }
     }
@@ -279,8 +295,8 @@ public class PrecompiledController {
     // check table name exist by desc(tableName)
     public Object desc(int groupId, String sql) throws Exception {
         Instant startTime = Instant.now();
-        log.info("start descTable startTime:{}, groupId:{},sql:{}",
-                startTime.toEpochMilli(), groupId, sql);
+        log.info("start descTable startTime:{}, groupId:{},sql:{}", startTime.toEpochMilli(),
+                groupId, sql);
         Table table = new Table();
         String[] sqlParams = sql.split(" ");
         // "desc t_demo"
@@ -288,10 +304,10 @@ public class PrecompiledController {
 
         if (tableName.length() > PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                            "The table name length is greater than " +
-                            PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH + ".",
-                    "The table name length is greater than " +
-                            PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH + ".");
+                    "The table name length is greater than "
+                            + PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH + ".",
+                    "The table name length is greater than "
+                            + PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH + ".");
         }
         CRUDParseUtils.invalidSymbol(tableName);
         if (tableName.endsWith(";")) {
@@ -310,18 +326,17 @@ public class PrecompiledController {
 
     public Object select(int groupId, String sql) throws Exception {
         Instant startTime = Instant.now();
-        log.info("start select startTime:{}, groupId:{},sql:{}",
-                startTime.toEpochMilli(), groupId, sql);
+        log.info("start select startTime:{}, groupId:{},sql:{}", startTime.toEpochMilli(), groupId,
+                sql);
         Table table = new Table();
         Condition conditions = table.getCondition();
         List<String> selectColumns = new ArrayList<>();
 
-        ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
-        try { //转化select语句
+        try { // 转化select语句
             log.debug("start parseSelect. sql:{}", sql);
             CRUDParseUtils.parseSelect(sql, table, conditions, selectColumns);
-            log.debug("end parseSelect. table:{}, conditions:{}, selectColumns:{}",
-                    table, conditions, selectColumns);
+            log.debug("end parseSelect. table:{}, conditions:{}, selectColumns:{}", table,
+                    conditions, selectColumns);
         } catch (Exception e) {
             log.error("parseSelect Error exception:[]", e);
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
@@ -352,9 +367,9 @@ public class PrecompiledController {
         result = precompiledService.select(groupId, table, conditions);
         log.info("end select useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), result);
-        int rows = 0;
         if (result.size() == 0) {
-            return new BaseResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, ConstantCode.CRUD_EMPTY_SET);
+            return new BaseResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST,
+                    ConstantCode.CRUD_EMPTY_SET);
         }
         result = CRUDParseUtils.filterSystemColum(result);
         if ("*".equals(selectColumns.get(0))) {
@@ -366,18 +381,20 @@ public class PrecompiledController {
             log.info("end select. result:{}", result);
             return new BaseResponse(ConstantCode.RET_SUCCESS, result);
         } else {
-            List<Map<String, String>> selectedResult = CRUDParseUtils.getSeletedColumn(selectColumns, result);
+            List<Map<String, String>> selectedResult =
+                    CRUDParseUtils.getSeletedColumn(selectColumns, result);
             log.info("end select. selectedResult:{}", selectedResult);
             return new BaseResponse(ConstantCode.RET_SUCCESS, selectedResult);
         }
 
-        //return new BaseResponse(ConstantCode.RET_SUCCESS, rows + " row(s) in set.");
+        // return new BaseResponse(ConstantCode.RET_SUCCESS, rows + " row(s) in set.");
     }
 
     public Object insert(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
         log.info("start insert startTime:{}, groupId:{},fromAddress:{},sql:{}",
-                startTime.toEpochMilli(), groupId, fromAddress, sql);        Table table = new Table();
+                startTime.toEpochMilli(), groupId, fromAddress, sql);
+        Table table = new Table();
         Entry entry = new Entry();
 
         // insert sql use "values" or not
@@ -389,7 +406,7 @@ public class PrecompiledController {
         } catch (Exception e) {
             log.error("parseInsert Error exception:[]", e);
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                            "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
+                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
         }
 
@@ -451,8 +468,8 @@ public class PrecompiledController {
                         }
                     }
                     strBuilder.append("in field list.");
-                    return new BaseResponse(
-                            PrecompiledUtils.CRUD_SQL_ERROR, strBuilder.toString(), strBuilder.toString());
+                    return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR, strBuilder.toString(),
+                            strBuilder.toString());
                 }
             }
             String keyValue = entry.get(keyName);
@@ -478,15 +495,16 @@ public class PrecompiledController {
     public Object update(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
         log.info("start update startTime:{}, groupId:{},fromAddress:{},sql:{}",
-                startTime.toEpochMilli(), groupId, fromAddress, sql);        Table table = new Table();
+                startTime.toEpochMilli(), groupId, fromAddress, sql);
+        Table table = new Table();
         Entry entry = new Entry();
         Condition conditions = new Condition();
 
         try {
             log.debug("start parseUpdate. sql:{}", sql);
             CRUDParseUtils.parseUpdate(sql, table, entry, conditions);
-            log.debug("end parseUpdate. table:{}, entry:{}, conditions:{}",
-                    table, entry, conditions);
+            log.debug("end parseUpdate. table:{}, entry:{}, conditions:{}", table, entry,
+                    conditions);
         } catch (Exception e) {
             log.error("parseUpdate error exception:[]", e);
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
@@ -497,7 +515,7 @@ public class PrecompiledController {
         String tableName = table.getTableName();
         Table descTable;
         try {
-           descTable = precompiledService.desc(groupId, tableName);
+            descTable = precompiledService.desc(groupId, tableName);
         } catch (Exception e) {
             log.error("updateTable Error exception:[]", e);
             return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists");
@@ -526,8 +544,8 @@ public class PrecompiledController {
             }
         }
         CRUDParseUtils.checkUserTableParam(entry, descTable);
-        int updateResult = precompiledService.update(groupId, fromAddress,
-                table, entry, conditions);
+        int updateResult =
+                precompiledService.update(groupId, fromAddress, table, entry, conditions);
         log.info("end update useTime:{} updateResult:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), updateResult);
         if (updateResult >= 0) {
@@ -542,12 +560,10 @@ public class PrecompiledController {
     public Object remove(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
         log.info("start remove startTime:{}, groupId:{},fromAddress:{},sql:{}",
-                startTime.toEpochMilli(), groupId, fromAddress, sql);        Table table = new Table();
+                startTime.toEpochMilli(), groupId, fromAddress, sql);
+        Table table = new Table();
         Condition conditions = new Condition();
 
-        int code;
-        String msg;
-        ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
         try {
             log.debug("start parseRemove. sql:{}", sql);
             CRUDParseUtils.parseRemove(sql, table, conditions);
@@ -568,8 +584,7 @@ public class PrecompiledController {
         }
         table.setKey(descTable.getKey());
         CRUDParseUtils.handleKey(table, conditions);
-        int removeResult = precompiledService.remove(groupId, fromAddress,
-                table, conditions);
+        int removeResult = precompiledService.remove(groupId, fromAddress, table, conditions);
         log.info("end remove useTime:{} removeResult:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), removeResult);
         if (removeResult >= 0) {
@@ -578,7 +593,164 @@ public class PrecompiledController {
         } else {
             return new BaseResponse(ConstantCode.SQL_ERROR, "Remove failed.");
         }
+    }
 
+    @ApiOperation(value = "contractStatusManage", notes = "contract status manage")
+    @PostMapping("contractStatusManage")
+    public Object contractStatusManage(
+            @Valid @RequestBody ContractStatusHandle contractStatusHandle) throws Exception {
+        log.debug("start contractStatusManage. contractStatusHandle:{}", contractStatusHandle);
+        switch (contractStatusHandle.getHandleType()) {
+            case PrecompiledUtils.CONTRACT_MANAGE_FREEZE:
+                return contractFreeze(contractStatusHandle);
+            case PrecompiledUtils.CONTRACT_MANAGE_UNFREEZE:
+                return contractUnfreeze(contractStatusHandle);
+            case PrecompiledUtils.CONTRACT_MANAGE_GRANTMANAGER:
+                return contractGrantManager(contractStatusHandle);
+            case PrecompiledUtils.CONTRACT_MANAGE_GETSTATUS:
+                return contractStatus(contractStatusHandle);
+            case PrecompiledUtils.CONTRACT_MANAGE_LISTMANAGER:
+                return contractManagerList(contractStatusHandle);
+            default:
+                log.error("end contractStatusManage. invalid contract handle type");
+                throw new FrontException(ConstantCode.INVALID_CONTRACT_HANDLE_TYPE);
+        }
+    }
+
+    private Object contractFreeze(ContractStatusHandle contractStatusHandle) {
+        Instant startTime = Instant.now();
+        log.info("start contractFreeze startTime:{}", startTime.toEpochMilli());
+        try {
+            if (StringUtils.isBlank(contractStatusHandle.getSignUserId())) {
+                log.error("signUserId is empty");
+                throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
+            }
+            String res = precompiledService.contractFreeze(contractStatusHandle.getGroupId(),
+                    contractStatusHandle.getSignUserId(),
+                    contractStatusHandle.getContractAddress());
+            ContractManageResult contractManageResult =
+                    JSON.parseObject(res, ContractManageResult.class);
+            if (contractManageResult.getCode() == 0) {
+                log.info("end contractFreeze useTime:{} contractManageResult:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(),
+                        contractManageResult);
+                return new BaseResponse(ConstantCode.RET_SUCCEED);
+            } else {
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            }
+        } catch (Exception e) {
+            log.error("contractFreeze exception:", e);
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+        }
+    }
+
+    private Object contractUnfreeze(ContractStatusHandle contractStatusHandle) throws Exception {
+        Instant startTime = Instant.now();
+        log.info("start contractUnfreeze startTime:{}", startTime.toEpochMilli());
+        try {
+            if (StringUtils.isBlank(contractStatusHandle.getSignUserId())) {
+                log.error("signUserId is empty");
+                throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
+            }
+            String res = precompiledService.contractUnfreeze(contractStatusHandle.getGroupId(),
+                    contractStatusHandle.getSignUserId(),
+                    contractStatusHandle.getContractAddress());
+            ContractManageResult contractManageResult =
+                    JSON.parseObject(res, ContractManageResult.class);
+            if (contractManageResult.getCode() == 0) {
+                log.info("end contractUnfreeze useTime:{} contractManageResult:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(),
+                        contractManageResult);
+                return new BaseResponse(ConstantCode.RET_SUCCEED);
+            } else {
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            }
+        } catch (Exception e) {
+            log.error("contractUnfreeze exception:", e);
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+        }
+    }
+
+    private Object contractGrantManager(ContractStatusHandle contractStatusHandle) {
+        Instant startTime = Instant.now();
+        log.info("start contractGrantManager startTime:{}", startTime.toEpochMilli());
+        try {
+            if (StringUtils.isBlank(contractStatusHandle.getSignUserId())) {
+                log.error("signUserId is empty");
+                throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
+            }
+            if (StringUtils.isBlank(contractStatusHandle.getGrantAddress())) {
+                log.error("grantAddress cannot be empty");
+                throw new FrontException(ConstantCode.PARAM_FAIL_GRANT_ADDRESS_EMPTY);
+            }
+            String res = precompiledService.contractGrantManager(contractStatusHandle.getGroupId(),
+                    contractStatusHandle.getSignUserId(), contractStatusHandle.getContractAddress(),
+                    contractStatusHandle.getGrantAddress());
+            ContractManageResult contractManageResult =
+                    JSON.parseObject(res, ContractManageResult.class);
+            if (contractManageResult.getCode() == 0) {
+                log.info("end contractGrantManager useTime:{} contractManageResult:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(),
+                        contractManageResult);
+                return new BaseResponse(ConstantCode.RET_SUCCEED);
+            } else {
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            }
+        } catch (Exception e) {
+            log.error("contractGrantManager exception:", e);
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+        }
+    }
+
+    private Object contractStatus(ContractStatusHandle contractStatusHandle) {
+        Instant startTime = Instant.now();
+        log.info("start contractStatus startTime:{}", startTime.toEpochMilli());
+        try {
+            String res = precompiledService.contractStatus(contractStatusHandle.getGroupId(),
+                    contractStatusHandle.getContractAddress());
+            if (res.contains("code")) {
+                ContractManageResult contractManageResult =
+                        JSON.parseObject(res, ContractManageResult.class);
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            } else {
+                BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+                response.setData(res);
+                log.info("end contractStatus useTime:{} response:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(), response);
+                return response;
+            }
+        } catch (Exception e) {
+            log.error("contractStatus exception:", e);
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+        }
+    }
+
+    private Object contractManagerList(ContractStatusHandle contractStatusHandle) {
+        Instant startTime = Instant.now();
+        log.info("start contractManagerList startTime:{}", startTime.toEpochMilli());
+        try {
+            String res = precompiledService.contractManagerList(contractStatusHandle.getGroupId(),
+                    contractStatusHandle.getContractAddress());
+            if (res.contains("code")) {
+                ContractManageResult contractManageResult =
+                        JSON.parseObject(res, ContractManageResult.class);
+                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+                        contractManageResult.getMsg());
+            } else {
+                BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+                response.setData(res);
+                log.info("end contractManagerList useTime:{} response:{}",
+                        Duration.between(startTime, Instant.now()).toMillis(), response);
+                return response;
+            }
+        } catch (Exception e) {
+            log.error("contractManagerList exception:", e);
+            throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+        }
     }
 
 }

@@ -67,9 +67,13 @@ constant:
   monitorDisk: /
   monitorEnabled: true
   aesKey: EfdsW23D23d3df43
-  nodePath: /fisco/nodes/127.0.0.1/node0
+  nodePath: /data
   http_read_timeOut: 100000
   http_connect_timeOut: 100000
   # event sync map task (unit: ms)
   eventRegisterTaskFixedDelay: 5000
   syncEventMapTaskFixedDelay: 60000
+  # sync stat log data task (unit: ms)
+  syncStatLogTime: 5000
+  syncStatLogCountLimit: 10000
+  statLogEnabled: true
