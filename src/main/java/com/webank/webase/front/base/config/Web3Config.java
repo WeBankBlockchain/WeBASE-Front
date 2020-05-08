@@ -67,7 +67,6 @@ public class Web3Config {
 
     /**
      * 覆盖EncryptType构造函数
-     * 放在web3sdk初始化前，否则当前类里的CnsServiceMap的credential为非国密的
      * @return
      */
     @Bean(name = "encryptType")
@@ -216,26 +215,26 @@ public class Web3Config {
         }
     }
 
-    @Bean
-    @DependsOn("encryptType")
-    public Map<Integer, CnsService> cnsServiceMap(Map<Integer, Web3j> web3jMap) {
-        // support guomi
-        Credentials credentials = GenCredential.create();
-        Map cnsServiceMap = new ConcurrentHashMap<Integer, CnsService>();
-        Iterator entries = web3jMap.entrySet().iterator();
+//    @Bean
+//    @DependsOn("encryptType")
+//    public Map<Integer, CnsService> cnsServiceMap(Map<Integer, Web3j> web3jMap) {
+//        // support guomi
+//        Credentials credentials = GenCredential.create();
+//        Map cnsServiceMap = new ConcurrentHashMap<Integer, CnsService>();
+//        Iterator entries = web3jMap.entrySet().iterator();
+//
+//        while (entries.hasNext()) {
+//            Map.Entry entry = (Map.Entry) entries.next();
+//            Integer key = (Integer) entry.getKey();
+//            Web3j value = (Web3j) entry.getValue();
+//            cnsServiceMap.put(key, new CnsService(value, credentials));
+//        }
+//        return cnsServiceMap;
+//    }
 
-        while (entries.hasNext()) {
-            Map.Entry entry = (Map.Entry) entries.next();
-            Integer key = (Integer) entry.getKey();
-            Web3j value = (Web3j) entry.getValue();
-            cnsServiceMap.put(key, new CnsService(value, credentials));
-        }
-        return cnsServiceMap;
-    }
-
-    @Bean
-    public HashMap<String, String> cnsMap() {
-        HashMap cnsMap = new HashMap<String, String>();
-        return cnsMap;
-    }
+//    @Bean
+//    public HashMap<String, String> cnsMap() {
+//        HashMap cnsMap = new HashMap<String, String>();
+//        return cnsMap;
+//    }
 }
