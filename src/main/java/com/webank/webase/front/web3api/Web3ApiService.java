@@ -61,8 +61,6 @@ public class Web3ApiService {
     @Autowired
     Map<Integer, Web3j> web3jMap;
     @Autowired
-    Map<Integer, CnsService> cnsServiceMap;
-    @Autowired
     NodeConfig nodeConfig;
     @Autowired
     GroupChannelConnectionsConfig groupChannelConnectionsConfig;
@@ -525,7 +523,6 @@ public class Web3ApiService {
         log.info("refreshWeb3jMap groupId:{}", groupId);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
-        Credentials credentials = GenCredential.create();
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections
                 .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
@@ -548,7 +545,6 @@ public class Web3ApiService {
         channelEthereumService.setChannelService(service);
         Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
         web3jMap.put(groupId, web3j);
-        cnsServiceMap.put(groupId, new CnsService(web3j, credentials));
     }
 
     // get all peers of chain

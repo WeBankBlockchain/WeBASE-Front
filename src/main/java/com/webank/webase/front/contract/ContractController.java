@@ -159,14 +159,6 @@ public class ContractController extends BaseController {
         return ResponseEntity.ok().build();
     }
 
-
-    @GetMapping("/cns")
-    public String getAddressByContractNameAndVersion(@RequestParam int groupId,
-        @RequestParam String name, @RequestParam String version) {
-        log.info("cns start. groupId:{} name:{} version:{}", groupId, name, version);
-        return contractService.getAddressByContractNameAndVersion(groupId, name, version);
-    }
-
     public HttpHeaders headers(String fileName) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);

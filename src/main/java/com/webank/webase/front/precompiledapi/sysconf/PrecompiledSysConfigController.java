@@ -73,7 +73,7 @@ public class PrecompiledSysConfigController{
     }
 
     @ApiOperation(value = "setSysConfigValueByKey", notes = "set system config value by key")
-    @ApiImplicitParam(name = "sysConfigHandle", value = "system config info", required = true, dataType = "SysConfigHandle")
+    @ApiImplicitParam(name = "systemConfigHandle", value = "system config info", required = true, dataType = "SystemConfigHandle")
     @PostMapping("config")
     public Object setSysConfigValueByKey(@Valid @RequestBody SystemConfigHandle systemConfigHandle)throws Exception {
         Instant startTime = Instant.now();

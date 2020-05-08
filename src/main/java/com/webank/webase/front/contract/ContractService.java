@@ -79,10 +79,6 @@ public class ContractService {
     private static final String CONTRACT_FILE_TEMP = BASE_FILE_PATH + "%1s.sol";
 
     @Autowired
-    private Map<String, String> cnsMap;
-    @Autowired
-    private Map<Integer, CnsService> cnsServiceMap;
-    @Autowired
     private ContractRepository contractRepository;
     @Autowired
     private ContractPathRepository contractPathRepository;
@@ -231,19 +227,6 @@ public class ContractService {
         TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
         String contractAddress = receipt.getContractAddress();
 
-        // save to cns
-//        if (version != null) {
-//            checkContractAbiExistedAndSave(contractName, version, abiInfos);
-//            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
-//                    JSON.toJSONString(abiInfos));
-//            cnsMap.put(contractName + ":" + version, contractAddress);
-//        } else {
-//            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-//            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
-//                    contractAddress, JSON.toJSONString(abiInfos));
-//            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
-//        }
-
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -269,17 +252,6 @@ public class ContractService {
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
-//        if (version != null) {
-//            checkContractAbiExistedAndSave(contractName, version, abiInfos);
-//            cnsServiceMap.get(groupId).registerCns(contractName, version, contractAddress,
-//                    JSON.toJSONString(abiInfos));
-//            cnsMap.put(contractName + ":" + version, contractAddress);
-//        } else {
-//            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-//            cnsServiceMap.get(groupId).registerCns(contractName, contractAddress.substring(2),
-//                    contractAddress, JSON.toJSONString(abiInfos));
-//            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
-//        }
         log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -382,10 +354,6 @@ public class ContractService {
         return baseRsp;
     }
 
-    @Deprecated
-    public String getAddressByContractNameAndVersion(int groupId, String name, String version) {
-        return cnsServiceMap.get(groupId).getAddressByContractNameAndVersion(name + ":" + version);
-    }
 
     public static FileContentHandle compileToJavaFile(String contractName,
             List<AbiDefinition> abiInfo, String contractBin, String packageName)
