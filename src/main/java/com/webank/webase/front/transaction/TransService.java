@@ -91,10 +91,6 @@ public class TransService {
 
     @Autowired
     private Web3ApiService web3ApiService;
-
-    @Autowired
-    private Map<Integer, CnsService> cnsServiceMap;
-
     @Autowired
     private KeyStoreService keyStoreService;
     @Autowired
@@ -532,18 +528,6 @@ public class TransService {
                     JSON.toJSONString(funcInputTypes), JSON.toJSONString(params));
             throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
         }
-    }
-
-    /**
-
-     * get web3j by groupId.
-     */
-    private Web3j getWeb3j(int groupId) {
-        Web3j web3j = web3ApiService.getWeb3j(groupId);
-        if (web3j == null) {
-            new FrontException(GROUPID_NOT_EXIST);
-        }
-        return web3j;
     }
 
     /**
