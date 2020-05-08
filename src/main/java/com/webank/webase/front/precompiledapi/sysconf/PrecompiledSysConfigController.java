@@ -56,7 +56,7 @@ public class PrecompiledSysConfigController{
         Instant startTime = Instant.now();
         log.info("start querySystemConfigByGroupId startTime:{}, groupId:{}",
                 startTime.toEpochMilli(), groupId);
-        List<SystemConfigHandle> list = new ArrayList<>();
+        List<ResSystemConfig> list = new ArrayList<>();
         try {
             list = precompiledSysConfigService.querySysConfigByGroupId(groupId);
             log.info("end querySystemConfigByGroupId useTime:{} res:{}",
@@ -65,8 +65,8 @@ public class PrecompiledSysConfigController{
             log.error("error querySystemConfigByGroupId exception:[]", e);
             return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
         }
-        List2Page<SystemConfigHandle> list2Page = new List2Page<>(list, pageSize, pageNumber);
-        List<SystemConfigHandle> finalList = list2Page.getPagedList();
+        List2Page<ResSystemConfig> list2Page = new List2Page<>(list, pageSize, pageNumber);
+        List<ResSystemConfig> finalList = list2Page.getPagedList();
         long totalCount = (long) list.size();
         log.info("end querySystemConfigByGroupId. finalList:{}", finalList);
         return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);

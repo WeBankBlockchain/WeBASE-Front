@@ -1,26 +1,38 @@
 /**
  * Copyright 2014-2020 the original author or authors.
  * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.webank.webase.front.precompiledapi;
 
 
+import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
+import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
+import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
+import static org.fisco.bcos.web3j.precompile.crud.CRUD.FUNC_UPDATE;
+import static org.fisco.bcos.web3j.precompile.crud.TableFactory.FUNC_CREATETABLE;
+import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_FREEZE;
+import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_GRANTMANAGER;
+import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_UNFREEZE;
+import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
+import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.web3api.Web3ApiService;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
@@ -31,10 +43,10 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
 import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
 import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
@@ -45,6 +57,7 @@ import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 
 /**
  * send raw transaction through webase-sign to call precompiled
+ * 
  * @author marsli
  */
 @Service
@@ -232,30 +245,68 @@ public class PrecompiledWithSignService {
 		return PrecompiledCommon.handleTransactionReceiptForCRUD(receipt);
 	}
 
-	/**
-	 * CRUD: remove table through webase-sign
-	 */
-	public int remove(int groupId, String signUserId, Table table, Condition condition) throws Exception {
-		checkTableKeyLength(table);
-		// trans
-		String conditionStr =
-				ObjectMapperFactory.getObjectMapper().writeValueAsString(condition.getConditions());
-		List<Object> funcParams = new ArrayList<>();
-		funcParams.add(table.getTableName());
-		funcParams.add(table.getKey());
-		funcParams.add(conditionStr);
-		funcParams.add(table.getOptional());
-		TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
-				signUserId, PrecompiledTypes.CRUD, FUNC_REMOVE, funcParams);
-		return PrecompiledCommon.handleTransactionReceiptForCRUD(receipt);
-	}
+    /**
+     * CRUD: remove table through webase-sign
+     */
+    public int remove(int groupId, String signUserId, Table table, Condition condition)
+            throws Exception {
+        checkTableKeyLength(table);
+        // trans
+        String conditionStr =
+                ObjectMapperFactory.getObjectMapper().writeValueAsString(condition.getConditions());
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(table.getTableName());
+        funcParams.add(table.getKey());
+        funcParams.add(conditionStr);
+        funcParams.add(table.getOptional());
+        TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                        signUserId, PrecompiledTypes.CRUD, FUNC_REMOVE, funcParams);
+        return PrecompiledCommon.handleTransactionReceiptForCRUD(receipt);
+    }
 
-	private void checkTableKeyLength(Table table) throws PrecompileMessageException {
-		if (table.getKey().length() > PrecompiledCommon.TABLE_KEY_MAX_LENGTH) {
-			throw new PrecompileMessageException(
-					"The value of the table key exceeds the maximum limit("
-							+ PrecompiledCommon.TABLE_KEY_MAX_LENGTH
-							+ ").");
-		}
-	}
+    private void checkTableKeyLength(Table table) throws PrecompileMessageException {
+        if (table.getKey().length() > PrecompiledCommon.TABLE_KEY_MAX_LENGTH) {
+            throw new PrecompileMessageException(
+                    "The value of the table key exceeds the maximum limit("
+                            + PrecompiledCommon.TABLE_KEY_MAX_LENGTH + ").");
+        }
+    }
+
+    public String contractFreeze(int groupId, String signUserId, String contractAddress)
+            throws Exception {
+        // trans
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(contractAddress);
+        TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                        signUserId, PrecompiledTypes.CSM, FUNC_FREEZE, funcParams);
+        return PrecompiledCommon.handleTransactionReceipt(receipt,
+                web3ApiService.getWeb3j(groupId));
+    }
+
+    public String contractUnfreeze(int groupId, String signUserId, String contractAddress)
+            throws Exception {
+        // trans
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(contractAddress);
+        TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                        signUserId, PrecompiledTypes.CSM, FUNC_UNFREEZE, funcParams);
+        return PrecompiledCommon.handleTransactionReceipt(receipt,
+                web3ApiService.getWeb3j(groupId));
+    }
+
+    public String contractGrantManager(int groupId, String signUserId, String contractAddress,
+            String grantAddress) throws Exception {
+        // trans
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(contractAddress);
+        funcParams.add(grantAddress);
+        TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                        signUserId, PrecompiledTypes.CSM, FUNC_GRANTMANAGER, funcParams);
+        return PrecompiledCommon.handleTransactionReceipt(receipt,
+                web3ApiService.getWeb3j(groupId));
+    }
 }
