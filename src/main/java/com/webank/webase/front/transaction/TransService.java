@@ -82,11 +82,7 @@ public class TransService {
     @Autowired
     private Web3ApiService web3ApiService;
     @Autowired
-    private Map<Integer, CnsService> cnsServiceMap;
-    @Autowired
     private KeyStoreService keyStoreService;
-    @Autowired
-    private Map<String, String> cnsMap;
     @Autowired
     private Constants constants;
     @Autowired
@@ -190,38 +186,38 @@ public class TransService {
      *
      * @param req request
      */
-    @Deprecated
-    public boolean checkAndSaveAbiFromCns(ContractOfTrans req) throws Exception {
-        log.info("checkAndSaveAbiFromCns start.");
-        List<CnsInfo> cnsInfoList = null;
-        CnsService cnsService = cnsServiceMap.get(req.getGroupId());
-        if (cnsService == null) {
-            log.info("cnsService is null");
-            return false;
-        }
-        if (req.getVersion() != null) {
-            cnsInfoList =
-                    cnsService.queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
-        } else {
-            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),
-                    req.getContractAddress().substring(2));
-        }
-        // check cns info
-        if (cnsInfoList == null || cnsInfoList.isEmpty()
-                || StringUtils.isBlank(cnsInfoList.get(0).getAbi())) {
-            log.info("cnsInfoList is empty:{}", cnsInfoList);
-            return false;
-        }
-        ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-        List<AbiDefinition> abiDefinitionList = objectMapper.readValue(cnsInfoList.get(0).getAbi(), objectMapper
-                .getTypeFactory().constructCollectionType(List.class, AbiDefinition.class));
-
-        // save abi
-        ContractAbiUtil.setContractWithAbi(req.getContractName(),
-                req.getVersion() == null ? req.getContractAddress().substring(2) : req.getVersion(),
-                abiDefinitionList, true);
-        return true;
-    }
+//    @Deprecated
+//    public boolean checkAndSaveAbiFromCns(ContractOfTrans req) throws Exception {
+//        log.info("checkAndSaveAbiFromCns start.");
+//        List<CnsInfo> cnsInfoList = null;
+//        CnsService cnsService = cnsServiceMap.get(req.getGroupId());
+//        if (cnsService == null) {
+//            log.info("cnsService is null");
+//            return false;
+//        }
+//        if (req.getVersion() != null) {
+//            cnsInfoList =
+//                    cnsService.queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
+//        } else {
+//            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),
+//                    req.getContractAddress().substring(2));
+//        }
+//        // check cns info
+//        if (cnsInfoList == null || cnsInfoList.isEmpty()
+//                || StringUtils.isBlank(cnsInfoList.get(0).getAbi())) {
+//            log.info("cnsInfoList is empty:{}", cnsInfoList);
+//            return false;
+//        }
+//        ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
+//        List<AbiDefinition> abiDefinitionList = objectMapper.readValue(cnsInfoList.get(0).getAbi(), objectMapper
+//                .getTypeFactory().constructCollectionType(List.class, AbiDefinition.class));
+//
+//        // save abi
+//        ContractAbiUtil.setContractWithAbi(req.getContractName(),
+//                req.getVersion() == null ? req.getContractAddress().substring(2) : req.getVersion(),
+//                abiDefinitionList, true);
+//        return true;
+//    }
 
     /**
      * checkAndSaveAbiFromDb.
@@ -526,33 +522,32 @@ public class TransService {
      * if address blank, check address from cnsMap, CnsService
      * 2020/05/06, not use cns anymore
      */
-    @Deprecated
-    public String checkContractAddress(String contractAddress, int groupId,
-                                       String contractName, String version) throws Exception {
-        String address = contractAddress;
-        // not blank
-        if (StringUtils.isNotBlank(address)) {
-            return address;
-        } else {
-            // try to get from cnsMap
-            address = cnsMap.get(contractName + Constants.SYMPOL + version);
-            if (StringUtils.isNotBlank(address)) {
-                return address;
-            } else {
-                // try to get from cnsService
-                address = precompiledService.getAddressByContractNameAndVersion(groupId,
-                        contractName, version);
-                if (StringUtils.isNotBlank(address)) {
-                    return address;
-                } else {
-                    // address cannot be found
-                    log.error("checkContractAddress. contractAddress is empty " +
-                            "after get from cnsMap and cnsService");
-                    throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
-                }
-            }
-        }
-    }
+//    public String checkContractAddress(String contractAddress, int groupId,
+//                                       String contractName, String version) throws Exception {
+//        String address = contractAddress;
+//        // not blank
+//        if (StringUtils.isNotBlank(address)) {
+//            return address;
+//        } else {
+//            // try to get from cnsMap
+//            address = cnsMap.get(contractName + Constants.SYMPOL + version);
+//            if (StringUtils.isNotBlank(address)) {
+//                return address;
+//            } else {
+//                // try to get from cnsService
+//                address = precompiledService.getAddressByContractNameAndVersion(groupId,
+//                        contractName, version);
+//                if (StringUtils.isNotBlank(address)) {
+//                    return address;
+//                } else {
+//                    // address cannot be found
+//                    log.error("checkContractAddress. contractAddress is empty " +
+//                            "after get from cnsMap and cnsService");
+//                    throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
+//                }
+//            }
+//        }
+//    }
 
     /**
      * send transaction locally
