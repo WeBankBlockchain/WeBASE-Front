@@ -78,9 +78,41 @@ export default {
         Bus.$on("changeGroup", data => {
             this.changeGroup()
         })
-        this.getEncryption(this.initSolc)
+        this.getEncryption(this.initSolc);
     },
     methods: {
+        initSolc() {
+            var head = document.head;
+            var script = document.createElement("script");
+            if (localStorage.getItem("encryptionId") == 0) {
+                script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+            } else {
+                script.src = "./static/js/soljson-v0.4.25-gm.js";
+            }
+            script.setAttribute('id', 'soljson');
+            if (!document.getElementById('soljson')) {
+                head.append(script)
+            }
+        },
+        getEncryption: function (callback) {
+            encryption().then(res => {
+                if (res.status == 200) {
+                    localStorage.setItem("encryptionId", res.data)
+                    callback();
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+        },
         changeGroup: function () {
             this.$refs.menu.getContracts()
         },

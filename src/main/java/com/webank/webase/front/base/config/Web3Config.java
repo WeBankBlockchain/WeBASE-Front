@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,6 +13,10 @@
  */
 package com.webank.webase.front.base.config;
 
+
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.enums.GMStatus;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import java.io.IOException;
@@ -101,7 +105,7 @@ public class Web3Config {
 
     /**
      * init getWeb3j.
-     * 
+     *
      * @return
      */
     @Bean
@@ -122,7 +126,7 @@ public class Web3Config {
 
     /**
      * set sdk threadPool.
-     * 
+     *
      * @return
      */
     @Bean
@@ -198,6 +202,30 @@ public class Web3Config {
         }
         return web3jMap;
     }
+
+
+    public void isMatchEncryptType(Web3j web3j) throws IOException {
+        boolean isMatch = true;
+        // 1: guomi, 0: standard
+        NodeVersion version = web3j.getNodeVersion().send();
+
+        Constants.version = version.getNodeVersion().getVersion();
+        Constants.chainId = version.getNodeVersion().getChainID();
+        log.info("Chain's clientVersion:{}", Constants.version);
+        if (Constants.version.contains("gm")) {
+            isMatch = EncryptType.encryptType == GMStatus.GUOMI.getValue();
+        } else {
+            isMatch = EncryptType.encryptType == GMStatus.STANDARD.getValue();
+        }
+        if (!isMatch) {
+            log.error("Chain's version not matches with Front's  encryptType:{}",
+                    EncryptType.encryptType);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR.getCode(),
+                    "Chain's version not matches with Front's" + " encryptType: "
+                            + EncryptType.encryptType);
+        }
+    }
+
 
     @Bean
     @DependsOn("encryptType")

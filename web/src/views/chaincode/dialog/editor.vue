@@ -221,7 +221,7 @@ export default {
                     }
                 });
                 this.funcData = this.typesArray.name;
-                if (this.typesArray.inputs.length) {
+                if (this.editorOutput.length) {
                     this.decodeData = Web3EthAbi.decodeParameters(this.editorOutput, this.transationData.output);
                     if (JSON.stringify(this.decodeData) != "{}") {
                         for (const key in this.decodeData) {
