@@ -47,6 +47,12 @@ public class PrecompiledUtils {
     public static final String PERMISSION_TYPE_NODE = "node";
     public static final String PERMISSION_TYPE_SYS_CONFIG = "sysConfig";
     public static final String PERMISSION_TYPE_CNS = "cns";
+    // contract manage type
+    public static final String CONTRACT_MANAGE_FREEZE = "freeze";
+    public static final String CONTRACT_MANAGE_UNFREEZE = "unfreeze";
+    public static final String CONTRACT_MANAGE_GRANTMANAGER = "grantManager";
+    public static final String CONTRACT_MANAGE_GETSTATUS = "getStatus";
+    public static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
 
     public static final int InvalidReturnNumber = -100;
     public static final int QueryLogCount = 20;
