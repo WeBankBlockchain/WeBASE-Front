@@ -65,7 +65,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-
 /**
  * Web3Api manage.
  */
