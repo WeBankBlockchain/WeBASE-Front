@@ -13,11 +13,20 @@
  */
 package com.webank.webase.front.base.config;
 
+
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
@@ -36,11 +45,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
-
 /**
  * init web3sdk getService.
  *
@@ -56,22 +60,27 @@ public class Web3Config {
     private int corePoolSize;
     private int maxPoolSize;
     private int queueCapacity;
-    public  int timeout = 30000;
+    public int timeout = 30000;
     private int keepAlive;
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
-    /**
-     * 0:standard, 1:guomi
-     */
-    private int encryptType;
 
     /**
-     * 覆盖EncryptType构造函数
-     * 放在web3sdk初始化前，否则当前类里的CnsServiceMap的credential为非国密的
+     * 覆盖EncryptType构造函数 放在web3sdk初始化前，否则当前类里的CnsServiceMap的credential为非国密的
+     * 
      * @return
      */
     @Bean(name = "encryptType")
-    public EncryptType EncryptType() {
+    public EncryptType EncryptType(Web3j web3j) throws IOException {
+        NodeVersion version = web3j.getNodeVersion().send();
+        Constants.version = version.getNodeVersion().getVersion();
+        Constants.chainId = version.getNodeVersion().getChainID();
+        log.info("Chain's clientVersion:{}", Constants.version);
+        // 1: guomi, 0: standard
+        int encryptType = 0;
+        if (Constants.version.contains("gm")) {
+            encryptType = 1;
+        }
         log.info("*****init EncrytType:" + encryptType);
         return new EncryptType(encryptType);
     }
@@ -100,7 +109,8 @@ public class Web3Config {
      * @return
      */
     @Bean
-    public Web3j getWeb3j(GroupChannelConnectionsConfig groupChannelConnectionsConfig) throws Exception {
+    public Web3j getWeb3j(GroupChannelConnectionsConfig groupChannelConnectionsConfig)
+            throws Exception {
         Service service = new Service();
         service.setOrgID(orgName);
         service.setGroupId(1);
@@ -133,17 +143,15 @@ public class Web3Config {
     }
 
     /**
-     * init channel service.
-     * set setBlockNotifyCallBack
+     * init channel service. set setBlockNotifyCallBack
+     * 
      * @return
      */
     @Bean(name = "serviceMap")
     @DependsOn("encryptType")
     public Map<Integer, Service> serviceMap(Web3j web3j,
-                                            GroupChannelConnectionsConfig groupChannelConnectionsConfig,
-                                            NewBlockEventCallback newBlockEventCallBack) throws Exception {
-        // whether front' encrypt type matches with chain's
-        isMatchEncryptType(web3j);
+            GroupChannelConnectionsConfig groupChannelConnectionsConfig,
+            NewBlockEventCallback newBlockEventCallBack) throws Exception {
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
@@ -174,14 +182,15 @@ public class Web3Config {
 
     /**
      * init Web3j
+     * 
      * @param serviceMap
      * @return
      */
     @Bean
     @DependsOn("encryptType")
-    public Map<Integer, Web3j> web3jMap(Map<Integer, Service> serviceMap){
+    public Map<Integer, Web3j> web3jMap(Map<Integer, Service> serviceMap) {
         Map web3jMap = new ConcurrentHashMap<Integer, Web3j>(serviceMap.size());
-        for(Integer i: serviceMap.keySet()){
+        for (Integer i : serviceMap.keySet()) {
             Service service = serviceMap.get(i);
             ChannelEthereumService channelEthereumService = new ChannelEthereumService();
             channelEthereumService.setTimeout(timeout);
@@ -193,6 +202,7 @@ public class Web3Config {
         }
         return web3jMap;
     }
+
 
     public void isMatchEncryptType(Web3j web3j) throws IOException {
         boolean isMatch = true;
@@ -216,6 +226,7 @@ public class Web3Config {
         }
     }
 
+
     @Bean
     @DependsOn("encryptType")
     public Map<Integer, CnsService> cnsServiceMap(Map<Integer, Web3j> web3jMap) {
@@ -233,6 +244,10 @@ public class Web3Config {
         return cnsServiceMap;
     }
 
+    /**
+     * store contractName:version or contractName:addressWithoutPrefix in map when contract is
+     * deployed in @link ContractService
+     */
     @Bean
     public HashMap<String, String> cnsMap() {
         HashMap cnsMap = new HashMap<String, String>();
