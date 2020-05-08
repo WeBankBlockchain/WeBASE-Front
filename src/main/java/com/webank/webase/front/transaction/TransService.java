@@ -81,6 +81,7 @@ import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 
 /**
  * TransService. handle transactions of deploy/call contract
