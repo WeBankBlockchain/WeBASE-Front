@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -24,18 +24,8 @@ import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ContractPath;
-import com.webank.webase.front.contract.entity.ContractPathKey;
-import com.webank.webase.front.contract.entity.FileContentHandle;
-import com.webank.webase.front.contract.entity.ReqContractPath;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
-import com.webank.webase.front.contract.entity.RspContractCompile;
-import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+
+import com.webank.webase.front.contract.entity.*;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.AbiUtil;
@@ -87,6 +77,23 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
+import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.*;
+
 /**
  * contract management.
  */
@@ -126,14 +133,6 @@ public class ContractService {
         addressIsValid(req.getGroupId(), req.getAddress(), req.getContractBin());
         // Check if it has been deployed based on the contract name and version number
         checkContractAbiExistedAndSave(contractName, address.substring(2), abiInfos);
-        try {
-            web3ApiService.getCnsService(req.getGroupId()).registerCns(contractName,
-                    address.substring(2), address, JSON.toJSONString(abiInfos));
-        } catch (Exception ex) {
-            log.error("fail sendAbi.", ex);
-            throw new FrontException(ConstantCode.SEND_ABI_INFO_FAIL);
-        }
-
         log.info("sendAbi end. contractname:{} ,version:{}", contractName, address);
     }
 
@@ -225,13 +224,17 @@ public class ContractService {
      */
     public String deployWithSign(ReqDeploy req) throws Exception {
         int groupId = req.getGroupId();
-        String version = req.getVersion();
+//        String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
 
         // check groupId
         Web3j web3j = web3ApiService.getWeb3j(groupId);
+
+        if (web3j == null) {
+            new FrontException(GROUPID_NOT_EXIST);
+        }
 
         String contractName = req.getContractName();
         ContractAbiUtil.VersionEvent versionEvent =
@@ -250,20 +253,7 @@ public class ContractService {
         transService.sendMessage(web3j, signMsg, transFuture);
         TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
         String contractAddress = receipt.getContractAddress();
-
-        // save to cns
-        if (version != null) {
-            checkContractAbiExistedAndSave(contractName, version, abiInfos);
-            web3ApiService.getCnsService(groupId).registerCns(contractName, version,
-                    contractAddress, JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName + ":" + version, contractAddress);
-        } else {
-            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-            web3ApiService.getCnsService(groupId).registerCns(contractName,
-                    contractAddress.substring(2), contractAddress, JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
-        }
-
+        
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -273,7 +263,7 @@ public class ContractService {
      */
     public String deployLocally(ReqDeploy req) throws Exception {
         String contractName = req.getContractName();
-        String version = req.getVersion();
+//        String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
@@ -289,17 +279,6 @@ public class ContractService {
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
-        if (version != null) {
-            checkContractAbiExistedAndSave(contractName, version, abiInfos);
-            web3ApiService.getCnsService(groupId).registerCns(contractName, version,
-                    contractAddress, JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName + ":" + version, contractAddress);
-        } else {
-            checkContractAbiExistedAndSave(contractName, contractAddress.substring(2), abiInfos);
-            web3ApiService.getCnsService(groupId).registerCns(contractName,
-                    contractAddress.substring(2), contractAddress, JSON.toJSONString(abiInfos));
-            cnsMap.put(contractName + ":" + contractAddress.substring(2), contractAddress);
-        }
         log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -364,7 +343,7 @@ public class ContractService {
         CommonContract commonContract = null;
         Web3j web3j = web3ApiService.getWeb3j(groupId);
         if (web3j == null) {
-            new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+            throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
         }
         try {
             commonContract =
@@ -402,6 +381,7 @@ public class ContractService {
         return baseRsp;
     }
 
+    @Deprecated
     public String getAddressByContractNameAndVersion(int groupId, String name, String version) {
         return web3ApiService.getCnsService(groupId)
                 .getAddressByContractNameAndVersion(name + ":" + version);
@@ -411,6 +391,7 @@ public class ContractService {
             List<AbiDefinition> abiInfo, String contractBin, String packageName)
             throws IOException {
 
+
         File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
         FrontUtils.createFileIfNotExist(abiFile, true);
         FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
@@ -419,6 +400,7 @@ public class ContractService {
         FileUtils.writeStringToFile(binFile, contractBin);
 
         generateJavaFile(packageName, abiFile, binFile);
+
         String outputDirectory = "";
         if (!packageName.isEmpty()) {
             outputDirectory = packageName.replace(".", File.separator);
@@ -431,6 +413,17 @@ public class ContractService {
         FrontUtils.createFileIfNotExist(file, true);
         InputStream targetStream = new FileInputStream(file);
         return new FileContentHandle(contractName + ".java", targetStream);
+    }
+
+    private static synchronized void generateJavaFile(String packageName, File abiFile, File binFile) {
+        try {
+            MySecurityManagerConfig.forbidSystemExitCall();
+            SolidityFunctionWrapperGenerator
+                    .main(Arrays.asList("-a", abiFile.getPath(), "-b", binFile.getPath(), "-p",
+                            packageName, "-o", Constants.JAVA_DIR).toArray(new String[0]));
+        } finally {
+            MySecurityManagerConfig.enableSystemExitCall();
+        }
     }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -21,6 +21,7 @@ import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.CRUDService;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
@@ -317,8 +318,9 @@ public class PermissionManageService {
      */
     public List<PermissionInfo> listPermissionManager(int groupId) throws Exception {
 
-        PermissionService permissionService = new PermissionService(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
+
         return permissionService.listPermissionManager();
     }
 
@@ -340,8 +342,8 @@ public class PermissionManageService {
     }
 
     public List<PermissionInfo> listDeployAndCreateManager(int groupId) throws Exception {
-        PermissionService permissionService = new PermissionService(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
         return permissionService.listDeployAndCreateManager();
     }
 
@@ -369,8 +371,8 @@ public class PermissionManageService {
     public List<PermissionInfo> listUserTableManager(int groupId, String tableName)
             throws Exception {
 
-        PermissionService permissionService = new PermissionService(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
         return permissionService.listUserTableManager(tableName);
 
     }
@@ -395,8 +397,8 @@ public class PermissionManageService {
     }
 
     public List<PermissionInfo> listNodeManager(int groupId) throws Exception {
-        PermissionService permissionService = new PermissionService(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
         return permissionService.listNodeManager();
     }
 
@@ -420,8 +422,8 @@ public class PermissionManageService {
     }
 
     public List<PermissionInfo> listSysConfigManager(int groupId) throws Exception {
-        PermissionService permissionService = new PermissionService(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
         return permissionService.listSysConfigManager();
     }
 
@@ -445,9 +447,8 @@ public class PermissionManageService {
     }
 
     public List<PermissionInfo> listCNSManager(int groupId) throws Exception {
-
-        PermissionService permissionService = new PermissionService(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
+        PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
         return permissionService.listCNSManager();
     }
 

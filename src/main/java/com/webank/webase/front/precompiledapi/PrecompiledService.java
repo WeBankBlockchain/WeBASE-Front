@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -23,6 +23,7 @@ import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.precompile.crud.CRUDService;
@@ -61,8 +62,10 @@ public class PrecompiledService {
         return cnsService.queryCnsByName(contractName);
     }
 
-    public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName, String version)
-            throws Exception {
+
+    public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName,
+                                                  String version) throws Exception {
+
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
 
@@ -70,7 +73,8 @@ public class PrecompiledService {
     }
 
     public String getAddressByContractNameAndVersion(int groupId, String contractName,
-            String version) throws Exception {
+                                                  String version) throws Exception {
+
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         String contractNameAndVersion = contractName + Constants.SYMPOL + version;
@@ -165,8 +169,8 @@ public class PrecompiledService {
     /**
      * select
      */
-    public List<Map<String, String>> select(int groupId, Table table, Condition conditions)
-            throws Exception {
+    public List<Map<String, String>> select(int groupId, Table table,
+                                            Condition conditions) throws Exception {
         CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         List<Map<String, String>> selectRes = crudService.select(table, conditions);
