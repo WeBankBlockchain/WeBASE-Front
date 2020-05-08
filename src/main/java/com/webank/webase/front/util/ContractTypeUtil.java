@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.abi.datatypes.Bool;
@@ -156,7 +157,7 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return (T) encodeBytes(input, (Class<Bytes>) type);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return (T) new DynamicBytes(input.getBytes());
+                return (T) new DynamicBytes(Numeric.hexStringToByteArray(input));
             } else {
                 throw new FrontException(201201,
                         String.format("type:%s unsupported encoding", type.getName()));
@@ -189,7 +190,7 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return decodeBytes((Bytes) result);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return decodeBytes((byte[]) result.getValue());
+                return "0x" + Hex.encodeHexString((byte[]) result.getValue());
             } else {
                 throw new FrontException(201202,
                         String.format("type:%s unsupported decoding", type.getName()));

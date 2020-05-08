@@ -28,10 +28,14 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_GROUP_ID_IS_EMPTY =  RetCode.mark(201001, "groupId cannot be empty");
     public static final String PARAM_FAIL_USER_IS_EMPTY_STRING = "{\"code\":201002,\"message\":\"user cannot be empty\"}";
     public static final RetCode PARAM_FAIL_USER_IS_EMPTY = RetCode.mark(201002, "user cannot be empty");
+    public static final String PARAM_FAIL_USEAES_IS_EMPTY =
+        "{\"code\":201003,\"message\":\"useAes cannot be empty\"}";
     public static final String PARAM_FAIL_VERSION_IS_EMPTY = "{\"code\":201004,\"message\":\"version cannot be empty\"}";
     public static final String PARAM_FAIL_FUNCNAME_IS_EMPTY = "{\"code\":201005,\"message\":\"funcName cannot be empty\"}";
     public static final String PARAM_FAIL_ABIINFO_IS_EMPTY = "{\"code\":201006,\"message\":\"abiInfo cannot be empty\"}";
     public static final String PARAM_FAIL_BYTECODE_BIN_IS_EMPTY = "{\"code\":201007,\"message\":\"bytecodeBin cannot be empty\"}";
+    public static final String PARAM_FAIL_SIGN_USER_ID_IS_EMPTY_STRING = "{\"code\":201008,\"message\":\"signUserId cannot be empty\"}";
+    public static final RetCode PARAM_FAIL_SIGN_USER_ID_IS_EMPTY = RetCode.mark(201008, "signUserId cannot be empty");
 
     /* general error */
     public static final RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");
@@ -79,8 +83,9 @@ public class ConstantCode {
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
     public static final RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
-    public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3jMap of groupId is null, please call /{groupId}/web3/refresh to refresh");
-    public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "groupList error for no group, web3jMap is empty!");
+    public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3jMap of groupId is null, please try again");
+    public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "groupList error for no group");
+    public static final RetCode SYSTEM_ERROR_CNSSERVICE_NULL = RetCode.mark(101005, "cnsServiceMap of groupId is null, please try again");
 
     /* precompiled success */
     public static final RetCode RET_SUCCESS = RetCode.mark(0, "success");
@@ -98,10 +103,11 @@ public class ConstantCode {
     public static final String PARAM_FAIL_NODE_ID_IS_EMPTY = "{\"code\":2011109,\"message\":\"node id cannot be empty\"}";
     public static final String PARAM_FAIL_NODE_TYPE_IS_EMPTY = "{\"code\":201110,\"message\":\"node type cannot be empty\"}";
     public static final String PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY = "{\"code\":201111,\"message\":\"Permission state cannot be all empty\"}";
-
-    /* sign error code */
-    public static final String PARAM_FAIL_SIGN_USER_ID_IS_EMPTY = "{\"code\":201130,\"message\":\"signUserId cannot be empty\"}";
-
+    public static final String PARAM_FAIL_CONTRACT_ADDRESS_EMPTY = "{\"code\":201112,\"message\":\"contract address cannot be empty\"}";
+    public static final String PARAM_FAIL_CONTRACT_HANDLE_TYPE_EMPTY = "{\"code\":201113,\"message\":\"contract handle type cannot be empty\"}";
+    public static final RetCode PARAM_FAIL_GRANT_ADDRESS_EMPTY = RetCode.mark(201114, "grantAddress cannot be empty");
+    public static final RetCode INVALID_CONTRACT_HANDLE_TYPE = RetCode.mark(201115, "invalid contract handle type");
+    public static final RetCode FAIL_CONTRACT_HANDLE = RetCode.mark(201116, "contract status handle fail");
     /* precompiled runtime check or error */
     // param
     public static final RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");

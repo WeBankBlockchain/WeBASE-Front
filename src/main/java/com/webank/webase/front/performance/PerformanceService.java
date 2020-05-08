@@ -1,30 +1,24 @@
 /*
  * Copyright 2014-2020 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.webank.webase.front.performance;
 
-import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.performance.entity.Performance;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -34,7 +28,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.FileSystem;
@@ -43,10 +41,16 @@ import org.hyperic.sigar.NetInterfaceConfig;
 import org.hyperic.sigar.NetInterfaceStat;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 /**
- * Host monitor: monitor computer's performance
- * such as cpu, memory, disk etc.
+ * Host monitor: monitor computer's performance such as cpu, memory, disk etc.
  */
 
 @Slf4j
@@ -58,7 +62,7 @@ public class PerformanceService {
     @Autowired
     private Constants constants;
     // host upload bps(bit per second)
-    private static  final String TXBPS = "txbps";
+    private static final String TXBPS = "txbps";
     // host download bps(bit per second)
     private static final String RXBPS = "rxbps";
 
@@ -88,8 +92,8 @@ public class PerformanceService {
      * @return
      */
     public List<PerformanceData> findContrastDataByTime(LocalDateTime startTime,
-                                                        LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
-                                                        int gap)  {
+            LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
+            int gap) {
 
         List<Performance> performanceList;
         if (startTime == null || endTime == null) {
@@ -107,11 +111,32 @@ public class PerformanceService {
         }
         return transferToPerformanceData(transferListByGap(performanceList, gap),
                 transferListByGap(contrastPerformanceList, gap));
+    }
 
+    public Page<Performance> pagingQuery(Integer pageNumber, Integer pageSize,
+            LocalDateTime beginDate, LocalDateTime endDate) {
+        Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
+        Specification<Performance> queryParam = new Specification<Performance>() {
+            @Override
+            public Predicate toPredicate(Root<Performance> root, CriteriaQuery<?> criteriaQuery,
+                    CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates = new ArrayList<>();
+                if (beginDate != null) {
+                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                            beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                }
+                if (endDate != null) {
+                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                            endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                }
+                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+            }
+        };
+        return performanceRepository.findAll(queryParam, pageable);
     }
 
     private List<PerformanceData> transferToPerformanceData(List<Performance> performanceList,
-                                                            List<Performance> contrastPerformanceList) {
+            List<Performance> contrastPerformanceList) {
         List<Long> timestampList = new ArrayList<>();
         List<BigDecimal> memoryValueList = new ArrayList<>();
         List<BigDecimal> cpuValueList = new ArrayList<>();
@@ -164,25 +189,25 @@ public class PerformanceService {
 
     public boolean toggleSync(boolean toggle) throws Exception {
         constants.setMonitorEnabled(toggle);
-        if(constants.isMonitorEnabled() == toggle) {
+        if (constants.isMonitorEnabled() == toggle) {
             log.debug("toggle sync performance status to " + toggle);
             return toggle;
-        }else {
-            throw new FrontException("Fail to toggle sync performance status to "+ toggle);
+        } else {
+            throw new FrontException("Fail to toggle sync performance status to " + toggle);
         }
     }
 
     public boolean getToggleStatus() throws Exception {
         return constants.isMonitorEnabled();
     }
+
     /**
      * syncPerformanceInfo per 5s
      */
     @Scheduled(cron = "0/5 * * * * ?")
     public void syncPerformanceInfo() throws SigarException {
         log.debug("begin sync performance");
-        if (!constants.isMonitorEnabled())
-        {
+        if (!constants.isMonitorEnabled()) {
             return;
         }
         Performance performance = new Performance();
@@ -197,7 +222,7 @@ public class PerformanceService {
             performance.setTxbps(new BigDecimal(map.get(TXBPS)));
             performance.setRxbps(new BigDecimal(map.get(RXBPS)));
         } catch (Exception e) {
-            log.error("get net speed failed.",e);
+            log.error("get net speed failed.", e);
         }
 
         performanceRepository.save(performance);
@@ -210,8 +235,7 @@ public class PerformanceService {
     @Scheduled(cron = "0 0 0 * * ?")
     public void deletePerformanceInfoPerWeek() throws SigarException {
         log.debug("begin delete performance");
-        if (!constants.isMonitorEnabled())
-        {
+        if (!constants.isMonitorEnabled()) {
             return;
         }
         Long currentTime = System.currentTimeMillis();
@@ -223,7 +247,7 @@ public class PerformanceService {
 
     private BigDecimal getCpuRatio() throws SigarException {
         CpuPerc cpuPerc = sigar.getCpuPerc();
-        return  BigDecimal.valueOf(cpuPerc.getCombined() * 100);
+        return BigDecimal.valueOf(cpuPerc.getCombined() * 100);
 
     }
 
@@ -231,7 +255,7 @@ public class PerformanceService {
         ;
         Mem mem = sigar.getMem();
         // log.info("内存总量: " + mem.getTotal() / 1024L + "K av");
-        return  BigDecimal.valueOf(mem.getUsedPercent());
+        return BigDecimal.valueOf(mem.getUsedPercent());
     }
 
     /**
@@ -242,7 +266,7 @@ public class PerformanceService {
     public BigDecimal getDiskRatio() throws SigarException {
         double use;
         use = sigar.getFileSystemUsage(constants.getMonitorDisk()).getUsePercent();
-        return  BigDecimal.valueOf(use * 100); // 硬盘使用百分率%
+        return BigDecimal.valueOf(use * 100); // 硬盘使用百分率%
     }
 
     /**
@@ -253,15 +277,7 @@ public class PerformanceService {
     public Map<String, Long> getNetSpeed()
             throws UnknownHostException, SigarException, InterruptedException {
         Map<String, Long> map = new HashMap<String, Long>();
-        InetAddress addr;
-        String ip;
-        try {
-            addr = InetAddress.getLocalHost();
-             ip = addr.getHostAddress();
-        } catch (Exception e ) {
-            log.info("sigar get ip failed!");
-            ip = "127.0.0.1";
-        }
+        String ip = getIp();
 
         String[] ifNames = sigar.getNetInterfaceList();
         long rxbps = 0;
@@ -296,31 +312,30 @@ public class PerformanceService {
      * @return
      */
     public Map<String, String> getConfigInfo() throws UnknownHostException, SigarException {
+        log.info("getConfigInfo.");
         Map<String, String> configMap = new HashMap<>();
-        InetAddress addr;
-        addr = InetAddress.getLocalHost();
-        String ip = addr.getHostAddress();
-        log.info("本地ip地址:    " + ip);
+        String ip = getIp();
+        log.debug("本地ip地址:    " + ip);
         configMap.put("ip", ip);
         Mem mem = sigar.getMem();
-        log.info("内存总量:    " + mem.getTotal() / 1024L + "K av");
-        log.info("当前内存使用量:    " + mem.getUsed() / 1024L + "K used");
+        log.debug("内存总量:    " + mem.getTotal() / 1024L + "K av");
+        log.debug("当前内存使用量:    " + mem.getUsed() / 1024L + "K used");
         configMap.put("memoryTotalSize", Long.toString(mem.getTotal() / 1024L));
         configMap.put("memoryUsedSize", Long.toString(mem.getUsed() / 1024L));
         CpuPerc cpu = sigar.getCpuPerc();
         CpuInfo[] infos = sigar.getCpuInfoList();
-        log.info("CPU的大小:    " + infos[0].getMhz());
-        log.info("CPU的核数:    " + infos.length);
+        log.debug("CPU的大小:    " + infos[0].getMhz());
+        log.debug("CPU的核数:    " + infos.length);
         configMap.put("cpuSize", Integer.toString(infos[0].getMhz()));
         configMap.put("cpuAmount", Integer.toString(infos.length));
         long total;
         long use;
         FileSystem[] fslist = sigar.getFileSystemList();
-        log.info("****fs " + fslist.length);
+        log.debug("****fs " + fslist.length);
         use = sigar.getFileSystemUsage(constants.getMonitorDisk()).getUsed();
         total = sigar.getFileSystemUsage(constants.getMonitorDisk()).getTotal();
-        log.info("文件系统总量:    " + total);
-        log.info("文件系统已使用量:    " + use);
+        log.debug("文件系统总量:    " + total);
+        log.debug("文件系统已使用量:    " + use);
         configMap.put("diskTotalSize", Long.toString(total));
         configMap.put("diskUsedSize", Long.toString(use));
         return configMap;
@@ -333,9 +348,9 @@ public class PerformanceService {
      * @param gap gap
      * @return
      */
-    public List transferListByGap(List arrayList, int gap)  {
+    public List transferListByGap(List arrayList, int gap) {
         if (gap == 0) {
-             throw new FrontException("gap cannot be 0");
+            throw new FrontException("gap cannot be 0");
         }
         List newPerformanceList = fillList(arrayList);
         List ilist = new ArrayList<>();
@@ -352,13 +367,13 @@ public class PerformanceService {
             Long startTime = performanceList.get(i).getTimestamp();
             Long endTime = performanceList.get(i + 1).getTimestamp();
             if (endTime - startTime > 10000) {
-                log.info("****startTime" + startTime);
-                log.info("****endTime" + endTime);
+                log.debug("****startTime" + startTime);
+                log.debug("****endTime" + endTime);
                 while (endTime - startTime > 5000) {
                     Performance emptyPerformance = new Performance();
                     emptyPerformance.setTimestamp(startTime + 5000);
                     newPerformanceList.add(emptyPerformance);
-                    log.info("****insert" + startTime);
+                    log.debug("****insert" + startTime);
                     startTime = startTime + 5000;
                 }
             } else {
@@ -366,6 +381,16 @@ public class PerformanceService {
             }
         }
         return newPerformanceList;
+    }
+
+    private String getIp() {
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            return addr.getHostAddress();
+        } catch (Exception e) {
+            log.info("get ip fail, return '127.0.0.1'");
+            return "127.0.0.1";
+        }
     }
 }
 

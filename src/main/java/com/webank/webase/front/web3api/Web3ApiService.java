@@ -24,32 +24,36 @@ import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.FrontUtils;
-import com.webank.webase.front.web3api.entity.*;
+import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
+import com.webank.webase.front.web3api.entity.GroupOperateStatus;
+import com.webank.webase.front.web3api.entity.NodeStatusInfo;
+import com.webank.webase.front.web3api.entity.PeerOfConsensusStatus;
+import com.webank.webase.front.web3api.entity.PeerOfSyncStatus;
 import com.webank.webase.front.web3api.entity.SyncStatus;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.channel.handler.ChannelConnections;
-import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
-import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
-import org.fisco.bcos.web3j.protocol.core.methods.response.*;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.channel.handler.ChannelConnections;
+import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
+import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
+import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
+import org.fisco.bcos.web3j.protocol.core.methods.response.GroupPeers;
+import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Service;
 
 /**
  * Web3Api manage.
@@ -118,6 +122,7 @@ public class Web3ApiService {
     public BcosBlock.Block getBlockByHash(int groupId, String blockHash) {
         BcosBlock.Block block;
         try {
+
             block = getWeb3j(groupId).getBlockByHash(blockHash, true)
                     .send()
                     .getBlock();
@@ -524,12 +529,10 @@ public class Web3ApiService {
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
         ChannelConnections channelConnections = new ChannelConnections();
-        channelConnections
-                .setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
+        channelConnections.setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
         channelConnections.setGroupId(groupId);
         channelConnectionsList.add(channelConnections);
-        org.fisco.bcos.channel.client.Service service =
-                new org.fisco.bcos.channel.client.Service();
+        org.fisco.bcos.channel.client.Service service = new org.fisco.bcos.channel.client.Service();
         service.setOrgID(Web3Config.orgName);
         service.setGroupId(groupId);
         service.setThreadPool(threadPoolTaskExecutor);
@@ -537,8 +540,8 @@ public class Web3ApiService {
         try {
             service.run();
         } catch (Exception e) {
-            log.error("refreshWeb3jMap failed:{}", e);
-            throw new FrontException("refresh Web3jMap failed");
+            log.error("refreshWeb3jMap fail. groupId:{} error:[]", groupId, e);
+            throw new FrontException("refresh web3j failed");
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setTimeout(web3Config.getTimeout());
@@ -774,9 +777,10 @@ public class Web3ApiService {
 
     /**
      * get first web3j in web3jMap
+     * 
      * @return
      */
-    private Web3j getWeb3j() {
+    public Web3j getWeb3j() {
         Set<Integer> iSet = web3jMap.keySet();
         if (iSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");

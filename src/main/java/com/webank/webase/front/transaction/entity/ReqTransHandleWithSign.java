@@ -15,14 +15,12 @@
  */
 package com.webank.webase.front.transaction.entity;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import java.util.ArrayList;
 import java.util.List;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
-import com.webank.webase.front.base.code.ConstantCode;
-import lombok.Data;
-
 import javax.validation.constraints.NotNull;
+import lombok.Data;
+import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * transHandleWithSign interface parameter.
@@ -32,7 +30,7 @@ import javax.validation.constraints.NotNull;
 @Data
 public class ReqTransHandleWithSign {
     private int groupId = 1;
-    @NotNull(message = ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY)
+    @NotNull(message = ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY_STRING)
     private String signUserId;
     /**
      * used in saving abi file
