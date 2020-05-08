@@ -14,7 +14,6 @@
 
 package com.webank.webase.front.precompiledapi;
 
-
 import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
 import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
 import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
@@ -32,7 +31,6 @@ import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
@@ -42,18 +40,6 @@ import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
-import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
-import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
-import static org.fisco.bcos.web3j.precompile.crud.CRUD.FUNC_UPDATE;
-import static org.fisco.bcos.web3j.precompile.crud.TableFactory.FUNC_CREATETABLE;
-import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
-import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 
 /**
  * send raw transaction through webase-sign to call precompiled
@@ -192,12 +178,63 @@ public class PrecompiledWithSignService {
 		return flag;
 	}
 
+	/**
+     * CRUD: create table through webase-sign
+     */
+    public int createTable(int groupId, String signUserId, Table table) throws Exception {
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(table.getTableName());
+        funcParams.add(table.getKey());
+        funcParams.add(table.getValueFields());
+        TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                signUserId, PrecompiledTypes.TABLE_FACTORY, FUNC_CREATETABLE, funcParams);
+        return PrecompiledCommon.handleTransactionReceiptForCRUD(receipt);
+    }
+
+    /**
+     * CRUD: insert table through webase-sign
+     */
+    public int insert(int groupId, String signUserId, Table table, Entry entry) throws Exception {
+        checkTableKeyLength(table);
+        // trans
+        String entryJsonStr =
+                ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFields());
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(table.getTableName());
+        funcParams.add(table.getKey());
+        funcParams.add(entryJsonStr);
+        funcParams.add(table.getOptional());
+        TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                signUserId, PrecompiledTypes.CRUD, FUNC_INSERT, funcParams);
+        return PrecompiledCommon.handleTransactionReceiptForCRUD(receipt);
+    }
+
+    /**
+     * CRUD: update table through webase-sign
+     */
+    public int update(int groupId, String signUserId, Table table,
+                      Entry entry, Condition condition) throws Exception {
+        checkTableKeyLength(table);
+        // trans
+        String entryJsonStr =
+                ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFields());
+        String conditionStr =
+                ObjectMapperFactory.getObjectMapper().writeValueAsString(condition.getConditions());
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(table.getTableName());
+        funcParams.add(table.getKey());
+        funcParams.add(entryJsonStr);
+        funcParams.add(conditionStr);
+        funcParams.add(table.getOptional());
+        TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                signUserId, PrecompiledTypes.CRUD, FUNC_UPDATE, funcParams);
+        return PrecompiledCommon.handleTransactionReceiptForCRUD(receipt);
+    }
 
     /**
      * CRUD: remove table through webase-sign
      */
-    public int remove(int groupId, String signUserId, Table table, Condition condition)
-            throws Exception {
+    public int remove(int groupId, String signUserId, Table table, Condition condition) throws Exception {
         checkTableKeyLength(table);
         // trans
         String conditionStr =
@@ -207,9 +244,8 @@ public class PrecompiledWithSignService {
         funcParams.add(table.getKey());
         funcParams.add(conditionStr);
         funcParams.add(table.getOptional());
-        TransactionReceipt receipt =
-                (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
-                        signUserId, PrecompiledTypes.CRUD, FUNC_REMOVE, funcParams);
+        TransactionReceipt receipt = (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                signUserId, PrecompiledTypes.CRUD, FUNC_REMOVE, funcParams);
         return PrecompiledCommon.handleTransactionReceiptForCRUD(receipt);
     }
 
@@ -217,7 +253,8 @@ public class PrecompiledWithSignService {
         if (table.getKey().length() > PrecompiledCommon.TABLE_KEY_MAX_LENGTH) {
             throw new PrecompileMessageException(
                     "The value of the table key exceeds the maximum limit("
-                            + PrecompiledCommon.TABLE_KEY_MAX_LENGTH + ").");
+                            + PrecompiledCommon.TABLE_KEY_MAX_LENGTH
+                            + ").");
         }
     }
 
