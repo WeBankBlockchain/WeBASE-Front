@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+ * Copyright 2014-2020  the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -19,6 +19,7 @@ import com.webank.webase.front.util.CommonUtils;
 import lombok.Data;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -45,19 +46,18 @@ public class NodeConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (constants.getNodePath() == "") {
+        if(StringUtils.isBlank(constants.getNodePath())) {
             return;
         }
-        List<String> nodeInfos =
-                CommonUtils.readFileToList(constants.getNodePath() + Constants.CONFIG_FILE);
-
-        if (nodeInfos == null || nodeInfos.size() == 0) {
-            // throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
-            log.warn("cannot read config.ini");
-            return;
-        }
+        List<String> nodeInfos = CommonUtils.readFileToList(constants.getNodePath() + Constants.CONFIG_FILE);
 
         this.p2pip = CommonUtils.getCurrentIp();
+        if (nodeInfos == null || nodeInfos.isEmpty() ) {
+          //  throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
+            log.info("cannot read config.ini");
+            return;
+        }
+
         for (String str : nodeInfos) {
             if (str.contains(" listen_ip")) {
                 this.listenip = str.substring(str.indexOf("=") + 1);
