@@ -427,18 +427,6 @@ public class ContractService {
     }
 
 
-    private static synchronized void generateJavaFile(String packageName, File abiFile, File binFile) {
-        try {
-            MySecurityManagerConfig.forbidSystemExitCall();
-            SolidityFunctionWrapperGenerator
-                    .main(Arrays.asList("-a", abiFile.getPath(), "-b", binFile.getPath(), "-p",
-                            packageName, "-o", Constants.JAVA_DIR).toArray(new String[0]));
-        } finally {
-            MySecurityManagerConfig.enableSystemExitCall();
-        }
-    }
-
-
     /**
      * delete contract by contractId.
      */
