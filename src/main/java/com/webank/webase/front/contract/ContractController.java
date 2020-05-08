@@ -13,15 +13,38 @@
  */
 package com.webank.webase.front.contract;
 
+import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.controller.BaseController;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.response.BasePageResponse;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.contract.entity.ContractPath;
+import com.webank.webase.front.contract.entity.FileContentHandle;
+import com.webank.webase.front.contract.entity.ReqContractCompile;
+import com.webank.webase.front.contract.entity.ReqContractPath;
+import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
+import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqSendAbi;
+import com.webank.webase.front.contract.entity.RspContractCompile;
+import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
-
-import com.webank.webase.front.contract.entity.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -38,17 +61,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.alibaba.fastjson.JSON;
-import com.webank.webase.front.base.controller.BaseController;
-import com.webank.webase.front.base.response.BasePageResponse;
-import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.exception.FrontException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -70,10 +82,11 @@ public class ContractController extends BaseController {
      * @param result checkResult
      */
     @ApiOperation(value = "contract deploy", notes = "contract deploy")
-    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
+    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true,
+            dataType = "ReqDeploy")
     @PostMapping("/deployWithSign")
     public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
-        throws Exception {
+            throws Exception {
         log.info("contract deployWithSign start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
         checkParamResult(result);
         if (StringUtils.isBlank(reqDeploy.getSignUserId())) {
@@ -84,12 +97,13 @@ public class ContractController extends BaseController {
         log.info("success deployWithSign. result:{}", contractAddress);
         return contractAddress;
     }
-    
+
     /**
      * deploy locally not through sign
      */
     @ApiOperation(value = "contract deploy locally", notes = "contract deploy")
-    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true, dataType = "ReqDeploy")
+    @ApiImplicitParam(name = "reqDeploy", value = "contract info", required = true,
+            dataType = "ReqDeploy")
     @PostMapping("/deploy")
     public String deployLocal(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
             throws Exception {
@@ -114,26 +128,27 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "compile java", notes = "compile java")
     @ApiImplicitParam(name = "param", value = "abi info", required = true, dataType = "ReqSendAbi")
     @PostMapping("/compile-java")
-    public ResponseEntity<InputStreamResource> compileJavaFile(
-        @Valid @RequestBody ReqSendAbi param,
-        BindingResult result) throws FrontException, IOException {
+    public ResponseEntity<InputStreamResource> compileJavaFile(@Valid @RequestBody ReqSendAbi param,
+            BindingResult result) throws FrontException, IOException {
         log.info("compileJavaFile start. reqSendAbi:{}", JSON.toJSONString(param));
         checkParamResult(result);
-        FileContentHandle fileContentHandle = ContractService
-            .compileToJavaFile(param.getContractName(), param.getAbiInfo(), param.getContractBin(),
-                param.getPackageName());
+        FileContentHandle fileContentHandle =
+                ContractService.compileToJavaFile(param.getContractName(), param.getAbiInfo(),
+                        param.getContractBin(), param.getPackageName());
         return ResponseEntity.ok().headers(headers(fileContentHandle.getFileName()))
-            .body(new InputStreamResource(fileContentHandle.getInputStream()));
+                .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
 
     @ApiOperation(value = "delete contract abi", notes = "delete contract abi")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "contractName", value = "contractName", required = true, dataType = "String"),
-        @ApiImplicitParam(name = "version", value = "version", required = true, dataType = "String")})
+            @ApiImplicitParam(name = "contractName", value = "contractName", required = true,
+                    dataType = "String"),
+            @ApiImplicitParam(name = "version", value = "version", required = true,
+                    dataType = "String")})
     @DeleteMapping("/deleteAbi/{contractName}/{version:.+}")
     public BaseResponse deleteAbi(@PathVariable String contractName, @PathVariable String version)
-        throws FrontException {
+            throws FrontException {
         log.info("deleteAbi start. contractName:{} version:{}", contractName, version);
         return contractService.deleteAbi(contractName, version);
     }
@@ -145,10 +160,11 @@ public class ContractController extends BaseController {
      * @param result checkResult
      */
     @ApiOperation(value = "send abi", notes = "send abi")
-    @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true, dataType = "ReqSendAbi")
+    @ApiImplicitParam(name = "reqSendAbi", value = "abi info", required = true,
+            dataType = "ReqSendAbi")
     @PostMapping("/abiInfo")
     public ResponseEntity sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)
-        throws FrontException {
+            throws FrontException {
         log.info("sendAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
         checkParamResult(result);
         if (Objects.isNull(reqSendAbi.getGroupId())) {
@@ -163,7 +179,7 @@ public class ContractController extends BaseController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-            "attachment;filename*=UTF-8''" + encode(fileName));
+                "attachment;filename*=UTF-8''" + encode(fileName));
         return httpHeaders;
     }
 
@@ -179,10 +195,11 @@ public class ContractController extends BaseController {
      * save contract.
      */
     @ApiOperation(value = "save contract", notes = "save contract ")
-    @ApiImplicitParam(name = "req", value = "contract info", required = true, dataType = "ReqContractSave")
+    @ApiImplicitParam(name = "req", value = "contract info", required = true,
+            dataType = "ReqContractSave")
     @PostMapping(value = "/save")
     public Contract saveContract(@RequestBody @Valid ReqContractSave contract, BindingResult result)
-        throws FrontException {
+            throws FrontException {
         log.info("saveContract start. contract:{}", JSON.toJSONString(contract));
         checkParamResult(result);
         return contractService.saveContract(contract);
@@ -193,11 +210,13 @@ public class ContractController extends BaseController {
      */
     @ApiOperation(value = "delete by contractId", notes = "delete by contractId")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "int"),
-        @ApiImplicitParam(name = "contractId", value = "contractId", required = true, dataType = "Long")})
+            @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
+                    dataType = "int"),
+            @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
+                    dataType = "Long")})
     @DeleteMapping("/{groupId}/{contractId}")
     public BaseResponse deleteByContractId(@PathVariable Integer groupId,
-        @PathVariable Long contractId) throws FrontException {
+            @PathVariable Long contractId) throws FrontException {
         log.info("deleteByContractId start. groupId:{} contractId:{}", groupId, contractId);
         contractService.deleteContract(contractId, groupId);
         return new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -207,10 +226,11 @@ public class ContractController extends BaseController {
      * query list of contract.
      */
     @ApiOperation(value = "query list of contract", notes = "query list of contract ")
-    @ApiImplicitParam(name = "req", value = "param info", required = true, dataType = "ReqPageContract")
+    @ApiImplicitParam(name = "req", value = "param info", required = true,
+            dataType = "ReqPageContract")
     @PostMapping(value = "/contractList")
     public BasePageResponse findByPage(@RequestBody @Valid ReqPageContract req,
-        BindingResult result) throws FrontException, IOException {
+            BindingResult result) throws FrontException, IOException {
         log.info("findByPage start. ReqPageContract:{}", JSON.toJSONString(req));
         checkParamResult(result);
         Page<Contract> page = contractService.findContractByPage(req);
@@ -219,14 +239,16 @@ public class ContractController extends BaseController {
         response.setData(page.getContent());
         return response;
     }
-    
+
     /**
      * verify that if the contract changed.
      */
     @ApiOperation(value = "verify contract", notes = "verify that if the contract changed")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "int"),
-        @ApiImplicitParam(name = "contractId", value = "contractId", required = true, dataType = "Long")})
+            @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
+                    dataType = "int"),
+            @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
+                    dataType = "Long")})
     @GetMapping("/ifChanged/{groupId}/{contractId}")
     public boolean ifChanged(@PathVariable Integer groupId, @PathVariable Long contractId) {
         log.info("ifChanged start. groupId:{} contractId:{}", groupId, contractId);
@@ -237,21 +259,40 @@ public class ContractController extends BaseController {
      * query list of contract.
      */
     @ApiOperation(value = "compile contract", notes = "compile contract")
-    @ApiImplicitParam(name = "req", value = "param info", required = true, dataType = "ReqContractCompile")
+    @ApiImplicitParam(name = "req", value = "param info", required = true,
+            dataType = "ReqContractCompile")
     @PostMapping(value = "/contractCompile")
     public RspContractCompile contractCompile(@RequestBody @Valid ReqContractCompile req,
             BindingResult result) throws FrontException {
         log.info("contractCompile start. param:{}", JSON.toJSONString(req));
         checkParamResult(result);
-        return contractService.contractCompile(req.getSolidityName(), req.getSolidityBase64());
+        return contractService.contractCompile(req.getContractName(), req.getSolidityBase64());
     }
-    
+
+    /**
+     * multiple contract compile.
+     */
+    @ApiOperation(value = "multiple contract compile", notes = "multiple contract compile")
+    @PostMapping(value = "/multiContractCompile")
+    public List<RspMultiContractCompile> multiContractCompile(
+            @RequestBody @Valid ReqMultiContractCompile req, BindingResult result)
+            throws FrontException, IOException {
+        Instant startTime = Instant.now();
+        log.info("start multiContractCompile startTime:{} param:{}", startTime.toEpochMilli(),
+                JSON.toJSONString(req));
+        checkParamResult(result);
+        List<RspMultiContractCompile> response = contractService.multiContractCompile(req);
+        log.info("end multiContractCompile useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return response;
+    }
+
     @PostMapping(value = "/addContractPath")
     public ContractPath addContractPath(@RequestBody @Valid ReqContractPath req) {
         log.info("addContractPath start. param:{}", JSON.toJSONString(req));
         return contractService.addContractPath(req);
     }
-    
+
     /**
      * query by groupId.
      */
@@ -260,9 +301,10 @@ public class ContractController extends BaseController {
         log.info("start findPathList. groupId:{}", groupId);
         return contractService.findPathList(groupId);
     }
-    
+
     @DeleteMapping("deletePath/{groupId}/{contractPath}")
-    public BaseResponse deletePath(@PathVariable("groupId") Integer groupId, @PathVariable String contractPath) {
+    public BaseResponse deletePath(@PathVariable("groupId") Integer groupId,
+            @PathVariable String contractPath) {
         log.info("start deletePath. contractPath:{}", contractPath);
         contractService.deletePath(groupId, contractPath);
         return new BaseResponse(ConstantCode.RET_SUCCEED);
