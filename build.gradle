@@ -86,7 +86,7 @@ dependencies {
 	// guomi contract compile: USE 'socJ-all-0.4.25-gm' to REPLACE 'ethereum:solcJ-all'
 	// will be fixed when solcJ-all-0.4.25-gm jar added to repository.
 	if (project.hasProperty("guomi")) {
-		compile('org.fisco-bcos:web3sdk:2.2.0') {
+		compile('org.fisco-bcos:web3sdk:2.4.0') {
 			exclude group: "org.ethereum"
 		}
 
@@ -108,7 +108,7 @@ dependencies {
 		}
 		compile fileTree(dir:'lib',includes:['solcJ-all-*-gm.jar'])
 	} else {
-		compile('org.fisco-bcos:web3sdk:2.2.0')
+		compile('org.fisco-bcos:web3sdk:2.4.0')
 	}
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
 	compile 'com.alibaba:fastjson:1.2.67'
