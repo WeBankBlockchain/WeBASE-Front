@@ -1,5 +1,17 @@
 version '1.0'
 
+// add download task plugin
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'de.undercouch:gradle-download-task:4.0.4'
+	}
+}
+
+// use download task plugin
+apply plugin: 'de.undercouch.download'
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -66,14 +78,38 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
+
+
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb
+
 	// guomi contract compile: USE 'socJ-all-0.4.25-gm' to REPLACE 'ethereum:solcJ-all'
-	compile ('org.fisco-bcos:web3sdk:2.4.0')
-//        {
-//            exclude group:"org.ethereum"
-//        }
-//    compile fileTree(dir:'lib',includes:['solcJ-all-0.4.25-gm.jar'])
+	// will be fixed when solcJ-all-0.4.25-gm jar added to repository.
+	if (project.hasProperty("guomi")) {
+		compile('org.fisco-bcos:web3sdk:2.2.0') {
+			exclude group: "org.ethereum"
+		}
+
+		// download solcJ gm jar
+		def solcGmJarVersion = project.findProperty('guomi') ?: '0.4.25'
+
+		if ( ! "local".equalsIgnoreCase(solcGmJarVersion)){ // download solcJ from url
+			def destDir= new File("$projectDir/lib")
+			if(! destDir.exists()) {
+				destDir.mkdirs()
+			}
+			delete fileTree(destDir){include 'solcJ-all-*-gm.jar'}
+			download {
+				src String.format("https://github.com/FISCO-BCOS/LargeFiles/raw/master/tools/solcj/solcJ-all-%s-gm.jar", solcGmJarVersion)
+				dest destDir
+				onlyIfModified true
+				overwrite true
+			}
+		}
+		compile fileTree(dir:'lib',includes:['solcJ-all-*-gm.jar'])
+	} else {
+		compile('org.fisco-bcos:web3sdk:2.2.0')
+	}
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
 	compile 'com.alibaba:fastjson:1.2.67'
 	compile 'com.h2database:h2:1.4.197'
