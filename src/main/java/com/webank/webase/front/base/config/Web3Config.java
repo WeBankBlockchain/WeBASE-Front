@@ -14,15 +14,10 @@
 package com.webank.webase.front.base.config;
 
 
-import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.enums.GMStatus;
-import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,10 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
-import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion;
@@ -66,12 +58,7 @@ public class Web3Config {
     private String channelPort = "20200";
 
     /**
-<<<<<<< HEAD
      * 覆盖EncryptType构造函数
-=======
-     * 覆盖EncryptType构造函数 放在web3sdk初始化前，否则当前类里的CnsServiceMap的credential为非国密的
-     * 
->>>>>>> upstream/dev
      * @return
      */
     @Bean(name = "encryptType")
@@ -109,8 +96,6 @@ public class Web3Config {
 
     /**
      * init getWeb3j.
-     *
-     * @return
      */
     @Bean
     public Web3j getWeb3j(GroupChannelConnectionsConfig groupChannelConnectionsConfig)
@@ -207,28 +192,6 @@ public class Web3Config {
         return web3jMap;
     }
 
-
-    public void isMatchEncryptType(Web3j web3j) throws IOException {
-        boolean isMatch = true;
-        // 1: guomi, 0: standard
-        NodeVersion version = web3j.getNodeVersion().send();
-
-        Constants.version = version.getNodeVersion().getVersion();
-        Constants.chainId = version.getNodeVersion().getChainID();
-        log.info("Chain's clientVersion:{}", Constants.version);
-        if (Constants.version.contains("gm")) {
-            isMatch = EncryptType.encryptType == GMStatus.GUOMI.getValue();
-        } else {
-            isMatch = EncryptType.encryptType == GMStatus.STANDARD.getValue();
-        }
-        if (!isMatch) {
-            log.error("Chain's version not matches with Front's  encryptType:{}",
-                    EncryptType.encryptType);
-            throw new FrontException(ConstantCode.SYSTEM_ERROR.getCode(),
-                    "Chain's version not matches with Front's" + " encryptType: "
-                            + EncryptType.encryptType);
-        }
-    }
 
 //    @Bean
 //    @DependsOn("encryptType")

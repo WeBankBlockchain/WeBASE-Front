@@ -103,4 +103,6 @@ public class ExceptionsHandler {
         map.put("code", 500);
         return ResponseEntity.status(500).body(map);
     }
+
+    // TODO catch Exception and separate different exception
 }
