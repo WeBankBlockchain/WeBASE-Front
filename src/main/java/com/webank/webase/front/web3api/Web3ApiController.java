@@ -15,9 +15,11 @@ package com.webank.webase.front.web3api;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.Address;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
+import com.webank.webase.front.web3api.entity.ReqGroupStatus;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -279,4 +281,21 @@ public class Web3ApiController {
             throws IOException {
         return web3ApiService.operateGroup(groupId, type);
     }
+
+    /**
+     * get group status of front's node
+     * @param groupIdList
+     * @return map of <groupId, status>
+     *     status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
+     */
+	@ApiOperation(value = "getGroupStatus", notes = "getStatus of the group id in the list")
+	@ApiImplicitParam(name = "groupIdList", value = "group id list of string", required = true, dataType = "ReqGroupStatusList")
+	@PostMapping("/queryGroupStatus")
+	public BaseResponse getGroupStatus(@RequestBody ReqGroupStatus groupIdList)
+			throws IOException {
+        if (groupIdList.getGroupIdList().isEmpty()) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY);
+        }
+		return web3ApiService.getGroupStatus(groupIdList.getGroupIdList());
+	}
 }

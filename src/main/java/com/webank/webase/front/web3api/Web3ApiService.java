@@ -695,7 +695,7 @@ public class Web3ApiService {
                 case Constants.OPERATE_GROUP_RECOVER:
                     return recoverGroup(groupId);
                 case Constants.OPERATE_GROUP_GET_STATUS:
-                    return queryGroupStatus(groupId);
+                    return querySingleGroupStatus(groupId);
                 default:
                     log.error("end operateGroup. invalid operate type");
                     throw new FrontException(ConstantCode.INVALID_GROUP_OPERATE_TYPE);
@@ -760,7 +760,7 @@ public class Web3ApiService {
         }
     }
 
-    private Object queryGroupStatus(int groupId) throws IOException {
+    private BaseResponse querySingleGroupStatus(int groupId) throws IOException {
         GroupOperateStatus status = CommonUtils.object2JavaBean(
                 getWeb3j().queryGroupStatus(groupId).send().getStatus(), GroupOperateStatus.class);
         log.info("queryGroupStatus. groupId:{} status:{}", groupId, status);
@@ -773,6 +773,21 @@ public class Web3ApiService {
             throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
                     status.getMessage());
         }
+    }
+
+    /**
+     * Map of <groupId, status>
+     * @param groupIdList
+     * @return status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
+     * @throws IOException
+     */
+    public BaseResponse getGroupStatus(List<Integer> groupIdList) throws IOException {
+        Map<Integer, String> groupIdStatusMap = new HashMap<>(groupIdList.size());
+        for (Integer groupId: groupIdList) {
+            BaseResponse res = querySingleGroupStatus(groupId);
+            groupIdStatusMap.put(groupId, (String)res.getData());
+        }
+        return new BaseResponse(ConstantCode.RET_SUCCESS, groupIdStatusMap);
     }
 
     /**
