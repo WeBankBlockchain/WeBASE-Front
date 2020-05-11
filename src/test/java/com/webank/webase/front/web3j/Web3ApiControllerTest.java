@@ -16,7 +16,7 @@ package com.webank.webase.front.web3j;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.Application;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
-import com.webank.webase.front.web3api.entity.GroupOperateStatus;
+import com.webank.webase.front.web3api.entity.ReqGroupStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -96,11 +96,32 @@ public class Web3ApiControllerTest {
 
     @Test
     public void testOperate() throws Exception {
-        int newGroupId = 2023;
-        String type = "start";
+        int newGroupId = 2020;
+        String type = "getStatus";
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .get("/" + newGroupId +"/web3/operate/" + type).
                 contentType(MediaType.APPLICATION_JSON_UTF8)
+        );
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testGroupStatusList() throws Exception {
+        ReqGroupStatus param = new ReqGroupStatus();
+        List<Integer> groupIdList = new ArrayList<>();
+        groupIdList.add(2020);
+        groupIdList.add(3);
+        groupIdList.add(1);
+        groupIdList.add(2021);
+        groupIdList.add(2023);
+        param.setGroupIdList(groupIdList);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .post("/3/web3/queryGroupStatus")
+                .content(JSON.toJSONString(param))
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
                 andExpect(MockMvcResultMatchers.status().isOk()).
