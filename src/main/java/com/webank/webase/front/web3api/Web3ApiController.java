@@ -201,7 +201,7 @@ public class Web3ApiController {
     @ApiOperation(value = "getNodeIDList", notes = "get list of node id")
     @GetMapping("/nodeIdList")
     public List<String> getNodeIDList() throws IOException {
-        return web3ApiService.getNodeIDList();
+        return web3ApiService.getNodeIdList();
     }
 
     @ApiOperation(value = "getPeers", notes = "get list of peers")
