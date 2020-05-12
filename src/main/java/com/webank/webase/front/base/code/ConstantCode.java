@@ -78,9 +78,26 @@ public class ConstantCode {
     // dynamic group manage
     public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201043, "invalid group operate type");
     public static final RetCode INVALID_DATA_TYPE = RetCode.mark(201044, "invalid data type");
-    public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201045, "group operate fail");
+	// group operate error code from sdk
+	public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201100, "group operate fail");
+	public static final RetCode NODE_INTERNAL_ERROR = RetCode.mark(201101, "node internal error");
+	public static final RetCode GROUP_ALREADY_EXISTS = RetCode.mark(201102, "group already exists");
+	public static final RetCode GROUP_ALREADY_RUNNING = RetCode.mark(201103, "group already running");
+	public static final RetCode GROUP_ALREADY_STOPPED = RetCode.mark(201104, "group already stopped");
+	public static final RetCode GROUP_ALREADY_DELETED = RetCode.mark(201105, "group already deleted");
+	public static final RetCode GROUP_NOT_FOUND = RetCode.mark(201106, "group not found");
+	public static final RetCode GROUP_OPERATE_INVALID_PARAMS = RetCode.mark(201107, "group operate param error");
+	public static final RetCode PEERS_NOT_CONNECTED = RetCode.mark(201108, "group peers not connected");
+	public static final RetCode GENESIS_CONF_ALREADY_EXISTS = RetCode.mark(201109, "group genesis conf already exists");
+	public static final RetCode GROUP_CONF_ALREADY_EXIST = RetCode.mark(201110, "group config.ini already exists");
+	public static final RetCode GENESIS_CONF_NOT_FOUND = RetCode.mark(201111, "group genesis conf not found");
+	public static final RetCode GROUP_CONF_NOT_FOUND = RetCode.mark(201112, "group config.ini not found");
+	public static final RetCode GROUP_IS_STOPPING = RetCode.mark(201113, "group is stopping");
+	public static final RetCode GROUP_NOT_DELETED = RetCode.mark(201114, "group not deleted");
 
-    /* system error */
+
+
+	/* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
     public static final RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
     public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3jMap of groupId is null, please try again");
