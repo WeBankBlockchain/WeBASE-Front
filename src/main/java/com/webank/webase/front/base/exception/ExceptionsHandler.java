@@ -104,5 +104,5 @@ public class ExceptionsHandler {
         return ResponseEntity.status(500).body(map);
     }
 
-    // TODO catch Exception and separate different exception
+    // catch Exception and separate different exception
 }
