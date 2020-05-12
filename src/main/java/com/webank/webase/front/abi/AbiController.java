@@ -103,10 +103,8 @@ public class AbiController extends BaseController {
 	}
 
 	@ApiOperation(value = "deleteAbi", notes = "delete imported abi info")
-	@DeleteMapping("")
-	public BaseResponse deleteAbi(@Valid @RequestBody ReqDelAbi param, BindingResult result) {
-		checkParamResult(result);
-		Long abiId = param.getAbiId();
+	@DeleteMapping("/{abiId}")
+	public BaseResponse deleteAbi(@PathVariable("abiId") Long abiId) {
 		log.debug("start deleteAbi. abiId:{}", abiId);
 		abiService.delete(abiId);
 		log.debug("end deleteAbi");
