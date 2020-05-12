@@ -66,8 +66,10 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
+
+
 dependencies {
-    compile spring,spring_boot,swagger,logger,jaxb
+  compile spring,spring_boot,swagger,logger,jaxb
 	compile ('org.fisco-bcos:web3sdk:2.4.0')
 	// support guomi/ecdsa same time, support solcJ-0.5.2
 	compile ('org.fisco-bcos:solcJ:0.4.25-rc1')
