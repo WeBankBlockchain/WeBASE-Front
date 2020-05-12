@@ -673,8 +673,7 @@ public class Web3ApiService {
                 return new BaseResponse(ConstantCode.RET_SUCCEED);
             } else {
                 log.error("generateGroup failed:{}", status.getMessage());
-                throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                        status.getMessage());
+                throw classifyGroupOperateException(status);
             }
         } catch (IOException e) {
             log.error("generateGroup fail:[]", e);
@@ -715,8 +714,7 @@ public class Web3ApiService {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("startGroup fail:{}", status.getMessage());
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            throw classifyGroupOperateException(status);
         }
     }
 
@@ -729,8 +727,7 @@ public class Web3ApiService {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("stopGroup fail:{}", status.getMessage());
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            throw classifyGroupOperateException(status);
         }
     }
 
@@ -742,8 +739,7 @@ public class Web3ApiService {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("removeGroup fail:{}", status.getMessage());
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            throw classifyGroupOperateException(status);
         }
     }
 
@@ -755,8 +751,48 @@ public class Web3ApiService {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("recoverGroup fail:{}", status.getMessage());
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            throw classifyGroupOperateException(status);
+        }
+    }
+
+    /**
+     * classify group operate exception code
+     * @param status
+     * @return FrontException
+     */
+    private FrontException classifyGroupOperateException(GroupOperateStatus status) {
+        int groupOperateStatusCode = CommonUtils.parseHexStr2Int(status.getCode());
+        switch (groupOperateStatusCode) {
+            case 1:
+                return new FrontException(ConstantCode.NODE_INTERNAL_ERROR);
+            case 2:
+                return new FrontException(ConstantCode.GROUP_ALREADY_EXISTS);
+            case 3:
+                return new FrontException(ConstantCode.GROUP_ALREADY_RUNNING);
+            case 4:
+                return new FrontException(ConstantCode.GROUP_ALREADY_STOPPED);
+            case 5:
+                return new FrontException(ConstantCode.GROUP_ALREADY_DELETED);
+            case 6:
+                return new FrontException(ConstantCode.GROUP_NOT_FOUND);
+            case 7:
+                return new FrontException(ConstantCode.GROUP_OPERATE_INVALID_PARAMS);
+            case 8:
+                return new FrontException(ConstantCode.PEERS_NOT_CONNECTED);
+            case 9:
+                return new FrontException(ConstantCode.GENESIS_CONF_ALREADY_EXISTS);
+            case 10:
+                return new FrontException(ConstantCode.GROUP_CONF_ALREADY_EXIST);
+            case 11:
+                return new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+            case 12:
+                return new FrontException(ConstantCode.GROUP_CONF_NOT_FOUND);
+            case 13:
+                return new FrontException(ConstantCode.GROUP_IS_STOPPING);
+            case 14:
+                return new FrontException(ConstantCode.GROUP_NOT_DELETED);
+            default:
+                return new FrontException(ConstantCode.GROUP_OPERATE_FAIL);
         }
     }
 
@@ -770,8 +806,7 @@ public class Web3ApiService {
             return response;
         } else {
             log.error("queryGroupStatus fail:{}", status.getMessage());
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            throw classifyGroupOperateException(status);
         }
     }
 
