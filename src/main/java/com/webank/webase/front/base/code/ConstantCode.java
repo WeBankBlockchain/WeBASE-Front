@@ -78,7 +78,8 @@ public class ConstantCode {
     // dynamic group manage
     public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201043, "invalid group operate type");
     public static final RetCode INVALID_DATA_TYPE = RetCode.mark(201044, "invalid data type");
-	// group operate error code from sdk
+
+    // group operate error code from sdk
 	public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201100, "group operate fail");
 	public static final RetCode NODE_INTERNAL_ERROR = RetCode.mark(201101, "node internal error");
 	public static final RetCode GROUP_ALREADY_EXISTS = RetCode.mark(201102, "group already exists");

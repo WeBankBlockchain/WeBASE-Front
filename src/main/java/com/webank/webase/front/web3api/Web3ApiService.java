@@ -502,7 +502,7 @@ public class Web3ApiService {
         }
     }
 
-    public List<String> getNodeIDList() {
+    public List<String> getNodeIdList() {
         try {
             return getWeb3j()
                     .getNodeIDList().send()
