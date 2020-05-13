@@ -517,16 +517,9 @@ public class TransService {
         // get privateKey
         Credentials credentials = getCredentials(contractFunction.getConstant(), req.getUser());
         // contract load
-        CommonContract commonContract;
         ContractGasProvider contractGasProvider =
                 new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
-        if (address != null) {
-            commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
-        } else {
-            // deprecated cns in front
-            commonContract = CommonContract.loadByName(cof.getContractName() + Constants.SYMPOL + cof.getVersion(),
-                    web3j, credentials, contractGasProvider);
-        }
+        CommonContract commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
 
         // request
         Object result;
