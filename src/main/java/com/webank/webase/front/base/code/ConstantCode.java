@@ -38,7 +38,6 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_SIGN_USER_ID_IS_EMPTY = RetCode.mark(201008, "signUserId cannot be empty");
 
     /* general error */
-    public static final RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");
     public static final RetCode CONTRACT_NOT_DEPLOY_ERROR = RetCode.mark(201009, "contract is not deployed");
     public static final RetCode ABI_SAVE_ERROR = RetCode.mark(201010, "save abi error");
     public static final RetCode IN_FUNCPARAM_ERROR = RetCode.mark(201011, "contract funcParam is error");
@@ -47,7 +46,8 @@ public class ConstantCode {
     public static final RetCode CONTRACT_DEPLOY_ERROR = RetCode.mark(201014, "contract deploy error");
     public static final RetCode PRIVATEKEY_IS_NULL = RetCode.mark(201015, "user's privateKey is null");
     public static final RetCode FILE_IS_NOT_EXIST = RetCode.mark(201016, "file is not exist");
-    public static final RetCode GET_NODE_CONFIG_FAILE = RetCode.mark(201017, "failed to get node config");
+    public static final RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201017, "contract's current version has been deployed");
+//    public static final RetCode GET_NODE_CONFIG_FAILE = RetCode.mark(201017, "failed to get node config");
     public static final RetCode BLOCKNUMBER_AND_PBFTVIEW_UNCHANGED = RetCode.mark(201018, "blockNumber and pbftView unchanged");
     public static final RetCode IN_FUNCTION_ERROR = RetCode.mark(201019, "request function is error");
     public static final RetCode TRANSACTION_QUERY_FAILED = RetCode.mark(201020, "transaction query from chain failed");
