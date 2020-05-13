@@ -79,25 +79,6 @@ public class ConstantCode {
     public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201043, "invalid group operate type");
     public static final RetCode INVALID_DATA_TYPE = RetCode.mark(201044, "invalid data type");
 
-    // group operate error code from sdk
-	public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201100, "group operate fail");
-	public static final RetCode NODE_INTERNAL_ERROR = RetCode.mark(201101, "node internal error");
-	public static final RetCode GROUP_ALREADY_EXISTS = RetCode.mark(201102, "group already exists");
-	public static final RetCode GROUP_ALREADY_RUNNING = RetCode.mark(201103, "group already running");
-	public static final RetCode GROUP_ALREADY_STOPPED = RetCode.mark(201104, "group already stopped");
-	public static final RetCode GROUP_ALREADY_DELETED = RetCode.mark(201105, "group already deleted");
-	public static final RetCode GROUP_NOT_FOUND = RetCode.mark(201106, "group not found");
-	public static final RetCode GROUP_OPERATE_INVALID_PARAMS = RetCode.mark(201107, "group operate param error");
-	public static final RetCode PEERS_NOT_CONNECTED = RetCode.mark(201108, "group peers not connected");
-	public static final RetCode GENESIS_CONF_ALREADY_EXISTS = RetCode.mark(201109, "group genesis conf already exists");
-	public static final RetCode GROUP_CONF_ALREADY_EXIST = RetCode.mark(201110, "group config.ini already exists");
-	public static final RetCode GENESIS_CONF_NOT_FOUND = RetCode.mark(201111, "group genesis conf not found");
-	public static final RetCode GROUP_CONF_NOT_FOUND = RetCode.mark(201112, "group config.ini not found");
-	public static final RetCode GROUP_IS_STOPPING = RetCode.mark(201113, "group is stopping");
-	public static final RetCode GROUP_NOT_DELETED = RetCode.mark(201114, "group not deleted");
-
-
-
 	/* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
     public static final RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
@@ -126,6 +107,26 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_GRANT_ADDRESS_EMPTY = RetCode.mark(201114, "grantAddress cannot be empty");
     public static final RetCode INVALID_CONTRACT_HANDLE_TYPE = RetCode.mark(201115, "invalid contract handle type");
     public static final RetCode FAIL_CONTRACT_HANDLE = RetCode.mark(201116, "contract status handle fail");
+
+
+    // group operate error code from sdk
+    public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201120, "group operate fail");
+    public static final RetCode NODE_INTERNAL_ERROR = RetCode.mark(201121, "node internal error");
+    public static final RetCode GROUP_ALREADY_EXISTS = RetCode.mark(201122, "group already exists");
+    public static final RetCode GROUP_ALREADY_RUNNING = RetCode.mark(201123, "group already running");
+    public static final RetCode GROUP_ALREADY_STOPPED = RetCode.mark(201124, "group already stopped");
+    public static final RetCode GROUP_ALREADY_DELETED = RetCode.mark(201125, "group already deleted");
+    public static final RetCode GROUP_NOT_FOUND = RetCode.mark(201126, "group not found");
+    public static final RetCode GROUP_OPERATE_INVALID_PARAMS = RetCode.mark(201127, "group operate param error");
+    public static final RetCode PEERS_NOT_CONNECTED = RetCode.mark(201128, "group peers not connected");
+    public static final RetCode GENESIS_CONF_ALREADY_EXISTS = RetCode.mark(201129, "group genesis conf already exists");
+    public static final RetCode GROUP_CONF_ALREADY_EXIST = RetCode.mark(201130, "group config.ini already exists");
+    public static final RetCode GENESIS_CONF_NOT_FOUND = RetCode.mark(201131, "group genesis conf not found");
+    public static final RetCode GROUP_CONF_NOT_FOUND = RetCode.mark(201132, "group config.ini not found");
+    public static final RetCode GROUP_IS_STOPPING = RetCode.mark(201133, "group is stopping");
+    public static final RetCode GROUP_NOT_DELETED = RetCode.mark(201134, "group not deleted");
+
+
     /* precompiled runtime check or error */
     // param
     public static final RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
