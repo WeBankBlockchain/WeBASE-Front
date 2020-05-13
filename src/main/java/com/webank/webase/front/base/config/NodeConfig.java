@@ -54,7 +54,7 @@ public class NodeConfig implements InitializingBean {
         this.p2pip = CommonUtils.getCurrentIp();
         if (nodeInfos == null || nodeInfos.isEmpty() ) {
           //  throw new FrontException(ConstantCode.GET_NODE_CONFIG_FAILE);
-            log.info("cannot read config.ini");
+            log.warn("cannot read config.ini");
             return;
         }
 
