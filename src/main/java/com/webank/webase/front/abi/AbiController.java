@@ -17,7 +17,6 @@
 package com.webank.webase.front.abi;
 
 import com.webank.webase.front.abi.entity.AbiInfo;
-import com.webank.webase.front.abi.entity.ReqDelAbi;
 import com.webank.webase.front.abi.entity.ReqImportAbi;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
