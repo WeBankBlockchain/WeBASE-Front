@@ -62,7 +62,7 @@ public class Web3Config {
      * @return
      */
     @Bean(name = "encryptType")
-    public EncryptType EncryptType(int encryptType) {
+    public EncryptType EncryptType() {
         // 1: guomi, 0: standard
         log.info("*****init EncrytType:" + encryptType);
         return new EncryptType(encryptType);
