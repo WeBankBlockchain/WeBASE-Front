@@ -56,22 +56,14 @@ public class Web3Config {
     private int keepAlive;
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
-
+    private int encryptType;
     /**
      * 覆盖EncryptType构造函数
      * @return
      */
     @Bean(name = "encryptType")
-    public EncryptType EncryptType(Web3j web3j) throws IOException {
-        NodeVersion version = web3j.getNodeVersion().send();
-        Constants.version = version.getNodeVersion().getVersion();
-        Constants.chainId = version.getNodeVersion().getChainID();
-        log.info("Chain's clientVersion:{}", Constants.version);
+    public EncryptType EncryptType(int encryptType) {
         // 1: guomi, 0: standard
-        int encryptType = 0;
-        if (Constants.version.contains("gm")) {
-            encryptType = 1;
-        }
         log.info("*****init EncrytType:" + encryptType);
         return new EncryptType(encryptType);
     }
@@ -82,7 +74,7 @@ public class Web3Config {
 
         List<String> connectionsList = new ArrayList<>();
         connectionsList.add(ip + ":" + channelPort);
-        log.info("*********" + ip + ":" + channelPort);
+        log.info("*****" + ip + ":" + channelPort);
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections.setConnectionsStr(connectionsList);
         channelConnections.setGroupId(1);
@@ -151,7 +143,7 @@ public class Web3Config {
             ChannelConnections channelConnections = new ChannelConnections();
             channelConnections.setConnectionsStr(connectionsList);
             channelConnections.setGroupId(Integer.parseInt(groupIdList.get(i)));
-            log.info("*** groupId " + groupIdList.get(i));
+            log.info("***** groupId:{}", groupIdList.get(i));
             channelConnectionsList.add(channelConnections);
         }
         Map serviceMap = new ConcurrentHashMap<Integer, Service>(groupIdList.size());
@@ -192,27 +184,4 @@ public class Web3Config {
         return web3jMap;
     }
 
-
-//    @Bean
-//    @DependsOn("encryptType")
-//    public Map<Integer, CnsService> cnsServiceMap(Map<Integer, Web3j> web3jMap) {
-//        // support guomi
-//        Credentials credentials = GenCredential.create();
-//        Map cnsServiceMap = new ConcurrentHashMap<Integer, CnsService>();
-//        Iterator entries = web3jMap.entrySet().iterator();
-//
-//        while (entries.hasNext()) {
-//            Map.Entry entry = (Map.Entry) entries.next();
-//            Integer key = (Integer) entry.getKey();
-//            Web3j value = (Web3j) entry.getValue();
-//            cnsServiceMap.put(key, new CnsService(value, credentials));
-//        }
-//        return cnsServiceMap;
-//    }
-
-//    @Bean
-//    public HashMap<String, String> cnsMap() {
-//        HashMap cnsMap = new HashMap<String, String>();
-//        return cnsMap;
-//    }
 }
