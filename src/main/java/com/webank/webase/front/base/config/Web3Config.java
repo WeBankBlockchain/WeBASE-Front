@@ -102,6 +102,11 @@ public class Web3Config {
         channelEthereumService.setTimeout(timeout);
         channelEthereumService.setChannelService(service);
         Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
+        // init node version
+        NodeVersion version = web3j.getNodeVersion().send();
+        Constants.version = version.getNodeVersion().getVersion();
+        Constants.chainId = version.getNodeVersion().getChainID();
+        log.info("Chain's clientVersion:{}", Constants.version);
         return web3j;
     }
 
