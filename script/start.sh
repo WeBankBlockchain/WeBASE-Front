@@ -56,6 +56,10 @@ while getopts s:gh OPT;do
         g)
             guomi="y"
             ;;
+        h)
+            usage
+            exit 4
+            ;;
         \?)
             usage
             exit 4
