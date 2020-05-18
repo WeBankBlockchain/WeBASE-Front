@@ -159,7 +159,7 @@ public class CommonUtils {
     }
 
     /**
-     * read File.
+     * read File by String
      * 
      * @param filePath filePath
      * @return
