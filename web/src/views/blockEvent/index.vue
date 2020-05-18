@@ -31,9 +31,9 @@
         </el-dialog>
         <el-dialog :title="$t('table.blockEventInfo')" :visible.sync="checkBlockEventVisible" width="550px" v-if="checkBlockEventVisible" center class="send-dialog">
             <el-table :data="eventDetail">
-                <el-table-column property="appId" :label="$t('table.appId')" width="150"></el-table-column>
-                <el-table-column property="exchangeName" :label="$t('table.exchangeName')" width="200"></el-table-column>
-                <el-table-column property="queueName" :label="$t('table.queueName')"></el-table-column>
+                <el-table-column  show-overflow-tooltip property="appId" :label="$t('table.appId')" width="150"></el-table-column>
+                <el-table-column  show-overflow-tooltip property="exchangeName" :label="$t('table.exchangeName')" width="200"></el-table-column>
+                <el-table-column  show-overflow-tooltip property="queueName" :label="$t('table.queueName')"></el-table-column>
             </el-table>
         </el-dialog>
     </div>
@@ -173,7 +173,6 @@ export default {
             }
             checkBlockEvent(param, {})
                 .then(res => {
-                    console.log(res)
                     if (res.data.code === 0) {
                         this.checkBlockEventVisible = true;
                         this.eventDetail = res.data.data

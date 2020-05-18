@@ -219,3 +219,87 @@ export function unique(array, onlyKey) {
     }
     return finalResult;
 }
+
+export function isJson(str) {
+    if (typeof str == 'string') {
+        try {
+            var obj = JSON.parse(str);
+            if (typeof obj == 'object' && obj) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (e) {
+            console.log('error：' + str + '!!!' + e);
+            return false;
+        }
+    }
+}
+
+export function dataType(type, value) {
+    switch (type) {
+        case 'bool' && (value === 'true' || value === 'false'):
+            return eval(value.toLowerCase())
+            break;
+        case 'uint[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint8[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint32[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint128[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint256[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint8[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'bytes32[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        default:
+            return value
+            break;
+    }
+}
