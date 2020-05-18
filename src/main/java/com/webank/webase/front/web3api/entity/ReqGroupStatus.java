@@ -18,9 +18,12 @@ package com.webank.webase.front.web3api.entity;
 
 import lombok.Data;
 
+import java.util.List;
+
+/**
+ * group status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
+ */
 @Data
-public class GroupOperateStatus {
-	private String code;
-	private String status;
-	private String message;
+public class ReqGroupStatus {
+	private List<Integer> groupIdList;
 }

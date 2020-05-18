@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.web3api.entity;
+package com.webank.webase.front.abi.entity;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotBlank;
 
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
+/**
+ * unique contractName_groupId
+ * @author marsli
+ */
 @Data
-public class GroupOperateStatus {
-	private String code;
-	private String status;
-	private String message;
+public class ReqImportAbi {
+	private Long abiId;
+	@NotNull
+	private Integer groupId;
+	@NotBlank
+	private String contractName;
+	@NotBlank
+	private String contractAddress;
+	@NotNull
+	private List<Object> contractAbi;
 }

@@ -34,22 +34,12 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
@@ -65,7 +55,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-
 /**
  * Web3Api manage.
  */
@@ -75,8 +64,6 @@ public class Web3ApiService {
 
     @Autowired
     Map<Integer, Web3j> web3jMap;
-    @Autowired
-    Map<Integer, CnsService> cnsServiceMap;
     @Autowired
     NodeConfig nodeConfig;
     @Autowired
@@ -515,7 +502,7 @@ public class Web3ApiService {
         }
     }
 
-    public List<String> getNodeIDList() {
+    public List<String> getNodeIdList() {
         try {
             return getWeb3j()
                     .getNodeIDList().send()
@@ -539,10 +526,8 @@ public class Web3ApiService {
 
     private void refreshWeb3jMap(int groupId) {
         log.info("refreshWeb3jMap groupId:{}", groupId);
-
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
-        Credentials credentials = GenCredential.create();
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections.setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
         channelConnections.setGroupId(groupId);
@@ -563,7 +548,6 @@ public class Web3ApiService {
         channelEthereumService.setChannelService(service);
         Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
         web3jMap.put(groupId, web3j);
-        cnsServiceMap.put(groupId, new CnsService(web3j, credentials));
     }
 
     // get all peers of chain
@@ -604,6 +588,7 @@ public class Web3ApiService {
                     .getSystemConfigByKey(key).send()
                     .getSystemConfigByKey();
         } catch (IOException e) {
+            log.error("getSystemConfigByKey error:[]", e);
             throw new FrontException(e.getMessage());
         }
     }
@@ -670,6 +655,10 @@ public class Web3ApiService {
         return null;
     }
 
+    /**
+     * dynamic group management
+     */
+
     public Object generateGroup(GenerateGroupInfo generateGroupInfo) {
         log.debug("start generateGroup. groupId:{}", generateGroupInfo.getGenerateGroupId());
         try {
@@ -683,12 +672,11 @@ public class Web3ApiService {
             if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
                 return new BaseResponse(ConstantCode.RET_SUCCEED);
             } else {
-                throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                        status.getMessage());
+                log.error("generateGroup failed:{}", status.getMessage());
+                throw classifyGroupOperateException(status);
             }
-
         } catch (IOException e) {
-            log.error("generateGroup fail.");
+            log.error("generateGroup fail:[]", e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
     }
@@ -705,14 +693,14 @@ public class Web3ApiService {
                     return removeGroup(groupId);
                 case Constants.OPERATE_GROUP_RECOVER:
                     return recoverGroup(groupId);
-                case Constants.OPERATE_GROUP_GETSTATUS:
-                    return queryGroupStatus(groupId);
+                case Constants.OPERATE_GROUP_GET_STATUS:
+                    return querySingleGroupStatus(groupId);
                 default:
                     log.error("end operateGroup. invalid operate type");
                     throw new FrontException(ConstantCode.INVALID_GROUP_OPERATE_TYPE);
             }
         } catch (IOException e) {
-            log.error("operateGroup fail.");
+            log.error("operateGroup fail:[]", e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
     }
@@ -725,8 +713,8 @@ public class Web3ApiService {
             refreshWeb3jMap(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            log.error("startGroup fail:{}", status.getMessage());
+            throw classifyGroupOperateException(status);
         }
     }
 
@@ -738,8 +726,8 @@ public class Web3ApiService {
             web3jMap.remove(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            log.error("stopGroup fail:{}", status.getMessage());
+            throw classifyGroupOperateException(status);
         }
     }
 
@@ -750,8 +738,8 @@ public class Web3ApiService {
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            log.error("removeGroup fail:{}", status.getMessage());
+            throw classifyGroupOperateException(status);
         }
     }
 
@@ -762,13 +750,53 @@ public class Web3ApiService {
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            log.error("recoverGroup fail:{}", status.getMessage());
+            throw classifyGroupOperateException(status);
         }
     }
 
+    /**
+     * classify group operate exception code
+     * @param status
+     * @return FrontException
+     */
+    private FrontException classifyGroupOperateException(GroupOperateStatus status) {
+        int groupOperateStatusCode = CommonUtils.parseHexStr2Int(status.getCode());
+        switch (groupOperateStatusCode) {
+            case 1:
+                return new FrontException(ConstantCode.NODE_INTERNAL_ERROR);
+            case 2:
+                return new FrontException(ConstantCode.GROUP_ALREADY_EXISTS);
+            case 3:
+                return new FrontException(ConstantCode.GROUP_ALREADY_RUNNING);
+            case 4:
+                return new FrontException(ConstantCode.GROUP_ALREADY_STOPPED);
+            case 5:
+                return new FrontException(ConstantCode.GROUP_ALREADY_DELETED);
+            case 6:
+                return new FrontException(ConstantCode.GROUP_NOT_FOUND);
+            case 7:
+                return new FrontException(ConstantCode.GROUP_OPERATE_INVALID_PARAMS);
+            case 8:
+                return new FrontException(ConstantCode.PEERS_NOT_CONNECTED);
+            case 9:
+                return new FrontException(ConstantCode.GENESIS_CONF_ALREADY_EXISTS);
+            case 10:
+                return new FrontException(ConstantCode.GROUP_CONF_ALREADY_EXIST);
+            case 11:
+                return new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+            case 12:
+                return new FrontException(ConstantCode.GROUP_CONF_NOT_FOUND);
+            case 13:
+                return new FrontException(ConstantCode.GROUP_IS_STOPPING);
+            case 14:
+                return new FrontException(ConstantCode.GROUP_NOT_DELETED);
+            default:
+                return new FrontException(ConstantCode.GROUP_OPERATE_FAIL);
+        }
+    }
 
-    private Object queryGroupStatus(int groupId) throws IOException {
+    private BaseResponse querySingleGroupStatus(int groupId) throws IOException {
         GroupOperateStatus status = CommonUtils.object2JavaBean(
                 getWeb3j().queryGroupStatus(groupId).send().getStatus(), GroupOperateStatus.class);
         log.info("queryGroupStatus. groupId:{} status:{}", groupId, status);
@@ -777,9 +805,24 @@ public class Web3ApiService {
             response.setData(status.getStatus());
             return response;
         } else {
-            throw new FrontException(ConstantCode.GROUP_OPERATE_FAIL.getCode(),
-                    status.getMessage());
+            log.error("queryGroupStatus fail:{}", status.getMessage());
+            throw classifyGroupOperateException(status);
         }
+    }
+
+    /**
+     * Map of <groupId, status>
+     * @param groupIdList
+     * @return status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
+     * @throws IOException
+     */
+    public BaseResponse getGroupStatus(List<Integer> groupIdList) throws IOException {
+        Map<Integer, String> groupIdStatusMap = new HashMap<>(groupIdList.size());
+        for (Integer groupId: groupIdList) {
+            BaseResponse res = querySingleGroupStatus(groupId);
+            groupIdStatusMap.put(groupId, (String)res.getData());
+        }
+        return new BaseResponse(ConstantCode.RET_SUCCESS, groupIdStatusMap);
     }
 
     /**
@@ -817,25 +860,4 @@ public class Web3ApiService {
         }
         return web3j;
     }
-
-    /**
-     * get target group's CnsService
-     * 
-     * @param groupId
-     * @return
-     */
-    public CnsService getCnsService(Integer groupId) {
-        if (cnsServiceMap.isEmpty()) {
-            log.error("cnsServiceMap is empty, groupList empty! please check your node status");
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-        }
-        CnsService cnsService = cnsServiceMap.get(groupId);
-        if (Objects.isNull(cnsService)) {
-            log.error("cnsService of {} is null, please try again", groupId);
-            getGroupList();
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_CNSSERVICE_NULL);
-        }
-        return cnsService;
-    }
-
 }
