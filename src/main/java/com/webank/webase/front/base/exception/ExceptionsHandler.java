@@ -48,15 +48,9 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = FrontException.class)
     public ResponseEntity myExceptionHandler(FrontException frontException) throws Exception {
-        //  log.warn("catch business exception", frontException);
-//        RetCode retCode = Optional.ofNullable(frontException).map(FrontException::getRetCode)
-//                .orElse(new RetCode(101001, frontException.getMessage()));
-//
-//        BaseResponse rep = new BaseResponse(retCode);
-
-        log.warn("catch frontException: {}",  frontException.getMessage());
+        log.error("catch frontException: {}",  frontException.getMessage());
         Map<String, Object> map = new HashMap<>();
-        //  map.put("exception", frontException);
+        map.put("data", frontException.getDetail());
         map.put("errorMessage", frontException.getMessage());
         map.put("code", frontException.getRetCode().getCode());
         return ResponseEntity.status(422).body(map);
@@ -109,4 +103,6 @@ public class ExceptionsHandler {
         map.put("code", 500);
         return ResponseEntity.status(500).body(map);
     }
+
+    // catch Exception and separate different exception
 }
