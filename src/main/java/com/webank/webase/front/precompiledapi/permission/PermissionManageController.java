@@ -139,7 +139,7 @@ public class PermissionManageController extends BaseController {
      * get list of user's permission state not paged
      */
     @GetMapping("/sorted/full")
-    public Object gerPermissionStateFull(
+    public BasePageResponse gerPermissionStateFull(
             @RequestParam(defaultValue = "1") int groupId) throws Exception {
         Instant startTime = Instant.now();
         log.info("start gerPermissionStateFull startTime:{}", startTime.toEpochMilli());
@@ -160,7 +160,7 @@ public class PermissionManageController extends BaseController {
     @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
     @ApiImplicitParam(name = "permissionHandle", value = "permission info", required = true, dataType = "PermissionHandle")
     @PostMapping("/sorted")
-    public Object updateUserPermissionStateAfterCheck(@Valid @RequestBody PermissionHandle permissionHandle) throws Exception {
+    public BaseResponse updateUserPermissionStateAfterCheck(@Valid @RequestBody PermissionHandle permissionHandle) throws Exception {
         Instant startTime = Instant.now();
         log.info("start updateUserPermissionStateAfterCheck startTime:{}, permissionHandle:{}",
                 startTime.toEpochMilli(), permissionHandle);
@@ -169,7 +169,7 @@ public class PermissionManageController extends BaseController {
         String userAddress = permissionHandle.getAddress();
         PermissionState permissionState = permissionHandle.getPermissionState();
         try {
-            Object resultState = permissionManageService.updatePermissionStateAfterCheck(groupId,
+            Map<String, Integer> resultState = permissionManageService.updatePermissionStateAfterCheck(groupId,
                     fromAddress, userAddress, permissionState);
             log.info("end updateUserPermissionStateAfterCheck startTime:{}, resultState:{}",
                     Instant.now().toEpochMilli(), resultState);

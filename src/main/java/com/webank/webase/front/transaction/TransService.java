@@ -42,7 +42,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -63,8 +62,6 @@ import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
 import org.fisco.bcos.web3j.crypto.RawTransaction;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.crypto.TransactionEncoder;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterName;
@@ -92,14 +89,8 @@ public class TransService {
 
     @Autowired
     private Web3ApiService web3ApiService;
-
-    @Autowired
-    private Map<Integer, CnsService> cnsServiceMap;
-
     @Autowired
     private KeyStoreService keyStoreService;
-    @Autowired
-    private Map<String, String> cnsMap;
     @Autowired
     private Constants constants;
     @Autowired
@@ -115,6 +106,8 @@ public class TransService {
      * @param req request
      */
     public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
+        // get signUserId
+        String signUserId = req.getSignUserId();
         ContractOfTrans contractOfTrans = new ContractOfTrans(req);
         // check param get function of abi
         ContractFunction contractFunction = buildContractFunction(contractOfTrans);
@@ -122,16 +115,12 @@ public class TransService {
         int groupId = contractOfTrans.getGroupId();
         Web3j web3j = web3ApiService.getWeb3j(groupId);
         // check contractAddress
-        String contractAddress = checkContractAddress(contractOfTrans.getContractAddress(), groupId,
-                contractOfTrans.getContractName(), contractOfTrans.getVersion());
-
-        // user as signUserId
-        String signUserId = req.getSignUserId();
+        String contractAddress = contractOfTrans.getContractAddress();
         // encode function
-        Function function = new Function(req.getFuncName(), contractFunction.getFinalInputs(),
-                contractFunction.getFinalOutputs());
-        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function,
-                contractFunction);
+        Function function = new Function(req.getFuncName(),
+                contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
+
+        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
     }
 
     /**
@@ -206,45 +195,6 @@ public class TransService {
         log.info("transHandleWithSign end. func:{} baseRsp:{}", contractFunction.getFuncName(),
                 JSON.toJSONString(response));
         return response;
-    }
-
-    /**
-     * checkAndSaveAbiFromCns.
-     *
-     * @param req request
-     */
-    @Deprecated
-    public boolean checkAndSaveAbiFromCns(ContractOfTrans req) throws Exception {
-        log.info("checkAndSaveAbiFromCns start.");
-        List<CnsInfo> cnsInfoList = null;
-        CnsService cnsService = web3ApiService.getCnsService(req.getGroupId());
-        if (cnsService == null) {
-            log.info("cnsService is null");
-            return false;
-        }
-        if (req.getVersion() != null) {
-            cnsInfoList =
-                    cnsService.queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
-        } else {
-            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),
-                    req.getContractAddress().substring(2));
-        }
-        // check cns info
-        if (cnsInfoList == null || cnsInfoList.isEmpty()
-                || StringUtils.isBlank(cnsInfoList.get(0).getAbi())) {
-            log.info("cnsInfoList is empty:{}", cnsInfoList);
-            return false;
-        }
-        ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-        List<AbiDefinition> abiDefinitionList =
-                objectMapper.readValue(cnsInfoList.get(0).getAbi(), objectMapper.getTypeFactory()
-                        .constructCollectionType(List.class, AbiDefinition.class));
-
-        // save abi
-        ContractAbiUtil.setContractWithAbi(req.getContractName(),
-                req.getVersion() == null ? req.getContractAddress().substring(2) : req.getVersion(),
-                abiDefinitionList, true);
-        return true;
     }
 
     /**
@@ -547,35 +497,6 @@ public class TransService {
         return web3j;
     }
 
-    /**
-     * check address from cnsMap, CnsService
-     */
-    public String checkContractAddress(String contractAddress, int groupId, String contractName,
-            String version) throws Exception {
-        String address = contractAddress;
-        // not blank
-        if (StringUtils.isNotBlank(address)) {
-            return address;
-        } else {
-            // try to get from cnsMap
-            address = cnsMap.get(contractName + Constants.SYMPOL + version);
-            if (StringUtils.isNotBlank(address)) {
-                return address;
-            } else {
-                // try to get from cnsService
-                address = precompiledService.getAddressByContractNameAndVersion(groupId,
-                        contractName, version);
-                if (StringUtils.isNotBlank(address)) {
-                    return address;
-                } else {
-                    // address cannot be found
-                    log.error("checkContractAddress. contractAddress is empty "
-                            + "after get from cnsMap and cnsService");
-                    throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
-                }
-            }
-        }
-    }
 
     /**
      * send transaction locally
@@ -590,26 +511,15 @@ public class TransService {
 
         // address
         String address = cof.getContractAddress();
-        if (address == null) {
-            // try to get address from map
-            address = cnsMap.get(req.getContractName() + ":" + cof.getVersion());
-        }
 
         // web3j
         Web3j web3j = web3ApiService.getWeb3j(cof.getGroupId());
         // get privateKey
         Credentials credentials = getCredentials(contractFunction.getConstant(), req.getUser());
         // contract load
-        CommonContract commonContract;
         ContractGasProvider contractGasProvider =
                 new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
-        if (address != null) {
-            commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
-        } else {
-            commonContract = CommonContract.loadByName(
-                    cof.getContractName() + Constants.SYMPOL + cof.getVersion(), web3j, credentials,
-                    contractGasProvider);
-        }
+        CommonContract commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
 
         // request
         Object result;

@@ -13,10 +13,6 @@
  */
 package com.webank.webase.front.contract;
 
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.ABI;
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.BIN;
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.INTERFACE;
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.METADATA;
 import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
@@ -44,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -59,14 +54,13 @@ import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
-import org.fisco.bcos.web3j.solidity.compiler.CompilationResult;
-import org.fisco.bcos.web3j.solidity.compiler.CompilationResult.ContractMetadata;
-import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler;
-import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options;
+import org.fisco.solc.compiler.CompilationResult;
+import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -77,22 +71,11 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
 import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.*;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
 
 /**
  * contract management.
@@ -103,8 +86,6 @@ public class ContractService {
     private static final String BASE_FILE_PATH = "./temp" + File.separator;
     private static final String CONTRACT_FILE_TEMP = BASE_FILE_PATH + "%1s.sol";
 
-    @Autowired
-    private Map<String, String> cnsMap;
     @Autowired
     private ContractRepository contractRepository;
     @Autowired
@@ -253,7 +234,6 @@ public class ContractService {
         transService.sendMessage(web3j, signMsg, transFuture);
         TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
         String contractAddress = receipt.getContractAddress();
-        
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -353,10 +333,10 @@ public class ContractService {
                             .send();
         } catch (TransactionException e) {
             log.error("commonContract deploy failed.", e);
-            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
+            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED, e.getMessage());
         } catch (Exception e) {
             log.error("commonContract deploy failed.", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR, e.getMessage());
         }
         log.info("commonContract deploy success. contractAddress:{}",
                 commonContract.getContractAddress());
@@ -379,12 +359,6 @@ public class ContractService {
             throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
         }
         return baseRsp;
-    }
-
-    @Deprecated
-    public String getAddressByContractNameAndVersion(int groupId, String name, String version) {
-        return web3ApiService.getCnsService(groupId)
-                .getAddressByContractNameAndVersion(name + ":" + version);
     }
 
     public static FileContentHandle compileToJavaFile(String contractName,
@@ -633,7 +607,10 @@ public class ContractService {
      */
     public RspContractCompile contractCompile(String contractName, String sourceBase64) {
         File contractFile = null;
+
         try {
+            // whether use guomi to compile
+            boolean useSM2 = Boolean.parseBoolean(String.valueOf(EncryptType.encryptType));
             // decode
             byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
             String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
@@ -642,16 +619,16 @@ public class ContractService {
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
             // compile
             SolidityCompiler.Result res =
-                    SolidityCompiler.compile(contractFile, true, ABI, BIN, INTERFACE, METADATA);
-            if ("".equals(res.output)) {
-                log.error("contractCompile error", res.errors);
-                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.errors);
+                    SolidityCompiler.compile(contractFile, useSM2, true, ABI, BIN, INTERFACE, METADATA);
+            if ("".equals(res.getOutput())) {
+                log.error("contractCompile error", res.getErrors());
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.getErrors());
             }
             // compile result
-            CompilationResult result = CompilationResult.parse(res.output);
+            CompilationResult result = CompilationResult.parse(res.getOutput());
             CompilationResult.ContractMetadata meta = result.getContract(contractName);
             RspContractCompile compileResult =
-                    new RspContractCompile(contractName, meta.abi, meta.bin, res.errors);
+                    new RspContractCompile(contractName, meta.abi, meta.bin, res.getErrors());
             return compileResult;
         } catch (Exception ex) {
             log.error("contractCompile error", ex);
@@ -686,6 +663,8 @@ public class ContractService {
             log.error("There is no sol files in source.");
             throw new FrontException(ConstantCode.NO_SOL_FILES);
         }
+        // whether use guomi to compile
+        boolean useSM2 = Boolean.parseBoolean(String.valueOf(EncryptType.encryptType));
 
         List<RspMultiContractCompile> compileInfos = new ArrayList<>();
         for (File solFile : solFiles) {
@@ -693,16 +672,16 @@ public class ContractService {
                     solFile.getName().substring(0, solFile.getName().lastIndexOf("."));
             // compile
             SolidityCompiler.Result res =
-                    SolidityCompiler.compile(solFile, true, Options.ABI, Options.BIN);
+                    SolidityCompiler.compile(solFile, useSM2, true, ABI, SolidityCompiler.Options.BIN);
             // check result
             if (res.isFailed()) {
                 log.error("multiContractCompile fail. contract:{} compile error. {}", contractName,
-                        res.errors);
-                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.errors);
+                        res.getErrors());
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.getErrors());
             }
             // parse result
-            CompilationResult result = CompilationResult.parse(res.output);
-            List<ContractMetadata> contracts = result.getContracts();
+            CompilationResult result = CompilationResult.parse(res.getOutput());
+            List<CompilationResult.ContractMetadata> contracts = result.getContracts();
             if (contracts.size() > 0) {
                 RspMultiContractCompile compileInfo = new RspMultiContractCompile();
                 compileInfo.setContractName(contractName);
