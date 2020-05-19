@@ -27,4 +27,5 @@ public interface SolcRepository extends CrudRepository<SolcInfo, Integer>,
 
 	List<SolcInfo> findAll();
 
+	SolcInfo findBySolcName(String fileName);
 }

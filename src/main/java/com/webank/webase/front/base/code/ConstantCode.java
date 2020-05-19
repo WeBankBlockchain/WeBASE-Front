@@ -178,6 +178,8 @@ public class ConstantCode {
     // upload solc js file
     public static final RetCode PARAM_FAIL_SOLC_FILE_EMPTY = RetCode.mark(201261, "Solc js file cannot be empty");
     public static final RetCode PARAM_FAIL_SOLC_FILE_NAME_EMPTY = RetCode.mark(201262, "Solc js file name cannot be empty");
-    public static final RetCode SAVE_SOLC_FILE_ERROR = RetCode.mark(201263, "Save solc js file error");
-    public static final RetCode READ_SOLC_FILE_ERROR = RetCode.mark(201264, "read solc js file error, please check if file deleted");
+    public static final RetCode PARAM_FAIL_FILE_NAME_EXISTS = RetCode.mark(201263, "Solc js file name already exist");
+    public static final RetCode PARAM_FAIL_FILE_NAME_NOT_EXISTS = RetCode.mark(201263, "Solc js file name not exist in db");
+    public static final RetCode SAVE_SOLC_FILE_ERROR = RetCode.mark(201264, "Save solc js file error");
+    public static final RetCode READ_SOLC_FILE_ERROR = RetCode.mark(201265, "read solc js file error, please check if file deleted");
 }
