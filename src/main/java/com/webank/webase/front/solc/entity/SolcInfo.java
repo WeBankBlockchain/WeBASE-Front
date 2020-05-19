@@ -24,7 +24,8 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(uniqueConstraints = {
-	@UniqueConstraint(name = "unique_file_name", columnNames = {"solcName"})
+	@UniqueConstraint(name = "unique_file_name", columnNames = {"solcName"}),
+	@UniqueConstraint(name = "unique_md5", columnNames = {"md5"})
 })
 public class SolcInfo {
 	@Id
@@ -32,6 +33,8 @@ public class SolcInfo {
 	private Integer solcId;
 	private String solcName;
 	private Integer fileSize;
+	private String md5;
+//	private String filePath;
 	private String description;
 	private LocalDateTime createTime;
 }
