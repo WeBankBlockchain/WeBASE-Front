@@ -54,6 +54,12 @@ public class SolcController {
 	public BaseResponse upload(@RequestParam("fileName") String fileName,
 							   @RequestParam("solcFile") MultipartFile solcFile,
 							   @RequestParam(value = "description", required = false, defaultValue = "") String description) {
+		if (fileName.isEmpty()) {
+			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
+		}
+		if (solcFile.getSize() == 0L) {
+			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_EMPTY);
+		}
 		solcService.saveSolcFile(fileName, solcFile, description);
 		return new BaseResponse(ConstantCode.RET_SUCCESS);
 	}
@@ -71,12 +77,13 @@ public class SolcController {
 
 	/**
 	 * download Solc js file
+	 * @return fileName in headers, file InputStream in body
 	 */
 	@ApiOperation(value = "download existed solc js", notes = "download solc js file")
 	@ApiImplicitParam(name = "fileName", value = "solc file name", required = true,
 			dataType = "String", paramType = "path")
-	@PostMapping("/download/{fileName}")
-	public ResponseEntity<InputStreamResource> downloadSolcFile(@PathVariable("fileName") String fileName) {
+	@PostMapping("/download")
+	public ResponseEntity<InputStreamResource> downloadSolcFile(@RequestParam("fileName") String fileName) {
 		if (fileName.isEmpty()) {
 			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
 		}

@@ -18,14 +18,14 @@ package com.webank.webase.front.solc.entity;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Table(uniqueConstraints = {
+	@UniqueConstraint(name = "unique_file_name", columnNames = {"solcName"})
+})
 public class SolcInfo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

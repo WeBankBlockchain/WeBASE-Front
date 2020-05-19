@@ -18,7 +18,6 @@ package com.webank.webase.front.solc;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.solc.entity.ReqUploadSolc;
 import com.webank.webase.front.solc.entity.RspDownload;
 import com.webank.webase.front.solc.entity.SolcInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -30,37 +29,36 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
 public class SolcService {
 
-	private static final String SOLC_BASE_PATH = "./solcjs" + File.separator;
-	private static final String SOLC_FILE_PATH = SOLC_BASE_PATH + "%1s.js";
+	private static final String SOLC_DIR_PATH = "src/main/resources/solcjs";
+	private static final String SOLC_JS_SUFFIX = ".js";
 
 	@Autowired
 	private SolcRepository solcRepository;
 
 	@Transactional
-	public void saveSolcFile(String fileName, MultipartFile solcFile, String description) {
-		Long fileSize = solcFile.getSize();
-
+	public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String description) {
+		// format filename end with js
+		String fileName = formatFileName(fileNameParam);
+		Long fileSize = solcFileParam.getSize();
 		if (description.isEmpty()) {
-			description = solcFile.getOriginalFilename();
+			description = solcFileParam.getOriginalFilename();
 		}
-
+		// check name not repeat
+		checkSolcInfoNotExist(fileName);
 		// save file info db
 		saveSolcInfo(fileName, description, fileSize);
 
-		// save file
-		String filePath = String.format(SOLC_FILE_PATH, fileName);
-		File fileTarget = new File(filePath);
-		// check parent path
-		if (!fileTarget.getParentFile().exists()){
-			fileTarget.getParentFile().mkdir();
-		}
+		// get solcjs dir and save file
+		File solcDir = getSolcDir();
 		try {
-			solcFile.transferTo(fileTarget);
+			File newFile = new File(solcDir.getAbsolutePath() + File.separator + fileName);
+			solcFileParam.transferTo(newFile);
 			log.info("saveSolcFile success, file name:{}", fileName);
 		} catch (IOException e) {
 			log.error("saveSolcFile write to file, fileName:{},error:[]", fileName, e);
@@ -68,6 +66,28 @@ public class SolcService {
 					e.getMessage());
 		}
 
+	}
+
+	/**
+	 * if exist, throw exception
+	 * @param fileName
+	 */
+	private void checkSolcInfoNotExist(String fileName) {
+		SolcInfo checkExist = solcRepository.findBySolcName(fileName);
+		if (Objects.nonNull(checkExist)) {
+			throw new FrontException(ConstantCode.PARAM_FAIL_FILE_NAME_EXISTS);
+		}
+	}
+
+	/**
+	 * if not exist, throw exception
+	 * @param fileName
+	 */
+	private void checkSolcInfoExist(String fileName) {
+		SolcInfo checkExist = solcRepository.findBySolcName(fileName);
+		if (Objects.isNull(checkExist)) {
+			throw new FrontException(ConstantCode.PARAM_FAIL_FILE_NAME_NOT_EXISTS);
+		}
 	}
 
 	private void saveSolcInfo(String fileName, String description, Long fileSize) {
@@ -80,10 +100,37 @@ public class SolcService {
 		solcRepository.save(solcInfo);
 	}
 
-	public RspDownload getSolcFile(String fileName) {
+	private String formatFileName(String fileName) {
+		return fileName.endsWith(SOLC_JS_SUFFIX) ? fileName : (fileName + SOLC_JS_SUFFIX);
+	}
+	/**
+	 * get solcjs dir's path
+	 * @return File, file instance of dir
+	 */
+	private File getSolcDir(){
+
+		File fileDir = new File(SOLC_DIR_PATH);
+		// check parent path
+		if(!fileDir.exists()){
+			// 递归生成文件夹
+			fileDir.mkdirs();
+		}
+		return fileDir;
+	}
+
+	/**
+	 * downlaod file
+	 * @param fileNameParam
+	 * @return
+	 */
+	public RspDownload getSolcFile(String fileNameParam) {
+		// format filename end with js
+		String fileName = formatFileName(fileNameParam);
+		checkSolcInfoExist(fileName);
+		File solcDir = getSolcDir();
 		try {
-			String filePath = String.format(SOLC_FILE_PATH, fileName);
-			File file = new File(filePath);
+			String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
+			File file = new File(solcLocate);
 			InputStream targetStream = new FileInputStream(file);
 			return new RspDownload(fileName, targetStream);
 		} catch (FileNotFoundException e) {
