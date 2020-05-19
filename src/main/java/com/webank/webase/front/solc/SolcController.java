@@ -75,13 +75,24 @@ public class SolcController {
 		return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
 	}
 
+	@ApiOperation(value = "delete uploaded solc js", notes = "delete uploaded solc js file")
+	@ApiImplicitParam(name = "solcId", value = "solc info id", required = true,
+			dataType = "Integer", paramType = "path")
+	@DeleteMapping("/{solcId}")
+	public BaseResponse deleteSolcFile(@PathVariable("solcId") Integer solcId) {
+
+		boolean deleteRsp = solcService.deleteFile(solcId);
+		return new BaseResponse(ConstantCode.RET_SUCCESS);
+	}
+
+
 	/**
 	 * download Solc js file
 	 * @return fileName in headers, file InputStream in body
 	 */
 	@ApiOperation(value = "download existed solc js", notes = "download solc js file")
 	@ApiImplicitParam(name = "fileName", value = "solc file name", required = true,
-			dataType = "String", paramType = "path")
+			dataType = "String")
 	@PostMapping("/download")
 	public ResponseEntity<InputStreamResource> downloadSolcFile(@RequestParam("fileName") String fileName) {
 		if (fileName.isEmpty()) {

@@ -21,6 +21,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.solc.entity.RspDownload;
 import com.webank.webase.front.solc.entity.SolcInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,17 +43,19 @@ public class SolcService {
 	private SolcRepository solcRepository;
 
 	@Transactional
-	public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String description) {
+	public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String description) throws IOException {
 		// format filename end with js
 		String fileName = formatFileName(fileNameParam);
 		Long fileSize = solcFileParam.getSize();
 		if (description.isEmpty()) {
 			description = solcFileParam.getOriginalFilename();
 		}
-		// check name not repeat
+		// check name and md5 not repeat
 		checkSolcInfoNotExist(fileName);
+		String md5 = DigestUtils.md5Hex(solcFileParam.getInputStream());
+		checkSolcMd5NotExist(md5);
 		// save file info db
-		saveSolcInfo(fileName, description, fileSize);
+		saveSolcInfo(fileName, description, fileSize, md5);
 
 		// get solcjs dir and save file
 		File solcDir = getSolcDir();
@@ -65,7 +68,17 @@ public class SolcService {
 			throw new FrontException(ConstantCode.SAVE_SOLC_FILE_ERROR.getCode(),
 					e.getMessage());
 		}
+	}
 
+	/**
+	 * check file's md5 not exist
+	 * @param md5
+	 */
+	private void checkSolcMd5NotExist(String md5) {
+		SolcInfo checkExist = solcRepository.findByMd5(md5);
+		if (Objects.nonNull(checkExist)) {
+			throw new FrontException(ConstantCode.PARAM_FAIL_FILE_NAME_EXISTS);
+		}
 	}
 
 	/**
@@ -90,8 +103,9 @@ public class SolcService {
 		}
 	}
 
-	private void saveSolcInfo(String fileName, String description, Long fileSize) {
-		log.info("start saveSolcInfo");
+
+	private void saveSolcInfo(String fileName, String description, Long fileSize, String md5) {
+		log.info("start saveSolcInfo fileName:{}", fileName);
 		SolcInfo solcInfo = new SolcInfo();
 		solcInfo.setSolcName(fileName);
 		solcInfo.setDescription(description);
@@ -141,5 +155,27 @@ public class SolcService {
 
 	public List<SolcInfo> getAllSolcInfo() {
 		return solcRepository.findAll();
+	}
+
+	@Transactional
+	public boolean deleteFile(Integer solcId) {
+		SolcInfo solcInfo = solcRepository.findOne(solcId);
+		String fileName = solcInfo.getSolcName();
+		File solcDir = getSolcDir();
+		String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
+		File file = new File(solcLocate);
+		removeSolcInfo(solcId);
+		if (!file.exists()) {
+			throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
+		}
+		return file.delete();
+	}
+
+	private void removeSolcInfo(Integer solcId) {
+		SolcInfo checkExist = solcRepository.findOne(solcId);
+		if (Objects.isNull(checkExist)) {
+			throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
+		}
+		solcRepository.delete(solcId);
 	}
 }
