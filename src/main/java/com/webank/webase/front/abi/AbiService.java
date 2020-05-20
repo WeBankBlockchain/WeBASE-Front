@@ -77,7 +77,7 @@ public class AbiService {
 		// check address
 		String contractBin = getAddressRuntimeBin(groupId, contractAddress);
 		// check name and address of abi not exist
-		checkAbiExist(groupId, contractName, contractAddress);
+		checkAbiNotExist(groupId, contractName, contractAddress);
 
 		AbiInfo saveAbi = new AbiInfo();
 		BeanUtils.copyProperties(param, saveAbi);
@@ -133,7 +133,7 @@ public class AbiService {
 	 * @param contractName
 	 * @param address
 	 */
-	private void checkAbiExist(int groupId, String contractName, String address) {
+	private void checkAbiNotExist(int groupId, String contractName, String address) {
 		AbiInfo checkAbiName = abiRepository.findByGroupIdAndContractName(groupId, contractName);
 		if (Objects.nonNull(checkAbiName)) {
 			throw new FrontException(ConstantCode.CONTRACT_NAME_REPEAT);
