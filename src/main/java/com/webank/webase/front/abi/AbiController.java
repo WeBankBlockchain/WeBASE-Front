@@ -42,7 +42,7 @@ import java.util.Objects;
  * @author marsli
  */
 @Slf4j
-@Api(value = "/abi", tags = "import contract abi directly")
+@Api(value = "/abi", tags = "abi import controller")
 @RestController
 @RequestMapping("/abi")
 public class AbiController extends BaseController {
