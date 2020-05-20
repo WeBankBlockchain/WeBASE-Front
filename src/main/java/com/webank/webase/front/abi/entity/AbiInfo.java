@@ -28,8 +28,10 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Data
-@Table(uniqueConstraints = {@UniqueConstraint(name = "unique_address",
-		columnNames = {"contractAddress"})})
+@Table(uniqueConstraints = {
+		@UniqueConstraint(name = "unique_address", columnNames = {"groupId", "contractAddress"}),
+		@UniqueConstraint(name = "unique_name", columnNames = {"groupId", "contractName"})
+})
 public class AbiInfo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
