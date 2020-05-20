@@ -32,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -53,7 +54,7 @@ public class SolcController {
 	@PostMapping("/upload")
 	public BaseResponse upload(@RequestParam("fileName") String fileName,
 							   @RequestParam("solcFile") MultipartFile solcFile,
-							   @RequestParam(value = "description", required = false, defaultValue = "") String description) {
+							   @RequestParam(value = "description", required = false, defaultValue = "") String description) throws IOException {
 		if (fileName.isEmpty()) {
 			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
 		}

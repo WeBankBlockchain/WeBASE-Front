@@ -36,7 +36,7 @@ import java.util.Objects;
 @Service
 public class SolcService {
 
-	private static final String SOLC_DIR_PATH = "src/main/resources/solcjs";
+	public static final String SOLC_DIR_PATH = "src/main/resources/solcjs";
 	private static final String SOLC_JS_SUFFIX = ".js";
 
 	@Autowired
