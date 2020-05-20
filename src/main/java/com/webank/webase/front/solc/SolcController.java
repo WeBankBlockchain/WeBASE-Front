@@ -50,7 +50,6 @@ public class SolcController {
 	private SolcService solcService;
 
 	@ApiOperation(value = "upload solc js file", notes = "upload solc js file")
-	@ApiImplicitParam(name = "version", value = "solc js version tag", required = true, dataType = "String")
 	@PostMapping("/upload")
 	public BaseResponse upload(@RequestParam("fileName") String fileName,
 							   @RequestParam("solcFile") MultipartFile solcFile,
