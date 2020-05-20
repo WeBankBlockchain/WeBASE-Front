@@ -136,7 +136,7 @@ public class PrecompiledController {
         if (resList.size() != 0) {
             List2Page<NodeInfo> list2Page = new List2Page<NodeInfo>(resList, pageSize, pageNumber);
             List<NodeInfo> finalList = list2Page.getPagedList();
-            long totalCount = (long) resList.size();
+            long totalCount = resList.size();
             log.debug("end getNodeList. finalList:{}", finalList);
             return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
         } else {
