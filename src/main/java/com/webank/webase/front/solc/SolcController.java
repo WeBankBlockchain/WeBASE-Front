@@ -21,6 +21,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.solc.entity.RspDownload;
 import com.webank.webase.front.solc.entity.SolcInfo;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ import java.util.List;
  * upload and download solc js file
  */
 @Slf4j
+@Api(value = "/solc", tags = "upload/download solc js controller")
 @RestController
 @RequestMapping("solc")
 public class SolcController {
