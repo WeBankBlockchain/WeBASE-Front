@@ -45,7 +45,7 @@ import java.util.List;
  * 待添加鉴权： 需要限制指定的appId订阅对应的queue
  * @author marsli
  */
-@Api(value = "/event", tags = "event notify of contract event log push and new block event")
+@Api(value = "/event", tags = "event push manage controller")
 @Slf4j
 @RestController
 @RequestMapping(value = "event")
