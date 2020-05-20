@@ -289,7 +289,7 @@ public class Web3ApiController {
      *     status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
      */
 	@ApiOperation(value = "getGroupStatus", notes = "getStatus of the group id in the list")
-	@ApiImplicitParam(name = "groupIdList", value = "group id list of string", required = true, dataType = "ReqGroupStatusList")
+	@ApiImplicitParam(name = "groupIdList", value = "group id list of string", required = true, dataType = "ReqGroupStatus")
 	@PostMapping("/queryGroupStatus")
 	public BaseResponse getGroupStatus(@RequestBody ReqGroupStatus groupIdList)
 			throws IOException {
