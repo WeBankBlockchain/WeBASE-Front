@@ -14,42 +14,27 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.abi.entity;
-
+package com.webank.webase.front.solc.entity;
 
 import lombok.Data;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * abi info used to send transaction
- * @author marsli
- */
-@Entity
 @Data
+@Entity
 @Table(uniqueConstraints = {
-		@UniqueConstraint(name = "unique_address", columnNames = {"groupId", "contractAddress"}),
-		@UniqueConstraint(name = "unique_name", columnNames = {"groupId", "contractName"})
+	@UniqueConstraint(name = "unique_file_name", columnNames = {"solcName"}),
+	@UniqueConstraint(name = "unique_md5", columnNames = {"md5"})
 })
-public class AbiInfo {
+public class SolcInfo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long abiId;
-	private Integer groupId;
-	private String contractName;
-	private String contractAddress;
-	@Column(columnDefinition = "text")
-	private String contractAbi;
-	/**
-	 * runtime bin
-	 */
-	@Column(columnDefinition = "text")
-	private String contractBin;
-	/**
-	 * 1-normal, 2-invalid
-	 */
-	// private Integer contractStatus;
+	private Integer solcId;
+	private String solcName;
+	private Integer fileSize;
+	private String md5;
+//	private String filePath;
+	private String description;
 	private LocalDateTime createTime;
-	private LocalDateTime modifyTime;
 }

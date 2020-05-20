@@ -116,13 +116,13 @@ public class FrontUtils {
     /**
      * create file if not exist.
      */
-    public static void createFileIfNotExist(File targetFile, boolean deketeOld) throws IOException {
+    public static void createFileIfNotExist(File targetFile, boolean deleteOld) throws IOException {
         Objects.requireNonNull(targetFile, "fail create file. targetFile is null");
         File parentFile = targetFile.getParentFile();
         if (!parentFile.exists()) {
             parentFile.mkdirs();
         }
-        if (deketeOld) {
+        if (deleteOld) {
             targetFile.deleteOnExit();
         }
 
