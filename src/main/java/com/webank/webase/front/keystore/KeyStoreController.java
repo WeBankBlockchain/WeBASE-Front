@@ -20,10 +20,7 @@ import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.keystore.entity.KeyStoreInfo;
-import com.webank.webase.front.keystore.entity.ReqImportPem;
-import com.webank.webase.front.keystore.entity.RspKeyStoreInfo;
-import com.webank.webase.front.keystore.entity.RspUserInfo;
+import com.webank.webase.front.keystore.entity.*;
 import com.webank.webase.front.util.PemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -121,7 +118,8 @@ public class KeyStoreController extends BaseController {
     }
 
     @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
-    @ApiImplicitParam(name = "reqImportPem", value = "import pem info", required = true, dataType = "ReqImportPem")
+    @ApiImplicitParam(name = "reqImportPem", value = "import pem info",
+            required = true, dataType = "ReqImportPem")
     @PostMapping("/importPem")
     public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
         String pemContent = reqImportPem.getPemContent();
@@ -131,6 +129,13 @@ public class KeyStoreController extends BaseController {
         }
         keyStoreService.importKeyStoreFromPem(pemContent, userName);
         return new BaseResponse(ConstantCode.RET_SUCCESS);
+    }
+
+    @ApiOperation(value = "import PrivateKey encoded by base64", notes = "import PrivateKey")
+    @PostMapping("/importWithSign")
+    public KeyStoreInfo importPrivateKeyWithSign(@Valid @RequestBody ReqImportWithSign reqImportWithSign) {
+        return keyStoreService.importPrivateKeyToSign(reqImportWithSign.getPrivateKey(),
+                reqImportWithSign.getSignUserId(), reqImportWithSign.getAppId());
     }
 
 }
