@@ -23,6 +23,7 @@ import com.webank.webase.front.solc.entity.SolcInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +37,7 @@ import java.util.Objects;
 @Service
 public class SolcService {
 
-	public static final String SOLC_DIR_PATH = "src/main/resources/solcjs";
+	public static final String SOLC_DIR_PATH = "solcjs";
 	private static final String SOLC_JS_SUFFIX = ".js";
 
 	@Autowired
@@ -121,7 +122,7 @@ public class SolcService {
 	 * get solcjs dir's path
 	 * @return File, file instance of dir
 	 */
-	private File getSolcDir(){
+	private File getSolcDir() {
 
 		File fileDir = new File(SOLC_DIR_PATH);
 		// check parent path
