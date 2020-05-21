@@ -57,7 +57,7 @@ public class ErrorCodeHandleUtils {
 	public static final RetCode PRECOMPILED_NODE_NOT_GROUP_PEER = RetCode.mark(-51103, "the node is not a group peer");
 	public static final RetCode PRECOMPILED_NODE_ALREADY_SEALER = RetCode.mark(-51104, "the node is already in the sealer list");
 	public static final RetCode PRECOMPILED_NODE_ALREADY_OBSERVER = RetCode.mark(-51105, "the node is already in the observer list");
-	public static final RetCode PRECOMPILED_CONTRACT_NAME_VERSION_EXIST = RetCode.mark(-51006, "contract name and version already exist");
+	public static final RetCode PRECOMPILED_CONTRACT_NAME_VERSION_EXIST = RetCode.mark(-51200, "contract name and version already exist");
 	public static final RetCode PRECOMPILED_VERSION_LENGTH_EXCEED = RetCode.mark(-51201, "version string length exceeds the maximum limit");
 	public static final RetCode PRECOMPILED_INVALID_CONFIG_ENTRY = RetCode.mark(-51300, "invalid configuration entry");
 	public static final RetCode PRECOMPILED_PARSE_ENTRY_ERROR = RetCode.mark(-51500, "entry parse error");
