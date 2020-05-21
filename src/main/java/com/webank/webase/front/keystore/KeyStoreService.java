@@ -20,13 +20,11 @@ import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.keystore.entity.EncodeInfo;
-import com.webank.webase.front.keystore.entity.KeyStoreInfo;
-import com.webank.webase.front.keystore.entity.RspUserInfo;
-import com.webank.webase.front.keystore.entity.SignInfo;
+import com.webank.webase.front.keystore.entity.*;
 import com.webank.webase.front.util.AesUtils;
 import com.webank.webase.front.util.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.queue.PredicatedQueue;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.PEMManager;
@@ -133,6 +131,10 @@ public class KeyStoreService {
      */
     public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId) {
         RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId);
+        return saveSignKeyStore(rspUserInfo);
+    }
+
+    private KeyStoreInfo saveSignKeyStore(RspUserInfo rspUserInfo) {
         String address = rspUserInfo.getAddress();
         if (StringUtils.isEmpty(address)) {
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
@@ -320,7 +322,7 @@ public class KeyStoreService {
             log.error("importKeyStoreFromPem error:[]", e);
             throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
         }
-        // to store
+        // to store local
         return importFromPrivateKey(privateKey, userName);
     }
 
@@ -331,7 +333,7 @@ public class KeyStoreService {
      * @return KeyStoreInfo local user
      */
     public KeyStoreInfo importFromPrivateKey(String privateKey, String userName) {
-        // to store
+        // to store locally
         ECKeyPair keyPair = GenCredential.createKeyPair(privateKey);
         KeyStoreInfo keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
         keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
@@ -340,5 +342,54 @@ public class KeyStoreService {
         return keystoreRepository.save(keyStoreInfo);
     }
 
+
+    public KeyStoreInfo importPrivateKeyToSign(String privateKeyEncoded, String signUserId, String appId) {
+        // save in sign
+        RspUserInfo rspUserInfo = getSignUserEntity(privateKeyEncoded, signUserId, appId);
+        // save in local as external
+        KeyStoreInfo keyStoreInfo = saveSignKeyStore(rspUserInfo);
+        return keyStoreInfo;
+    }
+
+
+    /**
+     * request sign to import private key
+     * @param signUserId
+     * @param appId
+     * @param privateKeyEncoded base64 encoded
+     * @return
+     */
+    public RspUserInfo getSignUserEntity(String privateKeyEncoded, String signUserId, String appId) {
+        try {
+            RspUserInfo rspUserInfo = new RspUserInfo();
+            String url = constants.WEBASE_SIGN_USER_URI.split("\\?")[0];
+            log.info("getSignUserEntity url:{}", url);
+            Map<String, Object> params = new HashMap<>();
+            params.put("privateKey", privateKeyEncoded);
+            params.put("signUserId", signUserId);
+            params.put("appId", appId);
+            params.put("encryptType", EncryptType.encryptType);
+            HttpEntity entity = CommonUtils.buildHttpEntity(params);
+
+            ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity, BaseResponse.class);
+            BaseResponse baseResponse = response.getBody();
+            log.info("getSignUserEntity response:{}", JSON.toJSONString(baseResponse));
+            if (baseResponse.getCode() == 0) {
+                rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+            }
+            return rspUserInfo;
+        } catch (ResourceAccessException ex) {
+            log.error("fail restTemplateExchange", ex);
+            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+        } catch (HttpStatusCodeException e) {
+            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
+            log.error("http request fail. error:{}", JSON.toJSONString(error));
+            throw new FrontException(error.getInteger("code"),
+                    error.getString("errorMessage"));
+        } catch (Exception e) {
+            log.error("getSignUserEntity exception", e);
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+    }
 }
 
