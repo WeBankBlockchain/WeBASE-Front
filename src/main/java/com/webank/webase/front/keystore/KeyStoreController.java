@@ -132,6 +132,8 @@ public class KeyStoreController extends BaseController {
     }
 
     @ApiOperation(value = "import PrivateKey encoded by base64", notes = "import PrivateKey")
+    @ApiImplicitParam(name = "reqImportWithSign", value = "import private key to sign",
+            required = true, dataType = "ReqImportWithSign")
     @PostMapping("/importWithSign")
     public KeyStoreInfo importPrivateKeyWithSign(@Valid @RequestBody ReqImportWithSign reqImportWithSign) {
         return keyStoreService.importPrivateKeyToSign(reqImportWithSign.getPrivateKey(),
