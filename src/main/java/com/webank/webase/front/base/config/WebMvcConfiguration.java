@@ -5,6 +5,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import java.io.File;
+
+import static com.webank.webase.front.solc.SolcService.SOLC_DIR_PATH;
+
 
 @Slf4j
 @Configuration
@@ -13,7 +17,7 @@ public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // web request uri of "/solcjs/**", return the files in classpath/solcjs/xx.js
-        registry.addResourceHandler("/solcjs/**").addResourceLocations("classpath:/solcjs/");
+        registry.addResourceHandler("/solcjs/**").addResourceLocations("classpath:/" + SOLC_DIR_PATH + File.separator);
         super.addResourceHandlers(registry);
     }
 }
