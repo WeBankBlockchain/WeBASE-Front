@@ -127,13 +127,18 @@ public class KeyStoreService {
      * without private key
      * @param signUserId
      * @param appId
-     * @return
+     * @return KeyStoreInfo
      */
     public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId) {
         RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId);
         return saveSignKeyStore(rspUserInfo);
     }
 
+    /**
+     * save rspUserInfo as KeyStoreInfo
+     * @param rspUserInfo
+     * @return KeyStoreInfo
+     */
     private KeyStoreInfo saveSignKeyStore(RspUserInfo rspUserInfo) {
         String address = rspUserInfo.getAddress();
         if (StringUtils.isEmpty(address)) {
@@ -342,7 +347,13 @@ public class KeyStoreService {
         return keystoreRepository.save(keyStoreInfo);
     }
 
-
+    /**
+     * import private key to sign
+     * @param privateKeyEncoded
+     * @param signUserId
+     * @param appId
+     * @return KeyStoreInfo
+     */
     public KeyStoreInfo importPrivateKeyToSign(String privateKeyEncoded, String signUserId, String appId) {
         // save in sign
         RspUserInfo rspUserInfo = getSignUserEntity(privateKeyEncoded, signUserId, appId);
@@ -353,11 +364,11 @@ public class KeyStoreService {
 
 
     /**
-     * request sign to import private key
+     * request(post) sign to import private key
      * @param signUserId
      * @param appId
      * @param privateKeyEncoded base64 encoded
-     * @return
+     * @return RspUserInfo
      */
     public RspUserInfo getSignUserEntity(String privateKeyEncoded, String signUserId, String appId) {
         try {
