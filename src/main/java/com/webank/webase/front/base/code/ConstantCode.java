@@ -82,7 +82,7 @@ public class ConstantCode {
 	/* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
     public static final RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
-    public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3jMap of groupId is null, please try again");
+    public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3j instance of groupId is null, please try again");
     public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "groupList error for no group");
     public static final RetCode SYSTEM_ERROR_CNSSERVICE_NULL = RetCode.mark(101005, "cnsServiceMap of groupId is null, please try again");
 
@@ -108,7 +108,6 @@ public class ConstantCode {
     public static final RetCode INVALID_CONTRACT_HANDLE_TYPE = RetCode.mark(201115, "invalid contract handle type");
     public static final RetCode FAIL_CONTRACT_HANDLE = RetCode.mark(201116, "contract status handle fail");
 
-
     // group operate error code from sdk
     public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201120, "group operate fail");
     public static final RetCode NODE_INTERNAL_ERROR = RetCode.mark(201121, "node internal error");
@@ -126,8 +125,12 @@ public class ConstantCode {
     public static final RetCode GROUP_IS_STOPPING = RetCode.mark(201133, "group is stopping");
     public static final RetCode GROUP_NOT_DELETED = RetCode.mark(201134, "group not deleted");
 
+    // contract type param error
+	public static final RetCode CONTRACT_TYPE_ENCODED_ERROR = RetCode.mark(201151, "Unsupported contract param type to encoded");
+	public static final RetCode CONTRACT_TYPE_DECODED_ERROR = RetCode.mark(201152, "Unsupported contract param type to decoded");
+	public static final RetCode CONTRACT_TYPE_PARAM_ERROR = RetCode.mark(201153, "unable to create instance of type, check input params");
 
-    /* precompiled runtime check or error */
+	/* precompiled runtime check or error */
     // param
     public static final RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
     public static final RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
@@ -159,6 +162,8 @@ public class ConstantCode {
     public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
     public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
     public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201233, "Pem file content error");
+    public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201233, "p12's password cannot be chinese");
+    public static final RetCode P12_CONTENT_ERROR = RetCode.mark(201233, "P12 file content error");
 
     // mq error
     public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
