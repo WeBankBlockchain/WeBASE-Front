@@ -136,8 +136,11 @@ public class KeyStoreController extends BaseController {
     }
 
     @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
-    @ApiImplicitParam(name = "reqImportPem", value = "import pem info",
-            required = true, dataType = "ReqImportPem")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userName", value = "user name", dataType = "String"),
+            @ApiImplicitParam(name = "p12File", value = ".p12 file of private key", dataType = "MultipartFile"),
+            @ApiImplicitParam(name = "p12Password", value = ".p12 file password", dataType = "String")
+    })
     @PostMapping("/importP12")
     public BaseResponse importP12PrivateKey(@RequestParam String userName,
                                             @RequestParam MultipartFile p12File,
