@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.queue.PredicatedQueue;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
@@ -44,12 +45,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.KeyPair;
 import java.util.*;
 
@@ -99,13 +102,7 @@ public class KeyStoreService {
      */
     public KeyStoreInfo createKeyStoreLocally(String userName) {
         log.info("start createKeyStore. userName:{}", userName);
-        // check keyStoreInfoLocal
-        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByUserNameAndType(userName,
-                KeyTypes.LOCALUSER.getValue());
-        if (Objects.nonNull(keyStoreInfoLocal)) {
-            log.error("fail createKeyStore. user name already exists.");
-            throw new FrontException(ConstantCode.USER_NAME_EXISTS);
-        }
+        checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // create keyPair(support guomi)
         KeyStoreInfo keyStoreInfo;
         try {
@@ -130,6 +127,7 @@ public class KeyStoreService {
      * @return KeyStoreInfo
      */
     public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId) {
+        // get from sign
         RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId);
         return saveSignKeyStore(rspUserInfo);
     }
@@ -237,7 +235,7 @@ public class KeyStoreService {
     }
 
     /**
-     * get user from webase-sign api(v1.3.0+)
+     * request (get) user from webase-sign api(v1.3.0+)
      * @param signUserId unique user id to call webase-sign
      * @return
      */
@@ -312,6 +310,19 @@ public class KeyStoreService {
     }
 
     /**
+     * check userName and userType not exist
+     */
+    private void checkUserNameAndTypeNotExist(String userName, Integer userType) {
+        // check keyStoreInfoLocal
+        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByUserNameAndType(userName,
+                userType);
+        if (Objects.nonNull(keyStoreInfoLocal)) {
+            log.error("fail checkUserNameAndTypeNotExist. user name already exists.");
+            throw new FrontException(ConstantCode.USER_NAME_EXISTS);
+        }
+    }
+
+    /**
      * import keystore info from pem file's content
      * @param pemContent
      * @param userName
@@ -332,12 +343,38 @@ public class KeyStoreService {
     }
 
     /**
+     * import keystore info from p12 file input stream and its password
+     * @param p12File
+     * @param p12Password
+     * @param userName
+     * @return KeyStoreInfo
+     */
+    public KeyStoreInfo importKeyStoreFromP12(MultipartFile p12File, String p12Password, String userName) {
+        P12Manager p12Manager = new P12Manager();
+        String privateKey;
+        try {
+            p12Manager.load(p12File.getInputStream(), p12Password);
+            privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
+        }catch (Exception e) {
+            log.error("importKeyStoreFromP12 error:[]", e);
+            if (e.getMessage().contains("password")) {
+                throw new FrontException(ConstantCode.P12_PASSWORD_ERROR);
+            }
+            throw new FrontException(ConstantCode.P12_FILE_ERROR);
+        }
+        // to store local
+        return importFromPrivateKey(privateKey, userName);
+    }
+
+    /**
      * save LOCAL_USER key store by private key
      * @param privateKey
      * @param userName
      * @return KeyStoreInfo local user
      */
     public KeyStoreInfo importFromPrivateKey(String privateKey, String userName) {
+        // check name
+        checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // to store locally
         ECKeyPair keyPair = GenCredential.createKeyPair(privateKey);
         KeyStoreInfo keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
@@ -355,7 +392,7 @@ public class KeyStoreService {
      * @return KeyStoreInfo
      */
     public KeyStoreInfo importPrivateKeyToSign(String privateKeyEncoded, String signUserId, String appId) {
-        // save in sign
+        // post private and save in sign
         RspUserInfo rspUserInfo = getSignUserEntity(privateKeyEncoded, signUserId, appId);
         // save in local as external
         KeyStoreInfo keyStoreInfo = saveSignKeyStore(rspUserInfo);
