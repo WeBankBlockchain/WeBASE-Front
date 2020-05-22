@@ -29,6 +29,7 @@ import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
+import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -55,6 +56,7 @@ import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -98,6 +100,8 @@ public class ContractService {
     private Web3ApiService web3ApiService;
     @Autowired
     private Constants constants;
+    @Autowired
+    private PermissionManageService permissionManageService;
 
     /**
      * sendAbi.
@@ -184,8 +188,15 @@ public class ContractService {
         String contractAddress;
         // deploy locally or webase-sign
         if (doLocally) {
+            // check deploy permission
+            checkDeployPermission(req.getGroupId(), req.getUser());
             contractAddress = deployLocally(req);
         } else {
+            // check deploy permission
+            String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
+            if (!userAddress.isEmpty()) {
+                checkDeployPermission(req.getGroupId(), userAddress);
+            }
             contractAddress = deployWithSign(req);
         }
         if (StringUtils.isNotBlank(contractAddress)) {
@@ -205,7 +216,7 @@ public class ContractService {
      */
     public String deployWithSign(ReqDeploy req) throws Exception {
         int groupId = req.getGroupId();
-//        String version = req.getVersion();
+        String signUserId = req.getSignUserId();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
@@ -217,15 +228,21 @@ public class ContractService {
             new FrontException(GROUPID_NOT_EXIST);
         }
 
+        // check deploy permission
+        String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
+        if (!userAddress.isEmpty()) {
+            checkDeployPermission(req.getGroupId(), userAddress);
+        }
+
         String contractName = req.getContractName();
         ContractAbiUtil.VersionEvent versionEvent =
-                ContractAbiUtil.getVersionEventFromAbi(contractName, req.getAbiInfo());
+                ContractAbiUtil.getVersionEventFromAbi(contractName, abiInfos);
         String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
 
 
         // data sign
         String data = bytecodeBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, web3j, req.getSignUserId(), "", data);
+        String signMsg = transService.signMessage(groupId, web3j, signUserId, "", data);
         if (StringUtils.isBlank(signMsg)) {
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
         }
@@ -242,19 +259,21 @@ public class ContractService {
      * deploy locally, not through webase-sign
      */
     public String deployLocally(ReqDeploy req) throws Exception {
+        int groupId = req.getGroupId();
+        String userAddress = req.getUser();
+        // check deploy permission
+        checkDeployPermission(groupId, userAddress);
         String contractName = req.getContractName();
-//        String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
-        int groupId = req.getGroupId();
 
         ContractAbiUtil.VersionEvent versionEvent =
                 ContractAbiUtil.getVersionEventFromAbi(contractName, abiInfos);
         String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
 
         // get privateKey
-        Credentials credentials = keyStoreService.getCredentials(req.getUser());
+        Credentials credentials = keyStoreService.getCredentials(userAddress);
         // contract deploy
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
@@ -732,6 +751,30 @@ public class ContractService {
         contractPathKey.setGroupId(groupId);
         contractPathKey.setContractPath(contractPath);
         contractPathRepository.delete(contractPathKey);
+    }
+
+    /**
+     * check user deploy permission
+     */
+    private void checkDeployPermission(int groupId, String userAddress) {
+        // get deploy permission list
+        try {
+            List<PermissionInfo> deployUserList = permissionManageService.listPermissionManager(groupId);
+            // check user in the list,
+            if (deployUserList.isEmpty()) {
+                return;
+            } else {
+                long count = 0;
+                count = deployUserList.stream().filter( admin -> admin.getAddress().equals(userAddress)).count();
+                // if not in the list, permission denied
+                if (count == 0) {
+                    log.error("checkDeployPermission permission denied for user:{}", userAddress);
+                    throw new FrontException(ConstantCode.PERMISSION_DENIED);
+                }
+            }
+        } catch (Exception e) {
+            log.error("checkDeployPermission get list error:{}", e.getMessage());
+        }
     }
 
 }
