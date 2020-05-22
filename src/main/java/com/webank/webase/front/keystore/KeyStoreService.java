@@ -52,8 +52,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyPair;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 
@@ -344,23 +347,28 @@ public class KeyStoreService {
 
     /**
      * import keystore info from p12 file input stream and its password
-     * @param p12File
-     * @param p12Password
+     * @param file
+     * @param password
      * @param userName
      * @return KeyStoreInfo
      */
-    public KeyStoreInfo importKeyStoreFromP12(MultipartFile p12File, String p12Password, String userName) {
+    public KeyStoreInfo importKeyStoreFromP12(MultipartFile file, String password, String userName) {
         P12Manager p12Manager = new P12Manager();
         String privateKey;
         try {
-            p12Manager.load(p12File.getInputStream(), p12Password);
+            // manually set password and load
+            p12Manager.setPassword(password);
+            p12Manager.load(file.getInputStream(), password);
             privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
-        }catch (Exception e) {
+        } catch (IOException e) {
             log.error("importKeyStoreFromP12 error:[]", e);
             if (e.getMessage().contains("password")) {
                 throw new FrontException(ConstantCode.P12_PASSWORD_ERROR);
             }
             throw new FrontException(ConstantCode.P12_FILE_ERROR);
+        } catch (Exception e) {
+            log.error("importKeyStoreFromP12 error:[]", e);
+            throw new FrontException(ConstantCode.P12_FILE_ERROR.getCode(), e.getMessage());
         }
         // to store local
         return importFromPrivateKey(privateKey, userName);
