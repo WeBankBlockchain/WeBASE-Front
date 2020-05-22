@@ -711,7 +711,8 @@ public class Web3ApiService {
     private Object startGroup(int groupId) throws IOException {
         GroupOperateStatus status = CommonUtils.object2JavaBean(
                 getWeb3j().startGroup(groupId).send().getStatus(), GroupOperateStatus.class);
-        refreshWeb3jMap(groupId);
+        // refresh group list
+        getGroupList();
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             refreshWeb3jMap(groupId);
@@ -725,7 +726,8 @@ public class Web3ApiService {
     private Object stopGroup(int groupId) throws IOException {
         GroupOperateStatus status = CommonUtils.object2JavaBean(
                 getWeb3j().stopGroup(groupId).send().getStatus(), GroupOperateStatus.class);
-        refreshWeb3jMap(groupId);
+        // refresh group list
+        getGroupList();
         log.info("stopGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             web3jMap.remove(groupId);
