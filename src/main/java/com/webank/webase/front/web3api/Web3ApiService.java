@@ -100,16 +100,19 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      */
     public BcosBlock.Block getBlockByNumber(int groupId, BigInteger blockNumber) {
+        if (blockNumberCheck(groupId, blockNumber)) {
+            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
+        }
         BcosBlock.Block block;
         try {
             block = getWeb3j(groupId)
                     .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                     .send()
                     .getBlock();
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.info("get blocknumber failed" + e.getMessage());
-            log.error("getBlockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
-            block = null;
+            log.error("getBlAockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
         return block;
     }
@@ -321,7 +324,7 @@ public class Web3ApiService {
         try {
             currentNumber = getWeb3j(groupId).getBlockNumber().send().getBlockNumber();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("blockNumberCheck error:{}", e.getMessage());
         }
         log.info("**** currentNumber:{}", currentNumber);
         return (blockNumber.compareTo(currentNumber) > 0);
