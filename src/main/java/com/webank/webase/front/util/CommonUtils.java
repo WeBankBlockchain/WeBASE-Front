@@ -344,12 +344,20 @@ public class CommonUtils {
     /**
      * 支持数字，字母与下划线"_"
      * 
-     * @param str
+     * @param input
      * @return
      */
-    public static boolean isLetterDigit(String str) {
+    public static boolean isLetterDigit(String input) {
         String regex = "^[a-z0-9A-Z_]+$";
-        return str.matches(regex);
+        return input.matches(regex);
+    }
+
+    /**
+     * 只包含中文
+     */
+    public static boolean notContainsChinese(String input) {
+        String regex = "[^\\u4e00-\\u9fa5]+";
+        return input.matches(regex);
     }
 
     /**
