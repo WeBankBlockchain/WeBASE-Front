@@ -272,15 +272,15 @@ public class KeyStoreService {
 
     /**
      * get signUserId by address
-     * @param address
-     * @return signUserId
+     * @param signUserId
+     * @return user address
      */
-    public String getSignUserIdByAddress(String address) {
-        KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
+    public String getAddressBySignUserId(String signUserId) {
+        KeyStoreInfo keyStoreInfo = keystoreRepository.findBySignUserId(signUserId);
         if (Objects.isNull(keyStoreInfo)) {
-            throw new FrontException(ConstantCode.KEYSTORE_NOT_EXIST);
+            return null;
         }
-        return keyStoreInfo.getSignUserId();
+        return keyStoreInfo.getAddress();
     }
 
     /**
@@ -294,7 +294,7 @@ public class KeyStoreService {
     /**
      * get PrivateKey.
      * default use aes encrypt
-     * @param user userId or userAddress.
+     * @param user  userAddress.
      */
     public String getPrivateKey(String user) {
 
@@ -377,6 +377,9 @@ public class KeyStoreService {
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // to store locally
         ECKeyPair keyPair = GenCredential.createKeyPair(privateKey);
+        if (keyPair == null) {
+            throw new FrontException(ConstantCode.PARAM_ERROR);
+        }
         KeyStoreInfo keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
         keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
         String realPrivateKey = keyStoreInfo.getPrivateKey();
