@@ -21,6 +21,7 @@ import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.entity.*;
+import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.PemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -33,6 +34,8 @@ import com.webank.webase.front.base.enums.KeyTypes;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+
+import java.io.IOException;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +49,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -128,6 +132,23 @@ public class KeyStoreController extends BaseController {
             throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
         }
         keyStoreService.importKeyStoreFromPem(pemContent, userName);
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
+    }
+
+    @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
+    @ApiImplicitParam(name = "reqImportPem", value = "import pem info",
+            required = true, dataType = "ReqImportPem")
+    @PostMapping("/importP12")
+    public BaseResponse importP12PrivateKey(@RequestParam String userName,
+                                            @RequestParam MultipartFile p12File,
+                                            @RequestParam String p12Password) throws IOException {
+        if (!CommonUtils.notContainsChinese(p12Password)) {
+            throw new FrontException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
+        }
+        if (p12File.getSize() == 0) {
+            throw new FrontException(ConstantCode.P12_FILE_ERROR);
+        }
+        keyStoreService.importKeyStoreFromP12(p12File, p12Password, userName);
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 

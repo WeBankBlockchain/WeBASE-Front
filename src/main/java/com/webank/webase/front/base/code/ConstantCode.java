@@ -161,9 +161,10 @@ public class ConstantCode {
     // cert PEM_FORMAT_ERROR
     public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
     public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
-    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201233, "Pem file content error");
-    public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201233, "p12's password cannot be chinese");
-    public static final RetCode P12_CONTENT_ERROR = RetCode.mark(201233, "P12 file content error");
+    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201234, "Pem file content error");
+    public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201235, "p12's password cannot be chinese");
+    public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(201236, "p12's password cannot be chinese");
+    public static final RetCode P12_FILE_ERROR = RetCode.mark(201237, "P12 file content error");
 
     // mq error
     public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
