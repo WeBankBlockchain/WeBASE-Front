@@ -865,7 +865,8 @@ public class Web3ApiService {
             log.error("web3j of {} is null, please call /{}/web3/refresh to refresh", groupId, groupId);
             // refresh group list
             getGroupList();
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL.getCode(),
+                    "web3j of " + groupId + " is null");
         }
         return web3j;
     }
