@@ -63,7 +63,9 @@ function COMPILE_INFO(i) {
     let COMPILE_INFO = [`<div>${compilationBegin}</div>`, `<div>${compiling}</div>`]
     return COMPILE_INFO[i]
 }
+const ABI_ARGUMENT_TYPE = ['string', 'address', 'address[]', 'uint', 'uint[]', 'uint8', 'uint8[]', 'uint32', 'uint32[]', 'uint128', 'uint128[]', 'uint256', 'uint256[]', 'bytes', 'bytes4', 'bytes32', 'bytes32[]', 'bool']
 export default {
     STATES,
-    COMPILE_INFO
+    COMPILE_INFO,
+    ABI_ARGUMENT_TYPE
 }
