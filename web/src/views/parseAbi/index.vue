@@ -33,7 +33,7 @@
                     </el-col>
                     <el-col :span="17">
                         <span class="font-color-fff text-hidden">value</span>
-                        <el-input v-model="item.argumentValue" validate-event @input="inputArgumentValue"></el-input>
+                        <el-input v-model="item.argumentValue" @input="inputArgumentValue"></el-input>
                         <span></span>
                     </el-col>
                 </el-row>
@@ -60,17 +60,21 @@ import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools";
 import constant from "@/util/constant";
-import { dataType } from "@/util/util";
+import { dataType, unique, unique1 } from "@/util/util";
 // import { validate } from "@/util/validate";
 import contentHead from "@/components/contentHead";
-let web3Abi = require("web3-eth-abi");
+import web3 from "@/util/ethAbi"
+let web3Abi = web3
+import inputFilter from '@/directives/input-filter/index.js'
 export default {
     name: 'parseAbi',
 
     components: {
         contentHead
     },
-
+    directives: {
+        inputFilter
+    },
     props: {
     },
 
@@ -179,18 +183,27 @@ export default {
                 this.initArgument()
             } else {
                 if (val === 'constructor') {
+                    this.functionValue = val
                     this.emptyArgument()
-                    sessionStorage.clear('temporaryArgument')
+                    this.abiJsonContent.forEach(item => {
+                        if (this.functionType == item.type) {
+                            var inputs = item.inputs;
+                            for (let index = 0; index < inputs.length; index++) {
+                                this.argumentList.push(Object.assign({}, { argumentOption: constant.ABI_ARGUMENT_TYPE, }, inputs[index]))
+                            }
+                        }
+                    })
+                    sessionStorage.setItem('temporaryArgument', JSON.stringify(this.argumentList));
                 } else if (val === 'your function') {
                     this.functionValue = ''
                     this.argumentList = []
                     var temporaryArgumentList = JSON.parse(sessionStorage.getItem('temporaryArgument'))
-                    if(temporaryArgumentList){
+                    if (temporaryArgumentList.length) {
                         this.argumentList.push(temporaryArgumentList[0])
-                    }else {
+                    } else {
                         this.initArgument()
                     }
-                    
+
                 } else {
                     this.functionValue = val
                     this.emptyArgument()
@@ -202,7 +215,7 @@ export default {
                             }
                         }
                     })
-                    sessionStorage.setItem('temporaryArgument',JSON.stringify(this.argumentList))
+                    sessionStorage.setItem('temporaryArgument', JSON.stringify(this.argumentList))
                 }
             }
             this.textarea = '';
@@ -218,7 +231,6 @@ export default {
         parseAbi() {
             if (typeof this.abiContent == 'string') {
                 try {
-
                     var obj = JSON.parse(this.abiContent);
                     this.abiJsonContent = obj;
 
@@ -236,7 +248,7 @@ export default {
         extractAbi(obj) {
             var array = []
             obj.forEach(item => {
-                if (item.inputs.length && item.type === 'function') {
+                if (item.inputs.length && (item.type === 'function' || item.type === 'constructor')) {
                     array.push(item)
                 }
             })
@@ -249,9 +261,11 @@ export default {
             this.abiJsonContent.forEach(item => {
                 this.functionList.push(item.name)
             });
+            this.functionList = unique1(this.functionList)
+            this.functionList = this._.compact(this.functionList)
             this.functionType = this.functionList[2] || this.functionList[0]
             this.functionValue = this.functionList[2]
-
+            this.abiJsonContent = unique(this.abiJsonContent, 'name')
             this.abiJsonContent.forEach(item => {
                 if (this.functionType == item.name) {
                     var inputs = item.inputs;
@@ -260,7 +274,7 @@ export default {
                     }
                 }
             })
-            sessionStorage.setItem('temporaryArgument',JSON.stringify(this.argumentList))
+            sessionStorage.setItem('temporaryArgument', JSON.stringify(this.argumentList))
             if (this.functionType === 'constructor') {
 
                 this.parseConstructorAbi()
@@ -296,7 +310,7 @@ export default {
                 inputsVal.push(dataType(item.type, item.argumentValue))
 
             })
-            if(!inputs.length){
+            if (!inputs.length) {
                 this.textarea = '';
                 return
             }
@@ -306,11 +320,19 @@ export default {
                 }
             }
             try {
-                this.textarea = web3Abi.encodeFunctionCall({
-                    name: this.functionValue,
-                    type: this.functionType,
-                    inputs: inputs
-                }, inputsVal)
+                if (localStorage.getItem("encryptionId") == 1) {
+                    this.textarea = web3Abi.smEncodeFunctionCall({
+                        name: this.functionValue,
+                        type: this.functionType,
+                        inputs: inputs
+                    }, inputsVal)
+                } else {
+                    this.textarea = web3Abi.encodeFunctionCall({
+                        name: this.functionValue,
+                        type: this.functionType,
+                        inputs: inputs
+                    }, inputsVal)
+                }
             } catch (error) {
                 this.textarea = error
             }
@@ -322,7 +344,7 @@ export default {
                 inputsVal.push(dataType(item.type, item.argumentValue))
 
             })
-            if(!inputs.length){
+            if (!inputs.length) {
                 this.textarea = '';
                 return
             }
