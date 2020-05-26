@@ -40,7 +40,7 @@
                     <span class="cursor-pointer" @click="groupVisible = !groupVisible">
                         {{groupName}}<i :class="[groupVisible?'el-icon-caret-top':'el-icon-caret-bottom']"></i>
                     </span>
-                    <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-menu slot="dropdown" style="max-height: 220px;overflow-y:auto">
                         <el-dropdown-item v-for=" item in groupList" :key="item.group" :command="item">{{item.groupName}}</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>

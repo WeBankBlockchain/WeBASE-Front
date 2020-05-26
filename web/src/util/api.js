@@ -393,6 +393,18 @@ export function ImportPemPrivateKey(data) {
         data: data,
     })
 }
+//import p12 privateKey 
+export function ImportP12PrivateKey(data) {
+    return post({
+        url: `${HANDLE}privateKey/importP12`,
+        method: 'post',
+        data: data,
+        headers: {
+            'Content-Type': "multipart/form-data"
+        }
+        
+    })
+}
 
 // localKeyStores
 export function queryLocalKeyStores() {
@@ -738,6 +750,64 @@ export function updateImportAbi(data) {
 export function deleteImportAbi(data) {
     return deleted({
         url: `${HANDLE}abi/${data}`,
+        method: 'delete',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+
+///solc/list
+export function solcList() {
+    return get({
+        url: `${HANDLE}solc/list`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+///solc/upload
+export function solcUpload(data) {
+    return post({
+        url: `${HANDLE}solc/upload`,
+        method: 'post',
+        data: data,
+        // responseType: '',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || "",
+            // 'Content-Type': "application/x-www-form-urlencoded"
+        }
+    })
+}
+
+///solc/download
+export function solcDownload(data) {
+    return post({
+        url: `${HANDLE}solc/download`,
+        method: 'post',
+        params: data,
+        headers: {
+            'Content-Type': "application/x-www-form-urlencoded"
+        }
+    })
+}
+//read solc version
+export function readSolcVersion(fielName) {
+    return get({
+        url: `${HANDLE}solcjs/${fielName}`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+//删除solc
+export function deleteSolcId(solcId) {
+    return deleted({
+        url: `${HANDLE}solc/${solcId}`,
         method: 'delete',
         headers: {
             AuthorizationToken: "Token " + localStorage.getItem("token") || ""
