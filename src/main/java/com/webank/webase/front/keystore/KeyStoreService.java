@@ -421,7 +421,8 @@ public class KeyStoreService {
     public RspUserInfo getSignUserEntity(String privateKeyEncoded, String signUserId, String appId) {
         try {
             RspUserInfo rspUserInfo = new RspUserInfo();
-            String url = constants.WEBASE_SIGN_USER_URI.split("\\?")[0];
+            String urlSpilt = constants.WEBASE_SIGN_USER_URI.split("\\?")[0];
+            String url = String.format(urlSpilt, constants.getKeyServer());
             log.info("getSignUserEntity url:{}", url);
             Map<String, Object> params = new HashMap<>();
             params.put("privateKey", privateKeyEncoded);
@@ -435,16 +436,21 @@ public class KeyStoreService {
             log.info("getSignUserEntity response:{}", JSON.toJSONString(baseResponse));
             if (baseResponse.getCode() == 0) {
                 rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+            } else {
+                log.error("getSignUserEntity fail for:{}", baseResponse.getMessage());
+                throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL.getCode(), baseResponse.getMessage());
             }
             return rspUserInfo;
         } catch (ResourceAccessException ex) {
-            log.error("fail restTemplateExchange", ex);
+            log.error("getSignUserEntity fail restTemplateExchange", ex);
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
         } catch (HttpStatusCodeException e) {
             JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-            log.error("http request fail. error:{}", JSON.toJSONString(error));
+            log.error("getSignUserEntity http request fail. error:{}", JSON.toJSONString(error));
             throw new FrontException(error.getInteger("code"),
                     error.getString("errorMessage"));
+        } catch (FrontException e) {
+            throw e;
         } catch (Exception e) {
             log.error("getSignUserEntity exception", e);
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
