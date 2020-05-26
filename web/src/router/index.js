@@ -37,6 +37,8 @@ const transactionCharts = resolve => require(['@/views/transactionCharts/transac
 // const helpDoc = resolve => require(['@/components/helpDoc'], resolve);
 const blockEvent = resolve => require(['@/views/blockEvent'], resolve);
 const contractEvent = resolve => require(['@/views/contractEvent'], resolve);
+const abiList = resolve => require(['@/views/abiList'], resolve);
+const parseAbi = resolve => require(['@/views/parseAbi'], resolve);
 Vue.use(Router);
 const routes = [
     {
@@ -85,7 +87,9 @@ const routes = [
         children: [
             { path: '/contract', component: contract, name: '合约IDE', enName: 'contractIDE', menuShow: true, meta: { requireAuth: false } },
             { path: '/contractList', component: oldContract, name: '合约列表', enName: 'contractList', menuShow: true, meta: { requireAuth: false } },
-            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '测试用户', enName: 'testUserList', menuShow: true, meta: { requireAuth: false } }
+            { path: '/abiList', component: abiList, name: 'Abi列表', enName: "abiList", menuShow: true, meta: { requireAuth: false } },
+            { path: '/parseAbi', component: parseAbi, name: '解析Abi', enName: "parseAbi", menuShow: true, meta: { requireAuth: false } },
+            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '测试用户', enName: 'testUserList', menuShow: true, meta: { requireAuth: false } },
         ]
     },
     {

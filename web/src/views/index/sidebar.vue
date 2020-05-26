@@ -139,6 +139,12 @@ export default {
                             case 'contractList':
                                 it.name = this.$t('route.contractList')
                                 break;
+                            case 'abiList':
+                                it.name = this.$t('route.abiList')
+                                break;
+                            case 'parseAbi':
+                                it.name = this.$t('route.parseAbi')
+                                break;
                             case 'hostMetrics':
                                 it.name = this.$t('route.hostMetrics')
                                 break;
