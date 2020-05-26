@@ -3,7 +3,6 @@ let web3Abi = require("web3-eth-abi");
 var _ = require('underscore');
 
 let ethAbi = web3Abi;
-console.log(utils)
 ethAbi.smEncodeFunctionSignature = function (functionName) {
     if (_.isObject(functionName)) {
         functionName = utils._jsonInterfaceMethodToString(functionName);

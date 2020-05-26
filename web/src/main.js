@@ -57,7 +57,9 @@ Vue.prototype.setCookie = setCookie;
 Vue.prototype.delCookie = delCookie;
 //error code
 Vue.prototype.$chooseLang = chooseLang;
-// require('./mock')
+// lodash
+import _ from 'lodash'
+Vue.prototype._ = _
 /* eslint-disable no-new */
 new Vue({
     el: '#app',

@@ -22,7 +22,7 @@ export default {
         subscribeEvent: 'Subscribe Event',
         blockEvent: 'Block Event',
         contractEvent: 'Contract Event',
-        testUserList: 'Test User List',
+        testUserList: 'Tester List',
         abiList: 'ABI List',
         parseAbi: 'Parse ABI',
     },
@@ -91,7 +91,7 @@ export default {
         createdTime: 'Created Time',
         importPem: "Import Pem Private Key",
         addBlockEvent: "Add Block Event",
-        addContractEvent: "add contract Event",
+        addContractEvent: "Add Contract Event",
         blockEventInfo: "Event Info",
         appId: "App Id",
         exchangeName: "Exchange",
@@ -100,7 +100,9 @@ export default {
         groupId: "Group Id",
         fromBlock: 'From Block',
         toBlock: 'To Block',
-        topicList: 'Topic List'
+        topicList: 'Topic List',
+        fileType: "File Type",
+        fileName: "PrivateKey Name",
     },
     errorLog: {
         tips: 'Please click the bug icon in the upper right corner',
@@ -201,7 +203,8 @@ export default {
         detailsTxn: 'Transactions Details',
         acquisitionSwitch: 'Acquisition switch',
         check: 'check',
-        detele: 'detele'
+        detele: 'detele',
+        uploadSolc: 'Upload different versions of compiler'
     },
     text: {
         noContract: 'Please create a new contract',
@@ -347,7 +350,8 @@ export default {
         addPrivateKeyInfo: "Please add a private key user!",
         updateAbi: "Update",
         deleteAbi: "Delete",
-        operation: "Operate"
+        operation: "Operate",
+        limit_1: "Only one file can be uploaded at a time"
     },
     rule: {
         textLong: "1 to 32 characters in length",
@@ -425,5 +429,44 @@ export default {
         groupStatus: "Status",
         status: "Status",
         groupTimestamp: "Timestamp"
+    },
+    privateKey: {
+        addUser: "Add Users",
+        importRivateKey: "Import Rivate Key",
+        addUserTips: "The account number of the transaction sent in the group needs to be added to the private key management, otherwise it will be judged as an abnormal user.",
+        searchUser: "Please enter user name or public key address",
+        copyPublicKey: "Copy Public Key",
+        privateKey: "Private Key",
+        publicKey: "Public Key",
+        createUser: "Create User",
+        userName: "Name",
+        userId: "ID",
+        description: "Description",
+        userAddress: "Address",
+        userStatus: "Status",
+        inputDescription: "Please enter User Description",
+        updateUserSuccess: "User modified successfully",
+        normal: "Normal",
+        disable: "Disable",
+        privateKeyUser: "Private key user",
+        publicKeyUser: "Public key user",
+        publicKeyInfo: "Public key information",
+        inputUserName: "Please enter User Name",
+        inputPublicInfo: "Please enter public key information or public key address.",
+        userLong: "Within 120 characters",
+        inputPublic: "Please enter public key information",
+        addUserSuccess: "User added successfully!",
+        addUserFail: "Failed to add user!",
+        signUserId: 'Sign User Id',
+        inputFileName: "Please enter privateKey name",
+        inputFileType: "Please enter privateKey type",
+        fileName: "PrivateKey Name",
+        fileType: "File Type",
+        importFile: "Import file",
+        copy: "Copy",
+        password: "Password",
+        placeholderPassword: "Please enter password",
+        passwordError: "Password cannot be Chinese",
+        file: "File"
     },
 }
