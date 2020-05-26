@@ -100,8 +100,9 @@ export default {
         groupId: "所属群组",
         fromBlock: 'event起始区块',
         toBlock: 'event末区块',
-        topicList: '合约event名列表'
-
+        topicList: '合约event名列表',
+        fileType: "文件类型",
+        fileName: "私钥用户名",
     },
     errorLog: {
         tips: '请点击右上角bug小图标',
@@ -198,7 +199,8 @@ export default {
         detailsTxn: '交易内容',
         acquisitionSwitch: '采集数据开关',
         check: '查询',
-        detele: '删除'
+        detele: '删除',
+        uploadSolc: '上传不同版本编译器'
     },
     text: {
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
@@ -344,7 +346,8 @@ export default {
         addPrivateKeyInfo: "请添加私钥用户!",
         updateAbi: "更新",
         deleteAbi: "删除",
-        operation: "操作"
+        operation: "操作",
+        limit_1: "每次最多只能上传一个文件"
     },
     rule: {
         textLong: "长度在 1 到 32 个字符",
@@ -422,5 +425,44 @@ export default {
         groupStatus: "群组状态",
         status: "状态",
         groupTimestamp: "创世块时间戳"
+    },
+    privateKey: {
+        addUser: "新增用户",
+        importRivateKey: "导入私钥",
+        addUserTips: "群组内发送交易的账号都需要在私钥管理里添加，否则会判断为异常用户。",
+        searchUser: "请输入用户名或公钥地址",
+        copyPublicKey: "复制公钥",
+        privateKey: "私钥",
+        publicKey: "公钥",
+        createUser: "新建用户",
+        userName: "用户名称",
+        userId: "用户ID",
+        description: "用户描述",
+        userAddress: "用户公钥地址信息",
+        userStatus: "用户状态",
+        inputDescription: "请输入用户描述",
+        updateUserSuccess: "修改用户成功",
+        normal: "正常",
+        disable: "停用",
+        privateKeyUser: "私钥用户",
+        publicKeyUser: "公钥用户",
+        publicKeyInfo: "公钥信息",
+        inputUserName: "请输入用户名称",
+        inputPublicInfo: "请输入公钥信息或公钥地址",
+        userLong: "120个字符以内",
+        inputPublic: "请输入公钥信息",
+        addUserSuccess: "添加用户成功！",
+        addUserFail: "添加用户失败！",
+        signUserId: 'Sign User Id',
+        inputFileName: "请输入私钥用户名",
+        inputFileType: "请选择文件类型",
+        fileName: "私钥用户名",
+        fileType: "文件类型",
+        importFile: "选择文件",
+        copy: "复制",
+        password: "密码",
+        placeholderPassword: "请输入密码",
+        passwordError: "密码不能是汉字",
+        file: "文件",
     },
 }
