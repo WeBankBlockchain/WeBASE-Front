@@ -238,42 +238,6 @@ public class KeyStoreService {
     }
 
     /**
-     * request (get) user from webase-sign api(v1.3.0+)
-     * @param signUserId unique user id to call webase-sign
-     * @return
-     */
-    public RspUserInfo getSignUserEntity(String signUserId, String appId) {
-        try {
-            // webase-sign api(v1.3.0) support
-            RspUserInfo rspUserInfo = new RspUserInfo();
-            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
-                    EncryptType.encryptType, signUserId, appId);
-            log.info("getSignUserEntity url:{}", url);
-            HttpHeaders headers = CommonUtils.buildHeaders();
-            HttpEntity<String> formEntity =
-                    new HttpEntity<String>(null, headers);
-            ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.GET, formEntity, BaseResponse.class);
-            BaseResponse baseResponse = response.getBody();
-            log.info("getSignUserEntity response:{}", JSON.toJSONString(baseResponse));
-            if (baseResponse.getCode() == 0) {
-                rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
-            }
-            return rspUserInfo;
-        } catch (ResourceAccessException ex) {
-            log.error("fail restTemplateExchange", ex);
-            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
-        } catch (HttpStatusCodeException e) {
-            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-            log.error("http request fail. error:{}", JSON.toJSONString(error));
-            throw new FrontException(error.getInteger("code"),
-                    error.getString("errorMessage"));
-        } catch (Exception e) {
-            log.error("getSignUserEntity exception", e);
-            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-        }
-    }
-
-    /**
      * get signUserId by address
      * @param signUserId
      * @return user address
@@ -410,6 +374,42 @@ public class KeyStoreService {
         return keyStoreInfo;
     }
 
+
+    /**
+     * request (get) user from webase-sign api(v1.3.0+)
+     * @param signUserId unique user id to call webase-sign
+     * @return
+     */
+    public RspUserInfo getSignUserEntity(String signUserId, String appId) {
+        try {
+            // webase-sign api(v1.3.0) support
+            RspUserInfo rspUserInfo = new RspUserInfo();
+            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
+                    EncryptType.encryptType, signUserId, appId);
+            log.info("getSignUserEntity url:{}", url);
+            HttpHeaders headers = CommonUtils.buildHeaders();
+            HttpEntity<String> formEntity =
+                    new HttpEntity<String>(null, headers);
+            ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.GET, formEntity, BaseResponse.class);
+            BaseResponse baseResponse = response.getBody();
+            log.info("getSignUserEntity response:{}", JSON.toJSONString(baseResponse));
+            if (baseResponse.getCode() == 0) {
+                rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+            }
+            return rspUserInfo;
+        } catch (ResourceAccessException ex) {
+            log.error("fail restTemplateExchange", ex);
+            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+        } catch (HttpStatusCodeException e) {
+            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
+            log.error("http request fail. error:{}", JSON.toJSONString(error));
+            throw new FrontException(error.getInteger("code"),
+                    error.getString("errorMessage"));
+        } catch (Exception e) {
+            log.error("getSignUserEntity exception", e);
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+    }
 
     /**
      * request(post) sign to import private key
