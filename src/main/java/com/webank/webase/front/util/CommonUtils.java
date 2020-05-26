@@ -48,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.utils.Numeric;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -272,6 +273,20 @@ public class CommonUtils {
     }
 
     /**
+     * build httpEntity.
+     */
+    public static HttpEntity buildHttpEntity(Object param) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        String paramStr = null;
+        if (Objects.nonNull(param)) {
+            paramStr = JSON.toJSONString(param);
+        }
+        HttpEntity requestEntity = new HttpEntity(paramStr, headers);
+        return requestEntity;
+    }
+
+    /**
      * Object to JavaBean.
      * 
      * @param obj obj
@@ -329,12 +344,20 @@ public class CommonUtils {
     /**
      * 支持数字，字母与下划线"_"
      * 
-     * @param str
+     * @param input
      * @return
      */
-    public static boolean isLetterDigit(String str) {
+    public static boolean isLetterDigit(String input) {
         String regex = "^[a-z0-9A-Z_]+$";
-        return str.matches(regex);
+        return input.matches(regex);
+    }
+
+    /**
+     * 只包含中文
+     */
+    public static boolean notContainsChinese(String input) {
+        String regex = "[^\\u4e00-\\u9fa5]+";
+        return input.matches(regex);
     }
 
     /**

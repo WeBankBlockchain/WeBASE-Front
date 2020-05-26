@@ -68,7 +68,8 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (address.length() != Address.ValidLen) {
+        if (address.length() != Address.ValidLen
+                || org.fisco.bcos.web3j.abi.datatypes.Address.DEFAULT.toString().equals(address)) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         Object obj =  transServiceImpl.transHandleWithSign(reqTransHandle);

@@ -100,16 +100,19 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      */
     public BcosBlock.Block getBlockByNumber(int groupId, BigInteger blockNumber) {
+        if (blockNumberCheck(groupId, blockNumber)) {
+            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
+        }
         BcosBlock.Block block;
         try {
             block = getWeb3j(groupId)
                     .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
                     .send()
                     .getBlock();
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.info("get blocknumber failed" + e.getMessage());
-            log.error("getBlockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
-            block = null;
+            log.error("getBlAockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
         return block;
     }
@@ -321,7 +324,7 @@ public class Web3ApiService {
         try {
             currentNumber = getWeb3j(groupId).getBlockNumber().send().getBlockNumber();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("blockNumberCheck error:{}", e.getMessage());
         }
         log.info("**** currentNumber:{}", currentNumber);
         return (blockNumber.compareTo(currentNumber) > 0);
@@ -708,6 +711,8 @@ public class Web3ApiService {
     private Object startGroup(int groupId) throws IOException {
         GroupOperateStatus status = CommonUtils.object2JavaBean(
                 getWeb3j().startGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        // refresh group list
+        getGroupList();
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             refreshWeb3jMap(groupId);
@@ -721,6 +726,8 @@ public class Web3ApiService {
     private Object stopGroup(int groupId) throws IOException {
         GroupOperateStatus status = CommonUtils.object2JavaBean(
                 getWeb3j().stopGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        // refresh group list
+        getGroupList();
         log.info("stopGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             web3jMap.remove(groupId);
@@ -734,6 +741,7 @@ public class Web3ApiService {
     private Object removeGroup(int groupId) throws IOException {
         GroupOperateStatus status = CommonUtils.object2JavaBean(
                 getWeb3j().removeGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        refreshWeb3jMap(groupId);
         log.info("removeGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -746,6 +754,7 @@ public class Web3ApiService {
     private Object recoverGroup(int groupId) throws IOException {
         GroupOperateStatus status = CommonUtils.object2JavaBean(
                 getWeb3j().recoverGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        refreshWeb3jMap(groupId);
         log.info("recoverGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -856,7 +865,8 @@ public class Web3ApiService {
             log.error("web3j of {} is null, please call /{}/web3/refresh to refresh", groupId, groupId);
             // refresh group list
             getGroupList();
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL.getCode(),
+                    "web3j of " + groupId + " is null");
         }
         return web3j;
     }
