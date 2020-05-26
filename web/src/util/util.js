@@ -219,7 +219,13 @@ export function unique(array, onlyKey) {
     }
     return finalResult;
 }
-
+/**
+* array:[]
+* */
+export function unique1(array) {
+    var tmp = Array.from(new Set(array));
+    return tmp;
+}
 export function isJson(str) {
     if (typeof str == 'string') {
         try {

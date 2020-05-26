@@ -39,6 +39,7 @@ const blockEvent = resolve => require(['@/views/blockEvent'], resolve);
 const contractEvent = resolve => require(['@/views/contractEvent'], resolve);
 const abiList = resolve => require(['@/views/abiList'], resolve);
 const parseAbi = resolve => require(['@/views/parseAbi'], resolve);
+const blank = resolve => require(['@/views/blank'], resolve);
 Vue.use(Router);
 const routes = [
     {
@@ -128,6 +129,19 @@ const routes = [
         children: [
             { path: '/blockEvent', component: blockEvent, name: '出块事件', enName: 'blockEvent', menuShow: true, meta: { requireAuth: false } },
             { path: '/contractEvent', component: contractEvent, name: '合约Event事件', enName: 'contractEvent', menuShow: true, meta: { requireAuth: false } }
+        ]
+    },
+    {
+        path: '/',
+        component: main,
+        name: '订阅事件',
+        enName: 'subscribeEvent',
+        // leaf: true,
+        menuShow: false,
+        iconCls: 'wbs-icon-dingyue sidebar-icon',
+        children: [
+            { path: '/blank', component: blank, name: '出块事件', enName: 'blank', menuShow: true, meta: { requireAuth: false } },
+        
         ]
     },
 ]
