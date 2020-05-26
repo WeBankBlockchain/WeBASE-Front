@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 <template>
-    <div class="contract-content">
+    <div class="contract-content" v-loading="loading">
         <v-content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.contractIDE')" @changeGroup="changeGroup"></v-content-head>
         <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}">
-            <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide"></v-menu>
+            <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide" @uploadLoading="uploadLoading" :solcVersionOptions="solcVersionOptions" :solcVersion="solcVersion"></v-menu>
             <div class="move" @mousedown="dragDetailWeight($event)"></div>
         </div>
         <div :class="[!menuHide ?  'code-detail-wrapper' : 'code-detail-reset-wrapper']" :style="{width: contentWidth}">
@@ -59,7 +59,10 @@ export default {
             changeWidth: false,
             contractHide: false,
             menuWidth: 240,
-            urlQuery: this.$root.$route.query
+            urlQuery: this.$root.$route.query,
+            loading: false,
+            solcVersion: "",
+            solcVersionOptions: []
         };
     },
     computed: {
@@ -81,13 +84,27 @@ export default {
         this.getEncryption(this.initSolc);
     },
     methods: {
-        initSolc() {
+        initSolc(val) {
             var head = document.head;
             var script = document.createElement("script");
             if (localStorage.getItem("encryptionId") == 0) {
+                this.solcVersionOptions = []
                 script.src = "./static/js/soljson-v0.4.25+commit.59dbf8f1.js";
+                this.solcVersion = './static/js/soljson-v0.4.25+commit.59dbf8f1.js'
+                this.solcVersionOptions.push({
+                    value: './static/js/soljson-v0.4.25+commit.59dbf8f1.js',
+                    label: '0.4.25+commit.59dbf8f1',
+                    solcId: ''
+                })
+                // this.$set()
             } else {
+                this.solcVersionOptions = []
                 script.src = "./static/js/soljson-v0.4.25-gm.js";
+                this.solcVersion = './static/js/soljson-v0.4.25-gm.js'
+                this.solcVersionOptions.push({
+                    value: './static/js/soljson-v0.4.25-gm.js',
+                    label: '0.4.25-gm'
+                })
             }
             script.setAttribute('id', 'soljson');
             if (!document.getElementById('soljson')) {
@@ -98,7 +115,7 @@ export default {
             encryption().then(res => {
                 if (res.status == 200) {
                     localStorage.setItem("encryptionId", res.data)
-                    callback();
+                    callback(res.data);
                 } else {
                     this.$message({
                         type: "error",
@@ -175,6 +192,9 @@ export default {
         },
         deploy: function (val) {
             this.$refs.menu.saveContact(val);
+        },
+        uploadLoading(val) {
+            this.loading = val;
         }
     }
 };
