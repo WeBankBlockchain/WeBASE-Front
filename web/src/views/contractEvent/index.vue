@@ -31,14 +31,14 @@
         </el-dialog>
         <el-dialog :title="$t('table.blockEventInfo')" :visible.sync="checkBlockEventVisible" width="850px" v-if="checkBlockEventVisible" center class="send-dialog">
             <el-table :data="eventDetail">
-                <el-table-column property="appId" :label="$t('table.appId')"></el-table-column>
-                <el-table-column property="exchangeName" :label="$t('table.exchangeName')"></el-table-column>
-                <el-table-column property="queueName" :label="$t('table.queueName')"></el-table-column>
-                <el-table-column property="contractAbi" :label="$t('table.contractAbi')"></el-table-column>
-                <el-table-column property="contractAddress" :label="$t('table.contractAddress')"></el-table-column>
-                <el-table-column property="fromBlock" :label="$t('table.fromBlock')"></el-table-column>
-                <el-table-column property="toBlock" :label="$t('table.toBlock')"></el-table-column>
-                <el-table-column property="topicList" :label="$t('table.topicList')"></el-table-column>
+                <el-table-column show-overflow-tooltip property="appId" :label="$t('table.appId')"></el-table-column>
+                <el-table-column show-overflow-tooltip property="exchangeName" :label="$t('table.exchangeName')"></el-table-column>
+                <el-table-column show-overflow-tooltip property="queueName" :label="$t('table.queueName')"></el-table-column>
+                <el-table-column show-overflow-tooltip property="contractAbi" :label="$t('table.contractAbi')"></el-table-column>
+                <el-table-column show-overflow-tooltip property="contractAddress" :label="$t('table.contractAddress')"></el-table-column>
+                <el-table-column show-overflow-tooltip property="fromBlock" :label="$t('table.fromBlock')"></el-table-column>
+                <el-table-column show-overflow-tooltip property="toBlock" :label="$t('table.toBlock')"></el-table-column>
+                <el-table-column show-overflow-tooltip property="topicList" :label="$t('table.topicList')"></el-table-column>
             </el-table>
         </el-dialog>
     </div>
