@@ -691,3 +691,56 @@ export function checkContractEvent(data, list) {
         method: 'get'
     })
 }
+//abi 列表
+export function getAbiList(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}abi/list/${params.str}`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+export function getAbiInfo(abiId) {
+    return get({
+        url: `${HANDLE}abi/${abiId}`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+export function importAbi(data) {
+    return post({
+        url: `${HANDLE}abi`,
+        method: 'post',
+        data: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+//update imported abi
+export function updateImportAbi(data) {
+    return put({
+        url: `${HANDLE}abi`,
+        method: 'put',
+        data: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+export function deleteImportAbi(data) {
+    return deleted({
+        url: `${HANDLE}abi/${data}`,
+        method: 'delete',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
