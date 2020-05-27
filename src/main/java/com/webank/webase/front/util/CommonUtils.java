@@ -353,9 +353,12 @@ public class CommonUtils {
     }
 
     /**
-     * 只包含中文
+     * 不包含中文
      */
     public static boolean notContainsChinese(String input) {
+        if (input.isEmpty()) {
+            return true;
+        }
         String regex = "[^\\u4e00-\\u9fa5]+";
         return input.matches(regex);
     }
