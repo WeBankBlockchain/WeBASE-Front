@@ -12,9 +12,6 @@
             <el-form-item :label="$t('privateKey.password')" prop="password" style="width: 546px;" v-if="keyForm.fileType==='.p12'">
                 <el-input v-model="keyForm.password" type="password" :placeholder="$t('privateKey.placeholderPassword')"></el-input>
             </el-form-item>
-            <el-form-item :label="$t('privateKey.description')" prop="description" style="width: 546px;">
-                <el-input v-model="keyForm.description" :placeholder="$t('privateKey.inputDescription')"></el-input>
-            </el-form-item>
             <el-form-item :label="$t('privateKey.file')" prop="file" style="width: 546px;">
                 <el-upload
                     ref="upload"
@@ -58,7 +55,6 @@ export default {
                 fileName: "",
                 fileType: ".txt",
                 password: "",
-                description: ""
             },
             fileTypeList: [
                 {
@@ -109,11 +105,6 @@ export default {
                     }
                 ],
                 password: [
-                    {
-                        required: true,
-                        message: this.$t('privateKey.placeholderPassword'),
-                        trigger: "blur"
-                    },
                     { validator: checkData, trigger: 'blur' }
                 ]
             };
@@ -142,7 +133,6 @@ export default {
         changeFileType(){
             this.$refs.upload.clearFiles()
             this.keyForm.fileName = '';
-            this.keyForm.description = '';
         },
         submitUploadList(){
             this.$refs.upload.submit()
@@ -182,7 +172,6 @@ export default {
             let reqQuery = {
                 privateKey: fileString,
                 userName: this.keyForm.fileName,
-                description: this.keyForm.description
             };
             queryImportPrivateKey(reqQuery)
                 .then(res => {
@@ -212,7 +201,6 @@ export default {
             let reqQuery = {
                 pemContent: fileContent,
                 userName: this.keyForm.fileName,
-                description: this.keyForm.description
             };
             ImportPemPrivateKey(reqQuery)
                 .then(res => {
@@ -245,7 +233,6 @@ export default {
             form.append('userName', this.keyForm.fileName)
             form.append('p12File', param)
             form.append('p12Password', this.keyForm.password)
-            form.append('description', this.keyForm.description)
             ImportP12PrivateKey(form)
                 .then(res => {
                     const { data, status } = res;
