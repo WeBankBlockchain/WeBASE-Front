@@ -144,7 +144,7 @@ public class KeyStoreController extends BaseController {
     @PostMapping("/importP12")
     public BaseResponse importP12PrivateKey(@RequestParam String userName,
                                             @RequestParam MultipartFile p12File,
-                                            @RequestParam String p12Password) throws IOException {
+                                            @RequestParam(required = false) String p12Password) throws IOException {
         if (!CommonUtils.notContainsChinese(p12Password)) {
             throw new FrontException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
