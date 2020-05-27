@@ -154,7 +154,7 @@ export default {
     watch: {
         solcVersionOptions(val){
             this.versionOptions = val
-            this.querySolcList()
+            // this.querySolcList()
         },
         solcVersion(val) {
             this.version = this.solcVersion
@@ -534,11 +534,12 @@ export default {
                                 if (value.contractPath != "/") {
                                     let item = {
                                         folderName: value.contractPath,
-                                        folderId: new Date().getTime(),
+                                        folderId: new Date().getTime() + `${value.contractPath}`,
                                         folderActive: false,
                                         groupId: localStorage.getItem("groupId"),
                                         modifyTime: value.modifyTime
                                     };
+                                    console.log(item)
                                     this.folderList.push(item);
                                 }
                             });
