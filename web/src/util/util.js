@@ -304,6 +304,14 @@ export function dataType(type, value) {
                 return
             }
             break;
+        case 'address[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
         default:
             return value
             break;
