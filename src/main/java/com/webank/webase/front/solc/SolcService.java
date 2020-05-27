@@ -110,6 +110,7 @@ public class SolcService {
 		SolcInfo solcInfo = new SolcInfo();
 		solcInfo.setSolcName(fileName);
 		solcInfo.setDescription(description);
+		solcInfo.setMd5(md5);
 		solcInfo.setFileSize(Math.toIntExact(fileSize));
 		solcInfo.setCreateTime(LocalDateTime.now());
 		solcRepository.save(solcInfo);
