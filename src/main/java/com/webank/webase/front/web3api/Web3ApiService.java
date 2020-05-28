@@ -527,7 +527,7 @@ public class Web3ApiService {
         });
     }
 
-    private void refreshWeb3jMap(int groupId) {
+    private synchronized void refreshWeb3jMap(int groupId) {
         log.info("refreshWeb3jMap groupId:{}", groupId);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
