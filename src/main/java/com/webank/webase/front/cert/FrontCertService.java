@@ -21,6 +21,7 @@ import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -224,7 +225,7 @@ public class FrontCertService {
      * @param input
      */
     public String formatStr(String input) {
-        if (input.isEmpty()) {
+        if (StringUtils.isBlank(input)) {
             return input;
         }
         return input.substring(0, input.length() - 1);
