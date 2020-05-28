@@ -22,6 +22,7 @@ import com.webank.webase.front.solc.entity.RspDownload;
 import com.webank.webase.front.solc.entity.SolcInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class SolcService {
 		// format filename end with js
 		String fileName = formatFileName(fileNameParam);
 		Long fileSize = solcFileParam.getSize();
-		if (description.isEmpty()) {
+		if (StringUtils.isBlank(description)) {
 			description = solcFileParam.getOriginalFilename();
 		}
 		// check name and md5 not repeat
