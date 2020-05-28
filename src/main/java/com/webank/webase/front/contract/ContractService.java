@@ -194,7 +194,7 @@ public class ContractService {
         } else {
             // check deploy permission
             String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
-            if (!userAddress.isEmpty()) {
+            if (StringUtils.isNotBlank(userAddress)) {
                 checkDeployPermission(req.getGroupId(), userAddress);
             }
             contractAddress = deployWithSign(req);
@@ -225,12 +225,12 @@ public class ContractService {
         Web3j web3j = web3ApiService.getWeb3j(groupId);
 
         if (web3j == null) {
-            new FrontException(GROUPID_NOT_EXIST);
+            throw new FrontException(GROUPID_NOT_EXIST);
         }
 
         // check deploy permission
         String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
-        if (!userAddress.isEmpty()) {
+        if (StringUtils.isNotBlank(userAddress)) {
             checkDeployPermission(req.getGroupId(), userAddress);
         }
 
@@ -395,7 +395,7 @@ public class ContractService {
         generateJavaFile(packageName, abiFile, binFile);
 
         String outputDirectory = "";
-        if (!packageName.isEmpty()) {
+        if (StringUtils.isNotBlank(packageName)) {
             outputDirectory = packageName.replace(".", File.separator);
         }
         if (contractName.length() > 1) {
