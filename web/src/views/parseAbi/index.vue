@@ -33,8 +33,10 @@
                     </el-col>
                     <el-col :span="17">
                         <span class="font-color-fff text-hidden">value</span>
-                        <el-input v-model="item.argumentValue" @input="inputArgumentValue"></el-input>
-                        <span></span>
+                        <el-input v-model="item.argumentValue" @input="inputArgumentValue($event,item.type)"></el-input>
+                        <span v-if="item.msgObj&&!item.msgObj.is" class="font-color-ed5454">
+                            {{item.msgObj.msg}}
+                        </span>
                     </el-col>
                 </el-row>
             </div>
@@ -61,7 +63,7 @@ import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools";
 import constant from "@/util/constant";
 import { dataType, unique, unique1 } from "@/util/util";
-// import { validate } from "@/util/validate";
+import { validate } from "@/util/validate";
 import contentHead from "@/components/contentHead";
 import web3 from "@/util/ethAbi"
 let web3Abi = web3
@@ -179,6 +181,7 @@ export default {
             this.abiContent = this.aceEditor.getSession().getValue();
         },
         changeFunType(val) {
+            this.validateArgumentValue()
             if (!this.abiJsonContent.length) {
                 this.initArgument()
             } else {
@@ -227,6 +230,7 @@ export default {
                     item.argumentValue = ''
                 }
             })
+            this.validateArgumentValue()
         },
         parseAbi() {
             if (typeof this.abiContent == 'string') {
@@ -289,7 +293,17 @@ export default {
                 this.parseNewAbi()
             }
         },
-        inputArgumentValue(val) {
+        validateArgumentValue(){
+            this.argumentList.forEach(item=>{
+                if(item.argumentValue) {
+                    item.msgObj = validate(item.type, item.argumentValue)
+                }else {
+                    item.msgObj = undefined
+                };
+            })
+        },
+        inputArgumentValue(val, type) {
+            this.validateArgumentValue()
             if (val) {
                 if (this.functionType === 'constructor') {
                     this.parseConstructorAbi()

@@ -90,7 +90,7 @@ export default {
                     if (num == 0) {
                         let data = {
                             folderName: this.folderFrom.folderName,
-                            folderId: (new Date()).getTime(),
+                            folderId: (new Date()).getTime() + `${this.folderFrom.folderName}`,
                             folderActive: false,
                             groupId: localStorage.getItem("groupId")
                         }
