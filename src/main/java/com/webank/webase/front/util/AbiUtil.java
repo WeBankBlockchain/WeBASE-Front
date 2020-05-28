@@ -148,8 +148,7 @@ public class AbiUtil {
             Object input = null;
             if (funcInputTypes.get(i).indexOf("[") != -1
                     && funcInputTypes.get(i).indexOf("]") != -1) {
-                List<Object> arrList =
-                        new ArrayList<>(Arrays.asList(params.get(i).toString().split(",")));
+                List<Object> arrList = (List<Object>) params.get(i);
                 List<Type> arrParams = new ArrayList<>();
                 for (int j = 0; j < arrList.size(); j++) {
                     inputType = AbiTypes.getType(
