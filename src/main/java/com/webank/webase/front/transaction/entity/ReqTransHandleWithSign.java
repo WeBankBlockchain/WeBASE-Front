@@ -32,10 +32,14 @@ public class ReqTransHandleWithSign {
     private int groupId = 1;
     @NotNull(message = ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY_STRING)
     private String signUserId;
+    /**
+     * used in saving abi file
+     */
     private String contractName;
     private String version;
     private String contractAddress;
     private String contractPath;
+
     @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
     private String funcName;
     private List<Object> contractAbi = new ArrayList<>();
