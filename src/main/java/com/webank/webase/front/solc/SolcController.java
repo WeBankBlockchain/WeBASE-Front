@@ -25,6 +25,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -56,7 +57,7 @@ public class SolcController {
 	public BaseResponse upload(@RequestParam("fileName") String fileName,
 							   @RequestParam("solcFile") MultipartFile solcFile,
 							   @RequestParam(value = "description", required = false, defaultValue = "") String description) throws IOException {
-		if (fileName.isEmpty()) {
+		if (StringUtils.isBlank(fileName)) {
 			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
 		}
 		if (solcFile.getSize() == 0L) {
@@ -97,7 +98,7 @@ public class SolcController {
 			dataType = "String")
 	@PostMapping("/download")
 	public ResponseEntity<InputStreamResource> downloadSolcFile(@RequestParam("fileName") String fileName) {
-		if (fileName.isEmpty()) {
+		if (StringUtils.isBlank(fileName)) {
 			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
 		}
 		log.info("downloadSolcFile start. fileName:{}", fileName);
