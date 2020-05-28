@@ -141,7 +141,6 @@
         <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' ref="editor" :input='editorInput' :editorOutput="editorOutput"></v-editor>
         <el-dialog :title="$t('title.writeJavaName')" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
             <el-input v-model="javaClassName" :placeholder="$t('placeholder.javaPackage')"></el-input>
-            <!-- <i style="color: #606266"></i> -->
             <span class="font-12 font-color-ed5454" style="margin-left: 5px;">{{$t('dialog.exportJavaNote')}}</span>
             <div slot="footer" class="text-right send-btn">
                 <el-button @click="closeJavaClass">{{$t('dialog.cancel')}}</el-button>
@@ -280,7 +279,16 @@ export default {
         
     },
     beforeMount() {
-        
+        // var head = document.head;
+        // var solcVersion = sessionStorage.getItem('solcVersion')
+        // if (document.getElementById('soljson')) {
+        //     document.getElementById('soljson').remove()
+        //     var script = document.createElement("script");
+        //     script.type = "text/javascript"
+        //     script.src = solcVersion;
+        //     script.setAttribute('id', 'soljson');
+        //     head.append(script)
+        // }
     },
     mounted: function () {
         this.initEditor();
@@ -310,19 +318,6 @@ export default {
             this.version = data.version;
             this.complieAbiTextHeight = false;
             this.complieBinTextHeight = false;
-            // this.$refs['showAbiText'].style.overflow = 'hidden'
-            // this.$refs['showBinText'].style.overflow = 'hidden'
-            // if (data.contractAbi) {
-            //     this.$nextTick(() => {
-            //         if (this.$refs['showAbiText'].offsetHeight >= 72) {
-            //             this.complieAbiTextHeight = true
-            //         }
-            //         if (this.$refs['showBinText'].offsetHeight >= 72) {
-            //             this.complieBinTextHeight = true
-            //         }
-
-            //     })
-            // }
             this.$nextTick(() => {
                 if (this.contractName === 'Asset'&&data.contractPath==="template" || this.contractName === 'Evidence'&&data.contractPath==="template" || this.contractName === 'EvidenceFactory'&&data.contractPath==="template") {
                     this.aceEditor.setReadOnly(true);

@@ -59,7 +59,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -175,17 +174,9 @@ public class ContractController extends BaseController {
         return ResponseEntity.ok().build();
     }
 
-
-    @GetMapping("/cns")
-    public String getAddressByContractNameAndVersion(@RequestParam int groupId,
-            @RequestParam String name, @RequestParam String version) {
-        log.info("cns start. groupId:{} name:{} version:{}", groupId, name, version);
-        return contractService.getAddressByContractNameAndVersion(groupId, name, version);
-    }
-
-    public HttpHeaders headers(String fileName) {
+    private HttpHeaders headers(String fileName) {
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
         httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment;filename*=UTF-8''" + encode(fileName));
         return httpHeaders;

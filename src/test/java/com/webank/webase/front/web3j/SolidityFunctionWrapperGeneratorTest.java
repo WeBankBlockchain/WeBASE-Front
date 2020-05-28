@@ -15,7 +15,10 @@
  */
 package com.webank.webase.front.web3j;
 
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.*;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +27,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
 import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
-import org.fisco.bcos.web3j.solidity.compiler.CompilationResult;
-import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler;
+import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.solc.compiler.CompilationResult;
+import org.fisco.solc.compiler.SolidityCompiler;
 import org.junit.Test;
 
 public class SolidityFunctionWrapperGeneratorTest {
@@ -61,14 +65,16 @@ public class SolidityFunctionWrapperGeneratorTest {
   public void compileSolFilesToJavaTest() throws IOException {
     File solFileList = new File("src/test/resources/contract");
     File[] solFiles = solFileList.listFiles();
-
+    // whether use guomi to compile
+    boolean useSM2 = true;
+    boolean useSM2False = false;
     for (File solFile : solFiles) {
 
       SolidityCompiler.Result res =
-          SolidityCompiler.compile(solFile, true, ABI, BIN, INTERFACE, METADATA);
-      System.out.println("Out: '" + res.output + "'");
-      System.out.println("Err: '" + res.errors + "'");
-      CompilationResult result = CompilationResult.parse(res.output);
+          SolidityCompiler.compile(solFile, useSM2, true, ABI, BIN, INTERFACE, METADATA);
+      System.out.println("Out: '" + res.getOutput() + "'");
+      System.out.println("Err: '" + res.getErrors() + "'");
+      CompilationResult result = CompilationResult.parse(res.getOutput());
       System.out.println("contractname  " + solFile.getName());
       Path source = Paths.get(solFile.getPath());
       String contractname = solFile.getName().split("\\.")[0];
