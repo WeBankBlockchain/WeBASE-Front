@@ -355,7 +355,7 @@ export function nodesHostInfo(data, list) {
 export function nodesHealth(data, list) {
     const params = reviseParam(data, list);
     return get({
-        url: `${HANDLE}chain/${params.str}`,
+        url: `${HANDLE}chain${params.str}`,
         method: 'get',
         params: params.querys
     })
