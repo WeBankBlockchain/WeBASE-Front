@@ -17,6 +17,11 @@ package com.webank.webase.front.base.exception;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.webank.webase.front.base.code.RetCode;
+import com.webank.webase.front.util.ErrorCodeHandleUtils;
+import org.fisco.bcos.web3j.protocol.exceptions.MessageDecodingException;
+import org.fisco.bcos.web3j.protocol.exceptions.MessageEncodingException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -48,19 +53,12 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = FrontException.class)
     public ResponseEntity myExceptionHandler(FrontException frontException) throws Exception {
-        //  log.warn("catch business exception", frontException);
-//        RetCode retCode = Optional.ofNullable(frontException).map(FrontException::getRetCode)
-//                .orElse(new RetCode(101001, frontException.getMessage()));
-//
-//        BaseResponse rep = new BaseResponse(retCode);
-
-        log.warn("catch frontException: {}",  frontException.getMessage());
+        log.error("catch frontException: {}",  frontException.getMessage());
         Map<String, Object> map = new HashMap<>();
-        //  map.put("exception", frontException);
+        map.put("data", frontException.getDetail());
         map.put("errorMessage", frontException.getMessage());
         map.put("code", frontException.getRetCode().getCode());
         return ResponseEntity.status(422).body(map);
-
     }
 
     /**
@@ -95,7 +93,7 @@ public class ExceptionsHandler {
 
 
     /**
-     * exceptionHandler.
+     * all non-catch exception Handler.
      *
      * @param exc e
      */
@@ -103,10 +101,19 @@ public class ExceptionsHandler {
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity exceptionHandler(Exception exc) {
         log.info("catch  exception: ", exc);
+        RetCode errorDetail = chainErrorHandle(exc.getMessage());
         Map<String, Object> map = new HashMap<>();
-        //  map.put("exception", frontException);
-        map.put("errorMessage", exc.getMessage());
-        map.put("code", 500);
+        map.put("errorMessage", errorDetail.getMessage());
+        map.put("code", errorDetail.getCode());
         return ResponseEntity.status(500).body(map);
+    }
+
+    private RetCode chainErrorHandle(String errorMessage) {
+        RetCode response = ErrorCodeHandleUtils.handleErrorMsg(errorMessage);
+        if (response == null) {
+            return new RetCode(500, errorMessage);
+        } else {
+            return response;
+        }
     }
 }

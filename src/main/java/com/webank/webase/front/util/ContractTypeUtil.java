@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.abi.datatypes.Bool;
@@ -156,9 +157,9 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return (T) encodeBytes(input, (Class<Bytes>) type);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return (T) new DynamicBytes(input.getBytes());
+                return (T) new DynamicBytes(Numeric.hexStringToByteArray(input));
             } else {
-                throw new FrontException(201201,
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
                         String.format("type:%s unsupported encoding", type.getName()));
             }
         } catch (FrontException e) {
@@ -189,9 +190,9 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return decodeBytes((Bytes) result);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return decodeBytes((byte[]) result.getValue());
+                return "0x" + Hex.encodeHexString((byte[]) result.getValue());
             } else {
-                throw new FrontException(201202,
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR.getCode(),
                         String.format("type:%s unsupported decoding", type.getName()));
             }
         } catch (FrontException e) {
@@ -210,7 +211,7 @@ public class ContractTypeUtil {
         } catch (NoSuchMethodException | SecurityException | InstantiationException
                 | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             log.error("encodeNumeric failed.");
-            throw new FrontException(201203,
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_PARAM_ERROR.getCode(),
                     String.format("unable to create instance of type:%s", type.getName()));
         }
     }
@@ -222,7 +223,7 @@ public class ContractTypeUtil {
         } catch (NoSuchMethodException | SecurityException | InstantiationException
                 | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             log.error("encodeBytes failed.", e);
-            throw new FrontException(201203,
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_PARAM_ERROR.getCode(),
                     String.format("unable to create instance of type:%s", type.getName()));
         }
     }
@@ -243,7 +244,7 @@ public class ContractTypeUtil {
             }
         } catch (UnsupportedEncodingException e) {
             log.error("decodeBytes failed.");
-            throw new FrontException(201202,
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR.getCode(),
                     String.format("type:byte%s unsupported decoding", data.length));
         }
     }
@@ -488,7 +489,7 @@ public class ContractTypeUtil {
             case "bytes32":
                 return new TypeReference<DynamicArray<Bytes32>>() {};
             default:
-                throw new FrontException(201201,
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
                         String.format("type:%s array unsupported encoding", type));
         }
 
@@ -611,7 +612,7 @@ public class ContractTypeUtil {
                 case "bytes":
                     return value;
                 default:
-                    throw new FrontException(201201,
+                    throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
                             String.format("type:%s unsupported encoding", type));
             }
         } catch (Exception e) {
