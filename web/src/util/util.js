@@ -20,7 +20,7 @@ let changeDate = function (date) {
     let D = newData.getDate() > 9 ? newData.getDate() : "0" + newData.getDate();
     return Y + "-" + M + "-" + D
 };
-
+var _ = require('lodash');
 export function date(date) {
     let newData = new Date(date.getTime());
     let Y = newData.getFullYear();
@@ -304,15 +304,15 @@ export function dataType(type, value) {
                 return
             }
             break;
-        case 'address[]':
-            try {
-                return JSON.parse(value)
-            } catch (error) {
-                console.log('error：' + value + '!!!' + error);
-                return
-            }
-            break;
-        default:
+        // case 'address[]':
+        //     try {
+        //         return JSON.parse(value)
+        //     } catch (error) {
+        //         console.log('error：' + value + '!!!' + error);
+        //         return
+        //     }
+        //     break;
+        // default:
             return value
             break;
     }
