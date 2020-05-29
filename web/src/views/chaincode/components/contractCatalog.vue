@@ -539,7 +539,6 @@ export default {
                                         groupId: localStorage.getItem("groupId"),
                                         modifyTime: value.modifyTime
                                     };
-                                    console.log(item)
                                     this.folderList.push(item);
                                 }
                             });
