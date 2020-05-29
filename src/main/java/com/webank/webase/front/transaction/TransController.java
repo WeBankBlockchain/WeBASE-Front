@@ -20,6 +20,7 @@ import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
+import com.webank.webase.front.util.Address;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 import java.time.Instant;
 
+import static com.webank.webase.front.base.code.ConstantCode.PARAM_ADDRESS_IS_INVALID;
 import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
 
 /**
@@ -62,10 +64,14 @@ public class TransController extends BaseController {
         log.info("transHandle start startTime:{}", startTime.toEpochMilli());
 
         checkParamResult(result);
-        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(reqTransHandle.getContractAddress())) {
+        String address = reqTransHandle.getContractAddress();
+        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-
+        if (address.length() != Address.ValidLen
+                || org.fisco.bcos.web3j.abi.datatypes.Address.DEFAULT.toString().equals(address)) {
+            throw new FrontException(PARAM_ADDRESS_IS_INVALID);
+        }
         Object obj =  transServiceImpl.transHandleWithSign(reqTransHandle);
         log.info("transHandle end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
@@ -82,10 +88,13 @@ public class TransController extends BaseController {
         log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
 
         checkParamResult(result);
-        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(reqTransHandle.getContractAddress())) {
+        String address = reqTransHandle.getContractAddress();
+        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-
+        if (address.length() != Address.ValidLen) {
+            throw new FrontException(PARAM_ADDRESS_IS_INVALID);
+        }
         Object obj =  transServiceImpl.transHandleLocal(reqTransHandle);
         log.info("transHandleLocal end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());

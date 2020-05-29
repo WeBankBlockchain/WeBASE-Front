@@ -102,7 +102,10 @@ public class RabbitMQUtils {
         addresses.add(contractAddress);
         params.setAddresses(addresses);
         List<Object> topics = new ArrayList<>();
-        topicList.forEach(t -> topics.add(TopicTools.stringToTopic((String)t)));
+        // put multiple event in topics[0]
+        List<String> topicSigList = new ArrayList<>();
+        topicList.forEach(t -> topicSigList.add(TopicTools.stringToTopic(t)));
+        topics.add(topicSigList);
         params.setTopics(topics);
 
         return params;

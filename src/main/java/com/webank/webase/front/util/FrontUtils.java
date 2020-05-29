@@ -116,13 +116,13 @@ public class FrontUtils {
     /**
      * create file if not exist.
      */
-    public static void createFileIfNotExist(File targetFile, boolean deketeOld) throws IOException {
+    public static void createFileIfNotExist(File targetFile, boolean deleteOld) throws IOException {
         Objects.requireNonNull(targetFile, "fail create file. targetFile is null");
         File parentFile = targetFile.getParentFile();
         if (!parentFile.exists()) {
             parentFile.mkdirs();
         }
-        if (deketeOld) {
+        if (deleteOld) {
             targetFile.deleteOnExit();
         }
 
@@ -144,18 +144,19 @@ public class FrontUtils {
         if(list == null) {
             return null;
         }
-        return String.join(",", list);
+        return JSON.toJSONString(list);
     }
 
     /**
      * list of String recover from String
-     * @param str
      * @return
      */
-    public static List<String> string2ListStr(String str) {
-        if(str == null) {
+    public static List<String> string2ListStr(String input) {
+        if(input == null) {
             return null;
         }
-        return Arrays.asList(str.split(","));
+        return JSON.parseArray(input, String.class);
     }
+
+
 }
