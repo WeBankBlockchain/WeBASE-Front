@@ -79,7 +79,7 @@ export default {
                 endDate: `${format(new Date().getTime(), 'yyyy-MM-dd')}T${format(new Date().getTime(), 'HH:mm:ss')}`,
                 contrastBeginDate: "",
                 contrastEndDate: "",
-                group: localStorage.getItem('groupId') || null
+                groupId: localStorage.getItem('groupId') || null
             },
             nodesReloadNum: 1,
             nodesHealthData: [],
@@ -94,15 +94,15 @@ export default {
             this.changeGroup(data)
         })
         Bus.$on("chooselanguage", data => {
-            this.changeGroup(this.chartParam.group)
+            this.changeGroup(this.chartParam.groupId)
         })
-        if (this.chartParam.group) {
+        if (this.chartParam.groupId) {
             this.getHealthData();
         }
     },
     methods: {
         changeGroup(val) {
-            this.chartParam.group = val
+            this.chartParam.groupId = val
             this.getHealthData();
         },
         changeCurrentDate($event) {
@@ -196,7 +196,7 @@ export default {
             this.chartParam.contrastBeginDate = this.contrastBeginDate;
             this.chartParam.contrastEndDate = this.contrastEndDate;
             this.chartParam.gap = this.timeGranularity;
-            this.chartParam.group = localStorage.getItem('groupName') ? localStorage.getItem('groupName') : '1';
+            this.chartParam.groupId = localStorage.getItem('groupName') ? localStorage.getItem('groupName') : '1';
         }
     }
 };
