@@ -88,6 +88,7 @@
 </template>
 <script>
 import { sendTransation, queryLocalKeyStores } from "@/util/api";
+import { isJson } from "@/util/util"
 export default {
     name: "sendTransation",
     props: ["data", "dialogClose", "abi", 'version', 'sendErrorMessage'],
@@ -217,7 +218,15 @@ export default {
             if (this.transation.funcValue.length) {
                 for (let i = 0; i < this.transation.funcValue.length; i++) {
                     let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
-                    this.transation.funcValue[i] = data;
+                    if(data && isJson(data)){
+                        try {
+                            this.transation.funcValue[i] = JSON.parse(data)
+                        } catch (error) {
+                            console.log(error)
+                        }
+                    }else {
+                        this.transation.funcValue[i] = data;
+                    }
                 }
             }
             let functionName = "";

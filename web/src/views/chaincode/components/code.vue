@@ -278,16 +278,7 @@ export default {
 
     },
     beforeMount() {
-        // var head = document.head;
-        // var solcVersion = sessionStorage.getItem('solcVersion')
-        // if (document.getElementById('soljson')) {
-        //     document.getElementById('soljson').remove()
-        //     var script = document.createElement("script");
-        //     script.type = "text/javascript"
-        //     script.src = solcVersion;
-        //     script.setAttribute('id', 'soljson');
-        //     head.append(script)
-        // }
+        
     },
     mounted: function () {
         this.initEditor();
@@ -642,12 +633,6 @@ export default {
             } else {
                 this.$message.error(`${this.$t('text.compilationFailed')}`);
             }
-            // let data = Base64.encode(this.content);
-            // if (this.data.contractSource != data && this.abiFile) {
-            //     this.compile(this.deploy)
-            // } else {
-            //     this.deploy()
-            // }
 
         },
         deploy: function () {
