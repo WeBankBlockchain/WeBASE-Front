@@ -84,7 +84,6 @@ public class ConstantCode {
     public static final RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
     public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3j instance of groupId is null, please try again");
     public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "groupList error for no group");
-    public static final RetCode SYSTEM_ERROR_CNSSERVICE_NULL = RetCode.mark(101005, "cnsServiceMap of groupId is null, please try again");
 
     /* precompiled success */
     public static final RetCode RET_SUCCESS = RetCode.mark(0, "success");
@@ -104,7 +103,7 @@ public class ConstantCode {
     public static final String PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY = "{\"code\":201111,\"message\":\"Permission state cannot be all empty\"}";
     public static final String PARAM_FAIL_CONTRACT_ADDRESS_EMPTY = "{\"code\":201112,\"message\":\"contract address cannot be empty\"}";
     public static final String PARAM_FAIL_CONTRACT_HANDLE_TYPE_EMPTY = "{\"code\":201113,\"message\":\"contract handle type cannot be empty\"}";
-    public static final RetCode PARAM_FAIL_GRANT_ADDRESS_EMPTY = RetCode.mark(201114, "grantAddress cannot be empty");
+    public static final RetCode PARAM_FAIL_GRANT_ADDRESS_EMPTY = RetCode.mark(201114, "grant Address cannot be empty");
     public static final RetCode INVALID_CONTRACT_HANDLE_TYPE = RetCode.mark(201115, "invalid contract handle type");
     public static final RetCode FAIL_CONTRACT_HANDLE = RetCode.mark(201116, "contract status handle fail");
 
@@ -137,13 +136,10 @@ public class ConstantCode {
     // permission
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied, please check chain administrator permission");
     // sys config
-    public static final RetCode SYSTEM_CONFIG_EXIST = RetCode.mark(201206, "create system config in db fail for already exist");
-    public static final RetCode INVALID_SYSTEM_CONFIG_KEY = RetCode.mark(201207, "system config key is invalid");
     public static final RetCode UNSUPPORTED_SYSTEM_CONFIG_KEY = RetCode.mark(201208, "unsupported for this system config key");
     public static final RetCode FAIL_SET_SYSTEM_CONFIG_TOO_SMALL =  RetCode.mark(201209,
             "provide value by positive integer mode, from 100000 to 2147483647");
     public static final RetCode FAIL_SET_SYSTEM_CONFIG = RetCode.mark(201210, "set system config value fail for params error or permission denied ");
-    public static final RetCode FAIL_QUERY_SYSTEM_CONFIG = RetCode.mark(201211, "query system config value list fail");
     // consensus (node manager)
     public static final RetCode INVALID_NODE_ID = RetCode.mark(201216,"node id is invalid");
     public static final RetCode INVALID_NODE_TYPE = RetCode.mark(201217,"invalid node type: sealer, observer, remove ");
@@ -152,7 +148,6 @@ public class ConstantCode {
     public static final RetCode INVALID_VERSION = RetCode.mark(201221,"Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ");
     public static final RetCode INVALID_VERSION_EXCEED_LENGTH = RetCode.mark(201222,"version of contract is out of length");
     // crud
-    public static int CODE_CRUD_SQL_ERROR = -51503;
     public static final RetCode PARAM_FAIL_SQL_ERROR = RetCode.mark(201226, "sql syntax error");
     public static final RetCode SQL_ERROR = RetCode.mark(201227, "crud sql fail");
     public static final RetCode FAIL_TABLE_NOT_EXISTS = RetCode.mark(201228, "table not exists");
@@ -161,7 +156,7 @@ public class ConstantCode {
     // cert PEM_FORMAT_ERROR
     public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
     public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
-    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201234, "Pem file content error");
+    public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201233, "Pem file content error");
     public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201235, "p12's password cannot be chinese");
     public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(201236, "p12's password not match");
     public static final RetCode P12_FILE_ERROR = RetCode.mark(201237, "P12 file content error");
