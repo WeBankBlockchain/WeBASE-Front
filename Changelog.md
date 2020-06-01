@@ -6,6 +6,7 @@
 - 支持导入.p12格式私钥
 - 新增导入私钥到webase-sign接口
 - 新增BSN分支中合约状态管理接口
+- 引入fisco-solcJ jar包，支持自动切换国密后台编译
 
 **Fix**
 - 修复链上事件通知-订阅合约event中同时订阅多个event和单个event有多个参数的bug
