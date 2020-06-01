@@ -12,10 +12,7 @@
 - 修复web页面中节点监控的入参bug
 
 **兼容性**
-- 支持FISCO-BCOS v2.0.0-rc1 版本
-- 支持FISCO-BCOS v2.0.0-rc2 版本
-- 支持FISCO-BCOS v2.0.0-rc3 版本
-- 支持FISCO-BCOS v2.0.0 及以上版本
+- 支持FISCO-BCOS v2.2.0 及以上版本
 - WeBASE-Web v1.3.0+
 - WeBASE-Node-Manager v1.3.0+
 - WeBASE-Sign v1.3.0+
