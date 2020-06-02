@@ -323,7 +323,7 @@ export default {
         folderSameFail: "The new folder has the same name as the existing folder",
         user: "User",
         params: "Params",
-        paramsInfo: 'If the parameter contains double quotes, escape, for example: AAA \ "BBB. If the parameter type is an array, enter it in the following format, separated by commas. Non numeric and Boolean values must use double quotation marks, for example: ["AAA", "BBB"] and [100101].',
+        paramsInfo: 'If the parameter contains double quotes, escape, for example: AAA\\"BBB. If the parameter type is an array, enter it in the following format, separated by commas. Non numeric and Boolean values must use double quotation marks, for example: ["AAA", "BBB"] and [100101].',
         contractAddress: "Address",
         method: "Method",
         contractAddressInput: "Please enter the contract address",
