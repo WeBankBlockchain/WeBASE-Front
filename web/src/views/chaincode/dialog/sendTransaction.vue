@@ -197,6 +197,7 @@ export default {
             }
         },
         changeFunc: function () {
+            this.transation.funcValue = [];
             this.constant = false;
             this.funcList.forEach(value => {
                 if (value.funcId === this.transation.funcName) {
