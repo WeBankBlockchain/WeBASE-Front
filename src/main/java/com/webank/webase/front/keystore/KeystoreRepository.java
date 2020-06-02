@@ -25,6 +25,8 @@ public interface KeystoreRepository extends CrudRepository<KeyStoreInfo, String>
 
     KeyStoreInfo findByAddress(String address);
 
+    KeyStoreInfo findBySignUserId(String signUserId);
+
     KeyStoreInfo findByUserName(String userName);
 
     KeyStoreInfo findByUserNameAndType(String userName, int type);
