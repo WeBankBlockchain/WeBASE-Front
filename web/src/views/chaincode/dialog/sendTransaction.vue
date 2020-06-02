@@ -74,7 +74,7 @@
                             </el-input>
                         </li>
                         <p class="font-color-ed5454" style="padding-top: 4px;">
-                            <i class="el-icon-info" style="padding-right: 4px;"></i>{{$t('text.deployParameVec')}}
+                            <i class="el-icon-info" style="padding-right: 4px;"></i>{{$t('contracts.paramsInfo')}}
                         </p>
                     </ul>
                 </td>
