@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
+import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
@@ -629,7 +630,7 @@ public class ContractService {
 
         try {
             // whether use guomi to compile
-            boolean useSM2 = Boolean.parseBoolean(String.valueOf(EncryptType.encryptType));
+            boolean useSM2 = EncryptType.encryptType == GMStatus.GUOMI.getValue();
             // decode
             byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
             String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
@@ -683,7 +684,7 @@ public class ContractService {
             throw new FrontException(ConstantCode.NO_SOL_FILES);
         }
         // whether use guomi to compile
-        boolean useSM2 = Boolean.parseBoolean(String.valueOf(EncryptType.encryptType));
+        boolean useSM2 = EncryptType.encryptType == GMStatus.GUOMI.getValue();
 
         List<RspMultiContractCompile> compileInfos = new ArrayList<>();
         for (File solFile : solFiles) {
