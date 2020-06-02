@@ -125,7 +125,7 @@ public class TransController extends BaseController {
 
     @ApiOperation(value = "send query transaction ")
     @ApiImplicitParam(name = "reqQueryTransHandle", value = "transaction info", required = true, dataType = "ReqQueryTransHandle")
-    @PostMapping("/signed-transaction")
+    @PostMapping("/query-transaction")
     public Object sendQueryTransaction(@Valid @RequestBody ReqQueryTransHandle reqQueryTransHandle, BindingResult result)   {
         log.info("transHandleLocal start. ReqQueryTransHandle:[{}]", JSON.toJSONString(reqQueryTransHandle));
 
