@@ -15,6 +15,7 @@ package com.webank.webase.front.transaction;
 
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
@@ -54,14 +55,11 @@ import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
+import org.fisco.bcos.web3j.abi.Utils;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
-import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
-import org.fisco.bcos.web3j.crypto.RawTransaction;
+import org.fisco.bcos.web3j.crypto.*;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.crypto.TransactionEncoder;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterName;
@@ -74,11 +72,14 @@ import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
+import org.fisco.bcos.web3j.tx.txdecode.ConstantProperties;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
+import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
+import static com.webank.webase.front.base.code.ConstantCode.TRANSACTION_FAILED;
 
 /**
  * TransService. handle transactions of deploy/call contract
@@ -416,7 +417,7 @@ public class TransService {
                 AbiUtil.getAbiDefinition(funcName, JSON.toJSONString(contractAbi));
         if (Objects.isNull(abiDefinition)) {
             log.warn("transaction fail. func:{} is not existed", funcName);
-            throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
+            throw new FrontException(IN_FUNCTION_ERROR);
         }
 
         // input format
@@ -536,6 +537,74 @@ public class TransService {
         return result;
     }
 
+
+    public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, int groupId)  {
+
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
+        if (sync) {
+            final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+            TransactionReceipt receipt;
+            try {
+                sendMessage(web3j, signedStr, transFuture);
+                receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+            } catch (Exception e ) {
+                throw new FrontException(TRANSACTION_FAILED.getMessage() +e.getMessage());
+            }
+             return receipt;
+        } else {
+            TransactionReceipt transactionReceipt = new TransactionReceipt();
+            web3j.sendRawTransaction(signedStr).sendAsync();
+            transactionReceipt.setTransactionHash(Hash.sha3(signedStr));
+            return transactionReceipt;
+        }
+    }
+
+
+
+    public Object sendQueryTransaction(String encodeStr, String contractAddress, String funcName, String contractAbi, int groupId, String userAddress) {
+
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
+        String callOutput ;
+        try {
+           callOutput = web3j.call(Transaction.createEthCallTransaction(userAddress, contractAddress, encodeStr), DefaultBlockParameterName.LATEST)
+                    .send().getValue().getOutput();
+        } catch (IOException e) {
+            throw new FrontException(TRANSACTION_FAILED);
+        }
+
+        AbiDefinition abiDefinition = getFunctionAbiDefinition(funcName, contractAbi);
+        if (Objects.isNull(abiDefinition)) {
+            throw new FrontException(IN_FUNCTION_ERROR);
+        }
+        List<String> funOutputTypes = AbiUtil.getFuncOutputType(abiDefinition);
+        List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
+
+        List<Type> typeList = FunctionReturnDecoder.decode(callOutput, Utils.convert(finalOutputs));
+        Object response;
+        if (typeList.size() > 0) {
+            response = AbiUtil.callResultParse(funOutputTypes, typeList);
+        } else {
+            response = typeList;
+        }
+        return response;
+    }
+
+    public static AbiDefinition getFunctionAbiDefinition(String functionName, String contractAbi) {
+        if(functionName == null) {
+            throw new FrontException(IN_FUNCTION_ERROR);
+        }
+        JSONArray abiArr = JSONArray.parseArray(contractAbi);
+        AbiDefinition result = null;
+        for (Object object : abiArr) {
+            AbiDefinition abiDefinition = JSON.parseObject(object.toString(), AbiDefinition.class);
+            if (ConstantProperties.TYPE_FUNCTION.equals(abiDefinition.getType())
+                    && functionName.equals(abiDefinition.getName())) {
+                result = abiDefinition;
+                break;
+            }
+        }
+        return result;
+    }
     /**
      * get Credentials by keyUser locally
      */
