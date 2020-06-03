@@ -24,7 +24,7 @@ export default {
         contractEvent: '合约事件',
         testUserList: '测试用户',
         abiList: 'ABI列表',
-        parseAbi: 'ABI解析',
+        parseAbi: 'ABI编码',
     },
     navbar: {
         dashboard: '首页',
