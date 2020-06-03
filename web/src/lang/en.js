@@ -24,7 +24,7 @@ export default {
         contractEvent: 'Contract Event',
         testUserList: 'Tester List',
         abiList: 'ABI List',
-        parseAbi: 'Parse ABI',
+        parseAbi: 'ABI Encode',
     },
     navbar: {
         dashboard: 'Dashboard',
