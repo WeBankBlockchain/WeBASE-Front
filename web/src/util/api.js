@@ -355,7 +355,7 @@ export function nodesHostInfo(data, list) {
 export function nodesHealth(data, list) {
     const params = reviseParam(data, list);
     return get({
-        url: `${HANDLE}chain/${params.str}`,
+        url: `${HANDLE}chain${params.str}`,
         method: 'get',
         params: params.querys
     })
@@ -391,6 +391,18 @@ export function ImportPemPrivateKey(data) {
         url: `${HANDLE}privateKey/importPem`,
         method: 'post',
         data: data,
+    })
+}
+//import p12 privateKey 
+export function ImportP12PrivateKey(data) {
+    return post({
+        url: `${HANDLE}privateKey/importP12`,
+        method: 'post',
+        data: data,
+        headers: {
+            'Content-Type': "multipart/form-data"
+        }
+        
     })
 }
 
@@ -689,5 +701,116 @@ export function checkContractEvent(data, list) {
     return get({
         url: `${HANDLE}event/contractEvent/${params.str}`,
         method: 'get'
+    })
+}
+//abi 列表
+export function getAbiList(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}abi/list/${params.str}`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+export function getAbiInfo(abiId) {
+    return get({
+        url: `${HANDLE}abi/${abiId}`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+export function importAbi(data) {
+    return post({
+        url: `${HANDLE}abi`,
+        method: 'post',
+        data: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+//update imported abi
+export function updateImportAbi(data) {
+    return put({
+        url: `${HANDLE}abi`,
+        method: 'put',
+        data: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+export function deleteImportAbi(data) {
+    return deleted({
+        url: `${HANDLE}abi/${data}`,
+        method: 'delete',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+
+///solc/list
+export function solcList() {
+    return get({
+        url: `${HANDLE}solc/list`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+///solc/upload
+export function solcUpload(data) {
+    return post({
+        url: `${HANDLE}solc/upload`,
+        method: 'post',
+        data: data,
+        // responseType: '',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || "",
+            // 'Content-Type': "application/x-www-form-urlencoded"
+        }
+    })
+}
+
+///solc/download
+export function solcDownload(data) {
+    return post({
+        url: `${HANDLE}solc/download`,
+        method: 'post',
+        params: data,
+        headers: {
+            'Content-Type': "application/x-www-form-urlencoded"
+        }
+    })
+}
+//read solc version
+export function readSolcVersion(fielName) {
+    return get({
+        url: `${HANDLE}solcjs/${fielName}`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+//删除solc
+export function deleteSolcId(solcId) {
+    return deleted({
+        url: `${HANDLE}solc/${solcId}`,
+        method: 'delete',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
     })
 }
