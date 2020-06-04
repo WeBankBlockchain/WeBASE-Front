@@ -17,16 +17,16 @@ package com.webank.webase.front.logparse.util;
 import com.webank.webase.front.logparse.entity.LogData;
 import com.webank.webase.front.logparse.entity.NetWorkData;
 import com.webank.webase.front.logparse.entity.TxGasData;
-import lombok.extern.slf4j.Slf4j;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * LogParseUtil. format log
  */
 @Slf4j
 public class LogParseUtil {
-
 
     public static LogData getLogData(String logMsg) {
         String[] sArray = logMsg.split("\\|");
@@ -97,28 +97,5 @@ public class LogParseUtil {
         }
         txGasData.setTimestamp(logData.getTimestamp());
         return txGasData;
-    }
-
-    public static void main(String args[]) {
-        String logMsg =
-                "info|2020-03-23 09:01:53.699992|Total|,g=11,Total_In=73153,Total_Out=32322";
-        LogData logData = getLogData(logMsg);
-        System.out.println("___________");
-        System.out.println(
-                logData.getLogData() + " " + logData.getLogType() + " " + logData.getTimestamp());
-        if (logData.getLogType() == LogTypes.NETWORK) {
-            NetWorkData netWorkData = parseNetworkLog(logData);
-            System.out.println(netWorkData);
-        }
-
-        logMsg = "info|2020-03-23 09:10:23.078979|TxsGasUsed|,g=2,txHash=f8c2bce773e58591a30bb03dbdf0789a3037e5b76a6118d0c7d02562b617048f,gasUsed=22744";
-        logData = getLogData(logMsg);
-        System.out.println("___________");
-        System.out.println(
-                logData.getLogData() + " " + logData.getLogType() + " " + logData.getTimestamp());
-        if (logData.getLogType() == LogTypes.TxGAS) {
-            TxGasData t = parseTxGasUsedLog(logData);
-            System.out.println(t);
-        }
     }
 }
