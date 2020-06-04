@@ -74,7 +74,7 @@
                             </el-input>
                         </li>
                         <p class="font-color-ed5454" style="padding-top: 4px;">
-                            <i class="el-icon-info" style="padding-right: 4px;"></i>{{$t('text.deployParameVec')}}
+                            <i class="el-icon-info" style="padding-right: 4px;"></i>{{$t('contracts.paramsInfo')}}
                         </p>
                     </ul>
                 </td>
@@ -88,6 +88,7 @@
 </template>
 <script>
 import { sendTransation, queryLocalKeyStores } from "@/util/api";
+import { isJson } from "@/util/util"
 export default {
     name: "sendTransation",
     props: ["data", "dialogClose", "abi", 'version', 'sendErrorMessage'],
@@ -196,6 +197,7 @@ export default {
             }
         },
         changeFunc: function () {
+            this.transation.funcValue = [];
             this.constant = false;
             this.funcList.forEach(value => {
                 if (value.funcId === this.transation.funcName) {
@@ -217,7 +219,15 @@ export default {
             if (this.transation.funcValue.length) {
                 for (let i = 0; i < this.transation.funcValue.length; i++) {
                     let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
-                    this.transation.funcValue[i] = data;
+                    if(data && isJson(data)){
+                        try {
+                            this.transation.funcValue[i] = JSON.parse(data)
+                        } catch (error) {
+                            console.log(error)
+                        }
+                    }else {
+                        this.transation.funcValue[i] = data;
+                    }
                 }
             }
             let functionName = "";

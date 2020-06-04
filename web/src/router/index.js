@@ -19,35 +19,23 @@ import { getCookie } from '@/util/util'
 
 const main = resolve => require(['@/views/index/main'], resolve);
 const home = resolve => require(['@/views/home/home'], resolve);
-// const blockInfo = resolve => require(['@/views/blockInfo/blockInfo'], resolve);
-// const transactionInfo = resolve => require(['@/views/transactionInfo/transactionInfo'], resolve);
 const group = resolve => require(['@/views/group'], resolve);
-// const hostDetail = resolve => require(['@/views/group/components/hostDetail'], resolve);
 const contract = resolve => require(['@/views/chaincode/contract'], resolve);
 const oldContract = resolve => require(['@/views/chaincode/oldContract'], resolve);
-const contractHistory = resolve => require(['@/views/contractHistory'], resolve);
 const rivateKeyManagement = resolve => require(['@/views/rivateKeyManagement'], resolve);
-// const errorLogExport = resolve => require(['@/views/errorLogExport/errorLogExport'], resolve);
 const hostMetric = resolve => require(['@/views/hostMetric'], resolve);
 const nodesMetric = resolve => require(['@/views/nodesMetric'], resolve);
-// const accountInfo = resolve => require(['@/views/account/accountInfo'], resolve); transactionCharts
-const transactionCharts = resolve => require(['@/views/transactionCharts/transactionCharts'], resolve);
-// const unusualUser = resolve => require(['@/views/unusualUser/unusualUser'], resolve);
-// const unusualContract = resolve => require(['@/views/unusualContract/unusualContract'], resolve);
-// const helpDoc = resolve => require(['@/components/helpDoc'], resolve);
 const blockEvent = resolve => require(['@/views/blockEvent'], resolve);
 const contractEvent = resolve => require(['@/views/contractEvent'], resolve);
+const abiList = resolve => require(['@/views/abiList'], resolve);
+const parseAbi = resolve => require(['@/views/parseAbi'], resolve);
+const blank = resolve => require(['@/views/blank'], resolve);
 Vue.use(Router);
 const routes = [
     {
         path: '/',
         redirect: '/home',
     },
-    // {
-    //     path: '/login',
-    //     name: 'login',
-    //     component: resolve => require(['@/views/login/login'], resolve),
-    // },
     {
         path: '/main',
         name: 'main',
@@ -71,7 +59,6 @@ const routes = [
         iconCls: 'wbs-icon-group sidebar-icon',
         children: [
             { path: '/group', component: group, name: '节点管理', enName: 'nodeManagement', menuShow: true, meta: { requireAuth: false } },
-            // { path: '/hostDetail', component: hostDetail, name: '节点详情', menuShow: true, meta: { requireAuth: false } }
         ]
     },
     {
@@ -79,13 +66,14 @@ const routes = [
         component: main,
         name: '合约管理',
         enName: 'contractManagement',
-        // leaf: true,
         menuShow: true,
         iconCls: 'wbs-icon-heyueguanli sidebar-icon',
         children: [
             { path: '/contract', component: contract, name: '合约IDE', enName: 'contractIDE', menuShow: true, meta: { requireAuth: false } },
             { path: '/contractList', component: oldContract, name: '合约列表', enName: 'contractList', menuShow: true, meta: { requireAuth: false } },
-            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '测试用户', enName: 'testUserList', menuShow: true, meta: { requireAuth: false } }
+            { path: '/abiList', component: abiList, name: 'Abi列表', enName: "abiList", menuShow: true, meta: { requireAuth: false } },
+            { path: '/parseAbi', component: parseAbi, name: '解析Abi', enName: "parseAbi", menuShow: true, meta: { requireAuth: false } },
+            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '测试用户', enName: 'testUserList', menuShow: true, meta: { requireAuth: false } },
         ]
     },
     {
@@ -96,29 +84,15 @@ const routes = [
         menuShow: true,
         iconCls: 'wbs-icon-monitor sidebar-icon',
         children: [
-            // { path: '/errorLogExport', component: errorLogExport, name: '错误日志', menuShow: true, meta: { requireAuth: false } },
             { path: '/hostMetric', component: hostMetric, name: '主机指标', enName: 'hostMetrics', menuShow: true, meta: { requireAuth: false } },
             { path: '/nodesMetric', component: nodesMetric, name: '节点指标', enName: 'nodeMetrics', menuShow: true, meta: { requireAuth: false } },
         ]
-    },
-    // {
-    //     path: '/',
-    //     component: main,
-    //     name: '私钥管理',
-    //     enName: 'privateKeyManagement',
-    //     leaf: true,
-    //     menuShow: true,
-    //     iconCls: 'wbs-icon-lock sidebar-icon',
-    //     children: [
-    //         { path: '/privateKeyManagement', component: rivateKeyManagement, name: '私钥管理', enName: 'privateKeyManagement', menuShow: true, meta: { requireAuth: false } }
-    //     ]
-    // }, 
+    }, 
     {
         path: '/',
         component: main,
         name: '订阅事件',
         enName: 'subscribeEvent',
-        // leaf: true,
         menuShow: true,
         iconCls: 'wbs-icon-dingyue sidebar-icon',
         children: [
@@ -126,33 +100,27 @@ const routes = [
             { path: '/contractEvent', component: contractEvent, name: '合约Event事件', enName: 'contractEvent', menuShow: true, meta: { requireAuth: false } }
         ]
     },
+    {
+        path: '/',
+        component: main,
+        name: '订阅事件',
+        enName: 'subscribeEvent',
+        menuShow: false,
+        iconCls: 'wbs-icon-dingyue sidebar-icon',
+        children: [
+            { path: '/blank', component: blank, name: '出块事件', enName: 'blank', menuShow: true, meta: { requireAuth: false } },
+        
+        ]
+    },
 ]
 const router = new Router({
     routes
 });
-router.onError((error) => {
-    const pattern = /Loading chunk (\d)+ failed/g;
-    const isChunkLoadFailed = error.message.match(pattern);
-    const targetPath = router.history.pending.fullPath;
-    if (isChunkLoadFailed) {
-        router.go(0);
-        router.replace(targetPath);
-    }
-});
 
-router.beforeEach((to, from, next) => {
-    if (to.meta.requireAuth) {
-        if (getCookie('NODE_MGR_ACCOUNT_C')) {
-            next();
-        } else {
-            next({
-                path: '/login'
-            });
-
-        }
-    } else {
-        next();
-    }
-});
+const originalPush = Router.prototype.push;
+Router.prototype.push = function push(location, onResolve, onReject) {
+    if (onResolve || onReject) return originalPush.call(this, location, onResolve, onReject)
+    return originalPush.call(this, location).catch(err => err)
+}
 
 export default router
