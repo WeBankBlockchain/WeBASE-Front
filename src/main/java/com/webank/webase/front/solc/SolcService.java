@@ -20,6 +20,8 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.solc.entity.RspDownload;
 import com.webank.webase.front.solc.entity.SolcInfo;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,19 +47,19 @@ public class SolcService {
 	private SolcRepository solcRepository;
 
 	@Transactional
-	public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String description) throws IOException {
+	public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String fileDesc) throws IOException {
 		// format filename end with js
 		String fileName = formatFileName(fileNameParam);
 		Long fileSize = solcFileParam.getSize();
-		if (StringUtils.isBlank(description)) {
-			description = solcFileParam.getOriginalFilename();
+		if (StringUtils.isBlank(fileDesc)) {
+			fileDesc = solcFileParam.getOriginalFilename();
 		}
 		// check name and md5 not repeat
 		checkSolcInfoNotExist(fileName);
 		String md5 = DigestUtils.md5Hex(solcFileParam.getInputStream());
 		checkSolcMd5NotExist(md5);
 		// save file info db
-		saveSolcInfo(fileName, description, fileSize, md5);
+		saveSolcInfo(fileName, fileDesc, fileSize, md5);
 
 		// get solcjs dir and save file
 		File solcDir = getSolcDir();
@@ -136,7 +138,7 @@ public class SolcService {
 	}
 
 	/**
-	 * downlaod file
+	 * download file
 	 * @param fileNameParam
 	 * @return
 	 */
@@ -148,10 +150,13 @@ public class SolcService {
 		try {
 			String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
 			File file = new File(solcLocate);
-			InputStream targetStream = new FileInputStream(file);
+			InputStream targetStream = Files.newInputStream(Paths.get(file.getPath()));
 			return new RspDownload(fileName, targetStream);
 		} catch (FileNotFoundException e) {
-			log.error("getSolcFile: file not found:{}", fileName);
+			log.error("getSolcFile: file not found:{}, e:{}", fileName, e.getMessage());
+			throw new FrontException(ConstantCode.READ_SOLC_FILE_ERROR);
+		} catch (IOException e) {
+			log.error("getSolcFile: file not found:{}", e.getMessage());
 			throw new FrontException(ConstantCode.READ_SOLC_FILE_ERROR);
 		}
 	}
