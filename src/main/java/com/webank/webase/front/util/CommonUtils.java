@@ -173,7 +173,7 @@ public class CommonUtils {
         }
         StringBuilder result = new StringBuilder();
         try (InputStream inputStream = new FileInputStream(dirFile);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result.append(line);
@@ -198,7 +198,7 @@ public class CommonUtils {
         }
         List<String> result = new ArrayList<String>();
         try (InputStream inputStream = new FileInputStream(dirFile);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result.add(line);
