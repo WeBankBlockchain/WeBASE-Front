@@ -5,7 +5,7 @@ linter:
     min_priority: 2
   eslint:
     dir: web/src
-    ext: ".js,.vue"
+    ext: ".js"
   checkstyle:
     dir: src/main/java
     ignore:

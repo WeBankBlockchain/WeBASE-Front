@@ -147,7 +147,6 @@
                                     <span v-else-if='item.logIndexRaw === null' class="transation-content null-color">{{item.logIndexRaw}}null</span>
                                     <span v-else class="transation-content">{{item.logIndexRaw}}</span>
                                 </div>
-                                
                             </div>
                             <div>}</div>
                         </div>

@@ -20,15 +20,10 @@
             <div class="search-part">
                 <div style="display: flex;">
                     <el-button type="primary" class="search-part-left-btn" @click="creatUserBtn">{{$t('table.addUser')}}</el-button>
-                    <span class="fileinput-button">
-                        <span>{{$t('table.importPrivateKey')}}</span>
-                        <input type="file" @change="importFile($event)" />
-                    </span>
-                    <el-button type="primary" style="margin-left: 10px;" class="search-part-left-btn" @click="importPemFile">{{$t('table.importPem')}}</el-button>
-                    <el-tooltip class="item" effect="dark" :content="$t('text.privateKeyManagementInfo')" placement="top-start">
+                    <el-button type="primary" class="search-part-left-btn" @click="$store.dispatch('switch_import_rivate_key_dialog')">{{this.$t('table.importPrivateKey')}}</el-button>
+                     <el-tooltip class="item" effect="dark" :content="$t('text.privateKeyManagementInfo')" placement="top-start">
                         <i class="el-icon-info" style="color: #fff;font-size: 18px;margin: 12px 0 0 15px;"></i>
                     </el-tooltip>
-
                 </div>
             </div>
             <div class="search-table">
@@ -55,8 +50,6 @@
                     </el-table-column>
 
                 </el-table>
-                <!-- <el-pagination class="page" @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 50]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
-                </el-pagination> -->
             </div>
         </div>
         <el-dialog :visible.sync="creatUserNameVisible" :title="$t('dialog.addUsername')" width="400px" class="dialog-wrapper" center v-if="creatUserNameVisible" @close="closeCallback">
@@ -70,15 +63,17 @@
                 <el-button type="primary" @click="sureUserName('userForm')">{{$t('table.confirm')}}</el-button>
             </div>
         </el-dialog>
-        <import-pem v-if='importPemShow' :show='importPemShow' @close='importPemClose'></import-pem>
+        <el-dialog :visible.sync="$store.state.importRivateKey" :title="$t('table.importPrivateKey')" width="640px" :append-to-body="true" class="dialog-wrapper" v-if='$store.state.importRivateKey' center>
+            <import-key @importRivateKeySuccess="importRivateKeySuccess" ref="importKey"></import-key>
+        </el-dialog>
     </div>
 </template>
 
 
 <script>
 import contentHead from "@/components/contentHead";
-import importPem from "./dialog/importPem"
-import { queryCreatePrivateKey, queryImportPrivateKey, queryLocalKeyStores, queryDeletePrivateKey,encryption,ImportPemPrivateKey } from "@/util/api";
+import importKey from "./dialog/importKey"
+import { queryCreatePrivateKey, queryLocalKeyStores, queryDeletePrivateKey,encryption } from "@/util/api";
 import { unique } from "@/util/util";
 const FileSaver = require("file-saver");
 import Bus from "@/bus";
@@ -87,7 +82,7 @@ export default {
     name: "RivateKeyManagement",
     components: {
         "v-contentHead": contentHead,
-        "import-pem": importPem
+        importKey
     },
     computed: {
         privateKeyHead() {
@@ -124,7 +119,6 @@ export default {
                         trigger: "blur"
                     },
                     {
-                        // pattern: /^\S.*\S*$/g,
                         pattern: /^[A-za-z0-9]+$/,
                         message: this.$t('dialog.rivateKeyVerifyFont'),
                         trigger: "blur",
@@ -151,7 +145,6 @@ export default {
             privateKeyList: localStorage.getItem("privateKeyList") ? JSON.parse(localStorage.getItem("privateKeyList")) : [],
             fileString: "",
             uploadMap: {},
-            importPemShow: false
         };
     },
     mounted() {
@@ -159,13 +152,6 @@ export default {
         this.getEncryption()
     },
     methods: {
-        importPemFile: function(){
-            this.importPemShow = true
-        },
-        importPemClose: function(){
-            this.importPemShow = false;
-            this.getLocalKeyStores();
-        },
         getEncryption: function(){
             encryption().then(res => {
                 if(res.status == 200){
@@ -323,58 +309,10 @@ export default {
             var blob = new Blob([str], { type: "text;charset=utf-8" });
             FileSaver.saveAs(blob, params.userName);
         },
-        importFile(e) {
-            if (!e.target.files.length) {
-                return;
-            }
-            this.fileString = "";
-            let files = e.target.files[0];
-            let filessize = Math.ceil(files.size / 1024);
-            let reader = new FileReader(); //新建一个FileReader
-            reader.readAsText(files, "UTF-8"); //读取文件
-            let _this = this;
-            reader.onload = function (evt) {
-                _this.fileString = evt.target.result; // 读取文件内容
-                try {
-                    let reqQuery = {
-                        privateKey: JSON.parse(_this.fileString).privateKey,
-                        userName: JSON.parse(_this.fileString).userName,
-                    };
-                    queryImportPrivateKey(reqQuery)
-                        .then(res => {
-                            const { data, status } = res;
-                            if (status === 200) {
-                                e.target.value = '';
-                                _this.getLocalKeyStores()
-                                _this.$message({
-                                    type: 'success',
-                                    message: _this.$t('text.importSuccessed')
-                                })
-                            } else {
-                                e.target.value = '';
-                                _this.$message({
-                                    type: "error",
-                                    message: _this.$chooseLang(res.data.code)
-                                });
-                            }
-                        })
-                        .catch(err => {
-                            e.target.value = '';
-                            _this.$message({
-                                type: "error",
-                                message: _this.$t('text.systemError')
-                            });
-                        });
-
-                } catch (error) {
-                    e.target.value = '';
-                    _this.$message({
-                        type: 'error',
-                        message: _this.$t('text.importFailed')
-                    })
-                }
-            };
-        },
+       
+        importRivateKeySuccess(){
+            this.getLocalKeyStores();
+        }
     }
 };
 </script>
