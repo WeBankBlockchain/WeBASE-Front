@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+"use strict"
 let changeDate = function (date) {
     let newData = new Date(date);
     let Y = newData.getFullYear();
@@ -245,8 +246,8 @@ export function isJson(str) {
 
 export function dataType(type, value) {
     switch (type) {
-        case 'bool' && (value === 'true' || value === 'false'):
-            return eval(value.toLowerCase())
+        case 'bool':
+            if ((value === 'true' || value === 'false')) return eval(value.toLowerCase())
             break;
         case 'uint[]':
             try {
@@ -298,21 +299,23 @@ export function dataType(type, value) {
             break;
         case 'bytes32[]':
             try {
+                var value = value.replace(/\^\[.*\]\$/, '')
                 return JSON.parse(value)
             } catch (error) {
                 console.log('error：' + value + '!!!' + error);
                 return
             }
             break;
-        // case 'address[]':
-        //     try {
-        //         return JSON.parse(value)
-        //     } catch (error) {
-        //         console.log('error：' + value + '!!!' + error);
-        //         return
-        //     }
-        //     break;
-        // default:
+        case 'address[]':
+            try {
+                var value = value.replace(/\^\[.*\]\$/, '')
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        default:
             return value
             break;
     }
