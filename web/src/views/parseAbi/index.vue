@@ -329,7 +329,7 @@ export default {
                 return
             }
             for (let i = 0; i < inputsVal.length; i++) {
-                if (!inputsVal[i]) {
+                if (!inputsVal[i] && typeof(inputsVal[i])!='boolean') {
                     return false
                 }
             }
@@ -358,12 +358,13 @@ export default {
                 inputsVal.push(dataType(item.type, item.argumentValue))
 
             })
+            
             if (!inputs.length) {
                 this.textarea = '';
                 return
             }
             for (let i = 0; i < inputsVal.length; i++) {
-                if (!inputsVal[i]) {
+                if (!inputsVal[i] && typeof(inputsVal[i])!='boolean') {
                     return false
                 }
             }
