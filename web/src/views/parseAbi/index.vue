@@ -33,7 +33,7 @@
                     </el-col>
                     <el-col :span="17">
                         <span class="font-color-fff text-hidden">value</span>
-                        <el-input v-model="item.argumentValue" @input="inputArgumentValue($event,item.type)"></el-input>
+                        <input class="input-inner" type="text" v-model="item.argumentValue" @input="inputArgumentValue($event,item.type)"></input>
                         <span v-if="item.msgObj&&!item.msgObj.is" class="font-color-ed5454">
                             {{item.msgObj.msg}}
                         </span>
@@ -224,6 +224,7 @@ export default {
             this.textarea = '';
         },
         changeArgType(val) {
+            
             this.textarea = '';
             this.argumentList.forEach((item, index) => {
                 if (index === val) {
@@ -458,5 +459,27 @@ export default {
 .container {
     padding: 0 20px;
     padding-right: 50%;
+}
+.input-inner {
+    -webkit-appearance: none;
+    background-color: #FFF;
+    background-image: none;
+    border-radius: 4px;
+    border: 1px solid #DCDFE6;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    color: #606266;
+    display: inline-block;
+    font-size: inherit;
+    height: 36px;
+    line-height: 36px;
+    outline: 0;
+    padding: 0 15px;
+    -webkit-transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+    transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+    width: 100%;
+    background-color: #252f43;
+    border-color: #252f43;
+    color: #70889e;
 }
 </style>
