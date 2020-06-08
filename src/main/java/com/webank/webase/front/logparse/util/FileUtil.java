@@ -15,7 +15,11 @@
 package com.webank.webase.front.logparse.util;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * FileUtil. format abi types from String
@@ -80,60 +84,5 @@ public class FileUtil {
                 iter.remove();
         }
         return;
-    }
-
-
-    public static void main(String args[]) {
-        Long statFileNameNumber = getStatFileNameNumber("log_2020031819.00.log");
-        System.out.println("Hello World!" + statFileNameNumber);
-        List<String> files = getFiles("C:\\nodelog");
-        for (String s : files) {
-            System.out.println("0 " + s);
-        }
-        List<String> logNames = new ArrayList<String>();
-        logNames.add("stat_2020031819.00.log");
-        logNames.add("stat_2020031818.00.log");
-        logNames.add("stat_2020031817.00.log");
-        logNames.add("stat_2020031817.01.log");
-        TreeMap<Long, String> treeMap = getStatFiles(files);
-
-        Iterator iter = treeMap.entrySet().iterator();
-
-        while (iter.hasNext()) {
-
-            Map.Entry entry = (Map.Entry) iter.next();
-
-            // 获取key
-
-            Long key = (Long) entry.getKey();
-
-            // 获取value
-
-            String value = (String) entry.getValue();
-
-            System.out.println("1 " + key + " " + value);
-        }
-        System.out.println("___________");
-        clearOldStatFiles(treeMap, "stat_2020031818.00.log");
-
-        iter = treeMap.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry entry = (Map.Entry) iter.next();
-            Long key = (Long) entry.getKey();
-            String value = (String) entry.getValue();
-
-            System.out.println("2 " + key + " " + value);
-        }
-        System.out.println("___________");
-        clearCurrentStatFile(treeMap, "stat_2020031818.00.log");
-
-        iter = treeMap.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry entry = (Map.Entry) iter.next();
-            Long key = (Long) entry.getKey();
-            String value = (String) entry.getValue();
-
-            System.out.println("3 " + key + " " + value);
-        }
     }
 }
