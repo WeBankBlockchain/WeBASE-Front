@@ -228,7 +228,7 @@ public class AbiUtil {
                 }
             }
             // todo JSON.parse(JSON.toJSONString(result));
-            return JsonUtils.toJSONString(result);
+            return JsonUtils.toJavaObject(JsonUtils.toJSONString(result), Object.class);
         }
         throw new FrontException("output parameter not match");
     }
@@ -268,9 +268,10 @@ public class AbiUtil {
      * check abi valid
      * @param contractAbi
      */
-    public static void checkAbi(String contractAbi) {
+    public static List<AbiDefinition> checkAbi(String contractAbi) {
         try {
             List<AbiDefinition> abiArr = JsonUtils.toJavaObjectList(contractAbi, AbiDefinition.class);
+            return abiArr;
         } catch (Exception ex) {
             throw new FrontException(ConstantCode.PARAM_FAIL_ABI_INVALID);
         }
