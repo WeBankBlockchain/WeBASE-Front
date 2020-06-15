@@ -40,9 +40,9 @@ public class JsonUtils {
         // 允许key有单引号
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         // 允许整数以0开头
-        mapper.configure(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS, true);
+//        mapper.configure(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS, true);
         // 允许字符串中存在回车换行控制符
-        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+//        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         // 属性值为null的不参与序列化
 //        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
