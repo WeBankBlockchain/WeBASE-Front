@@ -227,8 +227,7 @@ public class AbiUtil {
                     result.add(value);
                 }
             }
-            // todo JSON.parse(JSON.toJSONString(result));
-            return JsonUtils.toJavaObject(JsonUtils.toJSONString(result), Object.class);
+            return JsonUtils.toJSONString(result);
         }
         throw new FrontException("output parameter not match");
     }
