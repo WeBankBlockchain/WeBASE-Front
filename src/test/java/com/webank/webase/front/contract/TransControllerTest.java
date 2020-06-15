@@ -13,17 +13,11 @@
  */
 package com.webank.webase.front.contract;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+
 import com.webank.webase.front.Application;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.transaction.entity.ReqQueryTransHandle;
 import com.webank.webase.front.transaction.entity.ReqSignedTransHandle;
-import com.webank.webase.front.util.CommonUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import com.webank.webase.front.util.JsonUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,10 +33,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -72,7 +62,7 @@ public class TransControllerTest {
         testNew.setSync(Boolean.TRUE);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/trans/signed-transaction").
-            content(JSON.toJSONString(testNew)).
+            content(JsonUtils.toJSONString(testNew)).
             contentType(MediaType.APPLICATION_JSON)
         );
         resultActions.
@@ -94,7 +84,7 @@ public class TransControllerTest {
         testNew.setContractAbi(abi);
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/trans/query-transaction").
-                content(JSON.toJSONString(testNew)).
+                content(JsonUtils.toJSONString(testNew)).
                 contentType(MediaType.APPLICATION_JSON)
             );
         resultActions.
