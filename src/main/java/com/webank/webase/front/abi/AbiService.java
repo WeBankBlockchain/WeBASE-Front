@@ -16,12 +16,12 @@
 
 package com.webank.webase.front.abi;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.abi.entity.AbiInfo;
 import com.webank.webase.front.abi.entity.ReqImportAbi;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -69,7 +69,7 @@ public class AbiService {
 		String contractAddress = param.getContractAddress();
 		String contractAbiStr;
 		try {
-			contractAbiStr = JSON.toJSONString(param.getContractAbi());
+			contractAbiStr = JsonUtils.toJSONString(param.getContractAbi());
 		} catch (Exception e) {
 			log.warn("abi parse string error:{}", param.getContractAbi());
 			throw new FrontException(ConstantCode.PARAM_FAIL_ABI_INVALID);
@@ -98,7 +98,7 @@ public class AbiService {
 		BeanUtils.copyProperties(param, updateAbi);
 		String contractAbiStr;
 		try {
-			contractAbiStr = JSON.toJSONString(param.getContractAbi());
+			contractAbiStr = JsonUtils.toJSONString(param.getContractAbi());
 		} catch (Exception e) {
 			log.warn("abi parse string error:{}", param.getContractAbi());
 			throw new FrontException(ConstantCode.PARAM_FAIL_ABI_INVALID);
