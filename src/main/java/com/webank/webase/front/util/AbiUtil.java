@@ -51,7 +51,6 @@ public class AbiUtil {
         List<AbiDefinition> abiArr = JsonUtils.toJavaObjectList(contractAbi, AbiDefinition.class);
         AbiDefinition result = null;
         for (AbiDefinition abiDefinition : abiArr) {
-//            AbiDefinition abiDefinition = JSON.parseObject(object.toString(), AbiDefinition.class);
             if (ConstantProperties.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {
                 result = abiDefinition;
                 break;
@@ -227,7 +226,7 @@ public class AbiUtil {
                     result.add(value);
                 }
             }
-            return JsonUtils.toJSONString(result);
+            return JsonUtils.toJavaObject(JsonUtils.toJSONString(result), Object.class);
         }
         throw new FrontException("output parameter not match");
     }
