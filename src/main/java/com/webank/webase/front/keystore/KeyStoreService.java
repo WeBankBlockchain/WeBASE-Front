@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.keystore;
 
-import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
