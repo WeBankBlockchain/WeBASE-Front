@@ -16,9 +16,9 @@
 
 package com.webank.webase.front.event;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.event.entity.ReqNewBlockEventRegister;
 import com.webank.webase.front.event.entity.ReqContractEventRegister;
+import com.webank.webase.front.util.JsonUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ public class EventControllerTest extends BaseTest {
 		param.setExchangeName("group001");
 		param.setQueueName("user1");
 		String abiStr = "[{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"name\",\"type\":\"string\"}],\"name\":\"SetName\",\"type\":\"event\"}]";
-		List<Object> abi = JSON.parseArray(abiStr, Object.class);
+		List<Object> abi = JsonUtils.toJavaObjectList(abiStr, Object.class);
 		param.setContractAbi(abi);
 		param.setFromBlock("latest");
 		param.setToBlock("latest");
@@ -77,7 +77,7 @@ public class EventControllerTest extends BaseTest {
 		param.setTopicList(topics);
 		ResultActions resultActions = mockMvc
 				.perform(MockMvcRequestBuilders.post("/event/contractEvent").
-						content(JSON.toJSONString(param)).
+						content(JsonUtils.toJSONString(param)).
 						contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
@@ -98,7 +98,7 @@ public class EventControllerTest extends BaseTest {
 		param.setGroupId(1);
 		ResultActions resultActions = mockMvc
 				.perform(MockMvcRequestBuilders.post("/event/newBlockEvent").
-						content(JSON.toJSONString(param)).
+						content(JsonUtils.toJSONString(param)).
 						contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
@@ -173,7 +173,7 @@ public class EventControllerTest extends BaseTest {
 		param.setInfoId(blockInfoId);
 		ResultActions resultActions = mockMvc
 				.perform(MockMvcRequestBuilders.delete("/event/newBlockEvent").
-						content(JSON.toJSONString(param)).
+						content(JsonUtils.toJSONString(param)).
 						contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
@@ -192,7 +192,7 @@ public class EventControllerTest extends BaseTest {
 		param.setInfoId(eventInfoId);
 		ResultActions resultActions = mockMvc
 				.perform(MockMvcRequestBuilders.delete("/event/contractEvent").
-						content(JSON.toJSONString(param)).
+						content(JsonUtils.toJSONString(param)).
 						contentType(MediaType.APPLICATION_JSON)
 				);
 		resultActions.
