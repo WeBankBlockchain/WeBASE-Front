@@ -77,6 +77,9 @@ public class ConstantCode {
     public static final RetCode ENCODE_STR_CANNOT_BE_NULL = RetCode.mark(201044, "encode string can not be empty!");
     public static final RetCode TRANSACTION_FAILED = RetCode.mark(201045, "transaction failed!");
 
+    public static final RetCode FAIL_PARSE_JSON = RetCode.mark(201050, "Fail to parse json");
+    public static final RetCode GET_CONSENSUS_STATUS_FAIL = RetCode.mark(201051, "get consensus status fail");
+
     // dynamic group manage
     public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201043, "invalid group operate type");
     public static final RetCode INVALID_DATA_TYPE = RetCode.mark(201044, "invalid data type");
