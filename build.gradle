@@ -50,13 +50,13 @@ List swagger = [
 ]
 
 
-def log4j_version="2.13.1"
+def log4j_version="2.13.3"
 List logger = [
 	"org.apache.logging.log4j:log4j-api:$log4j_version",
 	"org.apache.logging.log4j:log4j-core:$log4j_version",
 	"org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
 	"org.apache.logging.log4j:log4j-web:$log4j_version",
-	"org.slf4j:jcl-over-slf4j:1.7.12"
+	"org.slf4j:jcl-over-slf4j:1.7.30"
 ]
 
 List jaxb = [
@@ -70,11 +70,11 @@ List jaxb = [
 
 dependencies {
   compile spring,spring_boot,swagger,logger,jaxb
-	compile ('org.fisco-bcos:web3sdk:2.4.0')
+	compile ('org.fisco-bcos:web3sdk:2.4.1-SNAPSHOT')
 	// support guomi/ecdsa same time, support solcJ-0.5.2
 	compile ('org.fisco-bcos:solcJ:0.4.25-rc1')
 	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
-	compile 'com.alibaba:fastjson:1.2.70'
+//	compile 'com.alibaba:fastjson:1.2.70'
 	compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
