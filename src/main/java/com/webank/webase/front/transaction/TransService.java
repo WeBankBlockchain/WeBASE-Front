@@ -456,8 +456,8 @@ public class TransService {
                     contract.getContractAddress().substring(2));
             contract.setVersion(contract.getContractAddress().substring(2));
         }
-        // check if contractAbi existed in cns
         // deprecated cns in front
+        // check if contractAbi existed in cns
 //        if (!ifExisted) {
 //            ifExisted = checkAndSaveAbiFromCns(contract);
 //        }
@@ -471,32 +471,6 @@ public class TransService {
             throw new FrontException(ConstantCode.ABI_GET_ERROR);
         }
 
-    }
-
-    /**
-     * Check transaction parameters.
-     */
-    @Deprecated
-    private void checkParamOfTransaction(ContractFunction cf, List<Object> params) {
-        // inputs format
-        List<String> funcInputTypes = cf.getInputList();
-        if (funcInputTypes.size() != params.size()) {
-            log.warn("transaction fail. funcInputTypes:{}, params:{}",
-                    JsonUtils.toJSONString(funcInputTypes), JsonUtils.toJSONString(params));
-            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-        }
-    }
-
-    /**
-
-     * get web3j by groupId.
-     */
-    private Web3j getWeb3j(int groupId) {
-        Web3j web3j = web3ApiService.getWeb3j(groupId);
-        if (web3j == null) {
-            new FrontException(GROUPID_NOT_EXIST);
-        }
-        return web3j;
     }
 
 
