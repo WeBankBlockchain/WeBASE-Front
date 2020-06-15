@@ -147,7 +147,7 @@ public class PrecompiledController {
     @ApiOperation(value = "nodeManageControl", notes = "set system config value by key")
     @ApiImplicitParam(name = "consensusHandle", value = "node consensus status control",
             required = true, dataType = "ConsensusHandle")
-    @PostMapping("consensus") // TODO url change to node
+    @PostMapping("consensus")
     public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle)
             throws Exception {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
@@ -628,9 +628,11 @@ public class PrecompiledController {
             String res = precompiledService.contractFreeze(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getSignUserId(),
                     contractStatusHandle.getContractAddress());
-            // todo check json
             ContractManageResult contractManageResult =
                     JsonUtils.toJavaObject(res, ContractManageResult.class);
+            if (contractManageResult == null) {
+                return new FrontException(ConstantCode.FAIL_PARSE_JSON);
+            }
             if (contractManageResult.getCode() == 0) {
                 log.info("end contractFreeze useTime:{} contractManageResult:{}",
                         Duration.between(startTime, Instant.now()).toMillis(),
