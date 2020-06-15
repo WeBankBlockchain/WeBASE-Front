@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.event.entity.message;
 
-import com.alibaba.fastjson.JSON;
+import com.webank.webase.front.util.JsonUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -55,7 +55,7 @@ public class BlockPushMessage implements MQObject {
      */
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
+        return JsonUtils.toJSONString(this);
     }
 
 }
