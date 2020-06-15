@@ -14,7 +14,6 @@
 package com.webank.webase.front.transaction;
 
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
@@ -36,6 +35,7 @@ import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -138,7 +138,8 @@ public class TransService {
         // get address and abi of precompiled contract
         String contractAddress = PrecompiledCommonInfo.getAddress(precompiledType);
         String abiStr = PrecompiledCommonInfo.getAbi(precompiledType);
-        List<Object> contractAbi = JSON.parseArray(abiStr);
+        // TODO abi json check
+        List<Object> contractAbi = JsonUtils.toJavaObjectList(abiStr, Object.class);
         // check function param and get function param from abi
         ContractFunction contractFunction =
                 buildContractFunctionWithAbi(contractAbi, funcName, funcParams);
@@ -194,7 +195,7 @@ public class TransService {
         log.info("***transaction total cost time***: {}",
                 Duration.between(startTime, Instant.now()).toMillis());
         log.info("transHandleWithSign end. func:{} baseRsp:{}", contractFunction.getFuncName(),
-                JSON.toJSONString(response));
+                JsonUtils.toJSONString(response));
         return response;
     }
 
@@ -414,7 +415,7 @@ public class TransService {
         log.debug("start buildContractFunctionWithAbi");
         // check function name
         AbiDefinition abiDefinition =
-                AbiUtil.getAbiDefinition(funcName, JSON.toJSONString(contractAbi));
+                AbiUtil.getAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
         if (Objects.isNull(abiDefinition)) {
             log.warn("transaction fail. func:{} is not existed", funcName);
             throw new FrontException(IN_FUNCTION_ERROR);
@@ -481,7 +482,7 @@ public class TransService {
         List<String> funcInputTypes = cf.getInputList();
         if (funcInputTypes.size() != params.size()) {
             log.warn("transaction fail. funcInputTypes:{}, params:{}",
-                    JSON.toJSONString(funcInputTypes), JSON.toJSONString(params));
+                    JsonUtils.toJSONString(funcInputTypes), JsonUtils.toJSONString(params));
             throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
         }
     }
@@ -503,7 +504,7 @@ public class TransService {
      * send transaction locally
      */
     public Object transHandleLocal(ReqTransHandle req) throws Exception {
-        log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(req));
+        log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(req));
 
         // init contract params
         ContractOfTrans cof = new ContractOfTrans(req);
@@ -533,7 +534,7 @@ public class TransService {
         }
 
         log.info("transHandle end. name:{} func:{} result:{}", cof.getContractName(),
-                cof.getFuncName(), JSON.toJSONString(result));
+                cof.getFuncName(), JsonUtils.toJSONString(result));
         return result;
     }
 
@@ -596,7 +597,10 @@ public class TransService {
         JSONArray abiArr = JSONArray.parseArray(contractAbi);
         AbiDefinition result = null;
         for (Object object : abiArr) {
-            AbiDefinition abiDefinition = JSON.parseObject(object.toString(), AbiDefinition.class);
+            AbiDefinition abiDefinition = JsonUtils.toJavaObject(object.toString(), AbiDefinition.class);
+            if (abiDefinition == null) {
+                throw new FrontException(IN_FUNCTION_ERROR);
+            }
             if (ConstantProperties.TYPE_FUNCTION.equals(abiDefinition.getType())
                     && functionName.equals(abiDefinition.getName())) {
                 result = abiDefinition;
@@ -683,7 +687,7 @@ public class TransService {
     // log.info("***transaction total cost time***: {}", Duration.between(startTime,
     // Instant.now()).toMillis());
     // log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(),
-    // JSON.toJSONString(response));
+    // JsonUtils.toJSONString(response));
     // return response;
     // }
 }
