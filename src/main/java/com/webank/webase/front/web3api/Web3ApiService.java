@@ -602,7 +602,6 @@ public class Web3ApiService {
      * getNodeInfo.
      */
     public Object getNodeInfo() {
-        // todo check json parse
         return JsonUtils.toJavaObject(nodeConfig.toString(), Object.class);
     }
 
