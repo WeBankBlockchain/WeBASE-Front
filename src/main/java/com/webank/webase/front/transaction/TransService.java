@@ -137,7 +137,6 @@ public class TransService {
         // get address and abi of precompiled contract
         String contractAddress = PrecompiledCommonInfo.getAddress(precompiledType);
         String abiStr = PrecompiledCommonInfo.getAbi(precompiledType);
-        // TODO abi json check
         List<Object> contractAbi = JsonUtils.toJavaObjectList(abiStr, Object.class);
         // check function param and get function param from abi
         ContractFunction contractFunction =
@@ -651,7 +650,6 @@ public class TransService {
     // // send transaction
     // final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
     // sendMessage(web3j, signMsg, transFuture);
-    // //todo
     // TransactionReceipt receipt =
     // transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
     // response = receipt;
