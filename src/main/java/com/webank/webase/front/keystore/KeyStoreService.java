@@ -13,8 +13,8 @@
  */
 package com.webank.webase.front.keystore;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
@@ -23,9 +23,8 @@ import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.entity.*;
 import com.webank.webase.front.util.AesUtils;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.queue.PredicatedQueue;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
@@ -221,11 +220,12 @@ public class KeyStoreService {
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             log.info("getSignData url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
+            // TODO check json
             HttpEntity<String> formEntity =
-                    new HttpEntity<String>(JSON.toJSONString(params), headers);
+                    new HttpEntity<String>(JsonUtils.toJSONString(params), headers);
             BaseResponse response =
                     restTemplate.postForObject(url, formEntity, BaseResponse.class);
-            log.info("getSignData response:{}", JSON.toJSONString(response));
+            log.info("getSignData response:{}", JsonUtils.toJSONString(response));
             if (response.getCode() == 0) {
                 signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
             }
@@ -392,7 +392,7 @@ public class KeyStoreService {
                     new HttpEntity<String>(null, headers);
             ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.GET, formEntity, BaseResponse.class);
             BaseResponse baseResponse = response.getBody();
-            log.info("getSignUserEntity response:{}", JSON.toJSONString(baseResponse));
+            log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
             if (baseResponse.getCode() == 0) {
                 rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
             }
@@ -401,10 +401,11 @@ public class KeyStoreService {
             log.error("fail restTemplateExchange", ex);
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
         } catch (HttpStatusCodeException e) {
-            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-            log.error("http request fail. error:{}", JSON.toJSONString(error));
-            throw new FrontException(error.getInteger("code"),
-                    error.getString("errorMessage"));
+            // TODO check json
+            JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
+            log.error("http request fail. error:{}", JsonUtils.toJSONString(error));
+            throw new FrontException(error.get("code").intValue(),
+                    error.get("errorMessage").asText());
         } catch (Exception e) {
             log.error("getSignUserEntity exception", e);
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
@@ -433,7 +434,7 @@ public class KeyStoreService {
 
             ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity, BaseResponse.class);
             BaseResponse baseResponse = response.getBody();
-            log.info("getSignUserEntity response:{}", JSON.toJSONString(baseResponse));
+            log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
             if (baseResponse.getCode() == 0) {
                 rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
             } else {
@@ -445,10 +446,12 @@ public class KeyStoreService {
             log.error("getSignUserEntity fail restTemplateExchange", ex);
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
         } catch (HttpStatusCodeException e) {
-            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-            log.error("getSignUserEntity http request fail. error:{}", JSON.toJSONString(error));
-            throw new FrontException(error.getInteger("code"),
-                    error.getString("errorMessage"));
+            // TODO check json
+            JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
+            log.error("getSignUserEntity http request fail. error:{}", JsonUtils.toJSONString(error));
+            throw new FrontException(error.get("code").intValue(),
+                error.get("errorMessage").asText());
+
         } catch (FrontException e) {
             throw e;
         } catch (Exception e) {
