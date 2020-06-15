@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.precompiledapi;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
@@ -24,6 +23,7 @@ import com.webank.webase.front.precompiledapi.entity.ContractStatusHandle;
 import com.webank.webase.front.precompiledapi.entity.CrudHandle;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
 import com.webank.webase.front.util.CRUDParseUtils;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
 import io.swagger.annotations.Api;
@@ -628,8 +628,9 @@ public class PrecompiledController {
             String res = precompiledService.contractFreeze(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getSignUserId(),
                     contractStatusHandle.getContractAddress());
+            // todo check json
             ContractManageResult contractManageResult =
-                    JSON.parseObject(res, ContractManageResult.class);
+                    JsonUtils.toJavaObject(res, ContractManageResult.class);
             if (contractManageResult.getCode() == 0) {
                 log.info("end contractFreeze useTime:{} contractManageResult:{}",
                         Duration.between(startTime, Instant.now()).toMillis(),
@@ -657,7 +658,7 @@ public class PrecompiledController {
                     contractStatusHandle.getSignUserId(),
                     contractStatusHandle.getContractAddress());
             ContractManageResult contractManageResult =
-                    JSON.parseObject(res, ContractManageResult.class);
+                    JsonUtils.toJavaObject(res, ContractManageResult.class);
             if (contractManageResult.getCode() == 0) {
                 log.info("end contractUnfreeze useTime:{} contractManageResult:{}",
                         Duration.between(startTime, Instant.now()).toMillis(),
@@ -689,7 +690,7 @@ public class PrecompiledController {
                     contractStatusHandle.getSignUserId(), contractStatusHandle.getContractAddress(),
                     contractStatusHandle.getGrantAddress());
             ContractManageResult contractManageResult =
-                    JSON.parseObject(res, ContractManageResult.class);
+                    JsonUtils.toJavaObject(res, ContractManageResult.class);
             if (contractManageResult.getCode() == 0) {
                 log.info("end contractGrantManager useTime:{} contractManageResult:{}",
                         Duration.between(startTime, Instant.now()).toMillis(),
@@ -713,7 +714,7 @@ public class PrecompiledController {
                     contractStatusHandle.getContractAddress());
             if (res.contains("code")) {
                 ContractManageResult contractManageResult =
-                        JSON.parseObject(res, ContractManageResult.class);
+                        JsonUtils.toJavaObject(res, ContractManageResult.class);
                 throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
                         contractManageResult.getMsg());
             } else {
@@ -737,7 +738,7 @@ public class PrecompiledController {
                     contractStatusHandle.getContractAddress());
             if (res.contains("code")) {
                 ContractManageResult contractManageResult =
-                        JSON.parseObject(res, ContractManageResult.class);
+                        JsonUtils.toJavaObject(res, ContractManageResult.class);
                 throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
                         contractManageResult.getMsg());
             } else {
