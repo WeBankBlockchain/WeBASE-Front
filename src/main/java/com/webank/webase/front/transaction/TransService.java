@@ -14,7 +14,6 @@
 package com.webank.webase.front.transaction;
 
 
-import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
@@ -568,10 +567,12 @@ public class TransService {
         if(functionName == null) {
             throw new FrontException(IN_FUNCTION_ERROR);
         }
-        JSONArray abiArr = JSONArray.parseArray(contractAbi);
+        List<AbiDefinition> abiDefinitionList = JsonUtils.toJavaObjectList(contractAbi, AbiDefinition.class);
+        if (abiDefinitionList == null) {
+            throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
+        }
         AbiDefinition result = null;
-        for (Object object : abiArr) {
-            AbiDefinition abiDefinition = JsonUtils.toJavaObject(object.toString(), AbiDefinition.class);
+        for (AbiDefinition abiDefinition : abiDefinitionList) {
             if (abiDefinition == null) {
                 throw new FrontException(IN_FUNCTION_ERROR);
             }
