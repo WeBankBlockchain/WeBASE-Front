@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.contract;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
@@ -29,6 +28,7 @@ import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import java.io.File;
@@ -388,7 +388,7 @@ public class ContractService {
 
         File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
         FrontUtils.createFileIfNotExist(abiFile, true);
-        FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
+        FileUtils.writeStringToFile(abiFile, JsonUtils.toJSONString(abiInfo));
         File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
         FrontUtils.createFileIfNotExist(binFile, true);
         FileUtils.writeStringToFile(binFile, contractBin);
@@ -437,7 +437,7 @@ public class ContractService {
      * save contract data.
      */
     public Contract saveContract(ReqContractSave contractReq) {
-        log.debug("start saveContract contractReq:{}", JSON.toJSONString(contractReq));
+        log.debug("start saveContract contractReq:{}", JsonUtils.toJSONString(contractReq));
         if (contractReq.getContractId() == null) {
             // new
             return newContract(contractReq);
