@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.util;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.exception.FrontException;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -280,7 +279,7 @@ public class CommonUtils {
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         String paramStr = null;
         if (Objects.nonNull(param)) {
-            paramStr = JSON.toJSONString(param);
+            paramStr = JsonUtils.toJSONString(param);
         }
         HttpEntity requestEntity = new HttpEntity(paramStr, headers);
         return requestEntity;
@@ -298,8 +297,7 @@ public class CommonUtils {
             log.warn("Object2JavaBean. obj or clazz null");
             return null;
         }
-        String jsonStr = JSON.toJSONString(obj);
-        return JSON.parseObject(jsonStr, clazz);
+        return JsonUtils.toJavaObject(obj, clazz);
     }
 
     /**

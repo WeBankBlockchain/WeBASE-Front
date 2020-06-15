@@ -15,7 +15,6 @@
  */
 package com.webank.webase.front.util;
 
-import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -259,7 +258,7 @@ public class ContractAbiUtil {
             outputStream = new FileOutputStream(file);
 
             //todo
-            outputStream.write(JSON.toJSONString(abiDefinitionList).getBytes());
+            outputStream.write(JsonUtils.toJSONString(abiDefinitionList).getBytes());
             outputStream.flush();
             log.info(file.getName() + "file create successfully");
         } catch (IOException e) {
