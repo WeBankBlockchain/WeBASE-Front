@@ -354,7 +354,7 @@ public class PermissionManageService {
      */
     public Object grantUserTableManager(int groupId, String signUserId, String tableName,
             String userAddress) throws Exception {
-        // CRUD.desc to check table exists TODO rely on crud
+        // CRUD.desc to check table exists
         CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         crudService.desc(tableName);

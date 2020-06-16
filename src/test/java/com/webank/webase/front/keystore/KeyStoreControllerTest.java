@@ -18,6 +18,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,6 +31,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.webank.webase.front.Application;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import java.io.File;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -60,4 +69,22 @@ public class KeyStoreControllerTest {
             .println("==============================================================response:" + resultActions.andReturn().getResponse().getContentAsString());
     }
 
+//    @Test
+//    public void testImportP12y() throws Exception {
+//        //{"publicKey":"0x1a532eba008787e5d16584eb40a0e3ddf1d8fa33fcef64c14d58aabbb1b191935ce540cdd4d3cbbe4779f558185cf4cea1be266cc46ee9b3903f1a819662c1b7","privateKey":"95d1ff9e42c70bf460490404a9b35a6618e711a51c0ec829d7401667cd6ad1d5","address":"0x58415e44c664af1eab071da728a8405afa1991f3"}
+//        String uri = "/privateKey/importP12";
+//        Map<String, Object> param = new HashMap<>();
+//        param.put("userName", "test");
+//        String filePath = "0x6399bda67f0ae8d1fdd997a885b8aee32a0c9696.p12";
+//        InputStream is = new ClassPathResource(filePath).getInputStream();
+//        param.put("p12Password", "123");
+//
+//        ResultActions resultActions = mockMvc.perform(
+//                MockMvcRequestBuilders.fileUpload(uri).file(new MockMultipartFile("p12File", is)));
+//        resultActions.
+//                andExpect(MockMvcResultMatchers.status().isOk()).
+//                andDo(MockMvcResultHandlers.print());
+//        System.out
+//                .println("==============================================================response:" + resultActions.andReturn().getResponse().getContentAsString());
+//    }
 }
