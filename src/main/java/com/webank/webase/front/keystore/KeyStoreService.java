@@ -456,7 +456,7 @@ public class KeyStoreService {
                 int code = error.get("code").intValue();
                 String errorMessage = error.get("errorMessage").asText();
                 throw new FrontException(code, errorMessage);
-            } catch (Exception ex) {
+            } catch (NullPointerException ex) {
                 throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
             }
         } catch (FrontException e) {
