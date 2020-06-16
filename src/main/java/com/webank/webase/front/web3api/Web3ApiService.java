@@ -13,8 +13,6 @@
  */
 package com.webank.webase.front.web3api;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.config.Web3Config;
@@ -23,7 +21,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.CommonUtils;
-import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.GroupOperateStatus;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
@@ -35,7 +33,6 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
@@ -341,7 +338,7 @@ public class Web3ApiService {
             List<NodeStatusInfo> statusList = new ArrayList<>();
             List<String> peerStrList = getGroupPeers(groupId);
             List<String> observerList = getObserverList(groupId);
-            SyncStatus syncStatus = JSON.parseObject(getSyncStatus(groupId), SyncStatus.class);
+            SyncStatus syncStatus = JsonUtils.toJavaObject(getSyncStatus(groupId), SyncStatus.class);
             List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
             if (Objects.isNull(peerStrList) || peerStrList.isEmpty() || consensusList == null) {
                 log.info("end getNodeStatusList. peerStrList is empty");
@@ -364,7 +361,7 @@ public class Web3ApiService {
 
             nodeStatusMap.put(groupId, statusList);
             log.info("end getNodeStatusList. groupId:{} statusList:{}", groupId,
-                    JSON.toJSONString(statusList));
+                    JsonUtils.toJSONString(statusList));
             return statusList;
         } catch (Exception e) {
             log.error("nodeHeartBeat Exception.", e);
@@ -464,19 +461,24 @@ public class Web3ApiService {
         if (StringUtils.isBlank(consensusStatusJson)) {
             return Collections.emptyList();
         }
-        JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
-        List<Object> dataIsList =
-                jsonArr.stream().filter(jsonObj -> jsonObj instanceof List).map(arr -> {
-                    Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
-                    try {
-                        FrontUtils.object2JavaBean(obj, PeerOfConsensusStatus.class);
-                    } catch (Exception e) {
-                        return null;
-                    }
-                    return arr;
-                }).collect(Collectors.toList());
-        return JSONArray.parseArray(JSON.toJSONString(dataIsList.get(0)),
-                PeerOfConsensusStatus.class);
+        List jsonArr = JsonUtils.toJavaObject(consensusStatusJson, List.class);
+        if (jsonArr == null) {
+            log.error("getPeerOfConsensusStatus error");
+            throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
+        }
+        List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
+        for (int i = 0; i < jsonArr.size(); i++ ) {
+            if (jsonArr.get(i) instanceof List) {
+                List<PeerOfConsensusStatus> tempList = JsonUtils.toJavaObjectList(
+                    JsonUtils.toJSONString(jsonArr.get(i)), PeerOfConsensusStatus.class);
+                if (tempList != null) {
+                    dataIsList.addAll(tempList);
+                } else {
+                    throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
+                }
+            }
+        }
+        return dataIsList;
     }
 
 
@@ -600,7 +602,7 @@ public class Web3ApiService {
      * getNodeInfo.
      */
     public Object getNodeInfo() {
-        return JSON.parse(nodeConfig.toString());
+        return JsonUtils.toJavaObject(nodeConfig.toString(), Object.class);
     }
 
     public int getPendingTransactions(int groupId) throws IOException {
