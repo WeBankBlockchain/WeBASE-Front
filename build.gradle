@@ -71,11 +71,12 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
+def jackson_version = "2.11.0"
 List jackson = [
-	"com.fasterxml.jackson.core:jackson-annotations:2.11.0",
-	"com.fasterxml.jackson.core:jackson-core:2.11.0",
-	"com.fasterxml.jackson.core:jackson-databind:2.11.0",
-	"com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.0"
+	"com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
+	"com.fasterxml.jackson.core:jackson-core:$jackson_version",
+	"com.fasterxml.jackson.core:jackson-databind:$jackson_version",
+	"com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
 ]
 
 dependencies {
@@ -91,7 +92,7 @@ dependencies {
 	compile 'org.apache.commons:commons-lang3:3.8.1'
 	compile 'org.slf4j:jcl-over-slf4j:1.7.30'
 	// cover low version guava
-	compile 'com.google.guava:guava:29.0'
+	compile 'com.google.guava:guava:29.0-jre'
 	testCompile('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
