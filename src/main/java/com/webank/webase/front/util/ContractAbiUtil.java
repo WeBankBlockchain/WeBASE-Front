@@ -257,7 +257,6 @@ public class ContractAbiUtil {
             FrontUtils.createFileIfNotExist(file, true);
             outputStream = new FileOutputStream(file);
 
-            //todo
             outputStream.write(JsonUtils.toJSONString(abiDefinitionList).getBytes());
             outputStream.flush();
             log.info(file.getName() + "file create successfully");

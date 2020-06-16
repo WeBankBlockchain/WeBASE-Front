@@ -219,7 +219,6 @@ public class KeyStoreService {
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             log.info("getSignData url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
-            // TODO check json
             HttpEntity<String> formEntity =
                     new HttpEntity<String>(JsonUtils.toJSONString(params), headers);
             BaseResponse response =
@@ -400,11 +399,16 @@ public class KeyStoreService {
             log.error("fail restTemplateExchange", ex);
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
         } catch (HttpStatusCodeException e) {
-            // TODO check json
             JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
             log.error("http request fail. error:{}", JsonUtils.toJSONString(error));
-            throw new FrontException(error.get("code").intValue(),
-                    error.get("errorMessage").asText());
+            try {
+                // if return 404, no code or errorMessage
+                int code = error.get("code").intValue();
+                String errorMessage = error.get("errorMessage").asText();
+                throw new FrontException(code, errorMessage);
+            } catch (Exception ex) {
+                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            }
         } catch (Exception e) {
             log.error("getSignUserEntity exception", e);
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
@@ -445,12 +449,16 @@ public class KeyStoreService {
             log.error("getSignUserEntity fail restTemplateExchange", ex);
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
         } catch (HttpStatusCodeException e) {
-            // TODO check json
             JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
             log.error("getSignUserEntity http request fail. error:{}", JsonUtils.toJSONString(error));
-            throw new FrontException(error.get("code").intValue(),
-                error.get("errorMessage").asText());
-
+            try {
+                // if return 404, no code or errorMessage
+                int code = error.get("code").intValue();
+                String errorMessage = error.get("errorMessage").asText();
+                throw new FrontException(code, errorMessage);
+            } catch (Exception ex) {
+                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            }
         } catch (FrontException e) {
             throw e;
         } catch (Exception e) {
