@@ -16,12 +16,11 @@
 
 package com.webank.webase.front.base.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.util.JsonUtils;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -52,8 +51,7 @@ public abstract class BaseController {
 
         RetCode retCode = null;
         try {
-            JSONObject jsonObject = JSON.parseObject(errorMsg);
-            retCode = JSONObject.toJavaObject(jsonObject, RetCode.class);
+            retCode = JsonUtils.toJavaObject(errorMsg, RetCode.class);
         } catch (Exception ex) {
             log.warn("OnWarning:retCodeJson convert error");
             throw new FrontException(ConstantCode.PARAM_VAILD_FAIL);
@@ -64,7 +62,7 @@ public abstract class BaseController {
 
     private String getParamValidFaildMessage(BindingResult bindingResult) {
         List<ObjectError> errorList = bindingResult.getAllErrors();
-        log.info("errorList:{}", JSON.toJSONString(errorList));
+        log.info("errorList:{}", JsonUtils.toJSONString(errorList));
         if (errorList == null) {
             log.warn("onWarning:errorList is empty!");
             return null;

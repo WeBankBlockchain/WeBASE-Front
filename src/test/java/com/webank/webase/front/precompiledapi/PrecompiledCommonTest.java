@@ -16,9 +16,10 @@
 
 package com.webank.webase.front.precompiledapi;
 
-import com.alibaba.fastjson.JSON;
+
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.util.AbiUtil;
+import com.webank.webase.front.util.JsonUtils;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,9 +33,9 @@ public class PrecompiledCommonTest {
 	@Test
 	public void testCommonInfo() {
 		String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.PERMISSION);
-		List<Object> contractAbi = JSON.parseArray(abiStr);
+		List<Object> contractAbi = JsonUtils.toJavaObjectList(abiStr, Object.class);
 		String funcName = FUNC_INSERT;
-		AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(funcName, JSON.toJSONString(contractAbi));
+		AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
 		Assert.assertTrue(!contractAbi.isEmpty());
 	}
 

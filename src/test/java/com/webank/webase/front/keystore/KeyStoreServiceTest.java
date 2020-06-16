@@ -93,10 +93,14 @@ public class KeyStoreServiceTest {
 	public void testLoadP12() throws UnrecoverableKeyException, InvalidKeySpecException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, CertificateException, IOException {
 		P12Manager p12Manager = new P12Manager();
 		p12Manager.setP12File("0x6399bda67f0ae8d1fdd997a885b8aee32a0c9696.p12");
-		p12Manager.setPassword("13");
+		p12Manager.setPassword("123");
 		p12Manager.load();
+		// c5658bbb9b905345e7c057690ec6f50c06dada711d1086820980496b4954fbc7
 		String privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
 		System.out.println("load private key: " + privateKey);
+		String address = GenCredential.create(privateKey).getAddress();
+		System.out.println("address: " + address);
+		Assert.assertTrue("pri error", address.equals("0x6399bda67f0ae8d1fdd997a885b8aee32a0c9696"));
 	}
 
 }

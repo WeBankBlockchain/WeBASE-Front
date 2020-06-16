@@ -23,7 +23,7 @@ repositories {
 
 }
 
-def spring_version="4.3.25.RELEASE"
+def spring_version="4.3.27.RELEASE"
 List spring =[
 	"org.springframework:spring-core:$spring_version",
 	"org.springframework:spring-beans:$spring_version",
@@ -31,7 +31,13 @@ List spring =[
 	"org.springframework:spring-tx:$spring_version",
 	"org.springframework:spring-web:$spring_version",
 	"org.springframework:spring-webmvc:$spring_version",
-	"org.springframework:spring-jdbc:$spring_version"
+	"org.springframework:spring-jdbc:$spring_version",
+	// cover old version
+	"org.springframework:spring-aspects:$spring_version",
+	"org.springframework:spring-messaging:$spring_version",
+	"org.springframework:spring-orm:$spring_version",
+	"org.springframework:spring-test:$spring_version"
+
 ]
 
 def spring_boot_version="1.5.9.RELEASE"
@@ -50,13 +56,12 @@ List swagger = [
 ]
 
 
-def log4j_version="2.13.1"
+def log4j_version="2.13.3"
 List logger = [
 	"org.apache.logging.log4j:log4j-api:$log4j_version",
 	"org.apache.logging.log4j:log4j-core:$log4j_version",
 	"org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
-	"org.apache.logging.log4j:log4j-web:$log4j_version",
-	"org.slf4j:jcl-over-slf4j:1.7.12"
+	"org.apache.logging.log4j:log4j-web:$log4j_version"
 ]
 
 List jaxb = [
@@ -66,22 +71,28 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-
+def jackson_version = "2.11.0"
+List jackson = [
+	"com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
+	"com.fasterxml.jackson.core:jackson-core:$jackson_version",
+	"com.fasterxml.jackson.core:jackson-databind:$jackson_version",
+	"com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
+]
 
 dependencies {
-  compile spring,spring_boot,swagger,logger,jaxb
-	compile ('org.fisco-bcos:web3sdk:2.4.0')
+  compile spring,spring_boot,swagger,logger,jaxb,jackson
+	compile ('org.fisco-bcos:web3sdk:2.4.1')
 	// support guomi/ecdsa same time, support solcJ-0.5.2
 	compile ('org.fisco-bcos:solcJ:0.4.25-rc1')
-	compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.0'
-	compile 'com.alibaba:fastjson:1.2.70'
 	compile 'com.h2database:h2:1.4.197'
     compile 'org.fusesource:sigar:1.6.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
 	compile 'org.projectlombok:lombok:1.18.6'
 	compile 'com.github.jsqlparser:jsqlparser:2.0'
-	compile "org.apache.commons:commons-lang3:3.8.1"
-
+	compile 'org.apache.commons:commons-lang3:3.8.1'
+	compile 'org.slf4j:jcl-over-slf4j:1.7.30'
+	// cover low version guava
+	compile 'com.google.guava:guava:29.0-jre'
 	testCompile('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
