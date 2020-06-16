@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * Jackson Util
+ * edit by marsli from hujkay
+ */
 @Slf4j
 public class JsonUtils {
     // 加载速度太慢了，放在静态代码块中
