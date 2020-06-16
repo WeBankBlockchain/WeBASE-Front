@@ -84,8 +84,6 @@ public class ConstantCode {
     public static final RetCode FAIL_PARSE_JSON = RetCode.mark(201050, "Fail to parse json");
     public static final RetCode GET_CONSENSUS_STATUS_FAIL = RetCode.mark(201051, "get consensus status fail");
 
-    // TODO dynamic group manage
-
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
     public static final RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
