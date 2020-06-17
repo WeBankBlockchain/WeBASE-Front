@@ -1,3 +1,17 @@
+### v1.3.1(2020-06-17)
+
+**Fix**
+- 移除Fastjson，替换为Jackson 2.11.0; web3sdk升级为2.4.1
+- 升级依赖包：spring: 4.3.27; log4j: 2.13.3; slf4j: 1.7.30; netty-all: 4.1.44+; guava: 29.0;
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.0 及以上版本
+- WeBASE-Node-Manager v1.3.1+
+- WeBASE-Sign v1.3.1+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.3.1(2020-06-01)
 
 **Add**
