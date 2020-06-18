@@ -536,7 +536,9 @@ public class ContractService {
             contractPathRepository.save(contractPathVo);
         }
         // findContractByPage
-        Pageable pageable = new PageRequest(param.getPageNumber(), param.getPageSize(),
+       // page start from index 1 instead of 0
+        int pageNumber = param.getPageNumber() - 1;
+        Pageable pageable = new PageRequest(pageNumber, param.getPageSize(),
                 Direction.DESC, "modifyTime");
         Page<Contract> contractPage = contractRepository.findAll(
                 (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
