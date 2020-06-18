@@ -71,6 +71,11 @@ public class Web3ApiService {
     Constants constants;
     @Autowired
     Web3Config web3Config;
+    /**
+     * web3j of group 1 for api that not rely on group id
+     */
+    @Autowired
+    private Web3j unrelatedWeb3j;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -497,7 +502,7 @@ public class Web3ApiService {
     public List<String> getGroupList() {
         log.debug("getGroupList. ");
         try {
-            List<String> groupIdList = getWeb3j().getGroupList().send().getGroupList();
+            List<String> groupIdList = unrelatedWeb3j.getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
             refreshWeb3jMapService(groupIdList);
             return groupIdList;
@@ -838,6 +843,8 @@ public class Web3ApiService {
     public Web3j getWeb3j() {
         Set<Integer> iSet = web3jMap.keySet();
         if (iSet.isEmpty()) {
+            // refresh group list
+            getGroupList();
             log.error("web3jMap is empty, groupList empty! please check your node status");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
         }
