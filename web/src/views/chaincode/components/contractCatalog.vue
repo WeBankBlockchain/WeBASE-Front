@@ -513,7 +513,7 @@ export default {
         getContracts(list) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                pageNumber: 0,
+                pageNumber: 1,
                 pageSize: 500
             };
             getContractList(data)
