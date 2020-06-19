@@ -505,7 +505,7 @@ public class Web3ApiService {
         try {
             List<String> groupIdList = getWeb3j().getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
-            refreshWeb3jMapService(groupIdList);
+            refreshWeb3jMap(groupIdList);
             return groupIdList;
         } catch (IOException e) {
             log.error("getGroupList error:[]", e);
@@ -530,8 +530,8 @@ public class Web3ApiService {
      * @throws FrontException
      */
     @DependsOn("encryptType")
-    public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
-        log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
+    public void refreshWeb3jMap(List<String> groupIdList) throws FrontException {
+        log.debug("refreshWeb3jMap groupIdList:{}", groupIdList);
         // if localGroupIdList not contain group in groupList from chain, add it
         groupIdList.stream()
             .filter(groupId ->
@@ -540,7 +540,7 @@ public class Web3ApiService {
                 initWeb3j(Integer.parseInt(group2Init)));
 
         Set<Integer> localGroupIdList = web3jMap.keySet();
-        log.debug("refreshWeb3jMapService localGroupList:{}", localGroupIdList);
+        log.debug("refreshWeb3jMap localGroupList:{}", localGroupIdList);
         // if local web3j map contains group that not in groupList from chain
         // remove it from local web3j map
         localGroupIdList.stream()
