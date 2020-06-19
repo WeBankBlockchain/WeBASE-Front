@@ -71,6 +71,8 @@ public class Web3ApiService {
     Constants constants;
     @Autowired
     Web3Config web3Config;
+    @Autowired
+    Web3j independentWeb3j;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -503,7 +505,7 @@ public class Web3ApiService {
         try {
             List<String> groupIdList = getWeb3j().getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
-            refreshWeb3jMapService(groupIdList);
+            refreshWeb3jMap(groupIdList);
             return groupIdList;
         } catch (IOException e) {
             log.error("getGroupList error:[]", e);
@@ -522,24 +524,40 @@ public class Web3ApiService {
         }
     }
 
+    /**
+     * add web3j from chain and remove web3j not in chain
+     * @param groupIdList
+     * @throws FrontException
+     */
     @DependsOn("encryptType")
-    public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
-        log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
-        groupIdList.forEach(gId -> {
-            Integer groupId = new Integer(gId);
-            if(web3jMap.get(groupId) == null) {
-                refreshWeb3j(groupId);
-            }
-        });
+    public void refreshWeb3jMap(List<String> groupIdList) throws FrontException {
+        log.debug("refreshWeb3jMap groupIdList:{}", groupIdList);
+        // if localGroupIdList not contain group in groupList from chain, add it
+        groupIdList.stream()
+            .filter(groupId ->
+                web3jMap.get(Integer.parseInt(groupId)) == null)
+            .forEach(group2Init ->
+                initWeb3j(Integer.parseInt(group2Init)));
+
+        Set<Integer> localGroupIdList = web3jMap.keySet();
+        log.debug("refreshWeb3jMap localGroupList:{}", localGroupIdList);
+        // if local web3j map contains group that not in groupList from chain
+        // remove it from local web3j map
+        localGroupIdList.stream()
+            // not contains in groupList from chain
+            .filter(groupId ->
+                !groupIdList.contains(String.valueOf(groupId)))
+            .forEach(group2Remove ->
+                web3jMap.remove(group2Remove));
     }
 
     /**
-     * init a new web3j of group id
+     * init a new web3j of group id, add in groupChannelConnectionsConfig's connections
      * @param groupId
      * @return
      */
-    private synchronized Web3j refreshWeb3j(int groupId) {
-        log.info("refreshWeb3j new web3j of groupId:{}", groupId);
+    private synchronized Web3j initWeb3j(int groupId) {
+        log.info("initWeb3j of groupId:{}", groupId);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
         ChannelConnections channelConnections = new ChannelConnections();
@@ -554,7 +572,7 @@ public class Web3ApiService {
         try {
             service.run();
         } catch (Exception e) {
-            log.error("refreshWeb3j fail. groupId:{} error:[]", groupId, e);
+            log.error("initWeb3j fail. groupId:{} error:[]", groupId, e);
             throw new FrontException("refresh web3j failed");
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -725,7 +743,7 @@ public class Web3ApiService {
                 getWeb3j().startGroup(groupId).send().getStatus(), GroupOperateStatus.class);
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            refreshWeb3j(groupId);
+            initWeb3j(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("startGroup fail:{}", status.getMessage());
@@ -849,8 +867,8 @@ public class Web3ApiService {
         Set<Integer> iSet = web3jMap.keySet();
         if (iSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
-            // get brand new web3j of integer max value
-            return refreshWeb3j(Integer.MAX_VALUE);
+            // get default web3j of integer max value
+            return independentWeb3j;
         }
         // get random index to get web3j
         Integer index = iSet.iterator().next();
