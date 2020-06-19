@@ -86,8 +86,7 @@ List tomcat = [
 	"org.apache.tomcat.embed:tomcat-embed-el:$tomcat_version",
 	"org.apache.tomcat.embed:tomcat-embed-websocket:$tomcat_version",
 	"org.apache.tomcat:tomcat-jdbc:$tomcat_version",
-	"org.apache.tomcat:tomcat-juli:$tomcat_version",
-	"org.apache.tomcat:tomcat-annotations:$tomcat_version"
+	"org.apache.tomcat:tomcat-juli:$tomcat_version"
 ]
 
 dependencies {
