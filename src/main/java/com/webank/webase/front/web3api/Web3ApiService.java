@@ -71,11 +71,6 @@ public class Web3ApiService {
     Constants constants;
     @Autowired
     Web3Config web3Config;
-    /**
-     * web3j of group 1 for api that not rely on group id
-     */
-    @Autowired
-    private Web3j unrelatedWeb3j;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -499,10 +494,14 @@ public class Web3ApiService {
         return groupPeers.getGroupPeers();
     }
 
+    /**
+     * get group list and refresh web3j map
+     * @return
+     */
     public List<String> getGroupList() {
         log.debug("getGroupList. ");
         try {
-            List<String> groupIdList = unrelatedWeb3j.getGroupList().send().getGroupList();
+            List<String> groupIdList = getWeb3j().getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
             refreshWeb3jMapService(groupIdList);
             return groupIdList;
@@ -529,13 +528,18 @@ public class Web3ApiService {
         groupIdList.forEach(gId -> {
             Integer groupId = new Integer(gId);
             if(web3jMap.get(groupId) == null) {
-                refreshWeb3jMap(groupId);
+                refreshWeb3j(groupId);
             }
         });
     }
 
-    private synchronized void refreshWeb3jMap(int groupId) {
-        log.info("refreshWeb3jMap groupId:{}", groupId);
+    /**
+     * init a new web3j of group id
+     * @param groupId
+     * @return
+     */
+    private synchronized Web3j refreshWeb3j(int groupId) {
+        log.info("refreshWeb3j new web3j of groupId:{}", groupId);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
         ChannelConnections channelConnections = new ChannelConnections();
@@ -550,7 +554,7 @@ public class Web3ApiService {
         try {
             service.run();
         } catch (Exception e) {
-            log.error("refreshWeb3jMap fail. groupId:{} error:[]", groupId, e);
+            log.error("refreshWeb3j fail. groupId:{} error:[]", groupId, e);
             throw new FrontException("refresh web3j failed");
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -558,6 +562,7 @@ public class Web3ApiService {
         channelEthereumService.setChannelService(service);
         Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
         web3jMap.put(groupId, web3j);
+        return web3j;
     }
 
     // get all peers of chain
@@ -720,7 +725,7 @@ public class Web3ApiService {
                 getWeb3j().startGroup(groupId).send().getStatus(), GroupOperateStatus.class);
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            refreshWeb3jMap(groupId);
+            refreshWeb3j(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("startGroup fail:{}", status.getMessage());
@@ -843,10 +848,9 @@ public class Web3ApiService {
     public Web3j getWeb3j() {
         Set<Integer> iSet = web3jMap.keySet();
         if (iSet.isEmpty()) {
-            // refresh group list
-            getGroupList();
             log.error("web3jMap is empty, groupList empty! please check your node status");
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+            // get brand new web3j of integer max value
+            return refreshWeb3j(Integer.MAX_VALUE);
         }
         // get random index to get web3j
         Integer index = iSet.iterator().next();
@@ -860,6 +864,8 @@ public class Web3ApiService {
      */
     public Web3j getWeb3j(Integer groupId) {
         if (web3jMap.isEmpty()) {
+            // refresh group list
+            getGroupList();
             log.error("web3jMap is empty, groupList empty! please check your node status");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
         }
