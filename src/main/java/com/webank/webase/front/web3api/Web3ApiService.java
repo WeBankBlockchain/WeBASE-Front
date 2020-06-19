@@ -71,6 +71,8 @@ public class Web3ApiService {
     Constants constants;
     @Autowired
     Web3Config web3Config;
+    @Autowired
+    Web3j independentWeb3j;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -534,7 +536,7 @@ public class Web3ApiService {
     }
 
     /**
-     * init a new web3j of group id
+     * init a new web3j of group id, add in groupChannelConnectionsConfig's connections
      * @param groupId
      * @return
      */
@@ -849,8 +851,8 @@ public class Web3ApiService {
         Set<Integer> iSet = web3jMap.keySet();
         if (iSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
-            // get brand new web3j of integer max value
-            return refreshWeb3j(Integer.MAX_VALUE);
+            // get default web3j of integer max value
+            return independentWeb3j;
         }
         // get random index to get web3j
         Integer index = iSet.iterator().next();
