@@ -16,7 +16,6 @@ package com.webank.webase.front.base.config;
 
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +86,7 @@ public class Web3Config {
     }
 
     /**
-     * init getWeb3j.
+     * init Web3j of default group id 1
      */
     @Bean
     public Web3j getWeb3j(GroupChannelConnectionsConfig groupChannelConnectionsConfig)
