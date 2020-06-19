@@ -74,7 +74,7 @@
 
 <script>
 import contentHead from "@/components/contentHead";
-import sendTransation from "./dialog/sendTransaction"
+import sendTransation from "@/components/sendTransaction"
 import editor from "./dialog/editor"
 import abiDialog from "./dialog/abiDialog"
 import { getContractList } from "@/util/api"
@@ -125,7 +125,7 @@ export default {
         getContracts: function () {
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                pageNumber: this.currentPage - 1,
+                pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 contractName: this.contractName,
                 contractAddress: this.contractAddress,
@@ -188,7 +188,6 @@ export default {
             this.abiData = null
         },
         search: function () {
-            this.currentPage = 1;
             if (this.contractData && this.contractData.length && this.contractData.length < 20) {
                 this.contractName = this.contractData;
                 this.contractAddress = ""
@@ -199,7 +198,7 @@ export default {
                 this.contractName = "";
                 this.contractAddress = ""
             }
-            this.currentPage = 1
+            this.currentPage = 1;
             this.getContracts();
         },
         send: function (val) {
@@ -221,7 +220,7 @@ export default {
         },
         handleSizeChange: function (val) {
             this.pageSize = val;
-            this.currentPage = 0;
+            this.currentPage = 1;
             this.getContracts();
         },
         handleCurrentChange: function (val) {
