@@ -151,7 +151,7 @@ public class Web3Config {
      */
     @Bean(name = "serviceMap")
     @DependsOn("encryptType")
-    public Map<Integer, Service> serviceMap(Web3j web3j, GroupChannelConnectionsConfig test, NewBlockEventCallback newBlockEventCallBack)
+    public Map<Integer, Service> serviceMap(Web3j web3j, NewBlockEventCallback newBlockEventCallBack)
         throws Exception {
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
         GroupChannelConnectionsConfig groupChannelConnectionsConfig = getGroupChannelConnectionsConfig();
