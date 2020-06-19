@@ -524,15 +524,31 @@ public class Web3ApiService {
         }
     }
 
+    /**
+     * add web3j from chain and remove web3j not in chain
+     * @param groupIdList
+     * @throws FrontException
+     */
     @DependsOn("encryptType")
     public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
         log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
-        groupIdList.forEach(gId -> {
-            Integer groupId = new Integer(gId);
-            if(web3jMap.get(groupId) == null) {
-                refreshWeb3j(groupId);
-            }
-        });
+        // if localGroupIdList not contain group in groupList from chain, add it
+        groupIdList.stream()
+            .filter(groupId ->
+                web3jMap.get(Integer.parseInt(groupId)) == null)
+            .forEach(group2Init ->
+                initWeb3j(Integer.parseInt(group2Init)));
+
+        Set<Integer> localGroupIdList = web3jMap.keySet();
+        log.debug("refreshWeb3jMapService localGroupList:{}", localGroupIdList);
+        // if local web3j map contains group that not in groupList from chain
+        // remove it from local web3j map
+        localGroupIdList.stream()
+            // not contains in groupList from chain
+            .filter(groupId ->
+                !groupIdList.contains(String.valueOf(groupId)))
+            .forEach(group2Remove ->
+                web3jMap.remove(group2Remove));
     }
 
     /**
@@ -540,8 +556,8 @@ public class Web3ApiService {
      * @param groupId
      * @return
      */
-    private synchronized Web3j refreshWeb3j(int groupId) {
-        log.info("refreshWeb3j new web3j of groupId:{}", groupId);
+    private synchronized Web3j initWeb3j(int groupId) {
+        log.info("initWeb3j of groupId:{}", groupId);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
         ChannelConnections channelConnections = new ChannelConnections();
@@ -556,7 +572,7 @@ public class Web3ApiService {
         try {
             service.run();
         } catch (Exception e) {
-            log.error("refreshWeb3j fail. groupId:{} error:[]", groupId, e);
+            log.error("initWeb3j fail. groupId:{} error:[]", groupId, e);
             throw new FrontException("refresh web3j failed");
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -727,7 +743,7 @@ public class Web3ApiService {
                 getWeb3j().startGroup(groupId).send().getStatus(), GroupOperateStatus.class);
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            refreshWeb3j(groupId);
+            initWeb3j(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("startGroup fail:{}", status.getMessage());
