@@ -56,6 +56,8 @@ public class Web3Config {
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
     private int encryptType;
+
+    private int independentGroupId = Integer.MAX_VALUE;
     /**
      * 覆盖EncryptType构造函数
      * @return
@@ -67,8 +69,20 @@ public class Web3Config {
         return new EncryptType(encryptType);
     }
 
+    /**
+     * singleton instance of config
+     * @return
+     */
     @Bean
-    public GroupChannelConnectionsConfig getGroupChannelConnectionsConfig() {
+    public GroupChannelConnectionsConfig initGroupChannelConnectionsConfig() {
+        return getGroupChannelConnectionsConfig();
+    }
+
+    /**
+     * get a new config instance
+     * @return
+     */
+    private GroupChannelConnectionsConfig getGroupChannelConnectionsConfig() {
         List<ChannelConnections> channelConnectionsList = new ArrayList<>();
 
         List<String> connectionsList = new ArrayList<>();
@@ -76,11 +90,11 @@ public class Web3Config {
         log.info("*****" + ip + ":" + channelPort);
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections.setConnectionsStr(connectionsList);
-        channelConnections.setGroupId(1);
+        channelConnections.setGroupId(independentGroupId);
         channelConnectionsList.add(channelConnections);
 
         GroupChannelConnectionsConfig groupChannelConnectionsConfig =
-                new GroupChannelConnectionsConfig();
+            new GroupChannelConnectionsConfig();
         groupChannelConnectionsConfig.setAllChannelConnections(channelConnectionsList);
         return groupChannelConnectionsConfig;
     }
@@ -93,7 +107,7 @@ public class Web3Config {
             throws Exception {
         Service service = new Service();
         service.setOrgID(orgName);
-        service.setGroupId(1);
+        service.setGroupId(independentGroupId);
         service.setThreadPool(sdkThreadPool());
         service.setAllChannelConnections(groupChannelConnectionsConfig);
         service.run();
@@ -134,12 +148,11 @@ public class Web3Config {
      */
     @Bean(name = "serviceMap")
     @DependsOn("encryptType")
-    public Map<Integer, Service> serviceMap(Web3j web3j,
-            GroupChannelConnectionsConfig groupChannelConnectionsConfig,
-            NewBlockEventCallback newBlockEventCallBack) throws Exception {
+    public Map<Integer, Service> serviceMap(Web3j web3j, GroupChannelConnectionsConfig test, NewBlockEventCallback newBlockEventCallBack)
+        throws Exception {
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
-        List<ChannelConnections> channelConnectionsList =
-                groupChannelConnectionsConfig.getAllChannelConnections();
+        GroupChannelConnectionsConfig groupChannelConnectionsConfig = getGroupChannelConnectionsConfig();
+        List<ChannelConnections> channelConnectionsList  = groupChannelConnectionsConfig.getAllChannelConnections();
         channelConnectionsList.clear();
         for (int i = 0; i < groupIdList.size(); i++) {
             List<String> connectionsList = new ArrayList<>();
