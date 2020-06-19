@@ -169,7 +169,7 @@ import {
     addFunctionAbi,
     backgroundCompile
 } from "@/util/api";
-import transaction from "../dialog/sendTransaction";
+import transaction from "@/components/sendTransaction";
 import changeUser from "../dialog/changeUser";
 import web3 from "@/util/ethAbi"
 export default {
