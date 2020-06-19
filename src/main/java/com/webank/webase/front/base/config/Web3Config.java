@@ -71,6 +71,9 @@ public class Web3Config {
 
     /**
      * singleton instance of config
+     * @case1: if add new web3j in web3jmap, add connection to channelConnectionsList of this bean
+     * @case2: if create a brand new web3j of new connections config,
+     * use getGroupChannelConnectionsConfig method to create new config
      * @return
      */
     @Bean
