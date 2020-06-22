@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.contract;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
@@ -31,6 +30,7 @@ import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -86,7 +86,7 @@ public class ContractController extends BaseController {
     @PostMapping("/deployWithSign")
     public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
             throws Exception {
-        log.info("contract deployWithSign start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
+        log.info("contract deployWithSign start. ReqDeploy:[{}]", JsonUtils.toJSONString(reqDeploy));
         checkParamResult(result);
         if (StringUtils.isBlank(reqDeploy.getSignUserId())) {
             log.error("contract deployWithSign error: signUserId is empty");
@@ -106,7 +106,7 @@ public class ContractController extends BaseController {
     @PostMapping("/deploy")
     public String deployLocal(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
             throws Exception {
-        log.info("contract deployLocal start. ReqDeploy:[{}]", JSON.toJSONString(reqDeploy));
+        log.info("contract deployLocal start. ReqDeploy:[{}]", JsonUtils.toJSONString(reqDeploy));
         checkParamResult(result);
         if (StringUtils.isBlank(reqDeploy.getUser())) {
             log.error("contract deployLocal error: user(address) is empty");
@@ -129,7 +129,7 @@ public class ContractController extends BaseController {
     @PostMapping("/compile-java")
     public ResponseEntity<InputStreamResource> compileJavaFile(@Valid @RequestBody ReqSendAbi param,
             BindingResult result) throws FrontException, IOException {
-        log.info("compileJavaFile start. reqSendAbi:{}", JSON.toJSONString(param));
+        log.info("compileJavaFile start. reqSendAbi:{}", JsonUtils.toJSONString(param));
         checkParamResult(result);
         FileContentHandle fileContentHandle =
                 ContractService.compileToJavaFile(param.getContractName(), param.getAbiInfo(),
@@ -164,7 +164,7 @@ public class ContractController extends BaseController {
     @PostMapping("/abiInfo")
     public ResponseEntity sendAbi(@Valid @RequestBody ReqSendAbi reqSendAbi, BindingResult result)
             throws FrontException {
-        log.info("sendAbi start. ReqSendAbi:[{}]", JSON.toJSONString(reqSendAbi));
+        log.info("sendAbi start. ReqSendAbi:[{}]", JsonUtils.toJSONString(reqSendAbi));
         checkParamResult(result);
         if (Objects.isNull(reqSendAbi.getGroupId())) {
             log.warn("fail sendAbi. groupId is null");
@@ -199,7 +199,7 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/save")
     public Contract saveContract(@RequestBody @Valid ReqContractSave contract, BindingResult result)
             throws FrontException {
-        log.info("saveContract start. contract:{}", JSON.toJSONString(contract));
+        log.info("saveContract start. contract:{}", JsonUtils.toJSONString(contract));
         checkParamResult(result);
         return contractService.saveContract(contract);
     }
@@ -230,7 +230,7 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/contractList")
     public BasePageResponse findByPage(@RequestBody @Valid ReqPageContract req,
             BindingResult result) throws FrontException, IOException {
-        log.info("findByPage start. ReqPageContract:{}", JSON.toJSONString(req));
+        log.info("findByPage start. ReqPageContract:{}", JsonUtils.toJSONString(req));
         checkParamResult(result);
         Page<Contract> page = contractService.findContractByPage(req);
         BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
@@ -263,7 +263,7 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/contractCompile")
     public RspContractCompile contractCompile(@RequestBody @Valid ReqContractCompile req,
             BindingResult result) throws FrontException {
-        log.info("contractCompile start. param:{}", JSON.toJSONString(req));
+        log.info("contractCompile start. param:{}", JsonUtils.toJSONString(req));
         checkParamResult(result);
         return contractService.contractCompile(req.getContractName(), req.getSolidityBase64());
     }
@@ -278,7 +278,7 @@ public class ContractController extends BaseController {
             throws FrontException, IOException {
         Instant startTime = Instant.now();
         log.info("start multiContractCompile startTime:{} param:{}", startTime.toEpochMilli(),
-                JSON.toJSONString(req));
+                JsonUtils.toJSONString(req));
         checkParamResult(result);
         List<RspMultiContractCompile> response = contractService.multiContractCompile(req);
         log.info("end multiContractCompile useTime:{}",
@@ -288,7 +288,7 @@ public class ContractController extends BaseController {
 
     @PostMapping(value = "/addContractPath")
     public ContractPath addContractPath(@RequestBody @Valid ReqContractPath req) {
-        log.info("addContractPath start. param:{}", JSON.toJSONString(req));
+        log.info("addContractPath start. param:{}", JsonUtils.toJSONString(req));
         return contractService.addContractPath(req);
     }
 

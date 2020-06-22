@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.method;
 
+import com.webank.webase.front.util.JsonUtils;
 import java.time.Duration;
 import java.time.Instant;
 import javax.validation.Valid;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
@@ -55,12 +55,12 @@ public class MethodController extends BaseController {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.RET_SUCCEED);
         Instant startTime = Instant.now();
         log.info("start addMethod. startTime:{} newMethodInputParam:{}",
-            startTime.toEpochMilli(), JSON.toJSONString(newMethodInputParamHandle));
+            startTime.toEpochMilli(), JsonUtils.toJSONString(newMethodInputParamHandle));
 
         methodService.saveMethod(newMethodInputParamHandle);
 
         log.info("end addMethod. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(baseResponse));
         return baseResponse;
     }
 
@@ -79,7 +79,7 @@ public class MethodController extends BaseController {
         baseResponse.setData(method);
 
         log.info("end getBymethodId. useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(baseResponse));
+            Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(baseResponse));
         return baseResponse;
     }
 }

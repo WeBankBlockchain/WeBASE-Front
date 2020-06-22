@@ -60,7 +60,7 @@ public class RabbitMQConfig {
 
     /**
      * 用于发送消息到队列
-     * 传输的message消息体在Message实体类中使用Fastjson进行序列化
+     * 传输的message消息体在Message实体类中使用jackson进行序列化
      * @param rabbitAdmin
      * @return
      */
