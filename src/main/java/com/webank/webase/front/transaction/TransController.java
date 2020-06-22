@@ -15,7 +15,6 @@
  */
 package com.webank.webase.front.transaction;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.transaction.entity.ReqQueryTransHandle;
@@ -23,6 +22,7 @@ import com.webank.webase.front.transaction.entity.ReqSignedTransHandle;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import com.webank.webase.front.util.Address;
+import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -60,7 +60,7 @@ public class TransController extends BaseController {
     @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
     @PostMapping("/handleWithSign")
     public Object transHandle(@Valid @RequestBody ReqTransHandleWithSign reqTransHandle, BindingResult result) throws Exception {
-        log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
+        log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqTransHandle));
 
         Instant startTime = Instant.now();
         log.info("transHandle start startTime:{}", startTime.toEpochMilli());
@@ -84,7 +84,7 @@ public class TransController extends BaseController {
     @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
     @PostMapping("/handle")
     public Object transHandleLocal(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
-        log.info("transHandleLocal start. ReqTransHandle:[{}]", JSON.toJSONString(reqTransHandle));
+        log.info("transHandleLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqTransHandle));
 
         Instant startTime = Instant.now();
         log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
@@ -108,7 +108,7 @@ public class TransController extends BaseController {
     @ApiImplicitParam(name = "reqSignedTransHandle", value = "transaction info", required = true, dataType = "ReqSignedTransHandle")
     @PostMapping("/signed-transaction")
     public TransactionReceipt sendSignedTransaction(@Valid @RequestBody ReqSignedTransHandle reqSignedTransHandle, BindingResult result) throws Exception {
-        log.info("transHandleLocal start. ReqSignedTransHandle:[{}]", JSON.toJSONString(reqSignedTransHandle));
+        log.info("transHandleLocal start. ReqSignedTransHandle:[{}]", JsonUtils.toJSONString(reqSignedTransHandle));
 
         Instant startTime = Instant.now();
         log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
@@ -127,7 +127,7 @@ public class TransController extends BaseController {
     @ApiImplicitParam(name = "reqQueryTransHandle", value = "transaction info", required = true, dataType = "ReqQueryTransHandle")
     @PostMapping("/query-transaction")
     public Object sendQueryTransaction(@Valid @RequestBody ReqQueryTransHandle reqQueryTransHandle, BindingResult result)   {
-        log.info("transHandleLocal start. ReqQueryTransHandle:[{}]", JSON.toJSONString(reqQueryTransHandle));
+        log.info("transHandleLocal start. ReqQueryTransHandle:[{}]", JsonUtils.toJSONString(reqQueryTransHandle));
 
         Instant startTime = Instant.now();
         log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());

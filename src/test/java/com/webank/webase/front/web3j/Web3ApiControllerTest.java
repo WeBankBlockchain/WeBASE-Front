@@ -13,8 +13,8 @@
  */
 package com.webank.webase.front.web3j;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.Application;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.ReqGroupStatus;
 import org.junit.Before;
@@ -85,7 +85,7 @@ public class Web3ApiControllerTest {
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .post("/1/web3/generateGroup").
-                content(JSON.toJSONString(param)).
+                content(JsonUtils.toJSONString(param)).
                 contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.
@@ -120,7 +120,7 @@ public class Web3ApiControllerTest {
         param.setGroupIdList(groupIdList);
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .post("/3/web3/queryGroupStatus")
-                .content(JSON.toJSONString(param))
+                .content(JsonUtils.toJSONString(param))
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
         );
         resultActions.

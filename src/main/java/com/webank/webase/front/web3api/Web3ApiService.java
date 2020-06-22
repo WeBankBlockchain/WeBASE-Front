@@ -13,8 +13,6 @@
  */
 package com.webank.webase.front.web3api;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.config.Web3Config;
@@ -23,7 +21,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.CommonUtils;
-import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.GroupOperateStatus;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
@@ -35,7 +33,6 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
@@ -74,6 +71,8 @@ public class Web3ApiService {
     Constants constants;
     @Autowired
     Web3Config web3Config;
+    @Autowired
+    Web3j independentWeb3j;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -341,7 +340,7 @@ public class Web3ApiService {
             List<NodeStatusInfo> statusList = new ArrayList<>();
             List<String> peerStrList = getGroupPeers(groupId);
             List<String> observerList = getObserverList(groupId);
-            SyncStatus syncStatus = JSON.parseObject(getSyncStatus(groupId), SyncStatus.class);
+            SyncStatus syncStatus = JsonUtils.toJavaObject(getSyncStatus(groupId), SyncStatus.class);
             List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
             if (Objects.isNull(peerStrList) || peerStrList.isEmpty() || consensusList == null) {
                 log.info("end getNodeStatusList. peerStrList is empty");
@@ -364,7 +363,7 @@ public class Web3ApiService {
 
             nodeStatusMap.put(groupId, statusList);
             log.info("end getNodeStatusList. groupId:{} statusList:{}", groupId,
-                    JSON.toJSONString(statusList));
+                    JsonUtils.toJSONString(statusList));
             return statusList;
         } catch (Exception e) {
             log.error("nodeHeartBeat Exception.", e);
@@ -464,19 +463,24 @@ public class Web3ApiService {
         if (StringUtils.isBlank(consensusStatusJson)) {
             return Collections.emptyList();
         }
-        JSONArray jsonArr = JSONArray.parseArray(consensusStatusJson);
-        List<Object> dataIsList =
-                jsonArr.stream().filter(jsonObj -> jsonObj instanceof List).map(arr -> {
-                    Object obj = JSONArray.parseArray(JSON.toJSONString(arr)).get(0);
-                    try {
-                        FrontUtils.object2JavaBean(obj, PeerOfConsensusStatus.class);
-                    } catch (Exception e) {
-                        return null;
-                    }
-                    return arr;
-                }).collect(Collectors.toList());
-        return JSONArray.parseArray(JSON.toJSONString(dataIsList.get(0)),
-                PeerOfConsensusStatus.class);
+        List jsonArr = JsonUtils.toJavaObject(consensusStatusJson, List.class);
+        if (jsonArr == null) {
+            log.error("getPeerOfConsensusStatus error");
+            throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
+        }
+        List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
+        for (int i = 0; i < jsonArr.size(); i++ ) {
+            if (jsonArr.get(i) instanceof List) {
+                List<PeerOfConsensusStatus> tempList = JsonUtils.toJavaObjectList(
+                    JsonUtils.toJSONString(jsonArr.get(i)), PeerOfConsensusStatus.class);
+                if (tempList != null) {
+                    dataIsList.addAll(tempList);
+                } else {
+                    throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
+                }
+            }
+        }
+        return dataIsList;
     }
 
 
@@ -492,12 +496,16 @@ public class Web3ApiService {
         return groupPeers.getGroupPeers();
     }
 
+    /**
+     * get group list and refresh web3j map
+     * @return
+     */
     public List<String> getGroupList() {
         log.debug("getGroupList. ");
         try {
             List<String> groupIdList = getWeb3j().getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
-            refreshWeb3jMapService(groupIdList);
+            refreshWeb3jMap(groupIdList);
             return groupIdList;
         } catch (IOException e) {
             log.error("getGroupList error:[]", e);
@@ -516,19 +524,40 @@ public class Web3ApiService {
         }
     }
 
+    /**
+     * add web3j from chain and remove web3j not in chain
+     * @param groupIdList
+     * @throws FrontException
+     */
     @DependsOn("encryptType")
-    public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
-        log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
-        groupIdList.forEach(gId -> {
-            Integer groupId = new Integer(gId);
-            if(web3jMap.get(groupId) == null) {
-                refreshWeb3jMap(groupId);
-            }
-        });
+    public void refreshWeb3jMap(List<String> groupIdList) throws FrontException {
+        log.debug("refreshWeb3jMap groupIdList:{}", groupIdList);
+        // if localGroupIdList not contain group in groupList from chain, add it
+        groupIdList.stream()
+            .filter(groupId ->
+                web3jMap.get(Integer.parseInt(groupId)) == null)
+            .forEach(group2Init ->
+                initWeb3j(Integer.parseInt(group2Init)));
+
+        Set<Integer> localGroupIdList = web3jMap.keySet();
+        log.debug("refreshWeb3jMap localGroupList:{}", localGroupIdList);
+        // if local web3j map contains group that not in groupList from chain
+        // remove it from local web3j map
+        localGroupIdList.stream()
+            // not contains in groupList from chain
+            .filter(groupId ->
+                !groupIdList.contains(String.valueOf(groupId)))
+            .forEach(group2Remove ->
+                web3jMap.remove(group2Remove));
     }
 
-    private synchronized void refreshWeb3jMap(int groupId) {
-        log.info("refreshWeb3jMap groupId:{}", groupId);
+    /**
+     * init a new web3j of group id, add in groupChannelConnectionsConfig's connections
+     * @param groupId
+     * @return
+     */
+    private synchronized Web3j initWeb3j(int groupId) {
+        log.info("initWeb3j of groupId:{}", groupId);
         List<ChannelConnections> channelConnectionsList =
                 groupChannelConnectionsConfig.getAllChannelConnections();
         ChannelConnections channelConnections = new ChannelConnections();
@@ -543,7 +572,7 @@ public class Web3ApiService {
         try {
             service.run();
         } catch (Exception e) {
-            log.error("refreshWeb3jMap fail. groupId:{} error:[]", groupId, e);
+            log.error("initWeb3j fail. groupId:{} error:[]", groupId, e);
             throw new FrontException("refresh web3j failed");
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -551,6 +580,7 @@ public class Web3ApiService {
         channelEthereumService.setChannelService(service);
         Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
         web3jMap.put(groupId, web3j);
+        return web3j;
     }
 
     // get all peers of chain
@@ -600,7 +630,7 @@ public class Web3ApiService {
      * getNodeInfo.
      */
     public Object getNodeInfo() {
-        return JSON.parse(nodeConfig.toString());
+        return JsonUtils.toJavaObject(nodeConfig.toString(), Object.class);
     }
 
     public int getPendingTransactions(int groupId) throws IOException {
@@ -713,7 +743,7 @@ public class Web3ApiService {
                 getWeb3j().startGroup(groupId).send().getStatus(), GroupOperateStatus.class);
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            refreshWeb3jMap(groupId);
+            initWeb3j(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("startGroup fail:{}", status.getMessage());
@@ -837,7 +867,8 @@ public class Web3ApiService {
         Set<Integer> iSet = web3jMap.keySet();
         if (iSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+            // get default web3j of integer max value
+            return independentWeb3j;
         }
         // get random index to get web3j
         Integer index = iSet.iterator().next();
@@ -851,6 +882,8 @@ public class Web3ApiService {
      */
     public Web3j getWeb3j(Integer groupId) {
         if (web3jMap.isEmpty()) {
+            // refresh group list
+            getGroupList();
             log.error("web3jMap is empty, groupList empty! please check your node status");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
         }

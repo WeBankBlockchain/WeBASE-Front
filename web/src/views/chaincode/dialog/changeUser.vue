@@ -40,7 +40,7 @@
                 </td>
                 <td>
                     <div v-for='(item,index) in inputs' :key='item.name'>
-                        <el-input v-model="parameter[index]" style="width: 310px;margin-bottom:10px;" :placeholder="item.type">
+                        <el-input v-model.trim="parameter[index]" style="width: 310px;margin-bottom:10px;" :placeholder="item.type">
                             <template slot="prepend">
                                 <span class="parame-item-name" :title="item.name">{{item.name}}</span>
                             </template>

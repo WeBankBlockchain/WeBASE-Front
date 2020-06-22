@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.transaction;
 
-import com.alibaba.fastjson.JSON;
+
 import com.webank.webase.front.Application;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.precompiledapi.PrecompiledCommonInfo;
@@ -42,7 +42,7 @@ public class TransactionServiceTest {
 ////        transService.signMessage(1, web3jHashMap.get(1), 100001, contractAddr, );
 //        ReqTransHandleWithSign param = new ReqTransHandleWithSign();
 //        String abi = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"n\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}]";
-//        List<Object> abiList = JSON.parseArray(abi, Object.class);
+//        List<Object> abiList = JsonUtils.toJavaObjectList(abi, Object.class);
 //        param.setContractAbi(abiList);
 //        param.setFuncName("set");
 //        String funParam = " [\"22\"]";
