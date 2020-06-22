@@ -74,12 +74,15 @@ public class ConstantCode {
     public static final RetCode KEYSTORE_NOT_EXIST = RetCode.mark(201040, "private key not exists");
     public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(201041, "external user's appId and signUserId cannot be empty");
     public static final RetCode NO_SOL_FILES = RetCode.mark(201042, "There is no sol files in source");
-    public static final RetCode ENCODE_STR_CANNOT_BE_NULL = RetCode.mark(201044, "encode string can not be empty!");
-    public static final RetCode TRANSACTION_FAILED = RetCode.mark(201045, "transaction failed!");
-
-    // dynamic group manage
     public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201043, "invalid group operate type");
+    // freeze contract
     public static final RetCode INVALID_DATA_TYPE = RetCode.mark(201044, "invalid data type");
+    // tx channel
+    public static final RetCode ENCODE_STR_CANNOT_BE_NULL = RetCode.mark(201045, "encode string can not be empty!");
+    public static final RetCode TRANSACTION_FAILED = RetCode.mark(201046, "transaction failed!");
+
+    public static final RetCode FAIL_PARSE_JSON = RetCode.mark(201050, "Fail to parse json");
+    public static final RetCode GET_CONSENSUS_STATUS_FAIL = RetCode.mark(201051, "get consensus status fail");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");

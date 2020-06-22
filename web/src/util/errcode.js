@@ -192,6 +192,10 @@ let errCode = {
         en: "external user's appId and signUserId cannot be empty",
         zh: '外部用户的appId和signUserId不能为空'
     },
+    "201042": {
+        en: "There is no sol files in source",
+        zh: '源文件中没有sol文件'
+    },
     "201043": {
         en: "Invalid group operate type",
         zh: '无效的群组操作类型'
@@ -199,6 +203,14 @@ let errCode = {
     "201044": {
         en: "Invalid data type",
         zh: '无效的数据类型'
+    },
+    "201045": {
+        en: "Encode string can not be empty",
+        zh: '编码字符串不能为空'
+    },
+    "201046": {
+        en: "Transaction failed!",
+        zh: '交易失败!'
     },
     "201100": {
         en: "Params not fit",
@@ -736,7 +748,10 @@ let errCode = {
         en: "Pem file content error",
         zh: "Pem文件内容错误"
     },
-
+    "202111": {
+        en: "Fail to parse json",
+        zh: "解析json失败"
+    },
     "302000": {
         en: "user not logged in",
         zh: '未登录的用户'
