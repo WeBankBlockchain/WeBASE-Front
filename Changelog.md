@@ -3,6 +3,7 @@
 **Fix**
 - 移除Fastjson，替换为Jackson 2.11.0; web3sdk升级为2.4.1
 - 升级依赖包：spring: 4.3.27; log4j: 2.13.3; slf4j: 1.7.30; netty-all: 4.1.44+; guava: 29.0;
+- 修改`/contract/contractList`接口分页页码`pageNumber`从0开始改为1开始
 
 **兼容性**
 - 支持FISCO-BCOS v2.4.0 及以上版本
