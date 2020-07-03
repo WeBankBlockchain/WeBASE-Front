@@ -143,6 +143,4 @@ public class FrontUtils {
         }
         return JsonUtils.toJavaObjectList(input, String.class);
     }
-
-
 }
