@@ -98,8 +98,6 @@ public class TransService {
     @Autowired
     private PrecompiledService precompiledService;
 
-
-
     /**
      * transHandleWithSign.
      *
@@ -470,7 +468,6 @@ public class TransService {
         }
 
     }
-
 
     /**
      * send transaction locally

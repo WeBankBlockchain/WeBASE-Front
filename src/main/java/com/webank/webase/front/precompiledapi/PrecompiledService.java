@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.precompile.crud.CRUDService;
@@ -51,32 +50,24 @@ public class PrecompiledService {
     @Autowired
     private PrecompiledWithSignService precompiledWithSignService;
 
-
-
     /**
      * CNS config related
      */
-
     public List<CnsInfo> queryCnsByName(int groupId, String contractName) throws Exception {
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
-
         return cnsService.queryCnsByName(contractName);
     }
 
-
     public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName,
                                                   String version) throws Exception {
-
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
-
         return cnsService.queryCnsByNameAndVersion(contractName, version);
     }
 
     public String getAddressByContractNameAndVersion(int groupId, String contractName,
                                                   String version) throws Exception {
-
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         String contractNameAndVersion = contractName + Constants.SYMPOL + version;
