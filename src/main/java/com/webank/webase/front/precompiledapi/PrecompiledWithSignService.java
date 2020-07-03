@@ -32,7 +32,6 @@ import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
@@ -42,18 +41,6 @@ import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
-import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
-import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
-import static org.fisco.bcos.web3j.precompile.crud.CRUD.FUNC_UPDATE;
-import static org.fisco.bcos.web3j.precompile.crud.TableFactory.FUNC_CREATETABLE;
-import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
-import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 
 /**
  * send raw transaction through webase-sign to call precompiled
