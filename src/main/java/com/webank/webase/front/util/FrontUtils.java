@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.util;
 
-import com.alibaba.fastjson.JSON;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -45,7 +44,7 @@ public class FrontUtils {
 
         Class clazz = param.getClass();
         Field[] fields = clazz.getDeclaredFields(); //all fields
-        if (Objects.isNull(fields) || fields.length == 0) {
+        if (fields.length == 0) {
             log.info("fail buildPredicate. param have not properties");
             return null;
         }
@@ -70,19 +69,6 @@ public class FrontUtils {
 
         Predicate[] p = new Predicate[list.size()];
         return builder.and(list.toArray(p));
-    }
-
-    /**
-     * conver object to java bean.
-     */
-    public static <T> T object2JavaBean(Object obj, Class<T> clazz) {
-        if (obj == null || clazz == null) {
-            log.warn("object2JavaBean. obj or clazz null");
-            return null;
-        }
-        String jsonStr = JSON.toJSONString(obj);
-
-        return JSON.parseObject(jsonStr, clazz);
     }
 
 
@@ -116,13 +102,13 @@ public class FrontUtils {
     /**
      * create file if not exist.
      */
-    public static void createFileIfNotExist(File targetFile, boolean deketeOld) throws IOException {
+    public static void createFileIfNotExist(File targetFile, boolean deleteOld) throws IOException {
         Objects.requireNonNull(targetFile, "fail create file. targetFile is null");
         File parentFile = targetFile.getParentFile();
         if (!parentFile.exists()) {
             parentFile.mkdirs();
         }
-        if (deketeOld) {
+        if (deleteOld) {
             targetFile.deleteOnExit();
         }
 
@@ -144,7 +130,7 @@ public class FrontUtils {
         if(list == null) {
             return null;
         }
-        return JSON.toJSONString(list);
+        return JsonUtils.toJSONString(list);
     }
 
     /**
@@ -155,7 +141,6 @@ public class FrontUtils {
         if(input == null) {
             return null;
         }
-        return JSON.parseArray(input, String.class);
+        return JsonUtils.toJavaObjectList(input, String.class);
     }
-
 }

@@ -40,7 +40,7 @@
                 </td>
                 <td>
                     <div v-for='(item,index) in inputs' :key='item.name'>
-                        <el-input v-model="parameter[index]" style="width: 310px;margin-bottom:10px;" :placeholder="item.type">
+                        <el-input v-model.trim="parameter[index]" style="width: 310px;margin-bottom:10px;" :placeholder="item.type">
                             <template slot="prepend">
                                 <span class="parame-item-name" :title="item.name">{{item.name}}</span>
                             </template>
@@ -52,7 +52,7 @@
                 <td></td>
                 <td>
                     <p class="font-color-ed5454">
-                        <i class="el-icon-info" style="padding-right: 4px;"></i>{{$t('text.deployParameVec')}}
+                        <i class="el-icon-info" style="padding-right: 4px;"></i>{{$t('contracts.paramsInfo')}}
                     </p>
                 </td>
             </tr>
@@ -65,6 +65,7 @@
 </template>
 <script>
 import { queryLocalKeyStores } from "@/util/api";
+import { isJson } from "@/util/util"
 export default {
     name: "changeUser",
     props: ["abi"],
@@ -135,9 +136,21 @@ export default {
         submit: function () {
             this.versionShow = false;
             this.errorInfo = "";
+            var params = []
+            for (let i = 0; i < this.parameter.length; i++) {
+                if (this.parameter[i] && isJson(this.parameter[i])) {
+                    try {
+                        params[i] = JSON.parse(this.parameter[i])
+                    } catch (error) {
+                        console.log(error)
+                    }
+                } else {
+                    params[i] = this.parameter[i];
+                }
+            }
             let data = {
                 userId: this.userId,
-                params: this.parameter
+                params: params
             };
             this.$emit("change", data);
             this.$emit("close");
@@ -180,7 +193,7 @@ export default {
     display: inline-block;
     max-width: 100px;
     overflow: hidden;
-    text-overflow:ellipsis;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 </style>

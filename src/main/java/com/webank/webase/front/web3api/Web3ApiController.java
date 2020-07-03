@@ -15,9 +15,11 @@ package com.webank.webase.front.web3api;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.Address;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
+import com.webank.webase.front.web3api.entity.ReqGroupStatus;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -184,41 +186,50 @@ public class Web3ApiController {
         return web3ApiService.getNodeStatusList(groupId);
     }
 
+    @ApiOperation(value = "getGroupPeers", notes = "get list of group peers")
     @GetMapping("/groupPeers")
     public List<String> getGroupPeers(@PathVariable int groupId) {
         return web3ApiService.getGroupPeers(groupId);
     }
 
+    @ApiOperation(value = "getGroupList", notes = "get list of group id")
     @GetMapping("/groupList")
-    public List<String> getGroupList() throws IOException {
+    public List<String> getGroupList() {
         return web3ApiService.getGroupList();
     }
 
+    @ApiOperation(value = "getNodeIDList", notes = "get list of node id")
     @GetMapping("/nodeIdList")
     public List<String> getNodeIDList() throws IOException {
-        return web3ApiService.getNodeIDList();
+        return web3ApiService.getNodeIdList();
     }
 
+    @ApiOperation(value = "getPeers", notes = "get list of peers")
     @GetMapping("/peers")
     public List<Peers.Peer> getPeers(@PathVariable int groupId) {
         return web3ApiService.getPeers(groupId);
     }
 
+    @ApiOperation(value = "getPendingTransactionCount", notes = "get count of pending transactions count")
     @GetMapping("/pending-transactions-count")
-    public int getPendingTransactions(@PathVariable int groupId) throws IOException {
+    public int getPendingTransactionCount(@PathVariable int groupId) throws IOException {
         return web3ApiService.getPendingTransactions(groupId);
     }
 
+    @ApiOperation(value = "getConsensusStatus", notes = "get consensus status of group")
     @GetMapping("/consensusStatus")
     public String getConsensusStatus(@PathVariable int groupId) {
         return web3ApiService.getConsensusStatus(groupId);
     }
 
+    @ApiOperation(value = "getSyncStatus", notes = "get sync status of group")
     @GetMapping("/syncStatus")
     public String getSyncStatus(@PathVariable int groupId) {
         return web3ApiService.getSyncStatus(groupId);
     }
 
+    @ApiOperation(value = "getSystemConfigByKey", notes = "get system config value by key")
+    @ApiImplicitParam(name = "key", value = "key of system config", required = true, dataType = "String")
     @GetMapping("/systemConfigByKey/{key}")
     public String getSystemConfigByKey(@PathVariable int groupId, @PathVariable String key) {
         return web3ApiService.getSystemConfigByKey(groupId, key);
@@ -230,36 +241,61 @@ public class Web3ApiController {
         return web3ApiService.getNodeInfo();
     }
 
+    @ApiOperation(value = "getSealerList", notes = "get list of group's sealers")
     @GetMapping("/sealerList")
     public List<String> getSealerList(@PathVariable int groupId) throws IOException {
         return web3ApiService.getSealerList(groupId);
     }
 
+    @ApiOperation(value = "getObserverList", notes = "get list of group's observers")
     @GetMapping("/observerList")
     public List<String> getObserverList(@PathVariable int groupId) throws IOException {
         return web3ApiService.getObserverList(groupId);
     }
 
+    @ApiOperation(value = "refresh", notes = "refresh all groups")
     @GetMapping("/refresh")
     public void refresh() {
         // Service of getGroupList will refresh web3jMap
         web3ApiService.getGroupList();
     }
 
+    @ApiOperation(value = "searchByCriteria", notes = "get list of group id")
+    @ApiImplicitParam(name = "input", value = "input of criteria", required = true, dataType = "String")
     @GetMapping("/search")
     public Object searchByCriteria(@PathVariable int groupId, @RequestParam String input) {
         return web3ApiService.searchByCriteria(groupId, input);
     }
 
+    @ApiOperation(value = "generateGroup", notes = "generate a new group")
     @PostMapping("/generateGroup")
     public Object generateGroup(@RequestBody GenerateGroupInfo req)
             throws IOException {
         return web3ApiService.generateGroup(req);
     }
 
+    @ApiOperation(value = "operateGroup", notes = "start/stop/recover/remove/getStatus the group")
+    @ApiImplicitParam(name = "type", value = "group operation type", required = true, dataType = "String")
     @GetMapping("/operateGroup/{type}")
     public Object operateGroup(@PathVariable int groupId, @PathVariable String type)
             throws IOException {
         return web3ApiService.operateGroup(groupId, type);
     }
+
+    /**
+     * get group status of front's node
+     * @param groupIdList
+     * @return map of <groupId, status>
+     *     status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
+     */
+	@ApiOperation(value = "getGroupStatus", notes = "getStatus of the group id in the list")
+	@ApiImplicitParam(name = "groupIdList", value = "group id list of string", required = true, dataType = "ReqGroupStatus")
+	@PostMapping("/queryGroupStatus")
+	public BaseResponse getGroupStatus(@RequestBody ReqGroupStatus groupIdList)
+			throws IOException {
+        if (groupIdList.getGroupIdList().isEmpty()) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY);
+        }
+		return web3ApiService.getGroupStatus(groupIdList.getGroupIdList());
+	}
 }

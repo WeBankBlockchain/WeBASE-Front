@@ -1,3 +1,41 @@
+### v1.3.2(2020-06-17)
+
+**Fix**
+- 移除Fastjson，替换为Jackson 2.11.0; web3sdk升级为2.4.1
+- 升级依赖包：spring: 4.3.27; log4j: 2.13.3; slf4j: 1.7.30; netty-all: 4.1.44+; guava: 29.0;
+- 修改`/contract/contractList`接口分页页码`pageNumber`从0开始改为1开始
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本
+- WeBASE-Node-Manager v1.3.1+
+- WeBASE-Sign v1.3.1+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+### v1.3.1(2020-06-01)
+
+**Add**
+- 新增动态管理群组接口
+- 新增导入已部署合约的ABI接口，支持导入abi进行合约调用
+- 支持导入.p12格式私钥
+- 新增导入私钥到webase-sign接口
+- 新增BSN分支中合约状态管理接口
+- 引入fisco-solcJ jar包，支持自动切换国密后台编译
+
+**Fix**
+- 修复链上事件通知-订阅合约event中同时订阅多个event和单个event有多个参数的bug
+- 修复web页面中节点监控的入参bug
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本
+- WeBASE-Node-Manager v1.3.1+
+- WeBASE-Sign v1.3.1+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 ### v1.3.0(2020-04-29)
 
 **Add**
@@ -18,7 +56,7 @@
 - 支持FISCO-BCOS v2.0.0-rc1 版本
 - 支持FISCO-BCOS v2.0.0-rc2 版本
 - 支持FISCO-BCOS v2.0.0-rc3 版本
-- 支持FISCO-BCOS v2.0.0 及以上版本
+- 支持FISCO-BCOS v2.0.0 - v2.4.x 版本
 - WeBASE-Web v1.2.2+
 - WeBASE-Node-Manager v1.2.2+
 - WeBASE-Sign v1.2.2+

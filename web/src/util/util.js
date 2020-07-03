@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+"use strict"
 let changeDate = function (date) {
     let newData = new Date(date);
     let Y = newData.getFullYear();
@@ -20,7 +21,7 @@ let changeDate = function (date) {
     let D = newData.getDate() > 9 ? newData.getDate() : "0" + newData.getDate();
     return Y + "-" + M + "-" + D
 };
-
+var _ = require('lodash');
 export function date(date) {
     let newData = new Date(date.getTime());
     let Y = newData.getFullYear();
@@ -218,4 +219,104 @@ export function unique(array, onlyKey) {
         finalResult.push(result[key]);
     }
     return finalResult;
+}
+/**
+* array:[]
+* */
+export function unique1(array) {
+    var tmp = Array.from(new Set(array));
+    return tmp;
+}
+export function isJson(str) {
+    if (typeof str == 'string') {
+        try {
+            var obj = JSON.parse(str);
+            if (typeof obj == 'object' && obj) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (e) {
+            console.log('error：' + str + '!!!' + e);
+            return false;
+        }
+    }
+}
+
+export function dataType(type, value) {
+    switch (type) {
+        case 'bool':
+            if ((value === 'true' || value === 'false')) return eval(value.toLowerCase())
+            break;
+        case 'uint[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint8[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint32[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint128[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint256[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'uint8[]':
+            try {
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'bytes32[]':
+            try {
+                var value = value.replace(/\^\[.*\]\$/, '')
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        case 'address[]':
+            try {
+                var value = value.replace(/\^\[.*\]\$/, '')
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
+            break;
+        default:
+            return value
+            break;
+    }
 }

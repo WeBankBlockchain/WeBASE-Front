@@ -22,6 +22,7 @@ import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.ContractAbiUtil;
 import org.fisco.bcos.web3j.abi.TypeReference;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -51,6 +52,11 @@ public class BasicTest extends TestBase {
 
   public static Credentials credentials =
           GenCredential.create("b83261efa42895c38c6c2364ca878f43e77f3cddbc922bf57d0d48070f79feb6");
+  @Test
+  public void testAddressZero() {
+      System.out.println(Address.DEFAULT.toString());
+  }
+
   @Test
   public void getBlockNumber() throws IOException {
     BigInteger blockNumber = web3j.getBlockNumber().send().getBlockNumber();

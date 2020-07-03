@@ -16,24 +16,29 @@
 
 package com.webank.webase.front.keystore;
 
+import com.webank.webase.front.util.CommonUtils;
+import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.utils.Numeric;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 
 public class KeyStoreServiceTest {
 
-    public static final String pemContent = "-----BEGIN PRIVATE KEY-----\n" +
+    private static final String pemContent = "-----BEGIN PRIVATE KEY-----\n" +
             "MIGEAgEAMBAGByqGSM49AgEGBSuBBAAKBG0wawIBAQQgC8TbvFSMA9y3CghFt51/" +
             "XmExewlioX99veYHOV7dTvOhRANCAASZtMhCTcaedNP+H7iljbTIqXOFM6qm5aVs" +
             "fM/yuDBK2MRfFbfnOYVTNKyOSnmkY+xBfCR8Q86wcsQm9NZpkmFK" +
@@ -72,5 +77,30 @@ public class KeyStoreServiceTest {
         String address = credentials.getAddress();
         System.out.println(address);
     }
+
+    @Test
+    public void testNotContainsChinese() {
+        String notContains = "test";
+        String contain = "test中文";
+        boolean flagTrue = CommonUtils.notContainsChinese(notContains);
+        boolean flagFalse = CommonUtils.notContainsChinese(contain);
+        Assert.assertTrue("contains chinese error", !flagFalse);
+        Assert.assertTrue("not contains normal", flagTrue);
+
+    }
+
+    @Test
+	public void testLoadP12() throws UnrecoverableKeyException, InvalidKeySpecException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, CertificateException, IOException {
+		P12Manager p12Manager = new P12Manager();
+		p12Manager.setP12File("0x6399bda67f0ae8d1fdd997a885b8aee32a0c9696.p12");
+		p12Manager.setPassword("123");
+		p12Manager.load();
+		// c5658bbb9b905345e7c057690ec6f50c06dada711d1086820980496b4954fbc7
+		String privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
+		System.out.println("load private key: " + privateKey);
+		String address = GenCredential.create(privateKey).getAddress();
+		System.out.println("address: " + address);
+		Assert.assertTrue("pri error", address.equals("0x6399bda67f0ae8d1fdd997a885b8aee32a0c9696"));
+	}
 
 }

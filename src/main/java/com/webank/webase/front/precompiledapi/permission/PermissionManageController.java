@@ -15,7 +15,6 @@
  */
 package com.webank.webase.front.precompiledapi.permission;
 
-import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
@@ -24,6 +23,7 @@ import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.Address;
 import com.webank.webase.front.util.AddressUtils;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -139,13 +139,13 @@ public class PermissionManageController extends BaseController {
      * get list of user's permission state not paged
      */
     @GetMapping("/sorted/full")
-    public Object gerPermissionStateFull(
+    public BasePageResponse gerPermissionStateFull(
             @RequestParam(defaultValue = "1") int groupId) throws Exception {
         Instant startTime = Instant.now();
         log.info("start gerPermissionStateFull startTime:{}", startTime.toEpochMilli());
         Map<String, PermissionState> resultMap = permissionManageService.getAllPermissionStateList(groupId);
         log.info("end listCns useTime:{} result:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(resultMap));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(resultMap));
         return new BasePageResponse(ConstantCode.RET_SUCCESS, resultMap, resultMap.size());
     }
 
@@ -160,7 +160,7 @@ public class PermissionManageController extends BaseController {
     @ApiOperation(value = "updateUserPermissionState", notes = "update address's all kinds of permissions")
     @ApiImplicitParam(name = "permissionHandle", value = "permission info", required = true, dataType = "PermissionHandle")
     @PostMapping("/sorted")
-    public Object updateUserPermissionStateAfterCheck(@Valid @RequestBody PermissionHandle permissionHandle) throws Exception {
+    public BaseResponse updateUserPermissionStateAfterCheck(@Valid @RequestBody PermissionHandle permissionHandle) throws Exception {
         Instant startTime = Instant.now();
         log.info("start updateUserPermissionStateAfterCheck startTime:{}, permissionHandle:{}",
                 startTime.toEpochMilli(), permissionHandle);
@@ -169,7 +169,7 @@ public class PermissionManageController extends BaseController {
         String userAddress = permissionHandle.getAddress();
         PermissionState permissionState = permissionHandle.getPermissionState();
         try {
-            Object resultState = permissionManageService.updatePermissionStateAfterCheck(groupId,
+            Map<String, Integer> resultState = permissionManageService.updatePermissionStateAfterCheck(groupId,
                     fromAddress, userAddress, permissionState);
             log.info("end updateUserPermissionStateAfterCheck startTime:{}, resultState:{}",
                     Instant.now().toEpochMilli(), resultState);
@@ -290,7 +290,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.grantPermissionManager(groupId, from, address);
         log.info("end grantPermissionManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;
     }
 
@@ -300,7 +300,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.revokePermissionManager(groupId, from, address);
         log.info("end revokePermissionManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;
     }
 
@@ -330,7 +330,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.grantDeployAndCreateManager(groupId, from, address);
         log.info("end grantDeployAndCreateManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;
     }
 
@@ -340,7 +340,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res =  permissionManageService.revokeDeployAndCreateManager(groupId, from, address);
         log.info("end revokeDeployAndCreateManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;
     }
 
@@ -376,7 +376,7 @@ public class PermissionManageController extends BaseController {
                 Object res = permissionManageService
                         .grantUserTableManager(groupId, from, tableName, address);
                 log.info("end grantUserTableManager useTime:{} res:{}",
-                        Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                        Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
                 return res;
             } catch (Exception e) {
                 log.error("end grantUserTableManager for startTime:{}, Exception:{}",
@@ -399,7 +399,7 @@ public class PermissionManageController extends BaseController {
                 Object res = permissionManageService
                         .revokeUserTableManager(groupId, from, tableName, address);
                 log.info("end revokeUserTableManager useTime:{} res:{}",
-                        Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                        Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
                 return res;
             } catch (Exception e) {
                 log.error("end grantUserTableManager for startTime:{}, Exception:{}",
@@ -440,7 +440,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.grantNodeManager(groupId, from, address);
         log.info("end grantNodeManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;
     }
 
@@ -450,7 +450,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.revokeNodeManager(groupId, from, address);
         log.info("end revokeNodeManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;
     }
 
@@ -481,7 +481,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.grantSysConfigManager(groupId, from, address);
         log.info("end grantSysConfigManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;
     }
 
@@ -491,7 +491,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.revokeSysConfigManager(groupId, from, address);
         log.info("end revokeSysConfigManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;
     }
     public Object listSysConfigManager(int groupId, int pageSize, int pageNumber) throws Exception {
@@ -522,7 +522,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.grantCNSManager(groupId, from, address);
         log.info("end grantCNSManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;
     }
 
@@ -532,7 +532,7 @@ public class PermissionManageController extends BaseController {
                 startTime.toEpochMilli(), groupId, from, address);
         String res = permissionManageService.revokeCNSManager(groupId, from, address);
         log.info("end revokeCNSManager useTime:{} res:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), JSON.toJSONString(res));
+                Duration.between(startTime, Instant.now()).toMillis(), JsonUtils.toJSONString(res));
         return res;}
 
     public Object listCNSManager(int groupId, int pageSize, int pageNumber) throws Exception {

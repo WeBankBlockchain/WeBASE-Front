@@ -59,7 +59,7 @@ public class Constants {
     public static final String OPERATE_GROUP_STOP = "stop";
     public static final String OPERATE_GROUP_REMOVE = "remove";
     public static final String OPERATE_GROUP_RECOVER = "recover";
-    public static final String OPERATE_GROUP_GETSTATUS = "getStatus";
+    public static final String OPERATE_GROUP_GET_STATUS = "getStatus";
     public static final String CONSTANT_PREFIX = "constant";
     public static String version;
     public static String chainId;

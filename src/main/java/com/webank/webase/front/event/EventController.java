@@ -16,7 +16,6 @@
 
 package com.webank.webase.front.event;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
@@ -25,6 +24,7 @@ import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.event.entity.*;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -45,7 +45,7 @@ import java.util.List;
  * 待添加鉴权： 需要限制指定的appId订阅对应的queue
  * @author marsli
  */
-@Api(value = "/event", tags = "event notify of contract event log push and new block event")
+@Api(value = "/event", tags = "event push manage controller")
 @Slf4j
 @RestController
 @RequestMapping(value = "event")
@@ -107,7 +107,7 @@ public class EventController extends BaseController {
         String contractAddress = reqContractEventRegister.getContractAddress();
         List<String> topicList = reqContractEventRegister.getTopicList();
         List<Object> contractAbi = reqContractEventRegister.getContractAbi();
-        String abiStr = JSON.toJSONString(contractAbi);
+        String abiStr = JsonUtils.toJSONString(contractAbi);
         AbiUtil.checkAbi(abiStr);
         String exchangeName = reqContractEventRegister.getExchangeName();
         // username as queue name

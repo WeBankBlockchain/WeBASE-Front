@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.util;
 
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.exception.FrontException;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -48,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.utils.Numeric;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -159,7 +159,7 @@ public class CommonUtils {
     }
 
     /**
-     * read File.
+     * read File by String
      * 
      * @param filePath filePath
      * @return
@@ -172,7 +172,7 @@ public class CommonUtils {
         }
         StringBuilder result = new StringBuilder();
         try (InputStream inputStream = new FileInputStream(dirFile);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result.append(line);
@@ -197,7 +197,7 @@ public class CommonUtils {
         }
         List<String> result = new ArrayList<String>();
         try (InputStream inputStream = new FileInputStream(dirFile);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));) {
             String line;
             while ((line = reader.readLine()) != null) {
                 result.add(line);
@@ -272,6 +272,20 @@ public class CommonUtils {
     }
 
     /**
+     * build httpEntity.
+     */
+    public static HttpEntity buildHttpEntity(Object param) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        String paramStr = null;
+        if (Objects.nonNull(param)) {
+            paramStr = JsonUtils.toJSONString(param);
+        }
+        HttpEntity requestEntity = new HttpEntity(paramStr, headers);
+        return requestEntity;
+    }
+
+    /**
      * Object to JavaBean.
      * 
      * @param obj obj
@@ -283,8 +297,7 @@ public class CommonUtils {
             log.warn("Object2JavaBean. obj or clazz null");
             return null;
         }
-        String jsonStr = JSON.toJSONString(obj);
-        return JSON.parseObject(jsonStr, clazz);
+        return JsonUtils.toJavaObject(obj, clazz);
     }
 
     /**
@@ -329,12 +342,23 @@ public class CommonUtils {
     /**
      * 支持数字，字母与下划线"_"
      * 
-     * @param str
+     * @param input
      * @return
      */
-    public static boolean isLetterDigit(String str) {
+    public static boolean isLetterDigit(String input) {
         String regex = "^[a-z0-9A-Z_]+$";
-        return str.matches(regex);
+        return input.matches(regex);
+    }
+
+    /**
+     * 不包含中文
+     */
+    public static boolean notContainsChinese(String input) {
+        if (StringUtils.isBlank(input)) {
+            return true;
+        }
+        String regex = "[^\\u4e00-\\u9fa5]+";
+        return input.matches(regex);
     }
 
     /**
@@ -382,7 +406,7 @@ public class CommonUtils {
     /**
      * getFolderSize.
      * 
-     * @param file
+     * @param
      * @return
      */
     public static long getFolderSize(File f) {

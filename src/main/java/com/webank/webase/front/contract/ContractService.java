@@ -13,15 +13,10 @@
  */
 package com.webank.webase.front.contract;
 
-import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.ABI;
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.BIN;
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.INTERFACE;
-import static org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options.METADATA;
-import com.alibaba.fastjson.JSON;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
+import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
@@ -43,7 +38,9 @@ import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
+import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -69,14 +66,14 @@ import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
-import org.fisco.bcos.web3j.solidity.compiler.CompilationResult;
-import org.fisco.bcos.web3j.solidity.compiler.CompilationResult.ContractMetadata;
-import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler;
-import org.fisco.bcos.web3j.solidity.compiler.SolidityCompiler.Options;
+import org.fisco.solc.compiler.CompilationResult;
+import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -86,6 +83,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
 
 /**
  * contract management.
@@ -108,6 +111,8 @@ public class ContractService {
     private Web3ApiService web3ApiService;
     @Autowired
     private Constants constants;
+    @Autowired
+    private PermissionManageService permissionManageService;
 
     /**
      * sendAbi.
@@ -194,8 +199,15 @@ public class ContractService {
         String contractAddress;
         // deploy locally or webase-sign
         if (doLocally) {
+            // check deploy permission
+            checkDeployPermission(req.getGroupId(), req.getUser());
             contractAddress = deployLocally(req);
         } else {
+            // check deploy permission
+            String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
+            if (StringUtils.isNotBlank(userAddress)) {
+                checkDeployPermission(req.getGroupId(), userAddress);
+            }
             contractAddress = deployWithSign(req);
         }
         if (StringUtils.isNotBlank(contractAddress)) {
@@ -215,7 +227,7 @@ public class ContractService {
      */
     public String deployWithSign(ReqDeploy req) throws Exception {
         int groupId = req.getGroupId();
-//        String version = req.getVersion();
+        String signUserId = req.getSignUserId();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
@@ -224,18 +236,24 @@ public class ContractService {
         Web3j web3j = web3ApiService.getWeb3j(groupId);
 
         if (web3j == null) {
-            new FrontException(GROUPID_NOT_EXIST);
+            throw new FrontException(GROUPID_NOT_EXIST);
+        }
+
+        // check deploy permission
+        String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
+        if (StringUtils.isNotBlank(userAddress)) {
+            checkDeployPermission(req.getGroupId(), userAddress);
         }
 
         String contractName = req.getContractName();
         ContractAbiUtil.VersionEvent versionEvent =
-                ContractAbiUtil.getVersionEventFromAbi(contractName, req.getAbiInfo());
+                ContractAbiUtil.getVersionEventFromAbi(contractName, abiInfos);
         String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
 
 
         // data sign
         String data = bytecodeBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, web3j, req.getSignUserId(), "", data);
+        String signMsg = transService.signMessage(groupId, web3j, signUserId, "", data);
         if (StringUtils.isBlank(signMsg)) {
             throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
         }
@@ -244,7 +262,6 @@ public class ContractService {
         transService.sendMessage(web3j, signMsg, transFuture);
         TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
         String contractAddress = receipt.getContractAddress();
-        
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -253,19 +270,21 @@ public class ContractService {
      * deploy locally, not through webase-sign
      */
     public String deployLocally(ReqDeploy req) throws Exception {
+        int groupId = req.getGroupId();
+        String userAddress = req.getUser();
+        // check deploy permission
+        checkDeployPermission(groupId, userAddress);
         String contractName = req.getContractName();
-//        String version = req.getVersion();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
-        int groupId = req.getGroupId();
 
         ContractAbiUtil.VersionEvent versionEvent =
                 ContractAbiUtil.getVersionEventFromAbi(contractName, abiInfos);
         String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
 
         // get privateKey
-        Credentials credentials = keyStoreService.getCredentials(req.getUser());
+        Credentials credentials = keyStoreService.getCredentials(userAddress);
         // contract deploy
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
@@ -344,10 +363,10 @@ public class ContractService {
                             .send();
         } catch (TransactionException e) {
             log.error("commonContract deploy failed.", e);
-            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED);
+            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED, e.getMessage());
         } catch (Exception e) {
             log.error("commonContract deploy failed.", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR, e.getMessage());
         }
         log.info("commonContract deploy success. contractAddress:{}",
                 commonContract.getContractAddress());
@@ -372,12 +391,6 @@ public class ContractService {
         return baseRsp;
     }
 
-    @Deprecated
-    public String getAddressByContractNameAndVersion(int groupId, String name, String version) {
-        return web3ApiService.getCnsService(groupId)
-                .getAddressByContractNameAndVersion(name + ":" + version);
-    }
-
     public static FileContentHandle compileToJavaFile(String contractName,
             List<AbiDefinition> abiInfo, String contractBin, String packageName)
             throws IOException {
@@ -385,7 +398,7 @@ public class ContractService {
 
         File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
         FrontUtils.createFileIfNotExist(abiFile, true);
-        FileUtils.writeStringToFile(abiFile, JSON.toJSONString(abiInfo));
+        FileUtils.writeStringToFile(abiFile, JsonUtils.toJSONString(abiInfo));
         File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
         FrontUtils.createFileIfNotExist(binFile, true);
         FileUtils.writeStringToFile(binFile, contractBin);
@@ -393,7 +406,7 @@ public class ContractService {
         generateJavaFile(packageName, abiFile, binFile);
 
         String outputDirectory = "";
-        if (!packageName.isEmpty()) {
+        if (StringUtils.isNotBlank(packageName)) {
             outputDirectory = packageName.replace(".", File.separator);
         }
         if (contractName.length() > 1) {
@@ -417,6 +430,7 @@ public class ContractService {
         }
     }
 
+
     /**
      * delete contract by contractId.
      */
@@ -433,7 +447,7 @@ public class ContractService {
      * save contract data.
      */
     public Contract saveContract(ReqContractSave contractReq) {
-        log.debug("start saveContract contractReq:{}", JSON.toJSONString(contractReq));
+        log.debug("start saveContract contractReq:{}", JsonUtils.toJSONString(contractReq));
         if (contractReq.getContractId() == null) {
             // new
             return newContract(contractReq);
@@ -532,7 +546,9 @@ public class ContractService {
             contractPathRepository.save(contractPathVo);
         }
         // findContractByPage
-        Pageable pageable = new PageRequest(param.getPageNumber(), param.getPageSize(),
+       // page start from index 1 instead of 0
+        int pageNumber = param.getPageNumber() - 1;
+        Pageable pageable = new PageRequest(pageNumber, param.getPageSize(),
                 Direction.DESC, "modifyTime");
         Page<Contract> contractPage = contractRepository.findAll(
                 (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
@@ -623,7 +639,10 @@ public class ContractService {
      */
     public RspContractCompile contractCompile(String contractName, String sourceBase64) {
         File contractFile = null;
+
         try {
+            // whether use guomi to compile
+            boolean useSM2 = EncryptType.encryptType == GMStatus.GUOMI.getValue();
             // decode
             byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
             String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
@@ -632,16 +651,16 @@ public class ContractService {
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
             // compile
             SolidityCompiler.Result res =
-                    SolidityCompiler.compile(contractFile, true, ABI, BIN, INTERFACE, METADATA);
-            if ("".equals(res.output)) {
-                log.error("contractCompile error", res.errors);
-                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.errors);
+                    SolidityCompiler.compile(contractFile, useSM2, true, ABI, BIN, INTERFACE, METADATA);
+            if ("".equals(res.getOutput())) {
+                log.error("contractCompile error", res.getErrors());
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.getErrors());
             }
             // compile result
-            CompilationResult result = CompilationResult.parse(res.output);
+            CompilationResult result = CompilationResult.parse(res.getOutput());
             CompilationResult.ContractMetadata meta = result.getContract(contractName);
             RspContractCompile compileResult =
-                    new RspContractCompile(contractName, meta.abi, meta.bin, res.errors);
+                    new RspContractCompile(contractName, meta.abi, meta.bin, res.getErrors());
             return compileResult;
         } catch (Exception ex) {
             log.error("contractCompile error", ex);
@@ -676,6 +695,8 @@ public class ContractService {
             log.error("There is no sol files in source.");
             throw new FrontException(ConstantCode.NO_SOL_FILES);
         }
+        // whether use guomi to compile
+        boolean useSM2 = EncryptType.encryptType == GMStatus.GUOMI.getValue();
 
         List<RspMultiContractCompile> compileInfos = new ArrayList<>();
         for (File solFile : solFiles) {
@@ -683,16 +704,16 @@ public class ContractService {
                     solFile.getName().substring(0, solFile.getName().lastIndexOf("."));
             // compile
             SolidityCompiler.Result res =
-                    SolidityCompiler.compile(solFile, true, Options.ABI, Options.BIN);
+                    SolidityCompiler.compile(solFile, useSM2, true, ABI, SolidityCompiler.Options.BIN);
             // check result
             if (res.isFailed()) {
                 log.error("multiContractCompile fail. contract:{} compile error. {}", contractName,
-                        res.errors);
-                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.errors);
+                        res.getErrors());
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.getErrors());
             }
             // parse result
-            CompilationResult result = CompilationResult.parse(res.output);
-            List<ContractMetadata> contracts = result.getContracts();
+            CompilationResult result = CompilationResult.parse(res.getOutput());
+            List<CompilationResult.ContractMetadata> contracts = result.getContracts();
             if (contracts.size() > 0) {
                 RspMultiContractCompile compileInfo = new RspMultiContractCompile();
                 compileInfo.setContractName(contractName);
@@ -743,6 +764,30 @@ public class ContractService {
         contractPathKey.setGroupId(groupId);
         contractPathKey.setContractPath(contractPath);
         contractPathRepository.delete(contractPathKey);
+    }
+
+    /**
+     * check user deploy permission
+     */
+    private void checkDeployPermission(int groupId, String userAddress) {
+        // get deploy permission list
+        try {
+            List<PermissionInfo> deployUserList = permissionManageService.listPermissionManager(groupId);
+            // check user in the list,
+            if (deployUserList.isEmpty()) {
+                return;
+            } else {
+                long count = 0;
+                count = deployUserList.stream().filter( admin -> admin.getAddress().equals(userAddress)).count();
+                // if not in the list, permission denied
+                if (count == 0) {
+                    log.error("checkDeployPermission permission denied for user:{}", userAddress);
+                    throw new FrontException(ConstantCode.PERMISSION_DENIED);
+                }
+            }
+        } catch (Exception e) {
+            log.error("checkDeployPermission get list error:{}", e.getMessage());
+        }
     }
 
 }

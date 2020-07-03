@@ -79,7 +79,23 @@
                     </div>
                 </li>
             </ul>
+
         </div>
+        <!-- <div class="solc-wrapper">
+            <div class="select-solc">
+                <el-select v-model="version" placeholder="请选择" @change="changeVersion">
+                    <el-option v-for="item in versionOptions" :key="item.value" :label="item.label" :value="item.value">
+                        <span style="float: left">{{ item.label }}</span>
+                        <span style=" color: #8492a6; font-size: 13px" class="el-icon-circle-close" @click="deleteSloc(item.solcId)"></span>
+                    </el-option>
+                </el-select>
+            </div>
+            <div class="import-solc cursor-pointer" :title="$t('title.uploadSolc')">
+                <el-upload ref="upload" action :http-request="uploadSolc" :limit="1" :on-exceed="handleExceed" :show-file-list="false" accept=".js">
+                    <i class="el-icon-upload2"></i>
+                </el-upload>
+            </div>
+        </div> -->
         <add-folder v-if="foldershow" :foldershow="foldershow" @close='folderClose' @success='folderSuccess'></add-folder>
         <add-file v-if="fileshow" :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
         <select-catalog v-if='cataLogShow' :show='cataLogShow' @success='catalogSuccess($event)' @close='catalogClose'></select-catalog>
@@ -89,11 +105,19 @@
 import addFolder from "../dialog/addFolder";
 import addFile from "../dialog/addFile";
 import selectCatalog from "../dialog/selectCatalog";
-import { getContractList, saveChaincode, deleteCode } from "@/util/api";
+import { getContractList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion } from "@/util/api";
 import Bus from "@/bus";
 import Clickoutside from 'element-ui/src/utils/clickoutside'
 export default {
     name: "contractCatalog",
+    props: {
+        solcVersionOptions: {
+            type: Array
+        },
+        solcVersion: {
+            type: String
+        }
+    },
     components: {
         "add-folder": addFolder,
         "add-file": addFile,
@@ -121,8 +145,20 @@ export default {
             folderId: null,
             modifyState: false,
             modifyParam: {},
-            uploadFiles: []
+            uploadFiles: [],
+            version: "",
+            versionOptions: []
+
         };
+    },
+    watch: {
+        solcVersionOptions(val){
+            this.versionOptions = val
+            // this.querySolcList()
+        },
+        solcVersion(val) {
+            this.version = this.solcVersion
+        }
     },
     beforeDestroy() {
         Bus.$off("compile");
@@ -165,6 +201,7 @@ export default {
                 }
             })
         })
+        // this.querySolcList()
     },
     directives: {
         Clickoutside,
@@ -476,7 +513,7 @@ export default {
         getContracts(list) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                pageNumber: 0,
+                pageNumber: 1,
                 pageSize: 500
             };
             getContractList(data)
@@ -497,7 +534,7 @@ export default {
                                 if (value.contractPath != "/") {
                                     let item = {
                                         folderName: value.contractPath,
-                                        folderId: new Date().getTime(),
+                                        folderId: new Date().getTime() + `${value.contractPath}`,
                                         folderActive: false,
                                         groupId: localStorage.getItem("groupId"),
                                         modifyTime: value.modifyTime
@@ -744,6 +781,159 @@ export default {
                     })
                 })
                 .catch(_ => { });
+        },
+        handleExceed(files, fileList) {
+            if (files.length > 1) {
+                this.$message({
+                    type: 'warning',
+                    message: this.$t('contracts.limit_1')
+                })
+            }
+        },
+        querySolcList() {
+            solcList()
+                .then(res => {
+                    if (res.data.code === 0) {
+                        var array = []
+                        res.data.data.forEach(item=>{
+                            array.push({
+                                value: item.solcName,
+                                label: item.solcName,
+                                solcId: item.solcId
+                            })
+                        })
+                        console.log(array)
+                        this.versionOptions = this.versionOptions.concat(array)
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        })
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+
+        },
+        uploadSolc(param) {
+            var reader = new FileReader(), self = this;
+            var filename = param.file.name.substring(0, param.file.name.lastIndexOf("."));
+            var version = param.file.name;
+            // new FormData()
+            reader.readAsText(param.file, "UTF-8");
+            reader.onload = function (e) {
+                var fileString = e.target.result;
+                self.queryUploadSolc(param.file, filename, version)
+            }
+            this.$refs.upload.clearFiles()
+        },
+        queryUploadSolc(file, filename, version) {
+            this.$emit('uploadLoading', true)
+            var form = new FormData()
+            form.append('fileName', filename)
+            form.append('solcFile', file)
+            form.append('description', '')
+            solcUpload(form)
+                .then(res => {
+                    console.log(res)
+                    this.$emit('uploadLoading', false)
+                    if (res.data.code === 0) {
+
+
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        })
+                    }
+                })
+                .catch(err => {
+                    this.$emit('uploadLoading', false)
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+
+        },
+        queryDownloadSolc() {
+            // solcDownload()
+
+        },
+        changeVersion(val) {
+            // sessionStorage.setItem('solcVersion', val)
+            // this.$router.push('blank')
+            console.log(val)
+            this.$emit('uploadLoading', true)
+            let param = {
+                fileName: 'soljson-v0.4.25+commit.59dbf8f1.js'
+            }
+            readSolcVersion('soljson-v0.4.25+commit.59dbf8f1.js')
+                .then(res => {
+                    console.log(res)
+                    this.$emit('uploadLoading', false)
+                    if (res.data.code === 0) {
+
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        })
+                    }
+                })
+                .catch(err => {
+                    this.$emit('uploadLoading', false)
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+            // this.loadScript(val)
+        },
+        async  loadScript(src) {
+            await new Promise(resolve => {
+                // 如果已经加载了本js，直接调用回调
+                // if (this._checkIsLoadScript(src)) {
+                //     resolve();
+                // }
+
+                var scriptNode = document.createElement("script");
+                scriptNode.setAttribute("type", "text/javascript");
+                scriptNode.setAttribute("src", src);
+                scriptNode.setAttribute('id', 'soljson');
+                if (document.getElementById('soljson')) {
+                    document.getElementById('soljson').remove()
+                    document.head.append(scriptNode)
+                }
+                if (scriptNode.readyState) { //IE 判断
+                    scriptNode.onreadystatechange = () => {
+                        if (scriptNode.readyState == "complete" || scriptNode.readyState == 'loaded') {
+                            resolve();
+                        }
+                    }
+                } else {
+                    scriptNode.onload = () => {
+                        console.log("script loaded");
+                        resolve();
+                    }
+                }
+            })
+        },
+        _checkIsLoadScript(src) {
+            let scriptObjs = document.getElementsByTagName('script');
+            for (let sObj of scriptObjs) {
+                if (sObj.src == src) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        deleteSloc(val) {
+            console.log(val)
         }
     }
 };
@@ -778,7 +968,6 @@ export default {
     margin-top: -30px;
     width: 100%;
     opacity: 0;
-    /* -ms-filter: "alpha(opacity=0)"; */
     z-index: 9;
     cursor: pointer;
 }
@@ -824,7 +1013,7 @@ export default {
 }
 .contract-menu-content {
     overflow: auto;
-    height: calc(100% - 50px);
+    height: calc(100% - 86px);
 }
 .contract-menu-content >>> .el-input__inner {
     width: 100px;
@@ -853,6 +1042,21 @@ export default {
 }
 .contract-menu-handle-list:hover {
     color: rgb(55, 238, 242);
+}
+.solc-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+.solc-wrapper >>> .el-select {
+    width: 100%;
+}
+.select-solc {
+    width: 100%;
+}
+.import-solc {
+    border: 1px solid;
+    height: 36px;
+    line-height: 36px;
 }
 </style>
 

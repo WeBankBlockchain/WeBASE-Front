@@ -38,7 +38,6 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_SIGN_USER_ID_IS_EMPTY = RetCode.mark(201008, "signUserId cannot be empty");
 
     /* general error */
-    public static final RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201008, "contract's current version has been deployed");
     public static final RetCode CONTRACT_NOT_DEPLOY_ERROR = RetCode.mark(201009, "contract is not deployed");
     public static final RetCode ABI_SAVE_ERROR = RetCode.mark(201010, "save abi error");
     public static final RetCode IN_FUNCPARAM_ERROR = RetCode.mark(201011, "contract funcParam is error");
@@ -47,7 +46,8 @@ public class ConstantCode {
     public static final RetCode CONTRACT_DEPLOY_ERROR = RetCode.mark(201014, "contract deploy error");
     public static final RetCode PRIVATEKEY_IS_NULL = RetCode.mark(201015, "user's privateKey is null");
     public static final RetCode FILE_IS_NOT_EXIST = RetCode.mark(201016, "file is not exist");
-    public static final RetCode GET_NODE_CONFIG_FAILE = RetCode.mark(201017, "failed to get node config");
+    public static final RetCode CONTRACT_DEPLOYED_ERROR = RetCode.mark(201017, "contract's current version has been deployed");
+//    public static final RetCode GET_NODE_CONFIG_FAILE = RetCode.mark(201017, "failed to get node config");
     public static final RetCode BLOCKNUMBER_AND_PBFTVIEW_UNCHANGED = RetCode.mark(201018, "blockNumber and pbftView unchanged");
     public static final RetCode IN_FUNCTION_ERROR = RetCode.mark(201019, "request function is error");
     public static final RetCode TRANSACTION_QUERY_FAILED = RetCode.mark(201020, "transaction query from chain failed");
@@ -75,15 +75,20 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY =  RetCode.mark(201041, "external user's appId and signUserId cannot be empty");
     public static final RetCode NO_SOL_FILES = RetCode.mark(201042, "There is no sol files in source");
     public static final RetCode INVALID_GROUP_OPERATE_TYPE = RetCode.mark(201043, "invalid group operate type");
+    // freeze contract
     public static final RetCode INVALID_DATA_TYPE = RetCode.mark(201044, "invalid data type");
-    public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201045, "group operate fail");
+    // tx channel
+    public static final RetCode ENCODE_STR_CANNOT_BE_NULL = RetCode.mark(201045, "encode string can not be empty!");
+    public static final RetCode TRANSACTION_FAILED = RetCode.mark(201046, "transaction failed!");
+
+    public static final RetCode FAIL_PARSE_JSON = RetCode.mark(201050, "Fail to parse json");
+    public static final RetCode GET_CONSENSUS_STATUS_FAIL = RetCode.mark(201051, "get consensus status fail");
 
     /* system error */
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
     public static final RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
-    public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3jMap of groupId is null, please try again");
+    public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3j instance of groupId is null, please try again");
     public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "groupList error for no group");
-    public static final RetCode SYSTEM_ERROR_CNSSERVICE_NULL = RetCode.mark(101005, "cnsServiceMap of groupId is null, please try again");
 
     /* precompiled success */
     public static final RetCode RET_SUCCESS = RetCode.mark(0, "success");
@@ -103,23 +108,43 @@ public class ConstantCode {
     public static final String PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY = "{\"code\":201111,\"message\":\"Permission state cannot be all empty\"}";
     public static final String PARAM_FAIL_CONTRACT_ADDRESS_EMPTY = "{\"code\":201112,\"message\":\"contract address cannot be empty\"}";
     public static final String PARAM_FAIL_CONTRACT_HANDLE_TYPE_EMPTY = "{\"code\":201113,\"message\":\"contract handle type cannot be empty\"}";
-    public static final RetCode PARAM_FAIL_GRANT_ADDRESS_EMPTY = RetCode.mark(201114, "grantAddress cannot be empty");
+    public static final RetCode PARAM_FAIL_GRANT_ADDRESS_EMPTY = RetCode.mark(201114, "grant Address cannot be empty");
     public static final RetCode INVALID_CONTRACT_HANDLE_TYPE = RetCode.mark(201115, "invalid contract handle type");
     public static final RetCode FAIL_CONTRACT_HANDLE = RetCode.mark(201116, "contract status handle fail");
-    /* precompiled runtime check or error */
+
+    // group operate error code from sdk
+    public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201120, "group operate fail");
+    public static final RetCode NODE_INTERNAL_ERROR = RetCode.mark(201121, "node internal error");
+    public static final RetCode GROUP_ALREADY_EXISTS = RetCode.mark(201122, "group already exists");
+    public static final RetCode GROUP_ALREADY_RUNNING = RetCode.mark(201123, "group already running");
+    public static final RetCode GROUP_ALREADY_STOPPED = RetCode.mark(201124, "group already stopped");
+    public static final RetCode GROUP_ALREADY_DELETED = RetCode.mark(201125, "group already deleted");
+    public static final RetCode GROUP_NOT_FOUND = RetCode.mark(201126, "group not found");
+    public static final RetCode GROUP_OPERATE_INVALID_PARAMS = RetCode.mark(201127, "group operate param error");
+    public static final RetCode PEERS_NOT_CONNECTED = RetCode.mark(201128, "group peers not connected");
+    public static final RetCode GENESIS_CONF_ALREADY_EXISTS = RetCode.mark(201129, "group genesis conf already exists");
+    public static final RetCode GROUP_CONF_ALREADY_EXIST = RetCode.mark(201130, "group config.ini already exists");
+    public static final RetCode GENESIS_CONF_NOT_FOUND = RetCode.mark(201131, "group genesis conf not found");
+    public static final RetCode GROUP_CONF_NOT_FOUND = RetCode.mark(201132, "group config.ini not found");
+    public static final RetCode GROUP_IS_STOPPING = RetCode.mark(201133, "group is stopping");
+    public static final RetCode GROUP_NOT_DELETED = RetCode.mark(201134, "group not deleted");
+
+    // contract type param error
+	public static final RetCode CONTRACT_TYPE_ENCODED_ERROR = RetCode.mark(201151, "Unsupported contract param type to encoded");
+	public static final RetCode CONTRACT_TYPE_DECODED_ERROR = RetCode.mark(201152, "Unsupported contract param type to decoded");
+	public static final RetCode CONTRACT_TYPE_PARAM_ERROR = RetCode.mark(201153, "unable to create instance of type, check input params");
+
+	/* precompiled runtime check or error */
     // param
     public static final RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
     public static final RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
     // permission
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied, please check chain administrator permission");
     // sys config
-    public static final RetCode SYSTEM_CONFIG_EXIST = RetCode.mark(201206, "create system config in db fail for already exist");
-    public static final RetCode INVALID_SYSTEM_CONFIG_KEY = RetCode.mark(201207, "system config key is invalid");
     public static final RetCode UNSUPPORTED_SYSTEM_CONFIG_KEY = RetCode.mark(201208, "unsupported for this system config key");
     public static final RetCode FAIL_SET_SYSTEM_CONFIG_TOO_SMALL =  RetCode.mark(201209,
             "provide value by positive integer mode, from 100000 to 2147483647");
     public static final RetCode FAIL_SET_SYSTEM_CONFIG = RetCode.mark(201210, "set system config value fail for params error or permission denied ");
-    public static final RetCode FAIL_QUERY_SYSTEM_CONFIG = RetCode.mark(201211, "query system config value list fail");
     // consensus (node manager)
     public static final RetCode INVALID_NODE_ID = RetCode.mark(201216,"node id is invalid");
     public static final RetCode INVALID_NODE_TYPE = RetCode.mark(201217,"invalid node type: sealer, observer, remove ");
@@ -128,7 +153,6 @@ public class ConstantCode {
     public static final RetCode INVALID_VERSION = RetCode.mark(201221,"Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ");
     public static final RetCode INVALID_VERSION_EXCEED_LENGTH = RetCode.mark(201222,"version of contract is out of length");
     // crud
-    public static int CODE_CRUD_SQL_ERROR = -51503;
     public static final RetCode PARAM_FAIL_SQL_ERROR = RetCode.mark(201226, "sql syntax error");
     public static final RetCode SQL_ERROR = RetCode.mark(201227, "crud sql fail");
     public static final RetCode FAIL_TABLE_NOT_EXISTS = RetCode.mark(201228, "table not exists");
@@ -138,6 +162,9 @@ public class ConstantCode {
     public static final RetCode CERT_FILE_NOT_FOUND = RetCode.mark(201231, "Cert file not found, please check cert path in config");
     public static final RetCode PEM_FORMAT_ERROR = RetCode.mark(201232, "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----");
     public static final RetCode PEM_CONTENT_ERROR = RetCode.mark(201233, "Pem file content error");
+    public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201235, "p12's password cannot be chinese");
+    public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(201236, "p12's password not match");
+    public static final RetCode P12_FILE_ERROR = RetCode.mark(201237, "P12 file content error");
 
     // mq error
     public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
@@ -148,4 +175,17 @@ public class ConstantCode {
     public static final RetCode REGISTER_FAILED_ERROR = RetCode.mark(201246, "Register contractEvent failed, please check your param");
     public static final RetCode UNREGISTER_FAILED_ERROR = RetCode.mark(201247, "Unregister event failed, please check mq server exchange");
     public static final RetCode PARAM_FAIL_ABI_INVALID = RetCode.mark(201248, "Contract abi invalid, please check abi");
+
+    // abi import
+    public static final RetCode CONTRACT_ADDRESS_ALREADY_EXISTS = RetCode.mark(201255, "contract address already exists");
+    public static final RetCode ABI_INFO_NOT_EXISTS = RetCode.mark(201256, "abi info of this id not exists");
+    public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(201257, "Abi Id cannot be empty");
+
+    // upload solc js file
+    public static final RetCode PARAM_FAIL_SOLC_FILE_EMPTY = RetCode.mark(201261, "Solc js file cannot be empty");
+    public static final RetCode PARAM_FAIL_SOLC_FILE_NAME_EMPTY = RetCode.mark(201262, "Solc js file name cannot be empty");
+    public static final RetCode PARAM_FAIL_FILE_NAME_EXISTS = RetCode.mark(201263, "Solc js file name already exist");
+    public static final RetCode PARAM_FAIL_FILE_NAME_NOT_EXISTS = RetCode.mark(201263, "Solc js file name not exist in db");
+    public static final RetCode SAVE_SOLC_FILE_ERROR = RetCode.mark(201264, "Save solc js file error");
+    public static final RetCode READ_SOLC_FILE_ERROR = RetCode.mark(201265, "read solc js file error, please check if file deleted");
 }

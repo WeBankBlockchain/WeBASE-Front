@@ -60,7 +60,7 @@ let errCode = {
         en: "bytecodeBin cannot be empty",
         zh: '合约bin不能为空'
     },
-    "201008": {
+    "201017": {
         en: "contract's current version has been deployed",
         zh: '合约的当前版本已部署'
     },
@@ -96,10 +96,10 @@ let errCode = {
         en: "file is not exist",
         zh: '文件不存在'
     },
-    "201017": {
-        en: "failed to get node config",
-        zh: '获取节点配置失败'
-    },
+    // "201017": {
+    //     en: "failed to get node config",
+    //     zh: '获取节点配置失败'
+    // },
     "201018": {
         en: "blockNumber and pbftView unchanged",
         zh: '块高和pbftview没有发生变化'
@@ -192,6 +192,26 @@ let errCode = {
         en: "external user's appId and signUserId cannot be empty",
         zh: '外部用户的appId和signUserId不能为空'
     },
+    "201042": {
+        en: "There is no sol files in source",
+        zh: '源文件中没有sol文件'
+    },
+    "201043": {
+        en: "Invalid group operate type",
+        zh: '无效的群组操作类型'
+    },
+    "201044": {
+        en: "Invalid data type",
+        zh: '无效的数据类型'
+    },
+    "201045": {
+        en: "Encode string can not be empty",
+        zh: '编码字符串不能为空'
+    },
+    "201046": {
+        en: "Transaction failed!",
+        zh: '交易失败!'
+    },
     "201100": {
         en: "Params not fit",
         zh: '参数不合适'
@@ -223,7 +243,7 @@ let errCode = {
     },
     "201202": {
         en: "Permission denied, please check chain administrator permission",
-        zh: '权限被拒绝，请检查链管理员权限'
+        zh: '权限管理,检查用户权限'
     },
     "201203": {
         en: "Node id is invalid",
@@ -325,6 +345,78 @@ let errCode = {
         en: "sql syntax error",
         zh: 'sql语法错误'
     },
+    "201120": {
+        en: "Group operate fail",
+        zh: '群组操作失败'
+    },
+    "201121": {
+        en: "Node internal error",
+        zh: '节点内部错误'
+    },
+    "201122": {
+        en: "Group already exists",
+        zh: '群组已存在'
+    },
+    "201123": {
+        en: "Group already running",
+        zh: '群组已处于运行状态'
+    },
+    "201124": {
+        en: "Group already stopped",
+        zh: '群组已处于停止状态'
+    },
+    "201125": {
+        en: "Group already deleted",
+        zh: '群组已处于删除状态'
+    },
+    "201126": {
+        en: "Group not found",
+        zh: '群组不存在'
+    },
+    "201127": {
+        en: "Group operate param error",
+        zh: '参数不合法'
+    },
+    "201128": {
+        en: "Group peers not connected",
+        zh: '与sealer间不存在有效的p2p链接'
+    },
+    "201129": {
+        en: "Group genesis conf already exists",
+        zh: '创世块配置文件已存在'
+    },
+    "201130": {
+        en: "Group config.ini already exists",
+        zh: '群组配置文件已存在'
+    },
+    "201131": {
+        en: "Group genesis conf not found",
+        zh: '未找到创世块配置文件'
+    },
+    "201132": {
+        en: "Group config.ini not found",
+        zh: '未找到群组配置文件'
+    },
+    "201133": {
+        en: "Group is stopping",
+        zh: '正在释放资源'
+    },
+    "201134": {
+        en: "Group not deleted",
+        zh: '群组并未被删除'
+    },
+    "201151": {
+        en: "Unsupported contract param type to encoded",
+        zh: '不支持合约参数类型编码'
+    },
+    "201152": {
+        en: "Unsupported contract param type to decoded",
+        zh: '不支持合约参数类型解码'
+    },
+    "201153": {
+        en: "Unable to create instance of type, check input params",
+        zh: '无法创建类型的实例，请检查输入参数'
+    },
     "201221": {
         en: "Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ",
         zh: '合约版本应仅包含“A-Z”或“A-Z”或“0-9”或点标记'
@@ -360,6 +452,18 @@ let errCode = {
         en: "Pem file content error",
         zh: '文件内容错误'
     },
+    "201235": {
+        en: "P12's password cannot be chinese",
+        zh: 'p12密码不能为中文'
+    },
+    "201236": {
+        en: "P12's password not match ",
+        zh: 'p12的密码错误'
+    },
+    "201237": {
+        en: "P12 file content error",
+        zh: '文件内容错误'
+    },
     "201241": {
         en: "Exchange or message queue not exists, please check mq server or mq configuration",
         zh: 'Exchange或消息队列不存在，请检查mq服务器或mq配置'
@@ -387,6 +491,26 @@ let errCode = {
     "201248": {
         en: "Contract abi invalid, please check abi",
         zh: '合约ABI校验错误，请检查ABI参数格式'
+    },
+    "201255": {
+        en: "Contract address already exists",
+        zh: '合同地址已存在'
+    },
+    "201256": {
+        en: "Abi info of this id not exists",
+        zh: '此ID的ABI信息不存在'
+    },
+    "201257": {
+        en: "ABI Id cannot be empty",
+        zh: 'ABI Id不能为空'
+    },
+    "201263": {
+        en: "Solc js file name already exist",
+        zh: '文件名已存在'
+    },
+    "201265": {
+        en: "Read solc js file error, please check if file deleted",
+        zh: '读取solc js文件错误，请检查文件是否已删除'
     },
     "202000": {
         en: "invalid node info",
@@ -624,7 +748,10 @@ let errCode = {
         en: "Pem file content error",
         zh: "Pem文件内容错误"
     },
-
+    "202111": {
+        en: "Fail to parse json",
+        zh: "解析json失败"
+    },
     "302000": {
         en: "user not logged in",
         zh: '未登录的用户'
@@ -632,6 +759,151 @@ let errCode = {
     "302001": {
         en: "access denied",
         zh: "没有权限"
+    },
+
+    "-32600": {
+        en: "Invalid json request",
+        zh: "发送无效的请求对象"
+    },
+    "-32601": {
+        en: "Method not found / not support",
+        zh: "该方法不存在或无效"
+    },
+    "-32602": {
+        en: "Invalid params when request",
+        zh: "无效的方法参数"
+    },
+    "-32603": {
+        en: "Node internal error",
+        zh: "内部调用错误"
+    },
+    "-32604": {
+        en: "Request require id value for procedure",
+        zh: "内部错误，请求未提供id字段"
+    },
+    "-32700": {
+        en: "Node receive json that parse error",
+        zh: "服务端接收到的json无法解析"
+    },
+    "-40001": {
+        en: "GroupID does not exist",
+        zh: "GroupID不存在"
+    },
+    "-40002": {
+        en: "Response json parse error",
+        zh: "JSON RPC获取的json数据解析错误"
+    },
+    "-40003": {
+        en: "BlockHash does not exist",
+        zh: "区块哈希不存在"
+    },
+    "-40004": {
+        en: "BlockNumber does not exist",
+        zh: "区块高度不存在"
+    },
+    "-40005": {
+        en: "TransactionIndex is out of range",
+        zh: "交易索引越界"
+    },
+    "-40006": {
+        en: "Call needs a 'from' field",
+        zh: "call接口需要提供from字段"
+    },
+    "-40007": {
+        en: "Only pbft consensus supports the view property",
+        zh: "getPbftView接口，只有pbft共识机制有view属性"
+    },
+    "-40008": {
+        en: "Invalid System Config",
+        zh: "getSystemConfigByKey接口，查询无效的key"
+    },
+    "-40009": {
+        en: "Don't send requests to this group, the node doesn't belong to the group",
+        zh: "非群组内节点发起无效的请求"
+    },
+    "-40010": {
+        en: "RPC module initialization is incomplete",
+        zh: "RPC模块初始化尚未完成"
+    },
+    "-50000": {
+        en: "Permission denied",
+        zh: "没有权限"
+    },
+    "-50001": {
+        en: "Table name already exist",
+        zh: "表名已经存在"
+    },
+    "-50100": {
+        en: "Table does not exist",
+        zh: "表不存在"
+    },
+    "-50101": {
+        en: "Unknow function call",
+        zh: "未知函数调用"
+    },
+    "-50102": {
+        en: "Address invalid",
+        zh: "地址无效"
+    },
+    "-51000": {
+        en: "Table name and address already exist",
+        zh: "表名和地址已经存在"
+    },
+    "-51001": {
+        en: "Table name and address does not exist",
+        zh: "该地址不属于管理员，无法删除"
+    },
+    "-51100": {
+        en: "Invalid node ID",
+        zh: "无效的节点ID"
+    },
+    "-51101": {
+        en: "The last sealer cannot be removed",
+        zh: "不能移除最后一个共识节点"
+    },
+    "-51102": {
+        en: "The node is not reachable",
+        zh: "节点无法访问"
+    },
+    "-51103": {
+        en: "The node is not a group peer",
+        zh: "节点不是群组成员"
+    },
+    "-51104": {
+        en: "The node is already in the sealer list",
+        zh: "节点已经在共识列表中"
+    },
+    "-51105": {
+        en: "The node is already in the observer list",
+        zh: "节点已经在观察者列表中"
+    },
+    "-51200": {
+        en: "Contract name and version already exist",
+        zh: "合约名称和版本已存在"
+    },
+    "-51201": {
+        en: "Version string length exceeds the maximum limit",
+        zh: "版本字符串长度超过最大限制"
+    },
+    "-51300": {
+        en: "Invalid configuration entry",
+        zh: "配置条目无效"
+    },
+    "-51500": {
+        en: "Entry parse error",
+        zh: "解析错误"
+    },
+    "-51501": {
+        en: "Condition parse error",
+        zh: "条件解析错误"
+    },
+    "-51502": {
+        en: "Condition operation undefined",
+        zh: "条件操作未定义"
+    },
+    "-51503": {
+        en: "Please provide field 'in field list",
+        zh: "请在字段列表中提供字段。"
     },
 }
 export function chooseLang(code) {

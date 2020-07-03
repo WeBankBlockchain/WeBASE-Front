@@ -37,6 +37,10 @@ spring:
     publisher-confirm: true
     ssl:
       enabled: false
+  http:
+    multipart:
+      max-request-size: 30MB # request max size
+      max-file-size: 20MB # single file size
 
 
 server:
@@ -61,12 +65,12 @@ logging:
   config: classpath:log4j2.xml
 
 constant:
-  keyServer: 127.0.0.1:5004 # webase-sign的IP端口，英文逗号相隔（不带空格）
+  keyServer: 127.0.0.1:5004 # webase-sign服务的IP:Port（单个）
   transMaxWait: 30
   monitorDisk: /
   monitorEnabled: true
   aesKey: EfdsW23D23d3df43
-  nodePath: /data
+  nodePath: /fisco/nodes/127.0.0.1/node0
   http_read_timeOut: 100000
   http_connect_timeOut: 100000
   # event sync map task (unit: ms)

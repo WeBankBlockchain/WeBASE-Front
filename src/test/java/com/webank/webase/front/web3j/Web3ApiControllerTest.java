@@ -14,11 +14,15 @@
 package com.webank.webase.front.web3j;
 
 import com.webank.webase.front.Application;
+import com.webank.webase.front.util.JsonUtils;
+import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
+import com.webank.webase.front.web3api.entity.ReqGroupStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,6 +32,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -58,4 +67,65 @@ public class Web3ApiControllerTest {
             .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
     }
 
+    @Test
+    public void testGenenrateGroup() {
+
+    }
+
+    @Test
+    public void testGenerateSingle() throws Exception {
+        List<String> nodeList = new ArrayList<>();
+        String targetNodeId = "dd7a2964007d583b719412d86dab9dcf773c61bccab18cb646cd480973de0827cc94fa84f33982285701c8b7a7f465a69e980126a77e8353981049831b550f5c";
+        nodeList.add(targetNodeId);
+        int newGroupId = 2023;
+        GenerateGroupInfo param = new GenerateGroupInfo();
+        param.setGenerateGroupId(newGroupId);
+        param.setTimestamp(BigInteger.valueOf(new Date().getTime()));
+        param.setNodeList(nodeList);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .post("/1/web3/generateGroup").
+                content(JsonUtils.toJSONString(param)).
+                contentType(MediaType.APPLICATION_JSON_UTF8)
+        );
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testOperate() throws Exception {
+        int newGroupId = 2020;
+        String type = "getStatus";
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .get("/" + newGroupId +"/web3/operate/" + type).
+                contentType(MediaType.APPLICATION_JSON_UTF8)
+        );
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    @Test
+    public void testGroupStatusList() throws Exception {
+        ReqGroupStatus param = new ReqGroupStatus();
+        List<Integer> groupIdList = new ArrayList<>();
+        groupIdList.add(2020);
+        groupIdList.add(3);
+        groupIdList.add(1);
+        groupIdList.add(2021);
+        groupIdList.add(2023);
+        param.setGroupIdList(groupIdList);
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .post("/3/web3/queryGroupStatus")
+                .content(JsonUtils.toJSONString(param))
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+        );
+        resultActions.
+                andExpect(MockMvcResultMatchers.status().isOk()).
+                andDo(MockMvcResultHandlers.print());
+        System.out.println("=================================response:"+resultActions.andReturn().getResponse().getContentAsString());
+    }
 }

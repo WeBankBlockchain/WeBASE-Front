@@ -142,7 +142,7 @@ public class PermissionManageService {
     /**
      * 批量grant/revoke权限 先getList(约1秒），XOR异或(权限状态有修改的)才需要发交易。 直接发四个交易
      */
-    public Object updatePermissionStateAfterCheck(int groupId, String signUserId,
+    public Map<String, Integer> updatePermissionStateAfterCheck(int groupId, String signUserId,
             String userAddress, PermissionState permissionState) throws Exception {
         Map<String, Integer> resultList = new HashMap<>();
         Map<String, PermissionState> checkList = getPermissionStateList(groupId);
@@ -354,7 +354,7 @@ public class PermissionManageService {
      */
     public Object grantUserTableManager(int groupId, String signUserId, String tableName,
             String userAddress) throws Exception {
-        // CRUD.desc to check table exists TODO rely on crud
+        // CRUD.desc to check table exists
         CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         crudService.desc(tableName);

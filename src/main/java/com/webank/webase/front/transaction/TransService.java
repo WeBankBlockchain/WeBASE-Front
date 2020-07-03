@@ -14,7 +14,6 @@
 package com.webank.webase.front.transaction;
 
 
-import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
@@ -35,6 +34,7 @@ import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -42,7 +42,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -55,16 +54,11 @@ import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
+import org.fisco.bcos.web3j.abi.Utils;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
-import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
-import org.fisco.bcos.web3j.crypto.RawTransaction;
+import org.fisco.bcos.web3j.crypto.*;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.crypto.TransactionEncoder;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterName;
@@ -77,10 +71,14 @@ import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
+import org.fisco.bcos.web3j.tx.txdecode.ConstantProperties;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
+import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
+import static com.webank.webase.front.base.code.ConstantCode.TRANSACTION_FAILED;
 
 /**
  * TransService. handle transactions of deploy/call contract
@@ -94,8 +92,6 @@ public class TransService {
     @Autowired
     private KeyStoreService keyStoreService;
     @Autowired
-    private Map<String, String> cnsMap;
-    @Autowired
     private Constants constants;
     @Autowired
     private ContractRepository contractRepository;
@@ -108,6 +104,8 @@ public class TransService {
      * @param req request
      */
     public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
+        // get signUserId
+        String signUserId = req.getSignUserId();
         ContractOfTrans contractOfTrans = new ContractOfTrans(req);
         // check param get function of abi
         ContractFunction contractFunction = buildContractFunction(contractOfTrans);
@@ -115,16 +113,12 @@ public class TransService {
         int groupId = contractOfTrans.getGroupId();
         Web3j web3j = web3ApiService.getWeb3j(groupId);
         // check contractAddress
-        String contractAddress = checkContractAddress(contractOfTrans.getContractAddress(), groupId,
-                contractOfTrans.getContractName(), contractOfTrans.getVersion());
-
-        // user as signUserId
-        String signUserId = req.getSignUserId();
+        String contractAddress = contractOfTrans.getContractAddress();
         // encode function
-        Function function = new Function(req.getFuncName(), contractFunction.getFinalInputs(),
-                contractFunction.getFinalOutputs());
-        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function,
-                contractFunction);
+        Function function = new Function(req.getFuncName(),
+                contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
+
+        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
     }
 
     /**
@@ -141,7 +135,7 @@ public class TransService {
         // get address and abi of precompiled contract
         String contractAddress = PrecompiledCommonInfo.getAddress(precompiledType);
         String abiStr = PrecompiledCommonInfo.getAbi(precompiledType);
-        List<Object> contractAbi = JSON.parseArray(abiStr);
+        List<Object> contractAbi = JsonUtils.toJavaObjectList(abiStr, Object.class);
         // check function param and get function param from abi
         ContractFunction contractFunction =
                 buildContractFunctionWithAbi(contractAbi, funcName, funcParams);
@@ -197,47 +191,8 @@ public class TransService {
         log.info("***transaction total cost time***: {}",
                 Duration.between(startTime, Instant.now()).toMillis());
         log.info("transHandleWithSign end. func:{} baseRsp:{}", contractFunction.getFuncName(),
-                JSON.toJSONString(response));
+                JsonUtils.toJSONString(response));
         return response;
-    }
-
-    /**
-     * checkAndSaveAbiFromCns.
-     *
-     * @param req request
-     */
-    @Deprecated
-    public boolean checkAndSaveAbiFromCns(ContractOfTrans req) throws Exception {
-        log.info("checkAndSaveAbiFromCns start.");
-        List<CnsInfo> cnsInfoList = null;
-        CnsService cnsService = web3ApiService.getCnsService(req.getGroupId());
-        if (cnsService == null) {
-            log.info("cnsService is null");
-            return false;
-        }
-        if (req.getVersion() != null) {
-            cnsInfoList =
-                    cnsService.queryCnsByNameAndVersion(req.getContractName(), req.getVersion());
-        } else {
-            cnsInfoList = cnsService.queryCnsByNameAndVersion(req.getContractName(),
-                    req.getContractAddress().substring(2));
-        }
-        // check cns info
-        if (cnsInfoList == null || cnsInfoList.isEmpty()
-                || StringUtils.isBlank(cnsInfoList.get(0).getAbi())) {
-            log.info("cnsInfoList is empty:{}", cnsInfoList);
-            return false;
-        }
-        ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-        List<AbiDefinition> abiDefinitionList =
-                objectMapper.readValue(cnsInfoList.get(0).getAbi(), objectMapper.getTypeFactory()
-                        .constructCollectionType(List.class, AbiDefinition.class));
-
-        // save abi
-        ContractAbiUtil.setContractWithAbi(req.getContractName(),
-                req.getVersion() == null ? req.getContractAddress().substring(2) : req.getVersion(),
-                abiDefinitionList, true);
-        return true;
     }
 
     /**
@@ -456,10 +411,10 @@ public class TransService {
         log.debug("start buildContractFunctionWithAbi");
         // check function name
         AbiDefinition abiDefinition =
-                AbiUtil.getAbiDefinition(funcName, JSON.toJSONString(contractAbi));
+                AbiUtil.getAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
         if (Objects.isNull(abiDefinition)) {
             log.warn("transaction fail. func:{} is not existed", funcName);
-            throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
+            throw new FrontException(IN_FUNCTION_ERROR);
         }
 
         // input format
@@ -497,8 +452,8 @@ public class TransService {
                     contract.getContractAddress().substring(2));
             contract.setVersion(contract.getContractAddress().substring(2));
         }
-        // check if contractAbi existed in cns
         // deprecated cns in front
+        // check if contractAbi existed in cns
 //        if (!ifExisted) {
 //            ifExisted = checkAndSaveAbiFromCns(contract);
 //        }
@@ -515,54 +470,10 @@ public class TransService {
     }
 
     /**
-     * Check transaction parameters.
-     */
-    @Deprecated
-    private void checkParamOfTransaction(ContractFunction cf, List<Object> params) {
-        // inputs format
-        List<String> funcInputTypes = cf.getInputList();
-        if (funcInputTypes.size() != params.size()) {
-            log.warn("transaction fail. funcInputTypes:{}, params:{}",
-                    JSON.toJSONString(funcInputTypes), JSON.toJSONString(params));
-            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-        }
-    }
-
-    /**
-     * check address from cnsMap, CnsService
-     */
-    public String checkContractAddress(String contractAddress, int groupId, String contractName,
-            String version) throws Exception {
-        String address = contractAddress;
-        // not blank
-        if (StringUtils.isNotBlank(address)) {
-            return address;
-        } else {
-            // try to get from cnsMap
-            address = cnsMap.get(contractName + Constants.SYMPOL + version);
-            if (StringUtils.isNotBlank(address)) {
-                return address;
-            } else {
-                // try to get from cnsService
-                address = precompiledService.getAddressByContractNameAndVersion(groupId,
-                        contractName, version);
-                if (StringUtils.isNotBlank(address)) {
-                    return address;
-                } else {
-                    // address cannot be found
-                    log.error("checkContractAddress. contractAddress is empty "
-                            + "after get from cnsMap and cnsService");
-                    throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
-                }
-            }
-        }
-    }
-
-    /**
      * send transaction locally
      */
     public Object transHandleLocal(ReqTransHandle req) throws Exception {
-        log.info("transHandle start. ReqTransHandle:[{}]", JSON.toJSONString(req));
+        log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(req));
 
         // init contract params
         ContractOfTrans cof = new ContractOfTrans(req);
@@ -571,26 +482,15 @@ public class TransService {
 
         // address
         String address = cof.getContractAddress();
-        if (address == null) {
-            // try to get address from map
-            address = cnsMap.get(req.getContractName() + ":" + cof.getVersion());
-        }
 
         // web3j
         Web3j web3j = web3ApiService.getWeb3j(cof.getGroupId());
         // get privateKey
         Credentials credentials = getCredentials(contractFunction.getConstant(), req.getUser());
         // contract load
-        CommonContract commonContract;
         ContractGasProvider contractGasProvider =
                 new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
-        if (address != null) {
-            commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
-        } else {
-            commonContract = CommonContract.loadByName(
-                    cof.getContractName() + Constants.SYMPOL + cof.getVersion(), web3j, credentials,
-                    contractGasProvider);
-        }
+        CommonContract commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
 
         // request
         Object result;
@@ -603,10 +503,83 @@ public class TransService {
         }
 
         log.info("transHandle end. name:{} func:{} result:{}", cof.getContractName(),
-                cof.getFuncName(), JSON.toJSONString(result));
+                cof.getFuncName(), JsonUtils.toJSONString(result));
         return result;
     }
 
+
+    public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, int groupId)  {
+
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
+        if (sync) {
+            final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+            TransactionReceipt receipt;
+            try {
+                sendMessage(web3j, signedStr, transFuture);
+                receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+            } catch (Exception e ) {
+                throw new FrontException(TRANSACTION_FAILED.getMessage() +e.getMessage());
+            }
+             return receipt;
+        } else {
+            TransactionReceipt transactionReceipt = new TransactionReceipt();
+            web3j.sendRawTransaction(signedStr).sendAsync();
+            transactionReceipt.setTransactionHash(Hash.sha3(signedStr));
+            return transactionReceipt;
+        }
+    }
+
+
+
+    public Object sendQueryTransaction(String encodeStr, String contractAddress, String funcName, String contractAbi, int groupId, String userAddress) {
+
+        Web3j web3j = web3ApiService.getWeb3j(groupId);
+        String callOutput ;
+        try {
+           callOutput = web3j.call(Transaction.createEthCallTransaction(userAddress, contractAddress, encodeStr), DefaultBlockParameterName.LATEST)
+                    .send().getValue().getOutput();
+        } catch (IOException e) {
+            throw new FrontException(TRANSACTION_FAILED);
+        }
+
+        AbiDefinition abiDefinition = getFunctionAbiDefinition(funcName, contractAbi);
+        if (Objects.isNull(abiDefinition)) {
+            throw new FrontException(IN_FUNCTION_ERROR);
+        }
+        List<String> funOutputTypes = AbiUtil.getFuncOutputType(abiDefinition);
+        List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
+
+        List<Type> typeList = FunctionReturnDecoder.decode(callOutput, Utils.convert(finalOutputs));
+        Object response;
+        if (typeList.size() > 0) {
+            response = AbiUtil.callResultParse(funOutputTypes, typeList);
+        } else {
+            response = typeList;
+        }
+        return response;
+    }
+
+    public static AbiDefinition getFunctionAbiDefinition(String functionName, String contractAbi) {
+        if(functionName == null) {
+            throw new FrontException(IN_FUNCTION_ERROR);
+        }
+        List<AbiDefinition> abiDefinitionList = JsonUtils.toJavaObjectList(contractAbi, AbiDefinition.class);
+        if (abiDefinitionList == null) {
+            throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
+        }
+        AbiDefinition result = null;
+        for (AbiDefinition abiDefinition : abiDefinitionList) {
+            if (abiDefinition == null) {
+                throw new FrontException(IN_FUNCTION_ERROR);
+            }
+            if (ConstantProperties.TYPE_FUNCTION.equals(abiDefinition.getType())
+                    && functionName.equals(abiDefinition.getName())) {
+                result = abiDefinition;
+                break;
+            }
+        }
+        return result;
+    }
     /**
      * get Credentials by keyUser locally
      */
@@ -674,7 +647,6 @@ public class TransService {
     // // send transaction
     // final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
     // sendMessage(web3j, signMsg, transFuture);
-    // //todo
     // TransactionReceipt receipt =
     // transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
     // response = receipt;
@@ -685,7 +657,7 @@ public class TransService {
     // log.info("***transaction total cost time***: {}", Duration.between(startTime,
     // Instant.now()).toMillis());
     // log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(),
-    // JSON.toJSONString(response));
+    // JsonUtils.toJSONString(response));
     // return response;
     // }
 }

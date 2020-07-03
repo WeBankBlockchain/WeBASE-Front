@@ -13,21 +13,19 @@
  */
 package com.webank.webase.front.keystore;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.keystore.entity.EncodeInfo;
-import com.webank.webase.front.keystore.entity.KeyStoreInfo;
-import com.webank.webase.front.keystore.entity.RspUserInfo;
-import com.webank.webase.front.keystore.entity.SignInfo;
+import com.webank.webase.front.keystore.entity.*;
 import com.webank.webase.front.util.AesUtils;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
@@ -45,13 +43,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.ByteArrayInputStream;
-import java.security.KeyPair;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 
@@ -100,13 +103,7 @@ public class KeyStoreService {
      */
     public KeyStoreInfo createKeyStoreLocally(String userName) {
         log.info("start createKeyStore. userName:{}", userName);
-        // check keyStoreInfoLocal
-        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByUserNameAndType(userName,
-                KeyTypes.LOCALUSER.getValue());
-        if (Objects.nonNull(keyStoreInfoLocal)) {
-            log.error("fail createKeyStore. user name already exists.");
-            throw new FrontException(ConstantCode.USER_NAME_EXISTS);
-        }
+        checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // create keyPair(support guomi)
         KeyStoreInfo keyStoreInfo;
         try {
@@ -128,11 +125,24 @@ public class KeyStoreService {
      * without private key
      * @param signUserId
      * @param appId
-     * @return
+     * @return KeyStoreInfo
      */
     public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId) {
+        // get from sign
         RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId);
+        return saveSignKeyStore(rspUserInfo);
+    }
+
+    /**
+     * save rspUserInfo as KeyStoreInfo
+     * @param rspUserInfo
+     * @return KeyStoreInfo
+     */
+    private KeyStoreInfo saveSignKeyStore(RspUserInfo rspUserInfo) {
         String address = rspUserInfo.getAddress();
+        if (StringUtils.isEmpty(address)) {
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setAddress(address);
         keyStoreInfo.setPublicKey(rspUserInfo.getPublicKey());
@@ -210,10 +220,10 @@ public class KeyStoreService {
             log.info("getSignData url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
             HttpEntity<String> formEntity =
-                    new HttpEntity<String>(JSON.toJSONString(params), headers);
+                    new HttpEntity<String>(JsonUtils.toJSONString(params), headers);
             BaseResponse response =
                     restTemplate.postForObject(url, formEntity, BaseResponse.class);
-            log.info("getSignData response:{}", JSON.toJSONString(response));
+            log.info("getSignData response:{}", JsonUtils.toJSONString(response));
             if (response.getCode() == 0) {
                 signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
             }
@@ -226,52 +236,16 @@ public class KeyStoreService {
     }
 
     /**
-     * get user from webase-sign api(v1.3.0+)
-     * @param signUserId unique user id to call webase-sign
-     * @return
-     */
-    public RspUserInfo getSignUserEntity(String signUserId, String appId) {
-        try {
-            // webase-sign api(v1.3.0) support
-            RspUserInfo rspUserInfo = new RspUserInfo();
-            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
-                    EncryptType.encryptType, signUserId, appId);
-            log.info("getSignUserEntity url:{}", url);
-            HttpHeaders headers = CommonUtils.buildHeaders();
-            HttpEntity<String> formEntity =
-                    new HttpEntity<String>(null, headers);
-            ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.GET, formEntity, BaseResponse.class);
-            BaseResponse baseResponse = response.getBody();
-            log.info("getSignUserEntity response:{}", JSON.toJSONString(baseResponse));
-            if (baseResponse.getCode() == 0) {
-                rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
-            }
-            return rspUserInfo;
-        } catch (ResourceAccessException ex) {
-            log.error("fail restTemplateExchange", ex);
-            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
-        } catch (HttpStatusCodeException e) {
-            JSONObject error = JSONObject.parseObject(e.getResponseBodyAsString());
-            log.error("http request fail. error:{}", JSON.toJSONString(error));
-            throw new FrontException(error.getInteger("code"),
-                    error.getString("errorMessage"));
-        } catch (Exception e) {
-            log.error("getSignUserEntity exception", e);
-            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-        }
-    }
-
-    /**
      * get signUserId by address
-     * @param address
-     * @return signUserId
+     * @param signUserId
+     * @return user address
      */
-    public String getSignUserIdByAddress(String address) {
-        KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
+    public String getAddressBySignUserId(String signUserId) {
+        KeyStoreInfo keyStoreInfo = keystoreRepository.findBySignUserId(signUserId);
         if (Objects.isNull(keyStoreInfo)) {
-            throw new FrontException(ConstantCode.KEYSTORE_NOT_EXIST);
+            return null;
         }
-        return keyStoreInfo.getSignUserId();
+        return keyStoreInfo.getAddress();
     }
 
     /**
@@ -285,7 +259,7 @@ public class KeyStoreService {
     /**
      * get PrivateKey.
      * default use aes encrypt
-     * @param user userId or userAddress.
+     * @param user  userAddress.
      */
     public String getPrivateKey(String user) {
 
@@ -298,6 +272,19 @@ public class KeyStoreService {
         //get privateKey by address
         return aesUtils.aesDecrypt(keyStoreInfoLocal.getPrivateKey());
 
+    }
+
+    /**
+     * check userName and userType not exist
+     */
+    private void checkUserNameAndTypeNotExist(String userName, Integer userType) {
+        // check keyStoreInfoLocal
+        KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByUserNameAndType(userName,
+                userType);
+        if (Objects.nonNull(keyStoreInfoLocal)) {
+            log.error("fail checkUserNameAndTypeNotExist. user name already exists.");
+            throw new FrontException(ConstantCode.USER_NAME_EXISTS);
+        }
     }
 
     /**
@@ -316,7 +303,36 @@ public class KeyStoreService {
             log.error("importKeyStoreFromPem error:[]", e);
             throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
         }
-        // to store
+        // to store local
+        return importFromPrivateKey(privateKey, userName);
+    }
+
+    /**
+     * import keystore info from p12 file input stream and its password
+     * @param file
+     * @param password
+     * @param userName
+     * @return KeyStoreInfo
+     */
+    public KeyStoreInfo importKeyStoreFromP12(MultipartFile file, String password, String userName) {
+        P12Manager p12Manager = new P12Manager();
+        String privateKey;
+        try {
+            // manually set password and load
+            p12Manager.setPassword(password);
+            p12Manager.load(file.getInputStream(), password);
+            privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
+        } catch (IOException e) {
+            log.error("importKeyStoreFromP12 error:[]", e);
+            if (e.getMessage().contains("password")) {
+                throw new FrontException(ConstantCode.P12_PASSWORD_ERROR);
+            }
+            throw new FrontException(ConstantCode.P12_FILE_ERROR);
+        } catch (Exception e) {
+            log.error("importKeyStoreFromP12 error:[]", e);
+            throw new FrontException(ConstantCode.P12_FILE_ERROR.getCode(), e.getMessage());
+        }
+        // to store local
         return importFromPrivateKey(privateKey, userName);
     }
 
@@ -327,8 +343,13 @@ public class KeyStoreService {
      * @return KeyStoreInfo local user
      */
     public KeyStoreInfo importFromPrivateKey(String privateKey, String userName) {
-        // to store
+        // check name
+        checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
+        // to store locally
         ECKeyPair keyPair = GenCredential.createKeyPair(privateKey);
+        if (keyPair == null) {
+            throw new FrontException(ConstantCode.PARAM_ERROR);
+        }
         KeyStoreInfo keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
         keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
         String realPrivateKey = keyStoreInfo.getPrivateKey();
@@ -336,5 +357,114 @@ public class KeyStoreService {
         return keystoreRepository.save(keyStoreInfo);
     }
 
+    /**
+     * import private key to sign
+     * @param privateKeyEncoded
+     * @param signUserId
+     * @param appId
+     * @return KeyStoreInfo
+     */
+    public KeyStoreInfo importPrivateKeyToSign(String privateKeyEncoded, String signUserId, String appId) {
+        // post private and save in sign
+        RspUserInfo rspUserInfo = getSignUserEntity(privateKeyEncoded, signUserId, appId);
+        // save in local as external
+        KeyStoreInfo keyStoreInfo = saveSignKeyStore(rspUserInfo);
+        return keyStoreInfo;
+    }
+
+
+    /**
+     * request (get) user from webase-sign api(v1.3.0+)
+     * @param signUserId unique user id to call webase-sign
+     * @return
+     */
+    public RspUserInfo getSignUserEntity(String signUserId, String appId) {
+        try {
+            // webase-sign api(v1.3.0) support
+            RspUserInfo rspUserInfo = new RspUserInfo();
+            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
+                    EncryptType.encryptType, signUserId, appId);
+            log.info("getSignUserEntity url:{}", url);
+            HttpHeaders headers = CommonUtils.buildHeaders();
+            HttpEntity<String> formEntity =
+                    new HttpEntity<String>(null, headers);
+            ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.GET, formEntity, BaseResponse.class);
+            BaseResponse baseResponse = response.getBody();
+            log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
+            if (baseResponse.getCode() == 0) {
+                rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+            }
+            return rspUserInfo;
+        } catch (ResourceAccessException ex) {
+            log.error("fail restTemplateExchange", ex);
+            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+        } catch (HttpStatusCodeException e) {
+            JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
+            log.error("http request fail. error:{}", JsonUtils.toJSONString(error));
+            try {
+                // if return 404, no code or errorMessage
+                int code = error.get("code").intValue();
+                String errorMessage = error.get("errorMessage").asText();
+                throw new FrontException(code, errorMessage);
+            } catch (Exception ex) {
+                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("getSignUserEntity exception", e);
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+    }
+
+    /**
+     * request(post) sign to import private key
+     * @param signUserId
+     * @param appId
+     * @param privateKeyEncoded base64 encoded
+     * @return RspUserInfo
+     */
+    public RspUserInfo getSignUserEntity(String privateKeyEncoded, String signUserId, String appId) {
+        try {
+            RspUserInfo rspUserInfo = new RspUserInfo();
+            String urlSpilt = constants.WEBASE_SIGN_USER_URI.split("\\?")[0];
+            String url = String.format(urlSpilt, constants.getKeyServer());
+            log.info("getSignUserEntity url:{}", url);
+            Map<String, Object> params = new HashMap<>();
+            params.put("privateKey", privateKeyEncoded);
+            params.put("signUserId", signUserId);
+            params.put("appId", appId);
+            params.put("encryptType", EncryptType.encryptType);
+            HttpEntity entity = CommonUtils.buildHttpEntity(params);
+
+            ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity, BaseResponse.class);
+            BaseResponse baseResponse = response.getBody();
+            log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
+            if (baseResponse.getCode() == 0) {
+                rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+            } else {
+                log.error("getSignUserEntity fail for:{}", baseResponse.getMessage());
+                throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL.getCode(), baseResponse.getMessage());
+            }
+            return rspUserInfo;
+        } catch (ResourceAccessException ex) {
+            log.error("getSignUserEntity fail restTemplateExchange", ex);
+            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+        } catch (HttpStatusCodeException e) {
+            JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
+            log.error("getSignUserEntity http request fail. error:{}", JsonUtils.toJSONString(error));
+            try {
+                // if return 404, no code or errorMessage
+                int code = error.get("code").intValue();
+                String errorMessage = error.get("errorMessage").asText();
+                throw new FrontException(code, errorMessage);
+            } catch (NullPointerException ex) {
+                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            }
+        } catch (FrontException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("getSignUserEntity exception", e);
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+    }
 }
 
