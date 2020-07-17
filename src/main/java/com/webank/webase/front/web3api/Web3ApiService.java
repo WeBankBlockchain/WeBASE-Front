@@ -506,6 +506,9 @@ public class Web3ApiService {
             List<String> groupIdList = getWeb3j().getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
             refreshWeb3jMap(groupIdList);
+            if (groupIdList.isEmpty()) {
+                throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+            }
             return groupIdList;
         } catch (IOException e) {
             log.error("getGroupList error:[]", e);
