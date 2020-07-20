@@ -15,22 +15,27 @@
 package com.webank.webase.front.version;
 
 import com.webank.webase.front.base.properties.VersionProperties;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Log4j2
+/**
+ * return version of local server
+ */
+@Slf4j
 @RestController
 @RequestMapping("version")
 public class VersionController {
 
-    // webase-web: when add first front, return version and tips
     @Autowired
     private VersionProperties versionProperties;
 
-    // return version of local server
+    /**
+     * webase-web: when add first front, return version and tips
+     * @return
+     */
     @GetMapping()
     public String getServerVersion() {
         return versionProperties.getVersion();
