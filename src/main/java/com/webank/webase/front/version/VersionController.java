@@ -71,7 +71,7 @@ public class VersionController {
      */
     private String getSignServerVersion() {
         try {
-            // webase-sign api(v1.3.0) support
+            // webase-sign api(v1.4.0) support
             String url = String.format(Constants.WEBASE_SIGN_VERSION_URI, constants.getKeyServer());
             log.info("getSignServerVersion url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
