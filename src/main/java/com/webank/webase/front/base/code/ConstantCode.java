@@ -88,7 +88,7 @@ public class ConstantCode {
     public static final RetCode SYSTEM_ERROR = RetCode.mark(101001, "system error");
     public static final RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
     public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3j instance of groupId is null, please try again");
-    public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "groupList error for no group");
+    public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "No group belongs to this groupId(node not belongs to this group)");
 
     /* precompiled success */
     public static final RetCode RET_SUCCESS = RetCode.mark(0, "success");
