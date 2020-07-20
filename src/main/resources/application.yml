@@ -1,5 +1,5 @@
 # server version
-version: v1.3.3
+version: v1.4.0
 
 spring:
   datasource:
