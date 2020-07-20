@@ -28,8 +28,6 @@ import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
