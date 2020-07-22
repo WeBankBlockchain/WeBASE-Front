@@ -19,6 +19,7 @@ package com.webank.webase.front.event;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
@@ -43,6 +44,7 @@ public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEven
 	/**
 	 * check unique by appId exchangeName queueName
 	 */
-	NewBlockEventInfo findByAppIdAndExchangeNameAndQueueName(
+	@Query(value = "select n from NewBlockEventInfo n where n.appId = ?1 and n.exchangeName = ?2 and n.queueName = ?3 ")
+	NewBlockEventInfo findNewBlockEventInfo(
 			String appId, String exchangeName, String queueName);
 }
