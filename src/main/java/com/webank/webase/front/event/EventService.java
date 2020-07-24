@@ -166,8 +166,7 @@ public class EventService {
 
     public void checkNewBlockEventExist(String appId, String exchangeName, String queueName) {
         NewBlockEventInfo eventRow = newBlockEventInfoRepository
-                .findByAppIdAndExchangeNameAndQueueName(appId,
-                        exchangeName, queueName);
+                .findNewBlockEventInfo(appId, exchangeName, queueName);
         if (Objects.nonNull(eventRow)) {
             log.warn("insert NewBlockEventInfo error for already exist. ");
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
@@ -205,8 +204,7 @@ public class EventService {
     public void checkContractEventExist(String appId, String exchangeName,
                                         String queueName, String contractAddress) {
         ContractEventInfo eventRow = contractEventInfoRepository
-                .findByAppIdAndExchangeNameAndQueueNameAndContractAddress(appId,
-                        exchangeName, queueName, contractAddress);
+                .findContractEventInfo(appId, exchangeName, queueName, contractAddress);
         if (Objects.nonNull(eventRow)) {
             log.warn("insert ContractEventInfo error for already exist. ");
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
