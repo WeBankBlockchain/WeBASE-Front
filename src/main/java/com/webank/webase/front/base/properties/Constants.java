@@ -54,6 +54,8 @@ public class Constants {
     public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
     public static final String WEBASE_SIGN_USER_URI =
             "http://%s/WeBASE-Sign/user/newUser?encryptType=%s&signUserId=%s&appId=%s";
+    public static final String WEBASE_SIGN_VERSION_URI =
+        "http://%s/WeBASE-Sign/version";
     public static final String ACCOUNT1_PATH = "node.key";
     public static final String OPERATE_GROUP_START = "start";
     public static final String OPERATE_GROUP_STOP = "stop";
