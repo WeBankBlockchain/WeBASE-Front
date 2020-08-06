@@ -1,3 +1,20 @@
+### v1.4.0(2020-08-06)
+
+**Add**
+- 增加返回 FISCO-BCOS, WeBASE-Front, WeBASE-Sign Version 版本接口；
+
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本（推荐）
+- 支持FISCO-BCOS v2.5.x 版本
+- WeBASE-Node-Manager v1.4.0+
+- WeBASE-Sign v1.4.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
+
 ### v1.3.2(2020-06-17)
 
 **Fix**
