@@ -15,6 +15,12 @@ package com.webank.webase.front.base.code;
 
 
 /**
+ * A-BB-CCC A:error level. <br/>
+ * 1:system exception <br/>
+ * 2:business exception <br/>
+ * B:project number <br/>
+ * WeBASE-Front:01 <br/>
+ * C: error code <br/>
  * Code Constant
  * String constants used in ReqXXXParam for validation
  * RetCode constants used in controller for response
