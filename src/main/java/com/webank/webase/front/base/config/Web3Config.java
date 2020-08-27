@@ -130,17 +130,16 @@ public class Web3Config {
 
     /**
      * init channel service. set setBlockNotifyCallBack
-     * 
+     *
      * @return
      */
     @Bean(name = "serviceMap")
     @DependsOn("encryptType")
-    public Map<Integer, Service> serviceMap(Web3j web3j,
-            GroupChannelConnectionsConfig groupChannelConnectionsConfig,
-            NewBlockEventCallback newBlockEventCallBack) throws Exception {
+    public Map<Integer, Service> serviceMap(Web3j web3j, NewBlockEventCallback newBlockEventCallBack)
+        throws Exception {
         List<String> groupIdList = web3j.getGroupList().send().getGroupList();
-        List<ChannelConnections> channelConnectionsList =
-                groupChannelConnectionsConfig.getAllChannelConnections();
+        GroupChannelConnectionsConfig groupChannelConnectionsConfig = getGroupChannelConnectionsConfig();
+        List<ChannelConnections> channelConnectionsList  = groupChannelConnectionsConfig.getAllChannelConnections();
         channelConnectionsList.clear();
         for (int i = 0; i < groupIdList.size(); i++) {
             List<String> connectionsList = new ArrayList<>();
