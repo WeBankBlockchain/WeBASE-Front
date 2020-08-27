@@ -74,6 +74,8 @@ public class Web3ApiService {
     Constants constants;
     @Autowired
     Web3Config web3Config;
+    @Autowired
+    Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -504,33 +506,43 @@ public class Web3ApiService {
             throw new FrontException(e.getMessage());
         }
     }
-
-    public List<String> getNodeIdList() {
-        try {
-            return getWeb3j()
-                    .getNodeIDList().send()
-                    .getNodeIDList();
-        } catch (IOException e) {
-            log.error("getNodeIDList error:[]", e);
-            throw new FrontException(e.getMessage());
-        }
-    }
-
+    /**
+     * add web3j from chain and remove web3j not in chain
+     * @param groupIdList
+     * @throws FrontException
+     */
     @DependsOn("encryptType")
-    public void refreshWeb3jMapService(List<String> groupIdList) throws FrontException {
-        log.debug("refreshWeb3jMapService groupIdList:{}", groupIdList);
-        groupIdList.forEach(gId -> {
-            Integer groupId = new Integer(gId);
-            if(web3jMap.get(groupId) == null) {
-                refreshWeb3jMap(groupId);
-            }
-        });
+    public void refreshWeb3jMap(List<String> groupIdList) throws FrontException {
+        log.debug("refreshWeb3jMap groupIdList:{}", groupIdList);
+        // if localGroupIdList not contain group in groupList from chain, add it
+        groupIdList.stream()
+            .filter(groupId ->
+                web3jMap.get(Integer.parseInt(groupId)) == null)
+            .forEach(group2Init ->
+                initWeb3j(Integer.parseInt(group2Init)));
+
+        Set<Integer> localGroupIdList = web3jMap.keySet();
+        log.debug("refreshWeb3jMap localGroupList:{}", localGroupIdList);
+        // if local web3j map contains group that not in groupList from chain
+        // remove it from local web3j map
+        localGroupIdList.stream()
+            // not contains in groupList from chain
+            .filter(groupId ->
+                !groupIdList.contains(String.valueOf(groupId)))
+            .forEach(group2Remove ->
+                web3jMap.remove(group2Remove));
     }
 
-    private synchronized void refreshWeb3jMap(int groupId) {
-        log.info("refreshWeb3jMap groupId:{}", groupId);
+
+    /**
+     * init a new web3j of group id, add in groupChannelConnectionsConfig's connections
+     * @param groupId
+     * @return
+     */
+    private synchronized Web3j initWeb3j(int groupId) {
+        log.info("initWeb3j of groupId:{}", groupId);
         List<ChannelConnections> channelConnectionsList =
-                groupChannelConnectionsConfig.getAllChannelConnections();
+            groupChannelConnectionsConfig.getAllChannelConnections();
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections.setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
         channelConnections.setGroupId(groupId);
@@ -542,8 +554,9 @@ public class Web3ApiService {
         service.setAllChannelConnections(groupChannelConnectionsConfig);
         try {
             service.run();
+            serviceMap.put(groupId, service);
         } catch (Exception e) {
-            log.error("refreshWeb3jMap fail. groupId:{} error:[]", groupId, e);
+            log.error("initWeb3j fail. groupId:{} error:[]", groupId, e);
             throw new FrontException("refresh web3j failed");
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -551,6 +564,19 @@ public class Web3ApiService {
         channelEthereumService.setChannelService(service);
         Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
         web3jMap.put(groupId, web3j);
+        return web3j;
+    }
+
+
+    public List<String> getNodeIdList() {
+        try {
+            return getWeb3j()
+                    .getNodeIDList().send()
+                    .getNodeIDList();
+        } catch (IOException e) {
+            log.error("getNodeIDList error:[]", e);
+            throw new FrontException(e.getMessage());
+        }
     }
 
     // get all peers of chain
