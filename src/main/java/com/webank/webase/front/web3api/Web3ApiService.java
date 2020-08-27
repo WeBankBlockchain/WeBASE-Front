@@ -75,6 +75,8 @@ public class Web3ApiService {
     @Autowired
     Web3Config web3Config;
     @Autowired
+    Web3j independentWeb3j;
+    @Autowired
     Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
@@ -856,19 +858,20 @@ public class Web3ApiService {
 
     /**
      * get first web3j in web3jMap
-     * 
      * @return
      */
     public Web3j getWeb3j() {
         Set<Integer> iSet = web3jMap.keySet();
         if (iSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+            // get default web3j of integer max value
+            return independentWeb3j;
         }
         // get random index to get web3j
         Integer index = iSet.iterator().next();
         return web3jMap.get(index);
     }
+
 
     /**
      * get target group's web3j
@@ -877,6 +880,8 @@ public class Web3ApiService {
      */
     public Web3j getWeb3j(Integer groupId) {
         if (web3jMap.isEmpty()) {
+            // refresh group list
+            getGroupList();
             log.error("web3jMap is empty, groupList empty! please check your node status");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
         }
