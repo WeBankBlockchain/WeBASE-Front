@@ -73,6 +73,8 @@ public class Web3ApiService {
     Web3Config web3Config;
     @Autowired
     Web3j independentWeb3j;
+    @Autowired
+    Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -571,6 +573,7 @@ public class Web3ApiService {
         service.setAllChannelConnections(groupChannelConnectionsConfig);
         try {
             service.run();
+            serviceMap.put(groupId, service);
         } catch (Exception e) {
             log.error("initWeb3j fail. groupId:{} error:[]", groupId, e);
             throw new FrontException("refresh web3j failed");
