@@ -499,7 +499,7 @@ public class Web3ApiService {
         try {
             List<String> groupIdList = getWeb3j().getGroupList().send().getGroupList();
             // check web3jMap, if not match groupIdList, refresh web3jMap in front
-            refreshWeb3jMapService(groupIdList);
+            refreshWeb3jMap(groupIdList);
             return groupIdList;
         } catch (IOException e) {
             log.error("getGroupList error:[]", e);
