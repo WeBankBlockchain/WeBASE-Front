@@ -739,7 +739,7 @@ public class Web3ApiService {
                 getWeb3j().startGroup(groupId).send().getStatus(), GroupOperateStatus.class);
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            refreshWeb3jMap(groupId);
+            initWeb3j(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("startGroup fail:{}", status.getMessage());
