@@ -49,7 +49,11 @@ public enum PrecompiledTypes {
     /**
      * Contract status Manage
      */
-    CSM(1007);
+    CSM(1007),
+    /**
+     * Chain governance
+     */
+    CHAIN_GOVERN(1008);
 
     private int value;
 
