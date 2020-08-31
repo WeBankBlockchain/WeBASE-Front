@@ -21,7 +21,6 @@ import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.CRUDService;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;

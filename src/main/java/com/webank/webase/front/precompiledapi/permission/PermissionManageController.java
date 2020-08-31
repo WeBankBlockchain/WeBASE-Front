@@ -60,7 +60,8 @@ import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_CNS;
 public class PermissionManageController extends BaseController {
     @Autowired
     private PermissionManageService permissionManageService;
-
+    @Autowired
+    private ChainGovernService chainGovernService;
     /**
      * handle get request by permission type
      * to get list of different administrators on chain

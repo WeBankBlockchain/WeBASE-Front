@@ -18,6 +18,9 @@ package com.webank.webase.front.precompiledapi;
 
 
 import com.webank.webase.front.base.enums.PrecompiledTypes;
+import org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled;
+import org.fisco.bcos.web3j.precompile.permission.ChainGovernance;
+import org.fisco.bcos.web3j.precompile.permission.Permission;
 
 /**
  * precompiled contract address, function name, abi
@@ -69,7 +72,10 @@ public class PrecompiledCommonInfo {
 	private static final String CSMAddress =
 	        "0x0000000000000000000000000000000000001007";
 	private static final String ABI_CSM = "[{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"getStatus\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"},{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"unfreeze\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"freeze\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"userAddr\",\"type\":\"address\"}],\"name\":\"grantManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"listManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"},{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]";
-
+	/**
+	 * Chain governance: listOperators, updateCommitteeMemberWeight, queryThreshold, queryCommitteeMemberWeight, grantCommitteeMember, unfreezeAccount, listCommitteeMembers, updateThreshold, revokeCommitteeMember, grantOperator, freezeAccount, revokeOperator, getAccountStatus
+	 */
+	private static final String ChainGovernAddress = "0x0000000000000000000000000000000000001008";
 
 	public static String getAddress(PrecompiledTypes types) {
 		switch (types) {
@@ -87,6 +93,8 @@ public class PrecompiledCommonInfo {
 				return PermissionPrecompileAddress;
 			case CSM:
 			    return CSMAddress;
+			case CHAIN_GOVERN:
+				return ChainGovernAddress;
 			default:
 				return "";
 		}
@@ -105,9 +113,11 @@ public class PrecompiledCommonInfo {
 			case CNS:
 				return ABI_CNS;
 			case PERMISSION:
-				return ABI_PERMISSION;
+				return Permission.ABI;
 			case CSM:
-			    return ABI_CSM;
+			    return ContractLifeCyclePrecompiled.ABI;
+			case CHAIN_GOVERN:
+				return ChainGovernance.ABI;
 			default:
 				return "";
 		}
