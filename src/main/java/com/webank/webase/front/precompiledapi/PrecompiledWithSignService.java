@@ -23,6 +23,17 @@ import static org.fisco.bcos.web3j.precompile.crud.TableFactory.FUNC_CREATETABLE
 import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_FREEZE;
 import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_GRANTMANAGER;
 import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_UNFREEZE;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_FREEZEACCOUNT;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_GRANTCOMMITTEEMEMBER;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_GRANTOPERATOR;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_REVOKECOMMITTEEMEMBER;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_REVOKEOPERATOR;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_UNFREEZEACCOUNT;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_UPDATECOMMITTEEMEMBERWEIGHT;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_QUERYCOMMITTEEMEMBERWEIGHT;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_LISTCOMMITTEEMEMBERS;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_QUERYTHRESHOLD;
+import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_UPDATETHRESHOLD;
 import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
 import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -296,4 +307,96 @@ public class PrecompiledWithSignService {
         return PrecompiledCommon.handleTransactionReceipt(receipt,
                 web3ApiService.getWeb3j(groupId));
     }
+
+	/**
+	 * chain governance, after FISCO-BCOS v2.5.0
+	 */
+	public String grantChainCommittee(int groupId, String signUserId, String toAddress) throws Exception {
+		// trans
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(toAddress);
+		TransactionReceipt receipt =
+			(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_GRANTCOMMITTEEMEMBER, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt,
+			web3ApiService.getWeb3j(groupId));
+	}
+
+	public String revokeChainCommittee(int groupId, String signUserId, String toAddress) throws Exception {
+		// trans
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(toAddress);
+		TransactionReceipt receipt =
+			(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_REVOKECOMMITTEEMEMBER, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt,
+			web3ApiService.getWeb3j(groupId));
+	}
+
+	public String updateChainCommitteeWeight(int groupId, String signUserId, String toAddress, int weight) throws Exception {
+		// trans
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(toAddress);
+		funcParams.add(weight);
+		TransactionReceipt receipt =
+			(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_UPDATECOMMITTEEMEMBERWEIGHT, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt,
+			web3ApiService.getWeb3j(groupId));
+	}
+
+	public String updateThreshold(int groupId, String signUserId, int threshold) throws Exception {
+		// trans
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(threshold);
+		TransactionReceipt receipt =
+			(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_UPDATETHRESHOLD, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt,
+			web3ApiService.getWeb3j(groupId));
+	}
+
+	public String grantOperator(int groupId, String signUserId, String toAddress) throws Exception {
+		// trans
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(toAddress);
+		TransactionReceipt receipt =
+			(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_GRANTOPERATOR, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt,
+			web3ApiService.getWeb3j(groupId));
+	}
+
+	public String revokeOperator(int groupId, String signUserId, String toAddress) throws Exception {
+		// trans
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(toAddress);
+		TransactionReceipt receipt =
+			(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_REVOKEOPERATOR, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt,
+			web3ApiService.getWeb3j(groupId));
+	}
+
+	public String freezeAccount(int groupId, String signUserId, String toAddress) throws Exception {
+		// trans
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(toAddress);
+		TransactionReceipt receipt =
+			(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_FREEZEACCOUNT, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt,
+			web3ApiService.getWeb3j(groupId));
+	}
+
+	public String unfreezeAccount(int groupId, String signUserId, String toAddress) throws Exception {
+		// trans
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(toAddress);
+		TransactionReceipt receipt =
+			(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_UNFREEZEACCOUNT, funcParams);
+		return PrecompiledCommon.handleTransactionReceipt(receipt,
+			web3ApiService.getWeb3j(groupId));
+	}
 }
