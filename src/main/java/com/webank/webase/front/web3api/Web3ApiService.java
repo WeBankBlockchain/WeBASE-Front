@@ -41,6 +41,8 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.web3j.protocol.core.methods.response.GroupPeers;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
@@ -899,5 +901,20 @@ public class Web3ApiService {
                     "web3j of " + groupId + " is null");
         }
         return web3j;
+    }
+
+    /**
+     * above v2.6.1
+     */
+    public BcosBlockHeader getBlockHeaderByHash(Integer groupId, String blockHash,
+        boolean returnSealers) throws IOException {
+
+        return getWeb3j(groupId).getBlockHeaderByHash(blockHash, returnSealers).send();
+    }
+
+    public BcosBlockHeader getBlockHeaderByNumber(Integer groupId, BigInteger blockNumber,
+        boolean returnSealers) throws IOException {
+
+        return getWeb3j(groupId).getBlockHeaderByNumber(blockNumber, returnSealers).send();
     }
 }
