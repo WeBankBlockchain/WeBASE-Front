@@ -22,6 +22,7 @@ import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
@@ -78,6 +79,8 @@ public class Web3ApiService {
     Web3j independentWeb3j;
     @Autowired
     Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
+    @Autowired
+    NewBlockEventCallback newBlockEventCallback;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -554,6 +557,8 @@ public class Web3ApiService {
         service.setGroupId(groupId);
         service.setThreadPool(threadPoolTaskExecutor);
         service.setAllChannelConnections(groupChannelConnectionsConfig);
+        // add block notify in new service
+        service.setBlockNotifyCallBack(newBlockEventCallback);
         try {
             service.run();
             serviceMap.put(groupId, service);
