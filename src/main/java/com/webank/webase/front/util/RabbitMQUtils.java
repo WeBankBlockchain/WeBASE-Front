@@ -18,6 +18,7 @@ package com.webank.webase.front.util;
 
 import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.entity.PublisherHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.channel.event.filter.TopicTools;
 import org.springframework.amqp.core.*;
@@ -32,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author marsli
  */
+@Slf4j
 public class RabbitMQUtils {
 
     public static final String ROUTING_KEY_EVENT = "event";
@@ -105,6 +107,8 @@ public class RabbitMQUtils {
         // put multiple event in topics[0]
         List<String> topicSigList = new ArrayList<>();
         topicList.forEach(t -> topicSigList.add(TopicTools.stringToTopic(t)));
+        log.debug("initSingleEventLogUserParams topicSigList :{}", topicSigList);
+        log.debug("initSingleEventLogUserParams topicList:{}", topicList);
         topics.add(topicSigList);
         params.setTopics(topics);
 
