@@ -116,6 +116,7 @@ public class EventRegisterInitTask {
 	private void registerContractEvent(ContractEventInfo rInfo) {
 		log.debug("start registerContractEvent infoId:{}", rInfo.getId());
 		List<String> topicList = FrontUtils.string2ListStr(rInfo.getTopicList());
+		log.debug("registerContractEvent topicList:{}", topicList);
 		String exchangeName = rInfo.getExchangeName();
 		String queueName = rInfo.getQueueName();
 		String appId = rInfo.getAppId();
