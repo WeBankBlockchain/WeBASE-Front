@@ -309,7 +309,7 @@ public class PrecompiledWithSignService {
     }
 
 	/**
-	 * chain governance, after FISCO-BCOS v2.5.0
+	 * chain governance, above FISCO-BCOS v2.5.0
 	 */
 	public String grantChainCommittee(int groupId, String signUserId, String toAddress) throws Exception {
 		// trans
