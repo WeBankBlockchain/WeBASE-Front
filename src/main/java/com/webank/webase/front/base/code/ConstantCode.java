@@ -194,4 +194,8 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_FILE_NAME_NOT_EXISTS = RetCode.mark(201263, "Solc js file name not exist in db");
     public static final RetCode SAVE_SOLC_FILE_ERROR = RetCode.mark(201264, "Save solc js file error");
     public static final RetCode READ_SOLC_FILE_ERROR = RetCode.mark(201265, "read solc js file error, please check if file deleted");
+
+    // chain governance
+    public static final RetCode CHAIN_GOVERNANCE_FAIL = RetCode.mark(201300, "update governance fail");
+
 }
