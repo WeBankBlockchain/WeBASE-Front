@@ -21,7 +21,8 @@ import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.util.Address;
+import com.webank.webase.front.precompiledapi.entity.PermissionHandle;
+import com.webank.webase.front.precompiledapi.entity.PermissionState;
 import com.webank.webase.front.util.AddressUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
@@ -60,8 +61,6 @@ import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_CNS;
 public class PermissionManageController extends BaseController {
     @Autowired
     private PermissionManageService permissionManageService;
-    @Autowired
-    private ChainGovernService chainGovernService;
     /**
      * handle get request by permission type
      * to get list of different administrators on chain
@@ -206,14 +205,8 @@ public class PermissionManageController extends BaseController {
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
         String from = permissionHandle.getSignUserId();
-        String address = permissionHandle.getAddress();
+        String address = AddressUtils.checkAndGetAddress(permissionHandle.getAddress());
         String tableName = permissionHandle.getTableName();
-        // validate address
-        Address converAddr = AddressUtils.convertAddress(address);
-        if(!converAddr.isValid()){
-            return ConstantCode.PARAM_ADDRESS_IS_INVALID;
-        }
-        address = converAddr.getAddress();
         switch (permissionType) {
             case PERMISSION_TYPE_PERMISSION:
                 return grantPermissionManager(groupId, from, address);
@@ -251,14 +244,8 @@ public class PermissionManageController extends BaseController {
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
         String from = permissionHandle.getSignUserId();
-        String address = permissionHandle.getAddress();
+        String address = AddressUtils.checkAndGetAddress(permissionHandle.getAddress());
         String tableName = permissionHandle.getTableName();
-        // validate address
-        Address convertAddress = AddressUtils.convertAddress(address);
-        if(!convertAddress.isValid()){
-            return ConstantCode.PARAM_ADDRESS_IS_INVALID;
-        }
-        address = convertAddress.getAddress();
         switch (permissionType) {
             case PERMISSION_TYPE_PERMISSION:
                 return revokePermissionManager(groupId, from, address);
