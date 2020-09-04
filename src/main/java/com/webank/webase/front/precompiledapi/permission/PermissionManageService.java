@@ -16,6 +16,7 @@ package com.webank.webase.front.precompiledapi.permission;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
+import com.webank.webase.front.precompiledapi.entity.PermissionState;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.HashMap;
