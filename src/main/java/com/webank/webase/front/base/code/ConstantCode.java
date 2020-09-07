@@ -196,6 +196,7 @@ public class ConstantCode {
     public static final RetCode READ_SOLC_FILE_ERROR = RetCode.mark(201265, "read solc js file error, please check if file deleted");
 
     // chain governance
-    public static final RetCode CHAIN_GOVERNANCE_FAIL = RetCode.mark(201300, "update governance fail");
+    public static final RetCode CHAIN_THRESHOLD_PARAM_ERROR = RetCode.mark(201301, "threshold must be greater than zero");
+    public static final RetCode COMMITTEE_WEIGHT_PARAM_ERROR = RetCode.mark(201301, "committee weight must be greater than zero");
 
 }
