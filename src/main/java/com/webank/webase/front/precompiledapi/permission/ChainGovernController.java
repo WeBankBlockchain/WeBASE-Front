@@ -16,6 +16,7 @@ package com.webank.webase.front.precompiledapi.permission;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.precompiledapi.ReqAccountStatus;
 import com.webank.webase.front.precompiledapi.entity.ChainGovernanceHandle;
 import com.webank.webase.front.util.AddressUtils;
 import io.swagger.annotations.Api;
@@ -23,6 +24,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
@@ -50,7 +52,7 @@ public class ChainGovernController {
 
     @GetMapping("committee/list")
     public List<PermissionInfo> listCommittee(
-        @RequestParam(defaultValue = "1") Integer groupId) throws Exception {
+        @RequestParam Integer groupId) throws Exception {
         log.info("start listCommittee groupId:{}", groupId);
         return chainGovernService.listChainCommittee(groupId);
     }
@@ -88,7 +90,7 @@ public class ChainGovernController {
      */
     @GetMapping("committee/weight")
     public Tuple2<Boolean, BigInteger> queryCommitteeWeight(
-        @RequestParam(defaultValue = "1") Integer groupId,
+        @RequestParam Integer groupId,
         @RequestParam String address) throws Exception {
         log.info("start queryCommitteeWeight groupId:{},address:{}", groupId, address);
         return chainGovernService.queryChainCommitteeWeight(groupId, address);
@@ -103,7 +105,7 @@ public class ChainGovernController {
         String fromSignUserId = governanceHandle.getSignUserId();
         String address =  AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         Integer weight = governanceHandle.getWeight();
-        if (weight < 0) {
+        if (weight == null || weight < 0) {
             throw new FrontException(ConstantCode.PARAM_ERROR);
         }
         return chainGovernService.updateChainCommitteeWeight(groupId, fromSignUserId, address, weight);
@@ -114,7 +116,7 @@ public class ChainGovernController {
      */
     @GetMapping("threshold")
     public BigInteger queryThreshold(
-        @RequestParam(defaultValue = "1") Integer groupId) throws Exception {
+        @RequestParam Integer groupId) throws Exception {
         log.info("start queryThreshold groupId:{}", groupId);
         return chainGovernService.queryThreshold(groupId);
     }
@@ -127,7 +129,7 @@ public class ChainGovernController {
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
         Integer threshold = governanceHandle.getThreshold();
-        if (threshold < 0) {
+        if (threshold == null || threshold < 0) {
             throw new FrontException(ConstantCode.PARAM_ERROR);
         }
         return chainGovernService.updateThreshold(groupId, fromSignUserId, threshold);
@@ -135,7 +137,7 @@ public class ChainGovernController {
 
     @GetMapping("operator/list")
     public List<PermissionInfo> listOperator(
-        @RequestParam(defaultValue = "1") Integer groupId) throws Exception {
+        @RequestParam Integer groupId) throws Exception {
         log.info("start listOperator groupId:{}", groupId);
         return chainGovernService.listOperator(groupId);
     }
@@ -174,10 +176,17 @@ public class ChainGovernController {
      */
     @GetMapping("account/status")
     public String getAccountStatus(
-        @RequestParam(defaultValue = "1") Integer groupId,
+        @RequestParam Integer groupId,
         @RequestParam String address) throws Exception {
         log.info("start getAccountStatus groupId:{},address:{}", groupId, address);
         return chainGovernService.getAccountStatus(groupId, address);
+    }
+
+    @GetMapping("account/status/list")
+    public Map<String, String> queryAccountStatusList(@Valid @RequestBody ReqAccountStatus reqAccountStatus)
+        throws Exception {
+        log.info("start queryAccountStatusList reqAccountStatus:{}", reqAccountStatus);
+        return chainGovernService.queryAccountStatus(reqAccountStatus);
     }
 
     @ApiOperation(value = "freezeAccount", notes = "freeze account address")
@@ -193,7 +202,7 @@ public class ChainGovernController {
 
     @ApiOperation(value = "unfreezeAccount", notes = "unfreeze account address")
     @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
-    @PostMapping("account/unfreeze")
+    @DeleteMapping("account/unfreeze")
     public String unfreezeAccount(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start unfreezeAccount governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
