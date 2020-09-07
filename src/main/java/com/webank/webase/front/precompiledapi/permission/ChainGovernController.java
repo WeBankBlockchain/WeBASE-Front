@@ -21,8 +21,12 @@ import com.webank.webase.front.util.AddressUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import java.math.BigInteger;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
+import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,13 +43,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "/governance", tags = "permission manage interface above fisco v2.5.x")
 @Slf4j
 @RestController
-@RequestMapping("/governance")
+@RequestMapping("governance")
 public class ChainGovernController {
     @Autowired
     private ChainGovernService chainGovernService;
 
     @GetMapping("committee/list")
-    public Object listCommittee(
+    public List<PermissionInfo> listCommittee(
         @RequestParam(defaultValue = "1") Integer groupId) throws Exception {
         log.info("start listCommittee groupId:{}", groupId);
         return chainGovernService.listChainCommittee(groupId);
@@ -57,7 +61,7 @@ public class ChainGovernController {
     @ApiOperation(value = "grantCommittee", notes = "grant address committee")
     @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @PostMapping("committee")
-    public Object grantCommittee(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
+    public String grantCommittee(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start grantCommittee governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
@@ -71,7 +75,7 @@ public class ChainGovernController {
     @ApiOperation(value = "revokeCommittee", notes = "revoke address committee")
     @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @DeleteMapping("committee")
-    public Object revokeCommittee(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
+    public String revokeCommittee(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start revokeCommittee governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
@@ -83,7 +87,7 @@ public class ChainGovernController {
      * handle update committee weight
      */
     @GetMapping("committee/weight")
-    public Object queryCommitteeWeight(
+    public Tuple2<Boolean, BigInteger> queryCommitteeWeight(
         @RequestParam(defaultValue = "1") Integer groupId,
         @RequestParam String address) throws Exception {
         log.info("start queryCommitteeWeight groupId:{},address:{}", groupId, address);
@@ -93,7 +97,7 @@ public class ChainGovernController {
     @ApiOperation(value = "updateCommitteeWeight", notes = "update address committee weight")
     @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @PostMapping("committee/weight")
-    public Object updateCommitteeWeight(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
+    public String updateCommitteeWeight(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start grantCommittee governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
@@ -109,7 +113,7 @@ public class ChainGovernController {
      * handle threshold
      */
     @GetMapping("threshold")
-    public Object queryThreshold(
+    public BigInteger queryThreshold(
         @RequestParam(defaultValue = "1") Integer groupId) throws Exception {
         log.info("start queryThreshold groupId:{}", groupId);
         return chainGovernService.queryThreshold(groupId);
@@ -118,7 +122,7 @@ public class ChainGovernController {
     @ApiOperation(value = "updateCommitteeThreshold", notes = "update address committee threshold")
     @ApiImplicitParam(name = "updateCommitteeThreshold", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @PostMapping("threshold")
-    public Object updateThreshold(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
+    public String updateThreshold(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start updateThreshold governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
@@ -130,7 +134,7 @@ public class ChainGovernController {
     }
 
     @GetMapping("operator/list")
-    public Object listOperator(
+    public List<PermissionInfo> listOperator(
         @RequestParam(defaultValue = "1") Integer groupId) throws Exception {
         log.info("start listOperator groupId:{}", groupId);
         return chainGovernService.listOperator(groupId);
@@ -142,7 +146,7 @@ public class ChainGovernController {
     @ApiOperation(value = "grantOperator", notes = "grant address operator")
     @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @PostMapping("operator")
-    public Object grantOperator(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
+    public String grantOperator(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start grantOperator governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
@@ -156,7 +160,7 @@ public class ChainGovernController {
     @ApiOperation(value = "revokeOperator", notes = "revoke address operator")
     @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @DeleteMapping("operator")
-    public Object revokeOperator(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
+    public String revokeOperator(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start revokeOperator governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
@@ -169,7 +173,7 @@ public class ChainGovernController {
      * handle freeze/unfreeze account address
      */
     @GetMapping("account/status")
-    public Object getAccountStatus(
+    public String getAccountStatus(
         @RequestParam(defaultValue = "1") Integer groupId,
         @RequestParam String address) throws Exception {
         log.info("start getAccountStatus groupId:{},address:{}", groupId, address);
@@ -179,7 +183,7 @@ public class ChainGovernController {
     @ApiOperation(value = "freezeAccount", notes = "freeze account address")
     @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @PostMapping("account/freeze")
-    public Object freezeAccount(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
+    public String freezeAccount(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start freezeAccount governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
@@ -190,7 +194,7 @@ public class ChainGovernController {
     @ApiOperation(value = "unfreezeAccount", notes = "unfreeze account address")
     @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @PostMapping("account/unfreeze")
-    public Object unfreezeAccount(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
+    public String unfreezeAccount(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start unfreezeAccount governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
