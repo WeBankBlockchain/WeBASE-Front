@@ -22,10 +22,8 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.permission.ChainGovernanceService;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
-import org.fisco.bcos.web3j.precompile.permission.PermissionService;
 import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -126,7 +124,6 @@ public class ChainGovernService {
         return chainGovernanceService.listOperators();
     }
 
-
     /**
      * freeze account related
      */
@@ -143,7 +140,7 @@ public class ChainGovernService {
     }
 
     /**
-     * get account's committee weight
+     * get account's freeze status
      */
     public String getAccountStatus(int groupId, String userAddress) throws Exception {
         ChainGovernanceService chainGovernanceService = new ChainGovernanceService(web3ApiService.getWeb3j(groupId),
@@ -152,6 +149,9 @@ public class ChainGovernService {
         return chainGovernanceService.getAccountStatus(userAddress);
     }
 
+    /**
+     * list account status
+     */
     public Map<String, String> queryAccountStatus(ReqAccountStatus reqAccountStatus) throws Exception {
         Integer groupId = reqAccountStatus.getGroupId();
         ChainGovernanceService chainGovernanceService = new ChainGovernanceService(web3ApiService.getWeb3j(groupId),

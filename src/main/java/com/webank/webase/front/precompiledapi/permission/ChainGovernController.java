@@ -106,7 +106,7 @@ public class ChainGovernController {
         String address =  AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         Integer weight = governanceHandle.getWeight();
         if (weight == null || weight < 0) {
-            throw new FrontException(ConstantCode.PARAM_ERROR);
+            throw new FrontException(ConstantCode.COMMITTEE_WEIGHT_PARAM_ERROR);
         }
         return chainGovernService.updateChainCommitteeWeight(groupId, fromSignUserId, address, weight);
     }
@@ -130,7 +130,7 @@ public class ChainGovernController {
         String fromSignUserId = governanceHandle.getSignUserId();
         Integer threshold = governanceHandle.getThreshold();
         if (threshold == null || threshold < 0) {
-            throw new FrontException(ConstantCode.PARAM_ERROR);
+            throw new FrontException(ConstantCode.CHAIN_THRESHOLD_PARAM_ERROR);
         }
         return chainGovernService.updateThreshold(groupId, fromSignUserId, threshold);
     }
@@ -175,9 +175,7 @@ public class ChainGovernController {
      * handle freeze/unfreeze account address
      */
     @GetMapping("account/status")
-    public String getAccountStatus(
-        @RequestParam Integer groupId,
-        @RequestParam String address) throws Exception {
+    public String getAccountStatus(@RequestParam Integer groupId, @RequestParam String address) throws Exception {
         log.info("start getAccountStatus groupId:{},address:{}", groupId, address);
         return chainGovernService.getAccountStatus(groupId, address);
     }
