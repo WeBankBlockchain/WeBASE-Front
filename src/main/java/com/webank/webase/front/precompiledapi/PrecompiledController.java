@@ -217,7 +217,7 @@ public class PrecompiledController {
     }
 
     /**
-     * CRUD operation checkVersionForCRUD(); TODO exception for
+     * CRUD operation checkVersionForCRUD();
      * "bcos's version above of 2.0.0-rc3 support crud operation"
      */
     @ApiOperation(value = "crudManage", notes = "operate table by crud")
