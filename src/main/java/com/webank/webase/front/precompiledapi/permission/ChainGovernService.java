@@ -158,19 +158,5 @@ public class ChainGovernService {
         return chainGovernanceService.getAccountStatus(userAddress);
     }
 
-    /**
-     * list account status
-     */
-    public Map<String, String> queryAccountStatus(ReqAccountStatus reqAccountStatus) throws Exception {
-        Integer groupId = reqAccountStatus.getGroupId();
-        ChainGovernanceService chainGovernanceService = new ChainGovernanceService(web3ApiService.getWeb3j(groupId),
-            keyStoreService.getCredentialsForQuery());
-        Map<String, String> statusResultMap = new HashMap<>();
-        for (String userAddress: reqAccountStatus.getAddressList()) {
-            String res = chainGovernanceService.getAccountStatus(userAddress);
-            statusResultMap.put(userAddress, res);
-        }
-        return statusResultMap;
-    }
 
 }
