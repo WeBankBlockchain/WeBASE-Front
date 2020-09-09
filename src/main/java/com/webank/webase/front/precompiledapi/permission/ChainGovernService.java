@@ -14,6 +14,9 @@
 
 package com.webank.webase.front.precompiledapi.permission;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.code.RetCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.precompiledapi.ReqAccountStatus;
@@ -77,12 +80,18 @@ public class ChainGovernService {
         return res;
     }
 
-    public Tuple2<Boolean, BigInteger> queryChainCommitteeWeight(int groupId, String userAddress)
+    public BigInteger queryChainCommitteeWeight(int groupId, String userAddress)
         throws Exception {
         ChainGovernanceService chainGovernanceService = new ChainGovernanceService(web3ApiService.getWeb3j(groupId),
             keyStoreService.getCredentialsForQuery());
 
-        return chainGovernanceService.queryCommitteeMemberWeight(userAddress);
+        Tuple2<Boolean, BigInteger> res = chainGovernanceService.queryCommitteeMemberWeight(userAddress);
+        if (res.getValue1()) {
+            return res.getValue2();
+        } else {
+            throw new FrontException(new RetCode(res.getValue2().intValue(), "address not committee"));
+        }
+
     }
 
     /**
