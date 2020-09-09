@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,9 @@ public class ChainGovernController {
         log.info("start grantCommittee governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
+        if (StringUtils.isBlank(governanceHandle.getAddress())) {
+            throw new FrontException(ConstantCode.GOVERNANCE_ADDRESS_PARAM_ERROR);
+        }
         String address = AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         return chainGovernService.grantChainCommittee(groupId, fromSignUserId, address);
     }
@@ -81,6 +85,9 @@ public class ChainGovernController {
         log.info("start revokeCommittee governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
+        if (StringUtils.isBlank(governanceHandle.getAddress())) {
+            throw new FrontException(ConstantCode.GOVERNANCE_ADDRESS_PARAM_ERROR);
+        }
         String address =  AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         return chainGovernService.revokeChainCommittee(groupId, fromSignUserId, address);
     }
@@ -103,6 +110,9 @@ public class ChainGovernController {
         log.info("start grantCommittee governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
+        if (StringUtils.isBlank(governanceHandle.getAddress())) {
+            throw new FrontException(ConstantCode.GOVERNANCE_ADDRESS_PARAM_ERROR);
+        }
         String address =  AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         Integer weight = governanceHandle.getWeight();
         if (weight == null || weight < 0) {
@@ -122,7 +132,7 @@ public class ChainGovernController {
     }
 
     @ApiOperation(value = "updateCommitteeThreshold", notes = "update address committee threshold")
-    @ApiImplicitParam(name = "updateCommitteeThreshold", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
+    @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @PostMapping("threshold")
     public String updateThreshold(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
         log.info("start updateThreshold governanceHandle:{}", governanceHandle);
@@ -152,6 +162,9 @@ public class ChainGovernController {
         log.info("start grantOperator governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
+        if (StringUtils.isBlank(governanceHandle.getAddress())) {
+            throw new FrontException(ConstantCode.GOVERNANCE_ADDRESS_PARAM_ERROR);
+        }
         String address = AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         return chainGovernService.grantOperator(groupId, fromSignUserId, address);
     }
@@ -166,6 +179,9 @@ public class ChainGovernController {
         log.info("start revokeOperator governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
+        if (StringUtils.isBlank(governanceHandle.getAddress())) {
+            throw new FrontException(ConstantCode.GOVERNANCE_ADDRESS_PARAM_ERROR);
+        }
         String address = AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         return chainGovernService.revokeOperator(groupId, fromSignUserId, address);
     }
@@ -194,6 +210,9 @@ public class ChainGovernController {
         log.info("start freezeAccount governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
+        if (StringUtils.isBlank(governanceHandle.getAddress())) {
+            throw new FrontException(ConstantCode.GOVERNANCE_ADDRESS_PARAM_ERROR);
+        }
         String address = AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         return chainGovernService.freezeAccount(groupId, fromSignUserId, address);
     }
@@ -205,6 +224,9 @@ public class ChainGovernController {
         log.info("start unfreezeAccount governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
+        if (StringUtils.isBlank(governanceHandle.getAddress())) {
+            throw new FrontException(ConstantCode.GOVERNANCE_ADDRESS_PARAM_ERROR);
+        }
         String address = AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         return chainGovernService.unfreezeAccount(groupId, fromSignUserId, address);
     }
