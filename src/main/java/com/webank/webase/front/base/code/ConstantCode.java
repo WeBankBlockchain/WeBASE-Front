@@ -197,6 +197,7 @@ public class ConstantCode {
 
     // chain governance
     public static final RetCode CHAIN_THRESHOLD_PARAM_ERROR = RetCode.mark(201301, "threshold must be greater than zero");
-    public static final RetCode COMMITTEE_WEIGHT_PARAM_ERROR = RetCode.mark(201301, "committee weight must be greater than zero");
+    public static final RetCode COMMITTEE_WEIGHT_PARAM_ERROR = RetCode.mark(201302, "committee weight must be greater than zero");
+    public static final RetCode GOVERNANCE_ADDRESS_PARAM_ERROR = RetCode.mark(201303, "chain governance address cannot be blank");
 
 }

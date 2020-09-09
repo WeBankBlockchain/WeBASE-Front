@@ -25,7 +25,6 @@ public class ChainGovernanceHandle {
     private Integer groupId;
     @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String signUserId;
-    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
     private String address;
     private Integer weight;
     private Integer threshold;
