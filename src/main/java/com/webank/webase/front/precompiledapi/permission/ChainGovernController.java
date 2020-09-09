@@ -115,7 +115,7 @@ public class ChainGovernController {
         }
         String address =  AddressUtils.checkAndGetAddress(governanceHandle.getAddress());
         Integer weight = governanceHandle.getWeight();
-        if (weight == null || weight < 0) {
+        if (weight == null || weight <= 0) {
             throw new FrontException(ConstantCode.COMMITTEE_WEIGHT_PARAM_ERROR);
         }
         return chainGovernService.updateChainCommitteeWeight(groupId, fromSignUserId, address, weight);
