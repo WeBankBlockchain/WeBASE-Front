@@ -96,7 +96,7 @@ public class ChainGovernController {
      * handle update committee weight
      */
     @GetMapping("committee/weight")
-    public Tuple2<Boolean, BigInteger> queryCommitteeWeight(
+    public BigInteger queryCommitteeWeight(
         @RequestParam Integer groupId,
         @RequestParam String address) throws Exception {
         log.info("start queryCommitteeWeight groupId:{},address:{}", groupId, address);
@@ -194,13 +194,6 @@ public class ChainGovernController {
     public String getAccountStatus(@RequestParam Integer groupId, @RequestParam String address) throws Exception {
         log.info("start getAccountStatus groupId:{},address:{}", groupId, address);
         return chainGovernService.getAccountStatus(groupId, address);
-    }
-
-    @GetMapping("account/status/list")
-    public Map<String, String> queryAccountStatusList(@Valid @RequestBody ReqAccountStatus reqAccountStatus)
-        throws Exception {
-        log.info("start queryAccountStatusList reqAccountStatus:{}", reqAccountStatus);
-        return chainGovernService.queryAccountStatus(reqAccountStatus);
     }
 
     @ApiOperation(value = "freezeAccount", notes = "freeze account address")

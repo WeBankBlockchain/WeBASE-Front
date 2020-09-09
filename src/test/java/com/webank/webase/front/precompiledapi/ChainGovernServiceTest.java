@@ -71,5 +71,10 @@ public class ChainGovernServiceTest extends BaseTest {
         System.out.println("queryChainCommitteeWeight: " + chainGovernService.queryChainCommitteeWeight(groupId, userAddress));
     }
 
+    @Test
+    public void testGetAccountStatus() throws Exception {
+        System.out.println("getAccountStatus: " + chainGovernService.getAccountStatus(groupId, adminAddress));
+    }
+
 
 }
