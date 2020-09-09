@@ -15,6 +15,7 @@
  */
 package com.webank.webase.front.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
@@ -72,16 +73,17 @@ public class AesUtils {
             Cipher cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
 
             //密码key(超过16字节即128bit的key，需要替换jre中的local_policy.jar和US_export_policy.jar，否则报错：Illegal key size)
-            SecretKeySpec keySpec = new SecretKeySpec(password.getBytes("utf-8"),KEY_ALGORITHM);
+            SecretKeySpec keySpec = new SecretKeySpec(password.getBytes(StandardCharsets.UTF_8),KEY_ALGORITHM);
 
             //向量iv
-            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes("utf-8"));
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes(
+                StandardCharsets.UTF_8));
 
             //初始化为加密模式的密码器
             cipher.init(Cipher.ENCRYPT_MODE,keySpec,ivParameterSpec);
 
             //加密
-            byte[] byteContent = content.getBytes("utf-8");
+            byte[] byteContent = content.getBytes(StandardCharsets.UTF_8);
             byte[] result = cipher.doFinal(byteContent);
 
             return Base64.getEncoder().encodeToString(result);
@@ -111,7 +113,7 @@ public class AesUtils {
      * @param iv 使用CBC模式，需要一个向量iv，可增加加密算法的强度
      * @return 明文
      */
-    public  String aesDecrypt(String content, String password,String iv) {
+    public  String aesDecrypt(String content, String password, String iv) {
     	if(StringUtils.isBlank(iv)) {
     		iv = DEFAULT_IV;
     	}
@@ -121,19 +123,20 @@ public class AesUtils {
             Cipher cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
 
             //密码key
-            SecretKeySpec keySpec = new SecretKeySpec(password.getBytes("utf-8"),KEY_ALGORITHM);
+            SecretKeySpec keySpec = new SecretKeySpec(password.getBytes(StandardCharsets.UTF_8), KEY_ALGORITHM);
 
             //向量iv
-            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes("utf-8"));
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes(
+                StandardCharsets.UTF_8));
 
             //初始化为解密模式的密码器
-            cipher.init(Cipher.DECRYPT_MODE,keySpec,ivParameterSpec);
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivParameterSpec);
 
             //执行操作
             byte[] encrypted1 = Base64.getDecoder().decode(content);
             byte[] result = cipher.doFinal(encrypted1);
 
-            return new String(result,"utf-8");
+            return new String(result, StandardCharsets.UTF_8);
         } catch (Exception ex) {
         	log.error(ex.getMessage(),ex);
         }
