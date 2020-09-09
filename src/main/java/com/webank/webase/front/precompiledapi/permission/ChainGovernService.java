@@ -154,8 +154,17 @@ public class ChainGovernService {
     public String getAccountStatus(int groupId, String userAddress) throws Exception {
         ChainGovernanceService chainGovernanceService = new ChainGovernanceService(web3ApiService.getWeb3j(groupId),
             keyStoreService.getCredentialsForQuery());
-
-        return chainGovernanceService.getAccountStatus(userAddress);
+        String res = chainGovernanceService.getAccountStatus(userAddress);
+        if (res.contains("frozen")) {
+            // res: The account has been frozen. You can use this account after unfreezing it.
+            return "1";
+        } else {
+            // res: The address is nonexistent.
+            // res: The account is available.
+            // res: invalid
+            // res: not a account address
+            return "0";
+        }
     }
 
 
