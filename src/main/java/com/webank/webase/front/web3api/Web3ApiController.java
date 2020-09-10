@@ -319,4 +319,10 @@ public class Web3ApiController {
         @PathVariable BigInteger blockNumber) throws IOException {
         return web3ApiService.getBlockHeaderByNumber(groupId, blockNumber, true);
     }
+
+    @ApiOperation(value = "getBlockNumberCache", notes = "Get block limit of node")
+    @GetMapping("/blockLimit")
+    public BigInteger getBlockNumberCache(@PathVariable int groupId) {
+        return web3ApiService.getBlockNumberCache(groupId);
+    }
 }

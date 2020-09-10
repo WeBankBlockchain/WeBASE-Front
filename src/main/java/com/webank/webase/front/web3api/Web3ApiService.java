@@ -907,9 +907,6 @@ public class Web3ApiService {
         return web3j;
     }
 
-    /**
-     * above v2.6.1
-     */
     public BcosBlockHeader getBlockHeaderByHash(Integer groupId, String blockHash,
         boolean returnSealers) throws IOException {
 
@@ -920,5 +917,13 @@ public class Web3ApiService {
         boolean returnSealers) throws IOException {
 
         return getWeb3j(groupId).getBlockHeaderByNumber(blockNumber, returnSealers).send();
+    }
+    /* above v2.6.1*/
+
+    /**
+     * get block limit
+     */
+    public BigInteger getBlockNumberCache(Integer groupId) {
+        return getWeb3j(groupId).getBlockNumberCache();
     }
 }
