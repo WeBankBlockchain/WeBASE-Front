@@ -14,11 +14,13 @@
 
 package com.webank.webase.front.precompiledapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.webank.webase.front.base.code.ConstantCode;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChainGovernanceHandle {
     // defaultValue = "1"
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
