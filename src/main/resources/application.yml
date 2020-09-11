@@ -83,4 +83,4 @@ constant:
   # sync stat log data task (unit: ms)
   syncStatLogTime: 5000
   syncStatLogCountLimit: 10000
-  statLogEnabled: true
+  statLogEnabled: false
