@@ -15,12 +15,55 @@
  */
 package com.webank.webase.front.base.exception;
 
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.AccountFrozen;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.AddressAlreadyUsed;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.AlreadyInChain;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.AlreadyKnown;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BadInstruction;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BadJumpDestination;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BadRLP;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BlockGasLimitReached;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BlockLimitCheckFail;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.CallAddressError;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.ContractFrozen;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.ErrorInRPC;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.FilterCheckFail;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.GasOverflow;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidFormat;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidNonce;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidSignature;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidTxChainId;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidTxGroupId;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidZeroSignatureFormat;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.MalformedTx;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NoCallPermission;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NoDeployPermission;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NoTxPermission;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NonceCheckFail;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NotEnoughCash;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OutOfGas;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OutOfGasBase;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OutOfGasIntrinsic;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OutOfStack;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OverGroupMemoryLimit;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.PermissionDenied;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.PrecompiledError;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.RequestNotBelongToTheGroup;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.RevertInstruction;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.StackUnderflow;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.Success;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.TransactionRefused;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.TxPoolIsFull;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.Unknown;
+
 import com.webank.webase.front.util.JsonUtils;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.util.ErrorCodeHandleUtils;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,19 +149,6 @@ public class ExceptionsHandler {
         return ResponseEntity.status(400).body(map);
     }
 
-//    @ResponseBody
-//    @ExceptionHandler(value = ContractCallException.class)
-//    public ResponseEntity contractException(ContractCallException ex) {
-//        log.warn("catch ContractCallException", ex);
-//
-//        Map<String, Object> map = new HashMap<>();
-//        //  map.put("exception", frontException);
-//        map.put("errorMessage", ex.getMessage());
-//        map.put("code", 400);
-//        log.warn("ContractCallException return:{}", JsonUtils.toJSONString(map));
-//        return ResponseEntity.status(400).body(map);
-//    }
-
 
     /**
      * all non-catch exception Handler.
@@ -135,6 +165,7 @@ public class ExceptionsHandler {
         map.put("code", errorDetail.getCode());
         return ResponseEntity.status(500).body(map);
     }
+
 
     private RetCode chainErrorHandle(String errorMessage) {
         RetCode response = ErrorCodeHandleUtils.handleErrorMsg(errorMessage);
