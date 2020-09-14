@@ -185,10 +185,10 @@ public class TransService {
             try{
                 response = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException  e) {
-                log.error("send call tx error for interrupted or exec:[]", e);
+                log.error("get tx receipt error for interrupted or exec:[]", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
             } catch (TimeoutException e) {
-                log.error("send call tx error for timeout:[]", e);
+                log.error("get tx receipt error for timeout:[]", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
             }
             log.info("***node cost time***: {}",

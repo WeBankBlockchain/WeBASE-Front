@@ -14,6 +14,7 @@
 package com.webank.webase.front.contract;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.enums.GMStatus;
@@ -54,7 +55,9 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -85,6 +88,46 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.AccountFrozen;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.AddressAlreadyUsed;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.AlreadyInChain;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.AlreadyKnown;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BadInstruction;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BadJumpDestination;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BadRLP;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BlockGasLimitReached;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.BlockLimitCheckFail;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.CallAddressError;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.ContractFrozen;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.ErrorInRPC;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.FilterCheckFail;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.GasOverflow;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidFormat;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidNonce;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidSignature;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidTxChainId;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidTxGroupId;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.InvalidZeroSignatureFormat;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.MalformedTx;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NoCallPermission;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NoDeployPermission;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NoTxPermission;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NonceCheckFail;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.NotEnoughCash;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OutOfGas;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OutOfGasBase;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OutOfGasIntrinsic;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OutOfStack;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.OverGroupMemoryLimit;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.PermissionDenied;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.PrecompiledError;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.RequestNotBelongToTheGroup;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.RevertInstruction;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.StackUnderflow;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.Success;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.TransactionRefused;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.TxPoolIsFull;
+import static org.fisco.bcos.web3j.protocol.channel.StatusCode.Unknown;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
@@ -144,13 +187,8 @@ public class ContractService {
             log.error("fail addressIsValid. bytecodeBin is empty");
             throw new FrontException(ConstantCode.CONTRACT_BIN_NULL);
         }
-        String binOnChain;
-        try {
-            binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
-        } catch (Exception e) {
-            log.error("fail addressIsValid.", e);
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
-        }
+        String binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+
         log.debug("addressIsValid address:{} binOnChain:{}", contractAddress, binOnChain);
         if (StringUtils.isBlank(binOnChain)) {
             log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
@@ -173,7 +211,7 @@ public class ContractService {
      * @param: ReqDeploy'scontractId
      * @param: doLocally deploy contract locally or through webase-sign
      */
-    public String caseDeploy(ReqDeploy req, boolean doLocally) throws Exception {
+    public String caseDeploy(ReqDeploy req, boolean doLocally) {
         if (Objects.nonNull(req.getContractId())) {
             return deployByLocalContract(req, doLocally);
         } else {
@@ -191,7 +229,7 @@ public class ContractService {
      * @param req
      * @param doLocally deploy contract locally or through webase-sign
      */
-    private String deployByLocalContract(ReqDeploy req, boolean doLocally) throws Exception {
+    private String deployByLocalContract(ReqDeploy req, boolean doLocally) {
         // check contract status
         Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
 
@@ -225,7 +263,7 @@ public class ContractService {
     /**
      * deploy through webase-sign
      */
-    public String deployWithSign(ReqDeploy req) throws Exception {
+    public String deployWithSign(ReqDeploy req) {
         int groupId = req.getGroupId();
         String signUserId = req.getSignUserId();
         List<AbiDefinition> abiInfos = req.getAbiInfo();
@@ -257,7 +295,16 @@ public class ContractService {
         // send transaction
         final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
         transService.sendMessage(web3j, signMsg, transFuture);
-        TransactionReceipt receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+        TransactionReceipt receipt;
+        try {
+            receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("get tx receipt error for interrupted or exec:[]", e);
+            throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
+        } catch (TimeoutException e) {
+            log.error("get tx receipt error for timeout:[]", e);
+            throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
+        }
         String contractAddress = receipt.getContractAddress();
         log.info("success deploy. contractAddress:{}", contractAddress);
         return contractAddress;
@@ -266,7 +313,7 @@ public class ContractService {
     /**
      * deploy locally, not through webase-sign
      */
-    public String deployLocally(ReqDeploy req) throws Exception {
+    public String deployLocally(ReqDeploy req) {
         int groupId = req.getGroupId();
         String userAddress = req.getUser();
         // check deploy permission
@@ -768,23 +815,21 @@ public class ContractService {
      */
     private void checkDeployPermission(int groupId, String userAddress) {
         // get deploy permission list
-        try {
-            List<PermissionInfo> deployUserList = permissionManageService.listPermissionManager(groupId);
-            // check user in the list,
-            if (deployUserList.isEmpty()) {
-                return;
-            } else {
-                long count = 0;
-                count = deployUserList.stream().filter( admin -> admin.getAddress().equals(userAddress)).count();
-                // if not in the list, permission denied
-                if (count == 0) {
-                    log.error("checkDeployPermission permission denied for user:{}", userAddress);
-                    throw new FrontException(ConstantCode.PERMISSION_DENIED);
-                }
+        List<PermissionInfo> deployUserList = permissionManageService.listPermissionManager(groupId);
+
+        // check user in the list,
+        if (deployUserList.isEmpty()) {
+            return;
+        } else {
+            long count = 0;
+            count = deployUserList.stream().filter( admin -> admin.getAddress().equals(userAddress)).count();
+            // if not in the list, permission denied
+            if (count == 0) {
+                log.error("checkDeployPermission permission denied for user:{}", userAddress);
+                throw new FrontException(ConstantCode.PERMISSION_DENIED);
             }
-        } catch (Exception e) {
-            log.error("checkDeployPermission get list error:{}", e.getMessage());
         }
+
     }
 
 }
