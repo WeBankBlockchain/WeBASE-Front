@@ -24,6 +24,11 @@ import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
+import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.channel.StatusCode;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 
 /**
  * Constants and tool function related with Precompiled module
@@ -102,12 +107,6 @@ public class PrecompiledUtils {
         }
     }
 
-    public static JsonNode string2Json(String str)
-            throws JsonParseException, IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode actualObj = mapper.readTree(str);
-        return actualObj;
-    }
 
     public static Map string2Map(String str)
             throws JsonParseException, IOException{
