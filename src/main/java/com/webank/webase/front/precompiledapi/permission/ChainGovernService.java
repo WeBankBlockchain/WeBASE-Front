@@ -150,6 +150,7 @@ public class ChainGovernService {
 
     /**
      * get account's freeze status
+     * @return code of status
      */
     public String getAccountStatus(int groupId, String userAddress) throws Exception {
         ChainGovernanceService chainGovernanceService = new ChainGovernanceService(web3ApiService.getWeb3j(groupId),
