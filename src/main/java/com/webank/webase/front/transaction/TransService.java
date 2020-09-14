@@ -175,9 +175,6 @@ public class TransService {
             // data sign
             String signMsg =
                     signMessage(groupId, web3j, signUserId, contractAddress, encodedFunction);
-            if (StringUtils.isBlank(signMsg)) {
-                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-            }
             Instant nodeStartTime = Instant.now();
             // send transaction
             final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
@@ -274,7 +271,7 @@ public class TransService {
      * @return
      */
     public String signMessage(int groupId, Web3j web3j, String signUserId, String contractAddress,
-            String data) throws FrontException {
+            String data) {
         Random r = new Random();
         BigInteger randomid = new BigInteger(250, r);
 
@@ -294,10 +291,6 @@ public class TransService {
             encodeInfo.setSignUserId(signUserId);
             encodeInfo.setEncodedDataStr(encodedDataStr);
             String signDataStr = keyStoreService.getSignData(encodeInfo);
-            if (StringUtils.isBlank(signDataStr)) {
-                log.warn("deploySend get sign data error.");
-                return null;
-            }
 
             SignatureData signData = CommonUtils.stringToSignatureData(signDataStr);
             byte[] signedMessage = TransactionEncoder.encode(rawTransaction, signData);
@@ -322,11 +315,6 @@ public class TransService {
 
             log.info("get signdatastr cost time: {}",
                     Duration.between(startTime, Instant.now()).toMillis());
-
-            if (StringUtils.isBlank(signDataStr)) {
-                log.warn("deploySend get sign data error.");
-                return null;
-            }
 
             SignatureData signData = CommonUtils.stringToSignatureData(signDataStr);
             byte[] signedMessage =
