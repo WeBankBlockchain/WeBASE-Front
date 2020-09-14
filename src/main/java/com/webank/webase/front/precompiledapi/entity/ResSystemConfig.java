@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.front.precompiledapi.sysconf;
+package com.webank.webase.front.precompiledapi.entity;
 
 import lombok.Data;
 
