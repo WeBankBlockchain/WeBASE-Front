@@ -189,7 +189,17 @@ public class PrecompiledService {
     public String contractStatus(int groupId, String contractAddress) throws Exception {
         ContractStatusService contractStatusService = new ContractStatusService(
                 web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
-        return contractStatusService.getStatus(contractAddress);
+        String res = contractStatusService.getStatus(contractAddress);
+        if (res.contains("frozen")) {
+            // res: The account has been frozen. You can use this account after unfreezing it.
+            return "1";
+        } else {
+            // res: The address is nonexistent.
+            // res: The account is available.
+            // res: invalid
+            // res: not a account address
+            return "0";
+        }
     }
 
     public String contractManagerList(int groupId, String contractAddress) throws Exception {
