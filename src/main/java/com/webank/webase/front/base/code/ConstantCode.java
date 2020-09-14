@@ -208,10 +208,16 @@ public class ConstantCode {
     public static final RetCode WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR = RetCode.mark(201503, "pem/p12 manager get key pair error for bc dependency error");
     public static final RetCode REQUEST_SIGN_RETURN_ERROR = RetCode.mark(201504, "sign service return error");
     // transaction
-    public static final RetCode CONTRACT_ABI_PARSE_JSON_ERROR = RetCode.mark(201505, "contract abi parse json error");
-    public static final RetCode CALL_CONTRACT_IO_EXCEPTION = RetCode.mark(201506, "call contract error for io exception");
-    public static final RetCode GET_TX_RECEIPT_EXEC_ERROR = RetCode.mark(201507, "get transaction receipt fail for exec");
-    public static final RetCode GET_TX_RECEIPT_TIMEOUT_ERROR = RetCode.mark(201508, "get transaction receipt fail for time out");
-
-
+    public static final RetCode TX_RECEIPT_CODE_ERROR = RetCode.mark(201510, "transaction receipt status return error");
+    public static final RetCode CONTRACT_ABI_PARSE_JSON_ERROR = RetCode.mark(201511, "contract abi parse json error");
+    public static final RetCode CALL_CONTRACT_IO_EXCEPTION = RetCode.mark(201512, "call contract error for io exception");
+    public static final RetCode GET_TX_RECEIPT_EXEC_ERROR = RetCode.mark(201513, "get transaction receipt fail for exec");
+    public static final RetCode GET_TX_RECEIPT_TIMEOUT_ERROR = RetCode.mark(201514, "get transaction receipt fail for time out");
+    public static final RetCode TX_RECEIPT_OUTPUT_PARSE_JSON_FAIL = RetCode.mark(201515, "transaction receipt fail and parse output fail");
+    public static final RetCode TX_RECEIPT_OUTPUT_NULL = RetCode.mark(201516, "transaction receipt fail and output is null");
+    // precompiled
+    public static final RetCode GET_LIST_MANAGER_FAIL = RetCode.mark(201521, "get list of manager on chain fail");
+    public static final RetCode CRUD_TABLE_KEY_LENGTH_ERROR = RetCode.mark(201522, "table key length error");
+    public static final RetCode CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR = RetCode.mark(201523, "crud's param parse json error");
+    public static final RetCode PRECOMPILED_COMMON_TRANSFER_JSON_FAIL = RetCode.mark(201524, "precompiled common transfer to json fail");
 }
