@@ -642,7 +642,7 @@ public class Web3ApiService {
         return JsonUtils.toJavaObject(nodeConfig.toString(), Object.class);
     }
 
-    public int getPendingTransactions(int groupId) throws IOException {
+    public int getPendingTransactions(int groupId) {
         try {
             return getWeb3j(groupId)
                     .getPendingTransaction().send()
@@ -653,7 +653,7 @@ public class Web3ApiService {
         }
     }
 
-    public BigInteger getPendingTransactionsSize(int groupId) throws IOException {
+    public BigInteger getPendingTransactionsSize(int groupId) {
         try {
             return getWeb3j(groupId).getPendingTxSize().send().getPendingTxSize();
         } catch (IOException e) {
@@ -662,7 +662,7 @@ public class Web3ApiService {
         }
     }
 
-    public List<String> getSealerList(int groupId) throws IOException {
+    public List<String> getSealerList(int groupId) {
         try {
             return getWeb3j(groupId).getSealerList().send().getSealerList();
         } catch (IOException e) {
@@ -671,7 +671,7 @@ public class Web3ApiService {
         }
     }
 
-    public List<String> getObserverList(int groupId) throws IOException {
+    public List<String> getObserverList(int groupId) {
         try {
             return getWeb3j(groupId).getObserverList().send().getObserverList();
         } catch (IOException e) {
@@ -725,31 +725,32 @@ public class Web3ApiService {
 
     public Object operateGroup(int groupId, String type) {
         log.debug("start operateGroup. groupId:{} type:{}", groupId, type);
-        try {
-            switch (type) {
-                case Constants.OPERATE_GROUP_START:
-                    return startGroup(groupId);
-                case Constants.OPERATE_GROUP_STOP:
-                    return stopGroup(groupId);
-                case Constants.OPERATE_GROUP_REMOVE:
-                    return removeGroup(groupId);
-                case Constants.OPERATE_GROUP_RECOVER:
-                    return recoverGroup(groupId);
-                case Constants.OPERATE_GROUP_GET_STATUS:
-                    return querySingleGroupStatus(groupId);
-                default:
-                    log.error("end operateGroup. invalid operate type");
-                    throw new FrontException(ConstantCode.INVALID_GROUP_OPERATE_TYPE);
-            }
-        } catch (IOException e) {
-            log.error("operateGroup fail:[]", e);
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        switch (type) {
+            case Constants.OPERATE_GROUP_START:
+                return startGroup(groupId);
+            case Constants.OPERATE_GROUP_STOP:
+                return stopGroup(groupId);
+            case Constants.OPERATE_GROUP_REMOVE:
+                return removeGroup(groupId);
+            case Constants.OPERATE_GROUP_RECOVER:
+                return recoverGroup(groupId);
+            case Constants.OPERATE_GROUP_GET_STATUS:
+                return querySingleGroupStatus(groupId);
+            default:
+                log.error("end operateGroup. invalid operate type");
+                throw new FrontException(ConstantCode.INVALID_GROUP_OPERATE_TYPE);
         }
     }
 
-    private Object startGroup(int groupId) throws IOException {
-        GroupOperateStatus status = CommonUtils.object2JavaBean(
+    private Object startGroup(int groupId) {
+        GroupOperateStatus status;
+        try {
+            status = CommonUtils.object2JavaBean(
                 getWeb3j().startGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        } catch (IOException e) {
+            log.error("startGroup fail:[]", e);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             initWeb3j(groupId);
@@ -760,9 +761,15 @@ public class Web3ApiService {
         }
     }
 
-    private Object stopGroup(int groupId) throws IOException {
-        GroupOperateStatus status = CommonUtils.object2JavaBean(
+    private Object stopGroup(int groupId) {
+        GroupOperateStatus status;
+        try {
+            status = CommonUtils.object2JavaBean(
                 getWeb3j().stopGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        } catch (IOException e) {
+            log.error("stopGroup fail:[]", e);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
         log.info("stopGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             web3jMap.remove(groupId);
@@ -773,9 +780,15 @@ public class Web3ApiService {
         }
     }
 
-    private Object removeGroup(int groupId) throws IOException {
-        GroupOperateStatus status = CommonUtils.object2JavaBean(
+    private Object removeGroup(int groupId) {
+        GroupOperateStatus status;
+        try {
+            status = CommonUtils.object2JavaBean(
                 getWeb3j().removeGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        } catch (IOException e) {
+            log.error("removeGroup fail:[]", e);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
         log.info("removeGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -785,9 +798,15 @@ public class Web3ApiService {
         }
     }
 
-    private Object recoverGroup(int groupId) throws IOException {
-        GroupOperateStatus status = CommonUtils.object2JavaBean(
+    private Object recoverGroup(int groupId) {
+        GroupOperateStatus status;
+        try {
+            status = CommonUtils.object2JavaBean(
                 getWeb3j().recoverGroup(groupId).send().getStatus(), GroupOperateStatus.class);
+        } catch (IOException e) {
+            log.error("recoverGroup fail:[]", e);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
         log.info("recoverGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -838,9 +857,15 @@ public class Web3ApiService {
         }
     }
 
-    private BaseResponse querySingleGroupStatus(int groupId) throws IOException {
-        GroupOperateStatus status = CommonUtils.object2JavaBean(
+    private BaseResponse querySingleGroupStatus(int groupId) {
+        GroupOperateStatus status;
+        try {
+            status = CommonUtils.object2JavaBean(
                 getWeb3j().queryGroupStatus(groupId).send().getStatus(), GroupOperateStatus.class);
+        } catch (IOException e) {
+            log.error("querySingleGroupStatus fail:[]", e);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
         log.info("queryGroupStatus. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
             BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -858,7 +883,7 @@ public class Web3ApiService {
      * @return status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
      * @throws IOException
      */
-    public BaseResponse getGroupStatus(List<Integer> groupIdList) throws IOException {
+    public BaseResponse getGroupStatus(List<Integer> groupIdList) {
         Map<Integer, String> groupIdStatusMap = new HashMap<>(groupIdList.size());
         for (Integer groupId: groupIdList) {
             BaseResponse res = querySingleGroupStatus(groupId);
@@ -908,15 +933,23 @@ public class Web3ApiService {
     }
 
     public BcosBlockHeader getBlockHeaderByHash(Integer groupId, String blockHash,
-        boolean returnSealers) throws IOException {
-
-        return getWeb3j(groupId).getBlockHeaderByHash(blockHash, returnSealers).send();
+        boolean returnSealers) {
+        try {
+            return getWeb3j(groupId).getBlockHeaderByHash(blockHash, returnSealers).send();
+        } catch (IOException e) {
+        log.error("getBlockHeaderByHash fail:[]", e);
+        throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+    }
     }
 
     public BcosBlockHeader getBlockHeaderByNumber(Integer groupId, BigInteger blockNumber,
-        boolean returnSealers) throws IOException {
-
-        return getWeb3j(groupId).getBlockHeaderByNumber(blockNumber, returnSealers).send();
+        boolean returnSealers) {
+        try {
+            return getWeb3j(groupId).getBlockHeaderByNumber(blockNumber, returnSealers).send();
+        } catch (IOException e) {
+            log.error("getBlockHeaderByNumber fail:[]", e);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
     }
     /* above v2.6.1*/
 
