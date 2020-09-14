@@ -106,13 +106,12 @@ public class KeyStoreService {
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // create keyPair(support guomi)
         KeyStoreInfo keyStoreInfo;
-        try {
-            ECKeyPair keyPair = GenCredential.createKeyPair();
-            keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
-        } catch (Exception e) {
-            log.error("fail createKeyStore.", e);
-            throw new FrontException("create keyInfo failed");
+        ECKeyPair keyPair = GenCredential.createKeyPair();
+        if (keyPair == null) {
+            log.error("fail createKeyStore for null key pair");
+            throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
         }
+        keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
         keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
         String realPrivateKey = keyStoreInfo.getPrivateKey();
         keyStoreInfo.setPrivateKey(aesUtils.aesEncrypt(realPrivateKey));
@@ -184,28 +183,24 @@ public class KeyStoreService {
     public Credentials getCredentialsForQuery() {
         log.debug("start getCredentialsForQuery. ");
         // create keyPair(support guomi)
-        KeyStoreInfo keyStoreInfo;
-        try {
-            ECKeyPair keyPair = GenCredential.createKeyPair();
-            keyStoreInfo = keyPair2KeyStoreInfo(keyPair, "");
-        } catch (Exception e) {
-            log.error("fail getCredentialsForQuery.", e);
-            throw new FrontException("create random Credentials for query failed");
+        ECKeyPair keyPair = GenCredential.createKeyPair();
+        if (keyPair == null) {
+            log.error("create random Credentials for query failed for null key pair");
+            throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
         }
+        KeyStoreInfo keyStoreInfo = keyPair2KeyStoreInfo(keyPair, "");
         return GenCredential.create(keyStoreInfo.getPrivateKey());
     }
 
     public KeyStoreInfo getKeyStoreInfoForQuery() {
         log.debug("start getKeyStoreInfoForQuery. ");
         // create keyPair(support guomi)
-        KeyStoreInfo keyStoreInfo;
-        try {
-            ECKeyPair keyPair = GenCredential.createKeyPair();
-            return keyPair2KeyStoreInfo(keyPair, "");
-        } catch (Exception e) {
-            log.error("fail getKeyStoreInfoForQuery.", e);
-            throw new FrontException("create random keyInfo for query failed");
+        ECKeyPair keyPair = GenCredential.createKeyPair();
+        if (keyPair == null) {
+            log.error("create random Credentials for query failed for null key pair");
+            throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
         }
+        return keyPair2KeyStoreInfo(keyPair, "");
     }
 
     /**
@@ -213,7 +208,7 @@ public class KeyStoreService {
      * @param params params
      * @return
      */
-    public String getSignData(EncodeInfo params) {
+    public String getSignData(EncodeInfo params) throws FrontException {
         try {
             SignInfo signInfo = new SignInfo();
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
@@ -226,13 +221,30 @@ public class KeyStoreService {
             log.info("getSignData response:{}", JsonUtils.toJSONString(response));
             if (response.getCode() == 0) {
                 signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
+            } else {
+                log.error("getSignData fail for:{}", response.getMessage());
+                throw new FrontException(ConstantCode.REQUEST_SIGN_RETURN_ERROR.getCode(), response.getMessage());
             }
-            return signInfo.getSignDataStr();
-        } catch (Exception e) {
-            log.error("getSignData exception", e);
+            String signDataStr = signInfo.getSignDataStr();
+            if (StringUtils.isBlank(signDataStr)) {
+                log.warn("get sign data error and get blank string.");
+                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            }
+            return signDataStr;
+        } catch (ResourceAccessException ex) {
+            log.error("getSignData fail restTemplateExchange", ex);
+            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+        } catch (HttpStatusCodeException e) {
+            JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
+            if (error == null) {
+                throw e;
+            }
+            log.error("getSignData http request fail. error:{}", JsonUtils.toJSONString(error));
+            // if return 404, no code or errorMessage
+            int code = error.get("code").intValue();
+            String errorMessage = error.get("errorMessage").asText();
+            throw new FrontException(code, errorMessage);
         }
-
-        return null;
     }
 
     /**
@@ -299,9 +311,15 @@ public class KeyStoreService {
         try {
             pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
             privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
-        }catch (Exception e) {
+        } catch (NoSuchAlgorithmException| CertificateException| IOException e) {
             log.error("importKeyStoreFromPem error:[]", e);
             throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
+        } catch (UnrecoverableKeyException | InvalidKeySpecException e) {
+            log.error("importKeyStoreFromPem get kepair error:[]", e);
+            throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR.getCode(), e.getMessage());
+        } catch (KeyStoreException | NoSuchProviderException e) {
+            log.error("importKeyStoreFromPem init p12 for dependency error:[]", e);
+            throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR.getCode(), e.getMessage());
         }
         // to store local
         return importFromPrivateKey(privateKey, userName);
@@ -322,15 +340,18 @@ public class KeyStoreService {
             p12Manager.setPassword(password);
             p12Manager.load(file.getInputStream(), password);
             privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
-        } catch (IOException e) {
+        } catch (NoSuchAlgorithmException| CertificateException| IOException e) {
             log.error("importKeyStoreFromP12 error:[]", e);
             if (e.getMessage().contains("password")) {
                 throw new FrontException(ConstantCode.P12_PASSWORD_ERROR);
             }
             throw new FrontException(ConstantCode.P12_FILE_ERROR);
-        } catch (Exception e) {
-            log.error("importKeyStoreFromP12 error:[]", e);
-            throw new FrontException(ConstantCode.P12_FILE_ERROR.getCode(), e.getMessage());
+        } catch (UnrecoverableKeyException | InvalidKeySpecException e) {
+            log.error("importKeyStoreFromP12 get kepair error:[]", e);
+            throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR.getCode(), e.getMessage());
+        } catch (KeyStoreException | NoSuchProviderException e) {
+            log.error("importKeyStoreFromP12 init p12 for dependency error:[]", e);
+            throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR.getCode(), e.getMessage());
         }
         // to store local
         return importFromPrivateKey(privateKey, userName);
@@ -348,7 +369,8 @@ public class KeyStoreService {
         // to store locally
         ECKeyPair keyPair = GenCredential.createKeyPair(privateKey);
         if (keyPair == null) {
-            throw new FrontException(ConstantCode.PARAM_ERROR);
+            log.error("importFromPrivateKey get null keyPair");
+            throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
         }
         KeyStoreInfo keyStoreInfo = keyPair2KeyStoreInfo(keyPair, userName);
         keyStoreInfo.setType(KeyTypes.LOCALUSER.getValue());
@@ -400,18 +422,14 @@ public class KeyStoreService {
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
         } catch (HttpStatusCodeException e) {
             JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
-            log.error("http request fail. error:{}", JsonUtils.toJSONString(error));
-            try {
-                // if return 404, no code or errorMessage
-                int code = error.get("code").intValue();
-                String errorMessage = error.get("errorMessage").asText();
-                throw new FrontException(code, errorMessage);
-            } catch (Exception ex) {
-                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            if (error == null) {
+                throw e;
             }
-        } catch (Exception e) {
-            log.error("getSignUserEntity exception", e);
-            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            log.error("http request fail. error:{}", JsonUtils.toJSONString(error));
+            // if return 404, no code or errorMessage
+            int code = error.get("code").intValue();
+            String errorMessage = error.get("errorMessage").asText();
+            throw new FrontException(code, errorMessage);
         }
     }
 
@@ -450,20 +468,14 @@ public class KeyStoreService {
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
         } catch (HttpStatusCodeException e) {
             JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
-            log.error("getSignUserEntity http request fail. error:{}", JsonUtils.toJSONString(error));
-            try {
-                // if return 404, no code or errorMessage
-                int code = error.get("code").intValue();
-                String errorMessage = error.get("errorMessage").asText();
-                throw new FrontException(code, errorMessage);
-            } catch (NullPointerException ex) {
-                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            if (error == null) {
+                throw e;
             }
-        } catch (FrontException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("getSignUserEntity exception", e);
-            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            log.error("getSignUserEntity http request fail. error:{}", JsonUtils.toJSONString(error));
+            // if return 404, no code or errorMessage
+            int code = error.get("code").intValue();
+            String errorMessage = error.get("errorMessage").asText();
+            throw new FrontException(code, errorMessage);
         }
     }
 }

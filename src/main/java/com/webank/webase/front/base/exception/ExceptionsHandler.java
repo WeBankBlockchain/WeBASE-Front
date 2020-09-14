@@ -21,6 +21,7 @@ import java.util.Map;
 
 import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.util.ErrorCodeHandleUtils;
+import org.fisco.bcos.web3j.tx.exceptions.ContractCallException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.web.client.HttpStatusCodeException;
 
 
 /**
@@ -88,6 +89,35 @@ public class ExceptionsHandler {
         return ResponseEntity.status(400).body(map);
     }
 
+    /**
+     * Method not found in request
+     * @param ex
+     * @return
+     */
+    @ResponseBody
+    @ExceptionHandler(value = HttpStatusCodeException.class)
+    public ResponseEntity bindExceptionHandler(HttpStatusCodeException ex) {
+        log.warn("catch bindExceptionHandler", ex);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("errorMessage", ex.getMessage());
+        map.put("code", 400);
+        log.warn("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
+        return ResponseEntity.status(400).body(map);
+    }
+
+//    @ResponseBody
+//    @ExceptionHandler(value = ContractCallException.class)
+//    public ResponseEntity contractException(ContractCallException ex) {
+//        log.warn("catch ContractCallException", ex);
+//
+//        Map<String, Object> map = new HashMap<>();
+//        //  map.put("exception", frontException);
+//        map.put("errorMessage", ex.getMessage());
+//        map.put("code", 400);
+//        log.warn("ContractCallException return:{}", JsonUtils.toJSONString(map));
+//        return ResponseEntity.status(400).body(map);
+//    }
 
 
     /**
