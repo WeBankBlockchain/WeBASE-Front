@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.webank.webase.front.precompiledapi;
+package com.webank.webase.front.precompiledapi.entity;
 
 import java.util.List;
 import javax.validation.constraints.NotNull;

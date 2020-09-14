@@ -14,17 +14,13 @@
 
 package com.webank.webase.front.precompiledapi.permission;
 
-import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
-import com.webank.webase.front.precompiledapi.ReqAccountStatus;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.fisco.bcos.web3j.precompile.permission.ChainGovernanceService;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.tuples.generated.Tuple2;
