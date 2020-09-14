@@ -174,18 +174,11 @@ public class PermissionManageController extends BaseController {
             log.info("end updateUserPermissionStateAfterCheck startTime:{}, resultState:{}",
                     Instant.now().toEpochMilli(), resultState);
             return new BaseResponse(ConstantCode.RET_SUCCEED, resultState);
-        }
-        catch (JsonParseException e) {
-            log.error("end updateUserPermissionStateAfterCheck for startTime:{}, Exception:{}",
-                    Instant.now().toEpochMilli(), e.getMessage());
-                return new BaseResponse(ConstantCode.SYSTEM_ERROR, "Parse json fail, please check permissionState's object structure");
-            }
-        catch(NullPointerException e) {
+        } catch(NullPointerException e) {
             log.error("end updateUserPermissionStateAfterCheck for startTime:{}, Exception:{}",
                     Instant.now().toEpochMilli(), e.getMessage());
             return new BaseResponse(ConstantCode.PARAM_VAILD_FAIL, "all cns, node, sysConfig, deployAndCreate cannot be null");
-        }
-        catch(FrontException e) {
+        } catch(FrontException e) {
             log.error("end updateUserPermissionStateAfterCheck for startTime:{}, Exception:{}",
                     Instant.now().toEpochMilli(), e.getMessage());
             return new BaseResponse(ConstantCode.PERMISSION_DENIED, e.getMessage());
