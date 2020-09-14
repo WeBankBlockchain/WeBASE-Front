@@ -254,9 +254,6 @@ public class ContractService {
         // data sign
         String data = bytecodeBin + encodedConstructor;
         String signMsg = transService.signMessage(groupId, web3j, signUserId, "", data);
-        if (StringUtils.isBlank(signMsg)) {
-            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-        }
         // send transaction
         final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
         transService.sendMessage(web3j, signMsg, transFuture);
