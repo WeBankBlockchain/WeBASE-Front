@@ -202,10 +202,16 @@ public class ConstantCode {
 
 
     /* classify common error of web3j*/
-
+    // keystore
     public static final RetCode WEB3J_CREATE_KEY_PAIR_NULL = RetCode.mark(201501, "web3sdk create key pair fail and return null");
     public static final RetCode WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR = RetCode.mark(201502, "pem/p12 manager get key pair error for input params");
     public static final RetCode WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR = RetCode.mark(201503, "pem/p12 manager get key pair error for bc dependency error");
-    public static final RetCode REQUEST_SIGN_RETURN_ERROR = RetCode.mark(201503, "data request sign error");
+    public static final RetCode REQUEST_SIGN_RETURN_ERROR = RetCode.mark(201504, "sign service return error");
+    // transaction
+    public static final RetCode CONTRACT_ABI_PARSE_JSON_ERROR = RetCode.mark(201505, "contract abi parse json error");
+    public static final RetCode CALL_CONTRACT_IO_EXCEPTION = RetCode.mark(201506, "call contract error for io exception");
+    public static final RetCode GET_TX_RECEIPT_EXEC_ERROR = RetCode.mark(201507, "get transaction receipt fail for exec");
+    public static final RetCode GET_TX_RECEIPT_TIMEOUT_ERROR = RetCode.mark(201508, "get transaction receipt fail for time out");
+
 
 }
