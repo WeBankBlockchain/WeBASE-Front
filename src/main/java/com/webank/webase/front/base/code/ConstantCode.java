@@ -200,4 +200,8 @@ public class ConstantCode {
     public static final RetCode COMMITTEE_WEIGHT_PARAM_ERROR = RetCode.mark(201302, "committee weight must be greater than zero");
     public static final RetCode GOVERNANCE_ADDRESS_PARAM_ERROR = RetCode.mark(201303, "chain governance address cannot be blank");
 
+
+    /* classify common error of web3j*/
+    public static final RetCode TRANS_ERROR_CONTRACT_FROZEN = RetCode.mark(201501, "contract has been frozen");
+
 }
