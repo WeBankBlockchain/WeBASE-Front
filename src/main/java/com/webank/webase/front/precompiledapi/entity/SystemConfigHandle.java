@@ -13,25 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.precompiledapi.permission;
+package com.webank.webase.front.precompiledapi.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 
 /**
- * handle POST permission state in api("/sorted") in permission controller
+ * handle POST request to manage system config value
+ * check param's validation
  */
 @Data
-public class PermissionState {
-    // 0 means revoked, 1 means granted
-    @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
-    private int deployAndCreate;
-    @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
-    private int cns;
-    @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
-    private int sysConfig;
-    @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
-    private int node;
+public class SystemConfigHandle {
+
+    @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
+    private int groupId;
+    @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
+    private String signUserId;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONFIG_KEY_IS_EMPTY)
+    private String configKey;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONFIG_VALUE_IS_EMPTY)
+    private String configValue;
+    @Deprecated
+    private String fromAddress;
 }

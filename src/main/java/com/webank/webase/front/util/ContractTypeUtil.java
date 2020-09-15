@@ -251,18 +251,7 @@ public class ContractTypeUtil {
 
     static String decodeBytes(BytesType bytesType) {
         byte[] value = bytesType.getValue();
-        int length = value.length;
-        int mod = length % MAX_BYTE_LENGTH;
-
-        byte[] dest;
-        if (mod != 0) {
-            int padding = MAX_BYTE_LENGTH - mod;
-            dest = new byte[length + padding];
-            System.arraycopy(value, 0, dest, 0, length);
-        } else {
-            dest = value;
-        }
-        return Numeric.toHexString(dest);
+        return Numeric.toHexString(value);
     }
 
     /**

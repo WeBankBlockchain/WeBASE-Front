@@ -15,13 +15,16 @@
  */
 package com.webank.webase.front.precompiledapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.webank.webase.front.base.code.ConstantCode;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ContractStatusHandle {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private int groupId;

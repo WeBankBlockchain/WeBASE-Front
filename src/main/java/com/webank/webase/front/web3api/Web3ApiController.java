@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
 import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
@@ -298,4 +299,25 @@ public class Web3ApiController {
         }
 		return web3ApiService.getGroupStatus(groupIdList.getGroupIdList());
 	}
+
+	/* after fisco-bcos v2.5.x */
+
+    @ApiOperation(value = "getBlockHeaderByHash", notes = "Get block header with sealers based on block hash")
+    @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true,
+        dataType = "String", paramType = "path")
+    @GetMapping("/blockHeaderByHash/{blockHash}")
+    public BcosBlockHeader getBlockHeaderByHash(@PathVariable int groupId,
+        @PathVariable String blockHash) throws IOException {
+        return web3ApiService.getBlockHeaderByHash(groupId, blockHash, true);
+    }
+
+    @ApiOperation(value = "getBlockHeaderByNumber", notes = "Get block header with sealers based on block height")
+    @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
+        dataType = "BigInteger", paramType = "path")
+    @GetMapping("/blockHeaderByNumber/{blockNumber}")
+    public BcosBlockHeader getBlockHeaderByNumber(@PathVariable int groupId,
+        @PathVariable BigInteger blockNumber) throws IOException {
+        return web3ApiService.getBlockHeaderByNumber(groupId, blockNumber, true);
+    }
+
 }
