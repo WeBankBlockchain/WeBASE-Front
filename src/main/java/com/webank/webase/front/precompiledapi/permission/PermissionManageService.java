@@ -203,8 +203,6 @@ public class PermissionManageService {
             if (resCode == PrecompiledUtils.PRECOMPILED_SUCCESS
                     || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
                 resState = FLAG_GRANTED;
-            } else if (resCode == PrecompiledUtils.PERMISSION_DENIED) { // permission denied
-                throw new FrontException("Update permission state fail for permission denied");
             }
         } else if (deployAndCreateState == FLAG_REVOKED) {
             String result = revokeDeployAndCreateManager(groupId, signUserId, userAddress);
@@ -212,8 +210,6 @@ public class PermissionManageService {
             if (resCode == PrecompiledUtils.PRECOMPILED_SUCCESS
                     || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
                 resState = FLAG_REVOKED;
-            } else if (resCode == PrecompiledUtils.PERMISSION_DENIED) {
-                throw new FrontException("Update permission state fail for permission denied");
             }
         }
         return resState;
@@ -229,9 +225,6 @@ public class PermissionManageService {
             if (resCode == PrecompiledUtils.PRECOMPILED_SUCCESS
                     || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
                 resState = FLAG_GRANTED;
-            } else if (resCode == PrecompiledUtils.PERMISSION_DENIED) {
-                // permission denied
-                throw new FrontException("Update permission state fail for permission denied");
             }
         } else if (cnsState == FLAG_REVOKED) {
             String result = revokeCNSManager(groupId, signUserId, userAddress);
@@ -239,8 +232,6 @@ public class PermissionManageService {
             if (resCode == PrecompiledUtils.PRECOMPILED_SUCCESS
                     || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
                 resState = FLAG_REVOKED;
-            } else if (resCode == PrecompiledUtils.PERMISSION_DENIED) {
-                throw new FrontException("Update permission state fail for permission denied");
             }
         }
         return resState;
@@ -256,8 +247,6 @@ public class PermissionManageService {
             if (resCode == PrecompiledUtils.PRECOMPILED_SUCCESS
                     || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
                 resState = FLAG_GRANTED;
-            } else if (resCode == PrecompiledUtils.PERMISSION_DENIED) { // permission denied
-                throw new FrontException("Update permission state fail for permission denied");
             }
         } else if (nodeState == FLAG_REVOKED) {
             String result = revokeNodeManager(groupId, signUserId, userAddress);
@@ -265,8 +254,6 @@ public class PermissionManageService {
             if (resCode == PrecompiledUtils.PRECOMPILED_SUCCESS
                     || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
                 resState = FLAG_REVOKED;
-            } else if (resCode == PrecompiledUtils.PERMISSION_DENIED) {
-                throw new FrontException("Update permission state fail for permission denied");
             }
         }
         return resState;
@@ -282,8 +269,6 @@ public class PermissionManageService {
             if (resCode == PrecompiledUtils.PRECOMPILED_SUCCESS
                     || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_ALREADY_EXIST) {
                 resState = FLAG_GRANTED;
-            } else if (resCode == PrecompiledUtils.PERMISSION_DENIED) { // permission denied
-                throw new FrontException("Update permission state fail for permission denied");
             }
         } else if (sysConfigState == FLAG_REVOKED) {
             String result = revokeSysConfigManager(groupId, signUserId, userAddress);
@@ -291,8 +276,6 @@ public class PermissionManageService {
             if (resCode == PrecompiledUtils.PRECOMPILED_SUCCESS
                     || resCode == PrecompiledUtils.TABLE_NAME_AND_ADDRESS_NOT_EXIST) {
                 resState = FLAG_REVOKED;
-            } else if (resCode == PrecompiledUtils.PERMISSION_DENIED) {
-                throw new FrontException("Update permission state fail for permission denied");
             }
         }
         return resState;
