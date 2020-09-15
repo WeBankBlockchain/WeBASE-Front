@@ -15,6 +15,12 @@ package com.webank.webase.front.base.code;
 
 
 /**
+ * A-BB-CCC A:error level. <br/>
+ * 1:system exception <br/>
+ * 2:business exception <br/>
+ * B:project number <br/>
+ * WeBASE-Front:01 <br/>
+ * C: error code <br/>
  * Code Constant
  * String constants used in ReqXXXParam for validation
  * RetCode constants used in controller for response
@@ -188,4 +194,31 @@ public class ConstantCode {
     public static final RetCode PARAM_FAIL_FILE_NAME_NOT_EXISTS = RetCode.mark(201263, "Solc js file name not exist in db");
     public static final RetCode SAVE_SOLC_FILE_ERROR = RetCode.mark(201264, "Save solc js file error");
     public static final RetCode READ_SOLC_FILE_ERROR = RetCode.mark(201265, "read solc js file error, please check if file deleted");
+
+    // chain governance
+    public static final RetCode CHAIN_THRESHOLD_PARAM_ERROR = RetCode.mark(201301, "threshold must be greater than zero");
+    public static final RetCode COMMITTEE_WEIGHT_PARAM_ERROR = RetCode.mark(201302, "committee weight must be greater than zero");
+    public static final RetCode GOVERNANCE_ADDRESS_PARAM_ERROR = RetCode.mark(201303, "chain governance address cannot be blank");
+
+
+    /* classify common error of web3j*/
+    // keystore
+    public static final RetCode WEB3J_CREATE_KEY_PAIR_NULL = RetCode.mark(201501, "web3sdk create key pair fail and return null");
+    public static final RetCode WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR = RetCode.mark(201502, "pem/p12 manager get key pair error for input params");
+    public static final RetCode WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR = RetCode.mark(201503, "pem/p12 manager get key pair error for bc dependency error");
+    public static final RetCode REQUEST_SIGN_RETURN_ERROR = RetCode.mark(201504, "sign service return error");
+    // transaction
+    public static final RetCode TX_RECEIPT_CODE_ERROR = RetCode.mark(201510, "transaction receipt status return error");
+    public static final RetCode CONTRACT_ABI_PARSE_JSON_ERROR = RetCode.mark(201511, "contract abi parse json error");
+    public static final RetCode CALL_CONTRACT_IO_EXCEPTION = RetCode.mark(201512, "call contract error for io exception");
+    public static final RetCode GET_TX_RECEIPT_EXEC_ERROR = RetCode.mark(201513, "get transaction receipt fail for exec");
+    public static final RetCode GET_TX_RECEIPT_TIMEOUT_ERROR = RetCode.mark(201514, "get transaction receipt fail for time out");
+    public static final RetCode TX_RECEIPT_OUTPUT_PARSE_JSON_FAIL = RetCode.mark(201515, "transaction receipt fail and parse output fail");
+    public static final RetCode TX_RECEIPT_OUTPUT_NULL = RetCode.mark(201516, "transaction receipt fail and output is null");
+    public static final RetCode CALL_CONTRACT_ERROR = RetCode.mark(201517, "call contract constant method fail");
+    // precompiled
+    public static final RetCode GET_LIST_MANAGER_FAIL = RetCode.mark(201521, "get list of manager on chain fail");
+    public static final RetCode CRUD_TABLE_KEY_LENGTH_ERROR = RetCode.mark(201522, "table key length error");
+    public static final RetCode CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR = RetCode.mark(201523, "crud's param parse json error");
+    public static final RetCode PRECOMPILED_COMMON_TRANSFER_JSON_FAIL = RetCode.mark(201524, "precompiled common transfer to json fail");
 }

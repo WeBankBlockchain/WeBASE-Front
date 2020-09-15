@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.precompiledapi.permission;
+package com.webank.webase.front.precompiledapi.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
@@ -21,20 +21,17 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 /**
- * handle POST request for permission controller
+ * handle POST permission state in api("/sorted") in permission controller
  */
 @Data
-public class PermissionHandle {
-    // defaultValue = "1"
-    @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
-    private int groupId;
-    private String permissionType;
-    @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
-    private String signUserId;
-    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
-    private String address;
-    private String tableName;
-    private PermissionState permissionState;
-    @Deprecated
-    private String fromAddress;
+public class PermissionState {
+    // 0 means revoked, 1 means granted
+    @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
+    private int deployAndCreate;
+    @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
+    private int cns;
+    @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
+    private int sysConfig;
+    @NotNull(message = ConstantCode.PARAM_FAIL_PERMISSION_STATE_ALL_CONNOT_BE_EMPTY)
+    private int node;
 }
