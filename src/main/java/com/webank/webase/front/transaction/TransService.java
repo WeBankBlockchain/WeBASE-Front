@@ -165,8 +165,12 @@ public class TransService {
                     .send().getValue().getOutput();
             } catch (IOException e) {
                 log.error("send constant tx error:[]", e);
-                throw new FrontException(ConstantCode.CALL_CONTRACT_IO_EXCEPTION);
+                throw new FrontException(ConstantCode.CALL_CONTRACT_IO_EXCEPTION, e.getMessage());
+            } catch (ContractCallException e) {
+                log.error("send constant tx fail for contract status error:[]", e);
+                throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR, e.getMessage());
             }
+
             List<Type> typeList =
                     FunctionReturnDecoder.decode(callOutput, function.getOutputParameters());
             if (typeList.size() > 0) {
@@ -551,7 +555,11 @@ public class TransService {
            callOutput = web3j.call(Transaction.createEthCallTransaction(userAddress, contractAddress, encodeStr), DefaultBlockParameterName.LATEST)
                     .send().getValue().getOutput();
         } catch (IOException e) {
-            throw new FrontException(TRANSACTION_FAILED);
+            log.error("sendQueryTransaction fail for contract status error:[]", e);
+            throw new FrontException(ConstantCode.CALL_CONTRACT_IO_EXCEPTION, e.getMessage());
+        } catch (ContractCallException e) {
+            log.error("sendQueryTransaction fail for contract status error:[]", e);
+            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR, e.getMessage());
         }
 
         AbiDefinition abiDefinition = getFunctionAbiDefinition(funcName, contractAbi);
