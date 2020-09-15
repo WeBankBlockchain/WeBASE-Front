@@ -14,6 +14,7 @@
 package com.webank.webase.front.transaction;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
@@ -49,7 +50,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
@@ -76,7 +76,6 @@ import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
 import static com.webank.webase.front.base.code.ConstantCode.TRANSACTION_FAILED;
 
@@ -103,7 +102,7 @@ public class TransService {
      *
      * @param req request
      */
-    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
+    public Object transHandleWithSign(ReqTransHandleWithSign req) {
         // get signUserId
         String signUserId = req.getSignUserId();
         ContractOfTrans contractOfTrans = new ContractOfTrans(req);
@@ -128,8 +127,7 @@ public class TransService {
      * @param funcName precompiled contract function name
      */
     public Object transHandleWithSignForPrecompile(int groupId, String signUserId,
-            PrecompiledTypes precompiledType, String funcName, List<Object> funcParams)
-            throws Exception {
+            PrecompiledTypes precompiledType, String funcName, List<Object> funcParams) {
         // check groupId
         Web3j web3j = web3ApiService.getWeb3j(groupId);
         // get address and abi of precompiled contract
@@ -151,8 +149,7 @@ public class TransService {
      * handleTransByFunction by whether is constant
      */
     private Object handleTransByFunction(int groupId, Web3j web3j, String signUserId,
-            String contractAddress, Function function, ContractFunction contractFunction)
-            throws IOException, InterruptedException, ExecutionException, TimeoutException {
+            String contractAddress, Function function, ContractFunction contractFunction) {
 
         String encodedFunction = FunctionEncoder.encode(function);
         Object response;
@@ -160,10 +157,20 @@ public class TransService {
         // if constant, signUserId can be ""
         if (contractFunction.getConstant()) {
             KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
-            String callOutput = web3j
+            String callOutput;
+            try {
+                callOutput = web3j
                     .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
-                            contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
+                        contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
                     .send().getValue().getOutput();
+            } catch (IOException e) {
+                log.error("send constant tx error:[]", e);
+                throw new FrontException(ConstantCode.CALL_CONTRACT_IO_EXCEPTION, e.getMessage());
+            } catch (ContractCallException e) {
+                log.error("send constant tx fail for contract status error:[]", e);
+                throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR, e.getMessage());
+            }
+
             List<Type> typeList =
                     FunctionReturnDecoder.decode(callOutput, function.getOutputParameters());
             if (typeList.size() > 0) {
@@ -175,16 +182,19 @@ public class TransService {
             // data sign
             String signMsg =
                     signMessage(groupId, web3j, signUserId, contractAddress, encodedFunction);
-            if (StringUtils.isBlank(signMsg)) {
-                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-            }
             Instant nodeStartTime = Instant.now();
             // send transaction
             final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
             sendMessage(web3j, signMsg, transFuture);
-            TransactionReceipt receipt =
-                    transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-            response = receipt;
+            try{
+                response = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException  e) {
+                log.error("get tx receipt error for interrupted or exec:[]", e);
+                throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
+            } catch (TimeoutException e) {
+                log.error("get tx receipt error for timeout:[]", e);
+                throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
+            }
             log.info("***node cost time***: {}",
                     Duration.between(nodeStartTime, Instant.now()).toMillis());
         }
@@ -200,7 +210,7 @@ public class TransService {
      *
      * @param req request
      */
-    public boolean checkAndSaveAbiFromDb(ContractOfTrans req) throws Exception {
+    public boolean checkAndSaveAbiFromDb(ContractOfTrans req) {
         Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(
                 req.getGroupId(), req.getContractPath(), req.getContractName());
         log.info("checkAndSaveAbiFromDb contract:{}", contract);
@@ -210,9 +220,14 @@ public class TransService {
         }
         // save abi
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-        List<AbiDefinition> abiDefinitionList =
-                objectMapper.readValue(contract.getContractAbi(), objectMapper.getTypeFactory()
-                        .constructCollectionType(List.class, AbiDefinition.class));
+        List<AbiDefinition> abiDefinitionList;
+        try {
+            abiDefinitionList = objectMapper.readValue(contract.getContractAbi(), objectMapper.getTypeFactory()
+                .constructCollectionType(List.class, AbiDefinition.class));
+        } catch (JsonProcessingException e) {
+            log.error("parse abi to json error:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_ABI_PARSE_JSON_ERROR);
+        }
         ContractAbiUtil.setFunctionFromAbi(req.getContractName(), req.getContractPath(),
                 abiDefinitionList, new ArrayList<>());
         return true;
@@ -274,7 +289,7 @@ public class TransService {
      * @return
      */
     public String signMessage(int groupId, Web3j web3j, String signUserId, String contractAddress,
-            String data) throws FrontException {
+            String data) {
         Random r = new Random();
         BigInteger randomid = new BigInteger(250, r);
 
@@ -294,10 +309,6 @@ public class TransService {
             encodeInfo.setSignUserId(signUserId);
             encodeInfo.setEncodedDataStr(encodedDataStr);
             String signDataStr = keyStoreService.getSignData(encodeInfo);
-            if (StringUtils.isBlank(signDataStr)) {
-                log.warn("deploySend get sign data error.");
-                return null;
-            }
 
             SignatureData signData = CommonUtils.stringToSignatureData(signDataStr);
             byte[] signedMessage = TransactionEncoder.encode(rawTransaction, signData);
@@ -323,11 +334,6 @@ public class TransService {
             log.info("get signdatastr cost time: {}",
                     Duration.between(startTime, Instant.now()).toMillis());
 
-            if (StringUtils.isBlank(signDataStr)) {
-                log.warn("deploySend get sign data error.");
-                return null;
-            }
-
             SignatureData signData = CommonUtils.stringToSignatureData(signDataStr);
             byte[] signedMessage =
                     ExtendedTransactionEncoder.encode(extendedRawTransaction, signData);
@@ -345,7 +351,7 @@ public class TransService {
      * @param future future
      */
     public void sendMessage(Web3j web3j, String signMsg,
-            final CompletableFuture<TransactionReceipt> future) throws IOException {
+            final CompletableFuture<TransactionReceipt> future) {
         Request<?, SendTransaction> request = web3j.sendRawTransaction(signMsg);
         request.setNeedTransCallback(true);
         request.setTransactionSucCallback(new TransactionSucCallback() {
@@ -356,14 +362,20 @@ public class TransService {
                 return;
             }
         });
-        request.send();
+        try {
+            request.send();
+        } catch (IOException e) {
+            log.error("send call tx error:[]", e);
+            throw new FrontException(ConstantCode.TRANSACTION_FAILED);
+        }
+
     }
 
 
     /**
      * build ContractFunction if abi is empty, check in db or file: conf/*.abi else build directly
      */
-    private ContractFunction buildContractFunction(ContractOfTrans cot) throws Exception {
+    private ContractFunction buildContractFunction(ContractOfTrans cot) {
         log.debug("start buildContractFunction");
         if (CollectionUtils.isEmpty(cot.getContractAbi())) {
             checkContractAbiInCnsOrDb(cot);
@@ -378,7 +390,7 @@ public class TransService {
      * build Function with cns.
      */
     private ContractFunction buildContractFunctionWithCns(String contractName, String funcName,
-            String version, List<Object> params) throws Exception {
+            String version, List<Object> params) {
         log.debug("start buildContractFunctionWithCns");
         // if function is constant
         boolean constant = ContractAbiUtil.getConstant(contractName, funcName, version);
@@ -440,7 +452,7 @@ public class TransService {
     /**
      * does abi exist in cns or db.
      */
-    private void checkContractAbiInCnsOrDb(ContractOfTrans contract) throws Exception {
+    private void checkContractAbiInCnsOrDb(ContractOfTrans contract) {
         log.debug("start checkContractAbiInCnsOrDb");
         boolean ifExisted;
         // check if contractAbi existed in cache
@@ -472,7 +484,7 @@ public class TransService {
     /**
      * send transaction locally
      */
-    public Object transHandleLocal(ReqTransHandle req) throws Exception {
+    public Object transHandleLocal(ReqTransHandle req) {
         log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(req));
 
         // init contract params
@@ -514,11 +526,15 @@ public class TransService {
         if (sync) {
             final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
             TransactionReceipt receipt;
-            try {
-                sendMessage(web3j, signedStr, transFuture);
+            sendMessage(web3j, signedStr, transFuture);
+            try{
                 receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-            } catch (Exception e ) {
-                throw new FrontException(TRANSACTION_FAILED.getMessage() +e.getMessage());
+            } catch (InterruptedException | ExecutionException  e) {
+                log.error("send call tx error for interrupted or exec:[]", e);
+                throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
+            } catch (TimeoutException e) {
+                log.error("send call tx error for timeout:[]", e);
+                throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
             }
              return receipt;
         } else {
@@ -539,7 +555,11 @@ public class TransService {
            callOutput = web3j.call(Transaction.createEthCallTransaction(userAddress, contractAddress, encodeStr), DefaultBlockParameterName.LATEST)
                     .send().getValue().getOutput();
         } catch (IOException e) {
-            throw new FrontException(TRANSACTION_FAILED);
+            log.error("sendQueryTransaction fail for contract status error:[]", e);
+            throw new FrontException(ConstantCode.CALL_CONTRACT_IO_EXCEPTION, e.getMessage());
+        } catch (ContractCallException e) {
+            log.error("sendQueryTransaction fail for contract status error:[]", e);
+            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR, e.getMessage());
         }
 
         AbiDefinition abiDefinition = getFunctionAbiDefinition(funcName, contractAbi);

@@ -13,29 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.precompiledapi.sysconf;
+package com.webank.webase.front.precompiledapi.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 
 /**
- * handle POST request to manage system config value
- * check param's validation
+ * handle POST request for permission controller
  */
 @Data
-public class SystemConfigHandle {
-
+public class PermissionHandle {
+    // defaultValue = "1"
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private int groupId;
+    private String permissionType;
     @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String signUserId;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONFIG_KEY_IS_EMPTY)
-    private String configKey;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_CONFIG_VALUE_IS_EMPTY)
-    private String configValue;
+    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
+    private String address;
+    private String tableName;
+    private PermissionState permissionState;
     @Deprecated
     private String fromAddress;
 }
