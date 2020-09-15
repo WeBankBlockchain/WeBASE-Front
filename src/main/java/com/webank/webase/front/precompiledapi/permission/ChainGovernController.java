@@ -103,7 +103,7 @@ public class ChainGovernController {
     @ApiOperation(value = "updateCommitteeWeight", notes = "update address committee weight")
     @ApiImplicitParam(name = "governanceHandle", value = "permission info", required = true, dataType = "ChainGovernanceHandle")
     @PostMapping("committee/weight")
-    public String updateCommitteeWeight(@Valid @RequestBody ChainGovernanceHandle governanceHandle) throws Exception {
+    public String updateCommitteeWeight(@Valid @RequestBody ChainGovernanceHandle governanceHandle) {
         log.info("start grantCommittee governanceHandle:{}", governanceHandle);
         Integer groupId = governanceHandle.getGroupId();
         String fromSignUserId = governanceHandle.getSignUserId();
