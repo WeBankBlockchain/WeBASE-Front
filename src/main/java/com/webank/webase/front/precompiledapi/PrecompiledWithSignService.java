@@ -16,6 +16,7 @@ package com.webank.webase.front.precompiledapi;
 
 
 import static com.webank.webase.front.base.code.ConstantCode.TX_RECEIPT_CODE_ERROR;
+import static org.fisco.bcos.web3j.precompile.common.PrecompiledCommon.*;
 import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
 import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
 import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
@@ -31,21 +32,17 @@ import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_RE
 import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_REVOKEOPERATOR;
 import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_UNFREEZEACCOUNT;
 import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_UPDATECOMMITTEEMEMBERWEIGHT;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_QUERYCOMMITTEEMEMBERWEIGHT;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_LISTCOMMITTEEMEMBERS;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_QUERYTHRESHOLD;
 import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_UPDATETHRESHOLD;
 import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
 import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
-import static org.fisco.bcos.web3j.protocol.channel.StatusCode.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.transaction.TransService;
+import com.webank.webase.front.util.JsonUtils;
+import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -56,12 +53,12 @@ import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
-import org.fisco.bcos.web3j.precompile.exception.PrecompileMessageException;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
+import org.omg.CORBA.PUBLIC_MEMBER;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -458,7 +455,8 @@ public class PrecompiledWithSignService {
 	 * @throws TransactionException
 	 * @throws IOException
 	 */
-	private String handleTransactionReceipt(TransactionReceipt receipt, Web3j web3j) throws FrontException{
+	private String handleTransactionReceipt(TransactionReceipt receipt, Web3j web3j) throws FrontException {
+		log.debug("handle tx receipt of precompiled");
 		String status = receipt.getStatus();
 		if (!"0x0".equals(status)) {
 			throw new FrontException(TX_RECEIPT_CODE_ERROR.getCode(),
@@ -466,7 +464,8 @@ public class PrecompiledWithSignService {
 		} else {
 			if (receipt.getOutput() != null) {
 				try {
-					return PrecompiledCommon.getJsonStr(receipt.getOutput(), web3j);
+					String codeMsgFromOutput = PrecompiledCommon.getJsonStr(receipt.getOutput(), web3j);
+					return PrecompiledUtils.handleReceiptOutput(codeMsgFromOutput);
 				} catch (IOException e) {
 					log.error("handleTransactionReceipt getJsonStr of error tx receipt fail:[]", e);
 					throw new FrontException(ConstantCode.TX_RECEIPT_OUTPUT_PARSE_JSON_FAIL.getCode(), e.getMessage());
