@@ -69,8 +69,7 @@ public class ChainGovernService {
     /**
      * account's committee weight
      */
-    public String updateChainCommitteeWeight(int groupId, String signUserId, String userAddress, int weight)
-        throws Exception {
+    public String updateChainCommitteeWeight(int groupId, String signUserId, String userAddress, int weight) {
         String res = precompiledWithSignService.updateChainCommitteeWeight(groupId,
             signUserId, userAddress, weight);
         return res;

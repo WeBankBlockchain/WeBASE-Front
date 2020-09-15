@@ -458,7 +458,7 @@ public class PrecompiledWithSignService {
 	 * @throws TransactionException
 	 * @throws IOException
 	 */
-	private String handleTransactionReceipt(TransactionReceipt receipt, Web3j web3j) {
+	private String handleTransactionReceipt(TransactionReceipt receipt, Web3j web3j) throws FrontException{
 		String status = receipt.getStatus();
 		if (!"0x0".equals(status)) {
 			throw new FrontException(TX_RECEIPT_CODE_ERROR.getCode(),
