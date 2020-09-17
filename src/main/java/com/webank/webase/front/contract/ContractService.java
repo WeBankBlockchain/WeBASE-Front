@@ -815,7 +815,7 @@ public class ContractService {
      */
     private void checkDeployPermission(int groupId, String userAddress) {
         // get deploy permission list
-        List<PermissionInfo> deployUserList = permissionManageService.listPermissionManager(groupId);
+        List<PermissionInfo> deployUserList = permissionManageService.listDeployAndCreateManager(groupId);
 
         // check user in the list,
         if (deployUserList.isEmpty()) {
