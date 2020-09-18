@@ -12,7 +12,7 @@
 
 **兼容性**
 - 支持FISCO-BCOS v2.4.x 版本及以上版本
-- WeBASE-Node-Manager v1.4.1+
+- WeBASE-Node-Manager v1.4.0+
 - WeBASE-Sign v1.4.0+
 - WeBASE-Transaction v1.3.0+
 
