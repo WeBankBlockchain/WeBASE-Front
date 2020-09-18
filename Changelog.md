@@ -1,6 +1,7 @@
 ### v1.4.1(2020-09-18)
 
 **Add**
+- 升级web3sdk为2.6.1版本
 - 新增ChainGovernance接口
 - 新增getBlockHeader接口
 
