@@ -560,12 +560,7 @@ export default {
                 content: this.content
             };
             try {
-                output = JSON.parse(
-                    solc.compileStandard(
-                        JSON.stringify(input),
-                        this.findImports
-                    )
-                );
+                output = JSON.parse(solc.compile(JSON.stringify(input), { import: this.findImports }));
             } catch (error) {
                 this.errorInfo = this.$t('text.compilationFailed');
                 this.errorMessage = error;
