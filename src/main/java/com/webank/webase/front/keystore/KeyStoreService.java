@@ -222,8 +222,8 @@ public class KeyStoreService {
             if (response.getCode() == 0) {
                 signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
             } else {
-                log.error("getSignData fail for:{}", response.getMessage());
-                throw new FrontException(ConstantCode.REQUEST_SIGN_RETURN_ERROR.getCode(), response.getMessage());
+                log.error("getSignData fail for error response:{}", response);
+                throw new FrontException(response.getCode(), response.getMessage());
             }
             String signDataStr = signInfo.getSignDataStr();
             if (StringUtils.isBlank(signDataStr)) {
@@ -460,7 +460,8 @@ public class KeyStoreService {
                 rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
             } else {
                 log.error("getSignUserEntity fail for:{}", baseResponse.getMessage());
-                throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL.getCode(), baseResponse.getMessage());
+//                throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL.getCode(), baseResponse.getMessage());
+                throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
             }
             return rspUserInfo;
         } catch (ResourceAccessException ex) {
