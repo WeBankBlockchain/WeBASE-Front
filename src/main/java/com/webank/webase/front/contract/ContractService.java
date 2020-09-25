@@ -66,6 +66,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -248,7 +249,7 @@ public class ContractService {
             }
             contractAddress = deployWithSign(req);
         }
-        if (StringUtils.isNotBlank(contractAddress)) {
+        if (StringUtils.isNotBlank(contractAddress) || !Address.DEFAULT.getValue().equals(contractAddress)) {
             // save address
             BeanUtils.copyProperties(req, contract);
             contract.setContractAddress(contractAddress);
