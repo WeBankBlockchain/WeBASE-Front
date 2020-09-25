@@ -1,5 +1,6 @@
 package com.webank.webase.front.util;
 
+import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.RawTransaction;
@@ -95,5 +96,10 @@ public class TransactionEncoderTest {
 
         return RawTransaction.createContractTransaction(
                 randomid, gasPrice, gasLimit, blockLimit, BigInteger.TEN, "0x0000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
+    }
+
+    @Test
+    public void testAddress() {
+        System.out.println(Address.DEFAULT.getValue());
     }
 }
