@@ -19,7 +19,7 @@
             <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>
         </div>
     </el-dialog> -->
-    <el-dialog  :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
+    <el-dialog :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
         <div v-if='!transationData'>{{$t('text.noData')}}</div>
         <div v-if='transationData && !transationData.logs' slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
             <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>
@@ -40,7 +40,7 @@
                     <div v-if="!showDecode" class="transation-data" style="width: 500px">
                         <div class="input-label">
                             <span class="label">function:</span>
-                            <span>{{funcData + "(" + abiType + ")"}}</span>
+                            <span>{{funcData + "(" + abiType + outputType + ")"}}</span>
                         </div>
                         <div class="input-label">
                             <span class="label">data:</span>
@@ -150,7 +150,8 @@
                             </div>
                             <div>}</div>
                         </div>
-                        ]</span>
+                        ]
+                    </span>
                 </div>
             </div>
             <div>}</div>
@@ -161,7 +162,7 @@
 import { getFunctionAbi } from "@/util/api"
 export default {
     name: 'editor',
-    props: ['data', 'show','input','editorOutput'],
+    props: ['data', 'show', 'input', 'editorOutput'],
     data() {
         return {
             editorShow: true,
@@ -230,10 +231,29 @@ export default {
                                 this.inputData[index].name = this.editorOutput[index].name;
                                 this.inputData[index].type = this.editorOutput[index].type;
                                 this.inputData[index].data = this.decodeData[index];
-                                
+
                             }
                         }
                     }
+
+                    let outputType = []
+                    this.editorOutput.forEach((val, index) => {
+                        if (val && val.type && val.name) {
+                            outputType[index] = val.type + " " + val.name;
+                        } else if (val && val.name) {
+                            outputType[index] = val.name;
+                        } else if (val && val.type) {
+                            outputType[index] = val.type;
+                        } else if (val) {
+                            outputType[index] = val;
+                        }
+                    });
+                    this.outputType = " returns "
+                    for (let i = 0; i < outputType.length; i++) {
+                        this.outputType = this.outputType + outputType[i]
+                    }
+                } else {
+                    this.outputType = ""
                 }
                 this.showDecode = false;
                 this.buttonTitle = this.$t('text.txnEncodeBtn');
@@ -316,7 +336,7 @@ export default {
                     this.$message({
                         type: "success",
                         showClose: true,
-                        message:this.$t('notice.copySuccessfully'),
+                        message: this.$t('notice.copySuccessfully'),
                         duration: 2000
                     });
                 });
