@@ -181,7 +181,8 @@ export default {
             buttonTitle: this.$t('text.txnDecodeBtn'),
             typesArray: this.input,
             inputButtonShow: true,
-            editorHeight: ''
+            editorHeight: '',
+            outputType: null
         }
     },
     mounted() {
