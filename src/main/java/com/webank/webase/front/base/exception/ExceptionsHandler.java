@@ -166,7 +166,6 @@ public class ExceptionsHandler {
         return ResponseEntity.status(500).body(map);
     }
 
-
     private RetCode chainErrorHandle(String errorMessage) {
         RetCode response = ErrorCodeHandleUtils.handleErrorMsg(errorMessage);
         if (response == null) {
