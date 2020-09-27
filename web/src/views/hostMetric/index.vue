@@ -218,7 +218,7 @@ export default {
             this.chartParam.contrastBeginDate = this.contrastBeginDate;
             this.chartParam.contrastEndDate = this.contrastEndDate;
             this.chartParam.gap = this.timeGranularity;
-            this.chartParam.group = localStorage.getItem('groupName') ? localStorage.getItem('groupName') : '1';
+            this.chartParam.groupId = localStorage.getItem('groupId') ? localStorage.getItem('groupId') : '1';
         },
         getPerformanceSwitch() {
             performanceSwitch().then(res => {
