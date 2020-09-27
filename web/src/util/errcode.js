@@ -114,7 +114,7 @@ let errCode = {
     },
     "201021": {
         en: "transaction send to chain failed",
-        zh: '事务发送到链失败'
+        zh: '交易上链超时'
     },
     "201022": {
         en: "node request failed",
