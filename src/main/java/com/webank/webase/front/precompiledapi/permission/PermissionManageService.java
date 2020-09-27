@@ -149,39 +149,56 @@ public class PermissionManageService {
     public Map<String, Integer> updatePermissionStateAfterCheck(int groupId, String signUserId,
             String userAddress, PermissionState permissionState) {
         Map<String, Integer> resultList = new HashMap<>();
-        Map<String, PermissionState> checkList = getPermissionStateList(groupId);
+        // get param's state
         int cnsMgrState = permissionState.getCns();
         int deployAndCreateMgrState = permissionState.getDeployAndCreate();
         int nodeMgrState = permissionState.getNode();
         int sysConfigMgrState = permissionState.getSysConfig();
+        // <address, state> map
+        Map<String, PermissionState> checkList = getPermissionStateList(groupId);
+        // check if user address have no permission
+        PermissionState userState = checkList.get(userAddress);
         // checkList包含address拥有的权限，不包含未拥有的权限
-        if (checkList.containsKey(userAddress)) { // checkList包含address拥有的权限，不包含未拥有的权限有部分权限
-            // 不执行的状况： get: 1, deployAndCreateMgrState: 1， get: 0, deployAndCreateMgrState: 0
-            if (checkList.get(userAddress).getDeployAndCreate() != deployAndCreateMgrState) {
+        // 不执行的状况： get: 1, deployAndCreateMgrState: 1， get: 0, deployAndCreateMgrState: 0
+        if (userState != null) {
+            // if not null, only if state is different, send tx
+            if (userState.getDeployAndCreate() != deployAndCreateMgrState) {
                 deployAndCreateMgrState = deployAndCreateMgrHandle(groupId, signUserId, userAddress,
-                        deployAndCreateMgrState);
+                    deployAndCreateMgrState);
             }
-            if (checkList.get(userAddress).getCns() != cnsMgrState) {
+            if (userState.getCns() != cnsMgrState) {
                 cnsMgrState = cnsMgrHandle(groupId, signUserId, userAddress, cnsMgrState);
             }
-            if (checkList.get(userAddress).getNode() != nodeMgrState) {
+            if (userState.getNode() != nodeMgrState) {
                 nodeMgrState = nodeMgrHandle(groupId, signUserId, userAddress, nodeMgrState);
             }
-            if (checkList.get(userAddress).getSysConfig() != sysConfigMgrState) {
+            if (userState.getSysConfig() != sysConfigMgrState) {
                 sysConfigMgrState =
-                        sysConfigMgrHandle(groupId, signUserId, userAddress, sysConfigMgrState);
-            }
-        } else { // 全部权限都没有
-            deployAndCreateMgrState = deployAndCreateMgrHandle(groupId, signUserId, userAddress,
-                    deployAndCreateMgrState);
-            cnsMgrState = cnsMgrHandle(groupId, signUserId, userAddress, cnsMgrState);
-            nodeMgrState = nodeMgrHandle(groupId, signUserId, userAddress, nodeMgrState);
-            sysConfigMgrState =
                     sysConfigMgrHandle(groupId, signUserId, userAddress, sysConfigMgrState);
+            }
+        } else {
+            // if state is null, only if target state is 1, send tx
+            if (deployAndCreateMgrState == FLAG_GRANTED) {
+                deployAndCreateMgrState = deployAndCreateMgrHandle(groupId, signUserId, userAddress,
+                    deployAndCreateMgrState);
+            }
+            if (cnsMgrState == FLAG_GRANTED) {
+                cnsMgrState = cnsMgrHandle(groupId, signUserId, userAddress, cnsMgrState);
+            }
+            if (nodeMgrState == FLAG_GRANTED) {
+                nodeMgrState = nodeMgrHandle(groupId, signUserId, userAddress, nodeMgrState);
+            }
+            if (sysConfigMgrState == FLAG_GRANTED) {
+                sysConfigMgrState =
+                    sysConfigMgrHandle(groupId, signUserId, userAddress, sysConfigMgrState);
+            }
         }
 
         if (cnsMgrState == FLAG_FAIL || deployAndCreateMgrState == FLAG_FAIL
                 || nodeMgrState == FLAG_FAIL || sysConfigMgrState == FLAG_FAIL) {
+            log.error("updatePermissionStateAfterCheck,"
+                    + " cnsMgrState{},deployAndCreateMgrState:{},nodeMgrState:{},sysConfigMgrState:{}",
+                cnsMgrState, deployAndCreateMgrState, nodeMgrState, sysConfigMgrState);
             throw new FrontException(
                     "Update permission state fail, please check admin permission or param not null");
         } else {
