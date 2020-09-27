@@ -17,11 +17,9 @@ package com.webank.webase.front.precompiledapi.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.webank.webase.front.base.code.ConstantCode;
-import jdk.nashorn.internal.ir.annotations.Ignore;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
-
-import javax.validation.constraints.NotNull;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
