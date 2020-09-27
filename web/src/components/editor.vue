@@ -28,11 +28,17 @@
             <div>{</div>
             <div v-for="(val,key) in transationData" style="padding-left: 10px;">
                 <div v-if='key != "logs"&& key != "output"'>
-                    <span class="transation-title">{{key}}:</span>
-                    <span class="transation-content string-color" v-if='typeof(val) == "string"'>"{{val}}"</span>
-                    <span class="transation-content null-color" v-else-if='val === null'>{{val}}null</span>
-                    <span class="transation-content" v-else-if='typeof(val) == "object"'>{{val}}</span>
-                    <span class="transation-content other-color" v-else>{{val}}</span>
+                    <template v-if="key=='status'">
+                        <span class="transation-title">{{key}}:</span>
+                        <span :style="{'color': txStatusColor(val)}">{{val}}</span>
+                    </template>
+                    <template v-else>
+                        <span class="transation-title">{{key}}:</span>
+                        <span class="transation-content string-color" v-if='typeof(val) == "string"'>"{{val}}"</span>
+                        <span class="transation-content null-color" v-else-if='val === null'>{{val}}null</span>
+                        <span class="transation-content" v-else-if='typeof(val) == "object"'>{{val}}</span>
+                        <span class="transation-content other-color" v-else>{{val}}</span>
+                    </template>
                 </div>
                 <div v-else-if='key == "output"'>
                     <span class="transation-title">{{key}}:</span>
@@ -332,6 +338,13 @@ export default {
                 this.eventTitle = this.$t('text.txnEncodeBtn')
             }
 
+        },
+        txStatusColor(val) {
+            if(val =='0x0'){
+                return '#67C23A'
+            }else {
+                return '#F56C6C'
+            }
         }
     }
 }
