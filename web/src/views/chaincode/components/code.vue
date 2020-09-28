@@ -23,31 +23,36 @@
             <span class="contract-code-handle" v-show="codeShow">
                 <span class="contract-code-done" @click="saveCode">
                     <el-tooltip class="item" effect="dark" :content="$t('title.handleSave')" placement="top-start">
-                        <i class="wbs-icon-baocun contract-icon-style font-16"></i>
+                        <svg-icon icon-class='save' class="contract-icon-style font-24"></svg-icon>
+                        <!-- <i class="wbs-icon-baocun contract-icon-style font-16"></i> -->
                     </el-tooltip>
-                    <span>{{$t('title.save')}}</span>
+                    <span class="contract-code-done-content">{{$t('title.save')}}</span>
                 </span>
                 <span class="contract-code-done" @click="compile">
                     <el-tooltip class="item" effect="dark" :content="$t('title.handleCompile')" placement="top-start">
-                        <i class="wbs-icon-bianyi contract-icon-style font-16"></i>
+                        <svg-icon icon-class='compile' class="contract-icon-style font-24"></svg-icon>
+                        <!-- <i class="wbs-icon-bianyi contract-icon-style font-16"></i> -->
                     </el-tooltip>
-                    <span>{{$t('title.compile')}}</span>
+                    <span class="contract-code-done-content">{{$t('title.compile')}}</span>
                 </span>
                 <span class="contract-code-done" @click="deploying">
                     <el-tooltip class="item" effect="dark" :content="$t('title.handleDeploy')" placement="top-start">
-                        <i class="wbs-icon-deploy contract-icon-style font-16"></i>
+                        <svg-icon icon-class='deploy' class="contract-icon-style font-24"></svg-icon>
+                        <!-- <i class="wbs-icon-deploy contract-icon-style font-16"></i> -->
                     </el-tooltip>
-                    <span>{{$t('title.deploy')}}</span>
+                    <span class="contract-code-done-content">{{$t('title.deploy')}}</span>
                 </span>
                 <span class="contract-code-done" @click="send">
                     <el-tooltip class="item" effect="dark" :content="$t('title.handleCallContract')" placement="top-start">
-                        <i class="wbs-icon-send contract-icon-style font-16"></i>
+                        <svg-icon icon-class='send' class="contract-icon-style font-24"></svg-icon>
+                        <!-- <i class="wbs-icon-send contract-icon-style font-16"></i> -->
                     </el-tooltip>
-                    <span>{{$t('title.callContract')}}</span>
+                    <span class="contract-code-done-content">{{$t('title.callContract')}}</span>
                 </span>
                 <span class="contract-code-done" @click="downloadJavaClass">
-                    <i class="el-icon-download contract-icon-style font-16"></i>
-                    <span>{{$t('title.exportJavaFile')}}</span>
+                    <svg-icon icon-class='uploadJava' class="contract-icon-style font-24"></svg-icon>
+                    <!-- <i class="el-icon-download contract-icon-style font-16"></i> -->
+                    <span class="contract-code-done-content">{{$t('title.exportJavaFile')}}</span>
                 </span>
             </span>
             <div class="search-model" v-if="searchVisibility">
@@ -75,7 +80,7 @@
             <div class="contract-info" v-show="successHide" :style="{height:infoHeight + 'px'}">
                 <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
                 <div class="contract-info-title" @mouseover="mouseHover=true" @mouseleave="mouseHover=false" v-show="abiFile||contractAddress" @click="collapse">
-                    <i :class="[showCompileText?'el-icon-caret-bottom':'el-icon-caret-top']">
+                    <i :class="[showCompileText?'el-icon-arrow-down':'el-icon-arrow-up']">
 
                     </i>
                     <template v-if="showCompileText&&mouseHover">
@@ -92,28 +97,34 @@
                         {{errorInfo}}
                     </div>
                     <div class="contract-info-list1" style="color: #f00" v-show="errorInfo">
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage">{{index+1}}、{{item}}</span>
+                        <span style="display:inline-block;width:calc(100% - 135px);word-wrap:break-word" v-for="(item, index) in errorMessage">{{index+1}}、{{item}}</span>
                     </div>
                     <div style="color: #68E600;padding-bottom: 15px;" v-show="abiFileShow">{{successInfo}}</div>
                     <div class="contract-info-list" v-show="contractAddress">
-                        <span class="contract-info-list-title" style="color: #0B8AEE">contractAddress
-                            <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(contractAddress)" :title="$t('title.copyContractAddress')"></i>
+                        <span class="contract-info-list-title">
+                            <span class="vertical_align">contractAddress</span> 
+                            <svg-icon icon-class='copy' class="font-16 copy-public-key" @click="copyKey(contractAddress)" :title="$t('title.copyContractAddress')"></svg-icon>
+                            <!-- <i class="wbs-icon-copy font-12 copy-public-key" ></i> -->
                         </span>
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">
+                        <span style="display:inline-block;width:calc(100% - 135px);word-wrap:break-word">
                             {{contractAddress}}
                         </span>
                     </div>
                     <div class="contract-info-list" v-if="abiFile">
-                        <span class="contract-info-list-title" style="color: #0B8AEE">contractName
-                            <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(contractName)" :title="$t('title.copyContractName')"></i>
+                        <span class="contract-info-list-title">
+                            <span class="vertical_align">contractName</span>
+                            <svg-icon icon-class='copy' class="font-16 copy-public-key" @click="copyKey(contractName)" :title="$t('title.copyContractAddress')"></svg-icon>
+                            <!-- <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(contractName)" :title="$t('title.copyContractName')"></i> -->
                         </span>
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">
+                        <span style="display:inline-block;width:calc(100% - 135px);word-wrap:break-word">
                             {{contractName}}
                         </span>
                     </div>
                     <div class="contract-info-list" v-show="abiFile">
-                        <span class="contract-info-list-title" style="color: #0B8AEE">abi
-                            <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(abiFile)" :title="$t('title.copyAbi')"></i>
+                        <span class="contract-info-list-title">
+                            <span class="vertical_align">abi</span>
+                            <svg-icon icon-class='copy' class="copy-public-key font-16" @click="copyKey(abiFile)" :title="$t('title.copyContractAddress')"></svg-icon>
+                            <!-- <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(abiFile)" :title="$t('title.copyAbi')"></i> -->
                         </span>
                         <span class="showText" ref="showAbiText">
                             {{abiFile}}
@@ -121,8 +132,10 @@
                         <i :class="[ showAbi ? 'el-icon-arrow-down': 'el-icon-arrow-up', 'font-13','cursor-pointer', 'visibility-wrapper']" v-if="complieAbiTextHeight" @click="showAbiText"></i>
                     </div>
                     <div class="contract-info-list" style="border-bottom: 1px solid #242e42;" v-show="abiFile">
-                        <span class="contract-info-list-title" style="color: #0B8AEE">bytecodeBin
-                            <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(bytecodeBin)" :title="$t('title.copyBin')"></i>
+                        <span class="contract-info-list-title">
+                            <span class="vertical_align">bytecodeBin</span>
+                            <svg-icon icon-class='copy' class="copy-public-key font-16" @click="copyKey(bytecodeBin)" :title="$t('title.copyContractAddress')"></svg-icon>
+                            <!-- <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(bytecodeBin)" :title="$t('title.copyBin')"></i> -->
                         </span>
                         <span class="showText" ref="showBinText">
                             {{bytecodeBin}}
@@ -142,7 +155,7 @@
         <el-dialog :title="$t('title.writeJavaName')" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
             <el-input v-model="javaClassName" :placeholder="$t('placeholder.javaPackage')"></el-input>
             <span class="font-12 font-color-ed5454" style="margin-left: 5px;">{{$t('dialog.exportJavaNote')}}</span>
-            <div slot="footer" class="text-right send-btn">
+            <div  class="text-right send-btn" style="margin-top: 20px">
                 <el-button @click="closeJavaClass">{{$t('dialog.cancel')}}</el-button>
                 <el-button type="primary" @click="sureJavaClass">{{$t('dialog.confirm')}}</el-button>
             </div>
@@ -152,7 +165,7 @@
 <script>
 import ace from "ace-builds";
 // import "ace-builds/webpack-resolver";
-import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds/src-noconflict/theme-tomorrow_night_blue";
 import "ace-builds/src-noconflict/theme-tomorrow";
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/ext-language_tools";
@@ -206,7 +219,7 @@ export default {
             abiFileShow: false,
             bytecodeBin: "",
             aceEditor: null,
-            themePath: "ace/theme/monokai",
+            themePath: "ace/theme/tomorrow_night_blue",
             modePath: "ace/mode/solidity",
             data: null,
             codeShow: false,
@@ -936,7 +949,7 @@ export default {
 <style scoped>
 .contract-code {
     height: 100%;
-    border-left: 1px solid #242e42;
+    border-left: 4px solid rgb(22, 14, 83);
     box-sizing: border-box;
 }
 .changeActive {
@@ -944,11 +957,13 @@ export default {
 }
 .contract-code-head {
     width: 100%;
-    height: 48px;
-    line-height: 48px;
+    height: 56px;
+    line-height: 56px;
     color: #fff;
-    border-bottom: 2px solid #242e42;
-    background-color: #2b374d;
+    border-bottom: 4px solid rgb(22, 14, 83);
+    background: rgba(69,54,187,0.40);
+    border-radius: 0 4px 0 0;
+    border-radius: 0px 4px 0px 0px;
     position: relative;
 }
 .search-model {
@@ -992,7 +1007,7 @@ export default {
 }
 .contract-code-done {
     display: inline-block;
-    margin-right: 10px;
+    margin-right: 20px;
     cursor: pointer;
 }
 .contract-code-done i {
@@ -1001,7 +1016,12 @@ export default {
 .contract-code-done span {
     font-size: 12px;
     color: #fff;
-    vertical-align: middle;
+    /* vertical-align: middle; */
+}
+.contract-code-done-content{
+    vertical-align: 2px;
+    display:inline-block;
+    padding-left: 5px;
 }
 .contract-no-content {
     border-left: 1px solid #242e42;
@@ -1009,8 +1029,7 @@ export default {
     box-sizing: border-box;
 }
 .contract-code-content {
-    border-left: 1px solid #242e42;
-    height: calc(100% - 50px);
+    height: calc(100% - 60px);
     box-sizing: border-box;
 }
 .contract-code-mirror {
@@ -1019,9 +1038,10 @@ export default {
 }
 .contract-info {
     position: relative;
-    padding-top: 10px;
+    padding-top: 5px;
     text-align: left;
-    border-top: 1px solid #242e42;
+    border-top: 4px solid rgb(22, 14, 83);
+    padding: 0 25px 20px 25px;
     box-sizing: border-box;
     overflow: auto;
 }
@@ -1032,8 +1052,8 @@ export default {
 }
 .contract-code-title {
     float: left;
-    font-weight: bold;
-    font-size: 18px;
+    /* font-weight: bold; */
+    font-size: 16px;
     padding-left: 20px;
 }
 .contract-code-handle {
@@ -1043,7 +1063,7 @@ export default {
 .contract-info-title {
     text-align: center;
     cursor: pointer;
-    padding: 5px 0px;
+    padding: 0 0 5px 0;
 }
 .contract-info-title:hover > i {
     color: #fff;
@@ -1064,17 +1084,26 @@ export default {
     color: #aeb1b5;
 }
 .contract-info-list {
-    padding: 5px 20px;
-    width: 90%;
-    margin: 0 auto;
-    border: 1px solid #242e42;
+    width: 100%;
+    /* line-height: 40px; */
+    margin: 4px auto;
+    padding: 13px 30px;
+    /* border: 1px solid #242e42; */
+    background-image: linear-gradient(49deg, rgb(22, 167, 252,0.2) 0%, rgb(200, 109, 215,0.2) 100%);
     border-bottom: none;
     position: relative;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border-radius: 8px;
 }
 .contract-info-list-title {
     display: inline-block;
-    width: 105px;
+    width: 130px;
     vertical-align: top;
+    font-size: 14px;
+    color: #25CEFE;
+    text-align: right;
+    box-sizing: border-box;
 }
 .contract-info-list-title::after {
     display: block;
@@ -1117,7 +1146,9 @@ export default {
     font-size: 12px;
 }
 .contract-info {
-    background-color: #2b374d;
+    background: rgba(69,54,187,0.40);
+    border-radius: 0 0 16px 0;
+    border-radius: 0px 0px 16px 0px;
     color: #fff;
 }
 .titleActive {
@@ -1138,16 +1169,21 @@ export default {
 }
 .showText {
     display: inline-block;
-    width: calc(100% - 120px);
+    width: calc(100% - 134px);
     word-wrap: break-word;
     max-height: 73px;
     overflow: hidden;
 }
 .copy-public-key {
     float: right;
+    padding-left: 10px;
+    vertical-align: 0px;
 }
 .visibility-wrapper {
     position: absolute;
     bottom: 10px;
+}
+.ace-editor>>> .ace_selection{
+    background: none !important;
 }
 </style>

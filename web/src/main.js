@@ -34,6 +34,7 @@ import '@/assets/icon/iconfont_webaas.css'
 import '@/assets/css/common.css'
 import i18n from './lang' // internationalization
 import { chooseLang } from "./util/errcode.js";
+import "./svgIcons"
 Vue.config.productionTip = false;
 axios.defaults.headers.post['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.headers.get['X-Requested-With'] = 'XMLHttpRequest';

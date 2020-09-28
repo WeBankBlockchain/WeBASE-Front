@@ -19,9 +19,9 @@
             <span class="content-head-icon" v-if="icon" @click="skip">
                 <i class="wbs-icon-back"></i>
             </span>
-            <span :class="{ 'font-color-9da2ab': headSubTitle}">{{title}}</span>
-            <span v-show="headSubTitle" class="font-color-9da2ab">/</span>
-            <span>{{headSubTitle}}</span>
+            <span :class="{ 'font-color-25CEFE': headSubTitle}">{{title}}</span>
+            <span v-show="headSubTitle" class="font-color-9da2ab">-</span>
+            <span class="font-bold">{{headSubTitle}}</span>
         </div>
         <div class="content-head-lang">
             <lang-select class="right-menu-item hover-effect" />
@@ -161,15 +161,15 @@ export default {
 .content-head-title {
     margin-left: 40px;
     float: left;
-    font-size: 16px;
+    font-size: 24px;
     color: #fff;
-    font-weight: bold;
-    line-height: 54px;
+    /* font-weight: bold; */
+    line-height: 70px;
 }
 .content-head-network {
     float: right;
     padding-right: 10px;
-    line-height: 54px;
+    line-height: 70px;
 }
 .content-head-item {
     display: inline-block;
