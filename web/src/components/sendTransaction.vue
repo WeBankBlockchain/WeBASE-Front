@@ -15,12 +15,12 @@
  */
 <template>
     <div class="send-wrapper">
-        <div class="font-color-ed5454 text-center" v-if="sendErrorMessage">{{sendErrorMessage}}</div>
+        <!-- <div class="font-color-ed5454 text-center" v-if="sendErrorMessage">{{sendErrorMessage}}</div> -->
         <table>
             <tr>
                 <td class="text-right text-td"><span class="font-color-fff ">{{$t('text.contractName')}}：</span></td>
                 <td>
-                    <span class="font-color-fff">{{data.contractName}}</span>
+                    <span class="font-color-fff send-contract-name">{{data.contractName}}</span>
                 </td>
             </tr>
             <tr>
@@ -334,5 +334,17 @@ export default {
 }
 .text-td {
     white-space: nowrap;
+}
+.send-contract-name{
+    display: inline-block;
+    width: 240px;
+    height: 32px;
+    line-height: 32px;
+    color: #25CEFE;
+    background-image: linear-gradient(49deg, rgba(22, 167, 252,0.2) 0%, rgba(200, 109, 215,0.2) 100%);
+    padding-left: 12px;
+    border-radius: 4px;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 </style>

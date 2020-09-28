@@ -34,12 +34,12 @@ Vue.use(Router);
 const routes = [
     {
         path: '/',
-        redirect: '/home',
+        redirect: '/contract',
     },
     {
         path: '/main',
         name: 'main',
-        redirect: '/home',
+        redirect: '/contract',
         leaf: true,
         menuShow: true,
         iconCls: 'wbs-icon-gailan sidebar-icon',

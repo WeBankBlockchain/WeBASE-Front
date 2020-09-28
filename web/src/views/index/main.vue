@@ -36,9 +36,9 @@
                 </el-form-item>
             </el-form>
         </div>
-        <div class="menu-wrapper header" :class="{'menu-show': menuShow,'menu-hide': menuHide}">
+        <!-- <div class="menu-wrapper header" :class="{'menu-show': menuShow,'menu-hide': menuHide}">
             <v-menu @sidebarChange="change($event)" :minMenu="show"></v-menu>
-        </div>
+        </div> -->
         <div class="view-wrapper" :class="{'view-show': menuShow,'view-hide': menuHide}">
             <router-view></router-view>
         </div>
@@ -225,7 +225,8 @@ export default {
 }
 .main-wrapper {
     width: 100%;
-    background: #20293c;
+    background-image: url("../../../static/image/bg.jpg");
+    background-repeat: no-repeat;
     height: 100%;
 }
 .main-wrapper::after {
@@ -244,7 +245,9 @@ export default {
 }
 .view-wrapper {
     height: 100%;
-    padding-left: 200px;
+    padding: 0 50px;
+    box-sizing: border-box;
+    /* padding-left: 200px; */
 }
 .menu-show {
     width: 200px;
@@ -263,7 +266,7 @@ export default {
 }
 .view-show {
     overflow-y: auto;
-    width: calc(100% - 200px);
+    width: 100%;
     transition: width 0.5s;
     -moz-transition: width 0.5s;
     -webkit-transition: width 0.5s;
