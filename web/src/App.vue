@@ -61,7 +61,8 @@ export default {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #2c3e50;
-    background-color: #20293c;
+    background-image: url("../static/image/bg.jpg");
+    background-repeat: no-repeat;
 }
 ul,
 li {

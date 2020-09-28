@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>合约调用</title>
+    <defs>
+        <linearGradient x1="0%" y1="100%" x2="100%" y2="10.3271484%" id="linearGradient-1">
+            <stop stop-color="#16A7FC" offset="0%"></stop>
+            <stop stop-color="#C86DD7" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="4.0-IDE" transform="translate(-1319.000000, -41.000000)">
+            <g id="Group" transform="translate(1319.000000, 41.000000)">
+                <rect id="Rectangle" fill="url(#linearGradient-1)" opacity="0.201497396" x="0" y="0" width="24" height="24" rx="4"></rect>
+                <rect id="Rectangle" x="4" y="4" width="16" height="16"></rect>
+                <path d="M17,4.5 C17.4142136,4.5 17.7892136,4.66789322 18.0606602,4.93933983 C18.3321068,5.21078644 18.5,5.58578644 18.5,6 L18.5,6 L18.5,19.2814092 L12.7411891,16.8676305 C12.2815864,16.6064109 11.7184136,16.6064109 11.2588109,16.8676305 L11.2588109,16.8676305 L6.24706305,19.7161043 L5.5,6 C5.5,5.58578644 5.66789322,5.21078644 5.93933983,4.93933983 C6.21078644,4.66789322 6.58578644,4.5 7,4.5 L7,4.5 Z" id="Rectangle" stroke="#FFFFFF"></path>
+                <circle id="Oval" stroke="#FFFFFF" cx="12" cy="9" r="1.5"></circle>
+                <line x1="9.5" y1="13.5" x2="14.5" y2="13.5" id="Line" stroke="#FFFFFF" stroke-linecap="round"></line>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -16,7 +16,7 @@
 <template>
     <div>
         <el-dialog :title="$t('title.newFile')" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="433px" :center="true">
-            <div>
+            <div style="margin-bottom: 20px">
                 <el-form :model="fileFrom" :rules="rules" ref="fileFrom" label-width="116px" class="demo-ruleForm">
                     <el-form-item :label="$t('text.contractName')" prop="contractName">
                         <el-input v-model="fileFrom.contractName" style="width: 210px;"></el-input>
@@ -29,7 +29,7 @@
                     </el-form-item>
                 </el-form>
             </div>
-            <div slot="footer" class="dialog-footer">
+            <div  class="text-right send-btn">
                 <el-button @click="modelClose">{{$t('dialog.cancel')}}</el-button>
                 <el-button type="primary" @click="submit('fileFrom')">{{$t('dialog.confirm')}}</el-button>
             </div>
@@ -134,4 +134,9 @@ export default {
     }
 }
 </script>
+<style scoped>
+.demo-ruleForm>>>.el-form-item{
+    margin-bottom: 10px !important;
+}
+</style>
 

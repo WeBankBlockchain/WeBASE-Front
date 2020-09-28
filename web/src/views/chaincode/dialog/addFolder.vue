@@ -16,14 +16,14 @@
 <template>
     <div>
         <el-dialog :title="$t('title.newFolder')" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="433px" :center="true">
-            <div>
+            <div style="margin-bottom: 20px">
                 <el-form :model="folderFrom" :rules="rules" ref="folderFrom" label-width="100px" class="demo-ruleForm">
                     <el-form-item :label="$t('dialog.folderName')" prop="folderName" style="width:330px">
                         <el-input v-model="folderFrom.folderName"></el-input>
                     </el-form-item>
                 </el-form>
             </div>
-            <div slot="footer" class="dialog-footer">
+            <div class="text-right send-btn">
                 <el-button @click="modelClose">{{$t('dialog.cancel')}}</el-button>
                 <el-button type="primary" @click="submit('folderFrom')">{{$t('dialog.confirm')}}</el-button>
             </div>

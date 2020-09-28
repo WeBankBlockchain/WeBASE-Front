@@ -15,7 +15,11 @@
  */
 <template>
     <div class="contract-content" v-loading="loading">
-        <v-content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.contractIDE')" @changeGroup="changeGroup"></v-content-head>
+        <div class="fullScreen">
+            <svg-icon :icon-class='icon' class=" font-24 cursor-pointer" @click='screenFull'></svg-icon>
+            <!-- <svg-icon icon-class='narrow' @click='narrowFull' class=" font-24" v-if='!screenFullShow'></svg-icon> -->
+        </div>
+        <!-- <v-content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.contractIDE')" @changeGroup="changeGroup"></v-content-head> -->
         <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}">
             <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide" @uploadLoading="uploadLoading" :solcVersionOptions="solcVersionOptions" :solcVersion="solcVersion"></v-menu>
             <div class="move" @mousedown="dragDetailWeight($event)"></div>
@@ -32,6 +36,7 @@ import codes from "./components/code";
 import contentHead from "@/components/contentHead";
 import { encryption } from "@/util/api";
 import Bus from "@/bus"
+import screenfull from "screenfull"
 export default {
     name: "contract",
     components: {
@@ -58,11 +63,14 @@ export default {
             menuHide: true,
             changeWidth: false,
             contractHide: false,
-            menuWidth: 240,
+            menuWidth: 320,
             urlQuery: this.$root.$route.query,
             loading: false,
             solcVersion: "",
-            solcVersionOptions: []
+            solcVersionOptions: [],
+            isFullscreen: false,
+            screenFullShow: true,
+            icon: "fullScreen"
         };
     },
     computed: {
@@ -82,8 +90,49 @@ export default {
             this.changeGroup()
         })
         this.getEncryption(this.initSolc);
+        window.onresize = () => {
+            // 全屏下监控是否按键了ESC
+            if (!this.checkFull()) {
+            // 全屏下按键esc后要执行的动作
+            this.isFullscreen = false
+            }
+            this.screenFullShow = true
+        }
     },
     methods: {
+        screenFull () {
+            if(!screenfull.isEnabled){
+                this.$message({
+                    type: "error",
+                    message: "你的浏览器不支持此操作！"
+                })
+                return false
+            }
+            screenfull.toggle();
+            this.isFullscreen = true;
+            this.screenFullShow = false;
+            if(this.icon == 'fullScreen'){
+                this.icon = 'narrow'
+            }else{
+                this.icon = 'fullScreen'
+            }
+            
+        },
+        checkFull() {
+            var isFull = document.fullscreenEnabled || window.fullScreen || document.webkitIsFullScreen || document.msFullscreenEnabled
+            // to fix : false || undefined == undefined
+            if (isFull === undefined) {
+                isFull = false
+            }
+            return isFull
+        },
+        narrowFull () {
+            if (!this.checkFull()) {
+            // 全屏下按键esc后要执行的动作
+            this.isFullscreen = false
+            }
+            this.screenFullShow = true
+        },
         initSolc(val) {
             var head = document.head;
             var script = document.createElement("script");
@@ -201,9 +250,17 @@ export default {
 </script>
 <style scoped>
 .contract-content {
+    position: relative;
     width: 100%;
     height: 100%;
+    padding-top: 40px;
     font-size: 0;
+    box-sizing: border-box;
+}
+.fullScreen{
+    position: absolute;
+    right: 20px;
+    top: 10px;
 }
 .contract-content::after {
     display: block;
@@ -214,8 +271,10 @@ export default {
     float: left;
     position: relative;
     padding-left: 20px;
-    height: calc(100% - 57px);
-    font-size: 12px;
+    height: 100%;
+    padding-bottom: 40px;
+    font-size: 14px;
+    line-height: 36px;
     box-sizing: border-box;
 }
 .move {
@@ -244,15 +303,17 @@ export default {
 }
 .code-detail-wrapper {
     float: left;
-    height: calc(100% - 57px);
+    height: 100%;
     padding-right: 20px;
+    padding-bottom: 40px;
     font-size: 12px;
     box-sizing: border-box;
 }
 .code-detail-reset-wrapper {
     float: left;
-    height: calc(100% - 57px);
+    height: 100%;
     padding-right: 20px;
+    padding-bottom: 40px;
     font-size: 12px;
     box-sizing: border-box;
 }
