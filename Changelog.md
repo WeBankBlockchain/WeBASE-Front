@@ -1,3 +1,24 @@
+### v1.4.1(2020-09-18)
+
+**Add**
+- 升级web3sdk为2.6.1版本
+- 新增ChainGovernance接口
+- 新增getBlockHeader接口
+
+**Fix**
+- 优化节点前置异常处理，优化预编译合约错误提示
+- 修复合约部署权限检查bug
+- 修复新建群组的区块推送与合约event推送bug
+- 修复合约中byte32编码补位报错问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 版本及以上版本
+- WeBASE-Node-Manager v1.4.0+
+- WeBASE-Sign v1.4.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.4.0(2020-08-06)
 
 **Add**

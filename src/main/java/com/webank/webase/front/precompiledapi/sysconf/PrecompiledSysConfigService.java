@@ -15,6 +15,8 @@ package com.webank.webase.front.precompiledapi.sysconf;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
+import com.webank.webase.front.precompiledapi.entity.ResSystemConfig;
+import com.webank.webase.front.precompiledapi.entity.SystemConfigHandle;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
@@ -22,13 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * System config service
