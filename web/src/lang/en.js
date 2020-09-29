@@ -159,7 +159,7 @@ export default {
         javaPackage: 'Example: com.webank',
         selected: 'select',
         selectedAccountAddress: 'Select Account Address',
-        selectedNoUser: 'No available user, please create a new user in private key management panel',
+        selectedNoUser: 'No available user, please create a new user in private key test panel',
         selectedContractAddress: 'Select Contract Address',
         functionName: 'Function Name',
         contractListSearch: 'Search by Name / Address',
