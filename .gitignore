@@ -39,5 +39,7 @@ gradle.properties
 *.key
 h2
 
+/lib/
+solcjs
 
 

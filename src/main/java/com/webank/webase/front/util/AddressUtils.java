@@ -15,10 +15,22 @@
  */
 package com.webank.webase.front.util;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
+
 /**
  * get Address from String
  */
 public class AddressUtils {
+
+    public static String checkAndGetAddress(String addressStr) {
+        // validate address
+        Address convertAddress = convertAddress(addressStr);
+        if(!convertAddress.isValid()){
+            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
+        }
+        return convertAddress.getAddress();
+    }
 
     public static Address convertAddress(String addressStr) {
         Address address = new Address();

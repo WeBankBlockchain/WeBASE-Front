@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 <template>
-    <!-- <el-dialog :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="600px" top="10vh">
-        <div slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
-            <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>
-        </div>
-    </el-dialog> -->
-    <el-dialog  :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
+    <el-dialog :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
         <div v-if='!transationData'>{{$t('text.noData')}}</div>
         <div v-if='transationData && !transationData.logs' slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
             <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>
@@ -28,19 +23,27 @@
             <div>{</div>
             <div v-for="(val,key) in transationData" style="padding-left: 10px;">
                 <div v-if='key != "logs"&& key != "output"'>
-                    <span class="transation-title">{{key}}:</span>
-                    <span class="transation-content string-color" v-if='typeof(val) == "string"'>"{{val}}"</span>
-                    <span class="transation-content null-color" v-else-if='val === null'>{{val}}null</span>
-                    <span class="transation-content" v-else-if='typeof(val) == "object"'>{{val}}</span>
-                    <span class="transation-content other-color" v-else>{{val}}</span>
+                    <template v-if="key=='status'">
+                        <span class="transation-title">{{key}}:</span>
+                        <span :style="{'color': txStatusColor(val)}">{{val}}</span>
+                    </template>
+                    <template v-else>
+                        <span class="transation-title">{{key}}:</span>
+                        <span class="transation-content string-color" v-if='typeof(val) == "string"'>"{{val}}"</span>
+                        <span class="transation-content null-color" v-else-if='val === null'>{{val}}null</span>
+                        <span class="transation-content" v-else-if='typeof(val) == "object"'>{{val}}</span>
+                        <span class="transation-content other-color" v-else>{{val}}</span>
+                    </template>
+
                 </div>
+
                 <div v-else-if='key == "output"'>
                     <span class="transation-title">{{key}}:</span>
                     <span class="transation-content string-color" v-if="showDecode">"{{val}}"</span>
                     <div v-if="!showDecode" class="transation-data" style="width: 500px">
                         <div class="input-label">
-                            <span class="label">function:</span>
-                            <span>{{funcData + "(" + abiType + ")"}}</span>
+                            <span class="label">function</span>
+                            <span>{{funcData + "(" + abiType  +")" +' ' +outputType}}</span>
                         </div>
                         <div class="input-label">
                             <span class="label">data:</span>
@@ -150,7 +153,8 @@
                             </div>
                             <div>}</div>
                         </div>
-                        ]</span>
+                        ]
+                    </span>
                 </div>
             </div>
             <div>}</div>
@@ -161,7 +165,7 @@
 import { getFunctionAbi } from "@/util/api"
 export default {
     name: 'editor',
-    props: ['data', 'show','input','editorOutput'],
+    props: ['data', 'show', 'input', 'editorOutput', 'sendConstant'],
     data() {
         return {
             editorShow: true,
@@ -180,7 +184,8 @@ export default {
             buttonTitle: this.$t('text.txnDecodeBtn'),
             typesArray: this.input,
             inputButtonShow: true,
-            editorHeight: ''
+            editorHeight: '',
+            outputType: null
         }
     },
     mounted() {
@@ -193,9 +198,12 @@ export default {
         if (this.transationData && this.transationData.logs) {
             this.decodeEvent();
         }
-        if (this.typesArray && this.transationData.output != "0x") {
-            this.decodefun()
+        if (!this.sendConstant) {
+            if (this.typesArray && this.transationData.output != "0x") {
+                this.decodefun()
+            }
         }
+
     },
     methods: {
         modelClose() {
@@ -230,10 +238,26 @@ export default {
                                 this.inputData[index].name = this.editorOutput[index].name;
                                 this.inputData[index].type = this.editorOutput[index].type;
                                 this.inputData[index].data = this.decodeData[index];
-                                
+
                             }
                         }
                     }
+
+                    let outputType = []
+                    this.editorOutput.forEach((val, index) => {
+                        if (val && val.type && val.name) {
+                            outputType[index] = val.type + " " + val.name;
+                        } else if (val && val.name) {
+                            outputType[index] = val.name;
+                        } else if (val && val.type) {
+                            outputType[index] = val.type;
+                        } else if (val) {
+                            outputType[index] = val;
+                        }
+                    });
+                    this.outputType = `returns(${outputType.join(', ')})`
+                } else {
+                    this.outputType = ""
                 }
                 this.showDecode = false;
                 this.buttonTitle = this.$t('text.txnEncodeBtn');
@@ -316,7 +340,7 @@ export default {
                     this.$message({
                         type: "success",
                         showClose: true,
-                        message:this.$t('notice.copySuccessfully'),
+                        message: this.$t('notice.copySuccessfully'),
                         duration: 2000
                     });
                 });
@@ -331,6 +355,13 @@ export default {
                 this.eventTitle = this.$t('text.txnEncodeBtn')
             }
 
+        },
+        txStatusColor(val) {
+            if (val == '0x0') {
+                return '#67C23A'
+            } else {
+                return '#F56C6C'
+            }
         }
     }
 }

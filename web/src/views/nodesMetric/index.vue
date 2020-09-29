@@ -123,6 +123,7 @@ export default {
             },
                 reqQurey = {};
             reqQurey = this.chartParam;
+            console.log(reqData, reqQurey)
             nodesHealth(reqData, reqQurey)
                 .then(res => {
                     this.loading = false;
@@ -196,7 +197,7 @@ export default {
             this.chartParam.contrastBeginDate = this.contrastBeginDate;
             this.chartParam.contrastEndDate = this.contrastEndDate;
             this.chartParam.gap = this.timeGranularity;
-            this.chartParam.groupId = localStorage.getItem('groupName') ? localStorage.getItem('groupName') : '1';
+            this.chartParam.groupId = localStorage.getItem('groupId') ? localStorage.getItem('groupId') : '1';
         }
     }
 };
