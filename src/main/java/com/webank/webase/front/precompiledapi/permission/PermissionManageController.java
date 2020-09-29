@@ -21,7 +21,8 @@ import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.util.Address;
+import com.webank.webase.front.precompiledapi.entity.PermissionHandle;
+import com.webank.webase.front.precompiledapi.entity.PermissionState;
 import com.webank.webase.front.util.AddressUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
@@ -60,7 +61,6 @@ import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_CNS;
 public class PermissionManageController extends BaseController {
     @Autowired
     private PermissionManageService permissionManageService;
-
     /**
      * handle get request by permission type
      * to get list of different administrators on chain
@@ -174,18 +174,11 @@ public class PermissionManageController extends BaseController {
             log.info("end updateUserPermissionStateAfterCheck startTime:{}, resultState:{}",
                     Instant.now().toEpochMilli(), resultState);
             return new BaseResponse(ConstantCode.RET_SUCCEED, resultState);
-        }
-        catch (JsonParseException e) {
-            log.error("end updateUserPermissionStateAfterCheck for startTime:{}, Exception:{}",
-                    Instant.now().toEpochMilli(), e.getMessage());
-                return new BaseResponse(ConstantCode.SYSTEM_ERROR, "Parse json fail, please check permissionState's object structure");
-            }
-        catch(NullPointerException e) {
+        } catch(NullPointerException e) {
             log.error("end updateUserPermissionStateAfterCheck for startTime:{}, Exception:{}",
                     Instant.now().toEpochMilli(), e.getMessage());
             return new BaseResponse(ConstantCode.PARAM_VAILD_FAIL, "all cns, node, sysConfig, deployAndCreate cannot be null");
-        }
-        catch(FrontException e) {
+        } catch(FrontException e) {
             log.error("end updateUserPermissionStateAfterCheck for startTime:{}, Exception:{}",
                     Instant.now().toEpochMilli(), e.getMessage());
             return new BaseResponse(ConstantCode.PERMISSION_DENIED, e.getMessage());
@@ -205,14 +198,8 @@ public class PermissionManageController extends BaseController {
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
         String from = permissionHandle.getSignUserId();
-        String address = permissionHandle.getAddress();
+        String address = AddressUtils.checkAndGetAddress(permissionHandle.getAddress());
         String tableName = permissionHandle.getTableName();
-        // validate address
-        Address converAddr = AddressUtils.convertAddress(address);
-        if(!converAddr.isValid()){
-            return ConstantCode.PARAM_ADDRESS_IS_INVALID;
-        }
-        address = converAddr.getAddress();
         switch (permissionType) {
             case PERMISSION_TYPE_PERMISSION:
                 return grantPermissionManager(groupId, from, address);
@@ -250,14 +237,8 @@ public class PermissionManageController extends BaseController {
         int groupId = permissionHandle.getGroupId();
         String permissionType = permissionHandle.getPermissionType();
         String from = permissionHandle.getSignUserId();
-        String address = permissionHandle.getAddress();
+        String address = AddressUtils.checkAndGetAddress(permissionHandle.getAddress());
         String tableName = permissionHandle.getTableName();
-        // validate address
-        Address convertAddress = AddressUtils.convertAddress(address);
-        if(!convertAddress.isValid()){
-            return ConstantCode.PARAM_ADDRESS_IS_INVALID;
-        }
-        address = convertAddress.getAddress();
         switch (permissionType) {
             case PERMISSION_TYPE_PERMISSION:
                 return revokePermissionManager(groupId, from, address);

@@ -27,7 +27,9 @@
                     <input multiple type="file" id="file" ref='file' name="chaincodes" class="uploads" @change="upload($event)" />
                 </i>
             </el-tooltip>
-
+            <div>
+                <slot name="footer"></slot>
+            </div>
         </div>
 
         <div class="contract-menu-content">
@@ -152,7 +154,7 @@ export default {
         };
     },
     watch: {
-        solcVersionOptions(val){
+        solcVersionOptions(val) {
             this.versionOptions = val
             // this.querySolcList()
         },
@@ -795,7 +797,7 @@ export default {
                 .then(res => {
                     if (res.data.code === 0) {
                         var array = []
-                        res.data.data.forEach(item=>{
+                        res.data.data.forEach(item => {
                             array.push({
                                 value: item.solcName,
                                 label: item.solcName,
@@ -894,7 +896,7 @@ export default {
                 });
             // this.loadScript(val)
         },
-        async  loadScript(src) {
+        async loadScript(src) {
             await new Promise(resolve => {
                 // 如果已经加载了本js，直接调用回调
                 // if (this._checkIsLoadScript(src)) {
@@ -951,7 +953,6 @@ export default {
     height: 48px;
     line-height: 48px;
     border-bottom: 2px solid #20293c;
-    padding-left: 20px;
     color: #4f6178;
 }
 .contract-icon {

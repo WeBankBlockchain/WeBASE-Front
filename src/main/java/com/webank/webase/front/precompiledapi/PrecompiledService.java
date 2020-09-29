@@ -67,7 +67,7 @@ public class PrecompiledService {
     }
 
     public String getAddressByContractNameAndVersion(int groupId, String contractName,
-                                                  String version) throws Exception {
+                                                  String version) {
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         String contractNameAndVersion = contractName + Constants.SYMPOL + version;
@@ -77,22 +77,22 @@ public class PrecompiledService {
     /**
      * Consensus config related
      */
-    public String addSealer(int groupId, String signUserId, String nodeId) throws Exception {
+    public String addSealer(int groupId, String signUserId, String nodeId) {
         String res = precompiledWithSignService.addSealer(groupId, signUserId, nodeId);
         return res;
     }
 
-    public String addObserver(int groupId, String signUserId, String nodeId) throws Exception {
+    public String addObserver(int groupId, String signUserId, String nodeId) {
         String res = precompiledWithSignService.addObserver(groupId, signUserId, nodeId);
         return res;
     }
 
-    public String removeNode(int groupId, String signUserId, String nodeId) throws Exception {
+    public String removeNode(int groupId, String signUserId, String nodeId) {
         String res = precompiledWithSignService.removeNode(groupId, signUserId, nodeId);
         return res;
     }
 
-    public List<NodeInfo> getNodeList(int groupId) throws Exception {
+    public List<NodeInfo> getNodeList(int groupId) throws IOException {
         // nodeListWithType 组合多个带有类型的nodeid list
         List<String> sealerList =
                 web3ApiService.getWeb3j(groupId).getSealerList().send().getResult();
@@ -118,7 +118,7 @@ public class PrecompiledService {
     /**
      * CRUD related Table table - validation in controller
      */
-    public int createTable(int groupId, String signUserId, Table table) throws Exception {
+    public int createTable(int groupId, String signUserId, Table table) {
         int res = precompiledWithSignService.createTable(groupId, signUserId, table);
         return res;
     }
@@ -126,7 +126,7 @@ public class PrecompiledService {
     /**
      * insert 校验tableName等操作放在controller
      */
-    public int insert(int groupId, String signUserId, Table table, Entry entry) throws Exception {
+    public int insert(int groupId, String signUserId, Table table, Entry entry) {
         int res = precompiledWithSignService.insert(groupId, signUserId, table, entry);
         return res;
     }
@@ -135,7 +135,7 @@ public class PrecompiledService {
      * update
      */
     public int update(int groupId, String signUserId, Table table, Entry entry, Condition condition)
-            throws Exception {
+            {
         int res = precompiledWithSignService.update(groupId, signUserId, table, entry, condition);
         return res;
     }
@@ -144,7 +144,7 @@ public class PrecompiledService {
      * remove
      */
     public int remove(int groupId, String signUserId, Table table, Condition condition)
-            throws Exception {
+            {
         int res = precompiledWithSignService.remove(groupId, signUserId, table, condition);
         return res;
     }
@@ -171,17 +171,17 @@ public class PrecompiledService {
     }
 
     public String contractFreeze(int groupId, String signUserId, String contractAddress)
-            throws Exception {
+            {
         return precompiledWithSignService.contractFreeze(groupId, signUserId, contractAddress);
     }
 
     public String contractUnfreeze(int groupId, String signUserId, String contractAddress)
-            throws Exception {
+            {
         return precompiledWithSignService.contractUnfreeze(groupId, signUserId, contractAddress);
     }
 
     public String contractGrantManager(int groupId, String signUserId, String contractAddress,
-            String grantAddress) throws Exception {
+            String grantAddress) {
         return precompiledWithSignService.contractGrantManager(groupId, signUserId, contractAddress,
                 grantAddress);
     }
@@ -189,7 +189,17 @@ public class PrecompiledService {
     public String contractStatus(int groupId, String contractAddress) throws Exception {
         ContractStatusService contractStatusService = new ContractStatusService(
                 web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
-        return contractStatusService.getStatus(contractAddress);
+        String res = contractStatusService.getStatus(contractAddress);
+        if (res.contains("frozen")) {
+            // res: The account has been frozen. You can use this account after unfreezing it.
+            return "1";
+        } else {
+            // res: The address is nonexistent.
+            // res: The account is available.
+            // res: invalid
+            // res: not a account address
+            return "0";
+        }
     }
 
     public String contractManagerList(int groupId, String contractAddress) throws Exception {
