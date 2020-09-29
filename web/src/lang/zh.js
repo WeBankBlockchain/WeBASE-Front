@@ -155,7 +155,7 @@ export default {
         javaPackage: '如：com.webank',
         selected: '请选择',
         selectedAccountAddress: '请选择用户地址',
-        selectedNoUser: '没有用户，请去私钥管理新建用户',
+        selectedNoUser: '没有用户，请去测试用户处新建用户',
         selectedContractAddress: '请输入合约地址',
         functionName: '方法名',
         contractListSearch: '请输入合约名或合约地址',

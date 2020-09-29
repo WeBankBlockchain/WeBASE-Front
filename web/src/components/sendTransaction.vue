@@ -263,7 +263,9 @@ export default {
                             },
                             data: this.pramasObj
                         }
-                        this.$emit("success", successData);
+                        this.$emit("success", Object.assign({},successData,{
+                            constant: this.constant
+                        }) );
                         if (this.constant) {
                             this.$message({
                                 type: "success",
