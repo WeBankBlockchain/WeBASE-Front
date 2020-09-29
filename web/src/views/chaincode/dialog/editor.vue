@@ -42,8 +42,8 @@
                     <span class="transation-content string-color" v-if="showDecode">"{{val}}"</span>
                     <div v-if="!showDecode" class="transation-data" style="width: 500px">
                         <div class="input-label">
-                            <span class="label">function:</span>
-                            <span>{{funcData + "(" + abiType + outputType + ")"}}</span>
+                            <span class="label">function</span>
+                            <span>{{funcData + "(" + abiType  +")" +' ' +outputType}}</span>
                         </div>
                         <div class="input-label">
                             <span class="label">data:</span>
@@ -165,7 +165,7 @@
 import { getFunctionAbi } from "@/util/api"
 export default {
     name: 'editor',
-    props: ['data', 'show', 'input', 'editorOutput'],
+    props: ['data', 'show', 'input', 'editorOutput', 'sendConstant'],
     data() {
         return {
             editorShow: true,
@@ -198,9 +198,12 @@ export default {
         if (this.transationData && this.transationData.logs) {
             this.decodeEvent();
         }
-        if (this.typesArray && this.transationData.output != "0x") {
-            this.decodefun()
+        if (!this.sendConstant) {
+            if (this.typesArray && this.transationData.output != "0x") {
+                this.decodefun()
+            }
         }
+
     },
     methods: {
         modelClose() {
@@ -252,10 +255,7 @@ export default {
                             outputType[index] = val;
                         }
                     });
-                    this.outputType = " returns "
-                    for (let i = 0; i < outputType.length; i++) {
-                        this.outputType = this.outputType + outputType[i]
-                    }
+                    this.outputType = `returns(${outputType.join(', ')})`
                 } else {
                     this.outputType = ""
                 }
@@ -357,9 +357,9 @@ export default {
 
         },
         txStatusColor(val) {
-            if(val =='0x0'){
+            if (val == '0x0') {
                 return '#67C23A'
-            }else {
+            } else {
                 return '#F56C6C'
             }
         }
