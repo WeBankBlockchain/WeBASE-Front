@@ -152,6 +152,9 @@ export default {
         getEncryption: function(){
             encryption().then(res => {
                 if(res.status == 200){
+                    
+                    localStorage.removeItem('solcName')
+                    localStorage.removeItem('versionId')
                     localStorage.setItem("encryptionId",res.data)
                 }else {
                     this.$message({

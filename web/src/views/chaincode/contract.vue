@@ -86,12 +86,6 @@ export default {
             }
         }
     },
-    beforeCreate(){
-        localStorage.removeItem('solcName')
-        localStorage.removeItem('versionId')
-        console.log('编译', localStorage.getItem('encryptionId'))
-
-    },
     beforeDestroy: function () {
         Bus.$off("changeGroup")
     },
