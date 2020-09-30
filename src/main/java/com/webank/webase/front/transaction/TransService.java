@@ -35,6 +35,7 @@ import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
@@ -191,7 +192,8 @@ public class TransService {
             try{
                 responseReceipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
                 // cover null message
-                responseReceipt.setMessage(StatusCode.getStatusMessage(responseReceipt.getStatus()));
+                String receiptMsg = FrontUtils.handleReceiptMsg(responseReceipt);
+                responseReceipt.setMessage(receiptMsg);
                 response = responseReceipt;
             } catch (InterruptedException | ExecutionException  e) {
                 log.error("get tx receipt error for interrupted or exec:[]", e);
