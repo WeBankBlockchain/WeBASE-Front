@@ -61,6 +61,7 @@ import org.fisco.bcos.web3j.crypto.*;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterName;
 import org.fisco.bcos.web3j.protocol.core.Request;
 import org.fisco.bcos.web3j.protocol.core.methods.request.Transaction;
@@ -185,9 +186,13 @@ public class TransService {
             Instant nodeStartTime = Instant.now();
             // send transaction
             final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+            TransactionReceipt responseReceipt;
             sendMessage(web3j, signMsg, transFuture);
             try{
-                response = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+                responseReceipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+                // cover null message
+                responseReceipt.setMessage(StatusCode.getStatusMessage(responseReceipt.getStatus()));
+                response = responseReceipt;
             } catch (InterruptedException | ExecutionException  e) {
                 log.error("get tx receipt error for interrupted or exec:[]", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
@@ -614,72 +619,6 @@ public class TransService {
         return credentials;
     }
 
-    /**
-     * @Deprecated old transHandleWithSign.
-     * @param req request
-     */
-
-    // public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
-    // //get function of abi
-    // ContractFunction cf = buildContractFunction(new ContractOfTrans(req));
-    // //check param
-    // checkParamOfTransaction(cf, req.getFuncParam());
-    //
-    // // check contractAddress
-    // String contractAddress = req.getContractAddress();
-    // if (StringUtils.isBlank(contractAddress)) {
-    // log.error("transHandleWithSign. contractAddress is empty");
-    // throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
-    // }
-    //
-    // // check groupId
-    // Web3j web3j = getWeb3j(req.getGroupId());
-    //
-    // // encode function
-    // Function function = new Function(req.getFuncName(), cf.getFinalInputs(),
-    // cf.getFinalOutputs());
-    // String encodedFunction = FunctionEncoder.encode(function);
-    //
-    // // trans handle
-    // Object response = "";
-    // Instant startTime = Instant.now();
-    // if (cf.getConstant()) {
-    // KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
-    // String callOutput = web3j
-    // .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
-    // contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
-    // .send().getValue().getOutput();
-    // List<Type> typeList =
-    // FunctionReturnDecoder.decode(callOutput, function.getOutputParameters());
-    // if (typeList.size() > 0) {
-    // response = AbiUtil.callResultParse(cf.getOutputList(), typeList);
-    // } else {
-    // response = typeList;
-    // }
-    // } else {
-    // // data sign
-    // String signMsg = signMessage(req.getGroupId(), web3j, req.getSignAddress(), contractAddress,
-    // encodedFunction);
-    // if (StringUtils.isBlank(signMsg)) {
-    // throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-    // }
-    // Instant nodeStartTime = Instant.now();
-    // // send transaction
-    // final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-    // sendMessage(web3j, signMsg, transFuture);
-    // TransactionReceipt receipt =
-    // transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-    // response = receipt;
-    // log.info("***node cost time***: {}", Duration.between(nodeStartTime,
-    // Instant.now()).toMillis());
-    //
-    // }
-    // log.info("***transaction total cost time***: {}", Duration.between(startTime,
-    // Instant.now()).toMillis());
-    // log.info("transHandleWithSign end. func:{} baseRsp:{}", req.getFuncName(),
-    // JsonUtils.toJSONString(response));
-    // return response;
-    // }
 }
 
 
