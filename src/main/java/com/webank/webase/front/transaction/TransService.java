@@ -277,6 +277,9 @@ public class TransService {
         log.info("execTransaction start startTime:{}", startTime.toEpochMilli());
         try {
             transactionReceipt = commonContract.execTransaction(function);
+            // cover null message through statusCode
+            String receiptMsg = FrontUtils.handleReceiptMsg(transactionReceipt);
+            transactionReceipt.setMessage(receiptMsg);
         } catch (IOException | TransactionException | ContractCallException e) {
             log.error("execTransaction failed.", e);
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
