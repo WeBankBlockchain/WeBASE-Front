@@ -26,6 +26,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.protocol.channel.StatusCode;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 
 /**
  * comment method.
@@ -142,5 +144,18 @@ public class FrontUtils {
             return null;
         }
         return JsonUtils.toJavaObjectList(input, String.class);
+    }
+
+    /**
+     * if message is null, set message
+     * else, return original message
+     * @return
+     */
+    public static String handleReceiptMsg(TransactionReceipt receipt) {
+        if (receipt.getMessage() == null) {
+            return StatusCode.getStatusMessage(receipt.getStatus());
+        } else {
+            return receipt.getMessage();
+        }
     }
 }

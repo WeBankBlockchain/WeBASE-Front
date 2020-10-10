@@ -512,6 +512,70 @@ let errCode = {
         en: "Read solc js file error, please check if file deleted",
         zh: '读取solc js文件错误，请检查文件是否已删除'
     },
+    "201501": {
+        en: "web3sdk create key pair fail and return null",
+        zh: 'sdk创建私钥对失败并返回Null'
+    },
+    "201502": {
+        en: "pem/p12 manager get key pair error for input params",
+        zh: 'pem/p12证书获取私钥对失败，检查入参'
+    },
+    "201503": {
+        en: "pem/p12 manager get key pair error for bc dependency error",
+        zh: 'pem/p12证书获取私钥对失败，检查bc依赖包版本'
+    },
+    "201504": {
+        en: "sign service return error",
+        zh: '签名服务并返回异常'
+    },
+    "201510": {
+        en: "transaction receipt status return error",
+        zh: '交易回执状态码非0x0，交易执行失败'
+    },
+    "201511": {
+        en: "contract abi parse json error",
+        zh: '合约ABI转JSON失败'
+    },
+    "201512": {
+        en: "call contract error for io exception",
+        zh: '调用合约的交易上链失败'
+    },
+    "201513": {
+        en: "get transaction receipt fail for exec",
+        zh: '获取交易回执失败，返回执行错误'
+    },
+    "201514": {
+        en: "get transaction receipt fail for time out",
+        zh: '获取交易回执失败，链上链下请求超时'
+    },
+    "201515": {
+        en: "transaction receipt fail and parse output fail",
+        zh: '转化交易回执中output输出值失败'
+    },
+    "201516": {
+        en: "transaction receipt fail and output is null",
+        zh: '交易回执output为空'
+    },
+    "201517": {
+        en: "call contract constant method fail",
+        zh: '合约状态异常，调用合约constant方法失败'
+    },
+    "201521": {
+        en: "get list of manager on chain fail",
+        zh: '获取链上管理员列表失败'
+    },
+    "201522": {
+        en: "table key length error",
+        zh: '用户表的键值长度大于最大值255'
+    },
+    "201523": {
+        en: "crud's param parse json error",
+        zh: 'CRUD方法的入参转Entry/Condition失败，请检查入参'
+    },
+    "201524": {
+        en: "precompiled common transfer to json fail",
+        zh: '预编译错误码转JSON失败'
+    },
     "202000": {
         en: "invalid node info",
         zh: '无效的节点信息'
