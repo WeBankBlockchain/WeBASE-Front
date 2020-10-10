@@ -16,7 +16,6 @@ package com.webank.webase.front.precompiledapi;
 
 
 import static com.webank.webase.front.base.code.ConstantCode.TX_RECEIPT_CODE_ERROR;
-import static org.fisco.bcos.web3j.precompile.common.PrecompiledCommon.*;
 import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
 import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
 import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
@@ -41,7 +40,6 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.transaction.TransService;
-import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
@@ -58,7 +56,6 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
-import org.omg.CORBA.PUBLIC_MEMBER;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
