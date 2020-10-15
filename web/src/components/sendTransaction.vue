@@ -26,7 +26,7 @@
             <tr>
                 <td class="text-right text-td"><span class="font-color-fff">{{$t('text.contractAddress')}}：</span></td>
                 <td>
-                    <el-input v-model.trim="contractAddress" style="width: 240px;" :placeholder="$t('placeholder.selectedContractAddress')"></el-input>
+                    <el-input v-model.trim="contractAddress" style="width: 240px;margin-bottom:4px;" :placeholder="$t('placeholder.selectedContractAddress')"></el-input>
                     <el-tooltip class="font-color-fff" effect="dark" :content="$t('title.txnContractAddExp')" placement="top-start">
                         <i class="el-icon-info"></i>
                     </el-tooltip>
@@ -49,7 +49,7 @@
                     <span class="font-color-fff">{{$t('text.acountAddress')}}：</span>
                 </td>
                 <td>
-                    <el-select v-model="transation.userName" :placeholder="placeholderText" style="width:240px" class="plac-op" @change="changeId">
+                    <el-select v-model="transation.userName" :placeholder="placeholderText" style="width:240px;margin-bottom:4px;" class="plac-op" @change="changeId">
                         <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'>
                             <span class="font-12">{{item.userName}}</span>
                             <span>{{item.address}}</span>
@@ -263,7 +263,9 @@ export default {
                             },
                             data: this.pramasObj
                         }
-                        this.$emit("success", successData);
+                        this.$emit("success", Object.assign({},successData,{
+                            constant: this.constant
+                        }) );
                         if (this.constant) {
                             this.$message({
                                 type: "success",
@@ -334,5 +336,8 @@ export default {
 }
 .text-td {
     white-space: nowrap;
+}
+.el-input .el-input--medium{
+
 }
 </style>
