@@ -53,6 +53,7 @@ public class EventController extends BaseController {
 
     @Autowired
     private EventService eventService;
+    private final Integer BLOCK_LIST_LIMIT = 5;
 
     @ApiOperation(value = "registerNewBlockEvent",
             notes = "register registerNewBlockEvent and push message to mq")
@@ -233,4 +234,35 @@ public class EventController extends BaseController {
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
+    @ApiOperation(value = "listContractEventLogs",
+        notes = "get event logs from block's tx receipts")
+    @ApiImplicitParam(name = "ReqEventLogList", value = "获取区块EventLog所需参数",
+        required = true, dataType = "ReqEventLogList")
+    @PostMapping("eventLogs/list")
+    public BaseResponse listContractEventLogs(
+        @Valid @RequestBody ReqEventLogList reqEventLogList, BindingResult result){
+        log.debug("start listContractEventLogs. reqEventLogList:{}", reqEventLogList);
+        checkParamResult(result);
+        int groupId = reqEventLogList.getGroupId();
+        Integer fromBlock = reqEventLogList.getFromBlock();
+        Integer toBlock = reqEventLogList.getToBlock();
+        // 0 < fromBlock <= toBlock, latest means latest block
+        if (fromBlock == 0 || toBlock == 0) {
+            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+        }
+        // limit 5 block one request
+        if ((toBlock - fromBlock) > BLOCK_LIST_LIMIT) {
+            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+        }
+        String contractAddress = reqEventLogList.getContractAddress();
+        List<String> topicList = reqEventLogList.getTopicList();
+        List<Object> contractAbi = reqEventLogList.getContractAbi();
+        String abiStr = JsonUtils.toJSONString(contractAbi);
+        AbiUtil.checkAbi(abiStr);
+        // get event log from each block's tx receipts
+        eventService.getContractEventFromReceipt(groupId, abiStr, contractAddress,
+            fromBlock, toBlock, topicList);
+        log.debug("end listContractEventLogs. ");
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
+    }
 }
