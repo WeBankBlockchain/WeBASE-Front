@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
+import org.fisco.bcos.channel.event.filter.TopicTools;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock.Block;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
@@ -336,19 +337,21 @@ public class EventService {
      * sync get history event
      */
     public List<LogResult> getContractEventFromReceipt(int groupId, String contractAddress, String abi,
-        Integer fromBlock, Integer toBlock, List<String> topicList) {
-        log.info("start registerContractEvent groupId:{},contractAddress:{},fromBlock:{},toBlock:{},topicList:{}",
-            groupId, contractAddress, fromBlock, toBlock, topicList);
+        Integer fromBlock, Integer toBlock, List<String> eventNameList) {
+        log.info("start registerContractEvent groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventNameList:{}",
+            groupId, contractAddress, fromBlock, toBlock, eventNameList);
         // 传入abi作decoder，解析logs
         TransactionDecoder decoder = new TransactionDecoder(abi);
         // get tx receipt list of block ( if getBlockTransactionReceipts not support, loop to get one by one
         // todo get tx receipt's by block height
 
-        // A same topic will be calculated only once
-        Set<String> topicSet = new HashSet<>();
+        // transfer event name to topic name
+        List<String> topicList = eventNameList.stream()
+            .map(TopicTools::stringToTopic)
+            .collect(Collectors.toList());
         // response to store log result
         List<LogResult> eventLogList = new ArrayList<>();
-        for(int height = fromBlock; height <= toBlock; height++) {
+        for (int height = fromBlock; height <= toBlock; height++) {
            Block blockInfo = web3ApiService.getBlockByNumber(groupId, new BigInteger(String.valueOf(height)));
            // get trans hash list
            List<String> transHashList = blockInfo
@@ -360,15 +363,18 @@ public class EventService {
            try {
                for (String transHash : transHashList) {
                    TransactionReceipt receipt = web3ApiService.getTransactionReceipt(groupId, transHash);
-                   for (Log log : receipt.getLogs()) {
-                       for (String topic: log.getTopics()) {
-                           // same topic log add only once
-                           if (topicSet.contains(topic)) {
-                               continue;
-                           } else {
-                               topicSet.add(topic);
-                               // add decoded logs into list
-                               eventLogList.add(decoder.decodeEventLogReturnObject(log));
+                   // todo filter target topic
+                   // only get target contract logs
+                   if (contractAddress.equals(receipt.getTo())) {
+                       for (Log log : receipt.getLogs()) {
+                           for (String topic : log.getTopics()) {
+                               // same topic log only add once
+                               if (topicList.contains(topic)) {
+                                   // add decoded logs into list
+                                   eventLogList.add(decoder.decodeEventLogReturnObject(log));
+                               } else {
+                                   continue;
+                               }
                            }
                        }
                    }
