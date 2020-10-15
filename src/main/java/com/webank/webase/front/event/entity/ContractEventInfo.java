@@ -89,6 +89,7 @@ public class ContractEventInfo {
     /**
      * List<String>
      */
+    @Column(columnDefinition = "text")
     private String topicList;
 
     private LocalDateTime createTime;
