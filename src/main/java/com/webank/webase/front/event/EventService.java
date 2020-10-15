@@ -25,8 +25,22 @@ import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock.Block;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock.TransactionResult;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
+import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.tx.txdecode.BaseException;
+import org.fisco.bcos.web3j.tx.txdecode.LogResult;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +77,8 @@ public class EventService {
     private MQService mqService;
     @Autowired
     private MQPublisher mqPublisher;
+    @Autowired
+    private Web3ApiService web3ApiService;
 
     /**
      * register NewBlockEventCallBack
@@ -315,4 +331,53 @@ public class EventService {
         contractEventInfoRepository.delete(infoId);
         return contractEventInfoRepository.findByAppId(appId);
     }
+
+    /**
+     * sync get history event
+     */
+    public List<LogResult> getContractEventFromReceipt(int groupId, String contractAddress, String abi,
+        Integer fromBlock, Integer toBlock, List<String> topicList) {
+        log.info("start registerContractEvent groupId:{},contractAddress:{},fromBlock:{},toBlock:{},topicList:{}",
+            groupId, contractAddress, fromBlock, toBlock, topicList);
+        // 传入abi作decoder，解析logs
+        TransactionDecoder decoder = new TransactionDecoder(abi);
+        // get tx receipt list of block ( if getBlockTransactionReceipts not support, loop to get one by one
+        // todo get tx receipt's by block height
+
+        // A same topic will be calculated only once
+        Set<String> topicSet = new HashSet<>();
+        // response to store log result
+        List<LogResult> eventLogList = new ArrayList<>();
+        for(int height = fromBlock; height <= toBlock; height++) {
+           Block blockInfo = web3ApiService.getBlockByNumber(groupId, new BigInteger(String.valueOf(height)));
+           // get trans hash list
+           List<String> transHashList = blockInfo
+               .getTransactions()
+               .stream()
+               .map(transactionResult -> ((Transaction) transactionResult.get()).getHash())
+               .collect(Collectors.toList());
+           // get logs from each trans
+           try {
+               for (String transHash : transHashList) {
+                   TransactionReceipt receipt = web3ApiService.getTransactionReceipt(groupId, transHash);
+                   for (Log log : receipt.getLogs()) {
+                       for (String topic: log.getTopics()) {
+                           // same topic log add only once
+                           if (topicSet.contains(topic)) {
+                               continue;
+                           } else {
+                               topicSet.add(topic);
+                               // add decoded logs into list
+                               eventLogList.add(decoder.decodeEventLogReturnObject(log));
+                           }
+                       }
+                   }
+               }
+           } catch (Exception e) {
+               log.error("get TransactionReceipt of blockHeight:{},error:[]", height, e);
+           }
+        }
+        return eventLogList;
+    }
+
 }
