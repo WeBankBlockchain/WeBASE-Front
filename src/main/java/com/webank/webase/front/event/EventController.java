@@ -29,6 +29,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.web3j.tx.txdecode.LogResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -260,9 +261,9 @@ public class EventController extends BaseController {
         String abiStr = JsonUtils.toJSONString(contractAbi);
         AbiUtil.checkAbi(abiStr);
         // get event log from each block's tx receipts
-        eventService.getContractEventFromReceipt(groupId, abiStr, contractAddress,
+        List<LogResult> resList = eventService.getContractEventFromReceipt(groupId, abiStr, contractAddress,
             fromBlock, toBlock, topicList);
         log.debug("end listContractEventLogs. ");
-        return new BaseResponse(ConstantCode.RET_SUCCESS);
+        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
     }
 }
