@@ -555,25 +555,48 @@ public class ContractService {
     }
 
     /**
-     * find contract by page.
+     * find contract by page with contract content
      */
     @Transactional
     public Page<Contract> findContractByPage(ReqPageContract param) throws IOException {
         // init templates
+        initDefaultContract(param.getGroupId());
+        // findContractByPage
+        // page start from index 1 instead of 0
+        int pageNumber = param.getPageNumber() - 1;
+        Pageable pageable = new PageRequest(pageNumber, param.getPageSize(),
+            Direction.DESC, "modifyTime");
+        Page<Contract> contractPage = contractRepository.findAll(
+            (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                // v1.4.2, param add contractPath to filter
+                Predicate predicate = FrontUtils.buildPredicate(root, criteriaBuilder, param);
+                query.where(predicate);
+                return query.getRestriction();
+            }, pageable);
+        return contractPage;
+    }
+
+
+    /**
+     * save default contract in path '/template' to db
+     * @param groupId
+     * @throws IOException
+     */
+    private void initDefaultContract(Integer groupId) throws IOException {
         List<String> templates = CommonUtils.readFileToList(Constants.TEMPLATE);
         String contractPath = "template";
         List<Contract> contracts =
-                contractRepository.findByGroupIdAndContractPath(param.getGroupId(), contractPath);
-        if ((contracts.isEmpty() && !Objects.isNull(templates)) || (!contracts.isEmpty()
-                && !Objects.isNull(templates) && templates.size() != contracts.size())) {
+            contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
+        if ((contracts.isEmpty() && !Objects.isNull(templates))
+            || (!contracts.isEmpty() && !Objects.isNull(templates) && templates.size() != contracts.size())) {
             for (String template : templates) {
                 Contract localContract =
-                        contractRepository.findByGroupIdAndContractPathAndContractName(
-                                param.getGroupId(), contractPath, template.split(",")[0]);
+                    contractRepository.findByGroupIdAndContractPathAndContractName(
+                        groupId, contractPath, template.split(",")[0]);
                 if (Objects.isNull(localContract)) {
                     log.info("init template contract:{}", template.split(",")[0]);
                     Contract contract = new Contract();
-                    contract.setGroupId(param.getGroupId());
+                    contract.setGroupId(groupId);
                     contract.setContractName(template.split(",")[0]);
                     contract.setContractSource(template.split(",")[1]);
                     contract.setContractPath(contractPath);
@@ -584,27 +607,13 @@ public class ContractService {
                 }
             }
             ContractPath contractPathVo = new ContractPath();
-            contractPathVo.setGroupId(param.getGroupId());
+            contractPathVo.setGroupId(groupId);
             contractPathVo.setContractPath(contractPath);
             contractPathVo.setCreateTime(LocalDateTime.now());
             contractPathVo.setModifyTime(contractPathVo.getCreateTime());
             contractPathRepository.save(contractPathVo);
         }
-        // findContractByPage
-       // page start from index 1 instead of 0
-        int pageNumber = param.getPageNumber() - 1;
-        Pageable pageable = new PageRequest(pageNumber, param.getPageSize(),
-                Direction.DESC, "modifyTime");
-        Page<Contract> contractPage = contractRepository.findAll(
-                (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
-                    Predicate predicate = FrontUtils.buildPredicate(root, criteriaBuilder, param);
-                    query.where(predicate);
-                    return query.getRestriction();
-                }, pageable);
-        return contractPage;
-
     }
-
 
     /**
      * verify contract not exist.
