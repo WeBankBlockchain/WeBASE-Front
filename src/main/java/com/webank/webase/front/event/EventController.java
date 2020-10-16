@@ -263,7 +263,7 @@ public class EventController extends BaseController {
         // get event log from each block's tx receipts
         List<LogResult> resList = eventService.getContractEventFromReceipt(groupId, abiStr, contractAddress,
             fromBlock, toBlock, topicList);
-        log.debug("end listContractEventLogs. ");
+        log.debug("end listContractEventLogs resList:{}. ", resList);
         return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
     }
 }
