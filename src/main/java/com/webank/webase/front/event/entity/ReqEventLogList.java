@@ -40,10 +40,10 @@ public class ReqEventLogList {
      * event log push info below
      */
 
-    @NotEmpty(message = "fromBlock cannot be empty")
+    @NotNull(message = "fromBlock cannot be empty")
     private Integer fromBlock;
 
-    @NotEmpty(message = "toBlock cannot be empty")
+    @NotNull(message = "toBlock cannot be empty")
     private Integer toBlock;
 
     /**
