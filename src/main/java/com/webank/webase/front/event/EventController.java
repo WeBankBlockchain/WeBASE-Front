@@ -261,7 +261,7 @@ public class EventController extends BaseController {
         String abiStr = JsonUtils.toJSONString(contractAbi);
         AbiUtil.checkAbi(abiStr);
         // get event log from each block's tx receipts
-        List<LogResult> resList = eventService.getContractEventFromReceipt(groupId, abiStr, contractAddress,
+        List<LogResult> resList = eventService.getContractEventFromReceipt(groupId, contractAddress, abiStr,
             fromBlock, toBlock, topicList);
         log.debug("end listContractEventLogs resList:{}. ", resList);
         return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
