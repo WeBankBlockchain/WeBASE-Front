@@ -338,7 +338,7 @@ public class EventService {
      */
     public List<LogResult> getContractEventFromReceipt(int groupId, String contractAddress, String abi,
         Integer fromBlock, Integer toBlock, List<String> eventNameList) {
-        log.info("start registerContractEvent groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventNameList:{}",
+        log.info("start getContractEventFromReceipt groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventNameList:{}",
             groupId, contractAddress, fromBlock, toBlock, eventNameList);
         // 传入abi作decoder，解析logs
         TransactionDecoder decoder = new TransactionDecoder(abi);
@@ -349,6 +349,7 @@ public class EventService {
         List<String> topicList = eventNameList.stream()
             .map(TopicTools::stringToTopic)
             .collect(Collectors.toList());
+        log.info("getContractEventFromReceipt topicList:{}", topicList);
         // response to store log result
         List<LogResult> eventLogList = new ArrayList<>();
         for (int height = fromBlock; height <= toBlock; height++) {
@@ -359,19 +360,25 @@ public class EventService {
                .stream()
                .map(transactionResult -> ((Transaction) transactionResult.get()).getHash())
                .collect(Collectors.toList());
-           // get logs from each trans
+            log.info("getContractEventFromReceipt height:{},transHashList:{}", height, transHashList);
+            // get logs from each trans
            try {
                for (String transHash : transHashList) {
                    TransactionReceipt receipt = web3ApiService.getTransactionReceipt(groupId, transHash);
-                   // todo filter target topic
+                   log.info("getContractEventFromReceipt transHash:{},receipt.getTo():{},receipt.getLogs():{}",
+                       transHash, receipt.getTo(), receipt.getLogs());
                    // only get target contract logs
                    if (contractAddress.equals(receipt.getTo())) {
-                       for (Log log : receipt.getLogs()) {
-                           for (String topic : log.getTopics()) {
+                       for (Log logInfo: receipt.getLogs()) {
+                           log.info("getContractEventFromReceipt logInfoIndex:{}", logInfo.getLogIndex());
+                           for (String topic : logInfo.getTopics()) {
+                               log.info("getContractEventFromReceipt topic:{}", topic);
                                // same topic log only add once
                                if (topicList.contains(topic)) {
                                    // add decoded logs into list
-                                   eventLogList.add(decoder.decodeEventLogReturnObject(log));
+                                   LogResult logResult = decoder.decodeEventLogReturnObject(logInfo);
+                                   log.info("getContractEventFromReceipt add decoded logResult :{}", logResult);
+                                   eventLogList.add(logResult);
                                } else {
                                    continue;
                                }
