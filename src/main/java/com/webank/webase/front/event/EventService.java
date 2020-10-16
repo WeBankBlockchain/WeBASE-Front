@@ -335,6 +335,7 @@ public class EventService {
 
     /**
      * sync get history event
+     * cannot filter by indexed param, only filter by event name and contractAddress
      */
     public List<LogResult> getContractEventFromReceipt(int groupId, String contractAddress, String abi,
         Integer fromBlock, Integer toBlock, List<String> eventNameList) {
@@ -392,5 +393,7 @@ public class EventService {
         }
         return eventLogList;
     }
+
+    // AbiUtils.getEventFromReceipt
 
 }
