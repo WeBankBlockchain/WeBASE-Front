@@ -19,28 +19,24 @@ package com.webank.webase.front.event;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.event.callback.ContractEventCallback;
+import com.webank.webase.front.event.callback.SyncEventLogCallback;
+import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
-import org.fisco.bcos.channel.event.filter.TopicTools;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock.Block;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock.TransactionResult;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.tx.txdecode.BaseException;
 import org.fisco.bcos.web3j.tx.txdecode.LogResult;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +76,8 @@ public class EventService {
     private MQPublisher mqPublisher;
     @Autowired
     private Web3ApiService web3ApiService;
+    @Autowired
+    private Constants constants;
 
     /**
      * register NewBlockEventCallBack
@@ -338,62 +336,74 @@ public class EventService {
      * cannot filter by indexed param, only filter by event name and contractAddress
      */
     public List<LogResult> getContractEventFromReceipt(int groupId, String contractAddress, String abi,
-        Integer fromBlock, Integer toBlock, List<String> eventNameList) {
-        log.info("start getContractEventFromReceipt groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventNameList:{}",
-            groupId, contractAddress, fromBlock, toBlock, eventNameList);
+        Integer fromBlock, Integer toBlock, EventTopicParam eventTopicParam) {
+        log.info("start getContractEventFromReceipt groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventTopicParam:{}",
+            groupId, contractAddress, fromBlock, toBlock, eventTopicParam);
         // 传入abi作decoder，解析logs
         TransactionDecoder decoder = new TransactionDecoder(abi);
-        // get tx receipt list of block ( if getBlockTransactionReceipts not support, loop to get one by one
-        // todo get tx receipt's by block height
 
-        // transfer event name to topic name
-        List<String> topicList = eventNameList.stream()
-            .map(TopicTools::stringToTopic)
-            .collect(Collectors.toList());
-        log.info("getContractEventFromReceipt topicList:{}", topicList);
-        // response to store log result
-        List<LogResult> eventLogList = new ArrayList<>();
-        for (int height = fromBlock; height <= toBlock; height++) {
-           Block blockInfo = web3ApiService.getBlockByNumber(groupId, new BigInteger(String.valueOf(height)));
-           // get trans hash list
-           List<String> transHashList = blockInfo
-               .getTransactions()
-               .stream()
-               .map(transactionResult -> ((Transaction) transactionResult.get()).getHash())
-               .collect(Collectors.toList());
-            log.info("getContractEventFromReceipt height:{},transHashList:{}", height, transHashList);
-            // get logs from each trans
-           try {
-               for (String transHash : transHashList) {
-                   TransactionReceipt receipt = web3ApiService.getTransactionReceipt(groupId, transHash);
-                   log.info("getContractEventFromReceipt transHash:{},receipt.getTo():{},receipt.getLogs():{}",
-                       transHash, receipt.getTo(), receipt.getLogs());
-                   // only get target contract logs
-                   if (contractAddress.equals(receipt.getTo())) {
-                       for (Log logInfo: receipt.getLogs()) {
-                           log.info("getContractEventFromReceipt logInfoIndex:{}", logInfo.getLogIndex());
-                           for (String topic : logInfo.getTopics()) {
-                               log.info("getContractEventFromReceipt topic:{}", topic);
-                               // same topic log only add once
-                               if (topicList.contains(topic)) {
-                                   // add decoded logs into list
-                                   LogResult logResult = decoder.decodeEventLogReturnObject(logInfo);
-                                   log.info("getContractEventFromReceipt add decoded logResult :{}", logResult);
-                                   eventLogList.add(logResult);
-                               } else {
-                                   continue;
-                               }
-                           }
-                       }
-                   }
-               }
-           } catch (Exception e) {
-               log.error("get TransactionReceipt of blockHeight:{},error:[]", height, e);
-           }
+        EventLogUserParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
+            contractAddress, eventTopicParam);
+        log.info("getContractEventFromReceipt eventParam:{}", eventParam);
+        // todo new thread get callback
+        final CompletableFuture<List<LogResult>> callbackFuture = new CompletableFuture<>();
+        SyncEventLogCallback callBack =
+            new SyncEventLogCallback(decoder, callbackFuture);
+        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
+        // async send register
+        service.registerEventLogFilter(eventParam, callBack);
+
+        List<LogResult> result;
+        try {
+            result = callbackFuture.get(constants.getEventCallbackWait(), TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("callbackFuture error: e", e);
+            throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_ERROR);
+        } catch (TimeoutException e) {
+            log.error("callbackFuture timeout: {}s, error:{}", constants.getEventCallbackWait(), e);
+            throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_TIMEOUT_ERROR);
         }
-        return eventLogList;
+        // response to store log result
+        return result;
+
     }
 
-    // AbiUtils.getEventFromReceipt
-
+//        for (int height = fromBlock; height <= toBlock; height++) {
+//           Block blockInfo = web3ApiService.getBlockByNumber(groupId, new BigInteger(String.valueOf(height)));
+//           // get trans hash list
+//           List<String> transHashList = blockInfo
+//               .getTransactions()
+//               .stream()
+//               .map(transactionResult -> ((Transaction) transactionResult.get()).getHash())
+//               .collect(Collectors.toList());
+//            log.info("getContractEventFromReceipt height:{},transHashList:{}", height, transHashList);
+//            // get logs from each trans
+//           try {
+//               for (String transHash : transHashList) {
+//                   TransactionReceipt receipt = web3ApiService.getTransactionReceipt(groupId, transHash);
+//                   log.info("getContractEventFromReceipt transHash:{},receipt.getTo():{},receipt.getLogs():{}",
+//                       transHash, receipt.getTo(), receipt.getLogs());
+//                   // only get target contract logs
+//                   if (contractAddress.equals(receipt.getTo())) {
+//                       for (Log logInfo: receipt.getLogs()) {
+//                           log.info("getContractEventFromReceipt logInfoIndex:{}", logInfo.getLogIndex());
+//                           for (String topic : logInfo.getTopics()) {
+//                               log.info("getContractEventFromReceipt topic:{}", topic);
+//                               // same topic log only add once
+//                               if (topicList.contains(topic)) {
+//                                   // add decoded logs into list
+//                                   LogResult logResult = decoder.decodeEventLogReturnObject(logInfo);
+//                                   log.info("getContractEventFromReceipt add decoded logResult :{}", logResult);
+//                                   eventLogList.add(logResult);
+//                               } else {
+//                                   continue;
+//                               }
+//                           }
+//                       }
+//                   }
+//               }
+//           } catch (Exception e) {
+//               log.error("get TransactionReceipt of blockHeight:{},error:[]", height, e);
+//           }
+//        }
 }
