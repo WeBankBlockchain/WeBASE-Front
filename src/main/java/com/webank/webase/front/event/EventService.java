@@ -347,8 +347,7 @@ public class EventService {
             contractAddress, eventTopicParam);
         log.info("getContractEventFromReceipt eventParam:{}", eventParam);
         final CompletableFuture<RspEventLog> callbackFuture = new CompletableFuture<>();
-        SyncEventLogCallback callBack =
-            new SyncEventLogCallback(decoder, callbackFuture);
+        SyncEventLogCallback callBack = new SyncEventLogCallback(decoder, callbackFuture);
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         // async send register
         service.registerEventLogFilter(eventParam, callBack);
