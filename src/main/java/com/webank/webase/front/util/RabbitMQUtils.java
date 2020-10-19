@@ -157,17 +157,14 @@ public class RabbitMQUtils {
         params.setAddresses(addresses);
         List<Object> topics = new ArrayList<>();
         // put event name in topics[0],
-        List<String> topicSigList = new ArrayList<>(4);
-        topicSigList.add(eventTopicParam.getEventNameSig());
+        topics.add(eventTopicParam.getEventNameSig());
         // if indexed param is null, add null, else add its sig value
-        topicSigList.add(Optional.ofNullable(eventTopicParam.getIndexed1()).map(
+        topics.add(Optional.ofNullable(eventTopicParam.getIndexed1()).map(
             IndexedParamType::getValueSig).orElse(null));
-        topicSigList.add(Optional.ofNullable(eventTopicParam.getIndexed2()).map(
+        topics.add(Optional.ofNullable(eventTopicParam.getIndexed2()).map(
             IndexedParamType::getValueSig).orElse(null));
-        topicSigList.add(Optional.ofNullable(eventTopicParam.getIndexed3()).map(
+        topics.add(Optional.ofNullable(eventTopicParam.getIndexed3()).map(
             IndexedParamType::getValueSig).orElse(null));
-
-        topics.add(topicSigList);
         params.setTopics(topics);
 
         return params;
