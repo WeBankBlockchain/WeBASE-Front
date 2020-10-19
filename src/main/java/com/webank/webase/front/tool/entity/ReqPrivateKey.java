@@ -12,16 +12,17 @@
  * the License.
  */
 
-package com.webank.webase.front.util;
+package com.webank.webase.front.tool.entity;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Slf4j
-@RestController
-@RequestMapping("tool")
-public class UtilController {
+@Data
+@NoArgsConstructor
+public class ReqPrivateKey {
 
-    // TransactionDecoder
+    /**
+     * string of BigInteger
+     */
+    private String privateKey;
 }
