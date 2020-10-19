@@ -46,6 +46,11 @@ public class EventTopicParam {
         private String value;
 
         public String getValueSig() {
+            // if null, not filer
+            if (this.value == null) {
+                return null;
+            }
+
             if (type.contains("int")) {
                 return TopicTools.integerToTopic(new BigInteger(value));
             } else if ("string".equals(type)) {
