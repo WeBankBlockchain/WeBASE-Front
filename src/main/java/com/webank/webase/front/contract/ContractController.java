@@ -30,6 +30,7 @@ import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -134,7 +135,7 @@ public class ContractController extends BaseController {
         FileContentHandle fileContentHandle =
                 ContractService.compileToJavaFile(param.getContractName(), param.getAbiInfo(),
                         param.getContractBin(), param.getPackageName());
-        return ResponseEntity.ok().headers(headers(fileContentHandle.getFileName()))
+        return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
                 .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
@@ -172,22 +173,6 @@ public class ContractController extends BaseController {
         }
         contractService.sendAbi(reqSendAbi);
         return ResponseEntity.ok().build();
-    }
-
-    private HttpHeaders headers(String fileName) {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment;filename*=UTF-8''" + encode(fileName));
-        return httpHeaders;
-    }
-
-    private String encode(String name) {
-        try {
-            return URLEncoder.encode(name, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
