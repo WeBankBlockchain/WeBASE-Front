@@ -18,7 +18,9 @@ package com.webank.webase.front.util;
 
 import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.entity.EventTopicParam;
+import com.webank.webase.front.event.entity.EventTopicParam.IndexedParamType;
 import com.webank.webase.front.event.entity.PublisherHelper;
+import java.util.Optional;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.channel.event.filter.TopicTools;
 import org.springframework.amqp.core.*;
@@ -156,10 +158,14 @@ public class RabbitMQUtils {
         List<Object> topics = new ArrayList<>();
         // put event name in topics[0],
         List<String> topicSigList = new ArrayList<>(4);
-        topicSigList.set(0, eventTopicParam.getEventNameSig());
-        topicSigList.set(1, eventTopicParam.getIndexed1().getValueSig());
-        topicSigList.set(2, eventTopicParam.getIndexed2().getValueSig());
-        topicSigList.set(3, eventTopicParam.getIndexed3().getValueSig());
+        topicSigList.add(eventTopicParam.getEventNameSig());
+        // if indexed param is null, add null, else add its sig value
+        topicSigList.add(Optional.ofNullable(eventTopicParam.getIndexed1()).map(
+            IndexedParamType::getValueSig).orElse(null));
+        topicSigList.add(Optional.ofNullable(eventTopicParam.getIndexed2()).map(
+            IndexedParamType::getValueSig).orElse(null));
+        topicSigList.add(Optional.ofNullable(eventTopicParam.getIndexed3()).map(
+            IndexedParamType::getValueSig).orElse(null));
 
         topics.add(topicSigList);
         params.setTopics(topics);
