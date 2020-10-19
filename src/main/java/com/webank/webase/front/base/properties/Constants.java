@@ -84,4 +84,7 @@ public class Constants {
     private int keepAliveRequests = 100;
     private int KeepAliveTimeout = 10;
 
+    // second
+    private Integer eventCallbackWait = 10;
+
 }

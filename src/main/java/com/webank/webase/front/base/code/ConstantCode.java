@@ -200,6 +200,8 @@ public class ConstantCode {
     public static final RetCode COMMITTEE_WEIGHT_PARAM_ERROR = RetCode.mark(201302, "committee weight must be greater than zero");
     public static final RetCode GOVERNANCE_ADDRESS_PARAM_ERROR = RetCode.mark(201303, "chain governance address cannot be blank");
 
+    public static final RetCode GET_EVENT_CALLBACK_TIMEOUT_ERROR = RetCode.mark(201311, "get event callback fail for time out");
+    public static final RetCode GET_EVENT_CALLBACK_ERROR = RetCode.mark(201311, "get event callback fail for time out");
 
     /* classify common error of web3j*/
     // keystore

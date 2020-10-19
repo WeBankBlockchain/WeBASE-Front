@@ -17,6 +17,7 @@
 package com.webank.webase.front.util;
 
 import com.webank.webase.front.event.callback.ContractEventCallback;
+import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.PublisherHelper;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
 import org.fisco.bcos.channel.event.filter.TopicTools;
@@ -141,4 +142,28 @@ public class RabbitMQUtils {
         return params;
     }
 
+    // eventTopicParam to topics
+    public static EventLogUserParams initEventTopicParam(Integer fromBlock, Integer toBlock,
+        String contractAddress, EventTopicParam eventTopicParam) {
+        EventLogUserParams params = new EventLogUserParams();
+        params.setFromBlock(String.valueOf(fromBlock));
+        params.setToBlock(String.valueOf(toBlock));
+
+        // addresses，设置为Java合约对象的地址
+        List<String> addresses = new ArrayList<>();
+        addresses.add(contractAddress);
+        params.setAddresses(addresses);
+        List<Object> topics = new ArrayList<>();
+        // put event name in topics[0],
+        List<String> topicSigList = new ArrayList<>(4);
+        topicSigList.set(0, eventTopicParam.getEventNameSig());
+        topicSigList.set(1, eventTopicParam.getIndexed1().getValueSig());
+        topicSigList.set(2, eventTopicParam.getIndexed2().getValueSig());
+        topicSigList.set(3, eventTopicParam.getIndexed3().getValueSig());
+
+        topics.add(topicSigList);
+        params.setTopics(topics);
+
+        return params;
+    }
 }
