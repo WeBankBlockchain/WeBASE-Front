@@ -16,6 +16,7 @@ package com.webank.webase.front.event.callback;
 
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
+import com.webank.webase.front.event.entity.RspEventLog;
 import com.webank.webase.front.event.entity.message.EventLogPushMessage;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -32,10 +33,10 @@ public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
 
     private static final Logger logger =
         LoggerFactory.getLogger(SyncEventLogCallback.class);
-    private CompletableFuture<List<LogResult>> future;
+    private CompletableFuture<RspEventLog> future;
 
     public SyncEventLogCallback(TransactionDecoder decoder,
-        final CompletableFuture<List<LogResult>> future) {
+        final CompletableFuture<RspEventLog> future) {
 
         this.future = future;
         // onPush will call father class's decoder, init EventLogPushWithDecodeCallback's decoder
@@ -55,7 +56,8 @@ public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
             getFilter().getParams(),
             status,
             logs);
-        future.complete(logs);
+        RspEventLog rspEventLog = new RspEventLog(status, logs);
+        future.complete(rspEventLog);
     }
 
     @Override
