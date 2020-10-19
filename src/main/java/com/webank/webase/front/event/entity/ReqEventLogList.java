@@ -54,6 +54,6 @@ public class ReqEventLogList {
     /**
      * List of topics
      */
-    private List<String> topicList;
+    private EventTopicParam topics;
 
 }
