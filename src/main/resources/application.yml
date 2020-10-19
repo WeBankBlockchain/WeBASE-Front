@@ -84,3 +84,5 @@ constant:
   syncStatLogTime: 5000
   syncStatLogCountLimit: 10000
   statLogEnabled: false
+  # get event callback wait (s)
+  eventCallbackWait: 10
