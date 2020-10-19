@@ -256,13 +256,13 @@ public class EventController extends BaseController {
             return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }
         String contractAddress = reqEventLogList.getContractAddress();
-        List<String> topicList = reqEventLogList.getTopicList();
+        EventTopicParam eventTopicParam = reqEventLogList.getTopics();
         List<Object> contractAbi = reqEventLogList.getContractAbi();
         String abiStr = JsonUtils.toJSONString(contractAbi);
         AbiUtil.checkAbi(abiStr);
         // get event log from each block's tx receipts
         List<LogResult> resList = eventService.getContractEventFromReceipt(groupId, contractAddress, abiStr,
-            fromBlock, toBlock, topicList);
+            fromBlock, toBlock, eventTopicParam);
         log.debug("end listContractEventLogs resList:{}. ", resList);
         return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
     }
