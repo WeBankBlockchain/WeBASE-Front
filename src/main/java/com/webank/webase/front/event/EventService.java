@@ -26,6 +26,7 @@ import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.PublisherHelper;
+import com.webank.webase.front.event.entity.RspEventLog;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
@@ -345,15 +346,14 @@ public class EventService {
         EventLogUserParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
             contractAddress, eventTopicParam);
         log.info("getContractEventFromReceipt eventParam:{}", eventParam);
-        // todo new thread get callback
-        final CompletableFuture<List<LogResult>> callbackFuture = new CompletableFuture<>();
+        final CompletableFuture<RspEventLog> callbackFuture = new CompletableFuture<>();
         SyncEventLogCallback callBack =
             new SyncEventLogCallback(decoder, callbackFuture);
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         // async send register
         service.registerEventLogFilter(eventParam, callBack);
 
-        List<LogResult> result;
+        RspEventLog result;
         try {
             result = callbackFuture.get(constants.getEventCallbackWait(), TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException e) {
@@ -364,7 +364,17 @@ public class EventService {
             throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_TIMEOUT_ERROR);
         }
         // response to store log result
-        return result;
+        if (result.getStatus() == 1) {
+            // return empty list
+            if (result.getLogs() == null) {
+                return new ArrayList<>();
+            }
+            return result.getLogs();
+        } else {
+            // status is not 1
+            throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_ERROR);
+        }
+
 
     }
 
