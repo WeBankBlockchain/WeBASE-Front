@@ -18,6 +18,7 @@ import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.RspEventLog;
 import com.webank.webase.front.event.entity.message.EventLogPushMessage;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import lombok.Setter;
@@ -33,12 +34,14 @@ public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
 
     private static final Logger logger =
         LoggerFactory.getLogger(SyncEventLogCallback.class);
-    private CompletableFuture<RspEventLog> future;
+    private CompletableFuture<List<LogResult>> future;
+    private List<LogResult> finalList;
 
     public SyncEventLogCallback(TransactionDecoder decoder,
-        final CompletableFuture<RspEventLog> future) {
+        final CompletableFuture<List<LogResult>> future) {
 
         this.future = future;
+        this.finalList = new ArrayList<>();
         // onPush will call father class's decoder, init EventLogPushWithDecodeCallback's decoder
         this.setDecoder(decoder);
     }
@@ -50,14 +53,24 @@ public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
      */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
-        logger.info(
-            "ContractEventCallback onPushEventLog" +
-                " params: {}, status: {}, logs: {}",
-            getFilter().getParams(),
-            status,
-            logs);
-        RspEventLog rspEventLog = new RspEventLog(status, logs);
-        future.complete(rspEventLog);
+
+        // push not finish
+        if (status == 0) {
+            logger.debug(
+                "SyncEventLogCallback onPushEventLog params: {}, status: {}, logs: {}",
+                getFilter().getParams(), status, logs);
+            // add in resultList
+            finalList.addAll(logs);
+        } else if (status == 1){
+            // if status == 1, finished
+            logger.info(
+                "SyncEventLogCallback onPushEventLog finished status: {}", status);
+            future.complete(finalList);
+        } else {
+            // not 0, not 1, error
+            logger.error("onPushEventLog error!");
+            future.complete(finalList);
+        }
     }
 
     @Override
