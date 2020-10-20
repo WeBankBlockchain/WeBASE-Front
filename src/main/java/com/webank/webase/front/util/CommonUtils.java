@@ -633,27 +633,4 @@ public class CommonUtils {
         return Numeric.toHexStringNoPrefix(utf8String.getBytes(StandardCharsets.UTF_8));
     }
 
-//    public static String hexToASCII(String hexValue)
-//    {
-//        StringBuilder output = new StringBuilder("");
-//        for (int i = 0; i < hexValue.length(); i += 2)
-//        {
-//            String str = hexValue.substring(i, i + 2);
-//            output.append((char) Integer.parseInt(str, 16));
-//        }
-//        return output.toString();
-//    }
-//
-//    // String to 64 length HexString (equivalent to 32 Hex lenght)
-//    public static String asciiToHex(String asciiValue)
-//    {
-//        char[] chars = asciiValue.toCharArray();
-//        StringBuilder hex = new StringBuilder();
-//        for (int i = 0; i < chars.length; i++)
-//        {
-//            hex.append(Integer.toHexString((int) chars[i]));
-//        }
-//
-//        return hex.toString() + "".join("", Collections.nCopies(32 - (hex.length()/2), "00"));
-//    }
 }
