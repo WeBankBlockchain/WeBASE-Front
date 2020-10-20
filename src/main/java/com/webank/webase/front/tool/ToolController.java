@@ -20,6 +20,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.tool.entity.ReqDecodeParam;
 import com.webank.webase.front.tool.entity.ReqPrivateKey;
+import com.webank.webase.front.tool.entity.RspHash;
 import com.webank.webase.front.tool.entity.RspKeyPair;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
@@ -40,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Hash;
@@ -117,17 +119,19 @@ public class ToolController {
     @ApiOperation(value = "get hash value", notes = "get hash value")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "input", value = "input to hash(utf-8 or hexString)", dataType = "String"),
-        @ApiImplicitParam(name = "type", value = " input type 1-utf8,2-hexString", dataType = "Integer")
+        @ApiImplicitParam(name = "type", value = " input type 1-hexString,2-utf8", dataType = "Integer")
     })
     @GetMapping("/hash")
-    public String getHashValue(@RequestParam String input, @RequestParam(defaultValue = "1") Integer type) {
-        if (type == 1) {
-            // hex input
-            return Hash.sha3(input);
-        } else {
+    public RspHash getHashValue(@RequestParam String input, @RequestParam(defaultValue = "1") Integer type) {
+        String hashValue;
+        if (type == 2) {
             // utf8 input
-            return Hash.sha3String(input);
+            hashValue = Hash.sha3(input);
+        } else {
+            // hex input
+            hashValue = Hash.sha3String(input);
         }
+        return new RspHash(hashValue, EncryptType.encryptType);
     }
 
 
@@ -197,5 +201,23 @@ public class ToolController {
     private RspKeyPair getRspKeyPair(String privateKey) {
         ECKeyPair ecKeyPair = GenCredential.createKeyPair(privateKey);
         return new RspKeyPair(ecKeyPair, EncryptType.encryptType);
+    }
+
+    @ApiOperation(value = "get hash value", notes = "get hash value")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "input", value = "input to hash(utf-8 or hexString)", dataType = "String"),
+        @ApiImplicitParam(name = "type", value = " input type input type 1-hexString,2-utf8(default hex)", dataType = "Integer")
+    })
+    @GetMapping("/convert2Bytes32")
+    public Bytes32 getBytes32FromStr(@RequestParam String input, @RequestParam(defaultValue = "1") Integer type) {
+        Bytes32 bytes32;
+        if (type == 1) {
+            // hex input
+            bytes32 = CommonUtils.hexStrToBytes32(input);
+        } else {
+            // utf8 input
+            bytes32 = CommonUtils.utf8StringToBytes32(input);
+        }
+        return bytes32;
     }
 }
