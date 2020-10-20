@@ -20,8 +20,10 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.tool.entity.ReqDecodeParam;
 import com.webank.webase.front.tool.entity.ReqPrivateKey;
+import com.webank.webase.front.tool.entity.ReqSign;
 import com.webank.webase.front.tool.entity.RspHash;
 import com.webank.webase.front.tool.entity.RspKeyPair;
+import com.webank.webase.front.tool.entity.RspSignData;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
@@ -42,15 +44,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.Sign;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 import org.fisco.bcos.web3j.tx.txdecode.BaseException;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoderFactory;
+import org.fisco.bcos.web3j.utils.ByteUtil;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -220,4 +225,18 @@ public class ToolController {
         }
         return bytes32;
     }
+
+    @ApiOperation(value = "sign raw data", notes = "sign raw data by private key")
+    @ApiImplicitParam(name = "reqSign", value = "raw data & private key", dataType = "ReqSign")
+    @PostMapping("/signMsg")
+    public RspSignData getSignedData(@Valid @RequestBody ReqSign reqSign) {
+        String privateKey = reqSign.getPrivateKey();
+        String rawData = reqSign.getRawData();
+        Credentials credentials = GenCredential.create(privateKey);
+        Sign.SignatureData signatureData = Sign.getSignInterface().signMessage(
+            ByteUtil.hexStringToBytes(Numeric.toHexString(rawData.getBytes())), credentials.getEcKeyPair());
+        return new RspSignData(signatureData, EncryptType.encryptType);
+    }
+
+
 }
