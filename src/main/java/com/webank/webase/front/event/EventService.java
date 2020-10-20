@@ -346,15 +346,15 @@ public class EventService {
         EventLogUserParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
             contractAddress, eventTopicParam);
         log.info("getContractEventFromReceipt eventParam:{}", eventParam);
-        final CompletableFuture<RspEventLog> callbackFuture = new CompletableFuture<>();
+        final CompletableFuture<List<LogResult>> callbackFuture = new CompletableFuture<>();
         SyncEventLogCallback callBack = new SyncEventLogCallback(decoder, callbackFuture);
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
         // async send register
         service.registerEventLogFilter(eventParam, callBack);
 
-        RspEventLog result;
+        List<LogResult> resultList;
         try {
-            result = callbackFuture.get(constants.getEventCallbackWait(), TimeUnit.SECONDS);
+            resultList = callbackFuture.get(constants.getEventCallbackWait(), TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException e) {
             log.error("callbackFuture error: e", e);
             throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_ERROR);
@@ -362,19 +362,7 @@ public class EventService {
             log.error("callbackFuture timeout: {}s, error:{}", constants.getEventCallbackWait(), e);
             throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_TIMEOUT_ERROR);
         }
-        // response to store log result
-        if (result.getStatus() == 1) {
-            // return empty list
-            if (result.getLogs() == null) {
-                return new ArrayList<>();
-            }
-            return result.getLogs();
-        } else {
-            // status is not 1
-            throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_ERROR);
-        }
-
-
+        return resultList;
     }
 
 //        for (int height = fromBlock; height <= toBlock; height++) {
