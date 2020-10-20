@@ -53,25 +53,20 @@ public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
      */
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
-
-        // push not finish
-        if (status == 0) {
+        logger.info(
+            "SyncEventLogCallback onPushEventLog params: {}, status: {}, logsSize:{} logs: {}",
+            getFilter().getParams(), status, logs.size(), logs);
+        // add in resultList
+        finalList.addAll(logs);
+        // status == 0 push not finish,  if status == 1, finished
+        if (status == 1){
             logger.info(
-                "SyncEventLogCallback onPushEventLog params: {}, status: {}, logs: {}",
-                getFilter().getParams(), status, logs);
-            // add in resultList
-            finalList.addAll(logs);
-        } else if (status == 1){
-            // add in resultList
-            finalList.addAll(logs);
-            // if status == 1, finished
-            logger.info(
-                "SyncEventLogCallback onPushEventLog finished status: {}, finalList size:{}",
+                "SyncEventLogCallback push finished status: {}, finalList size:{}",
                 status, finalList.size());
             future.complete(finalList);
         } else {
             // not 0, not 1, error
-            logger.error("onPushEventLog error!");
+            logger.error("SyncEventLogCallback onPushEventLog error!");
             future.complete(finalList);
         }
     }
