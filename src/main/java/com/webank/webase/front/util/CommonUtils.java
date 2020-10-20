@@ -32,8 +32,10 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
@@ -44,6 +46,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.utils.Numeric;
@@ -608,4 +611,49 @@ public class CommonUtils {
             }
         }
     }
+
+    public static Bytes32 utf8StringToBytes32(String utf8String) {
+        String hexStr = utf8StringToHex(utf8String);
+        return hexStrToBytes32(hexStr);
+    }
+
+    public static Bytes32 hexStrToBytes32(String hexStr) {
+        byte[] byteValue = Numeric.hexStringToByteArray(hexStr);
+        byte[] byteValueLen32 = new byte[32];
+        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
+        return new Bytes32(byteValueLen32);
+    }
+
+    public static String bytes32ToHexString(Bytes32 dataInBytes32) {
+        return Numeric.toHexStringNoPrefix(dataInBytes32.getValue());
+    }
+
+    // todo check utf8 to hex, utf8 to bytes32
+    public static String utf8StringToHex(String utf8String) {
+        return Numeric.toHexStringNoPrefix(utf8String.getBytes(StandardCharsets.UTF_8));
+    }
+
+//    public static String hexToASCII(String hexValue)
+//    {
+//        StringBuilder output = new StringBuilder("");
+//        for (int i = 0; i < hexValue.length(); i += 2)
+//        {
+//            String str = hexValue.substring(i, i + 2);
+//            output.append((char) Integer.parseInt(str, 16));
+//        }
+//        return output.toString();
+//    }
+//
+//    // String to 64 length HexString (equivalent to 32 Hex lenght)
+//    public static String asciiToHex(String asciiValue)
+//    {
+//        char[] chars = asciiValue.toCharArray();
+//        StringBuilder hex = new StringBuilder();
+//        for (int i = 0; i < chars.length; i++)
+//        {
+//            hex.append(Integer.toHexString((int) chars[i]));
+//        }
+//
+//        return hex.toString() + "".join("", Collections.nCopies(32 - (hex.length()/2), "00"));
+//    }
 }
