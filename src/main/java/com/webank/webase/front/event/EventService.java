@@ -336,16 +336,16 @@ public class EventService {
      * sync get history event
      * cannot filter by indexed param, only filter by event name and contractAddress
      */
-    public List<LogResult> getContractEventFromReceipt(int groupId, String contractAddress, String abi,
+    public List<LogResult> getContractEventLog(int groupId, String contractAddress, String abi,
         Integer fromBlock, Integer toBlock, EventTopicParam eventTopicParam) {
-        log.info("start getContractEventFromReceipt groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventTopicParam:{}",
+        log.info("start getContractEventLog groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventTopicParam:{}",
             groupId, contractAddress, fromBlock, toBlock, eventTopicParam);
         // 传入abi作decoder，解析logs
         TransactionDecoder decoder = new TransactionDecoder(abi);
 
         EventLogUserParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
             contractAddress, eventTopicParam);
-        log.info("getContractEventFromReceipt eventParam:{}", eventParam);
+        log.info("getContractEventLog eventParam:{}", eventParam);
         final CompletableFuture<List<LogResult>> callbackFuture = new CompletableFuture<>();
         SyncEventLogCallback callBack = new SyncEventLogCallback(decoder, callbackFuture);
         org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
@@ -356,51 +356,12 @@ public class EventService {
         try {
             resultList = callbackFuture.get(constants.getEventCallbackWait(), TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException e) {
-            log.error("callbackFuture error: e", e);
+            log.error("getContractEventLog callbackFuture error: e", e);
             throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_ERROR);
         } catch (TimeoutException e) {
-            log.error("callbackFuture timeout: {}s, error:{}", constants.getEventCallbackWait(), e);
+            log.error("getContractEventLog callbackFuture timeout: {}s, error:{}", constants.getEventCallbackWait(), e);
             throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_TIMEOUT_ERROR);
         }
         return resultList;
     }
-
-//        for (int height = fromBlock; height <= toBlock; height++) {
-//           Block blockInfo = web3ApiService.getBlockByNumber(groupId, new BigInteger(String.valueOf(height)));
-//           // get trans hash list
-//           List<String> transHashList = blockInfo
-//               .getTransactions()
-//               .stream()
-//               .map(transactionResult -> ((Transaction) transactionResult.get()).getHash())
-//               .collect(Collectors.toList());
-//            log.info("getContractEventFromReceipt height:{},transHashList:{}", height, transHashList);
-//            // get logs from each trans
-//           try {
-//               for (String transHash : transHashList) {
-//                   TransactionReceipt receipt = web3ApiService.getTransactionReceipt(groupId, transHash);
-//                   log.info("getContractEventFromReceipt transHash:{},receipt.getTo():{},receipt.getLogs():{}",
-//                       transHash, receipt.getTo(), receipt.getLogs());
-//                   // only get target contract logs
-//                   if (contractAddress.equals(receipt.getTo())) {
-//                       for (Log logInfo: receipt.getLogs()) {
-//                           log.info("getContractEventFromReceipt logInfoIndex:{}", logInfo.getLogIndex());
-//                           for (String topic : logInfo.getTopics()) {
-//                               log.info("getContractEventFromReceipt topic:{}", topic);
-//                               // same topic log only add once
-//                               if (topicList.contains(topic)) {
-//                                   // add decoded logs into list
-//                                   LogResult logResult = decoder.decodeEventLogReturnObject(logInfo);
-//                                   log.info("getContractEventFromReceipt add decoded logResult :{}", logResult);
-//                                   eventLogList.add(logResult);
-//                               } else {
-//                                   continue;
-//                               }
-//                           }
-//                       }
-//                   }
-//               }
-//           } catch (Exception e) {
-//               log.error("get TransactionReceipt of blockHeight:{},error:[]", height, e);
-//           }
-//        }
 }
