@@ -250,10 +250,6 @@ public class EventController extends BaseController {
         if (fromBlock == 0 || toBlock == 0) {
             return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }
-        // limit 5 block one request
-//        if ((toBlock - fromBlock) > BLOCK_LIST_LIMIT) {
-//            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
-//        }
         String contractAddress = reqEventLogList.getContractAddress();
         EventTopicParam eventTopicParam = reqEventLogList.getTopics();
         List<Object> contractAbi = reqEventLogList.getContractAbi();
