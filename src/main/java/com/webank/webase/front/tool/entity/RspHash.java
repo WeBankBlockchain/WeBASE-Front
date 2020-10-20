@@ -14,27 +14,12 @@
 
 package com.webank.webase.front.tool.entity;
 
-import java.util.List;
-import javax.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
-/**
- * decode tx receipt's input/output
- */
 @Data
-public class ReqDecodeParam {
-
-    /**
-     * 1-decode input, 2-decode output
-     */
-    @NotNull
-    private Integer decodeType;
-    /**
-     * 1-entity(default), 2-json
-     */
-    private Integer returnType;
-
-    private String input;
-    private String output;
-    private List<Object> abiList;
+@AllArgsConstructor
+public class RspHash {
+    private String hashValue;
+    private Integer encryptType;
 }
