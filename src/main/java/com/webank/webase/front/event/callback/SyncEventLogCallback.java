@@ -14,6 +14,7 @@
 
 package com.webank.webase.front.event.callback;
 
+import com.webank.webase.front.util.JsonUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -63,6 +64,11 @@ public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
         } else if (status == 1){
             if (logs != null) {
                 finalList.addAll(logs);
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                logger.error("sleep 1000ms interrupted:{}", JsonUtils.objToString(e.getStackTrace()));
             }
             logger.info(
                 "SyncEventLogCallback push finished status: {}, finalList size:{}",
