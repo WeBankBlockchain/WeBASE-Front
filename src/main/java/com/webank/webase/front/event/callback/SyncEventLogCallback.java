@@ -14,14 +14,9 @@
 
 package com.webank.webase.front.event.callback;
 
-import com.webank.webase.front.base.enums.EventTypes;
-import com.webank.webase.front.event.MQPublisher;
-import com.webank.webase.front.event.entity.RspEventLog;
-import com.webank.webase.front.event.entity.message.EventLogPushMessage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import lombok.Setter;
 import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
 import org.fisco.bcos.web3j.tx.txdecode.BaseException;
@@ -30,6 +25,9 @@ import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * use CompleteFuture to get all callback of event
+ */
 public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
 
     private static final Logger logger =
@@ -54,12 +52,18 @@ public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
     @Override
     public void onPushEventLog(int status, List<LogResult> logs) {
         logger.info(
-            "SyncEventLogCallback onPushEventLog params: {}, status: {}, logsSize:{} logs: {}",
-            getFilter().getParams(), status, logs.size(), logs);
-        // add in resultList
-        finalList.addAll(logs);
-        // status == 0 push not finish,  if status == 1, finished
-        if (status == 1){
+            "SyncEventLogCallback onPushEventLog params: {}, status: {}, logs: {}",
+            getFilter().getParams(), status, logs);
+        // status == 0 push not finish,
+        if (status == 0) {
+            // add in resultList
+            if (logs != null) {
+                finalList.addAll(logs);
+            }
+        } else if (status == 1){
+            if (logs != null) {
+                finalList.addAll(logs);
+            }
             logger.info(
                 "SyncEventLogCallback push finished status: {}, finalList size:{}",
                 status, finalList.size());

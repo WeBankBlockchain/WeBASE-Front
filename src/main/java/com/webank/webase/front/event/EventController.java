@@ -239,7 +239,7 @@ public class EventController extends BaseController {
     @ApiImplicitParam(name = "ReqEventLogList", value = "获取区块EventLog所需参数",
         required = true, dataType = "ReqEventLogList")
     @PostMapping("eventLogs/list")
-    public BaseResponse listContractEventLogs(
+    public BasePageResponse listContractEventLogs(
         @Valid @RequestBody ReqEventLogList reqEventLogList, BindingResult result){
         log.debug("start listContractEventLogs. reqEventLogList:{}", reqEventLogList);
         checkParamResult(result);
@@ -248,7 +248,7 @@ public class EventController extends BaseController {
         Integer toBlock = reqEventLogList.getToBlock();
         // 0 < fromBlock <= toBlock, latest means latest block
         if (fromBlock == 0 || toBlock == 0) {
-            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+            return new BasePageResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }
         String contractAddress = reqEventLogList.getContractAddress();
         EventTopicParam eventTopicParam = reqEventLogList.getTopics();
@@ -259,6 +259,6 @@ public class EventController extends BaseController {
         List<LogResult> resList = eventService.getContractEventLog(groupId, contractAddress, abiStr,
             fromBlock, toBlock, eventTopicParam);
         log.debug("end listContractEventLogs resList:{}. ", resList);
-        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+        return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
     }
 }
