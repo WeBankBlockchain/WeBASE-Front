@@ -618,7 +618,7 @@ public class CommonUtils {
     }
 
     public static Bytes32 hexStrToBytes32(String hexStr) {
-        byte[] byteValue = hexStr.getBytes();
+        byte[] byteValue = Numeric.hexStringToByteArray(hexStr);
         byte[] byteValueLen32 = new byte[32];
         System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
         return new Bytes32(byteValueLen32);
