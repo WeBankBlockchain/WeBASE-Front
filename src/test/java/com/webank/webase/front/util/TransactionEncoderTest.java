@@ -1,6 +1,8 @@
 package com.webank.webase.front.util;
 
+import java.nio.charset.StandardCharsets;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.RawTransaction;
@@ -102,4 +104,32 @@ public class TransactionEncoderTest {
     public void testAddress() {
         System.out.println(Address.DEFAULT.getValue());
     }
+
+
+    // expected: 0x3132330000000000000000000000000000000000000000000000000000000000
+    @Test
+    public void testBytes32() {
+        String input = "123";
+        String utf82Hex = Numeric.toHexStringNoPrefix(input.getBytes(StandardCharsets.UTF_8));
+        System.out.println("input " + input);
+        // expected: 0x313233
+        System.out.println("utf82Hex " + utf82Hex);
+
+        byte[] byteValue = input.getBytes();
+        byte[] byteValueUtf8 = utf82Hex.getBytes();
+
+        byte[] byteValueLen32 = new byte[32];
+        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
+        Bytes32 res1 = new Bytes32(byteValueLen32);
+        System.out.println("res1:");
+        System.out.println(Numeric.toHexString(res1.getValue()));
+
+        byte[] byteValueLen32_1 = new byte[32];
+        System.arraycopy(byteValueUtf8, 0, byteValueLen32_1, 0, byteValue.length);
+        Bytes32 res2 = new Bytes32(byteValueLen32);
+        System.out.println("res2:");
+        System.out.println(Numeric.toHexString(res2.getValue()));
+    }
+
+
 }

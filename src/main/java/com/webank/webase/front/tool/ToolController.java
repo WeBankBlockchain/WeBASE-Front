@@ -66,7 +66,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 
-@Api(value = "/tool", tags = "utils controller")
+@Api(value = "/tool", tags = "tools controller")
 @Slf4j
 @RestController
 @RequestMapping("tool")
@@ -131,10 +131,10 @@ public class ToolController {
         String hashValue;
         if (type == 2) {
             // utf8 input
-            hashValue = Hash.sha3(input);
+            hashValue = Hash.sha3String(input);
         } else {
             // hex input
-            hashValue = Hash.sha3String(input);
+            hashValue = Hash.sha3(input);
         }
         return new RspHash(hashValue, EncryptType.encryptType);
     }
@@ -214,7 +214,7 @@ public class ToolController {
         @ApiImplicitParam(name = "type", value = " input type input type 1-hexString,2-utf8(default hex)", dataType = "Integer")
     })
     @GetMapping("/convert2Bytes32")
-    public Bytes32 getBytes32FromStr(@RequestParam String input, @RequestParam(defaultValue = "1") Integer type) {
+    public String getBytes32FromStr(@RequestParam String input, @RequestParam(defaultValue = "1") Integer type) {
         Bytes32 bytes32;
         if (type == 1) {
             // hex input
@@ -223,7 +223,7 @@ public class ToolController {
             // utf8 input
             bytes32 = CommonUtils.utf8StringToBytes32(input);
         }
-        return bytes32;
+        return Numeric.toHexString(bytes32.getValue());
     }
 
     @ApiOperation(value = "sign raw data", notes = "sign raw data by private key")
