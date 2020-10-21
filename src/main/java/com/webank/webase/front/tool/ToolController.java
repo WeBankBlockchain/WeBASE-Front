@@ -210,7 +210,7 @@ public class ToolController {
 
     @ApiOperation(value = "get hash value", notes = "get hash value")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "input", value = "input to hash(utf-8 or hexString)", dataType = "String"),
+        @ApiImplicitParam(name = "input", value = "input to hash(hexString or utf-8)", dataType = "String"),
         @ApiImplicitParam(name = "type", value = " input type input type 1-hexString,2-utf8(default hex)", dataType = "Integer")
     })
     @GetMapping("/convert2Bytes32")
