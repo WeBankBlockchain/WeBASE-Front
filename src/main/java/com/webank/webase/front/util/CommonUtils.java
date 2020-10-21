@@ -618,17 +618,12 @@ public class CommonUtils {
     }
 
     public static Bytes32 hexStrToBytes32(String hexStr) {
-        byte[] byteValue = Numeric.hexStringToByteArray(hexStr);
+        byte[] byteValue = hexStr.getBytes();
         byte[] byteValueLen32 = new byte[32];
         System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
         return new Bytes32(byteValueLen32);
     }
 
-    public static String bytes32ToHexString(Bytes32 dataInBytes32) {
-        return Numeric.toHexStringNoPrefix(dataInBytes32.getValue());
-    }
-
-    // todo check utf8 to hex, utf8 to bytes32
     public static String utf8StringToHex(String utf8String) {
         return Numeric.toHexStringNoPrefix(utf8String.getBytes(StandardCharsets.UTF_8));
     }
