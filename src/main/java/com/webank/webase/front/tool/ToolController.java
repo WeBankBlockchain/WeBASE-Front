@@ -226,6 +226,13 @@ public class ToolController {
         return Numeric.toHexString(bytes32.getValue());
     }
 
+    @ApiOperation(value = "get utf8's hex string", notes = "get hex string")
+    @ApiImplicitParam(name = "input", value = "input to convert(utf8 String)", dataType = "String")
+    @GetMapping("/utf8ToHexString")
+    public String getHexStringFromUtf8(@RequestParam String input) {
+        return CommonUtils.utf8StringToHex(input);
+    }
+
     @ApiOperation(value = "sign raw data", notes = "sign raw data by private key")
     @ApiImplicitParam(name = "reqSign", value = "raw data & private key", dataType = "ReqSign")
     @PostMapping("/signMsg")
