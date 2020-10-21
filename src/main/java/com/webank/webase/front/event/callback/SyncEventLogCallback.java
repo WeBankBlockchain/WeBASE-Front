@@ -66,9 +66,9 @@ public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
                 finalList.addAll(logs);
             }
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
-                logger.error("sleep 1000ms interrupted:{}", JsonUtils.objToString(e.getStackTrace()));
+                logger.error("sleep 100ms interrupted:{}", JsonUtils.objToString(e.getStackTrace()));
             }
             logger.info(
                 "SyncEventLogCallback push finished status: {}, finalList size:{}",
