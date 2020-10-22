@@ -34,7 +34,7 @@ public class RspKeyPair {
         this.privateKey = Numeric.toHexStringNoPrefix(ecKeyPair.getPrivateKey());
         // with prefix
         this.publicKey = Numeric.toHexStringWithPrefix(ecKeyPair.getPublicKey());
-        this.address = Keys.getAddress(ecKeyPair.getPublicKey());
+        this.address = "0x" + Keys.getAddress(ecKeyPair.getPublicKey());
         this.encryptType = encryptType;
     }
 }
