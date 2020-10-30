@@ -250,6 +250,9 @@ public class EventController extends BaseController {
         if (fromBlock == 0 || toBlock == 0) {
             return new BasePageResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }
+        if (fromBlock > toBlock) {
+            return new BasePageResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+        }
         String contractAddress = reqEventLogList.getContractAddress();
         EventTopicParam eventTopicParam = reqEventLogList.getTopics();
         List<Object> contractAbi = reqEventLogList.getContractAbi();
