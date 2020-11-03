@@ -16,10 +16,12 @@ public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // File fileDir = new File(SOLC_DIR_PATH);
+        // String path = fileDir.getAbsolutePath();
+        // registry.addResourceHandler("/solcjs/**").addResourceLocations("file:/" + path + File.separator);
+
         // web request uri of "/solcjs/**", return the files in /solcjs/xx.js
-        File fileDir = new File(SOLC_DIR_PATH);
-        String path = fileDir.getAbsolutePath();
-        registry.addResourceHandler("/solcjs/**").addResourceLocations("file:/" + path + File.separator);
+        registry.addResourceHandler("/solcjs/**").addResourceLocations("classpath:/" + SOLC_DIR_PATH + File.separator);
         super.addResourceHandlers(registry);
     }
 }
