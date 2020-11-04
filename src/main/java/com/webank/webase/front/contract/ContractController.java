@@ -29,6 +29,7 @@ import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
+import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
@@ -286,11 +287,54 @@ public class ContractController extends BaseController {
         return contractService.findPathList(groupId);
     }
 
-    @DeleteMapping("deletePath/{groupId}/{contractPath}")
+    @DeleteMapping("/deletePath/{groupId}/{contractPath}")
     public BaseResponse deletePath(@PathVariable("groupId") Integer groupId,
             @PathVariable String contractPath) {
         log.info("start deletePath. contractPath:{}", contractPath);
         contractService.deletePath(groupId, contractPath);
         return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    @DeleteMapping("/batch/{groupId}/{contractPath}")
+    public BaseResponse batchDeletePath(@PathVariable("groupId") Integer groupId,
+            @PathVariable String contractPath) {
+        log.info("start deletePath. contractPath:{}", contractPath);
+        contractService.batchDeleteByPath(groupId, contractPath);
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "query list of all contract without abi/bin", notes = "query list of contract without abi/bin")
+    @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
+        dataType = "Integer")
+    @GetMapping(value = "/contractList/all/light/{groupId}")
+    public BasePageResponse findAll(@PathVariable("groupId") Integer groupId,
+        BindingResult result) throws FrontException, IOException {
+        log.info("findAll start. groupId:{}", groupId);
+        checkParamResult(result);
+        List<RspContractNoAbi> contractNoAbiList = contractService.findAllContractNoAbi(groupId);
+        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
+        response.setTotalCount(contractNoAbiList.size());
+        response.setData(contractNoAbiList);
+        return response;
+    }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "get one contract", notes = "get one contract")
+    @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
+        dataType = "Integer")
+    @GetMapping(value = "/findOne/{contractId}")
+    public BaseResponse findOne(@PathVariable Integer contractId,
+        BindingResult result) throws FrontException {
+        log.info("findOne start. contractId:{}", contractId);
+        checkParamResult(result);
+        Contract contract = contractService.findById(contractId.longValue());
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        response.setData(contract);
+        return response;
     }
 }
