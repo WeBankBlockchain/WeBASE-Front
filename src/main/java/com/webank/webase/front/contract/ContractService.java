@@ -32,6 +32,7 @@ import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
+import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.transaction.TransService;
@@ -576,6 +577,23 @@ public class ContractService {
         return contractPage;
     }
 
+    /**
+     * find all contract without contract content
+     */
+    public List<RspContractNoAbi> findAllContractNoAbi(Integer groupId) throws IOException {
+        // init templates
+        initDefaultContract(groupId);
+        // find all
+        List<Contract> contractList = contractRepository.findByGroupId(groupId);
+        List<RspContractNoAbi> resultList = new ArrayList<>();
+        contractList.forEach(c -> {
+            RspContractNoAbi rsp = new RspContractNoAbi();
+            BeanUtils.copyProperties(c, rsp);
+            resultList.add(rsp);
+        });
+        return resultList;
+    }
+
 
     /**
      * save default contract in path '/template' to db
@@ -657,7 +675,7 @@ public class ContractService {
     public boolean verifyContractChange(Long contractId, int groupId) {
         Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
         log.debug("verifyContractChange contract:{}", contract);
-        if (!Objects.isNull(contract) && contract.getContractStatus().intValue() == 2
+        if (!Objects.isNull(contract) && contract.getContractStatus() == 2
                 && !contract.getDeployTime().isEqual(contract.getModifyTime())) {
             return true;
         }
@@ -840,6 +858,31 @@ public class ContractService {
             }
         }
 
+    }
+
+    /**
+     * batch delete contract by path
+     * if path contain deployed
+     * @param groupId
+     * @param contractPath
+     * @return
+     */
+    public void batchDeleteByPath(int groupId, String contractPath) {
+        log.debug("start batchDeleteByPath groupId:{},contractPath:{}", groupId, contractPath);
+        List<Contract> contractList = contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
+        log.debug("batchDeleteByPath delete contracts");
+        contractList.forEach(c -> contractRepository.delete(c.getId()));
+        log.debug("batchDeleteByPath delete contracts");
+        contractPathRepository.delete(new ContractPathKey(groupId, contractPath));
+        log.debug("batchDeleteByPath delete contract path");
+    }
+
+    public Contract findById(Long contractId) {
+        Contract contract = contractRepository.findOne(contractId);
+        if (Objects.isNull(contract)) {
+            throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
+        }
+        return contract;
     }
 
 }
