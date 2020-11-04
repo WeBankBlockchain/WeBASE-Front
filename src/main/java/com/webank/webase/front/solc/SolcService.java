@@ -22,6 +22,7 @@ import com.webank.webase.front.solc.entity.RspDownload;
 import com.webank.webase.front.solc.entity.SolcInfo;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +46,25 @@ public class SolcService {
 
 	@Autowired
 	private SolcRepository solcRepository;
+
+	public List<String> checkSolcFile() {
+		List<String> solcList = new ArrayList<>();
+		File fileDir = new File(SOLC_DIR_PATH);
+		File[] files = fileDir.listFiles();
+		if (files == null) {
+			log.info("checkSolcFile find no solc js file in /solcjs");
+			return solcList;
+		}
+		for (File file: files) {
+			if (file.isFile()) {
+				solcList.add(file.getName());
+			}
+		}
+		return solcList;
+	}
+
+
+	/* deprecated */
 
 	@Transactional
 	public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String fileDesc) throws IOException {
@@ -132,7 +152,10 @@ public class SolcService {
 		// check parent path
 		if(!fileDir.exists()){
 			// 递归生成文件夹
-			fileDir.mkdirs();
+			boolean result = fileDir.mkdirs();
+			if (result) {
+				log.error("mkdirs solc exist or error");
+			}
 		}
 		return fileDir;
 	}
