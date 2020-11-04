@@ -56,6 +56,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -304,12 +305,11 @@ public class ContractController extends BaseController {
     @ApiOperation(value = "query list of all contract without abi/bin", notes = "query list of contract without abi/bin")
     @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
         dataType = "Integer")
-    @GetMapping(value = "/contractList/all/light/{groupId}")
-    public BasePageResponse findAll(@PathVariable("groupId") Integer groupId,
-        BindingResult result) throws FrontException, IOException {
-        log.info("findAll start. groupId:{}", groupId);
-        checkParamResult(result);
-        List<RspContractNoAbi> contractNoAbiList = contractService.findAllContractNoAbi(groupId);
+    @GetMapping(value = "/contractList/all/light")
+    public BasePageResponse findAll(@RequestParam("groupId") Integer groupId,
+        @RequestParam("contractStatus") Integer contractStatus) throws FrontException, IOException {
+        log.info("findAll start. groupId:{},contractStatus:{}", groupId,contractStatus);
+        List<RspContractNoAbi> contractNoAbiList = contractService.findAllContractNoAbi(groupId, contractStatus);
         BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
         response.setTotalCount(contractNoAbiList.size());
         response.setData(contractNoAbiList);
@@ -323,10 +323,8 @@ public class ContractController extends BaseController {
     @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
         dataType = "Integer")
     @GetMapping(value = "/findOne/{contractId}")
-    public BaseResponse findOne(@PathVariable Integer contractId,
-        BindingResult result) throws FrontException {
+    public BaseResponse findOne(@PathVariable Integer contractId) {
         log.info("findOne start. contractId:{}", contractId);
-        checkParamResult(result);
         Contract contract = contractService.findById(contractId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
         response.setData(contract);
