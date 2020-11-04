@@ -539,11 +539,11 @@ public class ContractService {
     /**
      * find all contract without contract content
      */
-    public List<RspContractNoAbi> findAllContractNoAbi(Integer groupId) throws IOException {
+    public List<RspContractNoAbi> findAllContractNoAbi(int groupId, int contractStatus) throws IOException {
         // init templates
         initDefaultContract(groupId);
         // find all
-        List<Contract> contractList = contractRepository.findByGroupId(groupId);
+        List<Contract> contractList = contractRepository.findByGroupIdAndContractStatus(groupId, contractStatus);
         List<RspContractNoAbi> resultList = new ArrayList<>();
         contractList.forEach(c -> {
             RspContractNoAbi rsp = new RspContractNoAbi();
