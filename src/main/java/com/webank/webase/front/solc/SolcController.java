@@ -67,14 +67,11 @@ public class SolcController {
 		return new BaseResponse(ConstantCode.RET_SUCCESS);
 	}
 
-	@ApiOperation(value = "get uploaded solc file info list", notes = "list uploaded file info")
+	@ApiOperation(value = "get solc file name in solcjs dir", notes = "list solc file info")
 	@GetMapping("/list")
 	public BaseResponse getSolcList() {
 		// get list
-		List<SolcInfo> resList = solcService.getAllSolcInfo();
-		if (resList.isEmpty()) {
-			return new BaseResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST);
-		}
+		List<String> resList = solcService.checkSolcFile();
 		return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
 	}
 
