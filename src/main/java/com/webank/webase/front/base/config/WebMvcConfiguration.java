@@ -1,13 +1,12 @@
 package com.webank.webase.front.base.config;
 
+import static com.webank.webase.front.base.properties.Constants.SOLC_DIR_PATH_CONFIG;
+
+import java.io.File;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-
-import java.io.File;
-
-import static com.webank.webase.front.solc.SolcService.SOLC_DIR_PATH;
 
 
 @Slf4j
@@ -21,7 +20,7 @@ public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
         // registry.addResourceHandler("/solcjs/**").addResourceLocations("file:/" + path + File.separator);
 
         // web request uri of "/solcjs/**", return the files in /solcjs/xx.js
-        registry.addResourceHandler("/solcjs/**").addResourceLocations("classpath:/" + SOLC_DIR_PATH + File.separator);
+        registry.addResourceHandler("/solcjs/**").addResourceLocations("classpath:/" + SOLC_DIR_PATH_CONFIG + File.separator);
         super.addResourceHandlers(registry);
     }
 }
