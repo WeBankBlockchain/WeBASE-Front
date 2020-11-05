@@ -814,3 +814,27 @@ export function deleteSolcId(solcId) {
         }
     })
 }
+
+//event check 
+export function checkEvent(data) {
+    return post({
+        url: `${HANDLE}event/eventLogs/list`,
+        method: 'post',
+        data: data
+    })
+}
+
+export function contractFindOne(contractId) {
+    return get({
+        url: `${HANDLE}contract/findOne/${contractId}`,
+        method: 'GET',
+    })
+}
+
+export function contractListAll(data) {
+    return get({
+        url: `${HANDLE}contract/contractList/all/light`,
+        method: 'GET',
+        params: data
+    })
+}

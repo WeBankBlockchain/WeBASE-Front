@@ -25,6 +25,7 @@ export default {
         testUserList: '测试用户',
         abiList: 'ABI列表',
         parseAbi: 'ABI编码',
+        eventCheck: 'Event 查看',
     },
     navbar: {
         dashboard: '首页',
@@ -103,6 +104,9 @@ export default {
         topicList: '合约event名列表',
         fileType: "文件类型",
         fileName: "私钥用户名",
+        checkEvent: 'Event 查看',
+        checkEventResult: 'Event',
+        eventName: '合约event名'
     },
     errorLog: {
         tips: '请点击右上角bug小图标',
@@ -149,6 +153,8 @@ export default {
         fromBlock: "请输入event起始区块",
         toBlock: "请输入event末区块",
         topicList: "请输入合约event名列表",
+        eventName: "请选择合约名",
+        isContractAbi: "请输入合约Abi",
     },
     placeholder: {
         globalSearch: '请输入 Block Number 或 Tx Hash',
@@ -200,7 +206,8 @@ export default {
         acquisitionSwitch: '采集数据开关',
         check: '查询',
         detele: '删除',
-        uploadSolc: '上传不同版本编译器'
+        uploadSolc: '上传不同版本编译器',
+        checkEvent: 'Event 查看',
     },
     text: {
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
@@ -278,7 +285,7 @@ export default {
         contractAddress: "合约地址",
         fromBlock: "最小值为0；默认值latest，表示监听最新区块",
         toBlock: "最小值为0；默认值latest，表示监听最新区块",
-        topicList: "合约Event事件的List，Event参数之间不带空格，且多个Event以英文分号(;)相隔；如 SetEvent(string,string);TransferEvent(address,uint)",
+        topicList: "合约Event事件的List，Event参数之间不带空格，且多个Event以英文分号(;)相隔；如 SetEvent(string,string);TransferEvent(address,uint256)",
         parse: '解析',
         remove: '移除',
         addParameter: "添加参数",
@@ -288,6 +295,9 @@ export default {
         parseTitle: "请输入合约ABI",
         parseAbiManually: "函数ABI编辑",
         addAbi: "导入ABI",
+        fromBlockEvent: "最小值为1,from",
+        toBlockEvent: "最小值为1；表示监听最新区块",
+        eventParam: '请严格按照event参数类型提示输入;例如 byte类型输入"0x"',
     },
     contracts: {
         createFile: "新建文件",

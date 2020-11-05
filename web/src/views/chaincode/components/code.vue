@@ -395,7 +395,11 @@ export default {
             this.aceEditor.resize();
         },
         blurAce: function () {
+            console.log('blur');
             let data = Base64.encode(this.content);
+            if (this.data.contractSource != data) {
+                this.saveCode()
+            }
         },
         saveCode: function () {
             this.data.contractSource = Base64.encode(this.content);
