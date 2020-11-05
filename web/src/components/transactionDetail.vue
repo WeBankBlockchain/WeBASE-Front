@@ -102,7 +102,7 @@ export default {
                 "from",
                 "transactionIndex",
                 "to",
-                "nonce",
+                "nonceRaw",
                 "value",
                 "hash",
                 "gasPrice",

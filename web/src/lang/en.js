@@ -25,6 +25,7 @@ export default {
         testUserList: 'Tester List',
         abiList: 'ABI List',
         parseAbi: 'ABI Encode',
+        eventCheck: 'Event Check',
     },
     navbar: {
         dashboard: 'Dashboard',
@@ -153,6 +154,7 @@ export default {
         fromBlock: "Please enter from block",
         toBlock: "Please enter to block",
         topicList: "Please enter topic List",
+        eventName: "Please enter event name",
     },
     placeholder: {
         globalSearch: 'Search by Block Number / Tx Hash',
@@ -204,7 +206,10 @@ export default {
         acquisitionSwitch: 'Acquisition switch',
         check: 'check',
         detele: 'detele',
-        uploadSolc: 'Upload different versions of compiler'
+        uploadSolc: 'Upload different versions of compiler',
+        checkEvent: 'Event Check',
+        checkEventResult: 'Event',
+        eventName: 'Event Name'
     },
     text: {
         noContract: 'Please create a new contract',
@@ -282,7 +287,7 @@ export default {
         contractAddress: "Contract address",
         fromBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
         toBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
-        topicList: "There is no space between the list and event parameters of contract event, and multiple events are separated by English semicolons (;); for example, setevent (string, string); transferevent (address, uint)",
+        topicList: "There is no space between the list and event parameters of contract event, and multiple events are separated by English semicolons (;); for example, setevent (string, string); transferevent (address, uint256)",
         parse: 'Parse',
         addParameter: "Add parameter",
         remove: 'Remove',
@@ -292,6 +297,7 @@ export default {
         parseTitle: "Enter your contract's ABI to auto-parse",
         parseAbiManually: "Or enter your parameters manually",
         addAbi: "Import ABI",
+        eventParam: 'Please follow the prompt of event parameter type strictly',
     },
     contracts: {
         createFile: "Create File",
