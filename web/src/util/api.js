@@ -839,3 +839,14 @@ export function deleteSolcId(solcId) {
         }
     })
 }
+
+//获取solc文件列表
+export function getSolcList () {
+    return get({
+        url: `${HANDLE}solc/list`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
