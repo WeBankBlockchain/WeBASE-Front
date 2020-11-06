@@ -87,7 +87,7 @@ export default {
         contractName: 'Name',
         contractPath: 'Location',
         contractAddress: 'Address',
-        contractAbi: 'Abi',
+        contractAbi: 'ABI',
         contractBin: 'Bin',
         createdTime: 'Created Time',
         importPem: "Import Pem Private Key",
@@ -99,11 +99,12 @@ export default {
         queueName: "Queue Name",
         routingKey: "RoutingKey",
         groupId: "Group Id",
-        fromBlock: 'From Block',
-        toBlock: 'To Block',
+        fromBlock: 'From',
+        toBlock: 'To',
         topicList: 'Topic List',
         fileType: "File Type",
         fileName: "PrivateKey Name",
+        eventValue: 'Event',
     },
     errorLog: {
         tips: 'Please click the bug icon in the upper right corner',
@@ -155,6 +156,7 @@ export default {
         toBlock: "Please enter to block",
         topicList: "Please enter topic List",
         eventName: "Please enter event name",
+        search: 'Search'
     },
     placeholder: {
         globalSearch: 'Search by Block Number / Tx Hash',
@@ -339,7 +341,7 @@ export default {
         methodName: "Method Name",
         contractCatalogue: "Location",
         copyContractAddress: "Copy Contract Address",
-        contractAbi: "Abi",
+        contractAbi: "ABI",
         contractBin: "Bin",
         runtimeBin: "Runtime-bin",
         copyContractAbi: "Copy Contract Abi",
@@ -396,7 +398,8 @@ export default {
         nodeIdList: "Please enter nodeList",
         number: "Please enter number",
         groupId: "Please enter group ID",
-        correctJson: "Enter correct JSON"
+        correctJson: "Enter correct JSON",
+        blockNumber: "Greater than 0",
     },
     nodes: {
         nodeFront: "Front Node",

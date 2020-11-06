@@ -510,10 +510,35 @@ export function queryBlockInfo(group, blockNumber) {
 
 /**Contract list */
 export function getContractList(data) {
-    return get({
+    return post({
         url: `${HANDLE}contract/contractList`,
         method: 'post',
         data: data
+    })
+}
+
+// coantarct path list
+export function getContractPathList(data) {
+    return get({
+        url: `${HANDLE}contract/findPathList/${data}`,
+        method: 'get'
+    })
+}
+
+//add contract path
+export function addContractPath(data) {
+    return post({
+        url: `${HANDLE}contract/addContractPath`,
+        method: 'post',
+        data: data
+    })
+}
+
+//delete contract path
+export function deletePath(groupId,contractPath) {
+    return deleted({
+        url: `${HANDLE}contract/batch/${groupId}/${contractPath}`,
+        method: 'delete'
     })
 }
 
@@ -836,5 +861,18 @@ export function contractListAll(data) {
         url: `${HANDLE}contract/contractList/all/light`,
         method: 'GET',
         params: data
+    })
+}
+export function listAddress(groupId) {
+    return get({
+        url: `${HANDLE}event/listAddress/${groupId}`,
+        method: 'GET',
+    })
+}
+export function eventContractInfo(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/contractInfo/${params.str}`,
+        method: 'get'
     })
 }

@@ -8,18 +8,19 @@
                 </el-tooltip>
             </el-form-item>
             <el-form-item :label="$t('table.fromBlock')" prop="fromBlock">
-                <el-input-number v-model.trim="contractEventForm.fromBlock" style="width: 240px;" clearable controls-position="right" :min="1"></el-input-number>
-               
+                <!-- <el-input-number v-model.trim="contractEventForm.fromBlock" style="width: 240px;" clearable controls-position="right" :min="1"></el-input-number> -->
+                <el-input v-model.number="contractEventForm.fromBlock" clearable style="width: 240px;"></el-input>
             </el-form-item>
             <el-form-item :label="$t('table.toBlock')" prop="toBlock">
-                <el-input-number v-model.trim="contractEventForm.toBlock" style="width: 240px;" clearable controls-position="right" :min="1"></el-input-number>
+                <!-- <el-input-number v-model.trim="contractEventForm.toBlock" style="width: 240px;" clearable controls-position="right" :min="1"></el-input-number> -->
+                <el-input v-model.number="contractEventForm.toBlock" clearable style="width: 240px;"></el-input>
             </el-form-item>
             <el-form-item :label="$t('table.eventName')" prop="eventName">
                 <el-select v-model="contractEventForm.eventName" :placeholder="$t('placeholder.selected')" style="width: 240px;" @change="changeEventName">
                     <el-option v-for="item in eventNameList" :key="item.value" :label="item.label" :value="item.value">
                     </el-option>
                 </el-select>
-                 <el-tooltip class="item" effect="dark" :content="$t('text.eventParam')" placement="right">
+                <el-tooltip class="item" effect="dark" :content="$t('text.eventParam')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
                 <li v-for="item in inputList" class="event-info">
@@ -72,6 +73,32 @@ export default {
 
     computed: {
         rules() {
+            var isAddress = (rule, value, callback) => {
+                if (value == '' || value == undefined || value == null) {
+                    callback();
+                } else {
+                    if ((!Web3Utils.isAddress(value)) && value != '') {
+                        callback(new Error('Invalid input: Unexpected end of address input'));
+                    } else {
+                        callback();
+                    }
+                }
+            }
+            var validateBlock = (rule, value, callback) => {
+                if (value === '' || value == undefined || value == null) {
+                    callback();
+                } else {
+                    if (!Number.isInteger(value)) {
+                        callback(new Error('Invalid input: Unexpected end of number input'));
+                    } else {
+                        if (value <= 0) {
+                            callback(new Error(this.$t('rule.blockNumber')));
+                        } else {
+                            callback();
+                        }
+                    }
+                }
+            }
             var obj = {
                 contractAbi: [
                     {
@@ -93,6 +120,9 @@ export default {
                         message: this.$t('dialog.fromBlock'),
                         trigger: "blur"
                     },
+                    {
+                        validator: validateBlock, trigger: 'blur'
+                    }
                 ],
                 toBlock: [
                     {
@@ -100,6 +130,9 @@ export default {
                         message: this.$t('dialog.toBlock'),
                         trigger: "blur"
                     },
+                    {
+                        validator: validateBlock, trigger: 'blur'
+                    }
                 ],
 
                 eventName: [
@@ -195,7 +228,7 @@ export default {
                 }
             })
             indexedList.forEach((item, index) => {
-                topicObj[`indexed${index+1}`] = {
+                topicObj[`indexed${index + 1}`] = {
                     type: item.type,
                     value: item.value
                 }
@@ -212,7 +245,16 @@ export default {
                     this.loading = false;
                     if (res.data.code === 0) {
                         this.modelClose()
-                        this.$emit("checkEventSuccess", res.data.data)
+                        var eventList = res.data.data;
+                        var newEventList = [];
+                        if(!eventList.length){
+                            this.eventList = newEventList
+                            return
+                        }
+                        eventList.forEach(item=>{
+                            newEventList.push(item.log)
+                        })
+                        this.$emit("checkEventSuccess", newEventList, this.contractEventForm.eventName)
                     } else {
                         this.$message({
                             type: "error",
