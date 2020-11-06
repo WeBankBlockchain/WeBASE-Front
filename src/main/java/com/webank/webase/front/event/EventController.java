@@ -17,17 +17,28 @@
 package com.webank.webase.front.event;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
-import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.event.entity.*;
+import com.webank.webase.front.event.entity.ContractEventInfo;
+import com.webank.webase.front.event.entity.EventTopicParam;
+import com.webank.webase.front.event.entity.NewBlockEventInfo;
+import com.webank.webase.front.event.entity.ReqContractEventRegister;
+import com.webank.webase.front.event.entity.ReqEventLogList;
+import com.webank.webase.front.event.entity.ReqNewBlockEventRegister;
+import com.webank.webase.front.event.entity.ReqUnregister;
+import com.webank.webase.front.event.entity.RspContractInfo;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.io.IOException;
+import java.util.List;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.tx.txdecode.LogResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +46,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 /**
@@ -54,6 +68,7 @@ public class EventController extends BaseController {
 
     @Autowired
     private EventService eventService;
+
 
     @ApiOperation(value = "registerNewBlockEvent",
             notes = "register registerNewBlockEvent and push message to mq")
@@ -264,4 +279,50 @@ public class EventController extends BaseController {
         log.debug("end listContractEventLogs resList:{}. ", resList);
         return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
     }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "get list contract/abi", notes = "get list contract/abi")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
+            dataType = "Integer"),
+        @ApiImplicitParam(name = "type", value = "type", required = true,
+            dataType = "String"),
+        @ApiImplicitParam(name = "contractAddress", value = "contractAddress", required = true,
+            dataType = "String")
+    })
+    @GetMapping("/contractInfo/{groupId}/{type}/{contractAddress}")
+    public BaseResponse findByAddress( @PathVariable Integer groupId,
+        @PathVariable String type, @PathVariable String contractAddress) {
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        log.info("findByAddress start. groupId:{},contractAddress:{},type:{}", groupId, contractAddress, type);
+        Object abiInfo = eventService.getAbiByAddressFromBoth(groupId, type, contractAddress);
+        response.setData(abiInfo);
+        return response;
+    }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "get list contract/abi", notes = "get list contract/abi")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
+            dataType = "Integer"),
+        @ApiImplicitParam(name = "type", value = "type", required = true,
+            dataType = "String"),
+        @ApiImplicitParam(name = "contractAddress", value = "contractAddress", required = true,
+            dataType = "String")
+    })
+    @GetMapping("/listAddress/{groupId}")
+    public BaseResponse listAbi(@PathVariable Integer groupId) throws IOException {
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        log.info("listAbi start. groupId:{}", groupId);
+
+        List<RspContractInfo> resultList = eventService.getContractInfoListFromBoth(groupId);
+        response.setData(resultList);
+        return response;
+    }
+
+
 }

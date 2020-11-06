@@ -47,7 +47,7 @@ public class EventTopicParam {
 
         public String getValueSig() {
             // if null, not filer
-            if (this.value == null) {
+            if (this.value == null || "".equals(this.value)) {
                 return null;
             }
 
