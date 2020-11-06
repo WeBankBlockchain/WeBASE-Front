@@ -2,28 +2,31 @@
     <div class="rivate-key-management-wrapper">
         <content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.eventCheck')" @changeGroup="changeGroup"></content-head>
         <div class="module-wrapper">
-            <div class="search-part " style="display: flex;">
-                <el-form :model="contractEventForm" :rules="rules" ref="contractEventForm" class="demo-ruleForm" :inline='true'>
+            <div class="search-part ">
+                <el-form :model="contractEventForm" :rules="rules" ref="contractEventForm" class="demo-ruleForm" label-width="110px">
                     <el-form-item :label="$t('table.contractAddress')" prop="contractAddress">
-                        <!-- <el-input v-model.trim="contractEventForm.contractAddress" style="width: 260px;" clearable></el-input> -->
-                        <el-select v-model="contractEventForm.contractAddress" :placeholder="$t('placeholder.selected')" clearable style="width: 240px;" @change="changeAddress">
+
+                        <el-select v-if="abiId || contractId" v-model="contractEventForm.contractAddress" :placeholder="$t('placeholder.selected')" style="width: 500px;" @change="changeAddress">
                             <el-option v-for="item in addressList" :key="item.id" :label="item.contractAddress" :value="item.contractAddress">
                                 <span style="float: left; font-size: 12px">{{ item.contractAddress }}</span>
                                 <span style="float: right; color: #8492a6; font-size: 12px; margin-left: 4px;">{{ item.contractName }}</span>
                             </el-option>
                         </el-select>
+                        <el-input v-else v-model.trim="contractEventForm.contractAddress" style="width: 500px;" clearable></el-input>
                     </el-form-item>
                     <el-form-item :label="$t('table.contractAbi')" prop="contractAbi">
-                        <el-input v-model="contractEventForm.contractAbi" clearable :rows="1" type="textarea" style="width: 240px;"></el-input>
+                        <el-input v-model="contractEventForm.contractAbi" :rows="1" type="textarea" style="width: 500px;"></el-input>
                     </el-form-item>
-                    <el-form-item :label="$t('table.fromBlock')" prop="fromBlock">
-                        <el-input v-model.number="contractEventForm.fromBlock" clearable style="width: 120px;"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="$t('table.toBlock')" prop="toBlock">
-                        <el-input v-model.number="contractEventForm.toBlock" clearable style="width: 120px;"></el-input>
-                    </el-form-item>
+                    <div class="block-wrapper">
+                        <el-form-item :label="$t('table.fromBlock')" prop="fromBlock">
+                            <el-input v-model.number="contractEventForm.fromBlock" clearable style="width: 195px;"></el-input>
+                        </el-form-item>
+                        <el-form-item :label="$t('table.toBlock')" prop="toBlock">
+                            <el-input v-model.number="contractEventForm.toBlock" clearable style="width: 195px;"></el-input>
+                        </el-form-item>
+                    </div>
                     <el-form-item :label="$t('table.eventName')" prop="eventName" class="event-option">
-                        <el-select v-model="contractEventForm.eventName" :placeholder="$t('placeholder.selected')" style="width: 240px;" @change="changeEventName" class="event-name">
+                        <el-select v-model="contractEventForm.eventName" :placeholder="$t('placeholder.selected')" style="width: 500px;" @change="changeEventName" class="event-name">
                             <el-option v-for="item in eventNameList" :key="item.value" :label="item.label" :value="item.value">
                             </el-option>
                         </el-select>
@@ -31,9 +34,9 @@
                             <i class="el-icon-info"></i>
                         </el-tooltip> -->
                         <li v-for="item in inputList" class="event-info">
-                            <div v-if="item.indexed" >
+                            <div v-if="item.indexed">
                                 <div>{{item.name}}:</div>
-                                <el-input v-model="item.value" :placeholder="item.type" style="width: 240px;" @input="e => (item.msgObj = isType(e,item.type))"></el-input>
+                                <el-input v-model="item.value" :placeholder="item.type" style="width: 500px;" @input="e => (item.msgObj = isType(e,item.type))"></el-input>
                                 <span v-if="item.msgObj&&!item.msgObj.is" class="font-color-ed5454 font-12" style="display:inline-block">
                                     {{item.msgObj.msg}}
                                 </span>
@@ -41,31 +44,24 @@
                         </li>
                     </el-form-item>
                     <el-form-item>
-                        <el-button type="primary" @click="submit('contractEventForm')" :loading="loading">{{$t('dialog.confirm')}}</el-button>
+                        <div class="text-center" style="width: 500px;">
+                            <el-button type="primary" @click="submit('contractEventForm')" :loading="loading">{{$t('dialog.search')}}</el-button>
+                        </div>
                     </el-form-item>
                 </el-form>
-                <!-- <div slot="footer" class="dialog-footer">
-                    <el-button type="primary" @click="submit('contractEventForm')" :loading="loading">{{$t('dialog.confirm')}}</el-button>
-                </div> -->
             </div>
-            <div class="search-table">
+
+        </div>
+        <div class="module-wrapper">
+            <div class="search-table" v-if="eventList.length > 0">
                 <el-table :data="eventList" tooltip-effect="dark" v-loading="loading">
-                    <el-table-column type="expand" align="center">
+                    <!-- <el-table-column type="expand" align="center">
                         <template slot-scope="scope">
                             <decode-log :logInfo="logInfo(scope.row)"></decode-log>
                         </template>
-                    </el-table-column>
-                    <el-table-column prop="address" :label="$t('table.contractAddress')" show-overflow-tooltip  align="center">
-                        <template slot-scope="scope">
-                            <span>{{scope.row.address}}</span>
-                        </template>
-                    </el-table-column>
+                    </el-table-column> -->
                     <el-table-column prop="blockNumber" :label="$t('table.blockHeight')" show-overflow-tooltip width="120" align="center"></el-table-column>
-                    <el-table-column prop="transactionHash" :label="$t('table.transactionHash')" show-overflow-tooltip align="center">
-                        <template slot-scope="scope">
-                            <span>{{scope.row.transactionHash}}</span>
-                        </template>
-                    </el-table-column>
+                    <el-table-column prop="eventVal" :label="$t('table.eventValue')" show-overflow-tooltip align="center"></el-table-column>
                 </el-table>
             </div>
         </div>
@@ -75,9 +71,11 @@
 <script>
 import contentHead from "@/components/contentHead";
 import decodeLog from "@/components/decodeLog";
-import { contractFindOne, contractListAll ,checkEvent} from "@/util/api"
+import { contractFindOne, contractListAll, checkEvent, queryBlockNumber, listAddress } from "@/util/api"
 import { validateEvent } from "@/util/validate";
+import { isJson } from "@/util/util";
 const Web3Utils = require('web3-utils');
+import Bus from "@/bus"
 export default {
     name: 'eventCheck',
 
@@ -96,17 +94,15 @@ export default {
                 groupId: '',
                 contractAbi: '',
                 contractAddress: '',
-                fromBlock: '',
+                fromBlock: 1,
                 toBlock: '',
                 eventName: ''
             },
-            groupList: localStorage.getItem("cluster")
-                ? JSON.parse(localStorage.getItem("cluster"))
-                : [],
             groupId: localStorage.getItem("groupId"),
             inputList: [],
             addressList: [],
             contractId: '',
+            abiId: '',
             eventList: []
         }
     },
@@ -125,11 +121,22 @@ export default {
                 }
             }
             var validateBlock = (rule, value, callback) => {
-                if (value == '' || value == undefined || value == null) {
+                if (value === '' || value == undefined || value == null) {
                     callback();
                 } else {
                     if (!Number.isInteger(value)) {
                         callback(new Error('Invalid input: Unexpected end of number input'));
+                    } else {
+                        callback();
+                    }
+                }
+            }
+            var validateAbi = (rule, value, callback) => {
+                if (value === '' || value == undefined || value == null) {
+                    callback();
+                } else {
+                    if (!isJson(value)) {
+                        callback(new Error('Invalid input: Unexpected end of JSON input'));
                     } else {
                         callback();
                     }
@@ -142,6 +149,7 @@ export default {
                         message: this.$t('dialog.contractAbi'),
                         trigger: "blur"
                     },
+                    { validator: validateAbi, trigger: 'blur' }
                 ],
                 contractAddress: [
                     {
@@ -186,49 +194,94 @@ export default {
         },
         eventNameList() {
             var options = []
-            if(!this.contractEventForm.contractAbi) {
+            if (!this.contractEventForm.contractAbi) {
                 return
             }
-            var abiList = JSON.parse(this.contractEventForm.contractAbi)
-            abiList.forEach(item => {
-                if (item.type == 'event') {
-                    var param = [];
-                    item.inputs.forEach(it => {
-                        param.push(`${it.type}`)
+            try {
+                var abiList = JSON.parse(this.contractEventForm.contractAbi)
+                abiList.forEach(item => {
+                    if (item.type == 'event') {
+                        var param = [], label = [];
+                        item.inputs.forEach(it => {
+                            param.push(`${it.type}`)
+                            label.push(this.labelParam(it))
+                        })
+                        options.push({
+                            label: `${item.name}(${label.join(',')})`,
+                            value: `${item.name}(${param.join(',')})`
+                        })
+                    }
+                });
+            } catch (error) {
 
-                    })
-                    options.push({
-                        label: `${item.name}`,
-                        value: `${item.name}(${param.join(',')})`
-                    })
-                }
-            });
+            }
+
+
             return options
         }
     },
 
     watch: {
+        $route() {
+            this.queryInit()
+        },
     },
 
     created() {
     },
-
+    beforeDestroy: function () {
+        Bus.$off("changeGroup")
+    },
     mounted() {
-        if (this.$route.query.id) {
-            this.contractId = this.$route.query.id
-            this.queryContractAbi()
-        }
-        this.queryAllAddress()
+        Bus.$on("changeGroup", data => {
+            this.changeGroup(data)
+        })
+        this.queryInit()
     },
 
     methods: {
-        changeGroup() { },
+        queryInit() {
+            if (this.$route.query.id) {
+                this.contractId = this.$route.query.id
+                this.queryContractAbi()
+                this.queryAllAddress()
+            } else if (this.$route.query.abiId) {
+                this.abiId = this.$route.query.abiId
+                this.queryContractAbi()
+                this.queryAllAddress()
+            } else {
+                this.contractId = ''
+                this.abiId = ''
+                this.contractEventForm = {
+                    groupId: '',
+                    contractAbi: '',
+                    contractAddress: '',
+                    fromBlock: 1,
+                    toBlock: '',
+                    eventName: ''
+                }
+            }
+            this.queryAllAddress()
+            this.getBlockNumber()
+        },
+        changeGroup(data) {
+            this.groupId = data
+            this.contractEventForm = {
+                groupId: '',
+                contractAbi: '',
+                contractAddress: '',
+                fromBlock: '',
+                toBlock: '',
+                eventName: ''
+            }
+            this.queryInit()
+        },
         queryAllAddress() {
             let reqParam = {
                 groupId: this.groupId,
-                contractStatus: 2
+                // contractStatus: 2
             }
-            contractListAll(reqParam)
+            listAddress(this.groupId)
                 .then(res => {
                     if (res.data.code === 0) {
                         this.addressList = res.data.data
@@ -330,18 +383,19 @@ export default {
                 .then(res => {
                     this.loading = false;
                     if (res.data.code === 0) {
-                        console.log(res.data.data);
                         var eventList = res.data.data;
                         var newEventList = [];
-                        if(!eventList.length){
+                        if (!eventList.length) {
                             this.eventList = newEventList
                             return
                         }
-                        eventList.forEach(item=>{
+                        eventList.forEach(item => {
                             newEventList.push(item.log)
                         })
+                        newEventList.forEach(item => {
+                            item.eventVal = this.decodeEvent(item)
+                        })
                         this.eventList = newEventList;
-                        console.log(this.eventList);
                     } else {
                         this.$message({
                             type: "error",
@@ -392,26 +446,96 @@ export default {
                 return val
             }
         },
-        logInfo(row){
+        logInfo(row) {
             var obj = {
-                contractAbi: this.contractEventForm.contractAbi, 
-                eventName: this.contractEventForm.eventName.replace(/[(][^）]+[\))]/g,'')
+                contractAbi: this.contractEventForm.contractAbi,
+                eventName: this.contractEventForm.eventName.replace(/[(][^）]+[\))]/g, '')
             }
-            var logInfo = Object.assign({},row, obj)
+            var logInfo = Object.assign({}, row, obj);
             return logInfo
-        }
+        },
+        labelParam(it) {
+            if (it.indexed) {
+                return `${it.type} indexed ${it.name} `
+            } else {
+                return `${it.type} ${it.name} `
+            }
+
+        },
+        decodeEvent(paramVal) {
+            let Web3EthAbi = require('web3-eth-abi');
+            let contractAbi = JSON.parse(this.contractEventForm.contractAbi)
+            let inputs = []
+            contractAbi.forEach(item => {
+                if (item.type == 'event' && item.name === this.contractEventForm.eventName.replace(/[(][^）]+[\))]/g, '')) {
+                    inputs = item.inputs
+                }
+            });
+            let eventResult = Web3EthAbi.decodeLog(inputs, paramVal.data, paramVal.topics.slice(1));
+            let outData = {}, eventLgData = [];
+            inputs.forEach(input => {
+                input.data = eventResult[input['name']]
+            })
+            let eventFun = []
+            inputs.forEach(input => {
+                eventFun.push(`${input.data}`)
+            })
+            return `${this.contractEventForm.eventName.replace(/[(][^）]+[\))]/g, '')} (${eventFun.join()})`
+        },
+        copyKey(val) {
+            if (!val) {
+                this.$message({
+                    type: "fail",
+                    showClose: true,
+                    message: this.$t("text.copyErrorMsg"),
+                    duration: 2000
+                });
+            } else {
+                this.$copyText(val).then(e => {
+                    this.$message({
+                        type: "success",
+                        showClose: true,
+                        message: this.$t("text.copySuccessMsg"),
+                        duration: 2000
+                    });
+                });
+            }
+        },
+        getBlockNumber: function () {
+            queryBlockNumber(this.groupId)
+                .then(res => {
+                    const { data, status } = res;
+                    if (status === 200) {
+                        this.$set(this.contractEventForm, 'toBlock', data)
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+        },
     }
 }
 </script>
 
 <style scoped>
 .event-info {
-    color:#fff;
+    color: #fff;
 }
 .event-option {
     /* display: flex; */
 }
-.event-name >>>.el-form-item__content {
+.event-name >>> .el-form-item__content {
+    display: flex;
+}
+.block-wrapper {
     display: flex;
 }
 </style>

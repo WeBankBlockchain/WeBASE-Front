@@ -70,11 +70,11 @@
             <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :data="data" :abi='abiData' :version='version'></send-transation>
         </el-dialog>
         <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose'></v-editor>
-        <el-dialog v-if="checkEventVisible" :title="$t('table.checkEvent')" :visible.sync="checkEventVisible" width="470px" center class="send-dialog">
-            <check-event-dialog @checkEventSuccess="checkEventSuccess($event)" @checkEventClose="checkEventClose" :contractInfo="contractInfo"></check-event-dialog>
+        <el-dialog :title="$t('table.checkEvent')" :visible.sync="checkEventVisible" width="470px" center class="send-dialog">
+            <check-event-dialog @checkEventSuccess="checkEventSuccess(arguments)" @checkEventClose="checkEventClose" :contractInfo="contractInfo"></check-event-dialog>
         </el-dialog>
-        <el-dialog v-if="checkEventResultVisible" :title="$t('table.checkEventResult')" :visible.sync="checkEventResultVisible" width="670px" center class="send-dialog">
-            <check-event-result @checkEventResultSuccess="checkEventResultSuccess($event)" @checkEventResultClose="checkEventResultClose" :checkEventResult="checkEventResult"></check-event-result>
+        <el-dialog v-if="checkEventResultVisible" :title="$t('table.checkEventResult')" :visible.sync="checkEventResultVisible" width="1070px" center class="send-dialog">
+            <check-event-result @checkEventResultSuccess="checkEventResultSuccess($event)" @checkEventResultClose="checkEventResultClose" :checkEventResult="checkEventResult" :contractInfo="contractInfo"></check-event-result>
         </el-dialog>
     </div>
 </template>
@@ -119,7 +119,8 @@ export default {
             checkEventVisible: false,
             checkEventResultVisible: false,
             contractInfo: null,
-            checkEventResult: null
+            checkEventResult: null,
+            eventName: ''
         }
     },
     beforeDestroy: function () {
@@ -266,8 +267,9 @@ export default {
             })
             // this.checkEventVisible = true
         },
-        checkEventSuccess(val) {
-            this.checkEventResult = val
+        checkEventSuccess(msg) {
+            this.checkEventResult = msg
+            
             this.checkEventResultVisible = true
         },
         checkEventClose() {

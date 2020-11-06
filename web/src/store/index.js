@@ -24,7 +24,10 @@ const state = {
     isLogin: 0,
     loading: false,
     language: getLanguage(),
-    importRivateKey: false
+    importRivateKey: false,
+    contractDataList: [],
+    worker: null,
+    versionData: null
 }
 export default new Vuex.Store({
     state,
@@ -54,6 +57,15 @@ export default new Vuex.Store({
             state.language = language
             Cookies.set('language', language)
         },
+        get_contractDataList(state,data){
+            state.contractDataList = data
+        },
+        set_worker(state,data) {
+            state.worker = data
+        },
+        set_version_data (state,data){
+            state.versionData = data
+        }
     },
     actions: {
         switch_creat_user_dialog(context) {
@@ -68,5 +80,14 @@ export default new Vuex.Store({
         setLanguage({ commit }, language) {
             commit('SET_LANGUAGE', language)
         },
+        set_contractDataList(context,data){
+            context.commit('get_contractDataList',data)
+        },
+        set_worker_action(context,data) {
+            context.commit("set_worker",data)
+        },
+        set_version_data_action(context,data){
+            context.commit("set_version_data",data)
+        }
     }
 })

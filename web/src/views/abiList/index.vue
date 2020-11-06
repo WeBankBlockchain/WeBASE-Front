@@ -14,25 +14,27 @@
                         <template slot-scope="scope">
                             <template v-if="head.enName !='operation'">
                                 <span v-if='head.enName === "contractAbi"'>
-                                <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row.contractAbi)" :title="$t('text.copy')"></i>
-                                <span class="link" @click='openAbi(scope.row)'>{{scope.row.contractAbi}}</span>
-                            </span>
-                            <span v-else-if='head.enName === "contractAddress"'>
-                                <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row.contractAddress)" :title="$t('text.copy')"></i>
-                                <span>{{scope.row.contractAddress}}</span>
-                            </span>
-                            <span v-else-if='head.enName === "contractBin"'>
-                                <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row.contractBin)" :title="$t('text.copy')"></i>
-                                <span>{{scope.row.contractBin}}</span>
-                            </span>
-                            <span v-else>{{scope.row[head.enName]}}</span>
+                                    <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row.contractAbi)" :title="$t('text.copy')"></i>
+                                    <span class="link" @click='openAbi(scope.row)'>{{scope.row.contractAbi}}</span>
+                                </span>
+                                <span v-else-if='head.enName === "contractAddress"'>
+                                    <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row.contractAddress)" :title="$t('text.copy')"></i>
+                                    <span>{{scope.row.contractAddress}}</span>
+                                </span>
+                                <span v-else-if='head.enName === "contractBin"'>
+                                    <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row.contractBin)" :title="$t('text.copy')"></i>
+                                    <span>{{scope.row.contractBin}}</span>
+                                </span>
+                                <span v-else>{{scope.row[head.enName]}}</span>
                             </template>
                             <template v-else>
                                 <el-button :disabled="!scope.row.contractAddress" :class="{'grayColor': !scope.row.contractAddress}" @click="send(scope.row)" type="text" size="small">{{$t('contracts.sendTransaction')}}</el-button>
-                            <el-button @click="updateAbi(scope.row)" type="text" size="small">{{$t('contracts.updateAbi')}}</el-button>
-                            <el-button @click="deleteAbi(scope.row)" type="text" size="small">{{$t('contracts.deleteAbi')}}</el-button>
+                                <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress}" @click="checkEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
+                                <el-button @click="updateAbi(scope.row)" type="text" size="small">{{$t('contracts.updateAbi')}}</el-button>
+                                <el-button @click="deleteAbi(scope.row)" type="text" size="small">{{$t('contracts.deleteAbi')}}</el-button>
+
                             </template>
-                            
+
                         </template>
                     </el-table-column>
                 </el-table>
@@ -126,7 +128,7 @@ export default {
                 {
                     enName: "operation",
                     name: this.$t('contracts.operation'),
-                    width: '200'
+                    width: '250'
                 }
             ];
             return data
@@ -176,7 +178,23 @@ export default {
             getAbiList(reqData, reqQuery)
                 .then(res => {
                     if (res.data.code === 0) {
-                        this.abiList = res.data.data;
+                        var dataArray = [];
+                        dataArray = res.data.data;
+                        console.time("耗时");
+                        dataArray.forEach(item => {
+                            item.haveEvent = false
+                            if (item.contractAbi) {
+                                let contractAbi = JSON.parse(item.contractAbi)
+                                for (let index = 0; index < contractAbi.length; index++) {
+                                    if (contractAbi[index]['type'] === "event") {
+                                        item.haveEvent = true
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+                        console.timeEnd("耗时");
+                        this.abiList = dataArray;
                         this.total = res.data.totalCount;
                     } else {
                         this.$message({
@@ -282,8 +300,15 @@ export default {
                         message: this.$t('text.systemError')
                     })
                 })
-        }
-
+        },
+        checkEvent: function (val) {
+            this.$router.push({
+                path: '/eventCheck',
+                query: {
+                    abiId: val.abiId
+                }
+            })
+        },
     }
 }
 </script>
