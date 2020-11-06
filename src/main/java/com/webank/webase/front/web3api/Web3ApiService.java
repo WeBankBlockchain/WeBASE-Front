@@ -932,6 +932,7 @@ public class Web3ApiService {
         return web3j;
     }
 
+    /* above v2.6.1*/
     public BcosBlockHeader getBlockHeaderByHash(Integer groupId, String blockHash,
         boolean returnSealers) {
         try {
@@ -953,10 +954,4 @@ public class Web3ApiService {
     }
     /* above v2.6.1*/
 
-    /**
-     * get block limit
-     */
-    public BigInteger getBlockNumberCache(Integer groupId) {
-        return getWeb3j(groupId).getBlockNumberCache();
-    }
 }
