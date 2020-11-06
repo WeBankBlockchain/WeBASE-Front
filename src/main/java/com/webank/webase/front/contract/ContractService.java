@@ -844,4 +844,12 @@ public class ContractService {
         return contract;
     }
 
+    public Contract findByGroupIdAndAddress(int groupId, String contractAddress) {
+        Contract contract = contractRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
+        if (Objects.isNull(contract)) {
+            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+        }
+        return contract;
+    }
+
 }

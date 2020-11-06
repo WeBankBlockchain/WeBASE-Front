@@ -16,20 +16,29 @@
 
 package com.webank.webase.front.event;
 
+import com.webank.webase.front.abi.AbiService;
+import com.webank.webase.front.abi.entity.AbiInfo;
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.contract.ContractService;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.callback.SyncEventLogCallback;
 import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.PublisherHelper;
+import com.webank.webase.front.event.entity.RspContractInfo;
 import com.webank.webase.front.event.entity.RspEventLog;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import java.util.concurrent.CompletableFuture;
@@ -79,6 +88,12 @@ public class EventService {
     private Web3ApiService web3ApiService;
     @Autowired
     private Constants constants;
+    @Autowired
+    private ContractService contractService;
+    @Autowired
+    private AbiService abiService;
+    private static final String TYPE_CONTRACT = "contract";
+    private static final String TYPE_ABI_INFO = "abi";
 
     /**
      * register NewBlockEventCallBack
@@ -371,4 +386,33 @@ public class EventService {
         }
         return resultList;
     }
+
+    public Object getAbiByAddressFromBoth(int groupId, String type, String contractAddress) {
+        if (TYPE_CONTRACT.equals(type)) {
+            return contractService.findByGroupIdAndAddress(groupId, contractAddress);
+        } else if (TYPE_ABI_INFO.equals(type)) {
+            return abiService.getAbiByGroupIdAndAddress(groupId, contractAddress);
+        } else {
+            throw new FrontException(ConstantCode.PARAM_ERROR);
+        }
+    }
+
+    /**
+     * get abi info from both
+     * @param groupId
+     * @return
+     * @throws IOException
+     */
+    public List<RspContractInfo> getContractInfoListFromBoth(int groupId) throws IOException {
+        // get contract list
+        List<RspContractNoAbi> contractList = contractService.findAllContractNoAbi(groupId, ContractStatus.DEPLOYED.getValue());
+        // get abi list
+        List<RspContractNoAbi> abiInfoList = abiService.getListByGroupIdNoAbi(groupId);
+        // add abi info and contract info in result list
+        List<RspContractInfo> resultList = new ArrayList<>();
+        contractList.forEach(c -> resultList.add(new RspContractInfo(TYPE_CONTRACT, c.getContractAddress(), c.getContractName())));
+        abiInfoList.forEach(c -> resultList.add(new RspContractInfo(TYPE_ABI_INFO, c.getContractAddress(), c.getContractName())));
+        return resultList;
+    }
+
 }
