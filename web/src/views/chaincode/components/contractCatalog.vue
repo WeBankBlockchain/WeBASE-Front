@@ -56,7 +56,7 @@
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
                         <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
-                                <li class="contract-menu-handle-list" @click="addFiles">{{$t('dialog.newFile')}}</li>
+                                <li class="contract-menu-handle-list" @click="addFiles(item)">{{$t('dialog.newFile')}}</li>
                                 <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
                             </ul>
                         </div>
@@ -99,7 +99,7 @@
             </div>
         </div> -->
         <add-folder v-if="foldershow" :foldershow="foldershow" @close='folderClose' @success='folderSuccess'></add-folder>
-        <add-file v-if="fileshow" :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
+        <add-file v-if="fileshow" :data='selectFolderData' :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
         <select-catalog v-if='cataLogShow' :show='cataLogShow' @success='catalogSuccess($event)' @close='catalogClose'></select-catalog>
     </div>
 </template>
@@ -151,7 +151,8 @@ export default {
             version: "",
             versionOptions: [],
             pathList: [],
-            folderData: null
+            folderData: null,
+            selectFolderData: null
         };
     },
     watch: {
@@ -355,7 +356,8 @@ export default {
             this.checkNull();
             this.fileshow = true;
         },
-        addFiles() {
+        addFiles(val) {
+            this.selectFolderData = val
             this.fileshow = true;
             this.folderId = this.ID;
             this.ID = "";
@@ -537,7 +539,6 @@ export default {
                         }
                     }
                     this.getContracts()
-                    console.log(this.folderList)
                 }else {
                         this.$message({
                             type: "error",
@@ -573,7 +574,6 @@ export default {
                     }
                 }
             }
-            console.log(list)
             return list
             
         },
@@ -583,7 +583,6 @@ export default {
                 pageNumber: 1,
                 pageSize: 500
             };
-            console.log(path)
             if(path){
                 data.contractPath = path
             }else{
@@ -708,7 +707,6 @@ export default {
             // } else {
             //     this.folderList = [];
             // }
-            console.log(this.folderList.length)
             this.folderList.forEach((value, index) => {
                 let num = 0;
                     var data = {
@@ -747,8 +745,6 @@ export default {
                     }
                     result.push(data);
             });
-            console.log(this.contractArry)
-            console.log(result)
             return result;
         },
         open(val) {
