@@ -79,7 +79,7 @@ const FileSaver = require("file-saver");
 import Bus from "@/bus";
 
 export default {
-    name: "RivateKeyManagement",
+    name: "privateKeyManagement",
     components: {
         "v-contentHead": contentHead,
         importKey
@@ -317,5 +317,5 @@ export default {
 };
 </script>
 <style scoped>
-@import "./rivateKeyManagement.css";
+@import "./privateKeyManagement.css";
 </style>

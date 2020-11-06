@@ -3,7 +3,7 @@ let Base64 = require("js-base64").Base64;
 var compileJSON;
 var missingInputs = [];
 function findImports (path,list,contractPath) {
-    let contractList = JSON.parse(list);
+    let contractList = list;
     let arry = path.split("/");
     let newpath = arry[arry.length - 1];
     let num = 0;
@@ -41,7 +41,6 @@ function findImports (path,list,contractPath) {
         if (newArry.length > 1) {
             for (let i = 0; i < newArry.length; i++) {
                 if (newpath == newArry[i].contractName + ".sol") {
-                    debugger
                     return {
                         contents: Base64.decode(
                             newArry[i].contractSource
@@ -83,6 +82,7 @@ function findImports (path,list,contractPath) {
 module.exports = function worker(self) {
     
     self.addEventListener('message', (e) => {
+        console.log("###############################################################")
     const data = e.data;
     switch (data.cmd) {
         case 'loadVersion':
@@ -113,16 +113,19 @@ module.exports = function worker(self) {
               })
             break
         case 'compile':
+            console.log(data.input,data.list,data.path)
             missingInputs.length = 0
             if(data.input && compileJSON) {
+           
             self.postMessage({
-                cmd: 'compiled', 
-                data: compileJSON(data.input,data.list,data.path),
-                input: data.input,
-                missingInputs: missingInputs
-            })
+                    cmd: 'compiled', 
+                    data: compileJSON(data.input,data.list,data.path),
+                    input: data.input,
+                    missingInputs: missingInputs
+                })
             }
             break
         }
+        
     },false)
 }

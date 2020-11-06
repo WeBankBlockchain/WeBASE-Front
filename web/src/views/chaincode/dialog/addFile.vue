@@ -140,7 +140,21 @@ export default {
             //         }
             //     })
             // }
+           
             if(this.folderList.length){
+                let num = 0;
+                for(let i = 0; i < this.folderList.length; i++){
+                    if(this.folderList.folderName === "/"){
+                        num++
+                    }
+                }
+                if(num  == 0){
+                    let data = {
+                        folderName: "/",
+                        folderId: 1,
+                    }
+                    this.folderList.unshift(data)
+                }
                 this.options = this.folderList
             }else{
                 this.options = [{
@@ -148,7 +162,13 @@ export default {
                 folderId: 1,
             }];
             }
-            
+            this.fileFrom.contractType = this.options[0].folderName
+            console.log(this.data)
+            for(let i = 0; i < this.options.length; i++){
+                if(this.options[i].folderName == this.data.contractName){
+                    this.fileFrom.contractType = this.options[i].folderName
+                }
+            }
         },
         submit: function (formName) {
             this.$refs[formName].validate(valid => {
