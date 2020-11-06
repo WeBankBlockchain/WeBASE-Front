@@ -39,7 +39,7 @@
 import menu from "./components/contractCatalog";
 import codes from "./components/code";
 import contentHead from "@/components/contentHead";
-import { encryption } from "@/util/api";
+import { encryption,getSolcList } from "@/util/api";
 import Bus from "@/bus"
 import webworkify from 'webworkify-webpack'
 export default {
@@ -76,7 +76,9 @@ export default {
             version: localStorage.getItem('solcName') ? localStorage.getItem('solcName') : '',
             baseURLWasm: './static/js',
             versionId: localStorage.getItem('versionId') ? localStorage.getItem('versionId') : '',
-            host: location.host
+            host: location.host,
+            solcList: [],
+            allVersionList: []
         };
     },
     computed: {
@@ -89,13 +91,17 @@ export default {
         }
     },
     beforeDestroy: function () {
-        Bus.$off("changeGroup")
+        Bus.$off("changeGroup");
+        if(this.$store.state.worker){
+            this.$store.state.worker.terminate();
+            this.$store.state.worker = null
+        }
     },
     mounted: function () {
         Bus.$on("changeGroup", data => {
             this.changeGroup()
         })
-        this.allVersion = [
+        this.allVersionList = [
             {
                 solcName: "v0.4.25",
                 versionId: 0,
@@ -119,20 +125,6 @@ export default {
                 versionId: 3,
                 encryptType: 1,
                 net: 0
-            },
-            {
-                solcName: "v0.6.10",
-                versionId: 4,
-                url: `http://${this.host}/WeBASE-Front/solcjs/v0.6.10.js`,
-                encryptType: 0,
-                net: 1
-            },
-            {
-                solcName: "v0.6.10-gm",
-                versionId: 5,
-                url: `http://${this.host}/WeBASE-Front/solcjs/soljson-0.6.10-gm.js`,
-                encryptType: 1,
-                net: 1
             }
         ]
         this.getEncryption(this.querySolcList);
@@ -162,15 +154,14 @@ export default {
                 }
             }
             if(this.versionData.net){
-                if(this.$store.state.worker){
-                    this.$store.state.worker.terminate();
-                    let w
-                }
+                // if(this.$store.state.worker){
+                //     this.$store.state.worker.terminate();
+                //     this.$store.state.worker = null
+                // }
                 let w = webworkify(require.resolve('@/util/file.worker'));
                 this.$store.state.worker = w
                 w.addEventListener('message', function (ev) {
                     if(ev.data.cmd == 'versionLoaded'){
-                        console.log(ev.data,that);
                         that.loading =false
                     }else{
                         console.log(ev.data);
@@ -182,7 +173,7 @@ export default {
                     data: this.versionData.url
                 });
                 w.addEventListener("error", function (ev) {
-                     console.log(ev)
+                    console.log(ev)
                 })
             }else{
                 var head = document.head;
@@ -197,7 +188,11 @@ export default {
             
         },
         onchangeLoadVersion(version) {
-            this.loading = true
+            this.loading = true;
+            if(this.$store.state.worker){
+                this.$store.state.worker.terminate();
+                this.$store.state.worker = null
+            }
             localStorage.setItem('solcName', version)
             var versionId = '';
             this.versionList.forEach(item => {
@@ -207,7 +202,6 @@ export default {
             });
             localStorage.setItem('versionId', versionId)
             this.initSolc(versionId)
-            console.log(this.$store.state.versionData)
             if(this.$store.state.versionData && this.$store.state.versionData.net == 0){
                 this.$router.go(0)
             }
@@ -218,8 +212,51 @@ export default {
             encryption().then(res => {
                 if (res.status == 200) {
                     localStorage.setItem("encryptionId", res.data)
-                    callback();
+                    this.getSolcs(callback)
                 } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+        },
+        getSolcs (callback) {
+            getSolcList().then(res => {
+                this.allVersion = [];
+                this.allVersion = this.allVersionList
+                if(res.data.code === 0){
+                    this.solcList = res.data.data;
+                    for(let i = 0; i < this.solcList.length; i++){
+                        if(this.solcList[i] == "v0.6.10.js"){
+                            let data = {
+                                solcName: "v0.6.10",
+                                versionId: 4,
+                                url: `http://${this.host}/WeBASE-Front/solcjs/v0.6.10.js`,
+                                encryptType: 0,
+                                net: 1
+                            }
+                            this.allVersion.push(data)
+                        }
+                        if(this.solcList[i] == "v0.6.10-gm.js"){
+                            let data = {
+                                solcName: "v0.6.10-gm",
+                                versionId: 5,
+                                url: `http://${this.host}/WeBASE-Front/solcjs/v0.6.10-gm.js`,
+                                encryptType: 1,
+                                net: 1
+                            }
+                            this.allVersion.push(data)
+                        }
+                    }
+                    callback()
+                }else {
                     this.$message({
                         type: "error",
                         message: this.$chooseLang(res.data.code)
