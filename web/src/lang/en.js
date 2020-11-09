@@ -25,6 +25,7 @@ export default {
         testUserList: 'Tester List',
         abiList: 'ABI List',
         parseAbi: 'ABI Encode',
+        eventCheck: 'Event Check',
     },
     navbar: {
         dashboard: 'Dashboard',
@@ -86,7 +87,7 @@ export default {
         contractName: 'Name',
         contractPath: 'Location',
         contractAddress: 'Address',
-        contractAbi: 'Abi',
+        contractAbi: 'ABI',
         contractBin: 'Bin',
         createdTime: 'Created Time',
         importPem: "Import Pem Private Key",
@@ -98,11 +99,12 @@ export default {
         queueName: "Queue Name",
         routingKey: "RoutingKey",
         groupId: "Group Id",
-        fromBlock: 'From Block',
-        toBlock: 'To Block',
+        fromBlock: 'From',
+        toBlock: 'To',
         topicList: 'Topic List',
         fileType: "File Type",
         fileName: "PrivateKey Name",
+        eventValue: 'Event',
     },
     errorLog: {
         tips: 'Please click the bug icon in the upper right corner',
@@ -153,6 +155,9 @@ export default {
         fromBlock: "Please enter from block",
         toBlock: "Please enter to block",
         topicList: "Please enter topic List",
+        eventName: "Please enter event name",
+        search: 'Search',
+        exportSol: 'Export Contract'
     },
     placeholder: {
         globalSearch: 'Search by Block Number / Tx Hash',
@@ -204,7 +209,10 @@ export default {
         acquisitionSwitch: 'Acquisition switch',
         check: 'check',
         detele: 'detele',
-        uploadSolc: 'Upload different versions of compiler'
+        uploadSolc: 'Upload different versions of compiler',
+        checkEvent: 'Event Check',
+        checkEventResult: 'Event',
+        eventName: 'Event Name'
     },
     text: {
         noContract: 'Please create a new contract',
@@ -282,7 +290,7 @@ export default {
         contractAddress: "Contract address",
         fromBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
         toBlock: "The minimum value is 0; the default value is latest, which means listening to the latest block",
-        topicList: "There is no space between the list and event parameters of contract event, and multiple events are separated by English semicolons (;); for example, setevent (string, string); transferevent (address, uint)",
+        topicList: "There is no space between the list and event parameters of contract event, and multiple events are separated by English semicolons (;); for example, setevent (string, string); transferevent (address, uint256)",
         parse: 'Parse',
         addParameter: "Add parameter",
         remove: 'Remove',
@@ -292,6 +300,7 @@ export default {
         parseTitle: "Enter your contract's ABI to auto-parse",
         parseAbiManually: "Or enter your parameters manually",
         addAbi: "Import ABI",
+        eventParam: 'Please follow the prompt of event parameter type strictly',
     },
     contracts: {
         createFile: "Create File",
@@ -333,7 +342,7 @@ export default {
         methodName: "Method Name",
         contractCatalogue: "Location",
         copyContractAddress: "Copy Contract Address",
-        contractAbi: "Abi",
+        contractAbi: "ABI",
         contractBin: "Bin",
         runtimeBin: "Runtime-bin",
         copyContractAbi: "Copy Contract Abi",
@@ -390,7 +399,8 @@ export default {
         nodeIdList: "Please enter nodeList",
         number: "Please enter number",
         groupId: "Please enter group ID",
-        correctJson: "Enter correct JSON"
+        correctJson: "Enter correct JSON",
+        blockNumber: "Greater than 0",
     },
     nodes: {
         nodeFront: "Front Node",

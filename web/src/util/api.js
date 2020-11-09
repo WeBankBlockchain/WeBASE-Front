@@ -850,3 +850,39 @@ export function getSolcList () {
         }
     })
 }
+//event check 
+export function checkEvent(data) {
+    return post({
+        url: `${HANDLE}event/eventLogs/list`,
+        method: 'post',
+        data: data
+    })
+}
+
+export function contractFindOne(contractId) {
+    return get({
+        url: `${HANDLE}contract/findOne/${contractId}`,
+        method: 'GET',
+    })
+}
+
+export function contractListAll(data) {
+    return get({
+        url: `${HANDLE}contract/contractList/all/light`,
+        method: 'GET',
+        params: data
+    })
+}
+export function listAddress(groupId) {
+    return get({
+        url: `${HANDLE}event/listAddress/${groupId}`,
+        method: 'GET',
+    })
+}
+export function eventContractInfo(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/contractInfo/${params.str}`,
+        method: 'get'
+    })
+}
