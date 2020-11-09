@@ -156,7 +156,8 @@ export default {
         toBlock: "Please enter to block",
         topicList: "Please enter topic List",
         eventName: "Please enter event name",
-        search: 'Search'
+        search: 'Search',
+        exportSol: 'Export Contract'
     },
     placeholder: {
         globalSearch: 'Search by Block Number / Tx Hash',

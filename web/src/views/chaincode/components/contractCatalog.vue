@@ -47,6 +47,7 @@
                             <ul v-if="contractFile">
                                 <li class="contract-menu-handle-list" @click="rename">{{$t('dialog.rename')}}</li>
                                 <li class="contract-menu-handle-list" @click="deleteFile(item)">{{$t('dialog.delete')}}</li>
+                                <li class="contract-menu-handle-list" @click="exportFile(item)">{{$t('dialog.exportSol')}}</li>
                             </ul>
                         </div>
                     </div>
@@ -56,8 +57,9 @@
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
                         <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
-                                <li class="contract-menu-handle-list" @click="addFiles">{{$t('dialog.newFile')}}</li>
+                                <li class="contract-menu-handle-list" @click="addFiles(item)">{{$t('dialog.newFile')}}</li>
                                 <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
+                                <li class="contract-menu-handle-list" @click="exportFolder(item)">{{$t('dialog.exportSol')}}</li>
                             </ul>
                         </div>
                         <br>
@@ -74,6 +76,7 @@
                                     <ul v-if="contractFile&&item.contractName!=='template'">
                                         <li class="contract-menu-handle-list" @click="rename">重命名</li>
                                         <li class="contract-menu-handle-list" @click="deleteFile(list)">删除</li>
+                                        <li class="contract-menu-handle-list" @click="exportFile(list)">{{$t('dialog.exportSol')}}</li>
                                     </ul>
                                 </div>
                             </li>
@@ -99,7 +102,7 @@
             </div>
         </div> -->
         <add-folder v-if="foldershow" :foldershow="foldershow" @close='folderClose' @success='folderSuccess'></add-folder>
-        <add-file v-if="fileshow" :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
+        <add-file v-if="fileshow" :data='selectFolderData' :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
         <select-catalog v-if='cataLogShow' :show='cataLogShow' @success='catalogSuccess($event)' @close='catalogClose'></select-catalog>
     </div>
 </template>
@@ -109,7 +112,9 @@ import addFile from "../dialog/addFile";
 import selectCatalog from "../dialog/selectCatalog";
 import { getContractList,getContractPathList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion,deletePath } from "@/util/api";
 import Bus from "@/bus";
-import Clickoutside from 'element-ui/src/utils/clickoutside'
+import Clickoutside from 'element-ui/src/utils/clickoutside';
+let Base64 = require("js-base64").Base64;
+const FileSaver = require("file-saver");
 export default {
     name: "contractCatalog",
     props: {
@@ -151,7 +156,8 @@ export default {
             version: "",
             versionOptions: [],
             pathList: [],
-            folderData: null
+            folderData: null,
+            selectFolderData: null
         };
     },
     watch: {
@@ -355,7 +361,8 @@ export default {
             this.checkNull();
             this.fileshow = true;
         },
-        addFiles() {
+        addFiles(val) {
+            this.selectFolderData = val
             this.fileshow = true;
             this.folderId = this.ID;
             this.ID = "";
@@ -537,7 +544,6 @@ export default {
                         }
                     }
                     this.getContracts()
-                    console.log(this.folderList)
                 }else {
                         this.$message({
                             type: "error",
@@ -573,7 +579,6 @@ export default {
                     }
                 }
             }
-            console.log(list)
             return list
             
         },
@@ -583,7 +588,6 @@ export default {
                 pageNumber: 1,
                 pageSize: 500
             };
-            console.log(path)
             if(path){
                 data.contractPath = path
             }else{
@@ -708,7 +712,6 @@ export default {
             // } else {
             //     this.folderList = [];
             // }
-            console.log(this.folderList.length)
             this.folderList.forEach((value, index) => {
                 let num = 0;
                     var data = {
@@ -747,8 +750,6 @@ export default {
                     }
                     result.push(data);
             });
-            console.log(this.contractArry)
-            console.log(result)
             return result;
         },
         open(val) {
@@ -1035,6 +1036,41 @@ export default {
         },
         deleteSloc(val) {
             console.log(val)
+        },
+        exportFile(val) {
+            this.$confirm(`${this.$t('dialog.sureExport')}？`)
+                .then(_ => {
+                    this.sureExportSol(val);
+                })
+                .catch(_ => { });
+        },
+        sureExportSol(val){
+            let contractSource = Base64.decode(val.contractSource);
+            let contractAbi = val.contractAbi;
+            let contractBin = val.contractBin;
+            var blobContractSource = new Blob([contractSource], { type: "text;charset=utf-8" });
+            var blobContractAbi = new Blob([contractAbi], { type: "text;charset=utf-8" });
+            var blobContractBin = new Blob([contractBin], { type: "text;charset=utf-8" });
+            FileSaver.saveAs(blobContractSource, `${val.contractName}.sol`);
+            FileSaver.saveAs(blobContractAbi, `${val.contractName}-abi`);
+            FileSaver.saveAs(blobContractBin, `${val.contractName}-bin`);
+        },
+        exportFolder(val){
+            this.$confirm(`${this.$t('dialog.sureExport')}？`)
+                .then(_ => {
+                    this.sureExportFolderSol(val);
+                })
+                .catch(_ => { });
+        },
+        sureExportFolderSol(val){
+            let folderInfo = val;
+            var contractList = []
+            if(folderInfo.child.length > 0) {
+                contractList = folderInfo.child
+                contractList.forEach(item => {
+                    this.sureExportSol(item)
+                });
+            }
         }
     }
 };

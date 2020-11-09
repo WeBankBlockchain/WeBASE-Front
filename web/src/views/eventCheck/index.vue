@@ -5,17 +5,21 @@
             <div class="search-part ">
                 <el-form :model="contractEventForm" :rules="rules" ref="contractEventForm" class="demo-ruleForm" label-width="110px">
                     <el-form-item :label="$t('table.contractAddress')" prop="contractAddress">
-
-                        <el-select v-if="abiId || contractId" v-model="contractEventForm.contractAddress" :placeholder="$t('placeholder.selected')" style="width: 500px;" @change="changeAddress">
+                        <!-- <el-select v-if="abiId || contractId" v-model="contractEventForm.contractAddress" :placeholder="$t('placeholder.selected')" style="width: 500px;" @change="changeAddress">
                             <el-option v-for="item in addressList" :key="item.id" :label="item.contractAddress" :value="item.contractAddress">
                                 <span style="float: left; font-size: 12px">{{ item.contractAddress }}</span>
                                 <span style="float: right; color: #8492a6; font-size: 12px; margin-left: 4px;">{{ item.contractName }}</span>
                             </el-option>
-                        </el-select>
-                        <el-input v-else v-model.trim="contractEventForm.contractAddress" style="width: 500px;" clearable></el-input>
+                        </el-select> -->
+                        <el-autocomplete v-model.trim="contractEventForm.contractAddress" :fetch-suggestions="querySearch" @select="selectAddress" style="width: 500px;" clearable>
+                            <template slot-scope="{ item }">
+                                <div class="name">{{ item.contractAddress }} {{item.contractName}}</div>
+                            </template>
+                        </el-autocomplete>
+                        <span></span>
                     </el-form-item>
                     <el-form-item :label="$t('table.contractAbi')" prop="contractAbi">
-                        <el-input v-model="contractEventForm.contractAbi" :rows="1" type="textarea" style="width: 500px;"></el-input>
+                        <el-input v-model="contractEventForm.contractAbi" :rows="1" type="textarea" style="width: 500px;" ></el-input>
                     </el-form-item>
                     <div class="block-wrapper">
                         <el-form-item :label="$t('table.fromBlock')" prop="fromBlock">
@@ -71,7 +75,7 @@
 <script>
 import contentHead from "@/components/contentHead";
 import decodeLog from "@/components/decodeLog";
-import { contractFindOne, contractListAll, checkEvent, queryBlockNumber, listAddress } from "@/util/api"
+import { checkEvent, queryBlockNumber, listAddress, eventContractInfo } from "@/util/api"
 import { validateEvent } from "@/util/validate";
 import { isJson } from "@/util/util";
 const Web3Utils = require('web3-utils');
@@ -103,14 +107,16 @@ export default {
             addressList: [],
             contractId: '',
             abiId: '',
-            eventList: []
+            eventList: [],
+            restaurants: [],
+            queryTypeParam: {}
         }
     },
 
     computed: {
         rules() {
             var isAddress = (rule, value, callback) => {
-                if (value == '' || value == undefined || value == null) {
+                if (value === '' || value == undefined || value == null) {
                     callback();
                 } else {
                     if ((!Web3Utils.isAddress(value)) && value != '') {
@@ -127,7 +133,11 @@ export default {
                     if (!Number.isInteger(value)) {
                         callback(new Error('Invalid input: Unexpected end of number input'));
                     } else {
-                        callback();
+                        if (value <= 0) {
+                            callback(new Error(this.$t('rule.blockNumber')));
+                        } else {
+                            callback();
+                        }
                     }
                 }
             }
@@ -195,6 +205,8 @@ export default {
         eventNameList() {
             var options = []
             if (!this.contractEventForm.contractAbi) {
+                this.contractEventForm.eventName = ''
+                this.inputList = []
                 return
             }
             try {
@@ -241,26 +253,11 @@ export default {
 
     methods: {
         queryInit() {
-            if (this.$route.query.id) {
-                this.contractId = this.$route.query.id
-                this.queryContractAbi()
-                this.queryAllAddress()
-            } else if (this.$route.query.abiId) {
-                this.abiId = this.$route.query.abiId
-                this.queryContractAbi()
-                this.queryAllAddress()
-            } else {
-                this.contractId = ''
-                this.abiId = ''
-                this.contractEventForm = {
-                    groupId: '',
-                    contractAbi: '',
-                    contractAddress: '',
-                    fromBlock: 1,
-                    toBlock: '',
-                    eventName: ''
-                }
-            }
+            if (this.$route.query.type) {
+                console.log(this.$route.query.type)
+                this.queryTypeParam = this.$route.query
+                this.queryContractAbi(this.queryTypeParam)
+            } 
             this.queryAllAddress()
             this.getBlockNumber()
         },
@@ -277,14 +274,14 @@ export default {
             this.queryInit()
         },
         queryAllAddress() {
-            let reqParam = {
-                groupId: this.groupId,
-                // contractStatus: 2
-            }
             listAddress(this.groupId)
                 .then(res => {
                     if (res.data.code === 0) {
-                        this.addressList = res.data.data
+                        var addressList = res.data.data;
+                        addressList.forEach(item => {
+                            item.value = item.contractAddress
+                        })
+                        this.restaurants = addressList
                     } else {
                         this.$message({
                             type: "error",
@@ -293,8 +290,9 @@ export default {
                     }
                 })
         },
-        queryContractAbi() {
-            contractFindOne(this.contractId)
+        queryContractAbi(queryParam) {
+            
+            eventContractInfo(queryParam)
                 .then(res => {
                     if (res.data.code === 0) {
                         this.contractEventForm.contractAddress = res.data.data.contractAddress
@@ -306,14 +304,6 @@ export default {
                         });
                     }
                 })
-        },
-        changeAddress($event) {
-            this.addressList.forEach(item => {
-                if (item.contractAddress == $event) {
-                    this.contractId = item.id
-                }
-            })
-            this.queryContractAbi()
         },
         changeEventName($event) {
             var eventName = $event.replace(/\((.+?)\)/g, '')
@@ -521,6 +511,25 @@ export default {
                     });
                 });
         },
+        createFilter(queryString) {
+            return (restaurant) => {
+                return (restaurant.contractAddress.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+            };
+        },
+        querySearch(queryString, cb) {
+            var restaurants = this.restaurants;
+            var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+            // 调用 callback 返回建议列表的数据
+            cb(results);
+        },
+        selectAddress(item) {
+            let queryParam = {
+                groupId: this.groupId,
+                type: item.type,
+                contractAddress: item.contractAddress
+            }
+            this.queryContractAbi(queryParam)
+        }
     }
 }
 </script>

@@ -156,7 +156,8 @@ export default {
         topicList: "请输入合约event名列表",
         eventName: "请选择合约名",
         isContractAbi: "请输入合约Abi",
-        search: '查看'
+        search: '查看',
+        exportSol: '导出合约'
     },
     placeholder: {
         globalSearch: '请输入 Block Number 或 Tx Hash',
