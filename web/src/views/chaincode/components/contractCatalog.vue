@@ -56,7 +56,7 @@
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
                         <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
-                                <li class="contract-menu-handle-list" @click="addFiles">{{$t('dialog.newFile')}}</li>
+                                <li class="contract-menu-handle-list" @click="addFiles(item)">{{$t('dialog.newFile')}}</li>
                                 <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
                             </ul>
                         </div>
@@ -99,7 +99,7 @@
             </div>
         </div> -->
         <add-folder v-if="foldershow" :foldershow="foldershow" @close='folderClose' @success='folderSuccess'></add-folder>
-        <add-file v-if="fileshow" :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
+        <add-file v-if="fileshow" :data='selectFolderData' :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
         <select-catalog v-if='cataLogShow' :show='cataLogShow' @success='catalogSuccess($event)' @close='catalogClose'></select-catalog>
     </div>
 </template>
@@ -107,7 +107,7 @@
 import addFolder from "../dialog/addFolder";
 import addFile from "../dialog/addFile";
 import selectCatalog from "../dialog/selectCatalog";
-import { getContractList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion } from "@/util/api";
+import { getContractList,getContractPathList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion,deletePath } from "@/util/api";
 import Bus from "@/bus";
 import Clickoutside from 'element-ui/src/utils/clickoutside'
 export default {
@@ -149,8 +149,10 @@ export default {
             modifyParam: {},
             uploadFiles: [],
             version: "",
-            versionOptions: []
-
+            versionOptions: [],
+            pathList: [],
+            folderData: null,
+            selectFolderData: null
         };
     },
     watch: {
@@ -170,8 +172,10 @@ export default {
         Bus.$off("modifyState");
     },
     mounted() {
+        
         this.$nextTick(function () {
-            this.getContracts();
+            this.getContractPaths()
+            // this.getContracts();
         });
         Bus.$on("compile", data => {
             this.saveContract(data, `${this.$t('text.compilationSucceeded')}`);
@@ -180,7 +184,7 @@ export default {
             this.saveContract(data);
         });
         Bus.$on("deploy", data => {
-            this.getContracts(data);
+            this.getContracts("",data);
         });
         Bus.$on("open", data => {
             this.contractArry.forEach(value => {
@@ -190,6 +194,8 @@ export default {
                 }
             });
             this.select(data);
+           
+            
         });
         Bus.$on('modifyState', data => {
             this.contractList.forEach(value => {
@@ -350,7 +356,8 @@ export default {
             this.checkNull();
             this.fileshow = true;
         },
-        addFiles() {
+        addFiles(val) {
+            this.selectFolderData = val
             this.fileshow = true;
             this.folderId = this.ID;
             this.ID = "";
@@ -435,7 +442,9 @@ export default {
         },
         folderSuccess() {
             this.folderClose();
-            this.getContractArry();
+
+            this.getContractPaths()
+            // this.getContractArry();
         },
         fileClose() {
             this.fileshow = false;
@@ -445,7 +454,7 @@ export default {
         getContractArry(val) {
             let result = [];
             let list = [];
-            let folderArry = this.createFolder();
+            let folderArry = this.createFolder(val);
             let newFileList = [];
             list = this.contractList || [];
             list.forEach(value => {
@@ -497,7 +506,7 @@ export default {
                             })
                         }
                         this.modifyState = false
-                        this.getContracts(data);
+                        this.getContracts(data.contractPath,data);
                     } else {
                         this.$message({
                             type: "error",
@@ -512,55 +521,119 @@ export default {
                     });
                 });
         },
-        getContracts(list) {
+        getContractPaths () {
+            getContractPathList(localStorage.getItem("groupId")).then(res => {
+                if(res.status == 200){
+                    this.pathList = res.data;
+                    this.folderList = []
+                    for(let i = 0; i < this.pathList.length; i++) {
+                        if (this.pathList[i].contractPath != "/") {
+                            let item = {
+                                folderName: this.pathList[i].contractPath,
+                                folderId: new Date().getTime() + this.pathList[i].contractPath,
+                                folderActive: false,
+                                groupId: localStorage.getItem("groupId"),
+                                modifyTime: this.pathList[i].modifyTime
+                            };
+                            this.folderList.push(item)
+                        }
+                    }
+                    this.getContracts()
+                }else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+        },
+        changeContractData(list1,list2){
+            let arry = [];
+            let obj = {}
+            let list = list1.concat(list2);
+                list = list.reduce(function(item, next) {
+                obj[next.id] ? '' : obj[next.id] = true && item.push(next);
+                return item;
+            }, []);
+            for(let i = 0; i < list.length; i++){
+                for(let j = 0; j < list2.length; j++){
+                    if(list[i].id === list2[j].id){
+                        list[i].contractName = list2[j].contractName;
+                        list[i].contractPath = list2[j].contractPath;
+                        list[i].contractSource = list2[j].contractSource;
+                        list[i].contractAbi = list2[j].contractAbi;
+                        list[i].contractBin = list2[j].contractBin;
+                        list[i].bytecodeBin = list2[j].bytecodeBin;
+                        list[i].contractAddress = list2[j].contractAddress;
+                    }
+                }
+            }
+            return list
+            
+        },
+        getContracts(path,list) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
                 pageNumber: 1,
                 pageSize: 500
             };
+            if(path){
+                data.contractPath = path
+            }else{
+                data.contractPath = "/"
+            }
             getContractList(data)
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.contractList = data.data || [];
+                        let contractList = data.data || [];
+                        let contractDataList = this.$store.state.contractDataList;
+                        this.contractList = this.changeContractData(contractDataList,contractList)
+                        this.$store.dispatch('set_contractDataList',this.contractList);
                         localStorage.setItem("contractList", JSON.stringify(this.contractList))
                         if (data.data.length) {
-                            if (localStorage.getItem("folderList")) {
-                                this.folderList = JSON.parse(
-                                    localStorage.getItem("folderList")
-                                );
-                            } else {
-                                this.folderList = [];
-                            }
-                            this.contractList.forEach(value => {
-                                if (value.contractPath != "/") {
-                                    let item = {
-                                        folderName: value.contractPath,
-                                        folderId: new Date().getTime() + `${value.contractPath}`,
-                                        folderActive: false,
-                                        groupId: localStorage.getItem("groupId"),
-                                        modifyTime: value.modifyTime
-                                    };
-                                    this.folderList.push(item);
-                                }
-                            });
+                            // if (localStorage.getItem("folderList")) {
+                            //     this.folderList = JSON.parse(
+                            //         localStorage.getItem("folderList")
+                            //     );
+                            // } else {
+                            //     this.folderList = [];
+                            // }
+                            // this.contractList.forEach(value => {
+                            //     if (value.contractPath != "/") {
+                            //         let item = {
+                            //             folderName: value.contractPath,
+                            //             folderId: new Date().getTime() + `${value.contractPath}`,
+                            //             folderActive: false,
+                            //             groupId: localStorage.getItem("groupId"),
+                            //             modifyTime: value.modifyTime
+                            //         };
+                            //         this.folderList.push(item);
+                            //     }
+                            // });
                             let result = [];
                             let array = [];
                             let obj = {};
-                            for (let i = 0; i < this.folderList.length; i++) {
-                                if (!obj[this.folderList[i].folderName] && this.folderList[i].groupId == localStorage.getItem("groupId")) {
-                                    result.push(this.folderList[i]);
-                                    obj[this.folderList[i].folderName] = true;
-                                } else if (this.folderList[i].groupId != localStorage.getItem('groupId')) {
-                                    array.push(this.folderList[i]);
-                                }
+                            // for (let i = 0; i < this.folderList.length; i++) {
+                            //     if (!obj[this.folderList[i].folderName] && this.folderList[i].groupId == localStorage.getItem("groupId")) {
+                            //         result.push(this.folderList[i]);
+                            //         obj[this.folderList[i].folderName] = true;
+                            //     } else if (this.folderList[i].groupId != localStorage.getItem('groupId')) {
+                            //         array.push(this.folderList[i]);
+                            //     }
 
-                            }
-                            this.folderList = result.concat(array);
-                            localStorage.setItem(
-                                "folderList",
-                                JSON.stringify(this.folderList)
-                            );
+                            // }
+                            // this.folderList = result.concat(array);
+                            // localStorage.setItem(
+                            //     "folderList",
+                            //     JSON.stringify(this.folderList)
+                            // );
                             this.contractList.forEach(value => {
                                 this.$set(value, "contractType", "file");
                                 this.$set(value, "contractActive", false);
@@ -588,12 +661,12 @@ export default {
                                 this.getContractArry();
                             }
                         } else {
-                            if (localStorage.getItem("folderList")) {
-                                this.folderList = JSON.parse(
-                                    localStorage.getItem("folderList")
-                                );
+                            // if (localStorage.getItem("folderList")) {
+                            //     this.folderList = JSON.parse(
+                            //         localStorage.getItem("folderList")
+                            //     );
                                 this.getContractArry();
-                            }
+                            // }
                         }
                     } else {
                         this.$message({
@@ -625,52 +698,59 @@ export default {
             }
             this.fileClose();
         },
-        createFolder() {
+        createFolder(val) {
             let result = [];
-            if (localStorage.getItem("folderList")) {
-                this.folderList = JSON.parse(
-                    localStorage.getItem("folderList")
-                );
-            } else {
-                this.folderList = [];
-            }
+            // if (localStorage.getItem("folderList")) {
+            //     this.folderList = JSON.parse(
+            //         localStorage.getItem("folderList")
+            //     );
+            // } else {
+            //     this.folderList = [];
+            // }
             this.folderList.forEach((value, index) => {
                 let num = 0;
-                if (!value.groupId || (value.groupId && localStorage.getItem("groupId") && value.groupId == localStorage.getItem("groupId"))) {
                     var data = {
                         contractName: value.folderName,
                         folderId: value.folderId,
                         contractActive: false,
                         contractType: "folder",
-                        folderIcon: "el-icon-caret-bottom",
-                        folderActive: true,
+                        folderIcon: "el-icon-caret-right",
+                        folderActive: false,
                         renameShow: false,
                         inputShow: false
                     };
-                    if (index != 0) {
-                        data = {
-                            contractName: value.folderName,
-                            folderId: value.folderId,
-                            contractActive: false,
-                            contractType: "folder",
-                            folderIcon: "el-icon-caret-right",
-                            folderActive: false,
-                            renameShow: false,
-                            inputShow: false
-                        }
-                    }
+                    // if (index != 0) {
+                    //     data = {
+                    //         contractName: value.folderName,
+                    //         folderId: value.folderId,
+                    //         contractActive: false,
+                    //         contractType: "folder",
+                    //         folderIcon: "el-icon-caret-bottom",
+                    //         folderActive: false,
+                    //         renameShow: false,
+                    //         inputShow: false
+                    //     }
+                    // }
                     this.contractArry.forEach((item, index) => {
-                        if (item.contractType == "folder" && item.folderId == value.folderId) {
+                        if (item.contractType == "folder" && item.contractName == data.contractName) {
                             data.folderIcon = item.folderIcon;
                             data.folderActive = item.folderActive;
                         }
                     });
+                    if(val && val.contractPath && val.contractPath != "/"){
+                        if(data.contractName == val.contractPath){
+                            data.folderIcon = "el-icon-caret-bottom";
+                            data.folderActive = true;
+                        }
+                    }
                     result.push(data);
-                }
             });
             return result;
         },
         open(val) {
+           if(val.contractName != "/" && val.contractPath != "/"){
+                this.getContracts(val.contractName);
+            }
             this.contractArry.forEach(value => {
                 this.$set(value, "contractActive", false);
                 if (value.contractType == "folder") {
@@ -687,6 +767,7 @@ export default {
                 this.$set(val, "folderIcon", "el-icon-caret-bottom");
             }
             this.$set(val, "contractActive", true);
+            this.folderData = val
         },
         sureSelect(val) {
             let num = 0;
@@ -741,6 +822,13 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
+                        let contractList = this.$store.state.contractDataList;
+                        for(let i = 0; i < contractList.length; i++){
+                            if(contractList[i].id === val.id){
+                                contractList.splice(i,1)
+                            }
+                        }
+                        this.$store.dispatch("set_contractDataList",contractList)
                         this.getContracts();
                     } else {
                         this.$message({
@@ -760,29 +848,40 @@ export default {
         deleteFolder(val) {
             this.$confirm(`${this.$t('dialog.sureDelete')}？`)
                 .then(_ => {
-                    let list = val.child;
-                    while (list.length > 0) {
-                        this.deleteData(list[0]);
-                        list.splice(0, 1);
-                    }
-                    this.$nextTick(() => {
-                        this.folderList = JSON.parse(
-                            localStorage.getItem("folderList")
-                        );
-                        this.folderList.forEach((value, index) => {
-                            if (val.folderId == value.folderId) {
-                                this.folderList.splice(index, 1);
-                            }
-                        });
-                        localStorage.setItem("folderList", JSON.stringify(this.folderList));
-                        if (list.length === 0) {
-                            setTimeout(() => {
-                                this.getContracts()
-                            }, 10);
-                        }
-                    })
+                    this.deleteFolderData(val)
                 })
                 .catch(_ => { });
+        },
+        deleteFolderData (val) {
+            deletePath(localStorage.getItem("groupId"),val.contractName).then(res=> {
+                if(res.status === 200){
+                    let contractList = this.$store.state.contractDataList;
+                    let list = []
+                    for(let i = 0; i < contractList.length; i++){
+                        if(contractList[i].contractPath === val.contractName){
+                            contractList[i].sure = true
+                        }
+                    }
+                     for(let i = 0; i < contractList.length; i++){
+                        if(!contractList[i].sure){
+                            list.push(contractList[i])
+                        }
+                    }
+                    this.$store.dispatch("set_contractDataList",list)
+                    this.getContractPaths()
+                }else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        })
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
         },
         handleExceed(files, fileList) {
             if (files.length > 1) {
@@ -804,7 +903,6 @@ export default {
                                 solcId: item.solcId
                             })
                         })
-                        console.log(array)
                         this.versionOptions = this.versionOptions.concat(array)
                     } else {
                         this.$message({
@@ -841,7 +939,6 @@ export default {
             form.append('description', '')
             solcUpload(form)
                 .then(res => {
-                    console.log(res)
                     this.$emit('uploadLoading', false)
                     if (res.data.code === 0) {
 
@@ -869,14 +966,12 @@ export default {
         changeVersion(val) {
             // sessionStorage.setItem('solcVersion', val)
             // this.$router.push('blank')
-            console.log(val)
             this.$emit('uploadLoading', true)
             let param = {
                 fileName: 'soljson-v0.4.25+commit.59dbf8f1.js'
             }
             readSolcVersion('soljson-v0.4.25+commit.59dbf8f1.js')
                 .then(res => {
-                    console.log(res)
                     this.$emit('uploadLoading', false)
                     if (res.data.code === 0) {
 
