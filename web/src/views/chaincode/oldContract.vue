@@ -120,7 +120,8 @@ export default {
             checkEventResultVisible: false,
             contractInfo: null,
             checkEventResult: null,
-            eventName: ''
+            eventName: '',
+            groupId: localStorage.getItem("groupId")
         }
     },
     beforeDestroy: function () {
@@ -128,6 +129,7 @@ export default {
     },
     mounted: function () {
         Bus.$on("changeGroup", data => {
+            this.groupId = data
             this.changeGroup()
         })
         if (localStorage.getItem("groupId")) {
@@ -140,7 +142,7 @@ export default {
         },
         getContracts: function () {
             let data = {
-                groupId: localStorage.getItem("groupId"),
+                groupId: this.groupId,
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 contractName: this.contractName,
@@ -262,7 +264,9 @@ export default {
             this.$router.push({
                 path:'/eventCheck',
                 query: {
-                    id: val.id
+                    groupId: this.groupId,
+                    type: 'contract',
+                    contractAddress: val.contractAddress
                 }
             })
             // this.checkEventVisible = true

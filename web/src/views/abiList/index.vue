@@ -1,6 +1,6 @@
 <template>
     <div>
-        <content-head :headTitle="$t('route.abiList')" @changGroup="changGroup"></content-head>
+        <content-head :headTitle="$t('route.abiList')"></content-head>
         <div class="module-wrapper">
             <div class="search-part">
                 <div class="search-part-left" style="padding-top: 20px;">
@@ -64,6 +64,7 @@ import editor from "@/components/editor"
 import importAbi from "./components/importAbi"
 import updateAbi from "./components/updateAbi"
 import { getAbiList, deleteImportAbi } from "@/util/api"
+import Bus from "@/bus"
 export default {
     name: 'nodeList',
 
@@ -98,7 +99,8 @@ export default {
             updateItem: {},
             editorData: null,
             editorInput: null,
-            editorOutput: null
+            editorOutput: null,
+            groupId: localStorage.getItem('groupId')
         }
     },
 
@@ -141,14 +143,19 @@ export default {
 
     created() {
     },
-
+    beforeDestroy: function () {
+        Bus.$off("changeGroup")
+    },
     mounted() {
-
+        Bus.$on("changeGroup", data => {
+            this.groupId = data
+            this.changeGroup()
+        })
         this.queryAbiList()
     },
 
     methods: {
-        changGroup() {
+        changeGroup() {
             this.queryAbiList()
         },
         closeImport() {
@@ -170,7 +177,7 @@ export default {
         },
         queryAbiList() {
             let reqData = {
-                groupId: localStorage.getItem('groupId'),
+                groupId: this.groupId,
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize
             },
@@ -305,7 +312,9 @@ export default {
             this.$router.push({
                 path: '/eventCheck',
                 query: {
-                    abiId: val.abiId
+                    groupId: this.groupId,
+                    type: 'abi',
+                    contractAddress: val.contractAddress
                 }
             })
         },
