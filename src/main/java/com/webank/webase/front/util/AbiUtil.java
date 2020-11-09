@@ -263,6 +263,32 @@ public class AbiUtil {
     }
 
     /**
+     * get target topic event log
+     * @param receipt
+     * @param abiList
+     */
+    public static Map<String, Object> getEventFromReceipt(TransactionReceipt receipt, List<AbiDefinition> abiList)
+        throws FrontException {
+        Map<String, Object> resultMap = new HashMap<>();
+        List<Log> logList = receipt.getLogs();
+        for (AbiDefinition abiDefinition : abiList) {
+            String eventName = abiDefinition.getName();
+            List<String> funcInputTypes = getFuncInputType(abiDefinition);
+            List<TypeReference<?>> finalOutputs = outputFormat(funcInputTypes);
+            Event event = new Event(eventName, finalOutputs);
+            for (Log logInfo : logList) {
+                EventValues eventValues = Contract.staticExtractEventParameters(event, logInfo);
+                if (eventValues != null) {
+                    resultMap.put(eventName, eventValues);
+                }
+            }
+        }
+        return resultMap;
+    }
+
+
+
+    /**
      * check abi valid
      * @param contractAbi
      */

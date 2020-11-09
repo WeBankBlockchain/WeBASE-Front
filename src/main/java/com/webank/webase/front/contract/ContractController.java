@@ -29,16 +29,15 @@ import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
+import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -49,8 +48,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,6 +56,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -134,7 +132,7 @@ public class ContractController extends BaseController {
         FileContentHandle fileContentHandle =
                 ContractService.compileToJavaFile(param.getContractName(), param.getAbiInfo(),
                         param.getContractBin(), param.getPackageName());
-        return ResponseEntity.ok().headers(headers(fileContentHandle.getFileName()))
+        return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
                 .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
@@ -172,22 +170,6 @@ public class ContractController extends BaseController {
         }
         contractService.sendAbi(reqSendAbi);
         return ResponseEntity.ok().build();
-    }
-
-    private HttpHeaders headers(String fileName) {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment;filename*=UTF-8''" + encode(fileName));
-        return httpHeaders;
-    }
-
-    private String encode(String name) {
-        try {
-            return URLEncoder.encode(name, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -301,11 +283,51 @@ public class ContractController extends BaseController {
         return contractService.findPathList(groupId);
     }
 
-    @DeleteMapping("deletePath/{groupId}/{contractPath}")
+    @DeleteMapping("/deletePath/{groupId}/{contractPath}")
     public BaseResponse deletePath(@PathVariable("groupId") Integer groupId,
             @PathVariable String contractPath) {
         log.info("start deletePath. contractPath:{}", contractPath);
         contractService.deletePath(groupId, contractPath);
         return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    @DeleteMapping("/batch/{groupId}/{contractPath}")
+    public BaseResponse batchDeletePath(@PathVariable("groupId") Integer groupId,
+            @PathVariable String contractPath) {
+        log.info("start deletePath. contractPath:{}", contractPath);
+        contractService.batchDeleteByPath(groupId, contractPath);
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "query list of all contract without abi/bin", notes = "query list of contract without abi/bin")
+    @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
+        dataType = "Integer")
+    @GetMapping(value = "/contractList/all/light")
+    public BasePageResponse findAll(@RequestParam("groupId") Integer groupId,
+        @RequestParam("contractStatus") Integer contractStatus) throws FrontException, IOException {
+        log.info("findAll start. groupId:{},contractStatus:{}", groupId,contractStatus);
+        List<RspContractNoAbi> contractNoAbiList = contractService.findAllContractNoAbi(groupId, contractStatus);
+        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
+        response.setTotalCount(contractNoAbiList.size());
+        response.setData(contractNoAbiList);
+        return response;
+    }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "get one contract", notes = "get one contract")
+    @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
+        dataType = "Integer")
+    @GetMapping(value = "/findOne/{contractId}")
+    public BaseResponse findOne(@PathVariable Integer contractId) {
+        log.info("findOne start. contractId:{}", contractId);
+        Contract contract = contractService.findById(contractId.longValue());
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        response.setData(contract);
+        return response;
     }
 }

@@ -328,11 +328,20 @@ public class KeyStoreService {
     /**
      * import keystore info from p12 file input stream and its password
      * @param file
-     * @param password
+     * @param p12PasswordEncoded
      * @param userName
      * @return KeyStoreInfo
      */
-    public KeyStoreInfo importKeyStoreFromP12(MultipartFile file, String password, String userName) {
+    public KeyStoreInfo importKeyStoreFromP12(MultipartFile file, String p12PasswordEncoded, String userName) {
+        // decode p12 password
+        String password;
+        try {
+            password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
+        } catch (Exception e) {
+            log.error("decode password error:[]", e);
+            throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
+        }
+
         P12Manager p12Manager = new P12Manager();
         String privateKey;
         try {
