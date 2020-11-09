@@ -47,6 +47,7 @@
                             <ul v-if="contractFile">
                                 <li class="contract-menu-handle-list" @click="rename">{{$t('dialog.rename')}}</li>
                                 <li class="contract-menu-handle-list" @click="deleteFile(item)">{{$t('dialog.delete')}}</li>
+                                <li class="contract-menu-handle-list" @click="exportFile(item)">{{$t('dialog.exportSol')}}</li>
                             </ul>
                         </div>
                     </div>
@@ -58,6 +59,7 @@
                             <ul>
                                 <li class="contract-menu-handle-list" @click="addFiles(item)">{{$t('dialog.newFile')}}</li>
                                 <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
+                                <li class="contract-menu-handle-list" @click="exportFolder(item)">{{$t('dialog.exportSol')}}</li>
                             </ul>
                         </div>
                         <br>
@@ -74,6 +76,7 @@
                                     <ul v-if="contractFile&&item.contractName!=='template'">
                                         <li class="contract-menu-handle-list" @click="rename">重命名</li>
                                         <li class="contract-menu-handle-list" @click="deleteFile(list)">删除</li>
+                                        <li class="contract-menu-handle-list" @click="exportFile(list)">{{$t('dialog.exportSol')}}</li>
                                     </ul>
                                 </div>
                             </li>
@@ -109,7 +112,9 @@ import addFile from "../dialog/addFile";
 import selectCatalog from "../dialog/selectCatalog";
 import { getContractList,getContractPathList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion,deletePath } from "@/util/api";
 import Bus from "@/bus";
-import Clickoutside from 'element-ui/src/utils/clickoutside'
+import Clickoutside from 'element-ui/src/utils/clickoutside';
+let Base64 = require("js-base64").Base64;
+const FileSaver = require("file-saver");
 export default {
     name: "contractCatalog",
     props: {
@@ -1031,6 +1036,41 @@ export default {
         },
         deleteSloc(val) {
             console.log(val)
+        },
+        exportFile(val) {
+            this.$confirm(`${this.$t('dialog.sureExport')}？`)
+                .then(_ => {
+                    this.sureExportSol(val);
+                })
+                .catch(_ => { });
+        },
+        sureExportSol(val){
+            let contractSource = Base64.decode(val.contractSource);
+            let contractAbi = val.contractAbi;
+            let contractBin = val.contractBin;
+            var blobContractSource = new Blob([contractSource], { type: "text;charset=utf-8" });
+            var blobContractAbi = new Blob([contractAbi], { type: "text;charset=utf-8" });
+            var blobContractBin = new Blob([contractBin], { type: "text;charset=utf-8" });
+            FileSaver.saveAs(blobContractSource, `${val.contractName}.sol`);
+            FileSaver.saveAs(blobContractAbi, `${val.contractName}-abi`);
+            FileSaver.saveAs(blobContractBin, `${val.contractName}-bin`);
+        },
+        exportFolder(val){
+            this.$confirm(`${this.$t('dialog.sureExport')}？`)
+                .then(_ => {
+                    this.sureExportFolderSol(val);
+                })
+                .catch(_ => { });
+        },
+        sureExportFolderSol(val){
+            let folderInfo = val;
+            var contractList = []
+            if(folderInfo.child.length > 0) {
+                contractList = folderInfo.child
+                contractList.forEach(item => {
+                    this.sureExportSol(item)
+                });
+            }
         }
     }
 };

@@ -16,35 +16,58 @@
 
 package com.webank.webase.front.solc;
 
+import static com.webank.webase.front.base.properties.Constants.SOLC_DIR_PATH;
+import static com.webank.webase.front.base.properties.Constants.SOLC_JS_SUFFIX;
+
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.solc.entity.RspDownload;
 import com.webank.webase.front.solc.entity.SolcInfo;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.*;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
 public class SolcService {
 
-	public static final String SOLC_DIR_PATH = "solcjs";
-	private static final String SOLC_JS_SUFFIX = ".js";
+
 
 	@Autowired
 	private SolcRepository solcRepository;
+
+	public List<String> checkSolcFile() {
+		List<String> solcList = new ArrayList<>();
+		File fileDir = new File(SOLC_DIR_PATH);
+		File[] files = fileDir.listFiles();
+		if (files == null) {
+			log.info("checkSolcFile find no solc js file in ./conf/solcjs/");
+			return solcList;
+		}
+		for (File file: files) {
+			if (file.isFile()) {
+				solcList.add(file.getName());
+			}
+		}
+		return solcList;
+	}
+
+
+	/* deprecated */
 
 	@Transactional
 	public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String fileDesc) throws IOException {
@@ -132,7 +155,10 @@ public class SolcService {
 		// check parent path
 		if(!fileDir.exists()){
 			// 递归生成文件夹
-			fileDir.mkdirs();
+			boolean result = fileDir.mkdirs();
+			if (result) {
+				log.error("mkdirs solc exist or error");
+			}
 		}
 		return fileDir;
 	}

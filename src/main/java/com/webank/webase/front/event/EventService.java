@@ -16,17 +16,38 @@
 
 package com.webank.webase.front.event;
 
+import com.webank.webase.front.abi.AbiService;
+import com.webank.webase.front.abi.entity.AbiInfo;
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.contract.ContractService;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.event.callback.ContractEventCallback;
+import com.webank.webase.front.event.callback.SyncEventLogCallback;
+import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.PublisherHelper;
+import com.webank.webase.front.event.entity.RspContractInfo;
+import com.webank.webase.front.event.entity.RspEventLog;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.event.filter.EventLogUserParams;
+import org.fisco.bcos.web3j.tx.txdecode.LogResult;
 import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +84,16 @@ public class EventService {
     private MQService mqService;
     @Autowired
     private MQPublisher mqPublisher;
+    @Autowired
+    private Web3ApiService web3ApiService;
+    @Autowired
+    private Constants constants;
+    @Autowired
+    private ContractService contractService;
+    @Autowired
+    private AbiService abiService;
+    private static final String TYPE_CONTRACT = "contract";
+    private static final String TYPE_ABI_INFO = "abi";
 
     /**
      * register NewBlockEventCallBack
@@ -315,4 +346,73 @@ public class EventService {
         contractEventInfoRepository.delete(infoId);
         return contractEventInfoRepository.findByAppId(appId);
     }
+
+    /**
+     * sync get history event
+     * cannot filter by indexed param, only filter by event name and contractAddress
+     */
+    public List<LogResult> getContractEventLog(int groupId, String contractAddress, String abi,
+        Integer fromBlock, Integer toBlock, EventTopicParam eventTopicParam) {
+        log.info("start getContractEventLog groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventTopicParam:{}",
+            groupId, contractAddress, fromBlock, toBlock, eventTopicParam);
+        // check block height
+        Integer blockHeight = web3ApiService.getBlockNumber(groupId).intValue();
+        if (blockHeight < toBlock) {
+            log.error("getContractEventLog error for request blockHeight greater than blockHeight.");
+            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
+        }
+
+        // 传入abi作decoder，解析logs
+        TransactionDecoder decoder = new TransactionDecoder(abi);
+
+        EventLogUserParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
+            contractAddress, eventTopicParam);
+        log.info("getContractEventLog eventParam:{}", eventParam);
+        final CompletableFuture<List<LogResult>> callbackFuture = new CompletableFuture<>();
+        SyncEventLogCallback callBack = new SyncEventLogCallback(decoder, callbackFuture);
+        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
+        // async send register
+        service.registerEventLogFilter(eventParam, callBack);
+
+        List<LogResult> resultList;
+        try {
+            resultList = callbackFuture.get(constants.getEventCallbackWait(), TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("getContractEventLog callbackFuture error: e", e);
+            throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_ERROR);
+        } catch (TimeoutException e) {
+            log.error("getContractEventLog callbackFuture timeout: {}s, error:{}", constants.getEventCallbackWait(), e);
+            throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_TIMEOUT_ERROR);
+        }
+        return resultList;
+    }
+
+    public Object getAbiByAddressFromBoth(int groupId, String type, String contractAddress) {
+        if (TYPE_CONTRACT.equals(type)) {
+            return contractService.findByGroupIdAndAddress(groupId, contractAddress);
+        } else if (TYPE_ABI_INFO.equals(type)) {
+            return abiService.getAbiByGroupIdAndAddress(groupId, contractAddress);
+        } else {
+            throw new FrontException(ConstantCode.PARAM_ERROR);
+        }
+    }
+
+    /**
+     * get abi info from both
+     * @param groupId
+     * @return
+     * @throws IOException
+     */
+    public List<RspContractInfo> getContractInfoListFromBoth(int groupId) throws IOException {
+        // get contract list
+        List<RspContractNoAbi> contractList = contractService.findAllContractNoAbi(groupId, ContractStatus.DEPLOYED.getValue());
+        // get abi list
+        List<RspContractNoAbi> abiInfoList = abiService.getListByGroupIdNoAbi(groupId);
+        // add abi info and contract info in result list
+        List<RspContractInfo> resultList = new ArrayList<>();
+        contractList.forEach(c -> resultList.add(new RspContractInfo(TYPE_CONTRACT, c.getContractAddress(), c.getContractName())));
+        abiInfoList.forEach(c -> resultList.add(new RspContractInfo(TYPE_ABI_INFO, c.getContractAddress(), c.getContractName())));
+        return resultList;
+    }
+
 }
