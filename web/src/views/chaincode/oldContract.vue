@@ -54,9 +54,10 @@
 
                     <el-table-column prop="createTime" :label="$t('table.createdTime')" show-overflow-tooltip width="150" align="center"></el-table-column>
 
-                    <el-table-column :label="$t('table.actions')" width="100">
+                    <el-table-column :label="$t('table.actions')" width="200">
                         <template slot-scope="scope">
                             <el-button :disabled="!scope.row.contractAddress" :class="{'grayColor': !scope.row.contractAddress}" @click="send(scope.row)" type="text" size="small">{{$t('title.callContract')}}</el-button>
+                            <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress}" @click="checkEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -69,6 +70,12 @@
             <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :data="data" :abi='abiData' :version='version'></send-transation>
         </el-dialog>
         <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose'></v-editor>
+        <el-dialog :title="$t('table.checkEvent')" :visible.sync="checkEventVisible" width="470px" center class="send-dialog">
+            <check-event-dialog @checkEventSuccess="checkEventSuccess(arguments)" @checkEventClose="checkEventClose" :contractInfo="contractInfo"></check-event-dialog>
+        </el-dialog>
+        <el-dialog v-if="checkEventResultVisible" :title="$t('table.checkEventResult')" :visible.sync="checkEventResultVisible" width="1070px" center class="send-dialog">
+            <check-event-result @checkEventResultSuccess="checkEventResultSuccess($event)" @checkEventResultClose="checkEventResultClose" :checkEventResult="checkEventResult" :contractInfo="contractInfo"></check-event-result>
+        </el-dialog>
     </div>
 </template>
 
@@ -77,6 +84,8 @@ import contentHead from "@/components/contentHead";
 import sendTransation from "@/components/sendTransaction"
 import editor from "./dialog/editor"
 import abiDialog from "./dialog/abiDialog"
+import checkEventDialog from "./dialog/checkEventDialog"
+import checkEventResult from "./dialog/checkEventResult"
 import { getContractList } from "@/util/api"
 import router from '@/router'
 import Bus from "@/bus"
@@ -86,7 +95,9 @@ export default {
         "v-contentHead": contentHead,
         "v-editor": editor,
         "abi-dialog": abiDialog,
-        "send-transation": sendTransation
+        "send-transation": sendTransation,
+        checkEventDialog,
+        checkEventResult
     },
     data: function () {
         return {
@@ -105,6 +116,12 @@ export default {
             currentPage: 1,
             pageSize: 10,
             total: 0,
+            checkEventVisible: false,
+            checkEventResultVisible: false,
+            contractInfo: null,
+            checkEventResult: null,
+            eventName: '',
+            groupId: localStorage.getItem("groupId")
         }
     },
     beforeDestroy: function () {
@@ -112,6 +129,7 @@ export default {
     },
     mounted: function () {
         Bus.$on("changeGroup", data => {
+            this.groupId = data
             this.changeGroup()
         })
         if (localStorage.getItem("groupId")) {
@@ -124,7 +142,7 @@ export default {
         },
         getContracts: function () {
             let data = {
-                groupId: localStorage.getItem("groupId"),
+                groupId: this.groupId,
                 pageNumber: this.currentPage,
                 pageSize: this.pageSize,
                 contractName: this.contractName,
@@ -133,7 +151,23 @@ export default {
             }
             getContractList(data).then(res => {
                 if (res.data.code == 0) {
-                    this.contractList = res.data.data || [];
+                    var dataArray = [];
+                    dataArray = res.data.data;
+                    console.time("耗时");
+                    dataArray.forEach(item => {
+                        item.haveEvent = false
+                        if(item.contractAbi) {
+                            let contractAbi  = JSON.parse(item.contractAbi)
+                            for (let index = 0; index < contractAbi.length; index++) {
+                                if(contractAbi[index]['type'] === "event") {
+                                    item.haveEvent = true
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    console.timeEnd("耗时");
+                    this.contractList = dataArray;
                     this.total = res.data.totalCount || 0;
                 } else {
                     this.$message({
@@ -173,8 +207,6 @@ export default {
                     id: val.id
                 }
             })
-            // this.editorShow = true;
-            // this.editorData = val.contractSource
         },
         editorClose: function () {
             this.editorShow = false;
@@ -226,6 +258,32 @@ export default {
         handleCurrentChange: function (val) {
             this.currentPage = val;
             this.getContracts();
+        },
+        checkEvent: function (val) {
+            this.contractInfo = val;
+            this.$router.push({
+                path:'/eventCheck',
+                query: {
+                    groupId: this.groupId,
+                    type: 'contract',
+                    contractAddress: val.contractAddress
+                }
+            })
+            // this.checkEventVisible = true
+        },
+        checkEventSuccess(msg) {
+            this.checkEventResult = msg
+            
+            this.checkEventResultVisible = true
+        },
+        checkEventClose() {
+            this.checkEventVisible = false;
+        },
+        checkEventResultSuccess(){
+            this.checkEventResultVisible = false
+        },
+        checkEventResultClose(){
+            this.checkEventResultVisible = false
         },
     }
 }
