@@ -36,4 +36,6 @@ public interface AbiRepository extends CrudRepository<AbiInfo, Long>,
 	AbiInfo findByGroupIdAndContractName(Integer groupId, String userName);
 
 	List<AbiInfo> findByGroupId(Integer groupId, Pageable pageable);
+
+	List<AbiInfo> findByGroupId(Integer groupId);
 }

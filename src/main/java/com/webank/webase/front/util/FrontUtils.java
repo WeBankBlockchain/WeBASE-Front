@@ -15,8 +15,11 @@ package com.webank.webase.front.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +31,8 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 /**
  * comment method.
@@ -156,6 +161,22 @@ public class FrontUtils {
             return StatusCode.getStatusMessage(receipt.getStatus());
         } else {
             return receipt.getMessage();
+        }
+    }
+
+    public static HttpHeaders headers(String fileName) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
+            "attachment;filename*=UTF-8''" + encode(fileName));
+        return httpHeaders;
+    }
+
+    public static String encode(String name) {
+        try {
+            return URLEncoder.encode(name, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

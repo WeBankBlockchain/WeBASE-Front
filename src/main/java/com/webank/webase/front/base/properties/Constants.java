@@ -63,6 +63,10 @@ public class Constants {
     public static final String OPERATE_GROUP_RECOVER = "recover";
     public static final String OPERATE_GROUP_GET_STATUS = "getStatus";
     public static final String CONSTANT_PREFIX = "constant";
+    public static final String SOLC_DIR_PATH_CONFIG = "solcjs";
+    public static final String SOLC_DIR_PATH = "./conf/solcjs";
+    public static final String SOLC_JS_SUFFIX = ".js";
+
     public static String version;
     public static String chainId;
     private String keyServer = "127.0.0.1:8080";
@@ -83,5 +87,8 @@ public class Constants {
     private int restTemplateMaxPerRoute = 100;
     private int keepAliveRequests = 100;
     private int KeepAliveTimeout = 10;
+
+    // second
+    private Integer eventCallbackWait = 10;
 
 }

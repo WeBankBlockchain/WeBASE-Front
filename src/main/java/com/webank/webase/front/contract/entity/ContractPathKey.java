@@ -14,12 +14,16 @@
 package com.webank.webase.front.contract.entity;
 
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Pk of table contract path.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ContractPathKey implements Serializable {
     private static final long serialVersionUID = 713233686141669428L;
     private Integer groupId;

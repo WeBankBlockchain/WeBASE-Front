@@ -1,5 +1,5 @@
 # server version
-version: v1.4.1
+version: v1.4.2
 
 spring:
   datasource:
@@ -84,3 +84,5 @@ constant:
   syncStatLogTime: 5000
   syncStatLogCountLimit: 10000
   statLogEnabled: false
+  # get event callback wait (s)
+  eventCallbackWait: 10

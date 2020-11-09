@@ -135,7 +135,7 @@ public class KeyStoreController extends BaseController {
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
-    @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
+    @ApiOperation(value = "import PrivateKey by p12", notes = "import PrivateKey by p12")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userName", value = "user name", dataType = "String"),
             @ApiImplicitParam(name = "p12File", value = ".p12 file of private key", dataType = "MultipartFile"),
