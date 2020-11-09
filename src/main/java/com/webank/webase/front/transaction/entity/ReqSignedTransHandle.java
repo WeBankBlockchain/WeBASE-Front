@@ -15,13 +15,8 @@
  */
 package com.webank.webase.front.transaction.entity;
 
-import com.webank.webase.front.base.code.ConstantCode;
-import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
-
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Data;
 
 /**
  * transHandler interface parameter.
