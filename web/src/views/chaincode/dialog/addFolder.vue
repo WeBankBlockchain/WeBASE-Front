@@ -31,6 +31,7 @@
     </div>
 </template>
 <script>
+import {addContractPath} from "@/util/api"
 export default {
     name: "addFolder",
     props: ['foldershow'],
@@ -77,27 +78,7 @@ export default {
         submit: function (formName) {
             this.$refs[formName].validate(valid => {
                 if (valid) {
-                    let num = 0
-                    for (let i = 0; i < this.folderList.length; i++) {
-                        if (this.folderList[i].folderName == this.folderFrom.folderName && this.folderList[i].groupId == localStorage.getItem("groupId")) {
-                            num++
-                            this.$message({
-                                message: this.$t('text.errorNewFolderName'),
-                                type: "error"
-                            });
-                        };
-                    }
-                    if (num == 0) {
-                        let data = {
-                            folderName: this.folderFrom.folderName,
-                            folderId: (new Date()).getTime() + `${this.folderFrom.folderName}`,
-                            folderActive: false,
-                            groupId: localStorage.getItem("groupId")
-                        }
-                        this.folderList.push(data)
-                        localStorage.setItem('folderList', JSON.stringify(this.folderList))
-                        this.$emit("success")
-                    }
+                    this.add()
                 } else {
                     return false;
                 }
@@ -105,6 +86,28 @@ export default {
         },
         modelClose: function () {
             this.$emit("close")
+        },
+        add: function () {
+            let reqData = {
+                contractPath: this.folderFrom.folderName,
+                groupId: localStorage.getItem("groupId")
+            }
+            addContractPath(reqData).then(res => {
+                if(res.status === 200){
+                    this.$emit("success")
+                }else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
         }
     }
 }
