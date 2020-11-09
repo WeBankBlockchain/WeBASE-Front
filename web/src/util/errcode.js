@@ -512,7 +512,6 @@ let errCode = {
         en: "Read solc js file error, please check if file deleted",
         zh: '读取solc js文件错误，请检查文件是否已删除'
     },
-
     "201311": {
         en: "get event callback fail for time out",
         zh: '获取事件回调超时失败'

@@ -24,4 +24,8 @@ public class ReqPageContract {
     private Integer contractStatus;
     private Integer pageNumber;
     private Integer pageSize;
+    /**
+     * list contract by path
+     */
+    private String contractPath;
 }
