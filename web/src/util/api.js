@@ -510,10 +510,35 @@ export function queryBlockInfo(group, blockNumber) {
 
 /**Contract list */
 export function getContractList(data) {
-    return get({
+    return post({
         url: `${HANDLE}contract/contractList`,
         method: 'post',
         data: data
+    })
+}
+
+// coantarct path list
+export function getContractPathList(data) {
+    return get({
+        url: `${HANDLE}contract/findPathList/${data}`,
+        method: 'get'
+    })
+}
+
+//add contract path
+export function addContractPath(data) {
+    return post({
+        url: `${HANDLE}contract/addContractPath`,
+        method: 'post',
+        data: data
+    })
+}
+
+//delete contract path
+export function deletePath(groupId,contractPath) {
+    return deleted({
+        url: `${HANDLE}contract/batch/${groupId}/${contractPath}`,
+        method: 'delete'
     })
 }
 
@@ -809,6 +834,17 @@ export function deleteSolcId(solcId) {
     return deleted({
         url: `${HANDLE}solc/${solcId}`,
         method: 'delete',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+//获取solc文件列表
+export function getSolcList () {
+    return get({
+        url: `${HANDLE}solc/list`,
+        method: 'GET',
         headers: {
             AuthorizationToken: "Token " + localStorage.getItem("token") || ""
         }
