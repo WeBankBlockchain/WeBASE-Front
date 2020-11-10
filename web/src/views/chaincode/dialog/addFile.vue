@@ -103,6 +103,7 @@ export default {
                                 num++
                             }
                         }
+                        
                     this.changeOptions();
                 }else {
                         this.$message({
@@ -139,8 +140,7 @@ export default {
             //             this.disabled = true
             //         }
             //     })
-            // }
-           
+            // } 
             if(this.folderList.length){
                 let num = 0;
                 for(let i = 0; i < this.folderList.length; i++){
@@ -163,7 +163,6 @@ export default {
             }];
             }
             this.fileFrom.contractType = this.options[0].folderName
-            console.log(this.data)
             for(let i = 0; i < this.options.length; i++){
                 if(this.data && this.options[i].folderName == this.data.contractName){
                     this.fileFrom.contractType = this.options[i].folderName
