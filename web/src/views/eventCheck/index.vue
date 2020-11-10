@@ -157,7 +157,7 @@ export default {
                     {
                         required: true,
                         message: this.$t('dialog.contractAbi'),
-                        trigger: "blur"
+                        trigger: "change"
                     },
                     { validator: validateAbi, trigger: 'blur' }
                 ],
@@ -165,7 +165,7 @@ export default {
                     {
                         required: true,
                         message: this.$t('dialog.contractAddress'),
-                        trigger: "blur"
+                        trigger: "change"
                     },
                     {
                         validator: isAddress, trigger: 'blur'
