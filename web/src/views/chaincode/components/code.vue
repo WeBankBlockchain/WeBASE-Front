@@ -579,7 +579,6 @@ export default {
                     if(ev.data.cmd == 'compiled' && num == 1){
                         that.loading =false
                         output = JSON.parse(ev.data.data);
-                        // setTimeout(() => {
                             if (output && output.contracts && JSON.stringify(output.contracts) != "{}") {
                                 that.status = 1;
                                 if (output.contracts[that.contractName + ".sol"]) {
@@ -590,8 +589,6 @@ export default {
                                 that.errorInfo = that.$t("contracts.contractCompileFail");
                                 that.loading = false;
                             }
-                            // that.$store.state.worker.terminate();
-                        // }, 500)
                     }else{
                         console.log(ev.data);
                         console.log(JSON.parse(ev.data.data))

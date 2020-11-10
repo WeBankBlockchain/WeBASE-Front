@@ -154,7 +154,7 @@ export default {
         fromBlock: "请输入起始区块",
         toBlock: "请输入末区块",
         topicList: "请输入合约event名列表",
-        eventName: "请选择合约名",
+        eventName: "请选择事件名",
         isContractAbi: "请输入合约Abi",
         search: '查看',
         exportSol: '导出合约'
