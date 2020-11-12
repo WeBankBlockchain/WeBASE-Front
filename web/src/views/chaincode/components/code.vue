@@ -458,9 +458,7 @@ export default {
         },
 
         findImports: function (path) {
-            this.contractList = JSON.parse(
-                localStorage.getItem("contractList")
-            );
+            this.contractList = this.$store.state.contractDataList
             let arry = path.split("/");
             let newpath = arry[arry.length - 1];
             let num = 0;
@@ -532,17 +530,87 @@ export default {
                 }
             }
         },
-        compile: function (callback) {
+        compile (callback) {
+            let version = this.$store.state.versionData;
+            if(version && version.net !== 0){
+                this.compileHighVersion(callback)
+            }else{
+                this.compileLowVersion(callback)
+            }
+        },
+        //v0.6.10
+        compileHighVersion (callback) {
+            let that = this
+            this.loading = true;
+            this.refreshMessage();
+            this.contractList = this.$store.state.contractDataList
+            let content = "";
+            let output;
+            let input = {
+                language: "Solidity",
+                settings: {
+                    outputSelection: {
+                        "*": {
+                            "*": ["*"]
+                        }
+                    }
+                }
+            };
+            input.sources = {};
+            input.sources[this.contractName + ".sol"] = {};
+            let libs = [];
+            input.sources[this.contractName + ".sol"] = {
+                content: this.content
+            };
+            let w = this.$store.state.worker;
+            w.postMessage({
+                cmd: "compile",
+                input: JSON.stringify(input),
+                list: this.$store.state.contractDataList,
+                path: this.data.contractPath
+            });
+            let num = 0;
+            w.addEventListener('message', function (ev) {
+                    num++
+                    if(ev.data.cmd == 'compiled' && num == 1){
+                        that.loading =false
+                        output = JSON.parse(ev.data.data);
+                        // setTimeout(() => {
+                            if (output && output.contracts && JSON.stringify(output.contracts) != "{}") {
+                                that.status = 1;
+                                if (output.contracts[that.contractName + ".sol"]) {
+                                    that.changeOutput(output.contracts[that.contractName + ".sol"],callback);
+                                }
+                            } else {
+                                that.errorMessage = output.errors;
+                                that.errorInfo = that.$t("contracts.contractCompileFail");
+                                that.loading = false;
+                            }
+                            // that.$store.state.worker.terminate();
+                        // }, 500)
+                    }else{
+                        console.log(ev.data);
+                        console.log(JSON.parse(ev.data.data))
+                    }
+                },false);
+                w.addEventListener("error", function (ev) {
+                     that.errorInfo = ev;
+                    that.errorMessage = ev;
+                    that.compileShow = true;
+                    that.loading = false;
+                })
+        },
+        //v0.4.25 v0.5.1
+        compileLowVersion: function (callback) {
+             this.loading = true;
             let wrapper = require("solc/wrapper");
             let solc = wrapper(window.Module);
-            this.loading = true;
+           
             this.refreshMessage();
             for (let i = 0; i < constant.COMPILE_INFO.length; i++) {
                 this.compileinfo = this.compileinfo + constant.COMPILE_INFO(i);
             }
-            this.contractList = JSON.parse(
-                localStorage.getItem("contractList")
-            );
+            this.contractList = this.$store.state.contractDataList
             let content = "";
             let output;
             let input = {
@@ -597,7 +665,7 @@ export default {
                     this.data.contractSource = Base64.encode(this.content);
                     this.$set(this.data, "bytecodeBin", this.bytecodeBin);
                     this.loading = false;
-                    if (!callback.type) {
+                    if (callback && !callback.type) {
                         callback()
                     }
                     Bus.$emit("compile", this.data);

@@ -22,7 +22,7 @@ const home = resolve => require(['@/views/home/home'], resolve);
 const group = resolve => require(['@/views/group'], resolve);
 const contract = resolve => require(['@/views/chaincode/contract'], resolve);
 const oldContract = resolve => require(['@/views/chaincode/oldContract'], resolve);
-const rivateKeyManagement = resolve => require(['@/views/rivateKeyManagement'], resolve);
+const privateKeyManagement = resolve => require(['@/views/privateKeyManagement'], resolve);
 const hostMetric = resolve => require(['@/views/hostMetric'], resolve);
 const nodesMetric = resolve => require(['@/views/nodesMetric'], resolve);
 const blockEvent = resolve => require(['@/views/blockEvent'], resolve);
@@ -73,7 +73,7 @@ const routes = [
             { path: '/contractList', component: oldContract, name: '合约列表', enName: 'contractList', menuShow: true, meta: { requireAuth: false } },
             { path: '/abiList', component: abiList, name: 'Abi列表', enName: "abiList", menuShow: true, meta: { requireAuth: false } },
             { path: '/parseAbi', component: parseAbi, name: '解析Abi', enName: "parseAbi", menuShow: true, meta: { requireAuth: false } },
-            { path: '/privateKeyManagement', component: rivateKeyManagement, name: '测试用户', enName: 'testUserList', menuShow: true, meta: { requireAuth: false } },
+            { path: '/privateKeyManagement', component: privateKeyManagement, name: '测试用户', enName: 'testUserList', menuShow: true, meta: { requireAuth: false } },
         ]
     },
     {
