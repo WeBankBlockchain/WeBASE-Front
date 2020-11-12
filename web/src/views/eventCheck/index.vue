@@ -5,12 +5,6 @@
             <div class="search-part ">
                 <el-form :model="contractEventForm" :rules="rules" ref="contractEventForm" class="demo-ruleForm" label-width="110px">
                     <el-form-item :label="$t('table.contractAddress')" prop="contractAddress">
-                        <!-- <el-select v-if="abiId || contractId" v-model="contractEventForm.contractAddress" :placeholder="$t('placeholder.selected')" style="width: 500px;" @change="changeAddress">
-                            <el-option v-for="item in addressList" :key="item.id" :label="item.contractAddress" :value="item.contractAddress">
-                                <span style="float: left; font-size: 12px">{{ item.contractAddress }}</span>
-                                <span style="float: right; color: #8492a6; font-size: 12px; margin-left: 4px;">{{ item.contractName }}</span>
-                            </el-option>
-                        </el-select> -->
                         <el-autocomplete v-model.trim="contractEventForm.contractAddress" :fetch-suggestions="querySearch" @select="selectAddress" style="width: 500px;" clearable>
                             <template slot-scope="{ item }">
                                 <div class="name">{{ item.contractAddress }} {{item.contractName}}</div>
@@ -34,9 +28,6 @@
                             <el-option v-for="item in eventNameList" :key="item.value" :label="item.label" :value="item.value">
                             </el-option>
                         </el-select>
-                        <!-- <el-tooltip class="item" effect="dark" :content="$t('text.eventParam')" placement="right">
-                            <i class="el-icon-info"></i>
-                        </el-tooltip> -->
                         <li v-for="item in inputList" class="event-info">
                             <div v-if="item.indexed">
                                 <div>{{item.name}}:</div>
@@ -57,16 +48,14 @@
 
         </div>
         <div class="module-wrapper">
-            <div class="search-table" v-if="eventList.length > 0">
+            <div class="search-table" v-if="eventList.length > 0" style="padding-bottom: 13px;">
                 <el-table :data="eventList" tooltip-effect="dark" v-loading="loading">
-                    <!-- <el-table-column type="expand" align="center">
-                        <template slot-scope="scope">
-                            <decode-log :logInfo="logInfo(scope.row)"></decode-log>
-                        </template>
-                    </el-table-column> -->
                     <el-table-column prop="blockNumber" :label="$t('table.blockHeight')" show-overflow-tooltip width="120" align="center"></el-table-column>
                     <el-table-column prop="eventVal" :label="$t('table.eventValue')" show-overflow-tooltip align="center"></el-table-column>
                 </el-table>
+            </div>
+            <div v-if="isSearch&&eventList.length==0" class="text-center" style="padding: 10px 0;">
+                <span class="font-color-fff">{{$t('text.noData')}}</span>
             </div>
         </div>
     </div>
@@ -109,7 +98,8 @@ export default {
             abiId: '',
             eventList: [],
             restaurants: [],
-            queryTypeParam: {}
+            queryTypeParam: {},
+            isSearch: false
         }
     },
 
@@ -157,7 +147,7 @@ export default {
                     {
                         required: true,
                         message: this.$t('dialog.contractAbi'),
-                        trigger: "blur"
+                        trigger: "change"
                     },
                     { validator: validateAbi, trigger: 'blur' }
                 ],
@@ -165,7 +155,7 @@ export default {
                     {
                         required: true,
                         message: this.$t('dialog.contractAddress'),
-                        trigger: "blur"
+                        trigger: "change"
                     },
                     {
                         validator: isAddress, trigger: 'blur'
@@ -372,6 +362,7 @@ export default {
             checkEvent(param)
                 .then(res => {
                     this.loading = false;
+                    this.isSearch = true
                     if (res.data.code === 0) {
                         var eventList = res.data.data;
                         var newEventList = [];
@@ -528,6 +519,7 @@ export default {
                 type: item.type,
                 contractAddress: item.contractAddress
             }
+            this.contractEventForm.eventName = ''
             this.queryContractAbi(queryParam)
         }
     }

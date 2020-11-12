@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 <template>
-    <el-dialog :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
+    <el-dialog :title="$t('title.transactionReceipt')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
         <div v-if='!transationData'>{{$t('text.noData')}}</div>
         <div v-if='transationData && !transationData.logs' slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
             <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>
@@ -300,9 +300,17 @@ export default {
             list.eventName = eventData.abiInfo.name + "(";
             for (let i = 0; i < eventData.abiInfo.inputs.length; i++) {
                 if (i == eventData.abiInfo.inputs.length - 1) {
-                    list.eventName = list.eventName + eventData.abiInfo.inputs[i].type + " " + eventData.abiInfo.inputs[i].name;
+                    if(eventData.abiInfo.inputs[i]['indexed']){
+                        list.eventName = list.eventName + eventData.abiInfo.inputs[i].type + " " + "indexed" +" "+ eventData.abiInfo.inputs[i].name;
+                    }else {
+                        list.eventName = list.eventName + eventData.abiInfo.inputs[i].type + " " + eventData.abiInfo.inputs[i].name;
+                    }
                 } else {
-                    list.eventName = list.eventName + eventData.abiInfo.inputs[i].type + " " + eventData.abiInfo.inputs[i].name + ",";
+                    if (eventData.abiInfo.inputs[i]['indexed']) {
+                        list.eventName = list.eventName + eventData.abiInfo.inputs[i].type + " " + "indexed" + " " + eventData.abiInfo.inputs[i].name + ",";
+                    }else {
+                        list.eventName = list.eventName + eventData.abiInfo.inputs[i].type + " " + eventData.abiInfo.inputs[i].name + ",";
+                    }
                 }
             }
             list.eventName = list.eventName + ")";
