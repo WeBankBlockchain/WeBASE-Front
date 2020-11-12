@@ -25,7 +25,7 @@ export default {
         testUserList: 'Tester List',
         abiList: 'ABI List',
         parseAbi: 'ABI Encode',
-        eventCheck: 'Event Check',
+        eventCheck: 'Event Search',
     },
     navbar: {
         dashboard: 'Dashboard',
@@ -104,6 +104,7 @@ export default {
         topicList: 'Topic List',
         fileType: "File Type",
         fileName: "PrivateKey Name",
+        eventName: 'Event Name',
         eventValue: 'Event',
     },
     errorLog: {
@@ -210,9 +211,10 @@ export default {
         check: 'check',
         detele: 'detele',
         uploadSolc: 'Upload different versions of compiler',
-        checkEvent: 'Event Check',
+        checkEvent: 'Event Search',
         checkEventResult: 'Event',
-        eventName: 'Event Name'
+        eventName: 'Event Name',
+        transactionReceipt: 'Transactions Receipt',
     },
     text: {
         noContract: 'Please create a new contract',
