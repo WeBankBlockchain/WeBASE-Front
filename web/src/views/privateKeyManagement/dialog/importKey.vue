@@ -232,7 +232,7 @@ export default {
             var form = new FormData()
             form.append('userName', this.keyForm.fileName)
             form.append('p12File', param)
-            form.append('p12Password', this.keyForm.password)
+            form.append('p12Password', Base64.encode(this.keyForm.password))
             ImportP12PrivateKey(form)
                 .then(res => {
                     const { data, status } = res;
