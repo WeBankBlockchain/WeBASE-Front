@@ -57,7 +57,7 @@
                     <el-table-column :label="$t('table.actions')" width="200">
                         <template slot-scope="scope">
                             <el-button :disabled="!scope.row.contractAddress" :class="{'grayColor': !scope.row.contractAddress}" @click="send(scope.row)" type="text" size="small">{{$t('title.callContract')}}</el-button>
-                            <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress}" @click="checkEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
+                            <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress || !scope.row.haveEvent}" @click="checkEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -69,7 +69,7 @@
         <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
             <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :data="data" :abi='abiData' :version='version'></send-transation>
         </el-dialog>
-        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose'></v-editor>
+        <v-editor v-if='editorShow' :show='editorShow' :data='editorData' :sendConstant="sendConstant" @close='editorClose' :input='editorInput' :editorOutput="editorOutput"></v-editor>
         <el-dialog :title="$t('table.checkEvent')" :visible.sync="checkEventVisible" width="470px" center class="send-dialog">
             <check-event-dialog @checkEventSuccess="checkEventSuccess(arguments)" @checkEventClose="checkEventClose" :contractInfo="contractInfo"></check-event-dialog>
         </el-dialog>
@@ -121,7 +121,10 @@ export default {
             contractInfo: null,
             checkEventResult: null,
             eventName: '',
-            groupId: localStorage.getItem("groupId")
+            groupId: localStorage.getItem("groupId"),
+            sendConstant: null,
+            editorInput: null,
+            editorOutput: null
         }
     },
     beforeDestroy: function () {
@@ -204,7 +207,8 @@ export default {
             router.push({
                 path: "/contract",
                 query: {
-                    id: val.id
+                    id: val.id,
+                    contractPath: val.contractPath
                 }
             })
         },
@@ -246,9 +250,13 @@ export default {
             this.dialogVisible = false
         },
         sendSuccess: function (val) {
+            this.sendConstant = val.constant;
             this.dialogVisible = false;
             this.editorShow = true;
-            this.editorData = val;
+            this.editorData = null;
+            this.editorData = val.resData;
+            this.editorInput = val.input;
+            this.editorOutput = val.data.outputs;
         },
         handleSizeChange: function (val) {
             this.pageSize = val;

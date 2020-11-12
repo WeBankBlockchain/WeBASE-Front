@@ -25,7 +25,7 @@ export default {
         testUserList: '测试用户',
         abiList: 'ABI列表',
         parseAbi: 'ABI编码',
-        eventCheck: 'Event 查看',
+        eventCheck: 'Event查看',
     },
     navbar: {
         dashboard: '首页',
@@ -210,7 +210,8 @@ export default {
         check: '查询',
         detele: '删除',
         uploadSolc: '上传不同版本编译器',
-        checkEvent: 'Event 查看',
+        checkEvent: 'Event查看',
+        transactionReceipt: '交易回执',
     },
     text: {
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
