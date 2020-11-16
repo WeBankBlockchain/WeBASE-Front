@@ -517,6 +517,19 @@ export function getContractList(data) {
     })
 }
 
+// search contract list for contract path
+export function searchContract (data) {
+    return get({
+        url: `${HANDLE}/contract/contractList/multiPath`,
+        method: 'post',
+        data: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+
 // coantarct path list
 export function getContractPathList(data) {
     return get({
