@@ -110,7 +110,7 @@
 import addFolder from "../dialog/addFolder";
 import addFile from "../dialog/addFile";
 import selectCatalog from "../dialog/selectCatalog";
-import { getContractList,getContractPathList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion,deletePath } from "@/util/api";
+import { searchContract,getContractPathList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion,deletePath } from "@/util/api";
 import Bus from "@/bus";
 import Clickoutside from 'element-ui/src/utils/clickoutside';
 let Base64 = require("js-base64").Base64;
@@ -585,17 +585,30 @@ export default {
         getContracts(path,list) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                pageNumber: 1,
-                pageSize: 500
+                // pageNumber: 1,
+                // pageSize: 500
             };
             if(path){
-                data.contractPath = path
-            }else if(this.$route.query.contractPath){
-                data.contractPath = this.$route.query.contractPath
-            }else{
-                data.contractPath = "/"
+                data.contractPathList = [path]
+            }else if (this.$route.query.contractPath) {
+                if(this.$route.query.contractPath == "/"){
+                    data.contractPathList = [this.$route.query.contractPath]
+                }else{
+                    data.contractPathList = [this.$route.query.contractPath,"/"]
+                }
+            }else if(sessionStorage.getItem("selectData")){
+                if(JSON.parse(sessionStorage.getItem("selectData")) && JSON.parse(sessionStorage.getItem("selectData")).contractPath){
+                    if(JSON.parse(sessionStorage.getItem("selectData")).contractPath == "/"){
+                        data.contractPathList = [JSON.parse(sessionStorage.getItem("selectData")).contractPath]
+                    }else{
+                        data.contractPathList = [JSON.parse(sessionStorage.getItem("selectData")).contractPath,"/"]
+                    }
+                    
+                }
+            } else{
+                data.contractPathList = ["/"]
             }
-            getContractList(data)
+            searchContract(data)
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
@@ -664,7 +677,21 @@ export default {
                                 if (index == 0) {
                                     this.getContractArry()
                                 }
-                            } else {
+                            }
+                            else if (sessionStorage.getItem("selectData") && JSON.parse(sessionStorage.getItem("selectData")) && JSON.parse(sessionStorage.getItem("selectData")).id) {
+                            let num = 0;
+                            this.contractList.forEach(value => {
+                                if (value.id == JSON.parse(sessionStorage.getItem("selectData")).id) {
+                                    num++
+                                    this.getContractArry(value);
+                                }
+                               
+                            })
+                             if (!num) {
+                                    this.getContractArry()
+                                }
+                        }  
+                            else {
                                 this.getContractArry();
                             }
                         } else {
@@ -738,6 +765,7 @@ export default {
                     //         inputShow: false
                     //     }
                     // }
+                    console.log(data)
                     this.contractArry.forEach((item, index) => {
                         if (item.contractType == "folder" && item.contractName == data.contractName) {
                             data.folderIcon = item.folderIcon;
@@ -755,6 +783,7 @@ export default {
             return result;
         },
         open(val) {
+            sessionStorage.setItem("selectData","")
            if(val.contractName != "/" && val.contractPath != "/"){
                 this.getContracts(val.contractName);
             }
@@ -795,6 +824,7 @@ export default {
                 }
             });
             this.modifyState = false;
+            sessionStorage.setItem("selectData",JSON.stringify(val))
             Bus.$emit("select", val);
         },
         select(val) {
