@@ -20,14 +20,15 @@ import lombok.Data;
 @Data
 public class RspContractNoAbi {
     private Long id;
-    private Integer contractStatus;
     private Integer groupId;
     private String contractAddress;
-    private String contractPath;
-    private String contractName;
-    private LocalDateTime deployTime;
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    // abiInfo not contains below, but contractInfo contains
+    private Integer contractStatus;
+    private String contractPath;
+    private String contractName;
+    private LocalDateTime deployTime;
 
 }
