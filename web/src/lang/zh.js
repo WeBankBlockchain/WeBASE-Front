@@ -134,7 +134,7 @@ export default {
         rivateKeyVerifyLength1_32: '长度在 1 到 32 个字符',
         rivateKeyVerifyFont: '只能是数字或者字母组成',
         rename: '重命名',
-        newFile: '新建文件',
+        newFile: '新建',
         delete: '删除',
         exportJavaNote: '注意：合约名和文件名必须相同',
         cancel: '取 消',

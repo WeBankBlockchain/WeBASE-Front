@@ -135,7 +135,7 @@ export default {
         rivateKeyVerifyLength1_32: 'The length is between 1 and 32 characters',
         rivateKeyVerifyFont: 'Can only be composed of numbers or letters',
         rename: 'Rename',
-        newFile: 'NewFile',
+        newFile: 'Create',
         delete: 'Delete',
         exportJavaNote: 'Note: Package name must equal to contract name',
         delete: 'Delete',
