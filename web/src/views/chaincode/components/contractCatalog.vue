@@ -84,23 +84,7 @@
                     </div>
                 </li>
             </ul>
-
         </div>
-        <!-- <div class="solc-wrapper">
-            <div class="select-solc">
-                <el-select v-model="version" placeholder="请选择" @change="changeVersion">
-                    <el-option v-for="item in versionOptions" :key="item.value" :label="item.label" :value="item.value">
-                        <span style="float: left">{{ item.label }}</span>
-                        <span style=" color: #8492a6; font-size: 13px" class="el-icon-circle-close" @click="deleteSloc(item.solcId)"></span>
-                    </el-option>
-                </el-select>
-            </div>
-            <div class="import-solc cursor-pointer" :title="$t('title.uploadSolc')">
-                <el-upload ref="upload" action :http-request="uploadSolc" :limit="1" :on-exceed="handleExceed" :show-file-list="false" accept=".js">
-                    <i class="el-icon-upload2"></i>
-                </el-upload>
-            </div>
-        </div> -->
         <add-folder v-if="foldershow" :foldershow="foldershow" @close='folderClose' @success='folderSuccess'></add-folder>
         <add-file v-if="fileshow" :data='selectFolderData' :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
         <select-catalog v-if='cataLogShow' :show='cataLogShow' @success='catalogSuccess($event)' @close='catalogClose'></select-catalog>
@@ -115,6 +99,7 @@ import Bus from "@/bus";
 import Clickoutside from 'element-ui/src/utils/clickoutside';
 let Base64 = require("js-base64").Base64;
 const FileSaver = require("file-saver");
+import JSZip from "jszip";
 export default {
     name: "contractCatalog",
     props: {
@@ -163,7 +148,6 @@ export default {
     watch: {
         solcVersionOptions(val) {
             this.versionOptions = val
-            // this.querySolcList()
         },
         solcVersion(val) {
             this.version = this.solcVersion
@@ -177,10 +161,8 @@ export default {
         Bus.$off("modifyState");
     },
     mounted() {
-        
         this.$nextTick(function () {
             this.getContractPaths()
-            // this.getContracts();
         });
         Bus.$on("compile", data => {
             this.saveContract(data, `${this.$t('text.compilationSucceeded')}`);
@@ -189,7 +171,7 @@ export default {
             this.saveContract(data);
         });
         Bus.$on("deploy", data => {
-            this.getContracts("",data);
+            this.getContracts("", data);
         });
         Bus.$on("open", data => {
             this.contractArry.forEach(value => {
@@ -199,8 +181,8 @@ export default {
                 }
             });
             this.select(data);
-           
-            
+
+
         });
         Bus.$on('modifyState', data => {
             this.contractList.forEach(value => {
@@ -214,7 +196,6 @@ export default {
                 }
             })
         })
-        // this.querySolcList()
     },
     directives: {
         Clickoutside,
@@ -511,7 +492,7 @@ export default {
                             })
                         }
                         this.modifyState = false
-                        this.getContracts(data.contractPath,data);
+                        this.getContracts(data.contractPath, data);
                     } else {
                         this.$message({
                             type: "error",
@@ -526,12 +507,12 @@ export default {
                     });
                 });
         },
-        getContractPaths () {
+        getContractPaths() {
             getContractPathList(localStorage.getItem("groupId")).then(res => {
-                if(res.status == 200){
+                if (res.status == 200) {
                     this.pathList = res.data;
                     this.folderList = []
-                    for(let i = 0; i < this.pathList.length; i++) {
+                    for (let i = 0; i < this.pathList.length; i++) {
                         if (this.pathList[i].contractPath != "/") {
                             let item = {
                                 folderName: this.pathList[i].contractPath,
@@ -544,13 +525,13 @@ export default {
                         }
                     }
                     this.getContracts()
-                }else {
-                        this.$message({
-                            type: "error",
-                            message: this.$chooseLang(res.data.code)
-                        });
-                    }
-                })
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
                 .catch(err => {
                     this.$message({
                         type: "error",
@@ -558,17 +539,17 @@ export default {
                     });
                 });
         },
-        changeContractData(list1,list2){
+        changeContractData(list1, list2) {
             let arry = [];
             let obj = {}
             let list = list1.concat(list2);
-                list = list.reduce(function(item, next) {
+            list = list.reduce(function (item, next) {
                 obj[next.id] ? '' : obj[next.id] = true && item.push(next);
                 return item;
             }, []);
-            for(let i = 0; i < list.length; i++){
-                for(let j = 0; j < list2.length; j++){
-                    if(list[i].id === list2[j].id){
+            for (let i = 0; i < list.length; i++) {
+                for (let j = 0; j < list2.length; j++) {
+                    if (list[i].id === list2[j].id) {
                         list[i].contractName = list2[j].contractName;
                         list[i].contractPath = list2[j].contractPath;
                         list[i].contractSource = list2[j].contractSource;
@@ -580,9 +561,9 @@ export default {
                 }
             }
             return list
-            
+
         },
-        getContracts(path,list) {
+        getContracts(path, list) {
             let data = {
                 groupId: localStorage.getItem("groupId"),
                 // pageNumber: 1,
@@ -614,46 +595,13 @@ export default {
                     if (status === 200) {
                         let contractList = data.data || [];
                         let contractDataList = this.$store.state.contractDataList;
-                        this.contractList = this.changeContractData(contractDataList,contractList)
-                        this.$store.dispatch('set_contractDataList',this.contractList);
+                        this.contractList = this.changeContractData(contractDataList, contractList)
+                        this.$store.dispatch('set_contractDataList', this.contractList);
                         localStorage.setItem("contractList", JSON.stringify(this.contractList))
                         if (data.data.length) {
-                            // if (localStorage.getItem("folderList")) {
-                            //     this.folderList = JSON.parse(
-                            //         localStorage.getItem("folderList")
-                            //     );
-                            // } else {
-                            //     this.folderList = [];
-                            // }
-                            // this.contractList.forEach(value => {
-                            //     if (value.contractPath != "/") {
-                            //         let item = {
-                            //             folderName: value.contractPath,
-                            //             folderId: new Date().getTime() + `${value.contractPath}`,
-                            //             folderActive: false,
-                            //             groupId: localStorage.getItem("groupId"),
-                            //             modifyTime: value.modifyTime
-                            //         };
-                            //         this.folderList.push(item);
-                            //     }
-                            // });
                             let result = [];
                             let array = [];
                             let obj = {};
-                            // for (let i = 0; i < this.folderList.length; i++) {
-                            //     if (!obj[this.folderList[i].folderName] && this.folderList[i].groupId == localStorage.getItem("groupId")) {
-                            //         result.push(this.folderList[i]);
-                            //         obj[this.folderList[i].folderName] = true;
-                            //     } else if (this.folderList[i].groupId != localStorage.getItem('groupId')) {
-                            //         array.push(this.folderList[i]);
-                            //     }
-
-                            // }
-                            // this.folderList = result.concat(array);
-                            // localStorage.setItem(
-                            //     "folderList",
-                            //     JSON.stringify(this.folderList)
-                            // );
                             this.contractList.forEach(value => {
                                 this.$set(value, "contractType", "file");
                                 this.$set(value, "contractActive", false);
@@ -695,12 +643,7 @@ export default {
                                 this.getContractArry();
                             }
                         } else {
-                            // if (localStorage.getItem("folderList")) {
-                            //     this.folderList = JSON.parse(
-                            //         localStorage.getItem("folderList")
-                            //     );
-                                this.getContractArry();
-                            // }
+                            this.getContractArry();
                         }
                     } else {
                         this.$message({
@@ -734,13 +677,6 @@ export default {
         },
         createFolder(val) {
             let result = [];
-            // if (localStorage.getItem("folderList")) {
-            //     this.folderList = JSON.parse(
-            //         localStorage.getItem("folderList")
-            //     );
-            // } else {
-            //     this.folderList = [];
-            // }
             this.folderList.forEach((value, index) => {
                 let num = 0;
                     var data = {
@@ -753,18 +689,6 @@ export default {
                         renameShow: false,
                         inputShow: false
                     };
-                    // if (index != 0) {
-                    //     data = {
-                    //         contractName: value.folderName,
-                    //         folderId: value.folderId,
-                    //         contractActive: false,
-                    //         contractType: "folder",
-                    //         folderIcon: "el-icon-caret-bottom",
-                    //         folderActive: false,
-                    //         renameShow: false,
-                    //         inputShow: false
-                    //     }
-                    // }
                     console.log(data)
                     this.contractArry.forEach((item, index) => {
                         if (item.contractType == "folder" && item.contractName == data.contractName) {
@@ -778,7 +702,7 @@ export default {
                             data.folderActive = true;
                         }
                     }
-                    result.push(data);
+                result.push(data);
             });
             return result;
         },
@@ -860,12 +784,12 @@ export default {
                     const { data, status } = res;
                     if (status === 200) {
                         let contractList = this.$store.state.contractDataList;
-                        for(let i = 0; i < contractList.length; i++){
-                            if(contractList[i].id === val.id){
-                                contractList.splice(i,1)
+                        for (let i = 0; i < contractList.length; i++) {
+                            if (contractList[i].id === val.id) {
+                                contractList.splice(i, 1)
                             }
                         }
-                        this.$store.dispatch("set_contractDataList",contractList)
+                        this.$store.dispatch("set_contractDataList", contractList)
                         this.getContracts();
                     } else {
                         this.$message({
@@ -889,30 +813,30 @@ export default {
                 })
                 .catch(_ => { });
         },
-        deleteFolderData (val) {
-            deletePath(localStorage.getItem("groupId"),val.contractName).then(res=> {
-                if(res.status === 200){
+        deleteFolderData(val) {
+            deletePath(localStorage.getItem("groupId"), val.contractName).then(res => {
+                if (res.status === 200) {
                     let contractList = this.$store.state.contractDataList;
                     let list = []
-                    for(let i = 0; i < contractList.length; i++){
-                        if(contractList[i].contractPath === val.contractName){
+                    for (let i = 0; i < contractList.length; i++) {
+                        if (contractList[i].contractPath === val.contractName) {
                             contractList[i].sure = true
                         }
                     }
-                     for(let i = 0; i < contractList.length; i++){
-                        if(!contractList[i].sure){
+                    for (let i = 0; i < contractList.length; i++) {
+                        if (!contractList[i].sure) {
                             list.push(contractList[i])
                         }
                     }
-                    this.$store.dispatch("set_contractDataList",list)
+                    this.$store.dispatch("set_contractDataList", list)
                     this.getContractPaths()
-                }else {
-                        this.$message({
-                            type: "error",
-                            message: this.$chooseLang(res.data.code)
-                        })
-                    }
-                })
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    })
+                }
+            })
                 .catch(err => {
                     this.$message({
                         type: "error",
@@ -960,7 +884,6 @@ export default {
             var reader = new FileReader(), self = this;
             var filename = param.file.name.substring(0, param.file.name.lastIndexOf("."));
             var version = param.file.name;
-            // new FormData()
             reader.readAsText(param.file, "UTF-8");
             reader.onload = function (e) {
                 var fileString = e.target.result;
@@ -996,13 +919,7 @@ export default {
                 });
 
         },
-        queryDownloadSolc() {
-            // solcDownload()
-
-        },
         changeVersion(val) {
-            // sessionStorage.setItem('solcVersion', val)
-            // this.$router.push('blank')
             this.$emit('uploadLoading', true)
             let param = {
                 fileName: 'soljson-v0.4.25+commit.59dbf8f1.js'
@@ -1026,15 +943,9 @@ export default {
                         message: this.$t('text.systemError')
                     });
                 });
-            // this.loadScript(val)
         },
         async loadScript(src) {
             await new Promise(resolve => {
-                // 如果已经加载了本js，直接调用回调
-                // if (this._checkIsLoadScript(src)) {
-                //     resolve();
-                // }
-
                 var scriptNode = document.createElement("script");
                 scriptNode.setAttribute("type", "text/javascript");
                 scriptNode.setAttribute("src", src);
@@ -1076,34 +987,48 @@ export default {
                 })
                 .catch(_ => { });
         },
-        sureExportSol(val){
+        sureExportSol(val) {
+            const zip = new JSZip();
             let contractSource = Base64.decode(val.contractSource);
             let contractAbi = val.contractAbi;
             let contractBin = val.contractBin;
             var blobContractSource = new Blob([contractSource], { type: "text;charset=utf-8" });
             var blobContractAbi = new Blob([contractAbi], { type: "text;charset=utf-8" });
             var blobContractBin = new Blob([contractBin], { type: "text;charset=utf-8" });
-            FileSaver.saveAs(blobContractSource, `${val.contractName}.sol`);
-            FileSaver.saveAs(blobContractAbi, `${val.contractName}-abi`);
-            FileSaver.saveAs(blobContractBin, `${val.contractName}-bin`);
+            zip.file(`${val.contractName}.sol`, blobContractSource, { binary: true })
+            zip.file(`${val.contractName}.abi`, blobContractAbi, { binary: true })
+            zip.file(`${val.contractName}.bin`, blobContractBin, { binary: true })
+            zip.generateAsync({ type: "blob" }).then(content => {
+                FileSaver.saveAs(content, `${val.contractName}`);
+            });
         },
-        exportFolder(val){
+        exportFolder(val) {
             this.$confirm(`${this.$t('dialog.sureExport')}？`)
                 .then(_ => {
                     this.sureExportFolderSol(val);
                 })
                 .catch(_ => { });
         },
-        sureExportFolderSol(val){
+        sureExportFolderSol(val) {
             let folderInfo = val;
             var contractList = []
-            if(folderInfo.child.length > 0) {
+            const zip = new JSZip();
+            if (folderInfo.child.length > 0) {
                 contractList = folderInfo.child
                 contractList.forEach(item => {
-                    this.sureExportSol(item)
+                    var blobContractSource = new Blob([Base64.decode(item.contractSource)], { type: "text;charset=utf-8" });
+                    var blobContractAbi = new Blob([item.contractAbi], { type: "text;charset=utf-8" });
+                    var blobContractBin = new Blob([item.contractBin], { type: "text;charset=utf-8" });
+                    zip.file(`${item.contractName}.sol`, blobContractSource, { binary: true })
+                    zip.file(`${item.contractName}.abi`, blobContractAbi, { binary: true })
+                    zip.file(`${item.contractName}.bin`, blobContractBin, { binary: true })
+                });
+                zip.generateAsync({ type: "blob" }).then(content => {
+                    FileSaver.saveAs(content, `${folderInfo.contractName}`);
                 });
             }
         }
+
     }
 };
 </script>

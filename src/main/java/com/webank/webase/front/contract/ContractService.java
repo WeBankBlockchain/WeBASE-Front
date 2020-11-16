@@ -33,6 +33,7 @@ import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.contract.entity.ReqContractPath;
 import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqListContract;
 import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
@@ -850,6 +851,25 @@ public class ContractService {
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
         return contract;
+    }
+
+    /**
+     * list contract by path list
+     * @param param
+     * @return
+     */
+    public List<Contract> listContractByMultiPath(ReqListContract param) {
+        log.debug("start listContractByMultiPath ReqListContract:{},", param);
+        List<Contract> resultList = new ArrayList<>();
+        int groupId = param.getGroupId();
+        List<String> contractPathList = param.getContractPathList();
+        for (String contractPath: contractPathList) {
+            List<Contract> contractList = contractRepository
+                .findByGroupIdAndContractPath(groupId, contractPath);
+            resultList.addAll(contractList);
+        }
+        log.debug("end listContractByMultiPath result size:{},", resultList.size());
+        return resultList;
     }
 
 }
