@@ -25,6 +25,7 @@ import com.webank.webase.front.contract.entity.ReqContractCompile;
 import com.webank.webase.front.contract.entity.ReqContractPath;
 import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqListContract;
 import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
 import com.webank.webase.front.contract.entity.ReqPageContract;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
@@ -328,6 +329,24 @@ public class ContractController extends BaseController {
         Contract contract = contractService.findById(contractId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
         response.setData(contract);
+        return response;
+    }
+
+    /**
+     * query list of contract by multi contract path
+     */
+    @ApiOperation(value = "query list of contract by multi path", notes = "query list of contract by multi path")
+    @ApiImplicitParam(name = "req", value = "param info", required = true,
+        dataType = "ReqListContract")
+    @PostMapping(value = "/contractList/multiPath")
+    public BasePageResponse listByMultiPath(@RequestBody @Valid ReqListContract req,
+        BindingResult result) {
+        log.info("listByMultiPath start. ReqListContract:{}", req);
+        checkParamResult(result);
+        List<Contract> resList = contractService.listContractByMultiPath(req);
+        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
+        response.setTotalCount(resList.size());
+        response.setData(resList);
         return response;
     }
 }
