@@ -14,21 +14,17 @@
 
 package com.webank.webase.front.contract.entity;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Data;
 
+/**
+ * for contract IDE
+ */
 @Data
-public class RspContractNoAbi {
-    private Long id;
+public class ReqListContract {
     private Integer groupId;
-    private String contractAddress;
-    private String description;
-    private LocalDateTime createTime;
-    private LocalDateTime modifyTime;
-    // abiInfo not contains below, but contractInfo contains
-    private Integer contractStatus;
-    private String contractPath;
-    private String contractName;
-    private LocalDateTime deployTime;
-
+    /**
+     * list contract by multi path
+     */
+    private List<String> contractPathList;
 }
