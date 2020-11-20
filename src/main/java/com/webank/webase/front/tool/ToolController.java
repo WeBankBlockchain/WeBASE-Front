@@ -84,14 +84,16 @@ public class ToolController {
             // return json
             if (param.getReturnType() == 2) {
                 return decoder.decodeInputReturnJson(param.getInput());
+            } else if (param.getReturnType() == 1) {
+                return decoder.decodeInputReturnObject(param.getInput());
             }
-            return decoder.decodeInputReturnObject(param.getInput());
         } else if (param.getDecodeType() == 2) {
             // return json
             if (param.getReturnType() == 2) {
                 return decoder.decodeOutputReturnJson(param.getInput(), param.getOutput());
+            } else if (param.getReturnType() == 1) {
+                return decoder.decodeOutputReturnObject(param.getInput(), param.getOutput());
             }
-            return decoder.decodeOutputReturnObject(param.getInput(), param.getOutput());
         }
         return new BaseResponse(ConstantCode.PARAM_ERROR);
     }
@@ -132,9 +134,11 @@ public class ToolController {
         if (type == 2) {
             // utf8 input
             hashValue = Hash.sha3String(input);
-        } else {
+        } else if (type == 1){
             // hex input
             hashValue = Hash.sha3(input);
+        } else {
+            throw new FrontException(ConstantCode.PARAM_ERROR);
         }
         return new RspHash(hashValue, EncryptType.encryptType);
     }
@@ -219,9 +223,11 @@ public class ToolController {
         if (type == 1) {
             // hex input
             bytes32 = CommonUtils.hexStrToBytes32(input);
-        } else {
+        } else if (type == 2) {
             // utf8 input
             bytes32 = CommonUtils.utf8StringToBytes32(input);
+        } else {
+            throw new FrontException(ConstantCode.PARAM_ERROR);
         }
         return Numeric.toHexString(bytes32.getValue());
     }
