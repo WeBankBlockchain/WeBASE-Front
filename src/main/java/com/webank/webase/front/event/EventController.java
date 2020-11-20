@@ -193,6 +193,8 @@ public class EventController extends BaseController {
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
+    /* 1.4.2 */
+
     @ApiOperation(value = "getContractEventInfo",
             notes = "get registered contract event info by app id")
     @ApiImplicitParam(name = "appId", value = "应用编号",
