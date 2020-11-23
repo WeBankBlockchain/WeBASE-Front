@@ -44,13 +44,13 @@ public class Contract {
     private String contractName;
     private Integer contractStatus;
     private Integer groupId;
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "medium_text")
     private String contractSource;
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "medium_text")
     private String contractAbi;
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "medium_text")
     private String contractBin;
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "medium_text")
     private String bytecodeBin;
     private String contractAddress;
     private LocalDateTime deployTime;
