@@ -39,12 +39,12 @@ public class AbiInfo {
 	private Integer groupId;
 	private String contractName;
 	private String contractAddress;
-	@Column(columnDefinition = "text")
+	@Column(columnDefinition = "mediumtext")
 	private String contractAbi;
 	/**
 	 * runtime bin
 	 */
-	@Column(columnDefinition = "text")
+	@Column(columnDefinition = "mediumtext")
 	private String contractBin;
 	/**
 	 * 1-normal, 2-invalid
