@@ -181,7 +181,7 @@ export default {
                 script.src = `${this.baseURLWasm}/${this.version}.js`;
                 script.setAttribute('id', 'soljson');
                 if (!document.getElementById('soljson')) {
-                    head.append(script)
+                    head.appendChild(script)
                 }
                 that.loading =false
             }
