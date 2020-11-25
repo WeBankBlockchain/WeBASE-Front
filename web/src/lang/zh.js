@@ -302,6 +302,9 @@ export default {
         fromBlockEvent: "最小值为1,from",
         toBlockEvent: "最小值为1；表示监听最新区块",
         eventParam: '请严格按照event参数类型提示输入;例如 byte类型输入"0x"',
+        searchMessage: "查询成功",
+        haveAbiAndBin: "缺少abi和bin",
+        emptyFolder: "空文件夹",
     },
     contracts: {
         createFile: "新建文件",

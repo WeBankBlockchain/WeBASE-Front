@@ -886,6 +886,14 @@ export default {
                 });
         },
         getJavaClass: function () {
+            if(!this.abiFile || !this.bytecodeBin){
+                this.$message({
+                    type: 'warning',
+                    message: this.$t('text.haveAbiAndBin'),
+                    duration: 2000
+                })
+                return
+            }
             let reqData = {
                 contractName: this.contractName,
                 abiInfo: JSON.parse(this.abiFile),
