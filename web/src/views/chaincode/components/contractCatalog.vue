@@ -41,7 +41,7 @@
                             <i class="wbs-icon-file" @contextmenu.prevent="handle($event,item)" @click='select(item)' v-if='!item.renameShow' :id='item.id'></i>
                             <span @contextmenu.prevent="handle($event,item)" @click='select(item)' :id='item.id' v-if='!item.renameShow'>{{item.contractName}}</span>
                         </div>
-                        <el-input v-model="contractName" v-focus="true" autofocus='autofocus' maxlength="32" @blur="changeName(item)" v-if="item.renameShow"></el-input>
+                        <el-input v-model="contractName" v-focus ref="user" maxlength="32" @blur="changeName(item)" v-if="item.renameShow"></el-input>
                         <div class="contract-menu-handle" v-if='item.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX}px`}" v-Clickoutside="checkNull">
 
                             <ul v-if="contractFile">
@@ -55,7 +55,7 @@
                         <i :class="item.folderIcon" @click='open(item)' v-if="!item.renameShow" :id='item.folderId' class="cursor-pointer font-16 no-chase"></i>
                         <i class="wbs-icon-folder cursor-pointer no-chase" @click='open(item)' @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
-                        <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
+                        <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'top': `${clentY}px`,'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
                                 <li class="contract-menu-handle-list" @click="addFiles(item)">{{$t('dialog.newFile')}}</li>
                                 <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
@@ -66,13 +66,13 @@
                         <ul v-if="item.folderActive" style="padding-left: 20px;">
                             <li class="contract-file" v-for='list in item.child' :key="list.id" :style="{'padding-left': list.modifyState ? `${10}px`:''}">
                                 <div class="ellipsis-info" :class="{'colorActive': list.contractActive}">
-                                    <i class="wbs-icon-radio font-6" v-if="list.modifyState"></i>
-                                    <i class="wbs-icon-file" v-if='!list.renameShow' @click='select(list)'></i>
+                                    <i class="wbs-icon-radio font-6" v-if="list.modifyState" ></i>
+                                    <i class="wbs-icon-file" v-if='!list.renameShow' @click='select(list)'  @contextmenu.prevent="handle($event,list)" :id='list.id'></i>
                                     <span @click='select(list)' @contextmenu.prevent="handle($event,list)" :id='list.id' v-if='!list.renameShow'>{{list.contractName}}</span>
                                 </div>
 
-                                <el-input v-model="contractName" autofocus='autofocus' maxlength="32" @blur="changeName(list)" v-if="list.renameShow"></el-input>
-                                <div class="contract-menu-handle" v-if='list.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX - 35}px`}" v-Clickoutside="checkNull">
+                                <el-input v-model="contractName" v-focus maxlength="32" @blur="changeName(list)" v-if="list.renameShow"></el-input>
+                                <div class="contract-menu-handle" v-if='list.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX}px`}" v-Clickoutside="checkNull">
                                     <ul v-if="contractFile&&item.contractName!=='template'">
                                         <li class="contract-menu-handle-list" @click="rename">重命名</li>
                                         <li class="contract-menu-handle-list" @click="deleteFile(list)">删除</li>
@@ -200,11 +200,10 @@ export default {
     directives: {
         Clickoutside,
         focus: {
-            update(el, { value }) {
-                if (value) {
-                    el.focus();
-                }
-            }
+            inserted: function (el, {value}) {
+                let dom = el.getElementsByClassName('el-input__inner')[0];
+                dom.focus();
+        }
         }
     },
     methods: {
@@ -230,7 +229,8 @@ export default {
             } else {
                 this.clentX = e.clientX;
             }
-            this.clentY = 20;
+            this.clentX = e.clientX;
+            this.clentY = e.clientY;
             this.ID = e.target.id;
             let item = {};
             if (this.ID) {
@@ -270,6 +270,7 @@ export default {
                     })
                 }
             })
+            // this.$refs.user.focus()
             this.contractArry.forEach(value => {
                 if (value.id == this.ID) {
                     this.$set(value, "renameShow", true);
@@ -1163,7 +1164,7 @@ export default {
     padding: 0 5px;
 }
 .contract-menu-handle {
-    position: absolute;
+    position: fixed;
     font-size: 0;
     width: 70px;
     cursor: pointer;
