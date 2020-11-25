@@ -303,6 +303,9 @@ export default {
         parseAbiManually: "Or enter your parameters manually",
         addAbi: "Import ABI",
         eventParam: 'Please follow the prompt of event parameter type strictly',
+        searchMessage: "Request Success",
+        haveAbiAndBin: "No have abi and bin",
+        emptyFolder: "Empty Folder",
     },
     contracts: {
         createFile: "Create File",
