@@ -74,7 +74,7 @@ public class ContractEventInfo {
     /**
      * if use DecodedEventLogPushCallback, needs abi for decoder
      */
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "mediumtext")
     private String contractAbi;
 
     /**
