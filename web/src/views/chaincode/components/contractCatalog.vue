@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 <template>
-    <div class="contract-menu" style="position: relative;height: 100% ;">
+    <div class="contract-menu" style="position: relative;height: 100% ;" v-loading="loading">
         <div class="contract-menu-header">
             <el-tooltip class="item" effect="dark" :content="$t('title.newFile')" placement="top-start">
                 <i class="wbs-icon-Addfile icon contract-icon" @click='addFile'></i>
@@ -55,10 +55,10 @@
                         <i :class="item.folderIcon" @click='open(item)' v-if="!item.renameShow" :id='item.folderId' class="cursor-pointer font-16 no-chase"></i>
                         <i class="wbs-icon-folder cursor-pointer no-chase" @click='open(item)' @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
-                        <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
+                        <div class="contract-menu-handle" v-if='item.handleModel' :style="{'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
-                                <li class="contract-menu-handle-list" @click="addFiles(item)">{{$t('dialog.newFile')}}</li>
-                                <li class="contract-menu-handle-list" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
+                                <li class="contract-menu-handle-list" v-if="item.contractName!=='template'" @click="addFiles(item)">{{$t('dialog.newFile')}}</li>
+                                <li class="contract-menu-handle-list" v-if="item.contractName!=='template'" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
                                 <li class="contract-menu-handle-list" @click="exportFolder(item)">{{$t('dialog.exportSol')}}</li>
                             </ul>
                         </div>
@@ -74,8 +74,8 @@
                                 <el-input v-model="contractName" autofocus='autofocus' maxlength="32" @blur="changeName(list)" v-if="list.renameShow"></el-input>
                                 <div class="contract-menu-handle" v-if='list.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX - 35}px`}" v-Clickoutside="checkNull">
                                     <ul v-if="contractFile&&item.contractName!=='template'">
-                                        <li class="contract-menu-handle-list" @click="rename">重命名</li>
-                                        <li class="contract-menu-handle-list" @click="deleteFile(list)">删除</li>
+                                        <li class="contract-menu-handle-list" @click="rename">{{$t('dialog.rename')}}</li>
+                                        <li class="contract-menu-handle-list" @click="deleteFile(list)">{{$t('dialog.delete')}}</li>
                                         <li class="contract-menu-handle-list" @click="exportFile(list)">{{$t('dialog.exportSol')}}</li>
                                     </ul>
                                 </div>
@@ -142,7 +142,8 @@ export default {
             versionOptions: [],
             pathList: [],
             folderData: null,
-            selectFolderData: null
+            selectFolderData: null,
+            loading: false
         };
     },
     watch: {
@@ -619,8 +620,10 @@ export default {
             } else{
                 data.contractPathList = ["/"]
             }
+            this.loading = true
             searchContract(data)
                 .then(res => {
+                    this.loading = false
                     const { data, status } = res;
                     if (status === 200) {
                         let contractList = data.data || [];
@@ -823,6 +826,7 @@ export default {
                 .catch(_ => { });
         },
         deleteData(val) {
+            this.loading = true
             let data = {
                 groupId: localStorage.getItem("groupId"),
                 contractId: val.id
@@ -862,7 +866,9 @@ export default {
                 .catch(_ => { });
         },
         deleteFolderData(val) {
+            this.loading = true
             deletePath(localStorage.getItem("groupId"), val.contractName).then(res => {
+                this.loading = false
                 if (res.status === 200) {
                     let contractList = this.$store.state.contractDataList;
                     let list = []
@@ -1074,6 +1080,12 @@ export default {
                 zip.generateAsync({ type: "blob" }).then(content => {
                     FileSaver.saveAs(content, `${folderInfo.contractName}`);
                 });
+            }else {
+                this.$message({
+                    type: 'warning',
+                    message: this.$t('text.emptyFolder'),
+                    duration: 2000
+                })
             }
         }
 
