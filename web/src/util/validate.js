@@ -1,5 +1,5 @@
 var Web3Utils = require('web3-utils');
-
+const lang = localStorage.getItem('lang')
 export function validate(type, value) {
     switch (type) {
         case 'address':
@@ -102,23 +102,23 @@ export function validateEvent(type, value) {
     var type = type.replace(reg, "");
     switch (type) {
         case 'address':
-            var result = { is: Web3Utils.isAddress(value), msg: Web3Utils.isAddress(value) ? '' : 'Invalid input: Unexpected end of address input ' };
+            var result = { is: Web3Utils.isAddress(value), msg: Web3Utils.isAddress(value) ? '' : lang == 'en' ? 'Invalid input: Unexpected end of address input ' : '输入address无效' };
             return result
-            break; 
+            break;
         case 'bytes':
-            var result = { is: Web3Utils.isHexStrict(value), msg: Web3Utils.isHexStrict(value) ? '' : 'Invalid input: Unexpected end of bytes input' };
+            var result = { is: Web3Utils.isHexStrict(value), msg: Web3Utils.isHexStrict(value) ? '' : lang == 'en' ? 'Invalid input: Unexpected end of bytes input' : '输入bytes无效' };
             return result
             break;
         case 'uint':
-            var result = { is: isUint(value), msg: 'Invalid input: Unexpected end of uint input' };
+            var result = { is: isUint(value), msg: lang == 'en' ? 'Invalid input: Unexpected end of uint input' : '输入uint无效' };
             return result
             break;
         case 'string':
-            var result = { is: isLetter(value), msg: 'Invalid input: Unexpected end of string input' };
+            var result = { is: isLetter(value), msg: lang == 'en' ? 'Invalid input: Unexpected end of string input' : '输入String无效' };
             return result
             break;
         case 'bool':
-            var result = { is: isBool(value), msg: 'Invalid input: Unexpected end of bool input' };
+            var result = { is: isBool(value), msg: lang == 'en' ? 'Invalid input: Unexpected end of bool input' : '输入Bool无效' };
             return result
             break;
     }
