@@ -205,7 +205,7 @@ export default {
             if(this.$store.state.versionData && this.$store.state.versionData.net == 0){
                 this.$router.go(0)
             }
-            this.$refs.menu.getContracts()
+            this.$refs.menu.getContractPaths()
         },
         getEncryption: function (callback) {
             this.loading = true
@@ -271,7 +271,7 @@ export default {
                 });
         },
         changeGroup: function () {
-            this.$refs.menu.getContracts()
+            this.$refs.menu.getContractPaths()
         },
         dragDetailWeight: function (e) {
             let startX = e.clientX,
