@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 <template>
-    <div class="contract-content" v-loading="loading">
+    <div class="contract-content">
         <v-content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.contractIDE')" @changeGroup="changeGroup"></v-content-head>
-        <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}">
+        <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}" v-loading="loading">
             <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide">
                 <template #footer>
                     <div class="version-selector">
@@ -182,8 +182,15 @@ export default {
                 script.setAttribute('id', 'soljson');
                 if (!document.getElementById('soljson')) {
                     head.appendChild(script)
+                    console.time("耗时");
+                    script.onload = function () {
+                        console.log('加载成功.');
+                        console.timeEnd("耗时");
+                        that.loading = false
+                    }
+                }else {
+                    that.loading =false
                 }
-                that.loading =false
             }
             
         },
