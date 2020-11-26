@@ -62,6 +62,8 @@ Vue.prototype.$chooseLang = chooseLang;
 // lodash
 import _ from 'lodash'
 Vue.prototype._ = _
+import { message } from '@/util/message.js';
+Vue.prototype.$message = message;
 /* eslint-disable no-new */
 new Vue({
     el: '#app',
