@@ -66,8 +66,8 @@
                         <ul v-if="item.folderActive" style="padding-left: 20px;">
                             <li class="contract-file" v-for='list in item.child' :key="list.id" :style="{'padding-left': list.modifyState ? `${10}px`:''}">
                                 <div class="ellipsis-info" :class="{'colorActive': list.contractActive}">
-                                    <i class="wbs-icon-radio font-6" v-if="list.modifyState" ></i>
-                                    <i class="wbs-icon-file" v-if='!list.renameShow' @click='select(list)'  @contextmenu.prevent="handle($event,list)" :id='list.id'></i>
+                                    <i class="wbs-icon-radio font-6" v-if="list.modifyState"></i>
+                                    <i class="wbs-icon-file" v-if='!list.renameShow' @click='select(list)' @contextmenu.prevent="handle($event,list)" :id='list.id'></i>
                                     <span @click='select(list)' @contextmenu.prevent="handle($event,list)" :id='list.id' v-if='!list.renameShow'>{{list.contractName}}</span>
                                 </div>
 
@@ -94,7 +94,7 @@
 import addFolder from "../dialog/addFolder";
 import addFile from "../dialog/addFile";
 import selectCatalog from "../dialog/selectCatalog";
-import { searchContract,getContractPathList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion,deletePath } from "@/util/api";
+import { searchContract, getContractPathList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion, deletePath } from "@/util/api";
 import Bus from "@/bus";
 import Clickoutside from 'element-ui/src/utils/clickoutside';
 let Base64 = require("js-base64").Base64;
@@ -201,10 +201,10 @@ export default {
     directives: {
         Clickoutside,
         focus: {
-            inserted: function (el, {value}) {
+            inserted: function (el, { value }) {
                 let dom = el.getElementsByClassName('el-input__inner')[0];
                 dom.focus();
-        }
+            }
         }
     },
     methods: {
@@ -453,7 +453,7 @@ export default {
             });
             folderArry.forEach(value => {
                 this.$set(value, 'handleModel', false)
-                
+
                 value.child = [];
                 list.forEach((item, index) => {
                     if (item.contractPath == value.contractName) {
@@ -465,33 +465,35 @@ export default {
             this.contractArry = result;
             if (this.contractList.length && !val) {
                 this.select(this.contractList[0]);
-            }else if(val && val.contractType == "folder"){
-                let num = 0
-                for (let i = 0; i < this.contractArry.length; i++){
-                    if(val.contractName === this.contractArry[i].contractName){
-                        if(this.contractArry[i].child.length){
-                            this.select(this.contractArry[i].child[0]);
-                            num++;
-                        }
-                    }
-                }
-                console.log(num)
-                if(num == 0){
-                    let index = 0;
-                    for(let i = 0; i < this.contractList.length; i++){
-                        if(this.contractList[i] && this.contractList[i].contractPath == "/"){
-                            this.select(this.contractList[i]);
-                            index++;
-                            console.log("*")
-                            continue;
-                        }
-                    }
-                    if(index == 0){
-                        this.select(this.contractList[0]);
-                    }
-                }
             }
-             else if (val && val.contractType !== "folder" && this.contractList.length) {
+            else if (val && val.contractType == "folder") {
+                this.select(val, 'title')
+                // return
+                // let num = 0
+                // for (let i = 0; i < this.contractArry.length; i++) {
+                //     if (val.contractName === this.contractArry[i].contractName) {
+                //         if (this.contractArry[i].child.length) {
+                //             this.select(this.contractArry[i].child[0]);
+                //             num++;
+                //         }
+                //     }
+                // }
+                // if (num == 0) {
+                //     let index = 0;
+                //     for (let i = 0; i < this.contractList.length; i++) {
+                //         if (this.contractList[i] && this.contractList[i].contractPath == "/") {
+                //             this.select(this.contractList[i]);
+                //             index++;
+                //             console.log("*")
+                //             continue;
+                //         }
+                //     }
+                //     if (index == 0) {
+                //         this.select(this.contractList[0]);
+                //     }
+                // }
+            }
+            else if (val && val.contractType !== "folder" && this.contractList.length) {
                 this.select(val);
             } else {
                 Bus.$emit("noData", true);
@@ -571,11 +573,17 @@ export default {
         changeContractData(list1, list2) {
             let arry = [];
             let obj = {}
-            let list = list1.concat(list2);
-            list = list.reduce(function (item, next) {
+            let list3 = list1.concat(list2);
+            let list = []
+            list3 = list3.reduce(function (item, next) {
                 obj[next.id] ? '' : obj[next.id] = true && item.push(next);
                 return item;
             }, []);
+            for (let i = 0; i < list3.length; i++) {
+                if (list3[i].groupId == localStorage.getItem("groupId")) {
+                    list.push(list3[i])
+                }
+            }
             for (let i = 0; i < list.length; i++) {
                 for (let j = 0; j < list2.length; j++) {
                     if (list[i].id === list2[j].id) {
@@ -590,7 +598,6 @@ export default {
                 }
             }
             return list
-
         },
         getContracts(path, list) {
             let data = {
@@ -599,26 +606,26 @@ export default {
                 // pageSize: 500
             };
             console.log(path)
-            if(path){
+            if (path) {
                 data.contractPathList = [path]
-            }else if (this.$route.query.contractPath) {
-                if(this.$route.query.contractPath == "/"){
+            } else if (this.$route.query.contractPath) {
+                if (this.$route.query.contractPath == "/") {
                     data.contractPathList = [this.$route.query.contractPath]
-                }else{
-                    data.contractPathList = [this.$route.query.contractPath,"/"]
+                } else {
+                    data.contractPathList = [this.$route.query.contractPath, "/"]
                 }
-            }else if(sessionStorage.getItem("selectData")){
-                if(JSON.parse(sessionStorage.getItem("selectData"))){
-                    if(JSON.parse(sessionStorage.getItem("selectData")).contractPath && JSON.parse(sessionStorage.getItem("selectData")).contractPath == "/"){
+            } else if (sessionStorage.getItem("selectData")) {
+                if (JSON.parse(sessionStorage.getItem("selectData"))) {
+                    if (JSON.parse(sessionStorage.getItem("selectData")).contractPath && JSON.parse(sessionStorage.getItem("selectData")).contractPath == "/") {
                         data.contractPathList = [JSON.parse(sessionStorage.getItem("selectData")).contractPath]
-                    }else if (JSON.parse(sessionStorage.getItem("selectData")).contractType == 'folder'){
-                        data.contractPathList = [JSON.parse(sessionStorage.getItem("selectData")).contractName,"/"]
-                    }else{
-                        data.contractPathList = [JSON.parse(sessionStorage.getItem("selectData")).contractPath,"/"]
+                    } else if (JSON.parse(sessionStorage.getItem("selectData")).contractType == 'folder') {
+                        data.contractPathList = [JSON.parse(sessionStorage.getItem("selectData")).contractName, "/"]
+                    } else {
+                        data.contractPathList = [JSON.parse(sessionStorage.getItem("selectData")).contractPath, "/"]
                     }
-                    
+
                 }
-            } else{
+            } else {
                 data.contractPathList = ["/"]
             }
             this.loading = true
@@ -661,27 +668,27 @@ export default {
                                 }
                             }
                             else if (sessionStorage.getItem("selectData") && JSON.parse(sessionStorage.getItem("selectData")) && JSON.parse(sessionStorage.getItem("selectData")).id) {
-                            let num = 0;
-                            this.contractList.forEach(value => {
-                                if (value.id == JSON.parse(sessionStorage.getItem("selectData")).id) {
-                                    num++
-                                    this.getContractArry(value);
-                                }
-                               
-                            })
-                             if (!num) {
+                                let num = 0;
+                                this.contractList.forEach(value => {
+                                    if (value.id == JSON.parse(sessionStorage.getItem("selectData")).id) {
+                                        num++
+                                        this.getContractArry(value);
+                                    }
+
+                                })
+                                if (!num) {
                                     this.getContractArry()
                                 }
-                        }  
+                            }
                             else {
                                 this.getContractArry();
                             }
                         } else {
-                            if(list){
-                                
-                            }else{
+                            if (list) {
+                                this.getContractArry(list);
+                            } else {
                                 this.getContractArry();
-                            }  
+                            }
                         }
                     } else {
                         this.$message({
@@ -718,40 +725,40 @@ export default {
             let result = [];
             this.folderList.forEach((value, index) => {
                 let num = 0;
-                    let data = {
-                        contractName: value.folderName,
-                        folderId: value.folderId,
-                        contractActive: false,
-                        contractType: "folder",
-                        folderIcon: "el-icon-caret-right",
-                        folderActive: false,
-                        renameShow: false,
-                        inputShow: false
-                    };
-                    this.contractArry.forEach((item, index) => {
-                        if (item.contractType == "folder" && item.contractName == data.contractName) {
-                            data.folderIcon = item.folderIcon;
-                            data.folderActive = item.folderActive;
-                            // data.contractActive = true;
-                            this.$set(data,"contractActive",data.contractActive)
-                        }
-                    });
-                    if(val && val.contractPath && val.contractPath != "/"){
-                        if(data.contractName == val.contractPath){
-                            data.folderIcon = "el-icon-caret-bottom";
-                            data.folderActive = true;
-                            data.contractActive = true
-                        }
+                let data = {
+                    contractName: value.folderName,
+                    folderId: value.folderId,
+                    contractActive: false,
+                    contractType: "folder",
+                    folderIcon: "el-icon-caret-right",
+                    folderActive: false,
+                    renameShow: false,
+                    inputShow: false
+                };
+                this.contractArry.forEach((item, index) => {
+                    if (item.contractType == "folder" && item.contractName == data.contractName) {
+                        data.folderIcon = item.folderIcon;
+                        data.folderActive = item.folderActive;
+                        // data.contractActive = true;
+                        this.$set(data, "contractActive", data.contractActive)
                     }
+                });
+                if (val && val.contractPath && val.contractPath != "/") {
+                    if (data.contractName == val.contractPath) {
+                        data.folderIcon = "el-icon-caret-bottom";
+                        data.folderActive = true;
+                        data.contractActive = true
+                    }
+                }
                 result.push(data);
             });
             return result;
         },
         open(val) {
             console.log(val)
-            sessionStorage.setItem("selectData","")
-           if(val.contractName != "/" && val.contractPath != "/"){
-                this.getContracts(val.contractName,val);
+            sessionStorage.setItem("selectData", "")
+            if (val.contractName != "/" && val.contractPath != "/") {
+                this.getContracts(val.contractName, val);
             }
             this.contractArry.forEach(value => {
                 this.$set(value, "contractActive", false);
@@ -760,7 +767,7 @@ export default {
                         this.$set(item, "contractActive", false);
                     });
                 }
-                if(value.contractName === val.contractName && value.contractType == "folder"){
+                if (value.contractName === val.contractName && value.contractType == "folder") {
                     this.$set(value, "contractActive", true);
                 }
             });
@@ -774,18 +781,19 @@ export default {
             this.$set(val, "contractActive", true);
             this.folderData = val
         },
-        sureSelect(val) {
+        sureSelect(val, type) {
             let num = 0;
             this.contractArry.forEach(value => {
-                if (val && value.id == val.id) {
+                if (val && val.id && value.id === val.id) {
+
                     this.$set(value, "contractActive", true);
                 }
-                 else if (value.contractType == "folder") {
-                     if(this.folderData && this.folderData.contractName === value.contractName){
-                        
+                else if (value.contractType == "folder") {
+                    if (this.folderData && this.folderData.contractName === value.contractName) {
                         this.$set(value, "contractActive", this.folderData.contractActive);
-                    }else{
+                    } else {
                         this.$set(value, "contractActive", false);
+                        value.contractActive = false
                     }
                     value.child.forEach(item => {
                         if (item.id == val.id) {
@@ -800,10 +808,14 @@ export default {
             });
             this.modifyState = false;
             this.folderData = null
-            sessionStorage.setItem("selectData",JSON.stringify(val))
-            Bus.$emit("select", val);
+
+            if (!type) {
+                Bus.$emit("select", val);
+                sessionStorage.setItem("selectData", JSON.stringify(val))
+            }
+
         },
-        select(val) {
+        select(val, type) {
             if (this.modifyState) {
                 this.$confirm(`${this.$t('text.unsavedContract')}？`, {
                     center: true,
@@ -813,10 +825,10 @@ export default {
                         this.saveContract(this.modifyParam)
                     })
                     .catch(() => {
-                        this.sureSelect(val)
+                        this.sureSelect(val, type)
                     })
             } else {
-                this.sureSelect(val)
+                this.sureSelect(val, type)
             }
         },
         deleteFile(val) {
@@ -1081,7 +1093,7 @@ export default {
                 zip.generateAsync({ type: "blob" }).then(content => {
                     FileSaver.saveAs(content, `${folderInfo.contractName}`);
                 });
-            }else {
+            } else {
                 this.$message({
                     type: 'warning',
                     message: this.$t('text.emptyFolder'),
