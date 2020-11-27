@@ -49,7 +49,8 @@ Vue.use(ElementUI, {
     i18n: (key, value) => i18n.t(key, value)
 });
 
-
+import Loaded from './components/Loading'
+Vue.use(Loaded)
 import promise from 'es6-promise';
 //compatible Promise
 promise.polyfill();

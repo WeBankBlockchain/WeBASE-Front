@@ -205,7 +205,7 @@ export default {
                 let dom = el.getElementsByClassName('el-input__inner')[0];
                 dom.focus();
             }
-        }
+        },
     },
     methods: {
         checkNull(list) {
