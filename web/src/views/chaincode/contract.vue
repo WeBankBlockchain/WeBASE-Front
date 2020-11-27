@@ -39,7 +39,7 @@
 import menu from "./components/contractCatalog";
 import codes from "./components/code";
 import contentHead from "@/components/contentHead";
-import { encryption,getSolcList } from "@/util/api";
+import { encryption, getSolcList } from "@/util/api";
 import Bus from "@/bus"
 import webworkify from 'webworkify-webpack'
 export default {
@@ -92,7 +92,7 @@ export default {
     },
     beforeDestroy: function () {
         Bus.$off("changeGroup");
-        if(this.$store.state.worker){
+        if (this.$store.state.worker) {
             this.$store.state.worker.terminate();
             this.$store.state.worker = null
         }
@@ -103,13 +103,13 @@ export default {
         })
         this.allVersionList = [
             {
-                solcName: "v0.4.25",
+                solcName: "v0.4.24",
                 versionId: 0,
                 encryptType: 0,
                 net: 0
             },
             {
-                solcName: "v0.4.25-gm",
+                solcName: "v0.4.24-gm",
                 versionId: 1,
                 encryptType: 1,
                 net: 0
@@ -130,9 +130,9 @@ export default {
         this.getEncryption(this.querySolcList);
     },
     methods: {
-        querySolcList () {
-            for(let i = 0; i < this.allVersion.length; i++){
-                if(localStorage.getItem("encryptionId") == this.allVersion[i].encryptType){
+        querySolcList() {
+            for (let i = 0; i < this.allVersion.length; i++) {
+                if (localStorage.getItem("encryptionId") == this.allVersion[i].encryptType) {
                     this.versionList.push(this.allVersion[i])
                 }
             }
@@ -146,14 +146,14 @@ export default {
         },
         initSolc(versionId) {
             let that = this;
-             for(let i = 0; i < this.versionList.length; i++){
-                if(this.versionList[i].versionId == versionId){
+            for (let i = 0; i < this.versionList.length; i++) {
+                if (this.versionList[i].versionId == versionId) {
                     this.versionData = this.versionList[i];
                     this.version = this.versionList[i]['solcName'];
-                    this.$store.dispatch("set_version_data_action",this.versionData)
+                    this.$store.dispatch("set_version_data_action", this.versionData)
                 }
             }
-            if(this.versionData.net){
+            if (this.versionData.net) {
                 // if(this.$store.state.worker){
                 //     this.$store.state.worker.terminate();
                 //     this.$store.state.worker = null
@@ -161,9 +161,9 @@ export default {
                 let w = webworkify(require.resolve('@/util/file.worker'));
                 this.$store.state.worker = w
                 w.addEventListener('message', function (ev) {
-                    if(ev.data.cmd == 'versionLoaded'){
-                        that.loading =false
-                    }else{
+                    if (ev.data.cmd == 'versionLoaded') {
+                        that.loading = false
+                    } else {
                         console.log(ev.data);
                         console.log(JSON.parse(ev.data.data))
                     }
@@ -175,7 +175,7 @@ export default {
                 w.addEventListener("error", function (ev) {
                     console.log(ev)
                 })
-            }else{
+            } else {
                 var head = document.head;
                 var script = document.createElement("script");
                 script.src = `${this.baseURLWasm}/${this.version}.js`;
@@ -183,13 +183,13 @@ export default {
                 if (!document.getElementById('soljson')) {
                     head.appendChild(script)
                 }
-                that.loading =false
+                that.loading = false
             }
-            
+
         },
         onchangeLoadVersion(version) {
             this.loading = true;
-            if(this.$store.state.worker){
+            if (this.$store.state.worker) {
                 this.$store.state.worker.terminate();
                 this.$store.state.worker = null
             }
@@ -202,7 +202,7 @@ export default {
             });
             localStorage.setItem('versionId', versionId)
             this.initSolc(versionId)
-            if(this.$store.state.versionData && this.$store.state.versionData.net == 0){
+            if (this.$store.state.versionData && this.$store.state.versionData.net == 0) {
                 this.$router.go(0)
             }
             this.$refs.menu.getContractPaths()
@@ -227,14 +227,14 @@ export default {
                     });
                 });
         },
-        getSolcs (callback) {
+        getSolcs(callback) {
             getSolcList().then(res => {
                 this.allVersion = [];
                 this.allVersion = this.allVersionList
-                if(res.data.code === 0){
+                if (res.data.code === 0) {
                     this.solcList = res.data.data;
-                    for(let i = 0; i < this.solcList.length; i++){
-                        if(this.solcList[i] == "v0.6.10.js"){
+                    for (let i = 0; i < this.solcList.length; i++) {
+                        if (this.solcList[i] == "v0.6.10.js") {
                             let data = {
                                 solcName: "v0.6.10",
                                 versionId: 4,
@@ -244,7 +244,7 @@ export default {
                             }
                             this.allVersion.push(data)
                         }
-                        if(this.solcList[i] == "v0.6.10-gm.js"){
+                        if (this.solcList[i] == "v0.6.10-gm.js") {
                             let data = {
                                 solcName: "v0.6.10-gm",
                                 versionId: 5,
@@ -256,7 +256,7 @@ export default {
                         }
                     }
                     callback()
-                }else {
+                } else {
                     this.$message({
                         type: "error",
                         message: this.$chooseLang(res.data.code)
@@ -296,7 +296,8 @@ export default {
             this.$refs.menu.saveContact(val);
         },
         compile: function (val) {
-            this.$refs.menu.saveContact(val);
+            this.loading = val
+            // this.$refs.menu.saveContact(val);
         },
         deploy: function (val) {
             this.$refs.menu.saveContact(val);
