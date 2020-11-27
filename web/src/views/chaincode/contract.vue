@@ -20,7 +20,7 @@
             <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide">
                 <template #footer>
                     <div class="version-selector">
-                        <el-select v-model="version" placeholder="请选择" @change="onchangeLoadVersion" style="padding-left: 20px;">
+                        <el-select v-model="version" placeholder="请选择" @change="onchangeLoadVersion">
                             <el-option v-for="item in versionList" :key="item.versionId" :label="item.solcName" :value="item.solcName">
                             </el-option>
                         </el-select>
