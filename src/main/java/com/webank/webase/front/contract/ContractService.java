@@ -561,10 +561,14 @@ public class ContractService {
      * @throws IOException
      */
     private void initDefaultContract(Integer groupId) throws IOException {
-        List<String> templates = CommonUtils.readFileToList(Constants.TEMPLATE);
         String contractPath = "template";
         List<Contract> contracts =
             contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
+        // if no template contracts in db, load contract file in template; else, not load
+        List<String> templates = null;
+        if (contracts.isEmpty()) {
+           templates = CommonUtils.readFileToList(Constants.TEMPLATE);
+        }
         if ((contracts.isEmpty() && !Objects.isNull(templates))
             || (!contracts.isEmpty() && !Objects.isNull(templates) && templates.size() != contracts.size())) {
             for (String template : templates) {
@@ -778,9 +782,9 @@ public class ContractService {
      * addContractPath.
      */
     public List<ContractPath> findPathList(Integer groupId) throws IOException {
-        // init templates
+        // init default contracts and dir
         initDefaultContract(groupId);
-        // get from database.
+        // get from database
         Sort sort = new Sort(Sort.Direction.DESC, "modifyTime");
         List<ContractPath> contractPaths = contractPathRepository.findAll((Root<ContractPath> root,
                 CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
