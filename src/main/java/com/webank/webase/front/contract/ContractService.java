@@ -777,7 +777,9 @@ public class ContractService {
     /**
      * addContractPath.
      */
-    public List<ContractPath> findPathList(Integer groupId) {
+    public List<ContractPath> findPathList(Integer groupId) throws IOException {
+        // init templates
+        initDefaultContract(groupId);
         // get from database.
         Sort sort = new Sort(Sort.Direction.DESC, "modifyTime");
         List<ContractPath> contractPaths = contractPathRepository.findAll((Root<ContractPath> root,
