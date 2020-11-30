@@ -564,7 +564,7 @@ public class ContractService {
         String contractPath = "template";
         List<Contract> contracts =
             contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
-        // if no contracts in db, load contract file in template; else, not load
+        // if no template contracts in db, load contract file in template; else, not load
         List<String> templates = null;
         if (contracts.isEmpty()) {
            templates = CommonUtils.readFileToList(Constants.TEMPLATE);
