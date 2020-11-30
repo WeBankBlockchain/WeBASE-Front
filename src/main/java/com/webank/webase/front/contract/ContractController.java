@@ -279,7 +279,7 @@ public class ContractController extends BaseController {
      * query by groupId.
      */
     @GetMapping(value = "/findPathList/{groupId}")
-    public List<ContractPath> findPathList(@PathVariable("groupId") Integer groupId) {
+    public List<ContractPath> findPathList(@PathVariable("groupId") Integer groupId) throws IOException {
         log.info("start findPathList. groupId:{}", groupId);
         return contractService.findPathList(groupId);
     }
