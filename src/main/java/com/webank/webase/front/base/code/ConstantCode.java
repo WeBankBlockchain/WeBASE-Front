@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.base.code;
 
-
 /**
  * A-BB-CCC A:error level. <br/>
  * 1:system exception <br/>
@@ -139,6 +138,9 @@ public class ConstantCode {
 	public static final RetCode CONTRACT_TYPE_ENCODED_ERROR = RetCode.mark(201151, "Unsupported contract param type to encoded");
 	public static final RetCode CONTRACT_TYPE_DECODED_ERROR = RetCode.mark(201152, "Unsupported contract param type to decoded");
 	public static final RetCode CONTRACT_TYPE_PARAM_ERROR = RetCode.mark(201153, "unable to create instance of type, check input params");
+	
+	// add in v1.4.2
+    public static final RetCode CONTRACT_PATH_IS_EXISTS = RetCode.mark(201154, "contract path is exists.");
 
 	/* precompiled runtime check or error */
     // param
