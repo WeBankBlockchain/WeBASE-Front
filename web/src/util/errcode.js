@@ -229,6 +229,10 @@ let errCode = {
         en: "sql syntax error",
         zh: 'sql语法错误'
     },
+    "201154": {
+        en: "contract path is exists.",
+        zh: '目录已存在。'
+    },
     "201213": {
         en: "address is invalid",
         zh: '地址无效'

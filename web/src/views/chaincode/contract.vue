@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 <template>
-    <div class="contract-content">
+    <div class="contract-content" v-loading="loading">
         <v-content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.contractIDE')" @changeGroup="changeGroup"></v-content-head>
-        <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}" v-loading="loading">
+        <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}">
             <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide">
                 <template #footer>
                     <div class="version-selector">
