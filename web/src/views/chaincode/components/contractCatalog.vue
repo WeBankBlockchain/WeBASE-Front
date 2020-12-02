@@ -205,7 +205,7 @@ export default {
                 let dom = el.getElementsByClassName('el-input__inner')[0];
                 dom.focus();
             }
-        }
+        },
     },
     methods: {
         checkNull(list) {
@@ -363,7 +363,8 @@ export default {
 
             for (let i = 0; i < this.uploadFiles.length; i++) {
                 let filessize = Math.ceil(this.uploadFiles[i].size / 1024);
-                let filetype = this.uploadFiles[i].name.split(".")[1];
+                let files = this.uploadFiles[i].name.split(".");
+                let filetype = files[files.length - 1];
                 if (filessize > 400) {
                     this.$message({
                         message: this.$t('text.fileExceeds'),
@@ -388,7 +389,7 @@ export default {
                 let reader = new FileReader(); //新建一个FileReader
                 reader.readAsText(this.uploadFiles[i], "UTF-8"); //读取文件
                 let filename = "", _this = this;
-                filename = this.uploadFiles[i].name.split(".")[0];
+                filename = this.uploadFiles[i].name.slice(0, this.uploadFiles[i].name.length - 4)
                 let num = 0;
                 this.contractList.forEach(value => {
                     if (value.contractName == filename && value.contractPath == val && num === 0) {
@@ -424,6 +425,7 @@ export default {
             this.catalogClose();
         },
         catalogClose() {
+            this.$refs.file.value = "";
             this.cataLogShow = false;
         },
         folderClose() {
@@ -539,7 +541,7 @@ export default {
                     });
                 });
         },
-        getContractPaths() {
+        getContractPaths(val) {
             getContractPathList(localStorage.getItem("groupId")).then(res => {
                 if (res.status == 200) {
                     this.pathList = res.data;
@@ -556,7 +558,12 @@ export default {
                             this.folderList.push(item)
                         }
                     }
-                    this.getContracts()
+                    if (val) {
+                        this.getContracts(val)
+                    } else {
+                        this.getContracts()
+                    }
+
                 } else {
                     this.$message({
                         type: "error",
@@ -590,6 +597,7 @@ export default {
                     if (list[i].id === list2[j].id) {
                         list[i].contractName = list2[j].contractName;
                         list[i].contractPath = list2[j].contractPath;
+                        list[i].contractAddress = list2[j].contractAddress;
                         list[i].contractSource = list2[j].contractSource;
                         list[i].contractAbi = list2[j].contractAbi;
                         list[i].contractBin = list2[j].contractBin;
@@ -607,8 +615,16 @@ export default {
                 // pageSize: 500
             };
             console.log(path)
-            if (path) {
+            if (path && this.$store.state.contractDataList.length > 0) {
                 data.contractPathList = [path]
+            } else if (path && this.$store.state.contractDataList.length == 0) {
+                if (typeof (path) == 'object') {
+                    path.push("/")
+                } else {
+                    path = [path, "/"]
+                }
+
+                data.contractPathList = path;
             } else if (this.$route.query.contractPath) {
                 if (this.$route.query.contractPath == "/") {
                     data.contractPathList = [this.$route.query.contractPath]
@@ -855,8 +871,8 @@ export default {
                                 contractList.splice(i, 1)
                             }
                         }
-                        this.$store.dispatch("set_contractDataList", contractList)
-                        this.getContracts("");
+                        this.$store.dispatch("set_contractDataList", [])
+                        this.getContracts(val.contractPath);
                     } else {
                         this.$message({
                             type: "error",
@@ -896,8 +912,14 @@ export default {
                             list.push(contractList[i])
                         }
                     }
-                    this.$store.dispatch("set_contractDataList", list)
-                    this.getContractPaths()
+                    this.$store.dispatch("set_contractDataList", [])
+                    let arry = []
+                    for (let i = 0; i < this.contractArry.length; i++) {
+                        if (this.contractArry[i].contractType == 'folder' && this.contractArry[i].folderActive) {
+                            arry.push(this.contractArry[i].contractName)
+                        }
+                    }
+                    this.getContractPaths(arry)
                 } else {
                     this.$message({
                         type: "error",
