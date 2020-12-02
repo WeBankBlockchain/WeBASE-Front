@@ -769,6 +769,12 @@ public class ContractService {
      * addContractPath.
      */
     public ContractPath addContractPath(ReqContractPath req) {
+        ContractPathKey pathKey = new ContractPathKey(req.getGroupId(), req.getContractPath());
+        ContractPath check = contractPathRepository.findOne(pathKey);
+        if (check != null) {
+            log.error("addContractPath fail, path exists check:{}", check);
+            throw new FrontException(ConstantCode.CONTRACT_PATH_IS_EXISTS);
+        }
         // add to database.
         ContractPath contractPath = new ContractPath();
         BeanUtils.copyProperties(req, contractPath);
