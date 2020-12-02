@@ -67,33 +67,33 @@ export default {
         this.getContractPaths();
     },
     methods: {
-        getContractPaths () {
+        getContractPaths() {
             getContractPathList(localStorage.getItem("groupId")).then(res => {
-                if(res.status == 200){
+                if (res.status == 200) {
                     this.pathList = res.data;
-                     let num = 0;
-                     this.folderList = []
-                        for(let i = 0;i < this.pathList.length; i++){
-                                let item = {
-                                    folderName: this.pathList[i].contractPath,
-                                    folderId: new Date().getTime() + this.pathList[i].contractPath,
-                                    folderActive: false,
-                                    groupId: localStorage.getItem("groupId"),
-                                    modifyTime: this.pathList[i].modifyTime
-                                };
-                                this.folderList.push(item)
-                            if(this.pathList[i].contractPath == this.userFolader){
-                                num++
-                            }
+                    let num = 0;
+                    this.folderList = []
+                    for (let i = 0; i < this.pathList.length; i++) {
+                        let item = {
+                            folderName: this.pathList[i].contractPath,
+                            folderId: new Date().getTime() + this.pathList[i].contractPath,
+                            folderActive: false,
+                            groupId: localStorage.getItem("groupId"),
+                            modifyTime: this.pathList[i].modifyTime
+                        };
+                        this.folderList.push(item)
+                        if (this.pathList[i].contractPath == this.userFolader) {
+                            num++
                         }
-                    this.changeOptions();
-                }else {
-                        this.$message({
-                            type: "error",
-                            message: this.$chooseLang(res.data.code)
-                        });
                     }
-                })
+                    this.changeOptions();
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
                 .catch(err => {
                     this.$message({
                         type: "error",
@@ -102,14 +102,15 @@ export default {
                 });
         },
         changeOptions: function () {
-            if(this.folderList.length){
+            this.options = []
+            if (this.folderList.length) {
                 let num = 0;
-                for(let i = 0; i < this.folderList.length; i++){
-                    if(this.folderList.folderName === "/"){
+                for (let i = 0; i < this.folderList.length; i++) {
+                    if (this.folderList[i].folderName == "/") {
                         num++
                     }
                 }
-                if(num  == 0){
+                if (num == 0) {
                     let data = {
                         folderName: "/",
                         folderId: 1,
@@ -117,11 +118,11 @@ export default {
                     this.folderList.unshift(data)
                 }
                 this.options = this.folderList
-            }else{
+            } else {
                 this.options = [{
-                folderName: "/",
-                folderId: 1,
-            }];
+                    folderName: "/",
+                    folderId: 1,
+                }];
             }
             this.folderFrom.folderName = this.options[0].folderName
         },
