@@ -405,6 +405,9 @@ export default {
         groupId: "请输入群组编号",
         correctJson: "输入正确的JSON",
         blockNumber: "值需要大于0",
+        inputIsNumber: '输入不是数字',
+        inputIsAddress: '输入不是Address',
+        inputIsJson: '输入不是JSON',
     },
     nodes: {
         nodeFront: "节点前置",
