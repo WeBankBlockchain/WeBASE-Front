@@ -540,7 +540,7 @@ export default {
                     });
                 });
         },
-        getContractPaths() {
+        getContractPaths(val) {
             getContractPathList(localStorage.getItem("groupId")).then(res => {
                 if (res.status == 200) {
                     this.pathList = res.data;
@@ -557,7 +557,12 @@ export default {
                             this.folderList.push(item)
                         }
                     }
-                    this.getContracts()
+                    if (val) {
+                        this.getContracts(val)
+                    } else {
+                        this.getContracts()
+                    }
+
                 } else {
                     this.$message({
                         type: "error",
@@ -612,7 +617,13 @@ export default {
             if (path && this.$store.state.contractDataList.length > 0) {
                 data.contractPathList = [path]
             } else if (path && this.$store.state.contractDataList.length == 0) {
-                data.contractPathList = [path, "/"]
+                if (typeof (path) == 'object') {
+                    path.push("/")
+                } else {
+                    path = [path, "/"]
+                }
+
+                data.contractPathList = path;
             } else if (this.$route.query.contractPath) {
                 if (this.$route.query.contractPath == "/") {
                     data.contractPathList = [this.$route.query.contractPath]
@@ -901,7 +912,13 @@ export default {
                         }
                     }
                     this.$store.dispatch("set_contractDataList", [])
-                    this.getContractPaths()
+                    let arry = []
+                    for (let i = 0; i < this.contractArry.length; i++) {
+                        if (this.contractArry[i].contractType == 'folder' && this.contractArry[i].folderActive) {
+                            arry.push(this.contractArry[i].contractName)
+                        }
+                    }
+                    this.getContractPaths(arry)
                 } else {
                     this.$message({
                         type: "error",
