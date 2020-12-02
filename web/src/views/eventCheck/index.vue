@@ -13,7 +13,7 @@
                         <span></span>
                     </el-form-item>
                     <el-form-item :label="$t('table.contractAbi')" prop="contractAbi">
-                        <el-input v-model="contractEventForm.contractAbi" :rows="1" type="textarea" style="width: 500px;" ></el-input>
+                        <el-input v-model="contractEventForm.contractAbi" :rows="1" type="textarea" style="width: 500px;"></el-input>
                     </el-form-item>
                     <div class="block-wrapper">
                         <el-form-item :label="$t('table.fromBlock')" prop="fromBlock">
@@ -112,7 +112,7 @@ export default {
                     callback();
                 } else {
                     if ((!Web3Utils.isAddress(value)) && value != '') {
-                        callback(new Error('Invalid input: Unexpected end of address input'));
+                        callback(new Error(this.$t('rule.inputIsAddress')));
                     } else {
                         callback();
                     }
@@ -123,7 +123,7 @@ export default {
                     callback();
                 } else {
                     if (!Number.isInteger(value)) {
-                        callback(new Error('Invalid input: Unexpected end of number input'));
+                        callback(new Error(this.$t('rule.inputIsNumber')));
                     } else {
                         if (value <= 0) {
                             callback(new Error(this.$t('rule.blockNumber')));
@@ -138,7 +138,7 @@ export default {
                     callback();
                 } else {
                     if (!isJson(value)) {
-                        callback(new Error('Invalid input: Unexpected end of JSON input'));
+                        callback(new Error(this.$t('rule.inputIsJson')));
                     } else {
                         callback();
                     }
@@ -249,7 +249,7 @@ export default {
                 console.log(this.$route.query.type)
                 this.queryTypeParam = this.$route.query
                 this.queryContractAbi(this.queryTypeParam)
-            } 
+            }
             this.queryAllAddress()
             this.getBlockNumber()
         },
@@ -283,7 +283,7 @@ export default {
                 })
         },
         queryContractAbi(queryParam) {
-            
+
             eventContractInfo(queryParam)
                 .then(res => {
                     if (res.data.code === 0) {
@@ -365,11 +365,11 @@ export default {
                 .then(res => {
                     this.loading = false;
                     this.isSearch = true
-                    this.searchMessage = this.$t('text.searchMessage')
-                    setTimeout(() => {
-                        this.searchMessage = ''
-                    }, 3000);
                     if (res.data.code === 0) {
+                        this.searchMessage = this.$t('text.searchMessage')
+                        setTimeout(() => {
+                            this.searchMessage = ''
+                        }, 3000);
                         var eventList = res.data.data;
                         var newEventList = [];
                         if (!eventList.length) {
