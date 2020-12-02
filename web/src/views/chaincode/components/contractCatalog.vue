@@ -55,7 +55,7 @@
                         <i :class="item.folderIcon" @click='open(item)' v-if="!item.renameShow" :id='item.folderId' class="cursor-pointer font-16 no-chase"></i>
                         <i class="wbs-icon-folder cursor-pointer no-chase" @click='open(item)' @contextmenu.prevent="handle($event,item)" v-if="!item.renameShow" style="color: #d19650" :id='item.folderId'></i>
                         <span @click='open(item)' @contextmenu.prevent="handle($event,item)" :id='item.folderId' v-if="!item.renameShow" :class="{'colorActive': item.contractActive}" class="no-chase cursor-pointer">{{item.contractName}}</span>
-                        <div class="contract-menu-handle" v-if='item.handleModel&&item.contractName!=="template"' :style="{'top': `${clentY}px`,'left': `${clentX}px`}" v-Clickoutside="checkNull">
+                        <div class="contract-menu-handle" v-if='item.handleModel' :style="{'top': `${clentY}px`,'left': `${clentX}px`}" v-Clickoutside="checkNull">
                             <ul>
                                 <li class="contract-menu-handle-list" v-if="item.contractName!=='template'" @click="addFiles(item)">{{$t('dialog.newFile')}}</li>
                                 <li class="contract-menu-handle-list" v-if="item.contractName!=='template'" @click='deleteFolder(item)'>{{$t('dialog.delete')}}</li>
@@ -223,6 +223,7 @@ export default {
             this.handleModel = false;
         },
         handle(e, list) {
+            console.log(e, list);
             this.checkNull()
             list.handleModel = true
             if (e.clientX > 201) {
@@ -1077,29 +1078,43 @@ export default {
                 .catch(_ => { });
         },
         sureExportFolderSol(val) {
-            let folderInfo = val;
-            var contractList = []
-            const zip = new JSZip();
-            if (folderInfo.child.length > 0) {
-                contractList = folderInfo.child
-                contractList.forEach(item => {
-                    var blobContractSource = new Blob([Base64.decode(item.contractSource)], { type: "text;charset=utf-8" });
-                    var blobContractAbi = new Blob([item.contractAbi], { type: "text;charset=utf-8" });
-                    var blobContractBin = new Blob([item.contractBin], { type: "text;charset=utf-8" });
-                    zip.file(`${item.contractName}.sol`, blobContractSource, { binary: true })
-                    zip.file(`${item.contractName}.abi`, blobContractAbi, { binary: true })
-                    zip.file(`${item.contractName}.bin`, blobContractBin, { binary: true })
-                });
-                zip.generateAsync({ type: "blob" }).then(content => {
-                    FileSaver.saveAs(content, `${folderInfo.contractName}`);
-                });
-            } else {
-                this.$message({
-                    type: 'warning',
-                    message: this.$t('text.emptyFolder'),
-                    duration: 2000
-                })
+            this.loading = true
+            let data = {
+                groupId: localStorage.getItem("groupId"),
+                contractPathList: [val.contractName]
             }
+            searchContract(data).then(res => {
+                if (res.data.code == 0) {
+                    this.loading = false
+                    var contractList = res.data.data
+                    const zip = new JSZip();
+                    if (contractList.length > 0) {
+                        contractList.forEach(item => {
+                            var blobContractSource = new Blob([Base64.decode(item.contractSource)], { type: "text;charset=utf-8" });
+                            var blobContractAbi = new Blob([item.contractAbi], { type: "text;charset=utf-8" });
+                            var blobContractBin = new Blob([item.contractBin], { type: "text;charset=utf-8" });
+                            zip.file(`${item.contractName}.sol`, blobContractSource, { binary: true })
+                            zip.file(`${item.contractName}.abi`, blobContractAbi, { binary: true })
+                            zip.file(`${item.contractName}.bin`, blobContractBin, { binary: true })
+                        });
+                        zip.generateAsync({ type: "blob" }).then(content => {
+                            FileSaver.saveAs(content, `${val.contractName}`);
+                        });
+                    } else {
+                        this.$message({
+                            type: 'warning',
+                            message: this.$t('text.emptyFolder'),
+                            duration: 2000
+                        })
+                    }
+                } else {
+                    this.$message({
+                        message: this.$chooseLang(res.data.code),
+                        type: "error",
+                        duration: 2000
+                    });
+                }
+            })
         }
 
     }
