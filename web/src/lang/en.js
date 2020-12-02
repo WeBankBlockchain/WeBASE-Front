@@ -406,6 +406,9 @@ export default {
         groupId: "Please enter group ID",
         correctJson: "Enter correct JSON",
         blockNumber: "Greater than 0",
+        inputIsNumber: 'Input is not a number',
+        inputIsAddress: 'Input is not address',
+        inputIsJson: 'Input is not JSON',
     },
     nodes: {
         nodeFront: "Front Node",
