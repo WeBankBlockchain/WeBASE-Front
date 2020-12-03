@@ -48,6 +48,9 @@ Vue.use(ElementUI, {
     size: Cookies.get('size') || 'medium', // set element-ui default size
     i18n: (key, value) => i18n.t(key, value)
 });
+
+import Loaded from './components/Loading'
+Vue.use(Loaded)
 import promise from 'es6-promise';
 //compatible Promise
 promise.polyfill();
@@ -60,6 +63,8 @@ Vue.prototype.$chooseLang = chooseLang;
 // lodash
 import _ from 'lodash'
 Vue.prototype._ = _
+import { message } from '@/util/message.js';
+Vue.prototype.$message = message;
 /* eslint-disable no-new */
 new Vue({
     el: '#app',

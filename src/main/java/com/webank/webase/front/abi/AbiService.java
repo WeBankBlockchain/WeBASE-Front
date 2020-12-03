@@ -20,9 +20,11 @@ import com.webank.webase.front.abi.entity.AbiInfo;
 import com.webank.webase.front.abi.entity.ReqImportAbi;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
+import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -52,6 +54,20 @@ public class AbiService {
 	public List<AbiInfo> getListByGroupId(Integer groupId, Pageable pageable) {
 		List<AbiInfo> abiList = abiRepository.findByGroupId(groupId, pageable);
 		return abiList;
+	}
+
+	/**
+	 * get all
+	 */
+	public List<RspContractNoAbi> getListByGroupIdNoAbi(Integer groupId) {
+		List<AbiInfo> abiList = abiRepository.findByGroupId(groupId);
+		List<RspContractNoAbi> resultList = new ArrayList<>();
+		abiList.forEach(c -> {
+			RspContractNoAbi rsp = new RspContractNoAbi();
+			BeanUtils.copyProperties(c, rsp);
+			resultList.add(rsp);
+		});
+		return resultList;
 	}
 
 	public void saveAbi(ReqImportAbi param) {
@@ -117,7 +133,19 @@ public class AbiService {
 	}
 
 	public AbiInfo getAbiById(Long abiId) {
-		return abiRepository.findByAbiId(abiId);
+		AbiInfo abiInfo = abiRepository.findByAbiId(abiId);
+		if (Objects.isNull(abiInfo)) {
+			throw new FrontException(ConstantCode.ABI_INFO_NOT_EXISTS);
+		}
+		return abiInfo;
+	}
+
+	public AbiInfo getAbiByGroupIdAndAddress(int groupId, String contractAddress) {
+		AbiInfo abiInfo = abiRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
+		if (Objects.isNull(abiInfo)) {
+			throw new FrontException(ConstantCode.ABI_INFO_NOT_EXISTS);
+		}
+		return abiInfo;
 	}
 
 	private void checkAbiIdExist(Long abiId) {

@@ -34,6 +34,7 @@
     </div>
 </template>
 <script>
+import { getContractPathList } from "@/util/api"
 export default {
     name: "selectCatalog",
     props: ['show'],
@@ -57,25 +58,71 @@ export default {
             folderFrom: {
                 folderName: ""
             },
-            dialogVisible: this.show
+            dialogVisible: this.show,
+            pathList: [],
+            folderList: []
         }
     },
     mounted: function () {
-        this.changeOptions();
+        this.getContractPaths();
     },
     methods: {
+        getContractPaths() {
+            getContractPathList(localStorage.getItem("groupId")).then(res => {
+                if (res.status == 200) {
+                    this.pathList = res.data;
+                    let num = 0;
+                    this.folderList = []
+                    for (let i = 0; i < this.pathList.length; i++) {
+                        let item = {
+                            folderName: this.pathList[i].contractPath,
+                            folderId: new Date().getTime() + this.pathList[i].contractPath,
+                            folderActive: false,
+                            groupId: localStorage.getItem("groupId"),
+                            modifyTime: this.pathList[i].modifyTime
+                        };
+                        this.folderList.push(item)
+                        if (this.pathList[i].contractPath == this.userFolader) {
+                            num++
+                        }
+                    }
+                    this.changeOptions();
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
+                .catch(err => {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.systemError')
+                    });
+                });
+        },
         changeOptions: function () {
-            this.options = [{
-                folderName: "/",
-                folderId: 1,
-            }];
-            if (localStorage.getItem("folderList")) {
-                let arry = JSON.parse(localStorage.getItem("folderList"));
-                for (let i = 0; i < arry.length; i++) {
-                    if (arry[i].groupId == localStorage.getItem("groupId")) {
-                        this.options.push(arry[i])
+            this.options = []
+            if (this.folderList.length) {
+                let num = 0;
+                for (let i = 0; i < this.folderList.length; i++) {
+                    if (this.folderList[i].folderName == "/") {
+                        num++
                     }
                 }
+                if (num == 0) {
+                    let data = {
+                        folderName: "/",
+                        folderId: 1,
+                    }
+                    this.folderList.unshift(data)
+                }
+                this.options = this.folderList
+            } else {
+                this.options = [{
+                    folderName: "/",
+                    folderId: 1,
+                }];
             }
             this.folderFrom.folderName = this.options[0].folderName
         },

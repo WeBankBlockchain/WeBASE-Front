@@ -229,6 +229,10 @@ let errCode = {
         en: "sql syntax error",
         zh: 'sql语法错误'
     },
+    "201154": {
+        en: "contract path is exists.",
+        zh: '目录已存在。'
+    },
     "201213": {
         en: "address is invalid",
         zh: '地址无效'
@@ -512,6 +516,19 @@ let errCode = {
         en: "Read solc js file error, please check if file deleted",
         zh: '读取solc js文件错误，请检查文件是否已删除'
     },
+    "201311": {
+        en: "get event callback fail for time out",
+        zh: '获取事件回调超时失败'
+    },
+    "201312": {
+        en: "get event callback error",
+        zh: '获取事件回调错误'
+    },
+    "201031": {
+        en: "privateKey decode fail",
+        zh: '私钥解码失败'
+    },
+
     "201501": {
         en: "web3sdk create key pair fail and return null",
         zh: 'sdk创建私钥对失败并返回Null'
@@ -804,6 +821,9 @@ let errCode = {
         en: "not support transaction",
         zh: "不支持发交易"
     },
+
+    
+    
     "201232": {
         en: "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----",
         zh: "Pem文件格式错误，必须包含-----XXXXX PRIVATE KEY----- "

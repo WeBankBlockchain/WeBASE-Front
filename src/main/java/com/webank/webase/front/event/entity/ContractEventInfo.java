@@ -74,7 +74,7 @@ public class ContractEventInfo {
     /**
      * if use DecodedEventLogPushCallback, needs abi for decoder
      */
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "mediumtext")
     private String contractAbi;
 
     /**
@@ -89,6 +89,7 @@ public class ContractEventInfo {
     /**
      * List<String>
      */
+    @Column(columnDefinition = "text")
     private String topicList;
 
     private LocalDateTime createTime;

@@ -11,18 +11,18 @@ module.exports = {
         assetsSubDirectory: 'static',
         assetsPublicPath: '/',
         proxyTable: {
-            '/handle':{
-                target:'http://127.0.0.1',
-                changeOrigin:true,
-                pathRewrite:{
-                    '^/handle':'WeBASE-Front/'
+            '/handle': {
+                target: 'http://127.0.0.1/',
+                changeOrigin: true,
+                pathRewrite: {
+                    '^/handle': 'WeBASE-Front/'
                 }
             },
         },
 
         // Various Dev Server settings
         host: 'localhost', // can be overwritten by process.env.HOST
-        port: 3006, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+        port: 3010, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
         autoOpenBrowser: false,
         errorOverlay: true,
         notifyOnErrors: true,

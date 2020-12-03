@@ -16,6 +16,7 @@
 
 package com.webank.webase.front;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
@@ -64,6 +65,7 @@ public class Application {
 
         ObjectMapper om = new ObjectMapper();
         om.registerModule(javaTimeModule);
+        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return om;
     }
 }

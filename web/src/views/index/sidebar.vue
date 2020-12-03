@@ -151,6 +151,9 @@ export default {
                             case 'contractEvent':
                                 it.name = this.$t('route.contractEvent')
                                 break;
+                            case 'eventCheck':
+                                it.name = this.$t('route.eventCheck')
+                                break;
                         }
                     })
                 }

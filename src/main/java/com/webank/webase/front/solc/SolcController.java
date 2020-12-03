@@ -53,7 +53,7 @@ public class SolcController {
 	private SolcService solcService;
 
 	@ApiOperation(value = "upload solc js file", notes = "upload solc js file")
-	@PostMapping("/upload")
+//	@PostMapping("/upload")
 	public BaseResponse upload(@RequestParam("fileName") String fileName,
 							   @RequestParam("solcFile") MultipartFile solcFile,
 							   @RequestParam(value = "description", required = false, defaultValue = "") String description) throws IOException {
@@ -67,21 +67,18 @@ public class SolcController {
 		return new BaseResponse(ConstantCode.RET_SUCCESS);
 	}
 
-	@ApiOperation(value = "get uploaded solc file info list", notes = "list uploaded file info")
+	@ApiOperation(value = "get solc file name in solcjs dir", notes = "list solc file info")
 	@GetMapping("/list")
 	public BaseResponse getSolcList() {
 		// get list
-		List<SolcInfo> resList = solcService.getAllSolcInfo();
-		if (resList.isEmpty()) {
-			return new BaseResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST);
-		}
+		List<String> resList = solcService.checkSolcFile();
 		return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
 	}
 
 	@ApiOperation(value = "delete uploaded solc js", notes = "delete uploaded solc js file")
 	@ApiImplicitParam(name = "solcId", value = "solc info id", required = true,
 			dataType = "Integer", paramType = "path")
-	@DeleteMapping("/{solcId}")
+//	@DeleteMapping("/{solcId}")
 	public BaseResponse deleteSolcFile(@PathVariable("solcId") Integer solcId) {
 
 		boolean deleteRsp = solcService.deleteFile(solcId);
@@ -96,7 +93,7 @@ public class SolcController {
 	@ApiOperation(value = "download existed solc js", notes = "download solc js file")
 	@ApiImplicitParam(name = "fileName", value = "solc file name", required = true,
 			dataType = "String")
-	@PostMapping("/download")
+//	@PostMapping("/download")
 	public ResponseEntity<InputStreamResource> downloadSolcFile(@RequestParam("fileName") String fileName) {
 		if (StringUtils.isBlank(fileName)) {
 			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
