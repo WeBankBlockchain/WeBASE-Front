@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.base.code;
 
-
 /**
  * A-BB-CCC A:error level. <br/>
  * 1:system exception <br/>
@@ -139,6 +138,9 @@ public class ConstantCode {
 	public static final RetCode CONTRACT_TYPE_ENCODED_ERROR = RetCode.mark(201151, "Unsupported contract param type to encoded");
 	public static final RetCode CONTRACT_TYPE_DECODED_ERROR = RetCode.mark(201152, "Unsupported contract param type to decoded");
 	public static final RetCode CONTRACT_TYPE_PARAM_ERROR = RetCode.mark(201153, "unable to create instance of type, check input params");
+	
+	// add in v1.4.2
+    public static final RetCode CONTRACT_PATH_IS_EXISTS = RetCode.mark(201154, "contract path is exists.");
 
 	/* precompiled runtime check or error */
     // param
@@ -199,7 +201,9 @@ public class ConstantCode {
     public static final RetCode CHAIN_THRESHOLD_PARAM_ERROR = RetCode.mark(201301, "threshold must be greater than zero");
     public static final RetCode COMMITTEE_WEIGHT_PARAM_ERROR = RetCode.mark(201302, "committee weight must be greater than zero");
     public static final RetCode GOVERNANCE_ADDRESS_PARAM_ERROR = RetCode.mark(201303, "chain governance address cannot be blank");
-
+    // event callback
+    public static final RetCode GET_EVENT_CALLBACK_TIMEOUT_ERROR = RetCode.mark(201311, "get event callback fail for time out");
+    public static final RetCode GET_EVENT_CALLBACK_ERROR = RetCode.mark(201312, "get event callback error");
 
     /* classify common error of web3j*/
     // keystore

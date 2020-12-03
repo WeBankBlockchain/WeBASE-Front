@@ -510,10 +510,48 @@ export function queryBlockInfo(group, blockNumber) {
 
 /**Contract list */
 export function getContractList(data) {
-    return get({
+    return post({
         url: `${HANDLE}contract/contractList`,
         method: 'post',
         data: data
+    })
+}
+
+// search contract list for contract path
+export function searchContract (data) {
+    return get({
+        url: `${HANDLE}contract/contractList/multiPath`,
+        method: 'post',
+        data: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+
+
+// coantarct path list
+export function getContractPathList(data) {
+    return get({
+        url: `${HANDLE}contract/findPathList/${data}`,
+        method: 'get'
+    })
+}
+
+//add contract path
+export function addContractPath(data) {
+    return post({
+        url: `${HANDLE}contract/addContractPath`,
+        method: 'post',
+        data: data
+    })
+}
+
+//delete contract path
+export function deletePath(groupId,contractPath) {
+    return deleted({
+        url: `${HANDLE}contract/batch/${groupId}/${contractPath}`,
+        method: 'delete'
     })
 }
 
@@ -812,5 +850,52 @@ export function deleteSolcId(solcId) {
         headers: {
             AuthorizationToken: "Token " + localStorage.getItem("token") || ""
         }
+    })
+}
+
+//获取solc文件列表
+export function getSolcList () {
+    return get({
+        url: `${HANDLE}solc/list`,
+        method: 'GET',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+//event check 
+export function checkEvent(data) {
+    return post({
+        url: `${HANDLE}event/eventLogs/list`,
+        method: 'post',
+        data: data
+    })
+}
+
+export function contractFindOne(contractId) {
+    return get({
+        url: `${HANDLE}contract/findOne/${contractId}`,
+        method: 'GET',
+    })
+}
+
+export function contractListAll(data) {
+    return get({
+        url: `${HANDLE}contract/contractList/all/light`,
+        method: 'GET',
+        params: data
+    })
+}
+export function listAddress(groupId) {
+    return get({
+        url: `${HANDLE}event/listAddress/${groupId}`,
+        method: 'GET',
+    })
+}
+export function eventContractInfo(data, list) {
+    const params = reviseParam(data, list);
+    return get({
+        url: `${HANDLE}event/contractInfo/${params.str}`,
+        method: 'get'
     })
 }

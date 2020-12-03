@@ -15,7 +15,7 @@
  */
  
 <template>
-    <div class="contract-code" :class="{changeActive:changeWidth }" v-loading="loading">
+    <div class="contract-code" :class="{changeActive:changeWidth }" v-loading="loadingAce">
         <div class="contract-code-head">
             <span class="contract-code-title" v-show="codeShow" :class="{titleActive:changeWidth }">
                 <span ref="setReadOnly">{{contractName + '.sol'}}</span>
@@ -27,7 +27,7 @@
                     </el-tooltip>
                     <span>{{$t('title.save')}}</span>
                 </span>
-                <span class="contract-code-done" @click="compile">
+                <span class="contract-code-done" @click="compile" v-if='!loadingAce'>
                     <el-tooltip class="item" effect="dark" :content="$t('title.handleCompile')" placement="top-start">
                         <i class="wbs-icon-bianyi contract-icon-style font-16"></i>
                     </el-tooltip>
@@ -183,7 +183,7 @@ export default {
     data: function () {
         return {
             successHide: true,
-            loading: false,
+            loadingAce: false,
             content: "",
             successShow: true,
             errorShow: false,
@@ -274,13 +274,13 @@ export default {
             return !this.show;
         }
     },
-    
+
 
     created() {
-        
+
     },
     beforeMount() {
-        
+
     },
     mounted: function () {
         this.initEditor();
@@ -311,7 +311,7 @@ export default {
             this.complieAbiTextHeight = false;
             this.complieBinTextHeight = false;
             this.$nextTick(() => {
-                if (this.contractName === 'Asset'&&data.contractPath==="template" || this.contractName === 'Evidence'&&data.contractPath==="template" || this.contractName === 'EvidenceFactory'&&data.contractPath==="template") {
+                if (this.contractName === 'Asset' && data.contractPath === "template" || this.contractName === 'Evidence' && data.contractPath === "template" || this.contractName === 'EvidenceFactory' && data.contractPath === "template") {
                     this.aceEditor.setReadOnly(true);
                 } else {
                     this.aceEditor.setReadOnly(false);
@@ -395,7 +395,11 @@ export default {
             this.aceEditor.resize();
         },
         blurAce: function () {
+            console.log('blur');
             let data = Base64.encode(this.content);
+            if (this.data.contractSource != data) {
+                this.saveCode()
+            }
         },
         saveCode: function () {
             this.data.contractSource = Base64.encode(this.content);
@@ -458,9 +462,7 @@ export default {
         },
 
         findImports: function (path) {
-            this.contractList = JSON.parse(
-                localStorage.getItem("contractList")
-            );
+            this.contractList = this.$store.state.contractDataList
             let arry = path.split("/");
             let newpath = arry[arry.length - 1];
             let num = 0;
@@ -532,17 +534,89 @@ export default {
                 }
             }
         },
-        compile: function (callback) {
+        compile(callback) {
+            // this.$emit("compile", true)
+            this.loadingAce = true;
+            let version = this.$store.state.versionData;
+            if (version && version.net !== 0) {
+                this.compileHighVersion(callback)
+            } else {
+                setTimeout(() => {
+                    this.compileLowVersion(callback)
+                }, 500)
+
+            }
+        },
+        //v0.6.10
+        compileHighVersion(callback) {
+            //  this.loadingAce = true;
+            let that = this
+            this.refreshMessage();
+            this.contractList = this.$store.state.contractDataList
+            let content = "";
+            let output;
+            let input = {
+                language: "Solidity",
+                settings: {
+                    outputSelection: {
+                        "*": {
+                            "*": ["*"]
+                        }
+                    }
+                }
+            };
+            input.sources = {};
+            input.sources[this.contractName + ".sol"] = {};
+            let libs = [];
+            input.sources[this.contractName + ".sol"] = {
+                content: this.content
+            };
+            let w = this.$store.state.worker;
+            w.postMessage({
+                cmd: "compile",
+                input: JSON.stringify(input),
+                list: this.$store.state.contractDataList,
+                path: this.data.contractPath
+            });
+            let num = 0;
+            w.addEventListener('message', function (ev) {
+                num++
+                if (ev.data.cmd == 'compiled' && num == 1) {
+                    that.loadingAce = false
+                    output = JSON.parse(ev.data.data);
+                    if (output && output.contracts && JSON.stringify(output.contracts) != "{}") {
+                        that.status = 1;
+                        if (output.contracts[that.contractName + ".sol"]) {
+                            that.changeOutput(output.contracts[that.contractName + ".sol"], callback);
+                        }
+                    } else {
+                        that.errorMessage = output.errors;
+                        that.errorInfo = that.$t("contracts.contractCompileFail");
+                        that.loadingAce = false;
+                    }
+                } else {
+                    console.log(ev.data);
+                    console.log(JSON.parse(ev.data.data))
+                }
+            }, false);
+            w.addEventListener("error", function (ev) {
+                that.errorInfo = ev;
+                that.errorMessage = ev;
+                that.compileShow = true;
+                that.loadingAce = false;
+            })
+        },
+        //v0.4.25 v0.5.1
+        compileLowVersion: function (callback) {
+
             let wrapper = require("solc/wrapper");
             let solc = wrapper(window.Module);
-            this.loading = true;
+
             this.refreshMessage();
             for (let i = 0; i < constant.COMPILE_INFO.length; i++) {
                 this.compileinfo = this.compileinfo + constant.COMPILE_INFO(i);
             }
-            this.contractList = JSON.parse(
-                localStorage.getItem("contractList")
-            );
+            this.contractList = this.$store.state.contractDataList
             let content = "";
             let output;
             let input = {
@@ -567,7 +641,7 @@ export default {
                 this.errorInfo = this.$t('text.compilationFailed');
                 this.errorMessage = error;
                 this.compileShow = true;
-                this.loading = false;
+                this.loadingAce = false;
             }
             setTimeout(() => {
                 if (output && JSON.stringify(output.contracts) != "{}") {
@@ -578,7 +652,7 @@ export default {
                 } else {
                     this.errorMessage = output.errors;
                     this.errorInfo = this.$t('text.compilationFailed');
-                    this.loading = false;
+                    this.loadingAce = false;
                 }
             }, 500);
         },
@@ -596,8 +670,9 @@ export default {
                     this.data.contractBin = this.bin;
                     this.data.contractSource = Base64.encode(this.content);
                     this.$set(this.data, "bytecodeBin", this.bytecodeBin);
-                    this.loading = false;
-                    if (!callback.type) {
+                    // this.$emit("compile", false)
+                    this.loadingAce = false;
+                    if (callback && !callback.type) {
                         callback()
                     }
                     Bus.$emit("compile", this.data);
@@ -609,12 +684,12 @@ export default {
                     })
                     this.errorInfo = this.$t('text.compilationFailed');
                     this.compileShow = true;
-                    this.loading = false;
+                    this.loadingAce = false;
                 }
             } else {
                 this.errorInfo = this.$t('text.compilationFailed');
                 this.compileShow = true;
-                this.loading = false;
+                this.loadingAce = false;
             }
         },
         refreshMessage: function () {
@@ -652,13 +727,13 @@ export default {
                     if (value.name && value.type == "function") {
                         let data = {};
                         let methodId;
-                        if(localStorage.getItem("encryptionId") == 1){
+                        if (localStorage.getItem("encryptionId") == 1) {
                             methodId = Web3EthAbi.smEncodeFunctionSignature({
                                 name: value.name,
                                 type: value.type,
                                 inputs: value.inputs
                             });
-                        }else{
+                        } else {
                             methodId = Web3EthAbi.encodeFunctionSignature({
                                 name: value.name,
                                 type: value.type,
@@ -672,13 +747,13 @@ export default {
                     } else if (value.name && value.type == "event") {
                         let data = {};
                         let methodId;
-                        if(localStorage.getItem("encryptionId") == 1){
+                        if (localStorage.getItem("encryptionId") == 1) {
                             methodId = Web3EthAbi.smEncodeEventSignature({
                                 name: value.name,
                                 type: value.type,
                                 inputs: value.inputs
                             });
-                        }else{
+                        } else {
                             methodId = Web3EthAbi.encodeEventSignature({
                                 name: value.name,
                                 type: value.type,
@@ -717,7 +792,7 @@ export default {
                 });
         },
         deployContract(val) {
-            this.loading = true;
+            this.loadingAce = true;
             let reqData = {
                 groupId: localStorage.getItem("groupId"),
                 contractBin: this.bin,
@@ -736,7 +811,7 @@ export default {
             }
             getDeployStatus(reqData)
                 .then(res => {
-                    this.loading = false;
+                    this.loadingAce = false;
                     const { data, status } = res;
                     if (status === 200) {
                         this.abiFileShow = true;
@@ -761,7 +836,7 @@ export default {
                 })
                 .catch(err => {
                     this.status = 3;
-                    this.loading = false;
+                    this.loadingAce = false;
                     this.$message({
                         message: this.$t('text.systemError'),
                         type: "error"
@@ -817,6 +892,14 @@ export default {
                 });
         },
         getJavaClass: function () {
+            if (!this.abiFile || !this.bytecodeBin) {
+                this.$message({
+                    type: 'warning',
+                    message: this.$t('text.haveAbiAndBin'),
+                    duration: 2000
+                })
+                return
+            }
             let reqData = {
                 contractName: this.contractName,
                 abiInfo: JSON.parse(this.abiFile),
