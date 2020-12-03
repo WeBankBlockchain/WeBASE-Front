@@ -599,6 +599,7 @@ export default {
                         list[i].contractPath = list2[j].contractPath;
                         list[i].contractAddress = list2[j].contractAddress;
                         list[i].contractSource = list2[j].contractSource;
+                        list[i].contractStatus = list2[j].contractStatus;
                         list[i].contractAbi = list2[j].contractAbi;
                         list[i].contractBin = list2[j].contractBin;
                         list[i].bytecodeBin = list2[j].bytecodeBin;
@@ -898,7 +899,7 @@ export default {
         deleteFolderData(val) {
             this.loading = true
             deletePath(localStorage.getItem("groupId"), val.contractName).then(res => {
-                this.loading = false
+                // this.loading = false
                 if (res.status === 200) {
                     let contractList = this.$store.state.contractDataList;
                     let list = []
