@@ -103,7 +103,7 @@ export default {
         })
         this.allVersionList = [
             {
-                solcName: "v0.4.24",
+                solcName: "v0.4.25",
                 versionId: 0,
                 encryptType: 0,
                 net: 0
