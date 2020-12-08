@@ -52,6 +52,8 @@ public class ContractAbiUtil {
     public static HashMap<String, List<VersionEvent>> contractEventMap = new HashMap<>();
     private static final String REGEX = "(\\w+)(?:\\[(.*?)\\])(?:\\[(.*?)\\])?";
     private static final Pattern PATTERN = Pattern.compile(REGEX);
+    public static final String STATE_MUTABILITY_VIEW = "view";
+        public static final String STATE_MUTABILITY_PURE = "pure";
 
     @Data
     public static class VersionEvent {
@@ -172,7 +174,11 @@ public class ContractAbiUtil {
                     outputList.add(output.getType());
                 }
 
-                functions.put(abiDefinition.getName(), abiDefinition.isConstant());
+                // fit in solidity 0.6
+                boolean isConstant = STATE_MUTABILITY_VIEW.equals(abiDefinition.getStateMutability())
+                    || STATE_MUTABILITY_PURE.equals(abiDefinition.getStateMutability());
+                functions.put(abiDefinition.getName(), isConstant);
+                // functions.put(abiDefinition.getName(), abiDefinition.isConstant());
                 funcInputs.put(abiDefinition.getName(), inputList);
                 funcOutputs.put(abiDefinition.getName(), outputList);
             }
@@ -214,7 +220,11 @@ public class ContractAbiUtil {
                     outputList.add(output.getType());
                 }
 
-                functions.put(abiDefinition.getName(), abiDefinition.isConstant());
+                // fit in solidity 0.6
+                boolean isConstant = STATE_MUTABILITY_VIEW.equals(abiDefinition.getStateMutability())
+                    || STATE_MUTABILITY_PURE.equals(abiDefinition.getStateMutability());
+                functions.put(abiDefinition.getName(), isConstant);
+                // functions.put(abiDefinition.getName(), abiDefinition.isConstant());
                 funcInputs.put(abiDefinition.getName(), inputList);
                 funcOutputs.put(abiDefinition.getName(), outputList);
             }
