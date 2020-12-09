@@ -458,8 +458,8 @@ public class TransService {
         List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
 
         // fit in solidity 0.6
-        boolean isConstant = STATE_MUTABILITY_VIEW.equals(abiDefinition.getStateMutability())
-            || STATE_MUTABILITY_PURE.equals(abiDefinition.getStateMutability());
+        boolean isConstant = (STATE_MUTABILITY_VIEW.equals(abiDefinition.getStateMutability())
+            || STATE_MUTABILITY_PURE.equals(abiDefinition.getStateMutability()));
         // build ContractFunction
         ContractFunction cf =
                 ContractFunction.builder().funcName(funcName)
