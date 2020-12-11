@@ -44,7 +44,7 @@
                     </el-select>
                 </td>
             </tr>
-            <tr v-show="!constant">
+            <tr v-show="showUser">
                 <td class="text-right text-td">
                     <span class="font-color-fff">{{$t('text.acountAddress')}}：</span>
                 </td>
@@ -111,8 +111,18 @@ export default {
             contractAddress: this.data.contractAddress || "",
             errorMessage: '',
             placeholderText: this.$t('placeholder.selectedAccountAddress'),
-            pramasObj: null
+            pramasObj: null,
+            stateMutability: ''
         };
+    },
+    computed: {
+        showUser(){
+            let showUser = true;
+            if(this.constant || this.stateMutability==='view' || this.stateMutability==='pure'){
+                showUser = false
+            }
+            return showUser
+        }
     },
     mounted: function () {
 
@@ -203,7 +213,8 @@ export default {
                 if (value.funcId === this.transation.funcName) {
                     this.pramasData = value.inputs;
                     this.constant = value.constant;
-                    this.pramasObj = value
+                    this.pramasObj = value;
+                    this.stateMutability = value.stateMutability;
                 }
             });
             this.funcList.sort(function (a, b) {
@@ -238,7 +249,7 @@ export default {
             })
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                user: this.constant ? ' ' : this.transation.userName,
+                user: this.constant || this.stateMutability==='view' || this.stateMutability==='pure' ? '' : this.transation.userName,
                 contractName: this.data.contractName,
                 contractPath: this.data.contractPath,
                 version: this.contractVersion,
@@ -266,7 +277,7 @@ export default {
                         this.$emit("success", Object.assign({},successData,{
                             constant: this.constant
                         }) );
-                        if (this.constant) {
+                        if (this.constant || this.stateMutability==='view' || this.stateMutability==='pure') {
                             this.$message({
                                 type: "success",
                                 message: this.$t('text.searchSucceeded')

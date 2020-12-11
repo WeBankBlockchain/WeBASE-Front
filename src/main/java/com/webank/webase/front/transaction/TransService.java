@@ -15,6 +15,8 @@ package com.webank.webase.front.transaction;
 
 
 import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
+import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_PURE;
+import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_VIEW;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -455,11 +457,16 @@ public class TransService {
         List<String> funOutputTypes = AbiUtil.getFuncOutputType(abiDefinition);
         List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
 
+        // fit in solidity 0.6
+        boolean isConstant = (STATE_MUTABILITY_VIEW.equals(abiDefinition.getStateMutability())
+            || STATE_MUTABILITY_PURE.equals(abiDefinition.getStateMutability()));
         // build ContractFunction
         ContractFunction cf =
-                ContractFunction.builder().funcName(funcName).constant(abiDefinition.isConstant())
-                        .inputList(funcInputTypes).outputList(funOutputTypes)
-                        .finalInputs(finalInputs).finalOutputs(finalOutputs).build();
+                ContractFunction.builder().funcName(funcName)
+                    .constant(isConstant)
+                    //.constant(abiDefinition.isConstant())
+                    .inputList(funcInputTypes).outputList(funOutputTypes)
+                    .finalInputs(finalInputs).finalOutputs(finalOutputs).build();
         return cf;
     }
 
