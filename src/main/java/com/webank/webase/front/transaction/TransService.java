@@ -24,18 +24,17 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.ContractRepository;
 import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
+import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.precompiledapi.PrecompiledCommonInfo;
 import com.webank.webase.front.precompiledapi.PrecompiledService;
-import com.webank.webase.front.transaction.entity.ContractFunction;
-import com.webank.webase.front.transaction.entity.ContractOfTrans;
-import com.webank.webase.front.transaction.entity.ReqTransHandle;
-import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
+import com.webank.webase.front.transaction.entity.*;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
@@ -44,6 +43,7 @@ import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.KeyPair;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -56,19 +56,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
 import org.fisco.bcos.web3j.abi.Utils;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
-import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
-import org.fisco.bcos.web3j.crypto.Hash;
-import org.fisco.bcos.web3j.crypto.RawTransaction;
+import org.fisco.bcos.web3j.crypto.*;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.crypto.TransactionEncoder;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterName;
@@ -84,6 +86,7 @@ import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.fisco.bcos.web3j.tx.txdecode.ConstantProperties;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -104,6 +107,12 @@ public class TransService {
     private ContractRepository contractRepository;
     @Autowired
     private PrecompiledService precompiledService;
+    @Autowired
+    @Qualifier(value = "sm")
+    private CryptoSuite smCryptoSuite;
+    @Autowired
+    @Qualifier(value = "ecdsa")
+    private CryptoSuite ecdsaCryptoSuite;
 
     /**
      * transHandleWithSign.
@@ -635,6 +644,54 @@ public class TransService {
         return credentials;
     }
 
+    public SignatureResult signMessageHashByType(String messageHash, CryptoKeyPair cryptoKeyPair,
+                                                 int encryptType) {
+        if (encryptType == CryptoType.SM_TYPE) {
+            return smCryptoSuite.sign(messageHash, cryptoKeyPair);
+        } else {
+            return ecdsaCryptoSuite.sign(messageHash, cryptoKeyPair);
+        }
+    }
+
+    public CryptoKeyPair getKeyPairByType(BigInteger privateKeyRaw, int encryptType) {
+        if (encryptType == CryptoType.SM_TYPE) {
+            return smCryptoSuite.getKeyPairFactory().createKeyPair(privateKeyRaw);
+        } else {
+            return ecdsaCryptoSuite.getKeyPairFactory().createKeyPair(privateKeyRaw);
+        }
+    }
+
+    /**
+     * signMessageLocal
+     */
+    public Object signMessageLocal(ReqSignMessageHash req) {
+        log.info("transHandle start. ReqSignMessageHash:[{}]", JsonUtils.toJSONString(req));
+
+        Credentials credentials = keyStoreService.getCredentials(req.getUser());
+        CryptoKeyPair cryptoKeyPair = getKeyPairByType(credentials.getEcKeyPair().getPrivateKey(), EncryptType.encryptType);
+
+        SignatureResult signResult = signMessageHashByType(req.getHash(),cryptoKeyPair,EncryptType.encryptType);
+        if(EncryptType.encryptType == CryptoType.SM_TYPE)
+        {
+            SM2SignatureResult sm2SignatureResult = (SM2SignatureResult)signResult;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+            rspMessageHashSignature.setP(Numeric.toHexString(sm2SignatureResult.getPub()));
+            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setV((byte)0);
+            return rspMessageHashSignature;
+        }
+        else
+        {
+            ECDSASignatureResult sm2SignatureResult = (ECDSASignatureResult)signResult;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+            rspMessageHashSignature.setP("0x");
+            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setV(sm2SignatureResult.getV());
+            return rspMessageHashSignature;
+        }
+    }
 }
 
 
