@@ -17,10 +17,7 @@ package com.webank.webase.front.transaction;
 
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.transaction.entity.ReqQueryTransHandle;
-import com.webank.webase.front.transaction.entity.ReqSignedTransHandle;
-import com.webank.webase.front.transaction.entity.ReqTransHandle;
-import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
+import com.webank.webase.front.transaction.entity.*;
 import com.webank.webase.front.util.Address;
 import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
@@ -29,8 +26,13 @@ import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -141,5 +143,23 @@ public class TransController extends BaseController {
         log.info("transHandleLocal end  useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return obj;
     }
+
+
+    @ApiOperation(value = "sign Message locally", notes = "sign Message locally")
+    @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
+    @PostMapping("/signMessageHash")
+    public Object signMessageHash(@Valid @RequestBody ReqSignMessageHash reqTransHandle, BindingResult result) {
+        log.info("transHandleLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqTransHandle));
+
+        Instant startTime = Instant.now();
+        log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
+
+        Object obj =  transServiceImpl.signMessageLocal(reqTransHandle);
+        log.info("signMessageLocal end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return obj;
+    }
+
+
 
 }
