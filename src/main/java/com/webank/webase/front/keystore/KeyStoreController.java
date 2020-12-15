@@ -176,7 +176,7 @@ public class KeyStoreController extends BaseController {
             notes = "获取ECDSA或国密SM2 hash的签名数据，默认ECDSA")
     @ApiImplicitParam(name = "req", value = "Message", required = true,
             dataType = "MessageHashInfo")
-    @PostMapping("")
+    @PostMapping("/signMessageHash")
     public BaseResponse signMessageHash(@Valid @RequestBody MessageHashInfo req) {
         String str = keyStoreService.getMessageHashSignData(req);
         Sign.SignatureData signData = CommonUtils.stringToSignatureData(str);

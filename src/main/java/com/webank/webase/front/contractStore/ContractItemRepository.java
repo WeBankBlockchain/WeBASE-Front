@@ -16,17 +16,19 @@
 package com.webank.webase.front.contractStore;
 
 
-import com.webank.webase.front.contractStore.entity.StoreItem;
+import com.webank.webase.front.contractStore.entity.ContractItem;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface ContractStoreRepository extends CrudRepository<StoreItem, Long>,
-        JpaSpecificationExecutor<StoreItem> {
+public interface ContractItemRepository extends CrudRepository<ContractItem, Long>,
+        JpaSpecificationExecutor<ContractItem> {
 
-    StoreItem findByStoreItem(Long storeId);
+    ContractItem findByContractId(Long contractId);
 
-    List<StoreItem> findAll();
+    List<ContractItem> findByContractFolderId(Long contractFolderId);
+
+    List<ContractItem> findAll();
 
 }
