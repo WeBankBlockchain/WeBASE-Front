@@ -13,8 +13,13 @@
  */
 package com.webank.webase.front.contractStore;
 
+import com.webank.webase.front.contractStore.entity.ContractFolderItem;
+import com.webank.webase.front.contractStore.entity.ContractItem;
+import com.webank.webase.front.contractStore.entity.StoreItem;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 /**
  *
@@ -22,5 +27,58 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class ContractStoreService {
+    @Autowired
+    private ContractItemRepository contractItemRepository;
+    @Autowired
+    private ContractFolderRepository contractFolderRepository;
+    @Autowired
+    private ContractStoreRepository contractStoreRepository;
 
+    /**
+     *
+     */
+    public List<StoreItem> getStoreList() {
+        List<StoreItem> storeItemList = contractStoreRepository.findAll();
+        return storeItemList;
+    }
+
+    /**
+     *
+     */
+    public StoreItem getStoreItemById(Long storeId) {
+        StoreItem storeItem = contractStoreRepository.findByStoreItem(storeId);
+        return storeItem;
+    }
+
+    /**
+     *
+     */
+    public ContractItem getContractItemById(Long contractId) {
+        ContractItem contractItem = contractItemRepository.findByContractId(contractId);
+        return contractItem;
+    }
+
+    /**
+     *
+     */
+    public List<ContractItem> getContractItemByFolderId(Long contractFolderId) {
+        List<ContractItem> contractItemList = contractItemRepository.findByContractFolderId(contractFolderId);
+        return contractItemList;
+    }
+
+    /**
+     *
+     */
+    public ContractFolderItem getContractFolderById(Long contractFolderId) {
+        ContractFolderItem contractFolderItem = contractFolderRepository.findByContractFolderId(contractFolderId);
+        return contractFolderItem;
+    }
+
+    /**
+     *
+     */
+    public List<ContractFolderItem> getContractFolderItemListByStoreId(Long storeId) {
+        List<ContractFolderItem> contractFolderItemList = contractFolderRepository.findByStoreId(storeId);
+        return contractFolderItemList;
+    }
 }

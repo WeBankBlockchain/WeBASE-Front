@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
  * @author marsli
  */
 @Configuration
-public class BeanConfig {
+public class CryptoConfig {
 
 	@Bean(name = "ecdsa")
 	public CryptoSuite getECDSASuite() {
