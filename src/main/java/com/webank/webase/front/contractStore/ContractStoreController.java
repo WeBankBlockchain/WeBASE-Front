@@ -41,9 +41,6 @@ public class ContractStoreController extends BaseController {
     @Autowired
     ContractStoreService contractStoreService;
 
-    @Autowired
-    PresetDataService presetDataService;
-
 
     /**
      * query the list of contract store item
@@ -52,7 +49,6 @@ public class ContractStoreController extends BaseController {
     @GetMapping(value = "/getContractStoreList")
     public BaseResponse getContractStoreList() {
 
-        presetDataService.initPresetData();
         List<StoreItem>  storeItemList = contractStoreService.getStoreList();
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
         response.setData(storeItemList);
