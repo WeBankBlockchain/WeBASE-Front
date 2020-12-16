@@ -23,11 +23,9 @@ public class ContractItem {
     @Column(columnDefinition = "mediumtext")
     private String contractDesc;
     @Column(columnDefinition = "longtext")
-    private String contractDetail;
+    private String contractSrc;
     @Column(columnDefinition = "mediumtext")
     private String contractDesc_en;
-    @Column(columnDefinition = "longtext")
-    private String contractDetail_en;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 }

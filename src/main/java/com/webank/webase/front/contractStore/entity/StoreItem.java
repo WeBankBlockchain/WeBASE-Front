@@ -18,6 +18,7 @@ public class StoreItem {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long storeId;
     private String storeName;
+    private String storeName_en;
     private String storeType;
     @Column(columnDefinition = "mediumtext")
     private String storeIcon;
