@@ -146,15 +146,15 @@ public class TransController extends BaseController {
 
 
     @ApiOperation(value = "sign Message locally", notes = "sign Message locally")
-    @ApiImplicitParam(name = "ReqSignMessageHash", value = "ReqSignMessageHash info", required = true, dataType = "ReqSignMessageHash")
+    @ApiImplicitParam(name = "reqSignMessageHash", value = "ReqSignMessageHash info", required = true, dataType = "ReqSignMessageHash")
     @PostMapping("/signMessageHash")
-    public Object signMessageHash(@Valid @RequestBody ReqSignMessageHash reqTransHandle, BindingResult result) {
-        log.info("transHandleLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqTransHandle));
+    public Object signMessageHash(@Valid @RequestBody ReqSignMessageHash reqSignMessageHash, BindingResult result) {
+        log.info("transHandleLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqSignMessageHash));
 
         Instant startTime = Instant.now();
         log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
 
-        Object obj =  transServiceImpl.signMessageLocal(reqTransHandle);
+        Object obj =  transServiceImpl.signMessageLocal(reqSignMessageHash);
         log.info("signMessageLocal end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return obj;
