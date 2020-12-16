@@ -46,7 +46,7 @@ public class ContractStoreService {
      *
      */
     public StoreItem getStoreItemById(Long storeId) {
-        StoreItem storeItem = contractStoreRepository.findByStoreItem(storeId);
+        StoreItem storeItem = contractStoreRepository.findByStoreId(storeId);
         return storeItem;
     }
 
@@ -77,7 +77,7 @@ public class ContractStoreService {
     /**
      *
      */
-    public List<ContractFolderItem> getContractFolderItemListByStoreId(Long storeId) {
+    public List<ContractFolderItem> getFolderItemListByStoreId(Long storeId) {
         List<ContractFolderItem> contractFolderItemList = contractFolderRepository.findByStoreId(storeId);
         return contractFolderItemList;
     }

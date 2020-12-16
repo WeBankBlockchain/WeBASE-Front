@@ -25,7 +25,7 @@ import java.util.List;
 public interface ContractStoreRepository extends CrudRepository<StoreItem, Long>,
         JpaSpecificationExecutor<StoreItem> {
 
-    StoreItem findByStoreItem(Long storeId);
+    StoreItem findByStoreId(Long storeId);
 
     List<StoreItem> findAll();
 

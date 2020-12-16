@@ -146,7 +146,7 @@ public class TransController extends BaseController {
 
 
     @ApiOperation(value = "sign Message locally", notes = "sign Message locally")
-    @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
+    @ApiImplicitParam(name = "ReqSignMessageHash", value = "ReqSignMessageHash info", required = true, dataType = "ReqSignMessageHash")
     @PostMapping("/signMessageHash")
     public Object signMessageHash(@Valid @RequestBody ReqSignMessageHash reqTransHandle, BindingResult result) {
         log.info("transHandleLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqTransHandle));
