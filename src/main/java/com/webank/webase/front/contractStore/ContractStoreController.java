@@ -81,7 +81,7 @@ public class ContractStoreController extends BaseController {
     @ApiImplicitParam(name = "contractFolderId", value = "contractFolderId", required = true,
             dataType = "int")
     @GetMapping(value = "/getContractFolderById/{contractFolderId}")
-    public BaseResponse getContractFolderById(@RequestParam Integer contractFolderId) {
+    public BaseResponse getContractFolderById(@PathVariable("contractFolderId") Integer contractFolderId) {
         log.info("getContractStoreById start. contractFolderId:{}", contractFolderId);
         ContractFolderItem contractFolderItem = contractStoreService.getContractFolderById(contractFolderId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -96,7 +96,7 @@ public class ContractStoreController extends BaseController {
     @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
             dataType = "int")
     @GetMapping(value = "/getContractItemById/{contractId}")
-    public BaseResponse getContractItemById(@RequestParam Integer contractId) {
+    public BaseResponse getContractItemById(@PathVariable("contractId") Integer contractId) {
         log.info("getContractStoreById start. contractId:{}", contractId);
         ContractItem contractItem = contractStoreService.getContractItemById(contractId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -111,7 +111,7 @@ public class ContractStoreController extends BaseController {
     @ApiImplicitParam(name = "storeId", value = "storeId", required = true,
             dataType = "int")
     @GetMapping(value = "/getFolderItemListByStoreId/{storeId}")
-    public BaseResponse getFolderItemListByStoreId(@RequestParam Integer storeId) {
+    public BaseResponse getFolderItemListByStoreId(@PathVariable("storeId") Integer storeId) {
         log.info("getContractItemByFolderId start. storeId:{}", storeId);
         List<ContractFolderItem> contractFolderItemList = contractStoreService.getFolderItemListByStoreId(storeId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
