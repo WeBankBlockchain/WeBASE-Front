@@ -15,10 +15,7 @@ package com.webank.webase.front.contractStore;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
-import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ReqListContract;
 import com.webank.webase.front.contractStore.entity.ContractFolderItem;
 import com.webank.webase.front.contractStore.entity.ContractItem;
 import com.webank.webase.front.contractStore.entity.StoreItem;
@@ -27,10 +24,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 
@@ -109,10 +104,10 @@ public class ContractStoreController extends BaseController {
     @ApiOperation(value = "get contractItemList by folderId", notes = "get contractItemList by folderId")
     @ApiImplicitParam(name = "storeId", value = "storeId", required = true,
             dataType = "Integer")
-    @GetMapping(value = "/getContractFolderItemListByStoreId/{storeId}")
-    public BaseResponse getContractFolderItemListByStoreId(@PathVariable Integer storeId) {
+    @GetMapping(value = "/getFolderItemListByStoreId/{storeId}")
+    public BaseResponse getFolderItemListByStoreId(@PathVariable Integer storeId) {
         log.info("getContractItemByFolderId start. storeId:{}", storeId);
-        List<ContractFolderItem> contractFolderItemList = contractStoreService.getContractFolderItemListByStoreId(storeId.longValue());
+        List<ContractFolderItem> contractFolderItemList = contractStoreService.getFolderItemListByStoreId(storeId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
         response.setData(contractFolderItemList);
         return response;
