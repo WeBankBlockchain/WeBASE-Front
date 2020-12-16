@@ -311,10 +311,6 @@ public class EventController extends BaseController {
     @ApiImplicitParams({
         @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
             dataType = "Integer"),
-        @ApiImplicitParam(name = "type", value = "type", required = true,
-            dataType = "String"),
-        @ApiImplicitParam(name = "contractAddress", value = "contractAddress", required = true,
-            dataType = "String")
     })
     @GetMapping("/listAddress/{groupId}")
     public BaseResponse listAbi(@PathVariable Integer groupId) throws IOException {
