@@ -24,11 +24,11 @@ public class StoreItem {
     private String storeIcon;
     @Column(columnDefinition = "mediumtext")
     private String storeDesc;
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "mediumtext")
     private String storeDetail;
     @Column(columnDefinition = "mediumtext")
     private String storeDesc_en;
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "mediumtext")
     private String storeDetail_en;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
