@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * ContractStoreController.
  */
-@Api(value = "/contractStore", tags = "contract interface")
+@Api(value = "/contractStore", tags = "contractStore interface")
 @Slf4j
 @RestController
 @RequestMapping(value = "/contractStore")
@@ -41,12 +41,18 @@ public class ContractStoreController extends BaseController {
     @Autowired
     ContractStoreService contractStoreService;
 
+    @Autowired
+    PresetDataService presetDataService;
+
+
     /**
      * query the list of contract store item
      */
     @ApiOperation(value = "the list of contract store item", notes = "get contractStoreList")
     @GetMapping(value = "/getContractStoreList")
     public BaseResponse getContractStoreList() {
+
+        presetDataService.initPresetData();
         List<StoreItem>  storeItemList = contractStoreService.getStoreList();
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
         response.setData(storeItemList);
@@ -58,9 +64,9 @@ public class ContractStoreController extends BaseController {
      */
     @ApiOperation(value = "get contractStoreItem", notes = "get contractStoreItem")
     @ApiImplicitParam(name = "storeId", value = "storeId", required = true,
-            dataType = "Integer")
+            dataType = "int")
     @GetMapping(value = "/getContractStoreById/{storeId}")
-    public BaseResponse getContractStoreById(@PathVariable Integer storeId) {
+    public BaseResponse getContractStoreById(@PathVariable("storeId") Integer storeId) {
         log.info("getContractStoreById start. storeId:{}", storeId);
         StoreItem storeItem = contractStoreService.getStoreItemById(storeId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -73,9 +79,9 @@ public class ContractStoreController extends BaseController {
      */
     @ApiOperation(value = "get contractFolderItem", notes = "get contractFolderItem")
     @ApiImplicitParam(name = "contractFolderId", value = "contractFolderId", required = true,
-            dataType = "Integer")
+            dataType = "int")
     @GetMapping(value = "/getContractFolderById/{contractFolderId}")
-    public BaseResponse getContractFolderById(@PathVariable Integer contractFolderId) {
+    public BaseResponse getContractFolderById(@RequestParam Integer contractFolderId) {
         log.info("getContractStoreById start. contractFolderId:{}", contractFolderId);
         ContractFolderItem contractFolderItem = contractStoreService.getContractFolderById(contractFolderId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -88,9 +94,9 @@ public class ContractStoreController extends BaseController {
      */
     @ApiOperation(value = "get a contractItem", notes = "get a contractItem")
     @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
-            dataType = "Integer")
+            dataType = "int")
     @GetMapping(value = "/getContractItemById/{contractId}")
-    public BaseResponse getContractItemById(@PathVariable Integer contractId) {
+    public BaseResponse getContractItemById(@RequestParam Integer contractId) {
         log.info("getContractStoreById start. contractId:{}", contractId);
         ContractItem contractItem = contractStoreService.getContractItemById(contractId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -103,9 +109,9 @@ public class ContractStoreController extends BaseController {
      */
     @ApiOperation(value = "get contractItemList by folderId", notes = "get contractItemList by folderId")
     @ApiImplicitParam(name = "storeId", value = "storeId", required = true,
-            dataType = "Integer")
+            dataType = "int")
     @GetMapping(value = "/getFolderItemListByStoreId/{storeId}")
-    public BaseResponse getFolderItemListByStoreId(@PathVariable Integer storeId) {
+    public BaseResponse getFolderItemListByStoreId(@RequestParam Integer storeId) {
         log.info("getContractItemByFolderId start. storeId:{}", storeId);
         List<ContractFolderItem> contractFolderItemList = contractStoreService.getFolderItemListByStoreId(storeId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
