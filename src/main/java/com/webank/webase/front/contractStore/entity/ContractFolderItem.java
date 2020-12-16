@@ -22,11 +22,11 @@ public class ContractFolderItem {
     private String contractFolderName;
     @Column(columnDefinition = "mediumtext")
     private String contractFolderDesc;
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "mediumtext")
     private String contractFolderDetail;
     @Column(columnDefinition = "mediumtext")
     private String contractFolderDesc_en;
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "mediumtext")
     private String contractFolderDetail_en;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;

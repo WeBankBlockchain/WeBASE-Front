@@ -22,7 +22,7 @@ public class ContractItem {
     private String contractName;
     @Column(columnDefinition = "mediumtext")
     private String contractDesc;
-    @Column(columnDefinition = "longtext")
+    @Column(columnDefinition = "mediumtext")
     private String contractSrc;
     @Column(columnDefinition = "mediumtext")
     private String contractDesc_en;
