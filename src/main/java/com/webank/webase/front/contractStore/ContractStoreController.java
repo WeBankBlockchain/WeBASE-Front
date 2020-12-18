@@ -121,7 +121,7 @@ public class ContractStoreController extends BaseController {
     @ApiOperation(value = "get contractItemList by folderId", notes = "get contractItemList by folderId")
     @ApiImplicitParam(name = "folderId", value = "folderId", required = true,
             dataType = "int")
-    @GetMapping(value = "/getContractItemByFolderId/{storeId}")
+    @GetMapping(value = "/getContractItemByFolderId/{folderId}")
     public BaseResponse getContractItemByFolderId(@PathVariable("folderId") Integer folderId) {
         log.info("getContractItemByFolderId start. storeId:{}", folderId);
         List<ContractItem> contractItemList = contractStoreService.getFolderItemListByFolderId(folderId.longValue());
