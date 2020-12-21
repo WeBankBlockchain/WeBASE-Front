@@ -26,20 +26,7 @@ import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ContractPath;
-import com.webank.webase.front.contract.entity.ContractPathKey;
-import com.webank.webase.front.contract.entity.FileContentHandle;
-import com.webank.webase.front.contract.entity.ReqContractPath;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqListContract;
-import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
-import com.webank.webase.front.contract.entity.RspContractCompile;
-import com.webank.webase.front.contract.entity.RspContractNoAbi;
-import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import com.webank.webase.front.contract.entity.*;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import com.webank.webase.front.transaction.TransService;
@@ -461,6 +448,23 @@ public class ContractService {
             // update
             return updateContract(contractReq);
         }
+    }
+
+    /**
+     * copyContracts
+     */
+    @Transactional
+    public void copyContracts(ReqCopyContracts reqCopyContracts) {
+        log.debug("start saveContractBatch ReqContractList:{}", JsonUtils.toJSONString(reqCopyContracts));
+         reqCopyContracts.getContractItems().forEach(c -> {
+                    ReqContractSave reqContractSave = new ReqContractSave();
+                    reqContractSave.setContractName(c.getContractName());
+                    reqContractSave.setContractSource(c.getContractSource());
+                    reqContractSave.setContractPath(reqCopyContracts.getContractPath());
+                    reqContractSave.setGroupId(reqCopyContracts.getGroupId());
+                    newContract(reqContractSave);
+                 }
+         );
     }
 
 
