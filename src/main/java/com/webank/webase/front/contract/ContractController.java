@@ -18,20 +18,7 @@ import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.contract.entity.Contract;
-import com.webank.webase.front.contract.entity.ContractPath;
-import com.webank.webase.front.contract.entity.FileContentHandle;
-import com.webank.webase.front.contract.entity.ReqContractCompile;
-import com.webank.webase.front.contract.entity.ReqContractPath;
-import com.webank.webase.front.contract.entity.ReqContractSave;
-import com.webank.webase.front.contract.entity.ReqDeploy;
-import com.webank.webase.front.contract.entity.ReqListContract;
-import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
-import com.webank.webase.front.contract.entity.ReqPageContract;
-import com.webank.webase.front.contract.entity.ReqSendAbi;
-import com.webank.webase.front.contract.entity.RspContractCompile;
-import com.webank.webase.front.contract.entity.RspContractNoAbi;
-import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import com.webank.webase.front.contract.entity.*;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
@@ -185,6 +172,21 @@ public class ContractController extends BaseController {
         log.info("saveContract start. contract:{}", JsonUtils.toJSONString(contract));
         checkParamResult(result);
         return contractService.saveContract(contract);
+    }
+
+    /**
+     * copy Contracts.
+     */
+    @ApiOperation(value = "copy Contracts", notes = "copy Contracts ")
+    @ApiImplicitParam(name = "req", value = "contract info", required = true,
+            dataType = "ReqCopyContracts")
+    @PostMapping(value = "/copyContracts")
+    public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req, BindingResult result)
+            throws FrontException {
+        log.info("copyContracts start. req:{}", JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        contractService.copyContracts(req);
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 
     /**
