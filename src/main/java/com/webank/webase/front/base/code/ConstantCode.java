@@ -220,6 +220,7 @@ public class ConstantCode {
     public static final RetCode TX_RECEIPT_OUTPUT_PARSE_JSON_FAIL = RetCode.mark(201515, "transaction receipt fail and parse output fail");
     public static final RetCode TX_RECEIPT_OUTPUT_NULL = RetCode.mark(201516, "transaction receipt fail and output is null");
     public static final RetCode CALL_CONTRACT_ERROR = RetCode.mark(201517, "call contract constant method fail");
+    public static final RetCode GET_MESSAGE_HASH = RetCode.mark(201518, "get message's hash fail");
     // precompiled
     public static final RetCode GET_LIST_MANAGER_FAIL = RetCode.mark(201521, "get list of manager on chain fail");
     public static final RetCode CRUD_TABLE_KEY_LENGTH_ERROR = RetCode.mark(201522, "table key length error");
