@@ -24,7 +24,6 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
-import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.ContractRepository;
 import com.webank.webase.front.contract.entity.Contract;
@@ -43,7 +42,6 @@ import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.KeyPair;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -57,6 +55,8 @@ import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.exceptions.HashException;
+import org.fisco.bcos.sdk.crypto.exceptions.SignatureException;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
@@ -646,10 +646,22 @@ public class TransService {
 
     public SignatureResult signMessageHashByType(String messageHash, CryptoKeyPair cryptoKeyPair,
                                                  int encryptType) {
-        if (encryptType == CryptoType.SM_TYPE) {
-            return smCryptoSuite.sign(messageHash, cryptoKeyPair);
-        } else {
-            return ecdsaCryptoSuite.sign(messageHash, cryptoKeyPair);
+        try{
+            if (encryptType == CryptoType.SM_TYPE) {
+                return smCryptoSuite.sign(messageHash, cryptoKeyPair);
+            } else {
+                return ecdsaCryptoSuite.sign(messageHash, cryptoKeyPair);
+            }
+        }
+        catch(SignatureException e)
+        {
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+        }
+        catch (HashException e){
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+        }
+        catch (Exception e){
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
         }
     }
 
@@ -670,7 +682,7 @@ public class TransService {
         Credentials credentials = keyStoreService.getCredentials(req.getUser());
         CryptoKeyPair cryptoKeyPair = getKeyPairByType(credentials.getEcKeyPair().getPrivateKey(), EncryptType.encryptType);
 
-        SignatureResult signResult = signMessageHashByType(req.getHash(),cryptoKeyPair,EncryptType.encryptType);
+        SignatureResult signResult = signMessageHashByType(org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()),cryptoKeyPair,EncryptType.encryptType);
         if(EncryptType.encryptType == CryptoType.SM_TYPE)
         {
             SM2SignatureResult sm2SignatureResult = (SM2SignatureResult)signResult;
