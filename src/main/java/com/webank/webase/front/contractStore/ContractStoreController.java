@@ -101,17 +101,32 @@ public class ContractStoreController extends BaseController {
     }
 
     /**
-     * get contractItemList by folderId
+     * get folderItemList by storeId
      */
-    @ApiOperation(value = "get contractItemList by folderId", notes = "get contractItemList by folderId")
+    @ApiOperation(value = "get folderItemList by storeId", notes = "get folderItemList by storeId")
     @ApiImplicitParam(name = "storeId", value = "storeId", required = true,
             dataType = "int")
     @GetMapping(value = "/getFolderItemListByStoreId/{storeId}")
     public BaseResponse getFolderItemListByStoreId(@PathVariable("storeId") Integer storeId) {
-        log.info("getContractItemByFolderId start. storeId:{}", storeId);
+        log.info("getFolderItemListByStoreId start. storeId:{}", storeId);
         List<ContractFolderItem> contractFolderItemList = contractStoreService.getFolderItemListByStoreId(storeId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
         response.setData(contractFolderItemList);
+        return response;
+    }
+
+    /**
+     * get contractItemList by folderId
+     */
+    @ApiOperation(value = "get contractItemList by folderId", notes = "get contractItemList by folderId")
+    @ApiImplicitParam(name = "folderId", value = "folderId", required = true,
+            dataType = "int")
+    @GetMapping(value = "/getContractItemByFolderId/{folderId}")
+    public BaseResponse getContractItemByFolderId(@PathVariable("folderId") Integer folderId) {
+        log.info("getContractItemByFolderId start. storeId:{}", folderId);
+        List<ContractItem> contractItemList = contractStoreService.getFolderItemListByFolderId(folderId.longValue());
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        response.setData(contractItemList);
         return response;
     }
 }
