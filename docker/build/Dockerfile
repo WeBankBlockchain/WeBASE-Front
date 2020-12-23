@@ -1,33 +1,3 @@
-#FROM gradle:6.4.0-jdk8 as cache
-#LABEL maintainer yuanhongbin9090@gmail.com
-#
-#RUN mkdir -p /home/gradle/cache_home
-#
-#ENV GRADLE_USER_HOME /home/gradle/cache_home
-#
-#WORKDIR /code
-#COPY build.gradle build.gradle
-#
-#RUN gradle clean build -i --stacktrace
-#
-#
-#FROM gradle:6.4.0-jdk8 as builder
-#LABEL maintainer yuanhongbin9090@gmail.com
-#
-## copy cache
-#COPY --from=cache /home/gradle/cache_home /home/gradle/.gradle
-#
-## copy source code
-#WORKDIR /code
-#COPY build.gradle build.gradle
-#COPY src src
-#
-## build
-#RUN gradle build -x test -i --stacktrace
-#
-#
-
-
 #FROM openjdk:8-jdk-alpine as prod
 FROM ubuntu:18.04 as prod
 
