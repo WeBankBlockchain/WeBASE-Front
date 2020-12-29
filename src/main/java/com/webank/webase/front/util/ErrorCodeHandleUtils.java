@@ -17,11 +17,16 @@
 package com.webank.webase.front.util;
 
 import com.webank.webase.front.base.code.RetCode;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * chain error code handle util
  */
+@Slf4j
 public class ErrorCodeHandleUtils {
+
+	private static final String NODE_INACTIVE_MSG = "no active connection available";
+	public static final RetCode NODE_NOT_ACTIVE = RetCode.mark(-1, "no active connection available with node, please check node status");
 
 	// json rpc error
 	public static final RetCode RPC_INVALID_JSON_REQUEST = RetCode.mark(-32600, "invalid json request");
@@ -70,6 +75,10 @@ public class ErrorCodeHandleUtils {
 	 * @return
 	 */
 	public static RetCode handleErrorMsg(String errorMsg) {
+		// node inactive exception
+		if (errorMsg.contains(NODE_INACTIVE_MSG)) {
+			return NODE_NOT_ACTIVE;
+		}
 		// json rpc
 		if (errorMsg.contains(RPC_INVALID_JSON_REQUEST.getCode().toString())) {
 			return RPC_INVALID_JSON_REQUEST;
