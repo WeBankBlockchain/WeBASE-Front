@@ -15,13 +15,12 @@
  */
 package com.webank.webase.front.transaction;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.transaction.entity.ReqQueryTransHandle;
-import com.webank.webase.front.transaction.entity.ReqSignedTransHandle;
-import com.webank.webase.front.transaction.entity.ReqTransHandle;
-import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
+import com.webank.webase.front.transaction.entity.*;
 import com.webank.webase.front.util.Address;
+import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -29,8 +28,14 @@ import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -88,7 +93,6 @@ public class TransController extends BaseController {
 
         Instant startTime = Instant.now();
         log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
-
         checkParamResult(result);
         String address = reqTransHandle.getContractAddress();
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
@@ -139,6 +143,30 @@ public class TransController extends BaseController {
         }
         Object obj =  transServiceImpl.sendQueryTransaction(encodeStr, reqQueryTransHandle.getContractAddress(),reqQueryTransHandle.getFuncName(),reqQueryTransHandle.getContractAbi(),reqQueryTransHandle.getGroupId(),reqQueryTransHandle.getUserAddress());
         log.info("transHandleLocal end  useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
+        return obj;
+    }
+
+
+    @ApiOperation(value = "sign Message locally", notes = "sign Message locally")
+    @ApiImplicitParam(name = "reqSignMessageHash", value = "ReqSignMessageHash info", required = true, dataType = "ReqSignMessageHash")
+    @PostMapping("/signMessageHash")
+    public Object signMessageHash(@Valid @RequestBody ReqSignMessageHash reqSignMessageHash, BindingResult result) {
+        log.info("transHandleLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqSignMessageHash));
+        checkParamResult(result);
+        Instant startTime = Instant.now();
+        log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
+
+        if(!CommonUtils.isHexNumber(Numeric.cleanHexPrefix(reqSignMessageHash.getHash())))
+        {
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "not a hexadecimal hash string");
+        }
+        if( Numeric.cleanHexPrefix(reqSignMessageHash.getHash()).length() != CommonUtils.HASH_LENGTH_64)
+        {
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "wrong length");
+        }
+        Object obj =  transServiceImpl.signMessageLocal(reqSignMessageHash);
+        log.info("signMessageLocal end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
         return obj;
     }
 
