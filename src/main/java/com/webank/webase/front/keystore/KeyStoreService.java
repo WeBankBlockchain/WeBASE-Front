@@ -27,10 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.P12Manager;
 import org.fisco.bcos.channel.client.PEMManager;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.*;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,12 +171,14 @@ public class KeyStoreService {
         keyStoreInfo.setPrivateKey(privateKey);
         keyStoreInfo.setUserName(userName);
         return keyStoreInfo;
+
     }
 
     /**
      * get random credential to call transaction(not execute)
      * 2019/11/26 support guomi
      */
+
     public Credentials getCredentialsForQuery() {
         log.debug("start getCredentialsForQuery. ");
         // create keyPair(support guomi)
@@ -226,6 +225,52 @@ public class KeyStoreService {
                 throw new FrontException(response.getCode(), response.getMessage());
             }
             String signDataStr = signInfo.getSignDataStr();
+            if (StringUtils.isBlank(signDataStr)) {
+                log.warn("get sign data error and get blank string.");
+                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+            }
+            return signDataStr;
+        } catch (ResourceAccessException ex) {
+            log.error("getSignData fail restTemplateExchange", ex);
+            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+        } catch (HttpStatusCodeException e) {
+            JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
+            if (error == null) {
+                throw e;
+            }
+            log.error("getSignData http request fail. error:{}", JsonUtils.toJSONString(error));
+            // if return 404, no code or errorMessage
+            int code = error.get("code").intValue();
+            String errorMessage = error.get("errorMessage").asText();
+            throw new FrontException(code, errorMessage);
+        }
+    }
+
+
+    /**
+     * getMessageHashSignData from sign service. (webase-sign)
+     * @param params params
+     * @return
+     */
+    public String getMessageHashSignData(MessageHashInfo params) throws FrontException {
+        try {
+            SignInfo signInfo = new SignInfo();
+            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
+            log.info("getSignData url:{}", url);
+            HttpHeaders headers = CommonUtils.buildHeaders();
+            HttpEntity<String> formEntity =
+                    new HttpEntity<String>(JsonUtils.toJSONString(params), headers);
+            BaseResponse response =
+                    restTemplate.postForObject(url, formEntity, BaseResponse.class);
+            log.info("getSignData response:{}", JsonUtils.toJSONString(response));
+            if (response.getCode() == 0) {
+                signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
+            } else {
+                log.error("getSignData fail for error response:{}", response);
+                throw new FrontException(response.getCode(), response.getMessage());
+            }
+            String signDataStr = signInfo.getSignDataStr();
+
             if (StringUtils.isBlank(signDataStr)) {
                 log.warn("get sign data error and get blank string.");
                 throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
