@@ -15,34 +15,37 @@
  */
 package com.webank.webase.front.transaction;
 
+import static com.webank.webase.front.base.code.ConstantCode.ENCODE_STR_CANNOT_BE_NULL;
+import static com.webank.webase.front.base.code.ConstantCode.PARAM_ADDRESS_IS_INVALID;
+import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.transaction.entity.*;
+import com.webank.webase.front.transaction.entity.ReqQueryTransHandle;
+import com.webank.webase.front.transaction.entity.ReqSignMessageHash;
+import com.webank.webase.front.transaction.entity.ReqSignedTransHandle;
+import com.webank.webase.front.transaction.entity.ReqTransHandle;
+import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import com.webank.webase.front.util.Address;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
+import com.webank.webase.front.util.PrecompiledUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import java.time.Duration;
+import java.time.Instant;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
-import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.Duration;
-import java.time.Instant;
-
-import static com.webank.webase.front.base.code.ConstantCode.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * TransController.
@@ -62,7 +65,7 @@ public class TransController extends BaseController {
      * @return
      */
     @ApiOperation(value = "transaction handing", notes = "transaction handing")
-    @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
+    @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandleWithSign")
     @PostMapping("/handleWithSign")
     public Object transHandle(@Valid @RequestBody ReqTransHandleWithSign reqTransHandle, BindingResult result) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqTransHandle));
@@ -75,9 +78,12 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (address.length() != Address.ValidLen
-                || org.fisco.bcos.web3j.abi.datatypes.Address.DEFAULT.toString().equals(address)) {
+        if (!StringUtils.isBlank(address) && (address.length() != Address.ValidLen
+                || org.fisco.bcos.web3j.abi.datatypes.Address.DEFAULT.toString().equals(address))) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
+        }
+        if (reqTransHandle.isUseCns() && !PrecompiledUtils.checkVersion(reqTransHandle.getVersion())) {
+            throw new FrontException(ConstantCode.INVALID_VERSION);
         }
         Object obj =  transServiceImpl.transHandleWithSign(reqTransHandle);
         log.info("transHandle end  useTime:{}",
@@ -99,8 +105,11 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (address.length() != Address.ValidLen) {
+        if (!StringUtils.isBlank(address) && address.length() != Address.ValidLen) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
+        }
+        if (reqTransHandle.isUseCns() && !PrecompiledUtils.checkVersion(reqTransHandle.getVersion())) {
+            throw new FrontException(ConstantCode.INVALID_VERSION);
         }
         Object obj =  transServiceImpl.transHandleLocal(reqTransHandle);
         log.info("transHandleLocal end  useTime:{}",

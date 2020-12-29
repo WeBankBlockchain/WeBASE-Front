@@ -159,7 +159,10 @@ public class ConstantCode {
     public static final RetCode FAIL_CHANGE_NODE_TYPE = RetCode.mark(201218,"set node consensus type fail, check permission or node's group config file");
     // cns
     public static final RetCode INVALID_VERSION = RetCode.mark(201221,"Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ");
-    public static final RetCode INVALID_VERSION_EXCEED_LENGTH = RetCode.mark(201222,"version of contract is out of length");
+    public static final RetCode INVALID_VERSION_EXCEED_LENGTH1 = RetCode.mark(201222,"version of contract is out of length");
+    public static final RetCode CNS_REGISTER_FAIL = RetCode.mark(201223,"cns register fail");
+    public static final RetCode CNS_SEARCH_FAIL = RetCode.mark(201224,"cns search fail");
+    public static final RetCode CONTRACT_VERSION_NOT_EXISTS = RetCode.mark(201225,"cns contract version not exists");
     // crud
     public static final RetCode PARAM_FAIL_SQL_ERROR = RetCode.mark(201226, "sql syntax error");
     public static final RetCode SQL_ERROR = RetCode.mark(201227, "crud sql fail");

@@ -16,47 +16,29 @@
 package com.webank.webase.front.contract.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import java.util.ArrayList;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
- * deploy interface parameter.
- * 
+ * ReqRegisterCns.
  */
 @Data
-public class ReqDeploy {
-    /**
-     * address
-     */
-    private String user;
-    /**
-     * sign user Id
-     */
-    private String signUserId;
+public class ReqRegisterCns {
+    @NotNull
+    private Integer groupId;
+    @NotBlank
     private String contractName;
+    @NotBlank
     private String version;
+    @NotBlank
+    private String contractAddress;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
-    /**
-     * 合约编译的bytecode(bin)，用于部署合约
-     */
-    @NotBlank(message = ConstantCode.PARAM_FAIL_BYTECODE_BIN_IS_EMPTY)
-    private String bytecodeBin;
-    /**
-     * 合约编译的runtime-bytecode(runtime-bin)，用于交易解析
-     */
-    private String contractBin;
-    private String contractSource;
-    private String contractPath;
-    private int groupId;
-    private Long contractId;
-    private List<Object> funcParam = new ArrayList<>();
-    @Deprecated
-    private boolean useAes;
-    // 1.4.3
-    private boolean registerCns = false;
+    private String signUserId;
+    private String userAddress;
+    private boolean saveEnabled = false;
 }
