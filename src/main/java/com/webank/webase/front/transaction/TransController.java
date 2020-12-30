@@ -93,7 +93,6 @@ public class TransController extends BaseController {
 
         Instant startTime = Instant.now();
         log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
-
         checkParamResult(result);
         String address = reqTransHandle.getContractAddress();
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
@@ -170,7 +169,5 @@ public class TransController extends BaseController {
                 Duration.between(startTime, Instant.now()).toMillis());
         return obj;
     }
-
-
 
 }

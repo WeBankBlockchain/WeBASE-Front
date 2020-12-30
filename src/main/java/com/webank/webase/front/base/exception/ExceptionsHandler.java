@@ -94,7 +94,7 @@ public class ExceptionsHandler {
      */
     @ResponseBody
     @ExceptionHandler(value = FrontException.class)
-    public ResponseEntity myExceptionHandler(FrontException frontException) throws Exception {
+    public ResponseEntity myExceptionHandler(FrontException frontException) {
         log.error("catch frontException: {}",  frontException.getMessage());
         Map<String, Object> map = new HashMap<>();
         map.put("data", frontException.getDetail());
@@ -152,7 +152,7 @@ public class ExceptionsHandler {
 
     /**
      * all non-catch exception Handler.
-     *
+     * v1.4.3: add NODE_NOT_ACTIVE error code
      * @param exc e
      */
     @ResponseBody
