@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.util.List;
 import org.fisco.bcos.web3j.precompile.permission.ChainGovernanceService;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -163,6 +164,27 @@ public class ChainGovernService {
             // res: not a account address
             return "0";
         }
+    }
+
+
+    /**
+     * query committee votes
+     */
+    public TransactionReceipt queryCommitteeVoteReceipt(int groupId) throws Exception {
+        ChainGovernanceService chainGovernanceService = new ChainGovernanceService(web3ApiService.getWeb3j(groupId),
+            keyStoreService.getCredentialsForQuery());
+
+        return chainGovernanceService.updateThresholdAndRetReceipt(groupId);
+
+    }
+
+    /**
+     * query threshold votes
+     */
+    public TransactionReceipt queryThresholdReceipt(int groupId) throws Exception {
+        ChainGovernanceService chainGovernanceService = new ChainGovernanceService(web3ApiService.getWeb3j(groupId),
+            keyStoreService.getCredentialsForQuery());
+        return chainGovernanceService.updateThresholdAndRetReceipt(groupId);
     }
 
 

@@ -27,6 +27,7 @@ import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -221,4 +222,15 @@ public class ChainGovernController {
         return chainGovernService.unfreezeAccount(groupId, fromSignUserId, address);
     }
 
+    @GetMapping("committee/vote/receipt")
+    public TransactionReceipt queryCommitteeReceipt(@RequestParam Integer groupId) throws Exception {
+        log.info("start queryCommitteeReceipt groupId:{}", groupId);
+        return chainGovernService.queryCommitteeVoteReceipt(groupId);
+    }
+
+    @GetMapping("threshold/vote/receipt")
+    public TransactionReceipt queryThresholdReceipt(@RequestParam Integer groupId) throws Exception {
+        log.info("start queryThresholdReceipt groupId:{}", groupId);
+        return chainGovernService.queryThresholdReceipt(groupId);
+    }
 }
