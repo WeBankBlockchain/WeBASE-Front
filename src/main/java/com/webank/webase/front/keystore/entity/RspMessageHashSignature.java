@@ -24,9 +24,9 @@ import lombok.Data;
  */
 @Data
 public class RspMessageHashSignature {
-	private Byte v;
-	private String r;
-	private String s;
-	private String p;
+    private Byte v;
+    private String r;
+    private String s;
+    private String p;
 
 }

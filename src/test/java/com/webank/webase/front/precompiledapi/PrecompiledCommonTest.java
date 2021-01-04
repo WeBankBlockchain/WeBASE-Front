@@ -30,14 +30,14 @@ import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
 
 public class PrecompiledCommonTest {
 
-	@Test
-	public void testCommonInfo() {
-		String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.PERMISSION);
-		List<Object> contractAbi = JsonUtils.toJavaObjectList(abiStr, Object.class);
-		String funcName = FUNC_INSERT;
-		AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
-		Assert.assertTrue(!contractAbi.isEmpty());
-	}
+    @Test
+    public void testCommonInfo() {
+        String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.PERMISSION);
+        List<Object> contractAbi = JsonUtils.toJavaObjectList(abiStr, Object.class);
+        String funcName = FUNC_INSERT;
+        AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
+        Assert.assertTrue(!contractAbi.isEmpty());
+    }
 
 
 }

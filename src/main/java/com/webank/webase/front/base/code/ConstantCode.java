@@ -136,16 +136,16 @@ public class ConstantCode {
     public static final RetCode GROUP_NOT_DELETED = RetCode.mark(201134, "group not deleted");
 
     // contract type param error
-	public static final RetCode CONTRACT_TYPE_ENCODED_ERROR = RetCode.mark(201151, "Unsupported contract param type to encoded");
-	public static final RetCode CONTRACT_TYPE_DECODED_ERROR = RetCode.mark(201152, "Unsupported contract param type to decoded");
-	public static final RetCode CONTRACT_TYPE_PARAM_ERROR = RetCode.mark(201153, "unable to create instance of type, check input params");
-	
-	// add in v1.4.2
+    public static final RetCode CONTRACT_TYPE_ENCODED_ERROR = RetCode.mark(201151, "Unsupported contract param type to encoded");
+    public static final RetCode CONTRACT_TYPE_DECODED_ERROR = RetCode.mark(201152, "Unsupported contract param type to decoded");
+    public static final RetCode CONTRACT_TYPE_PARAM_ERROR = RetCode.mark(201153, "unable to create instance of type, check input params");
+    
+    // add in v1.4.2
     public static final RetCode CONTRACT_PATH_IS_EXISTS = RetCode.mark(201154, "contract path is exists.");
     // add in v1.4.3
     public static final String PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING = "{\"code\":201155,\"message\":\"contract path cannot be empty\"}";
 
-	/* precompiled runtime check or error */
+    /* precompiled runtime check or error */
     // param
     public static final RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
     public static final RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");

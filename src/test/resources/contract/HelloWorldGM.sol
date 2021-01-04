@@ -12,6 +12,6 @@ contract HelloWorldGM{
     }
 
     function set(string n) public{
-    	name = n;
+        name = n;
     }
 }

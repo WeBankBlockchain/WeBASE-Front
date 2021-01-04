@@ -171,14 +171,12 @@ public class KeyStoreService {
         keyStoreInfo.setPrivateKey(privateKey);
         keyStoreInfo.setUserName(userName);
         return keyStoreInfo;
-
     }
 
     /**
      * get random credential to call transaction(not execute)
      * 2019/11/26 support guomi
      */
-
     public Credentials getCredentialsForQuery() {
         log.debug("start getCredentialsForQuery. ");
         // create keyPair(support guomi)
@@ -245,7 +243,6 @@ public class KeyStoreService {
             throw new FrontException(code, errorMessage);
         }
     }
-
 
     /**
      * getMessageHashSignData from sign service. (webase-sign)

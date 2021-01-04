@@ -26,27 +26,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class MQServiceTest extends BaseTest{
 
-	@Autowired
-	private RabbitAdmin rabbitAdmin;
+    @Autowired
+    private RabbitAdmin rabbitAdmin;
 
-	private String queueName = "test1";
-	private String exchangeName = "test_exchange";
-	private String routingKey = "test1_routing_key";
-	@Test
-	public void testDeclareExchange() {
-		rabbitAdmin.declareExchange(new DirectExchange(exchangeName));
-	}
+    private String queueName = "test1";
+    private String exchangeName = "test_exchange";
+    private String routingKey = "test1_routing_key";
+    @Test
+    public void testDeclareExchange() {
+        rabbitAdmin.declareExchange(new DirectExchange(exchangeName));
+    }
 
-	@Test
-	public void testDeclareQueue() {
-		rabbitAdmin.declareQueue(new Queue(queueName));
-	}
+    @Test
+    public void testDeclareQueue() {
+        rabbitAdmin.declareQueue(new Queue(queueName));
+    }
 
-	@Test
-	public void testDeclareBind() {
-		Binding bind = BindingBuilder.bind(new Queue(queueName))
-				.to(new DirectExchange(exchangeName))
-				.with(routingKey);
-		rabbitAdmin.declareBinding(bind);
-	}
+    @Test
+    public void testDeclareBind() {
+        Binding bind = BindingBuilder.bind(new Queue(queueName))
+                .to(new DirectExchange(exchangeName))
+                .with(routingKey);
+        rabbitAdmin.declareBinding(bind);
+    }
 }

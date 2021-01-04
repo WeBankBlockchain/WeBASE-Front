@@ -28,13 +28,13 @@ import java.util.List;
  */
 @Data
 public class ReqImportAbi {
-	private Long abiId;
-	@NotNull
-	private Integer groupId;
-	@NotBlank
-	private String contractName;
-	@NotBlank
-	private String contractAddress;
-	@NotNull
-	private List<Object> contractAbi;
+    private Long abiId;
+    @NotNull
+    private Integer groupId;
+    @NotBlank
+    private String contractName;
+    @NotBlank
+    private String contractAddress;
+    @NotNull
+    private List<Object> contractAbi;
 }

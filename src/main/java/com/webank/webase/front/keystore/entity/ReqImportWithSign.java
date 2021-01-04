@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ReqImportWithSign {
-	private String signUserId;
-	private String appId;
-	private String privateKey;
+    private String signUserId;
+    private String appId;
+    private String privateKey;
 }
