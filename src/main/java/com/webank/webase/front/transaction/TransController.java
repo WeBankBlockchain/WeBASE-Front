@@ -157,11 +157,11 @@ public class TransController extends BaseController {
 
         if(!CommonUtils.isHexNumber(Numeric.cleanHexPrefix(reqSignMessageHash.getHash())))
         {
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "Invalid input message, must be a hex string of length 64");
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, "Invalid input message, must be a hex string of length 64");
         }
         if(Numeric.cleanHexPrefix(reqSignMessageHash.getHash()).length() != CommonUtils.HASH_LENGTH_64)
         {
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "Invalid input message, must be a hex string of length 64");
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, "Invalid input message, must be a hex string of length 64");
         }
         Object obj =  transServiceImpl.signMessageLocal(reqSignMessageHash);
         log.info("signMessageLocal end  useTime:{}",

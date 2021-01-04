@@ -651,13 +651,13 @@ public class TransService {
         }
         catch(SignatureException e)
         {
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, e.getMessage());
         }
         catch (HashException e){
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, e.getMessage());
         }
         catch (Exception e){
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, e.getMessage());
         }
     }
 
