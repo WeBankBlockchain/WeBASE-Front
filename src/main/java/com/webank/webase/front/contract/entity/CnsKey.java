@@ -27,6 +27,6 @@ import lombok.NoArgsConstructor;
 public class CnsKey implements Serializable {
     private static final long serialVersionUID = 713233686141669428L;
     private Integer groupId;
+    private String contractPath;
     private String contractName;
-    private String version;
 }

@@ -45,4 +45,5 @@ public class ReqTransHandleWithSign {
     private List<Object> funcParam = new ArrayList<>();
     // 1.4.3
     private boolean useCns = false;
+    private String cnsName;
 }

@@ -16,7 +16,9 @@
 package com.webank.webase.front.transaction;
 
 import static com.webank.webase.front.base.code.ConstantCode.ENCODE_STR_CANNOT_BE_NULL;
+import static com.webank.webase.front.base.code.ConstantCode.INVALID_VERSION;
 import static com.webank.webase.front.base.code.ConstantCode.PARAM_ADDRESS_IS_INVALID;
+import static com.webank.webase.front.base.code.ConstantCode.PARAM_FAIL_CNS_NAME_IS_EMPTY;
 import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
@@ -82,8 +84,13 @@ public class TransController extends BaseController {
                 || org.fisco.bcos.web3j.abi.datatypes.Address.DEFAULT.toString().equals(address))) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
-        if (reqTransHandle.isUseCns() && !PrecompiledUtils.checkVersion(reqTransHandle.getVersion())) {
-            throw new FrontException(ConstantCode.INVALID_VERSION);
+        if (reqTransHandle.isUseCns()) {
+            if (!PrecompiledUtils.checkVersion(reqTransHandle.getVersion())) {
+                throw new FrontException(INVALID_VERSION);
+            }
+            if (StringUtils.isBlank(reqTransHandle.getCnsName())) {
+                throw new FrontException(PARAM_FAIL_CNS_NAME_IS_EMPTY);
+            }
         }
         Object obj =  transServiceImpl.transHandleWithSign(reqTransHandle);
         log.info("transHandle end  useTime:{}",
@@ -108,8 +115,13 @@ public class TransController extends BaseController {
         if (!StringUtils.isBlank(address) && address.length() != Address.ValidLen) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
-        if (reqTransHandle.isUseCns() && !PrecompiledUtils.checkVersion(reqTransHandle.getVersion())) {
-            throw new FrontException(ConstantCode.INVALID_VERSION);
+        if (reqTransHandle.isUseCns()) {
+            if (!PrecompiledUtils.checkVersion(reqTransHandle.getVersion())) {
+                throw new FrontException(INVALID_VERSION);
+            }
+            if (StringUtils.isBlank(reqTransHandle.getCnsName())) {
+                throw new FrontException(PARAM_FAIL_CNS_NAME_IS_EMPTY);
+            }
         }
         Object obj =  transServiceImpl.transHandleLocal(reqTransHandle);
         log.info("transHandleLocal end  useTime:{}",

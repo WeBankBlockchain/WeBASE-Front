@@ -38,6 +38,7 @@ public class ReqDeploy {
      */
     private String signUserId;
     private String contractName;
+    @Deprecated
     private String version;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
@@ -57,6 +58,4 @@ public class ReqDeploy {
     private List<Object> funcParam = new ArrayList<>();
     @Deprecated
     private boolean useAes;
-    // 1.4.3
-    private boolean registerCns = false;
 }

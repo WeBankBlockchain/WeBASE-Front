@@ -19,10 +19,14 @@ import com.webank.webase.front.contract.entity.Cns;
 import com.webank.webase.front.contract.entity.CnsKey;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 public interface CnsRepository extends CrudRepository<Cns, CnsKey>,
     JpaSpecificationExecutor<Cns> {
     
     List<Cns> findByGroupIdAndContractName(int groupId, String contractName);
+    
+    @Query(value = "select n from Cns n where n.groupId = ?1 and n.contractPath = ?2 and n.contractName = ?3  and n.contractAddress = ?4 ")
+    Cns findByAddress(int groupId, String contractPath, String contractName, String contractAddress);
 }

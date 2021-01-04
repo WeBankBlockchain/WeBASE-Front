@@ -26,6 +26,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.contract.entity.Cns;
+import com.webank.webase.front.contract.entity.CnsKey;
 import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.contract.entity.ContractPath;
 import com.webank.webase.front.contract.entity.ContractPathKey;
@@ -37,6 +38,7 @@ import com.webank.webase.front.contract.entity.ReqDeploy;
 import com.webank.webase.front.contract.entity.ReqListContract;
 import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
 import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqQueryCns;
 import com.webank.webase.front.contract.entity.ReqRegisterCns;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
@@ -278,11 +280,6 @@ public class ContractService {
         }
         String contractAddress = receipt.getContractAddress();
 
-        if (req.isRegisterCns()) {
-            precompiledWithSignService.registerCns(groupId, signUserId, contractName,
-                    req.getVersion(), contractAddress, JsonUtils.toJSONString(abiInfos));
-        }
-
         log.info("success deployWithSign. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -310,66 +307,46 @@ public class ContractService {
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
 
-        if (req.isRegisterCns()) {
-            String version = req.getVersion();
-            CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId), credentials);
-            try {
-                cnsService.registerCns(contractName, version, contractAddress,
-                        JsonUtils.toJSONString(abiInfos));
-            } catch (Exception e) {
-                log.error("fail registerCns. contractName:{}", contractName);
-                throw new FrontException(ConstantCode.CNS_REGISTER_FAIL);
-            }
-            saveCns(groupId, contractName, version, contractAddress);
-        }
-
         log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
     }
-    
+
     /**
      * registerCns.
      */
     public void registerCns(ReqRegisterCns req) {
         int groupId = req.getGroupId();
-        String contractName = req.getContractName();
+        String cnsName = req.getCnsName();
         String version = req.getVersion();
         String contractAddress = req.getContractAddress();
         String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
         if (req.isSaveEnabled()) {
+            if (StringUtils.isBlank(req.getContractPath())) {
+                throw new FrontException(ConstantCode.PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING);
+            }
             if (StringUtils.isBlank(req.getUserAddress())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
             }
             Credentials credentials = keyStoreService.getCredentials(req.getUserAddress());
             CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId), credentials);
             try {
-                cnsService.registerCns(contractName, version, contractAddress, abiInfo);
+                cnsService.registerCns(cnsName, version, contractAddress, abiInfo);
             } catch (Exception e) {
-                log.error("fail registerCns. contractName:{}", contractName);
+                log.error("fail registerCns. cnsName:{}", cnsName);
                 throw new FrontException(ConstantCode.CNS_REGISTER_FAIL);
             }
-            saveCns(groupId, contractName, version, contractAddress);
+            Cns cns = new Cns();
+            BeanUtils.copyProperties(req, cns);
+            cns.setCreateTime(LocalDateTime.now());
+            cns.setModifyTime(LocalDateTime.now());
+            cnsRepository.save(cns);
         } else {
             if (StringUtils.isBlank(req.getSignUserId())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
             }
-            precompiledWithSignService.registerCns(groupId, req.getSignUserId(), contractName,
+            precompiledWithSignService.registerCns(groupId, req.getSignUserId(), cnsName,
                     req.getVersion(), contractAddress, abiInfo);
         }
-    }
-    
-    /**
-     * saveCns.
-     */
-    public void saveCns(int groupId, String contractName, String version, String contractAddress) {
-        Cns cns = new Cns();
-        cns.setGroupId(groupId);
-        cns.setContractName(contractName);
-        cns.setVersion(version);
-        cns.setContractAddress(contractAddress);
-        cns.setCreateTime(LocalDateTime.now());
-        cns.setModifyTime(LocalDateTime.now());
-        cnsRepository.save(cns);
     }
 
     public static String constructorEncodedByContractNameAndVersion(String contractName,
@@ -985,12 +962,12 @@ public class ContractService {
     }
 
     /**
-     * findCnsList.
+     * findCns.
      */
-    public List<Cns> findCnsList(Integer groupId, String ContractName) throws IOException {
+    public Cns findCns(ReqQueryCns req) throws IOException {
         // get from database
-        List<Cns> cnsList = cnsRepository.findByGroupIdAndContractName(groupId, ContractName);
-        return cnsList;
+        return cnsRepository.findByAddress(req.getGroupId(), req.getContractPath(),
+                req.getContractName(), req.getContractAddress());
     }
 
 }

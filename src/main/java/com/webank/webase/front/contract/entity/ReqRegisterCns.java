@@ -28,17 +28,20 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 @Data
 public class ReqRegisterCns {
-    @NotNull
+    @NotNull(message = ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY_STRING)
     private Integer groupId;
-    @NotBlank
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_NAME_IS_EMPTY)
     private String contractName;
-    @NotBlank
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CNS_NAME_IS_EMPTY_STRING)
+    private String cnsName;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
     private String version;
-    @NotBlank
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_ADDRESS_EMPTY)
     private String contractAddress;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<AbiDefinition> abiInfo;
     private String signUserId;
     private String userAddress;
+    private String contractPath;
     private boolean saveEnabled = false;
 }

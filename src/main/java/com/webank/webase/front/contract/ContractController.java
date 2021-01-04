@@ -18,10 +18,26 @@ import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.contract.entity.*;
+import com.webank.webase.front.contract.entity.Cns;
+import com.webank.webase.front.contract.entity.Contract;
+import com.webank.webase.front.contract.entity.ContractPath;
+import com.webank.webase.front.contract.entity.FileContentHandle;
+import com.webank.webase.front.contract.entity.ReqContractCompile;
+import com.webank.webase.front.contract.entity.ReqContractPath;
+import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqCopyContracts;
+import com.webank.webase.front.contract.entity.ReqDeploy;
+import com.webank.webase.front.contract.entity.ReqListContract;
+import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
+import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqQueryCns;
+import com.webank.webase.front.contract.entity.ReqRegisterCns;
+import com.webank.webase.front.contract.entity.ReqSendAbi;
+import com.webank.webase.front.contract.entity.RspContractCompile;
+import com.webank.webase.front.contract.entity.RspContractNoAbi;
+import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
-import com.webank.webase.front.util.PrecompiledUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -80,9 +96,6 @@ public class ContractController extends BaseController {
             log.error("contract deployWithSign error: signUserId is empty");
             throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
         }
-        if (reqDeploy.isRegisterCns() && !PrecompiledUtils.checkVersion(reqDeploy.getVersion())) {
-            throw new FrontException(ConstantCode.INVALID_VERSION);
-        }
         String contractAddress = contractService.caseDeploy(reqDeploy, false);
         log.info("success deployWithSign. result:{}", contractAddress);
         return contractAddress;
@@ -102,9 +115,6 @@ public class ContractController extends BaseController {
         if (StringUtils.isBlank(reqDeploy.getUser())) {
             log.error("contract deployLocal error: user(address) is empty");
             throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
-        }
-        if (reqDeploy.isRegisterCns() && !PrecompiledUtils.checkVersion(reqDeploy.getVersion())) {
-            throw new FrontException(ConstantCode.INVALID_VERSION);
         }
         String contractAddress = contractService.caseDeploy(reqDeploy, true);
         log.info("success deployLocal. result:{}", contractAddress);
@@ -371,25 +381,29 @@ public class ContractController extends BaseController {
      * @param result checkResult
      */
     @PostMapping("/registerCns")
-    public void registerCns(@Valid @RequestBody ReqRegisterCns req, BindingResult result)
+    public BaseResponse registerCns(@Valid @RequestBody ReqRegisterCns req, BindingResult result)
             throws Exception {
         log.info("registerCns start. req:[{}]", JsonUtils.toJSONString(req));
         checkParamResult(result);
         contractService.registerCns(req);
         log.info("success registerCns.");
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 
     /**
-     * findPathList.
+     * findCns.
      * 
-     * @param groupId
-     * @param contractName
+     * @param req
+     * @param result
      * @return
      */
-    @GetMapping(value = "/findCnsList/{groupId}/{contractName}")
-    public List<Cns> findCnsList(@PathVariable("groupId") Integer groupId,
-            @PathVariable String contractName) throws IOException {
-        log.info("start findCnsList. groupId:{}", groupId, contractName);
-        return contractService.findCnsList(groupId, contractName);
+    @PostMapping(value = "/findCns")
+    public BaseResponse findCns(@Valid @RequestBody ReqQueryCns req, BindingResult result) throws IOException {
+        log.info("findCns start. req:[{}]", JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        Cns cns = contractService.findCns(req);
+        response.setData(cns);
+        return response;
     }
 }

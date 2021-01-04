@@ -33,8 +33,10 @@ public class Cns implements Serializable {
     @Id
     private Integer groupId;
     @Id
-    private String contractName;
+    private String contractPath;
     @Id
+    private String contractName;
+    private String cnsName;
     private String version;
     private String contractAddress;
     private LocalDateTime createTime;

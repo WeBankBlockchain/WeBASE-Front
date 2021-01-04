@@ -14,8 +14,8 @@
 package com.webank.webase.front.transaction;
 
 
-import static com.webank.webase.front.base.code.ConstantCode.CONTRACT_VERSION_NOT_EXISTS;
 import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
+import static com.webank.webase.front.base.code.ConstantCode.VERSION_NOT_EXISTS;
 import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_PURE;
 import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_VIEW;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -142,9 +142,9 @@ public class TransService {
         String contractAddress = contractOfTrans.getContractAddress();
         if (req.isUseCns()) {
             contractAddress = precompiledService.getAddressByContractNameAndVersion(req.getGroupId(),
-                    req.getContractName(), req.getVersion());
+                    req.getCnsName(), req.getVersion());
             if (StringUtils.isBlank(contractAddress)) {
-                throw new FrontException(CONTRACT_VERSION_NOT_EXISTS);
+                throw new FrontException(VERSION_NOT_EXISTS);
             }
         }
         // encode function
@@ -541,9 +541,9 @@ public class TransService {
         String address = cof.getContractAddress();
         if (req.isUseCns()) {
             address = precompiledService.getAddressByContractNameAndVersion(cof.getGroupId(),
-                    cof.getContractName(), cof.getVersion());
+                    req.getCnsName(), cof.getVersion());
             if (StringUtils.isBlank(address)) {
-                throw new FrontException(CONTRACT_VERSION_NOT_EXISTS);
+                throw new FrontException(VERSION_NOT_EXISTS);
             }
         }
 
