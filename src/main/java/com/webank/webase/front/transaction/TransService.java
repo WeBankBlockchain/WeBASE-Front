@@ -58,7 +58,6 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.exceptions.HashException;
 import org.fisco.bcos.sdk.crypto.exceptions.SignatureException;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
@@ -655,13 +654,13 @@ public class TransService {
         }
         catch(SignatureException e)
         {
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, e.getMessage());
         }
         catch (HashException e){
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, e.getMessage());
         }
         catch (Exception e){
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, e.getMessage());
         }
     }
 
@@ -703,254 +702,6 @@ public class TransService {
             rspMessageHashSignature.setV(sm2SignatureResult.getV());
             return rspMessageHashSignature;
         }
-    }
-
-
-    /**
-     * build ContractFunction if abi is empty, check in db or file: conf/*.abi else build directly
-     */
-    private ContractFunction buildContractFunction(ContractOfTrans cot) {
-        log.debug("start buildContractFunction");
-        if (CollectionUtils.isEmpty(cot.getContractAbi())) {
-            checkContractAbiInCnsOrDb(cot);
-            return buildContractFunctionWithCns(cot.getContractName(), cot.getFuncName(),
-                    cot.getVersion(), cot.getFuncParam());
-        }
-        return buildContractFunctionWithAbi(cot.getContractAbi(), cot.getFuncName(),
-                cot.getFuncParam());
-    }
-
-    /**
-     * build Function with cns.
-     */
-    private ContractFunction buildContractFunctionWithCns(String contractName, String funcName,
-            String version, List<Object> params) {
-        log.debug("start buildContractFunctionWithCns");
-        // if function is constant
-        boolean constant = ContractAbiUtil.getConstant(contractName, funcName, version);
-        // inputs format
-        List<String> funcInputTypes =
-                ContractAbiUtil.getFuncInputType(contractName, funcName, version);
-        // check param match inputs
-        if (funcInputTypes.size() != params.size()) {
-            log.error("load contract function error for function params not fit");
-            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-        }
-        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-        // outputs format
-        List<String> funOutputTypes =
-                ContractAbiUtil.getFuncOutputType(contractName, funcName, version);
-        List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
-
-        // build ContractFunction
-        ContractFunction cf = ContractFunction.builder().funcName(funcName).constant(constant)
-                .inputList(funcInputTypes).outputList(funOutputTypes).finalInputs(finalInputs)
-                .finalOutputs(finalOutputs).build();
-        return cf;
-    }
-
-    /**
-     * build Function with abi.
-     */
-    private ContractFunction buildContractFunctionWithAbi(List<Object> contractAbi, String funcName,
-            List<Object> params) {
-        log.debug("start buildContractFunctionWithAbi");
-        // check function name
-        AbiDefinition abiDefinition =
-                AbiUtil.getAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
-        if (Objects.isNull(abiDefinition)) {
-            log.warn("transaction fail. func:{} is not existed", funcName);
-            throw new FrontException(IN_FUNCTION_ERROR);
-        }
-
-        // input format
-        List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
-        // check param match inputs
-        if (funcInputTypes.size() != params.size()) {
-            log.error("load contract function error for function params not fit");
-            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-        }
-        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-        // output format
-        List<String> funOutputTypes = AbiUtil.getFuncOutputType(abiDefinition);
-        List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
-
-        // fit in solidity 0.6
-        boolean isConstant = (STATE_MUTABILITY_VIEW.equals(abiDefinition.getStateMutability())
-            || STATE_MUTABILITY_PURE.equals(abiDefinition.getStateMutability()));
-        // build ContractFunction
-        ContractFunction cf =
-                ContractFunction.builder().funcName(funcName)
-                    .constant(isConstant)
-                    //.constant(abiDefinition.isConstant())
-                    .inputList(funcInputTypes).outputList(funOutputTypes)
-                    .finalInputs(finalInputs).finalOutputs(finalOutputs).build();
-        return cf;
-    }
-
-    /**
-     * does abi exist in cns or db.
-     */
-    private void checkContractAbiInCnsOrDb(ContractOfTrans contract) {
-        log.debug("start checkContractAbiInCnsOrDb");
-        boolean ifExisted;
-        // check if contractAbi existed in cache
-        if (contract.getVersion() != null) {
-            ifExisted = ContractAbiUtil.ifContractAbiExisted(contract.getContractName(),
-                    contract.getVersion());
-        } else {
-            ifExisted = ContractAbiUtil.ifContractAbiExisted(contract.getContractName(),
-                    contract.getContractAddress().substring(2));
-            contract.setVersion(contract.getContractAddress().substring(2));
-        }
-        // deprecated cns in front
-        // check if contractAbi existed in cns
-//        if (!ifExisted) {
-//            ifExisted = checkAndSaveAbiFromCns(contract);
-//        }
-        // check if contractAbi existed in db
-        if (!ifExisted) {
-            ifExisted = checkAndSaveAbiFromDb(contract);
-            contract.setVersion(contract.getContractPath());
-        }
-
-        if (!ifExisted) {
-            throw new FrontException(ConstantCode.ABI_GET_ERROR);
-        }
-
-    }
-
-    /**
-     * send transaction locally
-     */
-    public Object transHandleLocal(ReqTransHandle req) {
-        log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(req));
-
-        // init contract params
-        ContractOfTrans cof = new ContractOfTrans(req);
-        // check param and build function
-        ContractFunction contractFunction = buildContractFunction(cof);
-
-        // address
-        String address = cof.getContractAddress();
-
-        // web3j
-        Web3j web3j = web3ApiService.getWeb3j(cof.getGroupId());
-        // get privateKey
-        Credentials credentials = getCredentials(contractFunction.getConstant(), req.getUser());
-        // contract load
-        ContractGasProvider contractGasProvider =
-                new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
-        CommonContract commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
-
-        // request
-        Object result;
-        Function function = new Function(cof.getFuncName(), contractFunction.getFinalInputs(),
-                contractFunction.getFinalOutputs());
-        if (contractFunction.getConstant()) {
-            result = execCall(contractFunction.getOutputList(), function, commonContract);
-        } else {
-            result = execTransaction(function, commonContract);
-        }
-
-        log.info("transHandle end. name:{} func:{} result:{}", cof.getContractName(),
-                cof.getFuncName(), JsonUtils.toJSONString(result));
-        return result;
-    }
-
-
-    public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, int groupId)  {
-
-        Web3j web3j = web3ApiService.getWeb3j(groupId);
-        if (sync) {
-            final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-            TransactionReceipt receipt;
-            sendMessage(web3j, signedStr, transFuture);
-            try{
-                receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException  e) {
-                log.error("send call tx error for interrupted or exec:[]", e);
-                throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
-            } catch (TimeoutException e) {
-                log.error("send call tx error for timeout:[]", e);
-                throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
-            }
-             return receipt;
-        } else {
-            TransactionReceipt transactionReceipt = new TransactionReceipt();
-            web3j.sendRawTransaction(signedStr).sendAsync();
-            transactionReceipt.setTransactionHash(Hash.sha3(signedStr));
-            return transactionReceipt;
-        }
-    }
-
-
-
-    public Object sendQueryTransaction(String encodeStr, String contractAddress, String funcName, String contractAbi, int groupId, String userAddress) {
-
-        Web3j web3j = web3ApiService.getWeb3j(groupId);
-        String callOutput ;
-        try {
-           callOutput = web3j.call(Transaction.createEthCallTransaction(userAddress, contractAddress, encodeStr), DefaultBlockParameterName.LATEST)
-                    .send().getValue().getOutput();
-        } catch (IOException e) {
-            log.error("sendQueryTransaction fail for contract status error:[]", e);
-            throw new FrontException(ConstantCode.CALL_CONTRACT_IO_EXCEPTION, e.getMessage());
-        } catch (ContractCallException e) {
-            log.error("sendQueryTransaction fail for contract status error:[]", e);
-            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR, e.getMessage());
-        }
-
-        AbiDefinition abiDefinition = getFunctionAbiDefinition(funcName, contractAbi);
-        if (Objects.isNull(abiDefinition)) {
-            throw new FrontException(IN_FUNCTION_ERROR);
-        }
-        List<String> funOutputTypes = AbiUtil.getFuncOutputType(abiDefinition);
-        List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
-
-        List<Type> typeList = FunctionReturnDecoder.decode(callOutput, Utils.convert(finalOutputs));
-        Object response;
-        if (typeList.size() > 0) {
-            response = AbiUtil.callResultParse(funOutputTypes, typeList);
-        } else {
-            response = typeList;
-        }
-        return response;
-    }
-
-    public static AbiDefinition getFunctionAbiDefinition(String functionName, String contractAbi) {
-        if(functionName == null) {
-            throw new FrontException(IN_FUNCTION_ERROR);
-        }
-        List<AbiDefinition> abiDefinitionList = JsonUtils.toJavaObjectList(contractAbi, AbiDefinition.class);
-        if (abiDefinitionList == null) {
-            throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
-        }
-        AbiDefinition result = null;
-        for (AbiDefinition abiDefinition : abiDefinitionList) {
-            if (abiDefinition == null) {
-                throw new FrontException(IN_FUNCTION_ERROR);
-            }
-            if (ConstantProperties.TYPE_FUNCTION.equals(abiDefinition.getType())
-                    && functionName.equals(abiDefinition.getName())) {
-                result = abiDefinition;
-                break;
-            }
-        }
-        return result;
-    }
-    /**
-     * get Credentials by keyUser locally
-     */
-    private Credentials getCredentials(boolean constant, String keyUser) {
-        // get privateKey
-        Credentials credentials;
-        if (constant) {
-            credentials = keyStoreService.getCredentialsForQuery();
-        } else {
-            credentials = keyStoreService.getCredentials(keyUser);
-        }
-        return credentials;
     }
 
 }
