@@ -13,38 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.transaction.entity;
+package com.webank.webase.front.contract.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
+import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
- * transHandler interface parameter.
- * handle transactions of deploy/call contract
+ * ReqRegisterCns.
  */
 @Data
-public class ReqTransHandle {
-    /**
-     * user address
-     */
-    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
-    private String user;
+public class ReqRegisterCns {
+    @NotNull(message = ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY_STRING)
+    private Integer groupId;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_NAME_IS_EMPTY)
     private String contractName;
-    private String version;
-    private String contractAddress;
-    private String contractPath;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
-    private String funcName;
-    private int groupId = 1;
-    private List<Object> contractAbi = new ArrayList<>();
-    private List<Object> funcParam = new ArrayList<>();
-    @Deprecated
-    private boolean useAes;
-    // 1.4.3
-    private boolean useCns = false;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CNS_NAME_IS_EMPTY_STRING)
     private String cnsName;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
+    private String version;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_ADDRESS_EMPTY)
+    private String contractAddress;
+    @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
+    private List<AbiDefinition> abiInfo;
+    private String signUserId;
+    private String userAddress;
+    private String contractPath;
+    private boolean saveEnabled = false;
 }

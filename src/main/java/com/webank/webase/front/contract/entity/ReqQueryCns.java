@@ -13,38 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.transaction.entity;
+package com.webank.webase.front.contract.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import java.util.ArrayList;
-import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
- * transHandler interface parameter.
- * handle transactions of deploy/call contract
+ * ReqQueryCns.
  */
 @Data
-public class ReqTransHandle {
-    /**
-     * user address
-     */
-    @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
-    private String user;
-    private String contractName;
-    private String version;
-    private String contractAddress;
+public class ReqQueryCns {
+    @NotNull(message = ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY_STRING)
+    private Integer groupId;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING)
     private String contractPath;
-    @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
-    private String funcName;
-    private int groupId = 1;
-    private List<Object> contractAbi = new ArrayList<>();
-    private List<Object> funcParam = new ArrayList<>();
-    @Deprecated
-    private boolean useAes;
-    // 1.4.3
-    private boolean useCns = false;
-    private String cnsName;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_NAME_IS_EMPTY)
+    private String contractName;
+    @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_ADDRESS_EMPTY)
+    private String contractAddress;
 }
