@@ -385,6 +385,7 @@ export default {
             }
         },
         catalogSuccess(val) {
+            let len = this.uploadFiles.length
             for (let i = 0; i < this.uploadFiles.length; i++) {
                 let reader = new FileReader(); //新建一个FileReader
                 reader.readAsText(this.uploadFiles[i], "UTF-8"); //读取文件
@@ -417,12 +418,68 @@ export default {
                             contractVersion: "",
                             contractNo: new Date().getTime()
                         };
-                        _this.saveContract(data);
+                        if (i == len - 1) {
+                            _this.saveOneContract(data, true)
+                        } else {
+                            _this.saveOneContract(data)
+                        }
                     };
                 }
             }
-            this.$refs.file.value = "";
+            // this.$refs.file.value = "";
             this.catalogClose();
+        },
+        /**
+       * @method 同步保存合约  （upload合约专用）
+       * @param param  合约内容
+       * @param type  为true执行查询合约列表请求
+       */
+        async saveOneContract(param, type) {
+            let reqData = {
+                groupId: localStorage.getItem("groupId"),
+                contractName: param.contractName,
+                contractPath: param.contractPath,
+                contractSource: param.contractSource,
+                contractAbi: param.contractAbi,
+                contractBin: param.contractBin,
+                bytecodeBin: param.bytecodeBin
+            }
+            if (param.id) {
+                reqData.contractId = param.id
+            }
+            await saveChaincode(reqData).then(res => {
+                if (res.status === 200) {
+                    try {
+                        if (type) {
+                            this.$refs.file.value = "";
+                            this.getContracts(param.contractPath, res.data);
+                        }
+                        if (param.contractId) {
+                            this.$message({
+                                type: "success",
+                                message: title || this.$t("contracts.contractSaveSuccess")
+                            });
+                        }
+                    } catch (error) {
+                        console.log(error)
+                    }
+
+                } else {
+                    this.$message({
+                        message: this.$chooseLang(res.data.code),
+                        type: "error",
+                        duration: 2000
+                    });
+                }
+            })
+                .catch(err => {
+                    this.$message({
+                        message: this.$t('text.systemError'),
+                        type: "error",
+                        duration: 2000
+                    });
+
+                });
         },
         catalogClose() {
             this.$refs.file.value = "";
