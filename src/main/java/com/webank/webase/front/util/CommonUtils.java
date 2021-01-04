@@ -62,7 +62,6 @@ import org.springframework.http.MediaType;
 public class CommonUtils {
 
     public static final int PUBLIC_KEY_LENGTH_64 = 64;
-
     public static final int HASH_LENGTH_64 = 64;
     private CommonUtils() {
         throw new IllegalStateException("Utility class");

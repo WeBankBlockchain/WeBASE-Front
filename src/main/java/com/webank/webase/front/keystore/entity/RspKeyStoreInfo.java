@@ -24,10 +24,10 @@ import lombok.Data;
  */
 @Data
 public class RspKeyStoreInfo {
-	private String address;
-	private String publicKey;
-	private String userName;
-	private int type;
-	private String signUserId;
-	private String appId;
+    private String address;
+    private String publicKey;
+    private String userName;
+    private int type;
+    private String signUserId;
+    private String appId;
 }

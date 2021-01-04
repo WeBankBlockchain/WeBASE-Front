@@ -28,14 +28,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CryptoConfig {
 
-	@Bean(name = "ecdsa")
-	public CryptoSuite getECDSASuite() {
-		return new CryptoSuite(CryptoType.ECDSA_TYPE);
-	}
+    @Bean(name = "ecdsa")
+    public CryptoSuite getECDSASuite() {
+        return new CryptoSuite(CryptoType.ECDSA_TYPE);
+    }
 
-	@Bean(name = "sm")
-	public CryptoSuite getGuomiSuite() {
-		return new CryptoSuite(CryptoType.SM_TYPE);
-	}
+    @Bean(name = "sm")
+    public CryptoSuite getGuomiSuite() {
+        return new CryptoSuite(CryptoType.SM_TYPE);
+    }
 
 }
