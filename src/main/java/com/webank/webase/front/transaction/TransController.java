@@ -28,14 +28,9 @@ import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
-import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -158,11 +153,11 @@ public class TransController extends BaseController {
 
         if(!CommonUtils.isHexNumber(Numeric.cleanHexPrefix(reqSignMessageHash.getHash())))
         {
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "not a hexadecimal hash string");
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, "not a hexadecimal hash string");
         }
         if( Numeric.cleanHexPrefix(reqSignMessageHash.getHash()).length() != CommonUtils.HASH_LENGTH_64)
         {
-            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "wrong length");
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH_ERROR, "wrong length");
         }
         Object obj =  transServiceImpl.signMessageLocal(reqSignMessageHash);
         log.info("signMessageLocal end  useTime:{}",
