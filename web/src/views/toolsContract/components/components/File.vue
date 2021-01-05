@@ -19,8 +19,8 @@
             <div>
                 <el-form :model="folderFrom" :rules="rules" ref="folderFrom" label-width="100px" class="demo-ruleForm">
                     <el-form-item :label="$t('dialog.folderName')" prop="folderName" style="width:330px">
-                        <el-select v-model="folderFrom.folderName" :placeholder="$t('placeholder.selected')" class="block-network">
-                            <el-option v-for="item in options" :key="item.folderName" :label="item.folderName" :value="item.folderName">
+                        <el-select v-model="folderFrom.folderName" :placeholder="$t('placeholder.selected')">
+                            <el-option v-for="item in options" :key="item.contractPath" :label="item.contractPath" :value="item.contractPath">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -36,8 +36,8 @@
 <script>
 import { getContractPathList } from "@/util/api"
 export default {
-    name: "selectCatalog",
-    props: ['show'],
+    name: "File",
+    props: ['fileVisible'],
     computed: {
         rules() {
             var obj = {
@@ -52,41 +52,28 @@ export default {
             return obj
         }
     },
-    data: function () {
+    data() {
         return {
             options: [],
             folderFrom: {
-                folderName: ""
+                folderName: "/"
             },
-            dialogVisible: this.show,
-            pathList: [],
-            folderList: []
+            dialogVisible: this.fileVisible,
+            pathList: []
         }
     },
-    mounted: function () {
+    mounted() {
         this.getContractPaths();
     },
     methods: {
         getContractPaths() {
             getContractPathList(localStorage.getItem("groupId")).then(res => {
                 if (res.status == 200) {
-                    this.pathList = res.data;
-                    let num = 0;
-                    this.folderList = []
-                    for (let i = 0; i < this.pathList.length; i++) {
-                        let item = {
-                            folderName: this.pathList[i].contractPath,
-                            folderId: new Date().getTime() + this.pathList[i].contractPath,
-                            folderActive: false,
-                            groupId: localStorage.getItem("groupId"),
-                            modifyTime: this.pathList[i].modifyTime
-                        };
-                        this.folderList.push(item)
-                        if (this.pathList[i].contractPath == this.userFolader) {
-                            num++
-                        }
-                    }
-                    this.changeOptions();
+                    var list = res.data;
+                    this.options = list.filter(item => {
+                        return item.contractPath != "template"
+                    })
+
                 } else {
                     this.$message({
                         type: "error",
@@ -94,52 +81,20 @@ export default {
                     });
                 }
             })
-                .catch(err => {
-                    this.$message({
-                        type: "error",
-                        message: this.$t('text.systemError')
-                    });
-                });
         },
-        changeOptions: function () {
-            this.options = []
-            if (this.folderList.length) {
-                let num = 0;
-                for (let i = 0; i < this.folderList.length; i++) {
-                    if (this.folderList[i].folderName == "/") {
-                        num++
-                    }
-                }
-                if (num == 0) {
-                    let data = {
-                        folderName: "/",
-                        folderId: 1,
-                    }
-                    this.folderList.unshift(data)
-                }
-                this.options = this.folderList
-            } else {
-                this.options = [{
-                    folderName: "/",
-                    folderId: 1,
-                }];
-            }
-            this.folderFrom.folderName = this.options[0].folderName;
-            this.options = this.options.filter(item => {
-                return item.folderName != "template"
-            })
-        },
-        submit: function (formName) {
+
+        submit(formName) {
             this.$refs[formName].validate(valid => {
                 if (valid) {
-                    this.$emit("success", this.folderFrom.folderName)
+                    this.$emit("successFile", this.folderFrom.folderName)
                 } else {
                     return false
                 }
             })
         },
-        close: function () {
-            this.$emit("close")
+
+        close() {
+            this.$emit("closeFile")
         }
     }
 }

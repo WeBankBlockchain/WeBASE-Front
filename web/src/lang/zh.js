@@ -26,6 +26,9 @@ export default {
         abiList: 'ABI列表',
         parseAbi: 'ABI编码',
         eventCheck: 'Event查看',
+        onlineTools: '在线工具',
+        contractWarehouse: '合约仓库', 
+        toolsContract: '工具合约'
     },
     navbar: {
         dashboard: '首页',
@@ -108,6 +111,9 @@ export default {
         checkEventResult: 'Event',
         eventName: 'Event名',
         eventValue: 'Event',
+        contractName: '合约名',
+        cnsVersion: 'cns版本号',
+        contractAddress: '合约地址'
     },
     errorLog: {
         tips: '请点击右上角bug小图标',
@@ -157,7 +163,10 @@ export default {
         eventName: "请选择事件名",
         isContractAbi: "请输入合约Abi",
         search: '查看',
-        exportSol: '导出'
+        exportSol: '导出',
+        cnsVersion: '请输入CNS版本',
+        cnsVersionPattern: "数字字母和英文字母'.'组成",
+        cnsName: '请输入名称',
     },
     placeholder: {
         globalSearch: '请输入 Block Number 或 Tx Hash',
@@ -166,6 +175,7 @@ export default {
         selectedAccountAddress: '请选择用户地址',
         selectedNoUser: '没有用户，请去新建用户',
         selectedContractAddress: '请输入合约地址',
+        inputCnsName: '请输入CNS名',
         functionName: '方法名',
         contractListSearch: '请输入合约名或合约地址',
         selectedDay: '选择日期',
@@ -198,6 +208,7 @@ export default {
         selectAccountAddress: '选择用户地址',
         writeJavaName: '请填写java包名',
         selectDirectory: '选择目录',
+        directory: '目录',
         txnContractAddExp: '选填项，导入已部署的合约地址',
         restore: '还原',
         zoom: '区域缩放',
@@ -212,9 +223,11 @@ export default {
         uploadSolc: '上传不同版本编译器',
         checkEvent: 'Event查看',
         transactionReceipt: '交易回执',
+        mgmtCns: "管理CNS"
     },
     text: {
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
+        noStoreContract: '请在左侧面板点击打开一个合约',
         hide: '隐藏',
         expand: '显示',
         compilationFailed: '合约未编译或编译失败',
@@ -305,6 +318,23 @@ export default {
         searchMessage: "查询成功",
         haveAbiAndBin: "缺少abi和bin",
         emptyFolder: "空文件夹",
+        folderIsExists:"目录已存在",
+        previewAndDescription: "预览和说明",
+        developing: "应用开发中，敬请期待。。。",
+        appIntroduction: "合约仓库",
+        warehouseDes: "合约仓库中提供常用的工具合约和推荐应用合约模板。用户可将合约导入到自己目录进行引入。",
+        fileSize: "上传文件大小不能超过 100kb!",
+        registerCns: "注册CNS",
+        version: "版本号",
+        no: "否",
+        yes: "是",
+        registerSuccess: "注册成功",
+        cnsName: "CNS名",
+        register: "注册",
+        cns: "CNS",
+        registerCnsTips: "如果版本号为空，则当前合约地址没有注册过CNS，可以输入版本号进行注册",
+        registered: "已注册",
+        updateRegister: "是否要更新注册",
     },
     contracts: {
         createFile: "新建文件",
@@ -364,7 +394,9 @@ export default {
         updateAbi: "更新",
         deleteAbi: "删除",
         operation: "操作",
-        limit_1: "每次最多只能上传一个文件"
+        limit_1: "每次最多只能上传一个文件",
+        exportToIde: "导出到IDE",
+        folder: "目录"
     },
     rule: {
         textLong: "长度在 1 到 32 个字符",
@@ -486,4 +518,16 @@ export default {
         passwordError: "密码不能是汉字",
         file: "文件",
     },
+    onlineTools: {
+        onlineHashCalculator: 'Hash计算器',
+        algorithm: '算法',
+        result: '结果',
+        encryption: '加密',
+        sign: '签名',
+        text: '文本', 
+        file: '文件',
+        drag:"将文件拖到此处，或",
+        upload: "点击上传",
+        uploadNumLimit: "只能上传一个文件",
+    }
 }

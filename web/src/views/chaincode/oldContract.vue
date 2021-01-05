@@ -32,6 +32,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="contractPath" :label="$t('table.contractPath')" show-overflow-tooltip width="120" align="center"></el-table-column>
+                    <!-- <el-table-column prop="version" :label="$t('table.cnsVersion')" show-overflow-tooltip width="120" align="center"></el-table-column> -->
                     <el-table-column prop="contractAddress" :label="$t('table.contractAddress')" show-overflow-tooltip align="center">
                         <template slot-scope="scope">
                             <i class="wbs-icon-copy font-12 copy-public-key" @click="copyPubilcKey(scope.row.contractAddress)" :title="$t('title.copyContractAddress')"></i>
@@ -54,10 +55,11 @@
 
                     <el-table-column prop="createTime" :label="$t('table.createdTime')" show-overflow-tooltip width="150" align="center"></el-table-column>
 
-                    <el-table-column :label="$t('table.actions')" width="200">
+                    <el-table-column :label="$t('table.actions')" width="280">
                         <template slot-scope="scope">
                             <el-button :disabled="!scope.row.contractAddress" :class="{'grayColor': !scope.row.contractAddress}" @click="send(scope.row)" type="text" size="small">{{$t('title.callContract')}}</el-button>
-                            <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress || !scope.row.haveEvent}" @click="checkEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
+                            <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress || !scope.row.haveEvent}" @click="handleEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
+                            <el-button @click="handleMgmtCns(scope.row)" type="text" size="small">CNS</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -70,11 +72,14 @@
             <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :data="data" :abi='abiData' :version='version'></send-transation>
         </el-dialog>
         <v-editor v-if='editorShow' :show='editorShow' :data='editorData' :sendConstant="sendConstant" @close='editorClose' :input='editorInput' :editorOutput="editorOutput"></v-editor>
-        <el-dialog :title="$t('table.checkEvent')" :visible.sync="checkEventVisible" width="470px" center class="send-dialog">
+        <el-dialog :title="$t('title.checkEvent')" :visible.sync="checkEventVisible" width="470px" center class="send-dialog">
             <check-event-dialog @checkEventSuccess="checkEventSuccess(arguments)" @checkEventClose="checkEventClose" :contractInfo="contractInfo"></check-event-dialog>
         </el-dialog>
         <el-dialog v-if="checkEventResultVisible" :title="$t('table.checkEventResult')" :visible.sync="checkEventResultVisible" width="1070px" center class="send-dialog">
             <check-event-result @checkEventResultSuccess="checkEventResultSuccess($event)" @checkEventResultClose="checkEventResultClose" :checkEventResult="checkEventResult" :contractInfo="contractInfo"></check-event-result>
+        </el-dialog>
+        <el-dialog v-if="mgmtCnsVisible" :title="$t('text.cns')" :visible.sync="mgmtCnsVisible" width="470px" center class="send-dialog">
+            <mgmt-cns :mgmtCnsItem="mgmtCnsItem" @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)" @mgmtCnsResultClose="mgmtCnsResultClose" ></mgmt-cns>
         </el-dialog>
     </div>
 </template>
@@ -86,6 +91,7 @@ import editor from "./dialog/editor"
 import abiDialog from "./dialog/abiDialog"
 import checkEventDialog from "./dialog/checkEventDialog"
 import checkEventResult from "./dialog/checkEventResult"
+import mgmtCns from "./dialog/mgmtCns"
 import { getContractList } from "@/util/api"
 import router from '@/router'
 import Bus from "@/bus"
@@ -97,7 +103,8 @@ export default {
         "abi-dialog": abiDialog,
         "send-transation": sendTransation,
         checkEventDialog,
-        checkEventResult
+        checkEventResult,
+        mgmtCns
     },
     data: function () {
         return {
@@ -124,7 +131,10 @@ export default {
             groupId: localStorage.getItem("groupId"),
             sendConstant: null,
             editorInput: null,
-            editorOutput: null
+            editorOutput: null,
+            mgmtCnsVisible:false,
+            mgmtCnsItem: {}
+
         }
     },
     beforeDestroy: function () {
@@ -267,7 +277,7 @@ export default {
             this.currentPage = val;
             this.getContracts();
         },
-        checkEvent: function (val) {
+        handleEvent: function (val) {
             this.contractInfo = val;
             this.$router.push({
                 path:'/eventCheck',
@@ -293,6 +303,16 @@ export default {
         checkEventResultClose(){
             this.checkEventResultVisible = false
         },
+        handleMgmtCns(item){
+            this.mgmtCnsVisible = true;
+            this.mgmtCnsItem = item;
+        },
+        mgmtCnsResultSuccess(){
+            this.mgmtCnsVisible = false;
+        },
+        mgmtCnsResultClose(){
+            this.mgmtCnsVisible = false;
+        }
     }
 }
 </script>
