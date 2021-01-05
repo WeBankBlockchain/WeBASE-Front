@@ -154,6 +154,12 @@ export default {
                             case 'eventCheck':
                                 it.name = this.$t('route.eventCheck')
                                 break;
+                            case 'onlineTools':
+                                it.name = this.$t('route.onlineTools')
+                                break;
+                            case 'contractWarehouse':
+                                it.name = this.$t('route.contractWarehouse')
+                                break;
                         }
                     })
                 }

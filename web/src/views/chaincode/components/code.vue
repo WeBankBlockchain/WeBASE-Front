@@ -88,11 +88,20 @@
                 <div>
                     <div class="contract-info-list1" v-html="compileinfo">
                     </div>
-                    <div class="contract-info-list1" style="color: #f00" v-show="errorInfo">
+                    <div class="contract-info-list1" style="color: #F56C6C" v-show="errorInfo">
                         {{errorInfo}}
                     </div>
-                    <div class="contract-info-list1" style="color: #f00" v-show="errorInfo">
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage">{{index+1}}、{{item}}</span>
+                    <div class="contract-info-list1" style="color: #F56C6C" v-show="errorInfo">
+                        <!-- <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage">{{index+1}}、{{item}}</span> -->
+                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage" :style="{'color' : severityColor(item)}">
+                            {{index+1}}: {{item | formatErrorMessage}}
+                            <!-- <i class="el-icon-circle-plus-outline" @click="optenErrorInfo(item, index)"></i>{{item | formatErrorMessage}} -->
+                            <!-- <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-if="item.open">
+                                <span>
+                                    <pre>{{item}}</pre>
+                                </span>
+                            </span> -->
+                        </span>
                     </div>
                     <div style="color: #68E600;padding-bottom: 15px;" v-show="abiFileShow">{{successInfo}}</div>
                     <div class="contract-info-list" v-show="contractAddress">
@@ -101,6 +110,8 @@
                         </span>
                         <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word">
                             {{contractAddress}}
+                            <span v-if="reqVersion" style="margin-left: 10px;">(CNS: {{cnsName}} {{reqVersion}})</span>
+                            <span v-else style="color:#1f83e7;cursor: pointer;margin-left: 10px;" @click="handleRegisterCns">{{$t('text.register')}}</span>
                         </span>
                     </div>
                     <div class="contract-info-list" v-if="abiFile">
@@ -136,7 +147,7 @@
             <v-transaction @success="sendSuccess($event)" @close="handleClose" ref="send" :sendErrorMessage="sendErrorMessage" :data="data" :abi='abiFile' :version='version'></v-transaction>
         </el-dialog>
         <el-dialog :title="$t('title.selectAccountAddress')" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
-            <v-user @change="deployContract($event)" @close="userClose" :abi='abiFile'></v-user>
+            <v-user @change="deployContract(arguments)" @close="userClose" :contractName="contractName" :abi='abiFile'></v-user>
         </el-dialog>
         <v-editor v-if='editorShow' :show='editorShow' :data='editorData' :sendConstant="sendConstant" @close='editorClose' ref="editor" :input='editorInput' :editorOutput="editorOutput"></v-editor>
         <el-dialog :title="$t('title.writeJavaName')" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
@@ -146,6 +157,9 @@
                 <el-button @click="closeJavaClass">{{$t('dialog.cancel')}}</el-button>
                 <el-button type="primary" @click="sureJavaClass">{{$t('dialog.confirm')}}</el-button>
             </div>
+        </el-dialog>
+        <el-dialog v-if="mgmtCnsVisible" :title="$t('text.cns')" :visible.sync="mgmtCnsVisible" width="470px" center class="send-dialog">
+            <mgmt-cns :mgmtCnsItem="mgmtCnsItem" @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)" @mgmtCnsResultClose="mgmtCnsResultClose" ></mgmt-cns>
         </el-dialog>
     </div>
 </template>
@@ -167,18 +181,22 @@ import {
     ifChangedDepaloy,
     queryJavaClass,
     addFunctionAbi,
-    backgroundCompile
+    backgroundCompile,
+    registerCns,
+    findCnsInfo
 } from "@/util/api";
 import transaction from "@/components/sendTransaction";
 import changeUser from "../dialog/changeUser";
 import web3 from "@/util/ethAbi"
+import mgmtCns from "../dialog/mgmtCns"
 export default {
     name: "codes",
     props: ["show", "changeStyle"],
     components: {
         "v-transaction": transaction,
         "v-user": changeUser,
-        "v-editor": editor
+        "v-editor": editor,
+        mgmtCns
     },
     data: function () {
         return {
@@ -226,7 +244,13 @@ export default {
             searchVisibility: false,
             modifyState: false,
             sendErrorMessage: "",
-            sendConstant: null
+            sendConstant: null,
+            errorInfoVisible: false,
+            openErrorIndex: "",
+            reqVersion: "",
+            cnsName: "",
+            mgmtCnsVisible:false,
+            mgmtCnsItem: {}
         };
     },
     watch: {
@@ -317,6 +341,9 @@ export default {
                     this.aceEditor.setReadOnly(false);
                 }
             })
+            if(this.data.contractAddress){
+                this.queryFindCnsInfo()
+            }
         });
         Bus.$on("noData", data => {
             this.codeShow = false;
@@ -651,6 +678,9 @@ export default {
                     }
                 } else {
                     this.errorMessage = output.errors;
+                    this.errorMessage.forEach(item => {
+                        item.open = false;
+                    })
                     this.errorInfo = this.$t('text.compilationFailed');
                     this.loadingAce = false;
                 }
@@ -791,7 +821,8 @@ export default {
                     message(constant.ERROR, "error");
                 });
         },
-        deployContract(val) {
+        deployContract($event) {
+            var val = $event[0], cns = $event[1];
             this.loadingAce = true;
             let reqData = {
                 groupId: localStorage.getItem("groupId"),
@@ -825,6 +856,10 @@ export default {
                         this.data.contractSource = Base64.encode(this.content);
                         this.data.contractAddress = this.contractAddress;
                         this.data.contractVersion = this.version;
+                        this.queryFindCnsInfo()
+                        if (cns.saveEnabled) {
+                            this.queryRegisterCns(val, cns)
+                        }
                         Bus.$emit("deploy", this.data);
                     } else {
                         this.status = 3;
@@ -834,14 +869,31 @@ export default {
                         });
                     }
                 })
-                .catch(err => {
-                    this.status = 3;
-                    this.loadingAce = false;
-                    this.$message({
-                        message: this.$t('text.systemError'),
-                        type: "error"
-                    });
-                });
+        },
+        queryRegisterCns(val, cns) {
+            let param = {
+                groupId: localStorage.getItem('groupId'),
+                contractName: this.contractName,
+                version: cns.version,
+                abiInfo: JSON.parse(this.abiFile),
+                userAddress: val.userId,
+                saveEnabled: true,
+                contractAddress: this.contractAddress,
+                cnsName: cns.cnsName,
+                contractPath: this.data.contractPath
+            }
+            registerCns(param)
+                .then(res => {
+                    const { data, status } = res;
+                    if (status === 200) {
+
+                    } else {
+                        this.$message({
+                            message: this.$chooseLang(res.data.code),
+                            type: "error"
+                        });
+                    }
+                })
         },
         foldInfo: function (val) {
             this.successHide = val;
@@ -1009,7 +1061,68 @@ export default {
                     });
                 });
             }
-        }
+        },
+        optenErrorInfo(item, index) {
+            console.log(index);
+            this.errorMessage.forEach((err, it) => {
+                if (index == it) {
+                    if (err.open) {
+                        this.$set(err, 'open', false)
+                    } else {
+                        this.$set(err, 'open', true)
+                    }
+                }
+            });
+        },
+        severityColor(item) {
+            let key = item.severity
+            switch (key) {
+                case "error":
+                    return '#F56C6C';
+                    break;
+
+                case "warning":
+                    return '#E6A23C';
+                    break;
+            }
+        },
+        queryFindCnsInfo() {
+            let param = {
+                groupId: localStorage.getItem('groupId'),
+                contractPath: this.data.contractPath,
+                contractName: this.data.contractName,
+                contractAddress: this.data.contractAddress
+            }
+            findCnsInfo(param)
+                .then(res => {
+                    const { data, status } = res
+                    if (status === 200) {
+                        if (data.data) {
+                            this.reqVersion = data.data.version;
+                            this.cnsName = data.data.cnsName;
+                        }else {
+                            this.reqVersion = "";
+                            this.cnsName = "";
+                        }
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
+        },
+        handleRegisterCns(val){
+            this.mgmtCnsItem = this.data;
+            this.mgmtCnsVisible = true;
+        },
+        mgmtCnsResultSuccess(){
+            this.queryFindCnsInfo()
+            this.mgmtCnsVisible = false;
+        },
+        mgmtCnsResultClose(){
+            this.mgmtCnsVisible = false;
+        },
     }
 };
 </script>

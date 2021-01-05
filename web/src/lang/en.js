@@ -26,6 +26,9 @@ export default {
         abiList: 'ABI List',
         parseAbi: 'ABI Encode',
         eventCheck: 'Event Search',
+        onlineTools: 'Online Tools',
+        contractWarehouse: 'Contract Warehouse',
+        toolsContract: 'Tools Contract'
     },
     navbar: {
         dashboard: 'Dashboard',
@@ -106,6 +109,9 @@ export default {
         fileName: "PrivateKey Name",
         eventName: 'Event Name',
         eventValue: 'Event',
+        contractName: 'Contract Name',
+        cnsVersion: 'CNS Version',
+        contractAddress: 'Contract Address',
     },
     errorLog: {
         tips: 'Please click the bug icon in the upper right corner',
@@ -158,7 +164,10 @@ export default {
         topicList: "Please enter topic List",
         eventName: "Please enter event name",
         search: 'Search',
-        exportSol: 'Export'
+        exportSol: 'Export',
+        cnsVersion: 'Please enter cns version',
+        cnsVersionPattern: "It can only be numbers and letters",
+        cnsName: 'Please enter CNS name',
     },
     placeholder: {
         globalSearch: 'Search by Block Number / Tx Hash',
@@ -167,6 +176,7 @@ export default {
         selectedAccountAddress: 'Select Account Address',
         selectedNoUser: 'No available user, please create a new user key',
         selectedContractAddress: 'Select Contract Address',
+        inputCnsName: 'Please enter CNS name',
         functionName: 'Function Name',
         contractListSearch: 'Search by Name / Address',
         selectedDay: 'Pick a day',
@@ -199,6 +209,7 @@ export default {
         selectAccountAddress: 'Select Account Address',
         writeJavaName: 'Java Package Name',
         selectDirectory: 'Select Directory',
+        directory: 'Directory',
         txnContractAddExp: 'Optional，Import deployed contract address',
         restore: 'Restore',
         zoom: 'Zoom',
@@ -215,9 +226,11 @@ export default {
         checkEventResult: 'Event',
         eventName: 'Event Name',
         transactionReceipt: 'Transactions Receipt',
+        mgmtCns: "Mgmt CNS"
     },
     text: {
         noContract: 'Please create a new contract',
+        noStoreContract: 'Please open a contract in the left panel',
         hide: 'Hide',
         expand: 'Expand',
         compilationFailed: 'Contract was not compiled or failed to compile',
@@ -306,6 +319,24 @@ export default {
         searchMessage: "Request Success",
         haveAbiAndBin: "No have abi and bin",
         emptyFolder: "Empty Folder",
+        folderIsExists: "Contract path is exists",
+        folder: "Folder",
+        previewAndDescription: "Preview And Description",
+        developing: "Application development, please look forward to...",
+        appIntroduction: "Contract warehouse",
+        warehouseDes: "The contract warehouse provides common tool contracts and recommended application contract templates. Users can import contracts into their own directory.",
+        fileSize: "The upload file size cannot exceed 100kb!",
+        registerCns: "Register CNS",
+        version: "Version",
+        no: 'No',
+        yes: 'Yes',
+        registerSuccess: "Register Success",
+        cnsName: "CNS Name",
+        register: "Register",
+        cns: "CNS",
+        registerCnsTips: "If the version number is empty, the current contract address has not been registered in CNS, you can enter the version number to register",
+        registered: "Registered",
+        updateRegister: "Do you want to update the registration",
     },
     contracts: {
         createFile: "Create File",
@@ -365,7 +396,9 @@ export default {
         updateAbi: "Update",
         deleteAbi: "Delete",
         operation: "Operate",
-        limit_1: "Only one file can be uploaded at a time"
+        limit_1: "Only one file can be uploaded at a time",
+        exportToIde: "Export To IDE",
+        folder: "Folder"
     },
     rule: {
         textLong: "1 to 32 characters in length",
@@ -487,4 +520,16 @@ export default {
         passwordError: "Password cannot be Chinese",
         file: "File"
     },
+    onlineTools: {
+        onlineHashCalculator: 'Hash Calculator',
+        algorithm: 'algorithm',
+        result: 'Result',
+        encryption: 'Encryption',
+        sign: 'Sign',
+        text: 'Text',
+        file: 'File',
+        drag: "Drag the file here, Or",
+        upload: " click upload",
+        uploadNumLimit: "Only one file can be uploaded",
+    }
 }
