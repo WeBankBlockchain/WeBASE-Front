@@ -104,10 +104,10 @@ public class EventController extends BaseController {
         checkParamResult(result);
         int groupId = reqContractEventRegister.getGroupId();
         String appId = reqContractEventRegister.getAppId();
-		if (!CommonUtils.isLetterDigit(appId)) {
-			throw new FrontException(ConstantCode.PARAM_INVALID);
-		}
-		String fromBlock = reqContractEventRegister.getFromBlock();
+        if (!CommonUtils.isLetterDigit(appId)) {
+            throw new FrontException(ConstantCode.PARAM_INVALID);
+        }
+        String fromBlock = reqContractEventRegister.getFromBlock();
         String toBlock = reqContractEventRegister.getToBlock();
         // 0 < fromBlock <= toBlock, latest means latest block
         if ("0".equals(fromBlock) || "0".equals(toBlock)) {

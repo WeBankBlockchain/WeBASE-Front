@@ -39,96 +39,96 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
 public class AbiControllerTest {
-	private MockMvc mockMvc;
-	private Integer groupId = 1;
-	private Integer pageNumber = 1;
-	private Integer pageSize = 5;
+    private MockMvc mockMvc;
+    private Integer groupId = 1;
+    private Integer pageNumber = 1;
+    private Integer pageSize = 5;
 
-	@Autowired
-	private WebApplicationContext webApplicationContext;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-	@Before
-	public void setUp() throws Exception {
-		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-	}
+    @Before
+    public void setUp() throws Exception {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
 
-	@Test
-	public void testInserAbi() throws Exception {
-		// test insert
-		ReqImportAbi abiInsert = new ReqImportAbi();
-		abiInsert.setGroupId(1);
-		abiInsert.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
-		abiInsert.setContractName("Hello");
-		String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-		abiInsert.setContractAbi(JsonUtils.toJavaObjectList(abiStr, Object.class));
+    @Test
+    public void testInserAbi() throws Exception {
+        // test insert
+        ReqImportAbi abiInsert = new ReqImportAbi();
+        abiInsert.setGroupId(1);
+        abiInsert.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
+        abiInsert.setContractName("Hello");
+        String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
+        abiInsert.setContractAbi(JsonUtils.toJavaObjectList(abiStr, Object.class));
 
-		// post action
-		ResultActions resultActions = mockMvc.perform(
-			MockMvcRequestBuilders.post("/abi")
-				.content(JsonUtils.toJSONString(abiInsert))
-				.contentType(MediaType.APPLICATION_JSON)
-		);
-		resultActions
-			.andExpect(MockMvcResultMatchers.status().isOk())
-			.andDo(MockMvcResultHandlers.print());
-		System.out
-				.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
+        // post action
+        ResultActions resultActions = mockMvc.perform(
+            MockMvcRequestBuilders.post("/abi")
+                .content(JsonUtils.toJSONString(abiInsert))
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+        resultActions
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andDo(MockMvcResultHandlers.print());
+        System.out
+                .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
 
-	}
+    }
 
-	@Test
-	public void testGetAbiById() throws Exception {
-		Integer abiId = 1;
-		// post action
-		String url = String.format("/abi/%1s", abiId);
-		ResultActions resultActions = mockMvc.perform(
-			MockMvcRequestBuilders.get(url)
-				.contentType(MediaType.APPLICATION_JSON)
-		);
-		resultActions.
-			andExpect(MockMvcResultMatchers.status().isOk()).
-			andDo(MockMvcResultHandlers.print());
-		System.out
-			.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
-	}
+    @Test
+    public void testGetAbiById() throws Exception {
+        Integer abiId = 1;
+        // post action
+        String url = String.format("/abi/%1s", abiId);
+        ResultActions resultActions = mockMvc.perform(
+            MockMvcRequestBuilders.get(url)
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out
+            .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
+    }
 
-	@Test
-	public void testGetAbi() throws Exception {
-		// post action
-		String url = String.format("/abi/list/%1s/%2s/%3s", groupId, pageNumber, pageSize);
-		ResultActions resultActions = mockMvc.perform(
-			MockMvcRequestBuilders.get(url)
-				.contentType(MediaType.APPLICATION_JSON)
-		);
-		resultActions.
-			andExpect(MockMvcResultMatchers.status().isOk()).
-			andDo(MockMvcResultHandlers.print());
-		System.out
-			.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
-	}
+    @Test
+    public void testGetAbi() throws Exception {
+        // post action
+        String url = String.format("/abi/list/%1s/%2s/%3s", groupId, pageNumber, pageSize);
+        ResultActions resultActions = mockMvc.perform(
+            MockMvcRequestBuilders.get(url)
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out
+            .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
+    }
 
-	@Test
-	public void testUpdateAbi() throws Exception {
-		// test insert
-		ReqImportAbi abiUpdate = new ReqImportAbi();
-		// abi id needed in update
-		abiUpdate.setAbiId(1L);
-		abiUpdate.setGroupId(groupId);
-		abiUpdate.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
-		abiUpdate.setContractName("Hello_222");
-		String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-		abiUpdate.setContractAbi(JsonUtils.toJavaObjectList(abiStr, Object.class));
+    @Test
+    public void testUpdateAbi() throws Exception {
+        // test insert
+        ReqImportAbi abiUpdate = new ReqImportAbi();
+        // abi id needed in update
+        abiUpdate.setAbiId(1L);
+        abiUpdate.setGroupId(groupId);
+        abiUpdate.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
+        abiUpdate.setContractName("Hello_222");
+        String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
+        abiUpdate.setContractAbi(JsonUtils.toJavaObjectList(abiStr, Object.class));
 
-		// post action
-		ResultActions resultActions = mockMvc.perform(
-			MockMvcRequestBuilders.put("/abi")
-				.content(JsonUtils.toJSONString(abiUpdate))
-				.contentType(MediaType.APPLICATION_JSON)
-		);
-		resultActions.
-			andExpect(MockMvcResultMatchers.status().isOk()).
-			andDo(MockMvcResultHandlers.print());
-		System.out
-			.println("response:" + resultActions.andReturn().getResponse().getContentAsString());
-	}
+        // post action
+        ResultActions resultActions = mockMvc.perform(
+            MockMvcRequestBuilders.put("/abi")
+                .content(JsonUtils.toJSONString(abiUpdate))
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+        resultActions.
+            andExpect(MockMvcResultMatchers.status().isOk()).
+            andDo(MockMvcResultHandlers.print());
+        System.out
+            .println("response:" + resultActions.andReturn().getResponse().getContentAsString());
+    }
 }

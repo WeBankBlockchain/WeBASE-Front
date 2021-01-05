@@ -18,7 +18,6 @@ package com.webank.webase.front.contract.entity;
 import com.webank.webase.front.base.code.ConstantCode;
 import java.util.ArrayList;
 import java.util.List;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
 import org.hibernate.validator.constraints.NotBlank;
