@@ -24,12 +24,12 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class ReqUploadSolc {
-	/**
-	 * ex: solc-0.4.25-a0b332...
-	 */
-	@NotBlank
-	private String fileName;
-	@NotNull
-	private MultipartFile solcFile;
-	private String description;
+    /**
+     * ex: solc-0.4.25-a0b332...
+     */
+    @NotBlank
+    private String fileName;
+    @NotNull
+    private MultipartFile solcFile;
+    private String description;
 }

@@ -39,9 +39,11 @@ public class ReqTransHandleWithSign {
     private String version;
     private String contractAddress;
     private String contractPath;
-
     @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
     private String funcName;
     private List<Object> contractAbi = new ArrayList<>();
     private List<Object> funcParam = new ArrayList<>();
+    // 1.4.3
+    private boolean useCns = false;
+    private String cnsName;
 }

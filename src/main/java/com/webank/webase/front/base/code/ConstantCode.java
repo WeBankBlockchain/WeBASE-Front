@@ -31,6 +31,7 @@ public class ConstantCode {
 
     /* paramaters check */
     public static final RetCode PARAM_FAIL_GROUP_ID_IS_EMPTY =  RetCode.mark(201001, "groupId cannot be empty");
+    public static final String PARAM_FAIL_GROUP_ID_IS_EMPTY_STRING = "{\"code\":201001,\"message\":\"groupId cannot be empty\"}";
     public static final String PARAM_FAIL_USER_IS_EMPTY_STRING = "{\"code\":201002,\"message\":\"user cannot be empty\"}";
     public static final RetCode PARAM_FAIL_USER_IS_EMPTY = RetCode.mark(201002, "user cannot be empty");
     public static final String PARAM_FAIL_USEAES_IS_EMPTY =
@@ -135,14 +136,16 @@ public class ConstantCode {
     public static final RetCode GROUP_NOT_DELETED = RetCode.mark(201134, "group not deleted");
 
     // contract type param error
-	public static final RetCode CONTRACT_TYPE_ENCODED_ERROR = RetCode.mark(201151, "Unsupported contract param type to encoded");
-	public static final RetCode CONTRACT_TYPE_DECODED_ERROR = RetCode.mark(201152, "Unsupported contract param type to decoded");
-	public static final RetCode CONTRACT_TYPE_PARAM_ERROR = RetCode.mark(201153, "unable to create instance of type, check input params");
-	
-	// add in v1.4.2
+    public static final RetCode CONTRACT_TYPE_ENCODED_ERROR = RetCode.mark(201151, "Unsupported contract param type to encoded");
+    public static final RetCode CONTRACT_TYPE_DECODED_ERROR = RetCode.mark(201152, "Unsupported contract param type to decoded");
+    public static final RetCode CONTRACT_TYPE_PARAM_ERROR = RetCode.mark(201153, "unable to create instance of type, check input params");
+    
+    // add in v1.4.2
     public static final RetCode CONTRACT_PATH_IS_EXISTS = RetCode.mark(201154, "contract path is exists.");
+    // add in v1.4.3
+    public static final String PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING = "{\"code\":201155,\"message\":\"contract path cannot be empty\"}";
 
-	/* precompiled runtime check or error */
+    /* precompiled runtime check or error */
     // param
     public static final RetCode PARAM_ERROR = RetCode.mark(201200,"params not fit");
     public static final RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
@@ -160,6 +163,11 @@ public class ConstantCode {
     // cns
     public static final RetCode INVALID_VERSION = RetCode.mark(201221,"Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ");
     public static final RetCode INVALID_VERSION_EXCEED_LENGTH = RetCode.mark(201222,"version of contract is out of length");
+    // add in v1.4.3
+    public static final RetCode CNS_REGISTER_FAIL = RetCode.mark(201223,"cns register fail");
+    public static final RetCode VERSION_NOT_EXISTS = RetCode.mark(201224,"version not exists");
+    public static final RetCode PARAM_FAIL_CNS_NAME_IS_EMPTY = RetCode.mark(201225,"cns name cannot be empty");
+    public static final String PARAM_FAIL_CNS_NAME_IS_EMPTY_STRING = "{\"code\":201225,\"message\":\"cns name cannot be empty\"}";
     // crud
     public static final RetCode PARAM_FAIL_SQL_ERROR = RetCode.mark(201226, "sql syntax error");
     public static final RetCode SQL_ERROR = RetCode.mark(201227, "crud sql fail");
@@ -220,6 +228,7 @@ public class ConstantCode {
     public static final RetCode TX_RECEIPT_OUTPUT_PARSE_JSON_FAIL = RetCode.mark(201515, "transaction receipt fail and parse output fail");
     public static final RetCode TX_RECEIPT_OUTPUT_NULL = RetCode.mark(201516, "transaction receipt fail and output is null");
     public static final RetCode CALL_CONTRACT_ERROR = RetCode.mark(201517, "call contract constant method fail");
+    public static final RetCode GET_MESSAGE_HASH = RetCode.mark(201518, "get message's hash fail");
     // precompiled
     public static final RetCode GET_LIST_MANAGER_FAIL = RetCode.mark(201521, "get list of manager on chain fail");
     public static final RetCode CRUD_TABLE_KEY_LENGTH_ERROR = RetCode.mark(201522, "table key length error");

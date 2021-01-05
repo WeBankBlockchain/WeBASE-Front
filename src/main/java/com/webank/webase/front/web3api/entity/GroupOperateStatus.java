@@ -20,7 +20,7 @@ import lombok.Data;
 
 @Data
 public class GroupOperateStatus {
-	private String code;
-	private String status;
-	private String message;
+    private String code;
+    private String status;
+    private String message;
 }

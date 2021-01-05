@@ -27,15 +27,15 @@ import java.util.List;
  * @author marsli
  */
 public interface AbiRepository extends CrudRepository<AbiInfo, Long>,
-		JpaSpecificationExecutor<AbiInfo> {
+        JpaSpecificationExecutor<AbiInfo> {
 
-	AbiInfo findByAbiId(Long abiId);
+    AbiInfo findByAbiId(Long abiId);
 
-	AbiInfo findByGroupIdAndContractAddress(Integer groupId, String address);
+    AbiInfo findByGroupIdAndContractAddress(Integer groupId, String address);
 
-	AbiInfo findByGroupIdAndContractName(Integer groupId, String userName);
+    AbiInfo findByGroupIdAndContractName(Integer groupId, String userName);
 
-	List<AbiInfo> findByGroupId(Integer groupId, Pageable pageable);
+    List<AbiInfo> findByGroupId(Integer groupId, Pageable pageable);
 
-	List<AbiInfo> findByGroupId(Integer groupId);
+    List<AbiInfo> findByGroupId(Integer groupId);
 }

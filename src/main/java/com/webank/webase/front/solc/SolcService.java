@@ -47,169 +47,169 @@ public class SolcService {
 
 
 
-	@Autowired
-	private SolcRepository solcRepository;
+    @Autowired
+    private SolcRepository solcRepository;
 
-	public List<String> checkSolcFile() {
-		List<String> solcList = new ArrayList<>();
-		File fileDir = new File(SOLC_DIR_PATH);
-		File[] files = fileDir.listFiles();
-		if (files == null) {
-			log.info("checkSolcFile find no solc js file in ./conf/solcjs/");
-			return solcList;
-		}
-		for (File file: files) {
-			if (file.isFile()) {
-				solcList.add(file.getName());
-			}
-		}
-		return solcList;
-	}
-
-
-	/* deprecated */
-
-	@Transactional
-	public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String fileDesc) throws IOException {
-		// format filename end with js
-		String fileName = formatFileName(fileNameParam);
-		Long fileSize = solcFileParam.getSize();
-		if (StringUtils.isBlank(fileDesc)) {
-			fileDesc = solcFileParam.getOriginalFilename();
-		}
-		// check name and md5 not repeat
-		checkSolcInfoNotExist(fileName);
-		String md5 = DigestUtils.md5Hex(solcFileParam.getInputStream());
-		checkSolcMd5NotExist(md5);
-		// save file info db
-		saveSolcInfo(fileName, fileDesc, fileSize, md5);
-
-		// get solcjs dir and save file
-		File solcDir = getSolcDir();
-		try {
-			File newFile = new File(solcDir.getAbsolutePath() + File.separator + fileName);
-			solcFileParam.transferTo(newFile);
-			log.info("saveSolcFile success, file name:{}", fileName);
-		} catch (IOException e) {
-			log.error("saveSolcFile write to file, fileName:{},error:[]", fileName, e);
-			throw new FrontException(ConstantCode.SAVE_SOLC_FILE_ERROR.getCode(),
-					e.getMessage());
-		}
-	}
-
-	/**
-	 * check file's md5 not exist
-	 * @param md5
-	 */
-	private void checkSolcMd5NotExist(String md5) {
-		SolcInfo checkExist = solcRepository.findByMd5(md5);
-		if (Objects.nonNull(checkExist)) {
-			throw new FrontException(ConstantCode.PARAM_FAIL_FILE_NAME_EXISTS);
-		}
-	}
-
-	/**
-	 * if exist, throw exception
-	 * @param fileName
-	 */
-	private void checkSolcInfoNotExist(String fileName) {
-		SolcInfo checkExist = solcRepository.findBySolcName(fileName);
-		if (Objects.nonNull(checkExist)) {
-			throw new FrontException(ConstantCode.PARAM_FAIL_FILE_NAME_EXISTS);
-		}
-	}
-
-	/**
-	 * if not exist, throw exception
-	 * @param fileName
-	 */
-	private void checkSolcInfoExist(String fileName) {
-		SolcInfo checkExist = solcRepository.findBySolcName(fileName);
-		if (Objects.isNull(checkExist)) {
-			throw new FrontException(ConstantCode.PARAM_FAIL_FILE_NAME_NOT_EXISTS);
-		}
-	}
+    public List<String> checkSolcFile() {
+        List<String> solcList = new ArrayList<>();
+        File fileDir = new File(SOLC_DIR_PATH);
+        File[] files = fileDir.listFiles();
+        if (files == null) {
+            log.info("checkSolcFile find no solc js file in ./conf/solcjs/");
+            return solcList;
+        }
+        for (File file: files) {
+            if (file.isFile()) {
+                solcList.add(file.getName());
+            }
+        }
+        return solcList;
+    }
 
 
-	private void saveSolcInfo(String fileName, String description, Long fileSize, String md5) {
-		log.info("start saveSolcInfo fileName:{}", fileName);
-		SolcInfo solcInfo = new SolcInfo();
-		solcInfo.setSolcName(fileName);
-		solcInfo.setDescription(description);
-		solcInfo.setMd5(md5);
-		solcInfo.setFileSize(Math.toIntExact(fileSize));
-		solcInfo.setCreateTime(LocalDateTime.now());
-		solcRepository.save(solcInfo);
-	}
+    /* deprecated */
 
-	private String formatFileName(String fileName) {
-		return fileName.endsWith(SOLC_JS_SUFFIX) ? fileName : (fileName + SOLC_JS_SUFFIX);
-	}
-	/**
-	 * get solcjs dir's path
-	 * @return File, file instance of dir
-	 */
-	private File getSolcDir() {
+    @Transactional
+    public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String fileDesc) throws IOException {
+        // format filename end with js
+        String fileName = formatFileName(fileNameParam);
+        Long fileSize = solcFileParam.getSize();
+        if (StringUtils.isBlank(fileDesc)) {
+            fileDesc = solcFileParam.getOriginalFilename();
+        }
+        // check name and md5 not repeat
+        checkSolcInfoNotExist(fileName);
+        String md5 = DigestUtils.md5Hex(solcFileParam.getInputStream());
+        checkSolcMd5NotExist(md5);
+        // save file info db
+        saveSolcInfo(fileName, fileDesc, fileSize, md5);
 
-		File fileDir = new File(SOLC_DIR_PATH);
-		// check parent path
-		if(!fileDir.exists()){
-			// 递归生成文件夹
-			boolean result = fileDir.mkdirs();
-			if (result) {
-				log.error("mkdirs solc exist or error");
-			}
-		}
-		return fileDir;
-	}
+        // get solcjs dir and save file
+        File solcDir = getSolcDir();
+        try {
+            File newFile = new File(solcDir.getAbsolutePath() + File.separator + fileName);
+            solcFileParam.transferTo(newFile);
+            log.info("saveSolcFile success, file name:{}", fileName);
+        } catch (IOException e) {
+            log.error("saveSolcFile write to file, fileName:{},error:[]", fileName, e);
+            throw new FrontException(ConstantCode.SAVE_SOLC_FILE_ERROR.getCode(),
+                    e.getMessage());
+        }
+    }
 
-	/**
-	 * download file
-	 * @param fileNameParam
-	 * @return
-	 */
-	public RspDownload getSolcFile(String fileNameParam) {
-		// format filename end with js
-		String fileName = formatFileName(fileNameParam);
-		checkSolcInfoExist(fileName);
-		File solcDir = getSolcDir();
-		try {
-			String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
-			File file = new File(solcLocate);
-			InputStream targetStream = Files.newInputStream(Paths.get(file.getPath()));
-			return new RspDownload(fileName, targetStream);
-		} catch (FileNotFoundException e) {
-			log.error("getSolcFile: file not found:{}, e:{}", fileName, e.getMessage());
-			throw new FrontException(ConstantCode.READ_SOLC_FILE_ERROR);
-		} catch (IOException e) {
-			log.error("getSolcFile: file not found:{}", e.getMessage());
-			throw new FrontException(ConstantCode.READ_SOLC_FILE_ERROR);
-		}
-	}
+    /**
+     * check file's md5 not exist
+     * @param md5
+     */
+    private void checkSolcMd5NotExist(String md5) {
+        SolcInfo checkExist = solcRepository.findByMd5(md5);
+        if (Objects.nonNull(checkExist)) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_FILE_NAME_EXISTS);
+        }
+    }
 
-	public List<SolcInfo> getAllSolcInfo() {
-		return solcRepository.findAll();
-	}
+    /**
+     * if exist, throw exception
+     * @param fileName
+     */
+    private void checkSolcInfoNotExist(String fileName) {
+        SolcInfo checkExist = solcRepository.findBySolcName(fileName);
+        if (Objects.nonNull(checkExist)) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_FILE_NAME_EXISTS);
+        }
+    }
 
-	@Transactional
-	public boolean deleteFile(Integer solcId) {
-		SolcInfo solcInfo = solcRepository.findOne(solcId);
-		String fileName = solcInfo.getSolcName();
-		File solcDir = getSolcDir();
-		String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
-		File file = new File(solcLocate);
-		removeSolcInfo(solcId);
-		if (!file.exists()) {
-			throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
-		}
-		return file.delete();
-	}
+    /**
+     * if not exist, throw exception
+     * @param fileName
+     */
+    private void checkSolcInfoExist(String fileName) {
+        SolcInfo checkExist = solcRepository.findBySolcName(fileName);
+        if (Objects.isNull(checkExist)) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_FILE_NAME_NOT_EXISTS);
+        }
+    }
 
-	private void removeSolcInfo(Integer solcId) {
-		SolcInfo checkExist = solcRepository.findOne(solcId);
-		if (Objects.isNull(checkExist)) {
-			throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
-		}
-		solcRepository.delete(solcId);
-	}
+
+    private void saveSolcInfo(String fileName, String description, Long fileSize, String md5) {
+        log.info("start saveSolcInfo fileName:{}", fileName);
+        SolcInfo solcInfo = new SolcInfo();
+        solcInfo.setSolcName(fileName);
+        solcInfo.setDescription(description);
+        solcInfo.setMd5(md5);
+        solcInfo.setFileSize(Math.toIntExact(fileSize));
+        solcInfo.setCreateTime(LocalDateTime.now());
+        solcRepository.save(solcInfo);
+    }
+
+    private String formatFileName(String fileName) {
+        return fileName.endsWith(SOLC_JS_SUFFIX) ? fileName : (fileName + SOLC_JS_SUFFIX);
+    }
+    /**
+     * get solcjs dir's path
+     * @return File, file instance of dir
+     */
+    private File getSolcDir() {
+
+        File fileDir = new File(SOLC_DIR_PATH);
+        // check parent path
+        if(!fileDir.exists()){
+            // 递归生成文件夹
+            boolean result = fileDir.mkdirs();
+            if (result) {
+                log.error("mkdirs solc exist or error");
+            }
+        }
+        return fileDir;
+    }
+
+    /**
+     * download file
+     * @param fileNameParam
+     * @return
+     */
+    public RspDownload getSolcFile(String fileNameParam) {
+        // format filename end with js
+        String fileName = formatFileName(fileNameParam);
+        checkSolcInfoExist(fileName);
+        File solcDir = getSolcDir();
+        try {
+            String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
+            File file = new File(solcLocate);
+            InputStream targetStream = Files.newInputStream(Paths.get(file.getPath()));
+            return new RspDownload(fileName, targetStream);
+        } catch (FileNotFoundException e) {
+            log.error("getSolcFile: file not found:{}, e:{}", fileName, e.getMessage());
+            throw new FrontException(ConstantCode.READ_SOLC_FILE_ERROR);
+        } catch (IOException e) {
+            log.error("getSolcFile: file not found:{}", e.getMessage());
+            throw new FrontException(ConstantCode.READ_SOLC_FILE_ERROR);
+        }
+    }
+
+    public List<SolcInfo> getAllSolcInfo() {
+        return solcRepository.findAll();
+    }
+
+    @Transactional
+    public boolean deleteFile(Integer solcId) {
+        SolcInfo solcInfo = solcRepository.findOne(solcId);
+        String fileName = solcInfo.getSolcName();
+        File solcDir = getSolcDir();
+        String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
+        File file = new File(solcLocate);
+        removeSolcInfo(solcId);
+        if (!file.exists()) {
+            throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
+        }
+        return file.delete();
+    }
+
+    private void removeSolcInfo(Integer solcId) {
+        SolcInfo checkExist = solcRepository.findOne(solcId);
+        if (Objects.isNull(checkExist)) {
+            throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
+        }
+        solcRepository.delete(solcId);
+    }
 }
