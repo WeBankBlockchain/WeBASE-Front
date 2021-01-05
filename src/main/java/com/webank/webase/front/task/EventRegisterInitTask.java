@@ -47,96 +47,96 @@ import static com.webank.webase.front.util.RabbitMQUtils.*;
 @Component
 public class EventRegisterInitTask {
 
-	@Autowired
-	MQService mqService;
-	@Autowired
-	NewBlockEventInfoRepository newBlockEventInfoRepository;
-	@Autowired
-	ContractEventInfoRepository contractEventInfoRepository;
-	@Autowired
-	MQPublisher mqPublisher;
-	@Autowired
-	Map<Integer, Service> serviceMap;
+    @Autowired
+    MQService mqService;
+    @Autowired
+    NewBlockEventInfoRepository newBlockEventInfoRepository;
+    @Autowired
+    ContractEventInfoRepository contractEventInfoRepository;
+    @Autowired
+    MQPublisher mqPublisher;
+    @Autowired
+    Map<Integer, Service> serviceMap;
 
 
-	/**
-	 * Callback used to run the bean.
-	 */
-	@Scheduled(fixedDelayString = "${constant.eventRegisterTaskFixedDelay}")
-	public void taskStart() {
-		syncEventRegisterTask();
-	}
+    /**
+     * Callback used to run the bean.
+     */
+    @Scheduled(fixedDelayString = "${constant.eventRegisterTaskFixedDelay}")
+    public void taskStart() {
+        syncEventRegisterTask();
+    }
 
-	/**
-	 * after front restart, re-register
-	 */
-	public synchronized void syncEventRegisterTask() {
-		try{
-			log.debug("Register task starts.");
-			for (Integer groupId: serviceMap.keySet()) {
-				List<NewBlockEventInfo> newBlockEventInfoList =
-						newBlockEventInfoRepository.findByGroupId(groupId);
-				List<ContractEventInfo> contractEventInfoList =
-						contractEventInfoRepository.findByGroupId(groupId);
-				log.debug("Register task groupId:{},newBlockEventInfoList count:{},contractEventInfoList count:{}",
-						groupId, newBlockEventInfoList.size(), contractEventInfoList.size());
-				// foreach register
-				newBlockEventInfoList.stream()
-						.filter(info -> !BLOCK_ROUTING_KEY_MAP.containsKey(info.getAppId()))
-						.forEach(this::registerNewBlockEvent);
-				contractEventInfoList.stream()
-						.filter(info -> !CONTRACT_EVENT_CALLBACK_MAP.containsKey(info.getId()))
-						.forEach(this::registerContractEvent);
-			}
-			log.debug("Register task finish.");
-		}catch (Exception ex) {
-			log.error("Register task error: ", ex);
-		}
-	}
+    /**
+     * after front restart, re-register
+     */
+    public synchronized void syncEventRegisterTask() {
+        try{
+            log.debug("Register task starts.");
+            for (Integer groupId: serviceMap.keySet()) {
+                List<NewBlockEventInfo> newBlockEventInfoList =
+                        newBlockEventInfoRepository.findByGroupId(groupId);
+                List<ContractEventInfo> contractEventInfoList =
+                        contractEventInfoRepository.findByGroupId(groupId);
+                log.debug("Register task groupId:{},newBlockEventInfoList count:{},contractEventInfoList count:{}",
+                        groupId, newBlockEventInfoList.size(), contractEventInfoList.size());
+                // foreach register
+                newBlockEventInfoList.stream()
+                        .filter(info -> !BLOCK_ROUTING_KEY_MAP.containsKey(info.getAppId()))
+                        .forEach(this::registerNewBlockEvent);
+                contractEventInfoList.stream()
+                        .filter(info -> !CONTRACT_EVENT_CALLBACK_MAP.containsKey(info.getId()))
+                        .forEach(this::registerContractEvent);
+            }
+            log.debug("Register task finish.");
+        }catch (Exception ex) {
+            log.error("Register task error: ", ex);
+        }
+    }
 
 
-	private void registerNewBlockEvent(NewBlockEventInfo registerInfo) {
-		log.debug("start registerNewBlockEvent appId:{}", registerInfo.getAppId());
-		String appId = registerInfo.getAppId();
-		String exchangeName = registerInfo.getExchangeName();
-		String queueName = registerInfo.getQueueName();
-		int groupId = registerInfo.getGroupId();
-		String blockRoutingKey = registerInfo.getRoutingKey();
-		mqService.bindQueue2Exchange(exchangeName,
-				queueName, blockRoutingKey);
-		// record groupId, exchange, routingKey for all block notify
-		PublisherHelper blockPublishInfo = new PublisherHelper(groupId,
-				exchangeName, blockRoutingKey);
-		BLOCK_ROUTING_KEY_MAP.put(appId, blockPublishInfo);
-		log.debug("end registerNewBlockEvent successful appId:{}", appId);
-	}
+    private void registerNewBlockEvent(NewBlockEventInfo registerInfo) {
+        log.debug("start registerNewBlockEvent appId:{}", registerInfo.getAppId());
+        String appId = registerInfo.getAppId();
+        String exchangeName = registerInfo.getExchangeName();
+        String queueName = registerInfo.getQueueName();
+        int groupId = registerInfo.getGroupId();
+        String blockRoutingKey = registerInfo.getRoutingKey();
+        mqService.bindQueue2Exchange(exchangeName,
+                queueName, blockRoutingKey);
+        // record groupId, exchange, routingKey for all block notify
+        PublisherHelper blockPublishInfo = new PublisherHelper(groupId,
+                exchangeName, blockRoutingKey);
+        BLOCK_ROUTING_KEY_MAP.put(appId, blockPublishInfo);
+        log.debug("end registerNewBlockEvent successful appId:{}", appId);
+    }
 
-	private void registerContractEvent(ContractEventInfo rInfo) {
-		log.debug("start registerContractEvent infoId:{}", rInfo.getId());
-		List<String> topicList = FrontUtils.string2ListStr(rInfo.getTopicList());
-		String exchangeName = rInfo.getExchangeName();
-		String queueName = rInfo.getQueueName();
-		String appId = rInfo.getAppId();
-		int groupId = rInfo.getGroupId();
-		String eventRoutingKey = rInfo.getRoutingKey();
-		String contractAddress = rInfo.getContractAddress();
-		String abi = rInfo.getContractAbi();
-		String fromBlock = rInfo.getFromBlock();
-		String toBlock = rInfo.getToBlock();
-		// 传入abi作decoder:
-		TransactionDecoder decoder = new TransactionDecoder(abi);
-		// init EventLogUserParams for register
-		EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(
-				fromBlock, toBlock, contractAddress, topicList);
-		// bind queue to exchange by routing key "queueName_event"
-		mqService.bindQueue2Exchange(exchangeName, queueName, eventRoutingKey);
-		ContractEventCallback callBack =
-				new ContractEventCallback(mqPublisher, exchangeName,
-						eventRoutingKey, decoder, groupId, appId);
-		org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
-		service.registerEventLogFilter(params, callBack);
-		callBack.setRunning(true);
-		CONTRACT_EVENT_CALLBACK_MAP.put(rInfo.getId(), callBack);
-		log.debug("end registerContractEvent successful infoId:{}", rInfo.getId());
-	}
+    private void registerContractEvent(ContractEventInfo rInfo) {
+        log.debug("start registerContractEvent infoId:{}", rInfo.getId());
+        List<String> topicList = FrontUtils.string2ListStr(rInfo.getTopicList());
+        String exchangeName = rInfo.getExchangeName();
+        String queueName = rInfo.getQueueName();
+        String appId = rInfo.getAppId();
+        int groupId = rInfo.getGroupId();
+        String eventRoutingKey = rInfo.getRoutingKey();
+        String contractAddress = rInfo.getContractAddress();
+        String abi = rInfo.getContractAbi();
+        String fromBlock = rInfo.getFromBlock();
+        String toBlock = rInfo.getToBlock();
+        // 传入abi作decoder:
+        TransactionDecoder decoder = new TransactionDecoder(abi);
+        // init EventLogUserParams for register
+        EventLogUserParams params = RabbitMQUtils.initSingleEventLogUserParams(
+                fromBlock, toBlock, contractAddress, topicList);
+        // bind queue to exchange by routing key "queueName_event"
+        mqService.bindQueue2Exchange(exchangeName, queueName, eventRoutingKey);
+        ContractEventCallback callBack =
+                new ContractEventCallback(mqPublisher, exchangeName,
+                        eventRoutingKey, decoder, groupId, appId);
+        org.fisco.bcos.channel.client.Service service = serviceMap.get(groupId);
+        service.registerEventLogFilter(params, callBack);
+        callBack.setRunning(true);
+        CONTRACT_EVENT_CALLBACK_MAP.put(rInfo.getId(), callBack);
+        log.debug("end registerContractEvent successful infoId:{}", rInfo.getId());
+    }
 }

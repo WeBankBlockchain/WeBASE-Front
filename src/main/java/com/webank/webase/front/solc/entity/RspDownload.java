@@ -24,6 +24,6 @@ import java.io.InputStream;
 @Data
 @AllArgsConstructor
 public class RspDownload {
-	private String fileName;
-	private InputStream inputStream;
+    private String fileName;
+    private InputStream inputStream;
 }

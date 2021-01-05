@@ -30,7 +30,7 @@ var sm3 = require('./sm_sm3');
 // }
 
 function sm3Digest(msg){
-	var _sm3 = new sm3();
+    var _sm3 = new sm3();
     var rawData = Array.from(msg);
     var digest = _sm3.sum(rawData);
     var hashHex = Array.from(digest, function(byte) {return ('0' + (byte & 0xFF).toString(16)).slice(-2);}).join('');

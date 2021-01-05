@@ -29,25 +29,25 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 public class PrecompiledWithSignServiceTest {
-	@Autowired
-	PrecompiledWithSignService precompiledWithSignService;
-	@Autowired
-	PrecompiledSysConfigService sysConfigService;
-	private int groupId = 1;
-	private String signAddress = "0xf16c0bf5a8bf4049ede4c3a070efcc1052095f63";
+    @Autowired
+    PrecompiledWithSignService precompiledWithSignService;
+    @Autowired
+    PrecompiledSysConfigService sysConfigService;
+    private int groupId = 1;
+    private String signAddress = "0xf16c0bf5a8bf4049ede4c3a070efcc1052095f63";
 
-	/**
-	 * need webase-sign is on
-	 */
-	@Test
-	public void testSysConf() throws Exception {
-		String txLimit = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
-//		System.out.println("==========1 " + txLimit);
-		String value = "1024";
-		String result = precompiledWithSignService.setValueByKey(groupId, signAddress, PrecompiledUtils.TxCountLimit, value);
-		String txLimit2 = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
-//		System.out.println("==========2 " + txLimit2);
-		Assert.assertNotEquals(txLimit, txLimit2);
-	}
+    /**
+     * need webase-sign is on
+     */
+    @Test
+    public void testSysConf() throws Exception {
+        String txLimit = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
+//        System.out.println("==========1 " + txLimit);
+        String value = "1024";
+        String result = precompiledWithSignService.setValueByKey(groupId, signAddress, PrecompiledUtils.TxCountLimit, value);
+        String txLimit2 = sysConfigService.getSysConfigByKey(groupId, PrecompiledUtils.TxCountLimit);
+//        System.out.println("==========2 " + txLimit2);
+        Assert.assertNotEquals(txLimit, txLimit2);
+    }
 
 }
