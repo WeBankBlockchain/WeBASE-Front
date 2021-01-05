@@ -741,6 +741,12 @@ export default {
                                 if (index == 0) {
                                     this.getContractArry()
                                 }
+                            } else if (this.$route.query.contractPath && !this.$route.query.contractId) {
+                                if (res.data.data.length) {
+                                    this.getContractArry(res.data.data[0])
+                                } else {
+                                    this.getContractArry()
+                                }
                             }
                             else if (sessionStorage.getItem("selectData") && JSON.parse(sessionStorage.getItem("selectData")) && JSON.parse(sessionStorage.getItem("selectData")).id) {
                                 let num = 0;
