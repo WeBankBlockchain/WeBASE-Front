@@ -289,18 +289,18 @@ public class Web3ApiController {
      * @return map of <groupId, status>
      *     status: "INEXISTENT"、"STOPPING"、"RUNNING"、"STOPPED"、"DELETED"
      */
-	@ApiOperation(value = "getGroupStatus", notes = "getStatus of the group id in the list")
-	@ApiImplicitParam(name = "groupIdList", value = "group id list of string", required = true, dataType = "ReqGroupStatus")
-	@PostMapping("/queryGroupStatus")
-	public BaseResponse getGroupStatus(@RequestBody ReqGroupStatus groupIdList)
-			throws IOException {
+    @ApiOperation(value = "getGroupStatus", notes = "getStatus of the group id in the list")
+    @ApiImplicitParam(name = "groupIdList", value = "group id list of string", required = true, dataType = "ReqGroupStatus")
+    @PostMapping("/queryGroupStatus")
+    public BaseResponse getGroupStatus(@RequestBody ReqGroupStatus groupIdList)
+            throws IOException {
         if (groupIdList.getGroupIdList().isEmpty()) {
             throw new FrontException(ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY);
         }
-		return web3ApiService.getGroupStatus(groupIdList.getGroupIdList());
-	}
+        return web3ApiService.getGroupStatus(groupIdList.getGroupIdList());
+    }
 
-	/* after fisco-bcos v2.5.x */
+    /* after fisco-bcos v2.5.x */
 
     @ApiOperation(value = "getBlockHeaderByHash", notes = "Get block header with sealers based on block hash")
     @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true,

@@ -32,55 +32,55 @@ import java.util.List;
 @NoArgsConstructor
 public class ReqContractEventRegister {
 
-	/**
-	 * id in database
-	 */
-	private String infoId;
+    /**
+     * id in database
+     */
+    private String infoId;
 
     /**
      * application which register contract event
      */
-	@NotEmpty(message = "appId cannot be empty")
-	private String appId;
+    @NotEmpty(message = "appId cannot be empty")
+    private String appId;
 
     /**
      * group id
      */
-	@NotNull(message = "groupId cannot be null")
-	private Integer groupId;
+    @NotNull(message = "groupId cannot be null")
+    private Integer groupId;
 
     /**
      * MQ info: exchange name
      */
-	@NotEmpty(message = "exchangeName cannot be empty")
-	private String exchangeName;
+    @NotEmpty(message = "exchangeName cannot be empty")
+    private String exchangeName;
 
     /**
      * appId as queue name
      */
-	@NotEmpty(message = "queueName cannot be empty(usually use appId as queueName)")
-	private String queueName;
+    @NotEmpty(message = "queueName cannot be empty(usually use appId as queueName)")
+    private String queueName;
 
-	/**
-	 * contract abi for decoder
-	 */
-	@NotEmpty(message = "contractAbi cannot be empty")
-	private List<Object> contractAbi;
+    /**
+     * contract abi for decoder
+     */
+    @NotEmpty(message = "contractAbi cannot be empty")
+    private List<Object> contractAbi;
 
     /**
      * event log push info below
      */
 
-	@NotEmpty(message = "fromBlock cannot be empty")
-	private String fromBlock;
+    @NotEmpty(message = "fromBlock cannot be empty")
+    private String fromBlock;
 
-	@NotEmpty(message = "toBlock cannot be empty")
-	private String toBlock;
+    @NotEmpty(message = "toBlock cannot be empty")
+    private String toBlock;
 
     /**
      * single contract address
      */
-	private String contractAddress;
+    private String contractAddress;
 
     /**
      * List of topics

@@ -28,46 +28,46 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @Table(uniqueConstraints = {
-		@UniqueConstraint(name = "unique_new_block_event", columnNames = {"appId", "exchangeName",
-				"queueName"})
+        @UniqueConstraint(name = "unique_new_block_event", columnNames = {"appId", "exchangeName",
+                "queueName"})
 })
 public class NewBlockEventInfo {
 
-	@Id
-	@GenericGenerator(name="idGenerator", strategy="uuid")
-	@GeneratedValue(generator="idGenerator")
-	private String id;
+    @Id
+    @GenericGenerator(name="idGenerator", strategy="uuid")
+    @GeneratedValue(generator="idGenerator")
+    private String id;
 
-	/**
-	 * event type: 1: newBlockEvent, 2: contractEvent, 3: others
-	 */
-	private Integer eventType;
+    /**
+     * event type: 1: newBlockEvent, 2: contractEvent, 3: others
+     */
+    private Integer eventType;
 
-	/**
-	 * application id to register
-	 */
-	private String appId;
+    /**
+     * application id to register
+     */
+    private String appId;
 
-	/**
-	 * group id
-	 */
-	private Integer groupId;
+    /**
+     * group id
+     */
+    private Integer groupId;
 
-	/**
-	 * MQ info
-	 */
-	private String exchangeName;
+    /**
+     * MQ info
+     */
+    private String exchangeName;
 
-	/**
-	 * @appId as queue name
-	 */
-	private String queueName;
+    /**
+     * @appId as queue name
+     */
+    private String queueName;
 
-	/**
-	 * concat appId + "_" + event/block + "_" + randomStr as routing key
-	 */
-	private String routingKey;
+    /**
+     * concat appId + "_" + event/block + "_" + randomStr as routing key
+     */
+    private String routingKey;
 
-	private LocalDateTime createTime;
+    private LocalDateTime createTime;
 
 }

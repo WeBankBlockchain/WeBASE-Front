@@ -53,7 +53,7 @@ public class AesUtils {
      * @return 加密数据
      */
     public  String aesEncrypt(String content) {
-    	return  aesEncrypt( content,  constants.getAesKey(),null);
+        return  aesEncrypt( content,  constants.getAesKey(),null);
     }
     
     /**
@@ -65,9 +65,9 @@ public class AesUtils {
      * @return 加密数据
      */
     public  String aesEncrypt(String content, String password,String iv) {
-    	if(StringUtils.isBlank(iv)) {
-    		iv = DEFAULT_IV;
-    	}
+        if(StringUtils.isBlank(iv)) {
+            iv = DEFAULT_IV;
+        }
         try {
             //创建密码器
             Cipher cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
@@ -88,8 +88,8 @@ public class AesUtils {
 
             return Base64.getEncoder().encodeToString(result);
         } catch (Exception ex) {
-        	log.error(ex.getMessage(),ex);
-        	return null;
+            log.error(ex.getMessage(),ex);
+            return null;
         }
     }
 
@@ -101,7 +101,7 @@ public class AesUtils {
      * @return 明文
      */
     public  String aesDecrypt(String content) {
-    	return aesDecrypt(content,  constants.getAesKey(),null);
+        return aesDecrypt(content,  constants.getAesKey(),null);
     }
     
     
@@ -114,10 +114,10 @@ public class AesUtils {
      * @return 明文
      */
     public  String aesDecrypt(String content, String password, String iv) {
-    	if(StringUtils.isBlank(iv)) {
-    		iv = DEFAULT_IV;
-    	}
-    	
+        if(StringUtils.isBlank(iv)) {
+            iv = DEFAULT_IV;
+        }
+        
         try {
             //创建密码器
             Cipher cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
@@ -138,7 +138,7 @@ public class AesUtils {
 
             return new String(result, StandardCharsets.UTF_8);
         } catch (Exception ex) {
-        	log.error(ex.getMessage(),ex);
+            log.error(ex.getMessage(),ex);
         }
 
         return null;
