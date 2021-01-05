@@ -6,8 +6,8 @@
                 <el-tab-pane :label="$t('onlineTools.onlineHashCalculator')" name="first">
                     <div class="hash-wrapper">
                         <div class="calc-hash">
-                            <!-- <el-tabs v-model="fileType" @tab-click="handleFileType"> -->
-                                <!-- <el-tab-pane :label="$t('onlineTools.file')" name="file-first">
+                            <el-tabs v-model="fileType" @tab-click="handleFileType">
+                                <el-tab-pane :label="$t('onlineTools.file')" name="file-first">
                                     <div>
                                         <p class="font-color-fff text-title">{{$t('onlineTools.file')}}</p>
                                         <div>
@@ -22,14 +22,14 @@
 
                                         </div>
                                     </div>
-                                </el-tab-pane> -->
-                                <!-- <el-tab-pane :label="$t('onlineTools.text')" name="file-second"> -->
+                                </el-tab-pane>
+                                <el-tab-pane :label="$t('onlineTools.text')" name="file-second">
                                     <div>
                                         <p class="font-color-fff text-title">{{$t('onlineTools.text')}}</p>
                                         <el-input type="textarea" v-model="inputText" @input="textFocus" style="margin-bottom: 20px;"></el-input>
                                     </div>
-                                <!-- </el-tab-pane> -->
-                            <!-- </el-tabs> -->
+                                </el-tab-pane>
+                            </el-tabs>
                             <div style="margin-top: 10px;">
                                 <span class="font-color-fff">{{$t('onlineTools.algorithm')}}</span>
                                 <el-select v-model="algorithm" :placeholder="$t('placeholder.selected')" style="width:100px;margin-left:5px;">
@@ -61,15 +61,15 @@
                             <el-button type="primary" style="margin-left:5px;" @click="querySignHash" v-loading="loading">{{$t('onlineTools.sign')}}</el-button>
                         </div>
                         <p class="font-color-fff text-title">{{$t('onlineTools.result')}}</p>
-                        <div class="result">
+                        <div class="result" v-if="inputSign">
                             <ul>
-                                <li v-for="(value, key) in inputSign">
+                                <li v-for="(value, key) in signKey">
                                     <span>
-                                        {{key}}:
+                                        {{value}}:
                                     </span>
                                     <span>
-                                        {{value}}
-                                        <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(value)" :title="$t('title.copy')"></i>
+                                        {{inputSign[value]}}
+                                        <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(inputSign[value])" :title="$t('title.copy')"></i>
                                     </span>
                                 </li>
                             </ul>
@@ -103,6 +103,7 @@ export default {
             inputHash: '',
             inputSignHash: '',
             inputSign: "",
+            signKey: ['v', 'r', 's'],
             algorithm: "sha256",
             algorithmOpt: [
                 {
@@ -138,10 +139,12 @@ export default {
                 let content;
                 if (this.inputText) {
                     content = this.inputText;
+                    this.inputHash = CryptoJS.SHA256(content).toString();
                 } else {
                     content = this.inputFile;
+                    this.inputHash = content.toString();
                 }
-                this.inputHash = CryptoJS.SHA256(content).toString();
+                
             } else if (this.algorithm === 'sm3') {
                 let content;
                 if (this.inputText) {
@@ -188,6 +191,7 @@ export default {
                 })
         },
         copyKey(val) {
+            var val = val.toString()
             if (!val) {
                 this.$message({
                     type: "fail",
@@ -206,28 +210,72 @@ export default {
                 });
             }
         },
+        // uploadCrt(param) {
+        //     this.inputFile = null
+        //     this.fileList = []
+        //     this.fileList.push({
+        //         name: param.file.name
+        //     })
+        //     var reader = new FileReader(), self = this;
+        //     this.inputText = ""
+        //     reader.readAsArrayBuffer(param.file);
+        //     reader.onload = function (e) {
+        //         console.log(1111);
+        //         if (e.target.readyState == 2) { // DONE == 2
+        //             // let wordArray = null;
+        //             // wordArray = CryptoJS.lib.WordArray.create(e.target.result);
+        //             // console.log(222);
+        //             var wordArray = self.arrayBufferToWordArray(e.target.result)
+        //             self.inputFile = wordArray;
+        //             var hash = CryptoJS.SHA256(self.inputFile);
+        //             console.log(hash.toString(CryptoJS.enc.Hex));
+        //         }
+        //     }
+        //     this.$refs.upload.clearFiles()
+        // },
         uploadCrt(param) {
-            this.inputFile = null
-            this.fileList = []
-            this.fileList.push({
-                name: param.file.name
-            })
-            var reader = new FileReader(), self = this;
-            this.inputText = ""
-            reader.readAsArrayBuffer(param.file);
-            reader.onload = function (e) {
-                console.log(1111);
-                if (e.target.readyState == 2) { // DONE == 2
-                    // let wordArray = null;
-                    // wordArray = CryptoJS.lib.WordArray.create(e.target.result);
-                    // console.log(222);
-                    var wordArray =  self.arrayBufferToWordArray(e.target.result)
-                    self.inputFile = wordArray;
-                    var hash = CryptoJS.SHA256(self.inputFile);
-                    console.log(hash.toString(CryptoJS.enc.Hex));
+            var contractFile = param.file;
+            var reader = new FileReader(), self = this;;
+            var blobSlice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice;
+            // 指定文件分块大小(2M)
+            var chunkSize = 6 * 1024 * 1024;
+            // 计算文件分块总数
+            var chunks = Math.ceil(contractFile.size / chunkSize);
+            // 指定当前块指针
+            var currentChunk = 0;
+            var hasher = CryptoJS.algo.SHA256.create();
+            // FileReader分片式读取文件
+            // 计算开始读取的位置
+            var start = currentChunk * chunkSize;
+            // 计算结束读取的位置
+            var end = start + chunkSize >= contractFile.size ? contractFile.size : start + chunkSize;
+            reader.readAsArrayBuffer(blobSlice.call(contractFile, start, end));
+            reader.onload = function (evt) {
+                var fileStr = evt.target.result;
+                var tmpWordArray = self.arrayBufferToWordArray(fileStr);
+                hasher.update(tmpWordArray);
+                currentChunk += 1;
+                fileStr = null;
+                tmpWordArray = null;
+                // 判断文件是否都已经读取完
+                if (currentChunk < chunks) {
+                    // 计算开始读取的位置
+                    var start = currentChunk * chunkSize;
+                    // 计算结束读取的位置
+                    var end = start + chunkSize >= contractFile.size ? contractFile.size : start + chunkSize;
+                    reader.readAsArrayBuffer(blobSlice.call(contractFile, start, end));
                 }
             }
-            this.$refs.upload.clearFiles()
+            reader.onloadend = function () {
+                contractFile = null;
+                var hash = hasher.finalize();
+                self.inputFile = hash;
+                hasher = null;
+                blobSlice = null;
+                reader = null;
+                hash = null;
+                // CollectGarbage();
+            }
         },
         arrayBufferToWordArray(ab) {
             var i8a = new Uint8Array(ab);
@@ -242,13 +290,16 @@ export default {
         },
         textFocus($event) {
             this.inputFile = null;
-            // this.$refs.upload.clearFiles()
+            this.$refs.upload.clearFiles()
         },
         uploadSuccess(response, file, fileList) {
             console.log(response, file, fileList);
         },
         handleFileType() {
-
+            this.inputFile = ""
+            this.inputText = ""
+            this.inputHash = ""
+            this.$refs.upload.clearFiles()
         }
     }
 }
