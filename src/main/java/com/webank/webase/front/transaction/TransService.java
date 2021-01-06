@@ -143,6 +143,7 @@ public class TransService {
         if (req.isUseCns()) {
             contractAddress = precompiledService.getAddressByContractNameAndVersion(req.getGroupId(),
                     req.getCnsName(), req.getVersion());
+            log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
             if (StringUtils.isBlank(contractAddress)) {
                 throw new FrontException(VERSION_NOT_EXISTS);
             }
@@ -542,6 +543,7 @@ public class TransService {
         if (req.isUseCns()) {
             address = precompiledService.getAddressByContractNameAndVersion(cof.getGroupId(),
                     req.getCnsName(), cof.getVersion());
+            log.info("transHandleLocal cns contractAddress:{}", address);
             if (StringUtils.isBlank(address)) {
                 throw new FrontException(VERSION_NOT_EXISTS);
             }
