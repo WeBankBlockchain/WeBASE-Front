@@ -80,6 +80,7 @@ import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.crypto.RawTransaction;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.crypto.TransactionEncoder;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -129,7 +130,7 @@ public class TransService {
      *
      * @param req request
      */
-    public Object transHandleWithSign(ReqTransHandleWithSign req) {
+    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
         // get signUserId
         String signUserId = req.getSignUserId();
         ContractOfTrans contractOfTrans = new ContractOfTrans(req);
@@ -141,12 +142,13 @@ public class TransService {
         // check contractAddress
         String contractAddress = contractOfTrans.getContractAddress();
         if (req.isUseCns()) {
-            contractAddress = precompiledService.getAddressByContractNameAndVersion(req.getGroupId(),
+            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
                     req.getCnsName(), req.getVersion());
-            log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
-            if (StringUtils.isBlank(contractAddress)) {
+            if (CollectionUtils.isEmpty(cnsList)) {
                 throw new FrontException(VERSION_NOT_EXISTS);
             }
+            contractAddress = cnsList.iterator().next().getAddress();
+            log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
         }
         // encode function
         Function function = new Function(req.getFuncName(), contractFunction.getFinalInputs(),
@@ -530,7 +532,7 @@ public class TransService {
     /**
      * send transaction locally
      */
-    public Object transHandleLocal(ReqTransHandle req) {
+    public Object transHandleLocal(ReqTransHandle req) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(req));
 
         // init contract params
@@ -541,12 +543,13 @@ public class TransService {
         // address
         String address = cof.getContractAddress();
         if (req.isUseCns()) {
-            address = precompiledService.getAddressByContractNameAndVersion(cof.getGroupId(),
+            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(cof.getGroupId(),
                     req.getCnsName(), cof.getVersion());
-            log.info("transHandleLocal cns contractAddress:{}", address);
-            if (StringUtils.isBlank(address)) {
+            if (CollectionUtils.isEmpty(cnsList)) {
                 throw new FrontException(VERSION_NOT_EXISTS);
             }
+            address = cnsList.iterator().next().getAddress();
+            log.info("transHandleLocal cns contractAddress:{}", address);
         }
 
         // web3j
