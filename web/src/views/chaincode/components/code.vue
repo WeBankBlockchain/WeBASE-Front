@@ -91,17 +91,30 @@
                     <div class="contract-info-list1" style="color: #F56C6C" v-show="errorInfo">
                         {{errorInfo}}
                     </div>
-                    <div class="contract-info-list1" style="color: #F56C6C" v-show="errorInfo">
+                    <div class="contract-info-list1 error-item" style="color: #F56C6C" v-show="errorInfo">
                         <!-- <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage">{{index+1}}、{{item}}</span> -->
-                        <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage" :style="{'color' : severityColor(item)}">
+                        <!-- <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage" :style="{'color' : severityColor(item)}">
                             {{index+1}}: {{item | formatErrorMessage}}
-                            <!-- <i class="el-icon-circle-plus-outline" @click="optenErrorInfo(item, index)"></i>{{item | formatErrorMessage}} -->
-                            <!-- <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-if="item.open">
+                            <i class="el-icon-circle-plus-outline" @click="optenErrorInfo(item, index)"></i>{{item | formatErrorMessage}}
+                            <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-show="item.open">
                                 <span>
                                     <pre>{{item}}</pre>
                                 </span>
-                            </span> -->
-                        </span>
+                            </span>
+                        </span> -->
+                        <el-collapse v-model="activeNames" @change="handleChange">
+                            <el-collapse-item :name="index" v-for="(item, index) in errorMessage" :key="index" :style="{'color': severityColor(item)}">
+                                <template slot="title">
+                                    {{index+1}}、{{item | formatErrorMessage}}
+                                </template>
+                                <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word;">
+                                    <span>
+                                        <pre :style="{'color': severityColor(item)}">{{item}}</pre>
+                                    </span>
+                                </span>
+                            </el-collapse-item>
+
+                        </el-collapse>
                     </div>
                     <div style="color: #68E600;padding-bottom: 15px;" v-show="abiFileShow">{{successInfo}}</div>
                     <div class="contract-info-list" v-show="contractAddress">
@@ -159,7 +172,7 @@
             </div>
         </el-dialog>
         <el-dialog v-if="mgmtCnsVisible" :title="$t('text.cns')" :visible.sync="mgmtCnsVisible" width="470px" center class="send-dialog">
-            <mgmt-cns :mgmtCnsItem="mgmtCnsItem" @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)" @mgmtCnsResultClose="mgmtCnsResultClose" ></mgmt-cns>
+            <mgmt-cns :mgmtCnsItem="mgmtCnsItem" @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)" @mgmtCnsResultClose="mgmtCnsResultClose"></mgmt-cns>
         </el-dialog>
     </div>
 </template>
@@ -249,8 +262,9 @@ export default {
             openErrorIndex: "",
             reqVersion: "",
             cnsName: "",
-            mgmtCnsVisible:false,
-            mgmtCnsItem: {}
+            mgmtCnsVisible: false,
+            mgmtCnsItem: {},
+            activeNames: []
         };
     },
     watch: {
@@ -341,7 +355,7 @@ export default {
                     this.aceEditor.setReadOnly(false);
                 }
             })
-            if(this.data.contractAddress){
+            if (this.data.contractAddress) {
                 this.queryFindCnsInfo()
             }
         });
@@ -679,7 +693,7 @@ export default {
                 } else {
                     this.errorMessage = output.errors;
                     this.errorMessage.forEach(item => {
-                        item.open = false;
+                        // item.open = false;
                     })
                     this.errorInfo = this.$t('text.compilationFailed');
                     this.loadingAce = false;
@@ -1063,16 +1077,13 @@ export default {
             }
         },
         optenErrorInfo(item, index) {
-            console.log(index);
+            console.log(index, this.errorMessage);
             this.errorMessage.forEach((err, it) => {
-                if (index == it) {
-                    if (err.open) {
-                        this.$set(err, 'open', false)
-                    } else {
-                        this.$set(err, 'open', true)
-                    }
+                if (err.open !== this.errorMessage[index]['open']) {
+                    err.open = false
                 }
             });
+            item.open = !item.open;
         },
         severityColor(item) {
             let key = item.severity
@@ -1100,7 +1111,7 @@ export default {
                         if (data.data) {
                             this.reqVersion = data.data.version;
                             this.cnsName = data.data.cnsName;
-                        }else {
+                        } else {
                             this.reqVersion = "";
                             this.cnsName = "";
                         }
@@ -1112,17 +1123,20 @@ export default {
                     }
                 })
         },
-        handleRegisterCns(val){
+        handleRegisterCns(val) {
             this.mgmtCnsItem = this.data;
             this.mgmtCnsVisible = true;
         },
-        mgmtCnsResultSuccess(){
+        mgmtCnsResultSuccess() {
             this.queryFindCnsInfo()
             this.mgmtCnsVisible = false;
         },
-        mgmtCnsResultClose(){
+        mgmtCnsResultClose() {
             this.mgmtCnsVisible = false;
         },
+        handleChange(val) {
+            console.log(val);
+        }
     }
 };
 </script>
@@ -1217,6 +1231,7 @@ export default {
     border-top: 1px solid #242e42;
     box-sizing: border-box;
     overflow: auto;
+    padding-left: 5px;
 }
 .contract-info-content {
     height: 100%;
@@ -1342,5 +1357,24 @@ export default {
 .visibility-wrapper {
     position: absolute;
     bottom: 10px;
+}
+.error-item >>> .el-collapse {
+    border-bottom: 1px solid #2b374d;
+    border-top: 1px solid #2b374d;
+}
+.error-item >>> .el-collapse-item__header {
+    color: inherit;
+    background-color: inherit;
+    height: 16px;
+    line-height: 16px;
+    border-bottom: 1px solid #2b374d;
+    font-size: 12px;
+    font-weight: none;
+}
+.error-item >>> .el-collapse-item__content {
+    background-color: #2b374d;
+}
+.error-item >>> .el-collapse-item__wrap {
+    border-bottom: 1px solid #2b374d;
 }
 </style>
