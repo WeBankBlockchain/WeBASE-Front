@@ -35,7 +35,7 @@ public class PresetDataService {
                 "一套区块链存证合约","一套区块链存证合约",
                 "Evidence Contract suite","Evidence Contract suite");
 
-        insertStoreItem(pointsId,"积分应用","Points","2","pointsId",
+        insertStoreItem(pointsId,"积分应用","Points","3","pointsId",
                 "一套积分合约","一套积分合约",
                 "Points Contract suite","Points Contract suite");
     }
