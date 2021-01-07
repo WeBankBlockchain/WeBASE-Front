@@ -729,7 +729,7 @@ public class TransService {
             rspMessageHashSignature.setP("0x");
             rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
             rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
-            rspMessageHashSignature.setV(sm2SignatureResult.getV());
+            rspMessageHashSignature.setV((byte) (sm2SignatureResult.getV()+27));
             return rspMessageHashSignature;
         }
     }
