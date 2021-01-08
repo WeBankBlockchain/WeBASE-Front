@@ -342,6 +342,7 @@ export default {
                         inputs: inputs
                     }, inputsVal)
                 } else {
+                    console.info(this.functionValue, this.functionType, inputs, inputsVal);
                     this.textarea = web3Abi.encodeFunctionCall({
                         name: this.functionValue,
                         type: this.functionType,
