@@ -29,15 +29,21 @@
                                     <p v-else>{{item.storeDetail_en}}</p>
                                 </div>
                                 <div class="right-warehouse-item">
-                                    <el-button type="primary" v-show="item.storeType==2" size="small" @click="exportContract(item)" class="btn-item">{{$t('contracts.exportToIde')}}</el-button>
-                                    <el-button type="primary" size="small" @click="toDetail(item)">{{$t('text.previewAndDescription')}}</el-button>
+                                    <el-button type="primary" v-show="item.storeType!=1" size="small" @click="exportContract(item)" class="btn-item">{{$t('contracts.exportToIde')}}</el-button>
+                                    <el-button type="primary" size="small" @click="toDetail(item)" class="right-btn-item">{{$t('text.previewAndDescription')}}</el-button>
                                 </div>
                             </div>
                         </li>
                     </el-col>
                     <el-col :span="12">
-                        <li class="item-warehouse-none item-warehouse">
-                            {{$t('text.developing')}}
+                        <li class="item-warehouse">
+                            <div class="left-warehouse">
+                                <svg-icon icon-class='comingSoon' class="font-120" style=""></svg-icon>
+                            </div>
+                            <div class="item-warehouse-none right-warehouse">
+                                {{$t('text.developing')}}
+                            </div>
+                            
                         </li>
                     </el-col>
                 </el-row>
@@ -101,12 +107,20 @@ export default {
                     this.loading = false;
                     if (res.data.code === 0) {
                         var list = res.data.data;
-                        var iconList = ["tools", "supply"];
+                        var iconList = ["tools", "supply", "points"];
                         list.forEach((item, index) => {
-                            if (index === 0) {
-                                item.iconName = iconList[index]
-                            } else {
-                                item.iconName = iconList[1]
+                            switch (item.storeIcon) {
+                                case "toolboxId":
+                                    item.iconName = "tools"
+                                    break;
+                                case "evidenceId":
+                                    item.iconName = "supply"
+                                    break;
+                                case "pointsId":
+                                    item.iconName = "points"
+                                    break;
+                                default:
+                                    break;
                             }
                         });
                         this.wareHouseList = list;
@@ -228,5 +242,8 @@ export default {
     justify-content: center;
     align-items: center;
     height: 120px;
+}
+.right-btn-item {
+    margin-left: 0px;
 }
 </style>

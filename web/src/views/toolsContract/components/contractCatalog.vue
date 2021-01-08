@@ -26,9 +26,9 @@
                         <i :class="item.folderIcon" @click='open(item)' :id='item.folderId' class="cursor-pointer font-16 no-chase"></i>
                         <i class="wbs-icon-folder cursor-pointer no-chase" @click='open(item)' @contextmenu.prevent="handle($event,item)" style="color: #d19650" :id='item.folderId'></i>
                         <span :id='item.folderId' @click='open(item)' :class="{'colorActive': item.contractActive}" @contextmenu.prevent="handle($event,item)" class="no-chase cursor-pointer">{{item.contractFolderName}}</span>
-                        <div class="contract-menu-handle" v-if='item.handleModel' :style="{'top': clentY,'left': clentX}" v-Clickoutside="checkNull">
+                        <div class="contract-menu-handle" v-show='item.handleModel' :style="{'top': clentY,'left': clentX}" v-Clickoutside="checkNull">
                             <ul>
-                                <li class="contract-menu-handle-list" @click="exportToIde(item, 'folder')">{{$t('contracts.exportToIde')}}</li>
+                                <li class="contract-menu-handle-list" @click.prevent="exportToIde(item, 'folder')">{{$t('contracts.exportToIde')}}</li>
                             </ul>
                         </div>
                         <br>
@@ -36,7 +36,7 @@
                             <li class="contract-file" v-for='list in item.child' :key="list.contractId">
                                 <i class="wbs-icon-file" @click='select(list)'></i>
                                 <span @click='select(list)' @contextmenu.prevent="handleFile($event,list)" :id='list.contractId' :class="{'colorActive': list.contractActive}">{{list.contractName}} </span>
-                                <div class="contract-menu-handle" v-if='list.handleFile' :style="{'top': clentY,'left': clentX}">
+                                <div class="contract-menu-handle" v-show='list.handleFile' :style="{'top': clentY,'left': clentX}">
                                     <ul>
                                         <li class="contract-menu-handle-list" @click="exportToIde(list, 'file')">{{$t('contracts.exportToIde')}}</li>
                                     </ul>
@@ -78,7 +78,9 @@ export default {
             folderItem: {},
             folderName: "",
             fileItem: {},
-            fileName: ""
+            fileName: "",
+            clentX: 0,
+            clentY: 0,
         };
     },
     watch: {
@@ -194,7 +196,6 @@ export default {
         },
         exportToIde(item, type) {
             this.checkNull()
-
             if (type === 'folder') {
                 this.folderVisible = true;
                 this.folderItem = item;

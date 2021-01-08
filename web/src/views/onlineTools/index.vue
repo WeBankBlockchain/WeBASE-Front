@@ -9,7 +9,7 @@
                             <el-tabs v-model="fileType" @tab-click="handleFileType">
                                 <el-tab-pane :label="$t('onlineTools.file')" name="file-first">
                                     <div>
-                                        <p class="font-color-fff text-title">{{$t('onlineTools.file')}}</p>
+                                        <!-- <p class="font-color-fff text-title">{{$t('onlineTools.file')}}</p> -->
                                         <div>
                                             <el-upload ref="upload" class="upload-file-hash" :file-list="fileList" :show-file-list="true" :limit="1" drag action :http-request="uploadCrt" :on-success="uploadSuccess">
                                                 <i class="el-icon-upload"></i>
@@ -25,7 +25,7 @@
                                 </el-tab-pane>
                                 <el-tab-pane :label="$t('onlineTools.text')" name="file-second">
                                     <div>
-                                        <p class="font-color-fff text-title">{{$t('onlineTools.text')}}</p>
+                                        <!-- <p class="font-color-fff text-title">{{$t('onlineTools.text')}}</p> -->
                                         <el-input type="textarea" v-model="inputText" @input="textFocus" style="margin-bottom: 20px;"></el-input>
                                     </div>
                                 </el-tab-pane>
@@ -53,7 +53,7 @@
                         <p class="font-color-fff text-title">Hash</p>
                         <el-input type="textarea" v-model="inputSignHash" style="margin-bottom: 20px;"></el-input>
                         <div>
-                            <span></span>
+                            <span>用户</span>
                             <el-select v-model="privateKey" placeholder="">
                                 <el-option v-for="item in privateKeyList" :key="item.address" :label="item.userName" :value="item.address">
                                 </el-option>
@@ -139,12 +139,18 @@ export default {
                 let content;
                 if (this.inputText) {
                     content = this.inputText;
-                    this.inputHash = CryptoJS.SHA256(content).toString();
-                } else {
+                    let result = CryptoJS.SHA256(content).toString();
+                    this.inputHash = `0x${result}`
+                } else if (this.inputFile) {
                     content = this.inputFile;
-                    this.inputHash = content.toString();
+                    let result = content.toString();
+                    this.inputHash = `0x${result}`
+                } else {
+                    content = ""
+                    let result = CryptoJS.SHA256(content).toString();
+                    this.inputHash = `0x${result}`
                 }
-                
+
             } else if (this.algorithm === 'sm3') {
                 let content;
                 if (this.inputText) {

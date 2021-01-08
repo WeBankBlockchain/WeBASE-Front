@@ -322,7 +322,7 @@ export default {
         folderIsExists: "Contract path is exists",
         folder: "Folder",
         previewAndDescription: "Preview And Description",
-        developing: "Application development, please look forward to...",
+        developing: "More wonderful, please look forward to...",
         appIntroduction: "Contract warehouse",
         warehouseDes: "The contract warehouse provides common tool contracts and recommended application contract templates. Users can import contracts into their own directory.",
         fileSize: "The upload file size cannot exceed 100kb!",
