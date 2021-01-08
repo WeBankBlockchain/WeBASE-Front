@@ -22,7 +22,7 @@
             <div class="move" @mousedown="dragDetailWeight($event)"></div>
         </div>
         <div :class="[!menuHide ?  'code-detail-wrapper' : 'code-detail-reset-wrapper']" :style="{width: contentWidth}">
-            <v-code :changeStyle="changeWidth" :data="contractData" :show="showCode"></v-code>
+            <v-code :changeStyle="changeWidth" :data="contractData" :show="showCode" :urlQuery="urlQuery"></v-code>
         </div>
     </div>
 </template>

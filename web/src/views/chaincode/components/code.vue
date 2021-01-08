@@ -1365,8 +1365,8 @@ export default {
 .error-item >>> .el-collapse-item__header {
     color: inherit;
     background-color: inherit;
-    height: 16px;
-    line-height: 16px;
+    height: inherit;
+    line-height: inherit;
     border-bottom: 1px solid #2b374d;
     font-size: 12px;
     font-weight: none;
