@@ -320,7 +320,7 @@ export default {
         emptyFolder: "空文件夹",
         folderIsExists:"目录已存在",
         previewAndDescription: "预览和说明",
-        developing: "应用开发中，敬请期待。。。",
+        developing: "更多精彩，敬请期待。。。",
         appIntroduction: "合约仓库",
         warehouseDes: "合约仓库中提供常用的工具合约和推荐应用合约模板。用户可将合约导入到自己目录进行引入。",
         fileSize: "上传文件大小不能超过 100kb!",

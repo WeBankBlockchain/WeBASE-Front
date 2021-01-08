@@ -20,7 +20,7 @@
             <span class="contract-code-title" v-show="codeShow" :class="{titleActive:changeWidth }">
                 <span ref="setReadOnly">{{contractName + '.sol'}}</span>
             </span>
-            <span class="contract-code-handle" v-show="codeShow">
+            <span class="contract-code-handle" v-show="codeShow&&urlQuery.storeType =='1'">
                 <el-button type="primary" size="mini" @click="exportToIde">导出到IDE</el-button>
             </span>
         </div>
