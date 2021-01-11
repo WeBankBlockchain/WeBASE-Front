@@ -775,7 +775,7 @@ public class PrecompiledController {
                 return precompiledService.queryRemainGas(gasChargeManageHandle.getGroupId(),gasChargeManageHandle.getUserAccount());
             default:
                 log.error("end GasChargeManage. invalid gas charge manage handle type");
-                throw new FrontException(ConstantCode.INVALID_CONTRACT_HANDLE_TYPE);
+                throw new FrontException(ConstantCode.INVALID_CHARGE_HANDLE_TYPE);
         }
     }
 
