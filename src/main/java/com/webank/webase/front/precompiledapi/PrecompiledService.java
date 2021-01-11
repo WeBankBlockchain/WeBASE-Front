@@ -16,12 +16,23 @@ package com.webank.webase.front.precompiledapi;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
+
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.enums.PrecompiledTypes;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precompiledapi.entity.GasChargeManageHandle;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
+import com.webank.webase.front.precompiledapi.entity.PrecompiledResult;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +43,9 @@ import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
 import org.fisco.bcos.web3j.precompile.csm.ContractStatusService;
+import org.fisco.bcos.web3j.precompile.gaschargemgr.GasChargeManagePrecompiled;
+import org.fisco.bcos.web3j.precompile.gaschargemgr.GasChargeManageService;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -206,5 +220,17 @@ public class PrecompiledService {
         ContractStatusService contractStatusService = new ContractStatusService(
                 web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
         return contractStatusService.listManager(contractAddress);
+    }
+
+    public List<String> listChargers(int groupId) throws Exception{
+        GasChargeManageService gasChargeManageService = new GasChargeManageService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
+        return gasChargeManageService.listChargers();
+    }
+
+    public BigInteger queryRemainGas(int groupId, String userAccount) throws Exception{
+        GasChargeManageService gasChargeManageService = new GasChargeManageService(web3ApiService.getWeb3j(groupId),
+                keyStoreService.getCredentialsForQuery());
+        return gasChargeManageService.queryRemainGas(userAccount);
     }
 }
