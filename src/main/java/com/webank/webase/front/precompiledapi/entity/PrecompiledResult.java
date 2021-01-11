@@ -16,7 +16,7 @@ package com.webank.webase.front.precompiledapi.entity;
 import lombok.Data;
 
 @Data
-public class ContractManageResult {
+public class PrecompiledResult {
     private Integer code;
     private String msg;
 }

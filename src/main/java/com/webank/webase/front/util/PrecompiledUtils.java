@@ -101,6 +101,15 @@ public class PrecompiledUtils {
     public static final String CONTRACT_MANAGE_GRANTMANAGER = "grantManager";
     public static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
 
+
+    // contract manage type
+    public static final String GAS_CHARGE_MANAGE_CHARGE = "charge";
+    public static final String GAS_CHARGE_MANAGE_DEDUCT = "deduct";
+    public static final String CONTRACT_MANAGE_QUERY_REMAIN_GAS = "queryRemainGas";
+    public static final String CONTRACT_MANAGE_GRANT_CHARGE = "grantCharger";
+    public static final String CONTRACT_MANAGE_REVOKE_CHARGER = "revokeCharger";
+    public static final String CONTRACT_MANAGE_LIST_CHARGERS = "listChargers";
+
     public static final int InvalidReturnNumber = -100;
     public static final int QueryLogCount = 20;
     public static final int LogMaxCount = 10000;

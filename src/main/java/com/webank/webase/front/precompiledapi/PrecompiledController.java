@@ -17,11 +17,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.precompiledapi.entity.ConsensusHandle;
-import com.webank.webase.front.precompiledapi.entity.ContractManageResult;
-import com.webank.webase.front.precompiledapi.entity.ContractStatusHandle;
-import com.webank.webase.front.precompiledapi.entity.CrudHandle;
-import com.webank.webase.front.precompiledapi.entity.NodeInfo;
+import com.webank.webase.front.precompiledapi.entity.*;
 import com.webank.webase.front.util.CRUDParseUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.PrecompiledUtils;
@@ -63,6 +59,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class PrecompiledController {
     @Autowired
     private PrecompiledService precompiledService;
+
+    @Autowired
+    private PrecompiledWithSignService precompiledWithSignService;
 
     /**
      * Cns manage
@@ -628,19 +627,19 @@ public class PrecompiledController {
             String res = precompiledService.contractFreeze(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getSignUserId(),
                     contractStatusHandle.getContractAddress());
-            ContractManageResult contractManageResult =
-                    JsonUtils.toJavaObject(res, ContractManageResult.class);
-            if (contractManageResult == null) {
+            PrecompiledResult precompiledResult =
+                    JsonUtils.toJavaObject(res, PrecompiledResult.class);
+            if (precompiledResult == null) {
                 return new FrontException(ConstantCode.FAIL_PARSE_JSON);
             }
-            if (contractManageResult.getCode() == 0) {
+            if (precompiledResult.getCode() == 0) {
                 log.info("end contractFreeze useTime:{} contractManageResult:{}",
                         Duration.between(startTime, Instant.now()).toMillis(),
-                        contractManageResult);
+                        precompiledResult);
                 return new BaseResponse(ConstantCode.RET_SUCCEED);
             } else {
                 throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
-                        contractManageResult.getMsg());
+                        precompiledResult.getMsg());
             }
         } catch (Exception e) {
             log.error("contractFreeze exception:", e);
@@ -659,16 +658,16 @@ public class PrecompiledController {
             String res = precompiledService.contractUnfreeze(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getSignUserId(),
                     contractStatusHandle.getContractAddress());
-            ContractManageResult contractManageResult =
-                    JsonUtils.toJavaObject(res, ContractManageResult.class);
-            if (contractManageResult.getCode() == 0) {
+            PrecompiledResult precompiledResult =
+                    JsonUtils.toJavaObject(res, PrecompiledResult.class);
+            if (precompiledResult.getCode() == 0) {
                 log.info("end contractUnfreeze useTime:{} contractManageResult:{}",
                         Duration.between(startTime, Instant.now()).toMillis(),
-                        contractManageResult);
+                        precompiledResult);
                 return new BaseResponse(ConstantCode.RET_SUCCEED);
             } else {
                 throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
-                        contractManageResult.getMsg());
+                        precompiledResult.getMsg());
             }
         } catch (Exception e) {
             log.error("contractUnfreeze exception:", e);
@@ -691,16 +690,16 @@ public class PrecompiledController {
             String res = precompiledService.contractGrantManager(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getSignUserId(), contractStatusHandle.getContractAddress(),
                     contractStatusHandle.getGrantAddress());
-            ContractManageResult contractManageResult =
-                    JsonUtils.toJavaObject(res, ContractManageResult.class);
-            if (contractManageResult.getCode() == 0) {
+            PrecompiledResult precompiledResult =
+                    JsonUtils.toJavaObject(res, PrecompiledResult.class);
+            if (precompiledResult.getCode() == 0) {
                 log.info("end contractGrantManager useTime:{} contractManageResult:{}",
                         Duration.between(startTime, Instant.now()).toMillis(),
-                        contractManageResult);
+                        precompiledResult);
                 return new BaseResponse(ConstantCode.RET_SUCCEED);
             } else {
                 throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
-                        contractManageResult.getMsg());
+                        precompiledResult.getMsg());
             }
         } catch (Exception e) {
             log.error("contractGrantManager exception:", e);
@@ -715,10 +714,10 @@ public class PrecompiledController {
             String res = precompiledService.contractStatus(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getContractAddress());
             if (res.contains("code")) {
-                ContractManageResult contractManageResult =
-                        JsonUtils.toJavaObject(res, ContractManageResult.class);
+                PrecompiledResult precompiledResult =
+                        JsonUtils.toJavaObject(res, PrecompiledResult.class);
                 throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
-                        contractManageResult.getMsg());
+                        precompiledResult.getMsg());
             } else {
                 BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
                 response.setData(res);
@@ -739,10 +738,10 @@ public class PrecompiledController {
             String res = precompiledService.contractManagerList(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getContractAddress());
             if (res.contains("code")) {
-                ContractManageResult contractManageResult =
-                        JsonUtils.toJavaObject(res, ContractManageResult.class);
+                PrecompiledResult precompiledResult =
+                        JsonUtils.toJavaObject(res, PrecompiledResult.class);
                 throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
-                        contractManageResult.getMsg());
+                        precompiledResult.getMsg());
             } else {
                 BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
                 response.setData(res);
@@ -755,5 +754,31 @@ public class PrecompiledController {
             throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
+
+    @ApiOperation(value = "GasChargeManage", notes = "GAS charge manage")
+    @PostMapping("GasChargeManage")
+    public Object GasChargeManage(
+            @Valid @RequestBody GasChargeManageHandle gasChargeManageHandle) throws Exception {
+        log.debug("start GasChargeManage. gasChargeManageHandle:{}", gasChargeManageHandle);
+        switch (gasChargeManageHandle.getHandleType()) {
+            case PrecompiledUtils.GAS_CHARGE_MANAGE_CHARGE:
+                return precompiledWithSignService.charge(gasChargeManageHandle);
+            case PrecompiledUtils.GAS_CHARGE_MANAGE_DEDUCT:
+                return precompiledWithSignService.deduct(gasChargeManageHandle);
+            case PrecompiledUtils.CONTRACT_MANAGE_GRANT_CHARGE:
+                return precompiledWithSignService.grantCharger(gasChargeManageHandle);
+            case PrecompiledUtils.CONTRACT_MANAGE_REVOKE_CHARGER:
+                return precompiledWithSignService.revokeCharger(gasChargeManageHandle);
+            case PrecompiledUtils.CONTRACT_MANAGE_LIST_CHARGERS:
+                return precompiledService.listChargers(gasChargeManageHandle.getGroupId());
+            case PrecompiledUtils.CONTRACT_MANAGE_QUERY_REMAIN_GAS:
+                return precompiledService.queryRemainGas(gasChargeManageHandle.getGroupId(),gasChargeManageHandle.getUserAccount());
+            default:
+                log.error("end GasChargeManage. invalid gas charge manage handle type");
+                throw new FrontException(ConstantCode.INVALID_CONTRACT_HANDLE_TYPE);
+        }
+    }
+
+
 
 }

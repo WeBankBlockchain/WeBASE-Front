@@ -37,13 +37,20 @@ import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.precompiledapi.entity.GasChargeManageHandle;
+import com.webank.webase.front.precompiledapi.entity.PrecompiledResult;
 import com.webank.webase.front.transaction.TransService;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +58,7 @@ import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
+import org.fisco.bcos.web3j.precompile.gaschargemgr.GasChargeManagePrecompiled;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
@@ -404,6 +412,8 @@ public class PrecompiledWithSignService {
 			web3ApiService.getWeb3j(groupId));
 	}
 
+
+
 	public String grantOperator(int groupId, String signUserId, String toAddress) {
 		// trans
 		List<Object> funcParams = new ArrayList<>();
@@ -446,12 +456,11 @@ public class PrecompiledWithSignService {
 				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_UNFREEZEACCOUNT, funcParams);
 		return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
 	}
-
-	/**
-	 * handle receipt of precompiled
-	 * @throws TransactionException
-	 * @throws IOException
-	 */
+			   /**
+            * handle receipt of precompiled
+            * @throws TransactionException
+            * @throws IOException
+            */
 	private String handleTransactionReceipt(TransactionReceipt receipt, Web3j web3j) throws FrontException {
 		log.debug("handle tx receipt of precompiled");
 		String status = receipt.getStatus();
@@ -486,5 +495,145 @@ public class PrecompiledWithSignService {
 			throw new FrontException(ConstantCode.TX_RECEIPT_OUTPUT_NULL);
 		}
 	}
-	
+
+	public Object deduct(GasChargeManageHandle gasChargeManageHandle) {
+		Instant startTime = Instant.now();
+		log.info("start gas deduct startTime:{}", startTime.toEpochMilli());
+		try {
+			String res = deduct(gasChargeManageHandle.getGroupId(),
+					gasChargeManageHandle.getSignUserId(),
+					gasChargeManageHandle.getUserAccount(),
+					gasChargeManageHandle.getGasValue());
+			if (res.contains("code")) {
+				PrecompiledResult precompiledResult =
+						JsonUtils.toJavaObject(res, PrecompiledResult.class);
+				throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+						precompiledResult.getMsg());
+			} else {
+				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+				response.setData(res);
+				log.info("end gas deduct useTime:{} response:{}",
+						Duration.between(startTime, Instant.now()).toMillis(), response);
+				return response;
+			}
+		} catch (Exception e) {
+			log.error("gas deduct exception:", e);
+			throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+		}
+	}
+
+	private String deduct(int groupId, String signUserId, String userAccount, BigInteger gasValue) {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(userAccount);
+		funcParams.add(gasValue);
+		TransactionReceipt receipt =
+				(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+						signUserId, PrecompiledTypes.CHAIN_CHARGE, GasChargeManagePrecompiled.FUNC_DEDUCT, funcParams);
+		return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+	}
+
+	public String revokeCharger(int groupId, String signUserId, String chargerAccount) {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(chargerAccount);
+		TransactionReceipt receipt =
+				(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+						signUserId, PrecompiledTypes.CHAIN_CHARGE, GasChargeManagePrecompiled.FUNC_REVOKECHARGER, funcParams);
+		return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+	}
+
+	public Object revokeCharger(GasChargeManageHandle gasChargeManageHandle) {
+		Instant startTime = Instant.now();
+		log.info("start revokeCharger startTime:{}", startTime.toEpochMilli());
+		try {
+			String res = revokeCharger(gasChargeManageHandle.getGroupId(),
+					gasChargeManageHandle.getSignUserId(),
+					gasChargeManageHandle.getUserAccount());
+			if (res.contains("code")) {
+				PrecompiledResult precompiledResult =
+						JsonUtils.toJavaObject(res, PrecompiledResult.class);
+				throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+						precompiledResult.getMsg());
+			} else {
+				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+				response.setData(res);
+				log.info("end revokeCharger useTime:{} response:{}",
+						Duration.between(startTime, Instant.now()).toMillis(), response);
+				return response;
+			}
+		} catch (Exception e) {
+			log.error("revokeCharger exception:", e);
+			throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+		}
+	}
+
+	private String charge(int groupId, String signUserId, String userAccount, BigInteger gasValue) {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(userAccount);
+		funcParams.add(gasValue);
+		TransactionReceipt receipt =
+				(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+						signUserId, PrecompiledTypes.CHAIN_CHARGE, GasChargeManagePrecompiled.FUNC_CHARGE, funcParams);
+		return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+	}
+
+	public Object charge(GasChargeManageHandle gasChargeManageHandle) {
+		Instant startTime = Instant.now();
+		log.info("start gas charge startTime:{}", startTime.toEpochMilli());
+		try {
+			String res = charge(gasChargeManageHandle.getGroupId(),
+					gasChargeManageHandle.getSignUserId(),
+					gasChargeManageHandle.getUserAccount(),
+					gasChargeManageHandle.getGasValue());
+			if (res.contains("code")) {
+				PrecompiledResult precompiledResult =
+						JsonUtils.toJavaObject(res, PrecompiledResult.class);
+				throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+						precompiledResult.getMsg());
+			} else {
+				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+				response.setData(res);
+				log.info("end gas charge useTime:{} response:{}",
+						Duration.between(startTime, Instant.now()).toMillis(), response);
+				return response;
+			}
+		} catch (Exception e) {
+			log.error("gas charge exception:", e);
+			throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+		}
+	}
+
+	private String grantCharger(int groupId, String signUserId, String chargerAccount) {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(chargerAccount);
+		TransactionReceipt receipt =
+				(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+						signUserId, PrecompiledTypes.CHAIN_CHARGE, GasChargeManagePrecompiled.FUNC_GRANTCHARGER, funcParams);
+		return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+	}
+
+	public Object grantCharger(GasChargeManageHandle gasChargeManageHandle) {
+		Instant startTime = Instant.now();
+		log.info("start grantCharger startTime:{}", startTime.toEpochMilli());
+		try {
+			String res = grantCharger(gasChargeManageHandle.getGroupId(),
+					gasChargeManageHandle.getSignUserId(),
+					gasChargeManageHandle.getUserAccount());
+			if (res.contains("code")) {
+				PrecompiledResult precompiledResult =
+						JsonUtils.toJavaObject(res, PrecompiledResult.class);
+				throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+						precompiledResult.getMsg());
+			} else {
+				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+				response.setData(res);
+				log.info("end grantCharger useTime:{} response:{}",
+						Duration.between(startTime, Instant.now()).toMillis(), response);
+				return response;
+			}
+		} catch (Exception e) {
+			log.error("grantCharger exception:", e);
+			throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+		}
+	}
+
 }
