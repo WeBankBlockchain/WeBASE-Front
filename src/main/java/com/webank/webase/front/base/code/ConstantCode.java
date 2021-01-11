@@ -225,4 +225,9 @@ public class ConstantCode {
     public static final RetCode CRUD_TABLE_KEY_LENGTH_ERROR = RetCode.mark(201522, "table key length error");
     public static final RetCode CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR = RetCode.mark(201523, "crud's param parse json error");
     public static final RetCode PRECOMPILED_COMMON_TRANSFER_JSON_FAIL = RetCode.mark(201524, "precompiled common transfer to json fail");
+    // charge
+    public static final RetCode FAIL_CHARGE_HANDLE = RetCode.mark(201530, "gas charge handle fail");
+    public static final RetCode INVALID_CHARGE_HANDLE_TYPE = RetCode.mark(201531, "invalid gas charge handle type");
+
+
 }

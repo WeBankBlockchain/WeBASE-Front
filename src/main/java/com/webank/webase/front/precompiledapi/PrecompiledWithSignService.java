@@ -507,7 +507,7 @@ public class PrecompiledWithSignService {
 			if (res.contains("code")) {
 				PrecompiledResult precompiledResult =
 						JsonUtils.toJavaObject(res, PrecompiledResult.class);
-				throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+				throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(),
 						precompiledResult.getMsg());
 			} else {
 				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -518,7 +518,7 @@ public class PrecompiledWithSignService {
 			}
 		} catch (Exception e) {
 			log.error("gas deduct exception:", e);
-			throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
 		}
 	}
 
@@ -551,7 +551,7 @@ public class PrecompiledWithSignService {
 			if (res.contains("code")) {
 				PrecompiledResult precompiledResult =
 						JsonUtils.toJavaObject(res, PrecompiledResult.class);
-				throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+				throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(),
 						precompiledResult.getMsg());
 			} else {
 				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -562,7 +562,7 @@ public class PrecompiledWithSignService {
 			}
 		} catch (Exception e) {
 			log.error("revokeCharger exception:", e);
-			throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
 		}
 	}
 
@@ -587,7 +587,7 @@ public class PrecompiledWithSignService {
 			if (res.contains("code")) {
 				PrecompiledResult precompiledResult =
 						JsonUtils.toJavaObject(res, PrecompiledResult.class);
-				throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+				throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(),
 						precompiledResult.getMsg());
 			} else {
 				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -598,7 +598,7 @@ public class PrecompiledWithSignService {
 			}
 		} catch (Exception e) {
 			log.error("gas charge exception:", e);
-			throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
 		}
 	}
 
@@ -621,7 +621,7 @@ public class PrecompiledWithSignService {
 			if (res.contains("code")) {
 				PrecompiledResult precompiledResult =
 						JsonUtils.toJavaObject(res, PrecompiledResult.class);
-				throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
+				throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(),
 						precompiledResult.getMsg());
 			} else {
 				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
@@ -632,7 +632,7 @@ public class PrecompiledWithSignService {
 			}
 		} catch (Exception e) {
 			log.error("grantCharger exception:", e);
-			throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
 		}
 	}
 
