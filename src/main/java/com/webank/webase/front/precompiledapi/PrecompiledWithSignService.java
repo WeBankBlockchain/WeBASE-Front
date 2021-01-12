@@ -501,6 +501,18 @@ public class PrecompiledWithSignService {
 	public Object deduct(GasChargeManageHandle gasChargeManageHandle) {
 		Instant startTime = Instant.now();
 		log.info("start gas deduct startTime:{}", startTime.toEpochMilli());
+		if(gasChargeManageHandle.getSignUserId().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,signUserId cannot be empty");
+		}
+		if(gasChargeManageHandle.getUserAccount().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
+		}
+		if(gasChargeManageHandle.getGasValue().compareTo(BigInteger.ZERO)==1)
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,gasValue needs to be greater than zero");
+		}
 		try {
 			TransactionResponse res = deduct(gasChargeManageHandle.getGroupId(),
 					gasChargeManageHandle.getSignUserId(),
@@ -544,6 +556,14 @@ public class PrecompiledWithSignService {
 	public Object revokeCharger(GasChargeManageHandle gasChargeManageHandle) {
 		Instant startTime = Instant.now();
 		log.info("start revokeCharger startTime:{}", startTime.toEpochMilli());
+		if(gasChargeManageHandle.getSignUserId().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,signUserId cannot be empty");
+		}
+		if(gasChargeManageHandle.getUserAccount().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
+		}
 		try {
 			TransactionResponse res = revokeCharger(gasChargeManageHandle.getGroupId(),
 					gasChargeManageHandle.getSignUserId(),
@@ -577,6 +597,18 @@ public class PrecompiledWithSignService {
 	public Object charge(GasChargeManageHandle gasChargeManageHandle) {
 		Instant startTime = Instant.now();
 		log.info("start gas charge startTime:{}", startTime.toEpochMilli());
+		if(gasChargeManageHandle.getSignUserId().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,signUserId cannot be empty");
+		}
+		if(gasChargeManageHandle.getUserAccount().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
+		}
+		if(gasChargeManageHandle.getGasValue().compareTo(BigInteger.ZERO)==1)
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,gasValue needs to be greater than zero");
+		}
 		try {
 			TransactionResponse res = charge(gasChargeManageHandle.getGroupId(),
 					gasChargeManageHandle.getSignUserId(),
@@ -610,6 +642,14 @@ public class PrecompiledWithSignService {
 	public Object grantCharger(GasChargeManageHandle gasChargeManageHandle) {
 		Instant startTime = Instant.now();
 		log.info("start grantCharger startTime:{}", startTime.toEpochMilli());
+		if(gasChargeManageHandle.getSignUserId().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,signUserId cannot be empty");
+		}
+		if(gasChargeManageHandle.getUserAccount().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
+		}
 		try {
 			TransactionResponse res = grantCharger(gasChargeManageHandle.getGroupId(),
 					gasChargeManageHandle.getSignUserId(),
