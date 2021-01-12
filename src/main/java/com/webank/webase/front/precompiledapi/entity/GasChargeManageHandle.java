@@ -27,7 +27,6 @@ import java.math.BigInteger;
 public class GasChargeManageHandle {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private Integer groupId;
-    @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String signUserId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_HANDLE_TYPE_EMPTY)
     private String handleType;

@@ -772,6 +772,10 @@ public class PrecompiledController {
             case PrecompiledUtils.CONTRACT_MANAGE_LIST_CHARGERS:
                 return precompiledService.listChargers(gasChargeManageHandle.getGroupId());
             case PrecompiledUtils.CONTRACT_MANAGE_QUERY_REMAIN_GAS:
+                if(gasChargeManageHandle.getUserAccount().isEmpty())
+                {
+                    throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
+                }
                 return precompiledService.queryRemainGas(gasChargeManageHandle.getGroupId(),gasChargeManageHandle.getUserAccount());
             default:
                 log.error("end GasChargeManage. invalid gas charge manage handle type");
