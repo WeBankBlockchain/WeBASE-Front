@@ -88,8 +88,16 @@ public class PrecompiledSysConfigService {
         systemConfigGas.setConfigValue(txGasLimit);
         systemConfigGas.setGroupId(groupId);
 
+        String enable_charge_mgr = web3ApiService.getWeb3j(groupId)
+                .getSystemConfigByKey(PrecompiledUtils.ENABLECHARGEMGR).sendForReturnString();
+        ResSystemConfig systemConfigCharge = new ResSystemConfig();
+        systemConfigCharge.setConfigKey(PrecompiledUtils.ENABLECHARGEMGR);
+        systemConfigCharge.setConfigValue(enable_charge_mgr);
+        systemConfigCharge.setGroupId(groupId);
+
         list.add(systemConfigCount);
         list.add(systemConfigGas);
+        list.add(systemConfigCharge);
         return list;
     }
 
