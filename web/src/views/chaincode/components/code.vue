@@ -900,7 +900,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-
+                        this.queryFindCnsInfo()
                     } else {
                         this.$message({
                             message: this.$chooseLang(res.data.code),
