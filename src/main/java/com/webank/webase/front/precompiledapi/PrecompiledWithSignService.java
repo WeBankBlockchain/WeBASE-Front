@@ -509,7 +509,7 @@ public class PrecompiledWithSignService {
 		{
 			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
 		}
-		if(gasChargeManageHandle.getGasValue().compareTo(BigInteger.ZERO)==1)
+		if(!(gasChargeManageHandle.getGasValue().compareTo(BigInteger.ZERO)==1))
 		{
 			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,gasValue needs to be greater than zero");
 		}
@@ -528,7 +528,12 @@ public class PrecompiledWithSignService {
 						Duration.between(startTime, Instant.now()).toMillis(), response);
 				return response;
 			}
-		} catch (Exception e) {
+		}
+		catch (FrontException e)
+		{
+			throw e;
+		}
+		catch (Exception e) {
 			log.error("gas deduct exception:", e);
 			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
 		}
@@ -578,7 +583,12 @@ public class PrecompiledWithSignService {
 						Duration.between(startTime, Instant.now()).toMillis(), response);
 				return response;
 			}
-		} catch (Exception e) {
+		}
+		catch (FrontException e)
+		{
+			throw e;
+		}
+		catch (Exception e) {
 			log.error("revokeCharger exception:", e);
 			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
 		}
@@ -605,7 +615,7 @@ public class PrecompiledWithSignService {
 		{
 			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
 		}
-		if(gasChargeManageHandle.getGasValue().compareTo(BigInteger.ZERO)==1)
+		if(!(gasChargeManageHandle.getGasValue().compareTo(BigInteger.ZERO)==1))
 		{
 			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,gasValue needs to be greater than zero");
 		}
@@ -624,7 +634,12 @@ public class PrecompiledWithSignService {
 						Duration.between(startTime, Instant.now()).toMillis(), response);
 				return response;
 			}
-		} catch (Exception e) {
+		}
+		catch (FrontException e)
+		{
+			throw e;
+		}
+		catch (Exception e) {
 			log.error("gas charge exception:", e);
 			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
 		}
@@ -664,7 +679,12 @@ public class PrecompiledWithSignService {
 						Duration.between(startTime, Instant.now()).toMillis(), response);
 				return response;
 			}
-		} catch (Exception e) {
+		}
+		catch (FrontException e)
+		{
+			throw e;
+		}
+		catch (Exception e) {
 			log.error("grantCharger exception:", e);
 			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
 		}
