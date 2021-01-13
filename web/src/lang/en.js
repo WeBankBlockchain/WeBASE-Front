@@ -105,13 +105,14 @@ export default {
         fromBlock: 'From',
         toBlock: 'To',
         topicList: 'Topic List',
-        fileType: "File Type",
+        fileType: "Import Type",
         fileName: "PrivateKey Name",
         eventName: 'Event Name',
         eventValue: 'Event',
         contractName: 'Contract Name',
         cnsVersion: 'CNS Version',
         contractAddress: 'Contract Address',
+        privateKey: 'PrivateKey',
     },
     errorLog: {
         tips: 'Please click the bug icon in the upper right corner',
@@ -166,7 +167,7 @@ export default {
         search: 'Search',
         exportSol: 'Export',
         cnsVersion: 'Please enter cns version',
-        cnsVersionPattern: "It can only be numbers and letters",
+        cnsVersionPattern: "It can only be numbers, letters and '.'",
         cnsName: 'Please enter CNS name',
     },
     placeholder: {
@@ -518,7 +519,9 @@ export default {
         password: "Password",
         placeholderPassword: "Please enter password",
         passwordError: "Password cannot be Chinese",
-        file: "File"
+        file: "File",
+        validatorPrivateKey: "Please enter privateKey key",
+        validatorPrivateKey1: "Please enter hexadecimal"
     },
     onlineTools: {
         onlineHashCalculator: 'Hash Calculator',
