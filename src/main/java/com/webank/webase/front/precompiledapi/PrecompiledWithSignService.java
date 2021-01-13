@@ -37,13 +37,20 @@ import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.precompiledapi.entity.GasChargeManageHandle;
+import com.webank.webase.front.precompiledapi.entity.PrecompiledResult;
 import com.webank.webase.front.transaction.TransService;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -51,11 +58,14 @@ import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
 import org.fisco.bcos.web3j.precompile.crud.Condition;
 import org.fisco.bcos.web3j.precompile.crud.Entry;
 import org.fisco.bcos.web3j.precompile.crud.Table;
+import org.fisco.bcos.web3j.precompile.gaschargemgr.GasChargeManagePrecompiled;
+import org.fisco.bcos.web3j.precompile.gaschargemgr.GasChargeManageService;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
+import org.fisco.bcos.web3j.tx.txdecode.TransactionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -404,6 +414,8 @@ public class PrecompiledWithSignService {
 			web3ApiService.getWeb3j(groupId));
 	}
 
+
+
 	public String grantOperator(int groupId, String signUserId, String toAddress) {
 		// trans
 		List<Object> funcParams = new ArrayList<>();
@@ -446,12 +458,11 @@ public class PrecompiledWithSignService {
 				signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_UNFREEZEACCOUNT, funcParams);
 		return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
 	}
-
-	/**
-	 * handle receipt of precompiled
-	 * @throws TransactionException
-	 * @throws IOException
-	 */
+			   /**
+            * handle receipt of precompiled
+            * @throws TransactionException
+            * @throws IOException
+            */
 	private String handleTransactionReceipt(TransactionReceipt receipt, Web3j web3j) throws FrontException {
 		log.debug("handle tx receipt of precompiled");
 		String status = receipt.getStatus();
@@ -486,5 +497,197 @@ public class PrecompiledWithSignService {
 			throw new FrontException(ConstantCode.TX_RECEIPT_OUTPUT_NULL);
 		}
 	}
-	
+
+	public Object deduct(GasChargeManageHandle gasChargeManageHandle) {
+		Instant startTime = Instant.now();
+		log.info("start gas deduct startTime:{}", startTime.toEpochMilli());
+		if(gasChargeManageHandle.getSignUserId().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,signUserId cannot be empty");
+		}
+		if(gasChargeManageHandle.getUserAccount().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
+		}
+		if(!(gasChargeManageHandle.getGasValue().compareTo(BigInteger.ZERO)==1))
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,gasValue needs to be greater than zero");
+		}
+		try {
+			TransactionResponse res = deduct(gasChargeManageHandle.getGroupId(),
+					gasChargeManageHandle.getSignUserId(),
+					gasChargeManageHandle.getUserAccount(),
+					gasChargeManageHandle.getGasValue());
+			if (res.getReturnCode() != PrecompiledCommon.Success) {
+				throw new FrontException(res.getReturnCode(),
+						res.getReturnMessage());
+			} else {
+				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+				response.setData(res.getValues());
+				log.info("end gas deduct useTime:{} response:{}",
+						Duration.between(startTime, Instant.now()).toMillis(), response);
+				return response;
+			}
+		}
+		catch (FrontException e)
+		{
+			throw e;
+		}
+		catch (Exception e) {
+			log.error("gas deduct exception:", e);
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
+		}
+	}
+
+	private TransactionResponse deduct(int groupId, String signUserId, String userAccount, BigInteger gasValue) throws Exception {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(userAccount);
+		funcParams.add(gasValue);
+		TransactionReceipt receipt =
+				(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+						signUserId, PrecompiledTypes.CHAIN_CHARGE, GasChargeManagePrecompiled.FUNC_DEDUCT, funcParams);
+		return GasChargeManageService.decodeReceipt(receipt, GasChargeManagePrecompiled.ABI, GasChargeManagePrecompiled.FUNC_DEDUCT);
+	}
+
+	public TransactionResponse revokeCharger(int groupId, String signUserId, String chargerAccount) throws Exception {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(chargerAccount);
+		TransactionReceipt receipt =
+				(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+						signUserId, PrecompiledTypes.CHAIN_CHARGE, GasChargeManagePrecompiled.FUNC_REVOKECHARGER, funcParams);
+		return GasChargeManageService.decodeReceipt(receipt, GasChargeManagePrecompiled.ABI,GasChargeManagePrecompiled.FUNC_REVOKECHARGER);
+	}
+
+	public Object revokeCharger(GasChargeManageHandle gasChargeManageHandle) {
+		Instant startTime = Instant.now();
+		log.info("start revokeCharger startTime:{}", startTime.toEpochMilli());
+		if(gasChargeManageHandle.getSignUserId().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,signUserId cannot be empty");
+		}
+		if(gasChargeManageHandle.getUserAccount().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
+		}
+		try {
+			TransactionResponse res = revokeCharger(gasChargeManageHandle.getGroupId(),
+					gasChargeManageHandle.getSignUserId(),
+					gasChargeManageHandle.getUserAccount());
+			if (res.getReturnCode() != PrecompiledCommon.Success) {
+				throw new FrontException(res.getReturnCode(),
+						res.getReturnMessage());
+			} else {
+				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+				response.setData(res.getValues());
+				log.info("end gas deduct useTime:{} response:{}",
+						Duration.between(startTime, Instant.now()).toMillis(), response);
+				return response;
+			}
+		}
+		catch (FrontException e)
+		{
+			throw e;
+		}
+		catch (Exception e) {
+			log.error("revokeCharger exception:", e);
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
+		}
+	}
+
+	private TransactionResponse charge(int groupId, String signUserId, String userAccount, BigInteger gasValue) throws Exception {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(userAccount);
+		funcParams.add(gasValue);
+		TransactionReceipt receipt =
+				(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+						signUserId, PrecompiledTypes.CHAIN_CHARGE, GasChargeManagePrecompiled.FUNC_CHARGE, funcParams);
+		return GasChargeManageService.decodeReceipt(receipt, GasChargeManagePrecompiled.ABI, GasChargeManagePrecompiled.FUNC_CHARGE);
+	}
+
+	public Object charge(GasChargeManageHandle gasChargeManageHandle) {
+		Instant startTime = Instant.now();
+		log.info("start gas charge startTime:{}", startTime.toEpochMilli());
+		if(gasChargeManageHandle.getSignUserId().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,signUserId cannot be empty");
+		}
+		if(gasChargeManageHandle.getUserAccount().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
+		}
+		if(!(gasChargeManageHandle.getGasValue().compareTo(BigInteger.ZERO)==1))
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,gasValue needs to be greater than zero");
+		}
+		try {
+			TransactionResponse res = charge(gasChargeManageHandle.getGroupId(),
+					gasChargeManageHandle.getSignUserId(),
+					gasChargeManageHandle.getUserAccount(),
+					gasChargeManageHandle.getGasValue());
+			if (res.getReturnCode() != PrecompiledCommon.Success) {
+				throw new FrontException(res.getReturnCode(),
+						res.getReturnMessage());
+			} else {
+				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+				response.setData(res.getValues());
+				log.info("end gas deduct useTime:{} response:{}",
+						Duration.between(startTime, Instant.now()).toMillis(), response);
+				return response;
+			}
+		}
+		catch (FrontException e)
+		{
+			throw e;
+		}
+		catch (Exception e) {
+			log.error("gas charge exception:", e);
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
+		}
+	}
+
+	private TransactionResponse grantCharger(int groupId, String signUserId, String chargerAccount) throws Exception {
+		List<Object> funcParams = new ArrayList<>();
+		funcParams.add(chargerAccount);
+		TransactionReceipt receipt =
+				(TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+						signUserId, PrecompiledTypes.CHAIN_CHARGE, GasChargeManagePrecompiled.FUNC_GRANTCHARGER, funcParams);
+		return GasChargeManageService.decodeReceipt(receipt, GasChargeManagePrecompiled.ABI,GasChargeManagePrecompiled.FUNC_GRANTCHARGER);
+	}
+
+	public Object grantCharger(GasChargeManageHandle gasChargeManageHandle) {
+		Instant startTime = Instant.now();
+		log.info("start grantCharger startTime:{}", startTime.toEpochMilli());
+		if(gasChargeManageHandle.getSignUserId().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,signUserId cannot be empty");
+		}
+		if(gasChargeManageHandle.getUserAccount().isEmpty())
+		{
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), "Param error,userAccount cannot be empty");
+		}
+		try {
+			TransactionResponse res = grantCharger(gasChargeManageHandle.getGroupId(),
+					gasChargeManageHandle.getSignUserId(),
+					gasChargeManageHandle.getUserAccount());
+			if (res.getReturnCode() != PrecompiledCommon.Success) {
+				throw new FrontException(res.getReturnCode(),
+						res.getReturnMessage());
+			} else {
+				BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+				response.setData(res.getValues());
+				log.info("end gas deduct useTime:{} response:{}",
+						Duration.between(startTime, Instant.now()).toMillis(), response);
+				return response;
+			}
+		}
+		catch (FrontException e)
+		{
+			throw e;
+		}
+		catch (Exception e) {
+			log.error("grantCharger exception:", e);
+			throw new FrontException(ConstantCode.FAIL_CHARGE_HANDLE.getCode(), e.getMessage());
+		}
+	}
+
 }

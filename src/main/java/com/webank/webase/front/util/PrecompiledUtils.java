@@ -83,6 +83,7 @@ public class PrecompiledUtils {
     // SystemConfig key
     public static final String TxCountLimit = "tx_count_limit";
     public static final String TxGasLimit = "tx_gas_limit";
+    public static final String ENABLECHARGEMGR = "enable_charge_mgr";
     // node consensus type
     public static final String NODE_TYPE_SEALER = "sealer";
     public static final String NODE_TYPE_OBSERVER = "observer";
@@ -100,6 +101,15 @@ public class PrecompiledUtils {
     public static final String CONTRACT_MANAGE_GETSTATUS = "getStatus";
     public static final String CONTRACT_MANAGE_GRANTMANAGER = "grantManager";
     public static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
+
+
+    // contract manage type
+    public static final String GAS_CHARGE_MANAGE_CHARGE = "charge";
+    public static final String GAS_CHARGE_MANAGE_DEDUCT = "deduct";
+    public static final String CONTRACT_MANAGE_QUERY_REMAIN_GAS = "queryRemainGas";
+    public static final String CONTRACT_MANAGE_GRANT_CHARGE = "grantCharger";
+    public static final String CONTRACT_MANAGE_REVOKE_CHARGER = "revokeCharger";
+    public static final String CONTRACT_MANAGE_LIST_CHARGERS = "listChargers";
 
     public static final int InvalidReturnNumber = -100;
     public static final int QueryLogCount = 20;

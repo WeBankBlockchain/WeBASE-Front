@@ -19,6 +19,7 @@ package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled;
+import org.fisco.bcos.web3j.precompile.gaschargemgr.GasChargeManagePrecompiled;
 import org.fisco.bcos.web3j.precompile.permission.ChainGovernance;
 import org.fisco.bcos.web3j.precompile.permission.Permission;
 
@@ -77,6 +78,8 @@ public class PrecompiledCommonInfo {
 	 */
 	private static final String ChainGovernAddress = "0x0000000000000000000000000000000000001008";
 
+	private static final String ChainCharge = "0x0000000000000000000000000000000000001009";
+
 	public static String getAddress(PrecompiledTypes types) {
 		switch (types) {
 			case SYSTEM_CONFIG:
@@ -95,6 +98,8 @@ public class PrecompiledCommonInfo {
 			    return CSMAddress;
 			case CHAIN_GOVERN:
 				return ChainGovernAddress;
+			case CHAIN_CHARGE:
+				return ChainCharge;
 			default:
 				return "";
 		}
@@ -118,6 +123,8 @@ public class PrecompiledCommonInfo {
 			    return ContractLifeCyclePrecompiled.ABI;
 			case CHAIN_GOVERN:
 				return ChainGovernance.ABI;
+			case CHAIN_CHARGE:
+				return GasChargeManagePrecompiled.ABI;
 			default:
 				return "";
 		}

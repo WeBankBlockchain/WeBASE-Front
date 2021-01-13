@@ -53,7 +53,12 @@ public enum PrecompiledTypes {
     /**
      * Chain governance
      */
-    CHAIN_GOVERN(1008);
+    CHAIN_GOVERN(1008),
+
+    /**
+     * Chain charge
+     */
+    CHAIN_CHARGE(1009);
 
     private int value;
 
