@@ -207,6 +207,7 @@ export default {
         },
         submit: function () {
             if (this.isCNS) {
+                if(!this.cnsVersionFrom.cnsName) return;
                 this.$refs['cnsVersionFrom'].validate((valid) => {
                     if (valid) {
                         this.queryDeploy()

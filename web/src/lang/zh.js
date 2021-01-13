@@ -105,7 +105,7 @@ export default {
         fromBlock: '起始区块',
         toBlock: '末区块',
         topicList: '合约event名列表',
-        fileType: "文件类型",
+        fileType: "导入类型",
         fileName: "私钥用户名",
         checkEvent: 'Event 查看',
         checkEventResult: 'Event',
@@ -113,7 +113,9 @@ export default {
         eventValue: 'Event',
         contractName: '合约名',
         cnsVersion: 'cns版本号',
-        contractAddress: '合约地址'
+        contractAddress: '合约地址',
+        privateKey: '私钥',
+        validatorPrivateKey: "请输入私钥",
     },
     errorLog: {
         tips: '请点击右上角bug小图标',
@@ -517,6 +519,8 @@ export default {
         placeholderPassword: "请输入密码",
         passwordError: "密码不能是汉字",
         file: "文件",
+        validatorPrivateKey: "请输入私钥",
+        validatorPrivateKey1: "请输入十六进制"
     },
     onlineTools: {
         onlineHashCalculator: 'Hash计算器',

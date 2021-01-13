@@ -68,6 +68,7 @@ Vue.prototype._ = _
 import { message } from '@/util/message.js';
 Vue.prototype.$message = message;
 import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
 Vue.use(mavonEditor)
 /* eslint-disable no-new */
 new Vue({
