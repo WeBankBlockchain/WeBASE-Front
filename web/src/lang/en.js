@@ -169,6 +169,8 @@ export default {
         cnsVersion: 'Please enter cns version',
         cnsVersionPattern: "It can only be numbers, letters and '.'",
         cnsName: 'Please enter CNS name',
+        rivateKeyVerifyLength1_32: 'The length is between 1 and 32 character',
+        length1_10: 'The length is between 1 and 10 character',
     },
     placeholder: {
         globalSearch: 'Search by Block Number / Tx Hash',
@@ -282,6 +284,7 @@ export default {
         searchEmpty: 'The query result is empty',
         noData: 'No Data',
         importSuccessed: 'Import Successed',
+        exportSuccessed: 'Export Successed',
         updateSuccess: 'Update Successed',
         importFailed: 'Import Failed',
         addUserSuccessed: 'Create successed',
@@ -338,6 +341,7 @@ export default {
         registerCnsTips: "If the version number is empty, the current contract address has not been registered in CNS, you can enter the version number to register",
         registered: "Registered",
         updateRegister: "Do you want to update the registration",
+        fileSize_5000: "The upload file size cannot exceed 5000kb!",
     },
     contracts: {
         createFile: "Create File",
@@ -533,6 +537,7 @@ export default {
         file: 'File',
         drag: "Drag the file here, Or",
         upload: " click upload",
-        uploadNumLimit: "Only one file can be uploaded",
+        uploadNumLimit: "Only one file can be uploaded, and no more than 5000kb",
+        user: "User"
     }
 }
