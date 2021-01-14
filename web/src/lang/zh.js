@@ -168,7 +168,8 @@ export default {
         exportSol: '导出',
         cnsVersion: '请输入CNS版本',
         cnsVersionPattern: "数字字母和英文字母'.'组成",
-        cnsName: '请输入名称',
+        cnsName: '请输入CNS名称',
+        length1_10: '长度在 1 到 10 个字符',
     },
     placeholder: {
         globalSearch: '请输入 Block Number 或 Tx Hash',
@@ -280,6 +281,7 @@ export default {
         searchEmpty: '查询结果为空',
         noData: '暂无数据',
         importSuccessed: '导入成功',
+        exportSuccessed: '导出成功',
         updateSuccess: '成功',
         importFailed: '导入失败',
         addUserSuccessed: '新增成功',
@@ -337,6 +339,7 @@ export default {
         registerCnsTips: "如果版本号为空，则当前合约地址没有注册过CNS，可以输入版本号进行注册",
         registered: "已注册",
         updateRegister: "是否要更新注册",
+        fileSize_5000: "上传文件大小不能超过 5000kb!",
     },
     contracts: {
         createFile: "新建文件",
@@ -532,6 +535,7 @@ export default {
         file: '文件',
         drag:"将文件拖到此处，或",
         upload: "点击上传",
-        uploadNumLimit: "只能上传一个文件",
+        uploadNumLimit: "只能上传一个文件,且不超过5000kb",
+        user: "用户"
     }
 }

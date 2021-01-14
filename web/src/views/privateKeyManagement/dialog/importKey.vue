@@ -113,7 +113,7 @@ export default {
                         trigger: "blur"
                     },
                     {
-                        pattern: /^[0-9a-fA-F]$/,
+                        pattern: /([a-fA-F0-9]{1,100})$/,
                         message: this.$t('privateKey.validatorPrivateKey1'),
                         trigger: "blur"
                     }

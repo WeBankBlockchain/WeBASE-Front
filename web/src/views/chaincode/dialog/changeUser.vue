@@ -136,7 +136,13 @@ export default {
                         pattern: /^[A-Za-z0-9.]+$/,
                         message: this.$t('dialog.cnsVersionPattern'),
                         trigger: "blur"
-                    }
+                    },
+                    {
+                        min: 1,
+                        max: 10,
+                        message: this.$t('dialog.length1_10'),
+                        trigger: "blur"
+                    },
                 ],
                 cnsName: [
                     {
@@ -148,7 +154,13 @@ export default {
                         pattern: /^[A-Za-z0-9.]+$/,
                         message: this.$t('dialog.cnsVersionPattern'),
                         trigger: "blur"
-                    }
+                    },
+                    {
+                        min: 1,
+                        max: 32,
+                        message: this.$t('dialog.rivateKeyVerifyLength1_32'),
+                        trigger: "blur"
+                    },
                 ],
             }
             return obj

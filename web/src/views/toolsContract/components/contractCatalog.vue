@@ -265,7 +265,7 @@ export default {
                     if (status === 200) {
                         this.$message({
                             type: "success",
-                            message: this.$t('text.importSuccessed')
+                            message: this.$t('text.exportSuccessed')
                         })
                     } else {
                         this.$message({
