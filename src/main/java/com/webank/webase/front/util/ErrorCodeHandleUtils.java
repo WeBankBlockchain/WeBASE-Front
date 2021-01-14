@@ -17,17 +17,22 @@
 package com.webank.webase.front.util;
 
 import com.webank.webase.front.base.code.RetCode;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * chain error code handle util
  */
+@Slf4j
 public class ErrorCodeHandleUtils {
+
+    public static final String NODE_INACTIVE_MSG = "no active connection available";
+    public static final RetCode NODE_NOT_ACTIVE = RetCode.mark(-1, "no active connection available with node, please check node status");
 
     // json rpc error
     public static final RetCode RPC_INVALID_JSON_REQUEST = RetCode.mark(-32600, "invalid json request");
     public static final RetCode RPC_METHOD_NOT_FOUND = RetCode.mark(-32601, "method not found / not support");
     public static final RetCode RPC_INVALID_PARAMS = RetCode.mark(-32602, "invalid params when request");
-    public static final RetCode RPC_INTERNAL_ERROR     = RetCode.mark(-32603, "node internal error");
+    public static final RetCode RPC_INTERNAL_ERROR	 = RetCode.mark(-32603, "node internal error");
     public static final RetCode RPC_PROCEDURE_IS_METHOD = RetCode.mark(-32604, "request require id value for procedure");
     public static final RetCode RPC_JSON_PARSE_ERROR = RetCode.mark(-32700, "node receive json that parse error");
 
@@ -70,6 +75,10 @@ public class ErrorCodeHandleUtils {
      * @return
      */
     public static RetCode handleErrorMsg(String errorMsg) {
+        // node inactive exception
+        if (errorMsg.contains(NODE_INACTIVE_MSG)) {
+            return NODE_NOT_ACTIVE;
+        }
         // json rpc
         if (errorMsg.contains(RPC_INVALID_JSON_REQUEST.getCode().toString())) {
             return RPC_INVALID_JSON_REQUEST;
