@@ -938,9 +938,9 @@ public class Web3ApiService {
         try {
             return getWeb3j(groupId).getBlockHeaderByHash(blockHash, returnSealers).send();
         } catch (IOException e) {
-        log.error("getBlockHeaderByHash fail:[]", e);
-        throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
-    }
+            log.error("getBlockHeaderByHash fail:[]", e);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
     }
 
     public BcosBlockHeader getBlockHeaderByNumber(Integer groupId, BigInteger blockNumber,
