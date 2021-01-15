@@ -20,6 +20,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.util.ErrorCodeHandleUtils;
 import com.webank.webase.front.util.JsonUtils;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -52,14 +53,25 @@ public class ExceptionsHandler {
     @ExceptionHandler(value = FrontException.class)
     public ResponseEntity myExceptionHandler(FrontException frontException) {
         log.error("catch frontException: {}",  frontException.getMessage());
-        if (frontException.getRetCode().getCode()
-            .equals(ConstantCode.NODE_REQUEST_FAILED.getCode())) {
-            return this.nodeInactiveErrorHandle(frontException);
-        }
         Map<String, Object> map = new HashMap<>();
         map.put("data", frontException.getDetail());
         map.put("errorMessage", frontException.getMessage());
-        map.put("code", frontException.getRetCode().getCode());
+        // handle node is down
+        if (frontException.getRetCode() != null) {
+            if (frontException.getRetCode().getMessage().contains(ErrorCodeHandleUtils.NODE_INACTIVE_MSG)
+                || frontException.getRetCode().getCode().equals(ConstantCode.NODE_REQUEST_FAILED.getCode())) {
+                // if retcode is not null or is null but contain no active
+                map.put("code", ErrorCodeHandleUtils.NODE_NOT_ACTIVE.getCode());
+                return ResponseEntity.status(422).body(map);
+            } else {
+                map.put("code", frontException.getRetCode().getCode());
+                return ResponseEntity.status(422).body(map);
+            }
+        } else if (frontException.getMessage().contains(ErrorCodeHandleUtils.NODE_INACTIVE_MSG)) {
+            // if null
+            map.put("code", ErrorCodeHandleUtils.NODE_NOT_ACTIVE.getCode());
+            return ResponseEntity.status(422).body(map);
+        }
         return ResponseEntity.status(422).body(map);
     }
 
@@ -109,6 +121,21 @@ public class ExceptionsHandler {
         return ResponseEntity.status(400).body(map);
     }
 
+    /**
+     * all non-catch exception Handler.
+     * v1.4.3: add NODE_NOT_ACTIVE error code
+     * @param exc e
+     */
+    @ResponseBody
+    @ExceptionHandler(value = IOException.class)
+    public ResponseEntity exceptionHandler(IOException exc) {
+        log.info("catch  exception: ", exc);
+        RetCode errorDetail = chainErrorHandle(exc.getMessage());
+        Map<String, Object> map = new HashMap<>();
+        map.put("errorMessage", errorDetail.getMessage());
+        map.put("code", errorDetail.getCode());
+        return ResponseEntity.status(500).body(map);
+    }
 
     /**
      * all non-catch exception Handler.
