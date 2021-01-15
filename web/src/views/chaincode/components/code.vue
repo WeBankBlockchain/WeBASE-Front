@@ -870,7 +870,6 @@ export default {
                         this.data.contractSource = Base64.encode(this.content);
                         this.data.contractAddress = this.contractAddress;
                         this.data.contractVersion = this.version;
-                        this.queryFindCnsInfo()
                         if (cns.saveEnabled) {
                             this.queryRegisterCns(val, cns)
                         }

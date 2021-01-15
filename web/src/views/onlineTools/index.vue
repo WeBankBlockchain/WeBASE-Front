@@ -9,9 +9,8 @@
                             <el-tabs v-model="fileType" @tab-click="handleFileType">
                                 <el-tab-pane :label="$t('onlineTools.file')" name="file-first">
                                     <div>
-                                        <!-- <p class="font-color-fff text-title">{{$t('onlineTools.file')}}</p> -->
                                         <div>
-                                            <el-upload ref="upload" class="upload-file-hash" :file-list="fileList" :show-file-list="true" :limit="1" drag action :http-request="uploadCrt" :on-success="uploadSuccess">
+                                            <el-upload ref="upload" class="upload-file-hash" :file-list="fileList" :show-file-list="true" :limit="1" drag action :http-request="uploadCrt" :before-upload="onBeforeUpload" :on-success="uploadSuccess">
                                                 <i class="el-icon-upload"></i>
                                                 <div class="el-upload__text">{{$t('onlineTools.drag')}}<em>{{$t('onlineTools.upload')}}</em></div>
                                                 <div slot="tip" class="el-upload__tip">
@@ -25,7 +24,6 @@
                                 </el-tab-pane>
                                 <el-tab-pane :label="$t('onlineTools.text')" name="file-second">
                                     <div>
-                                        <!-- <p class="font-color-fff text-title">{{$t('onlineTools.text')}}</p> -->
                                         <el-input type="textarea" v-model="inputText" @input="textFocus" style="margin-bottom: 20px;"></el-input>
                                     </div>
                                 </el-tab-pane>
@@ -53,7 +51,7 @@
                         <p class="font-color-fff text-title">Hash</p>
                         <el-input type="textarea" v-model="inputSignHash" style="margin-bottom: 20px;"></el-input>
                         <div>
-                            <span>用户</span>
+                            <span>{{$t('onlineTools.user')}}</span>
                             <el-select v-model="privateKey" placeholder="">
                                 <el-option v-for="item in privateKeyList" :key="item.address" :label="item.userName" :value="item.address">
                                 </el-option>
@@ -249,28 +247,37 @@ export default {
             var chunks = Math.ceil(contractFile.size / chunkSize);
             // 指定当前块指针
             var currentChunk = 0;
+
             var hasher = CryptoJS.algo.SHA256.create();
+            console.log(1111, hasher);
+
             // FileReader分片式读取文件
             // 计算开始读取的位置
             var start = currentChunk * chunkSize;
             // 计算结束读取的位置
             var end = start + chunkSize >= contractFile.size ? contractFile.size : start + chunkSize;
             reader.readAsArrayBuffer(blobSlice.call(contractFile, start, end));
+            console.log(2222, hasher);
             reader.onload = function (evt) {
-                var fileStr = evt.target.result;
-                var tmpWordArray = self.arrayBufferToWordArray(fileStr);
-                hasher.update(tmpWordArray);
-                currentChunk += 1;
-                fileStr = null;
-                tmpWordArray = null;
-                // 判断文件是否都已经读取完
-                if (currentChunk < chunks) {
-                    // 计算开始读取的位置
-                    var start = currentChunk * chunkSize;
-                    // 计算结束读取的位置
-                    var end = start + chunkSize >= contractFile.size ? contractFile.size : start + chunkSize;
-                    reader.readAsArrayBuffer(blobSlice.call(contractFile, start, end));
+                if (evt.target.readyState == 2) {
+                    console.log(333, hasher);
+                    var fileStr = evt.target.result;
+                    var tmpWordArray = self.arrayBufferToWordArray(fileStr);
+                    hasher.update(tmpWordArray);
+                    currentChunk += 1;
+                    fileStr = null;
+                    tmpWordArray = null;
+                    // 判断文件是否都已经读取完
+                    if (currentChunk < chunks) {
+                        // 计算开始读取的位置
+                        var start = currentChunk * chunkSize;
+                        // 计算结束读取的位置
+                        var end = start + chunkSize >= contractFile.size ? contractFile.size : start + chunkSize;
+                        reader.readAsArrayBuffer(blobSlice.call(contractFile, start, end));
+                    }
                 }
+
+
             }
             reader.onloadend = function () {
                 contractFile = null;
@@ -306,7 +313,14 @@ export default {
             this.inputText = ""
             this.inputHash = ""
             this.$refs.upload.clearFiles()
-        }
+        },
+        onBeforeUpload(file) {
+            const isLt1M = Math.ceil(file.size / 1024) < 5000;
+            if (!isLt1M) {
+                this.$message.error(this.$t('text.fileSize_5000'));
+            }
+            return isLt1M;
+        },
     }
 }
 </script>

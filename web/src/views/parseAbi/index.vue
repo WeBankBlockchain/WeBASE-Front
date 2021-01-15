@@ -134,6 +134,11 @@ export default {
     mounted() {
         this.initEditor();
         this.initFuction();
+        console.log(web3Abi.encodeFunctionCall({
+            name: 'set',
+            type: 'set',
+            inputs: [{type: "string[2]", name: "n"}]
+        }, [['1','1']]));
     },
 
     methods: {
@@ -224,7 +229,7 @@ export default {
             this.textarea = '';
         },
         changeArgType(val) {
-            
+
             this.textarea = '';
             this.argumentList.forEach((item, index) => {
                 if (index === val) {
@@ -294,11 +299,11 @@ export default {
                 this.parseNewAbi()
             }
         },
-        validateArgumentValue(){
-            this.argumentList.forEach(item=>{
-                if(item.argumentValue) {
+        validateArgumentValue() {
+            this.argumentList.forEach(item => {
+                if (item.argumentValue) {
                     item.msgObj = validate(item.type, item.argumentValue)
-                }else {
+                } else {
                     item.msgObj = undefined
                 };
             })
@@ -330,7 +335,7 @@ export default {
                 return
             }
             for (let i = 0; i < inputsVal.length; i++) {
-                if (!inputsVal[i] && typeof(inputsVal[i])!='boolean') {
+                if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
                     return false
                 }
             }
@@ -360,13 +365,13 @@ export default {
                 inputsVal.push(dataType(item.type, item.argumentValue))
 
             })
-            
+
             if (!inputs.length) {
                 this.textarea = '';
                 return
             }
             for (let i = 0; i < inputsVal.length; i++) {
-                if (!inputsVal[i] && typeof(inputsVal[i])!='boolean') {
+                if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
                     return false
                 }
             }
@@ -463,10 +468,10 @@ export default {
 }
 .input-inner {
     -webkit-appearance: none;
-    background-color: #FFF;
+    background-color: #fff;
     background-image: none;
     border-radius: 4px;
-    border: 1px solid #DCDFE6;
+    border: 1px solid #dcdfe6;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     color: #606266;
@@ -476,8 +481,8 @@ export default {
     line-height: 36px;
     outline: 0;
     padding: 0 15px;
-    -webkit-transition: border-color .2s cubic-bezier(.645,.045,.355,1);
-    transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+    -webkit-transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+    transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
     width: 100%;
     background-color: #252f43;
     border-color: #252f43;
