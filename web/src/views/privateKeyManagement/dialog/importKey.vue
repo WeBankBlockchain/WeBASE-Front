@@ -15,8 +15,8 @@
             <el-form-item :label="$t('table.privateKey')" prop="privateKey" style="width: 546px;" v-if="keyForm.fileType=='string'">
                 <el-input v-model="keyForm.privateKey" :placeholder="$t('privateKey.validatorPrivateKey')"></el-input>
             </el-form-item>
-            <el-form-item :label="$t('privateKey.file')" prop="file" style="width: 546px;" v-if="keyForm.fileType!='string'">
-                <el-upload ref="upload" :accept="keyForm.fileType" action="" :http-request="uploadFile" :auto-upload="false" :file-list="fileList" show-file-list :limit="1">
+            <el-form-item :label="$t('privateKey.file')" prop="fileList" style="width: 546px;" v-if="keyForm.fileType!='string'" ref="uploadKey">
+                <el-upload ref="upload" :accept="keyForm.fileType" action="" :http-request="uploadFile" :auto-upload="false" :file-list="keyForm.fileList" show-file-list :limit="1" :on-change="uploadChange" :on-remove="removeFile">
                     <el-button slot="trigger" size="small" type="primary">{{this.$t('privateKey.importFile')}}</el-button>
                 </el-upload>
             </el-form-item>
@@ -50,7 +50,8 @@ export default {
                 fileName: "",
                 fileType: "string",
                 password: "",
-                privateKey: ""
+                privateKey: "",
+                fileList: []
             },
             fileTypeList: [
                 {
@@ -117,6 +118,9 @@ export default {
                         message: this.$t('privateKey.validatorPrivateKey1'),
                         trigger: "blur"
                     }
+                ],
+                fileList: [
+                    { required: true, message: this.$t('privateKey.importFileValidator'), trigger: 'change' }
                 ]
             };
             return data
@@ -142,15 +146,20 @@ export default {
             this.$store.state.importRivateKey = false;
         },
         changeFileType() {
-            if(this.$refs.upload) this.$refs.upload.clearFiles();
+            if (this.$refs.upload) this.$refs.upload.clearFiles();
             this.$refs['keyForm'].clearValidate();
             this.keyForm.fileName = '';
+            this.keyForm.fileList = [];
         },
         submitUploadList() {
             if (this.keyForm.fileType == "string") {
                 this.uploadFile()
             } else {
-                this.$refs.upload.submit()
+                this.$refs['keyForm'].validate(valid => {
+                    if (valid) {
+                        this.$refs.upload.submit()
+                    }
+                })
             }
 
         },
@@ -201,7 +210,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.$emit('importRivateKeySuccess')
+                        this.$emit('importPrivateKeySuccess')
                         this.modelClose()
                         this.$message({
                             type: 'success',
@@ -230,7 +239,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.$emit('importRivateKeySuccess')
+                        this.$emit('importPrivateKeySuccess')
                         this.$message({
                             type: 'success',
                             message: this.$t('text.importSuccessed')
@@ -261,7 +270,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.$emit('importRivateKeySuccess')
+                        this.$emit('importPrivateKeySuccess')
                         this.$message({
                             type: 'success',
                             message: this.$t('text.importSuccessed')
@@ -281,6 +290,13 @@ export default {
                     });
                 });
         },
+        uploadChange(file, fileList) {
+            this.$refs['uploadKey'].clearValidate();
+            this.keyForm.fileList = fileList
+        },
+        removeFile() {
+            this.keyForm.fileList = []
+        }
     }
 }
 </script>

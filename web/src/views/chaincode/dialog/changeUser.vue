@@ -194,7 +194,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 })
         },
@@ -219,7 +219,7 @@ export default {
         },
         submit: function () {
             if (this.isCNS) {
-                if(!this.cnsVersionFrom.cnsName) return;
+                if (!this.cnsVersionFrom.cnsName) return;
                 this.$refs['cnsVersionFrom'].validate((valid) => {
                     if (valid) {
                         this.queryDeploy()
