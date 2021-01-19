@@ -64,7 +64,7 @@
             </div>
         </el-dialog>
         <el-dialog :visible.sync="$store.state.importRivateKey" :title="$t('table.importPrivateKey')" width="640px" :append-to-body="true" class="dialog-wrapper" v-if='$store.state.importRivateKey' center>
-            <import-key @importRivateKeySuccess="importRivateKeySuccess" ref="importKey"></import-key>
+            <import-key @importPrivateKeySuccess="importPrivateKeySuccess" ref="importKey"></import-key>
         </el-dialog>
     </div>
 </template>
@@ -310,7 +310,7 @@ export default {
             FileSaver.saveAs(blob, params.userName);
         },
 
-        importRivateKeySuccess() {
+        importPrivateKeySuccess() {
             this.getLocalKeyStores();
         }
     }

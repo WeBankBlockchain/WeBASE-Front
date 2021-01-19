@@ -210,7 +210,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.$emit('importRivateKeySuccess')
+                        this.$emit('importPrivateKeySuccess')
                         this.modelClose()
                         this.$message({
                             type: 'success',
@@ -239,7 +239,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.$emit('importRivateKeySuccess')
+                        this.$emit('importPrivateKeySuccess')
                         this.$message({
                             type: 'success',
                             message: this.$t('text.importSuccessed')
@@ -270,7 +270,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.$emit('importRivateKeySuccess')
+                        this.$emit('importPrivateKeySuccess')
                         this.$message({
                             type: 'success',
                             message: this.$t('text.importSuccessed')
@@ -294,7 +294,7 @@ export default {
             this.$refs['uploadKey'].clearValidate();
             this.keyForm.fileList = fileList
         },
-        removeFile(){
+        removeFile() {
             this.keyForm.fileList = []
         }
     }
