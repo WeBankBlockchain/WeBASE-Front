@@ -27,7 +27,7 @@ export default {
         parseAbi: 'ABI编码',
         eventCheck: 'Event查看',
         onlineTools: '在线工具',
-        contractWarehouse: '合约仓库', 
+        contractWarehouse: '合约仓库',
         toolsContract: '工具合约'
     },
     navbar: {
@@ -322,7 +322,7 @@ export default {
         searchMessage: "查询成功",
         haveAbiAndBin: "缺少abi和bin",
         emptyFolder: "空文件夹",
-        folderIsExists:"目录已存在",
+        folderIsExists: "目录已存在",
         previewAndDescription: "预览和说明",
         developing: "更多精彩，敬请期待。。。",
         appIntroduction: "合约仓库",
@@ -523,7 +523,8 @@ export default {
         passwordError: "密码不能是汉字",
         file: "文件",
         validatorPrivateKey: "请输入私钥",
-        validatorPrivateKey1: "请输入十六进制"
+        validatorPrivateKey1: "请输入十六进制",
+        importFileValidator: "请上传文件"
     },
     onlineTools: {
         onlineHashCalculator: 'Hash计算器',
@@ -531,9 +532,9 @@ export default {
         result: '结果',
         encryption: '加密',
         sign: '签名',
-        text: '文本', 
+        text: '文本',
         file: '文件',
-        drag:"将文件拖到此处，或",
+        drag: "将文件拖到此处，或",
         upload: "点击上传",
         uploadNumLimit: "只能上传一个文件,且不超过5000kb",
         user: "用户"

@@ -90,7 +90,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -121,7 +121,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -251,7 +251,7 @@ a {
     float: right;
 }
 .right-menu-item {
-   padding: 0 20px;
+    padding: 0 20px;
 }
 .hover-effect {
     cursor: pointer;
