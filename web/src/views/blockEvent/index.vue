@@ -31,9 +31,9 @@
         </el-dialog>
         <el-dialog :title="$t('table.blockEventInfo')" :visible.sync="checkBlockEventVisible" width="550px" v-if="checkBlockEventVisible" center class="send-dialog">
             <el-table :data="eventDetail">
-                <el-table-column  show-overflow-tooltip property="appId" :label="$t('table.appId')" width="150"></el-table-column>
-                <el-table-column  show-overflow-tooltip property="exchangeName" :label="$t('table.exchangeName')" width="200"></el-table-column>
-                <el-table-column  show-overflow-tooltip property="queueName" :label="$t('table.queueName')"></el-table-column>
+                <el-table-column show-overflow-tooltip property="appId" :label="$t('table.appId')" width="150"></el-table-column>
+                <el-table-column show-overflow-tooltip property="exchangeName" :label="$t('table.exchangeName')" width="200"></el-table-column>
+                <el-table-column show-overflow-tooltip property="queueName" :label="$t('table.queueName')"></el-table-column>
             </el-table>
         </el-dialog>
     </div>
@@ -92,7 +92,7 @@ export default {
                     enName: 'queueName',
                     name: this.$t('table.queueName')
                 },
-                
+
             ]
             return arr
         }
@@ -149,7 +149,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -186,7 +186,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -216,7 +216,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
 
