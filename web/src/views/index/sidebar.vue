@@ -111,8 +111,8 @@ export default {
                         item.name = this.$t('route.systemMonitoring')
                         break;
                     case 'subscribeEvent':
-                    item.name = this.$t('route.subscribeEvent')
-                    break;
+                        item.name = this.$t('route.subscribeEvent')
+                        break;
 
                 }
                 if (item.children) {
@@ -222,7 +222,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -262,7 +262,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-tabs v-model="activeName"  @tab-click="handleClick">
+        <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane :label="$t('table.transactionInfo')" name="txInfo">
                 <el-row v-for="item in txInfoList" :key="item">
                     <el-col :xs='24' :sm="24" :md="6" :lg="4" :xl="2">
@@ -58,7 +58,7 @@
                         </template>
                         <template v-else-if="item == 'status'">
                             <p class="base-p" :style="{'color': txStatusColor(txInfoReceiptMap[item])}">{{txInfoReceiptMap[item]}}</p>
-                            
+
                         </template>
                         <template v-else>
                             <p class="base-p">{{txInfoReceiptMap[item]}}</p>
@@ -144,7 +144,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -164,10 +164,10 @@ export default {
         //         this.btnReceiptText = "解码";
         //     }
         // },
-        decodeInputfun() {},
-        decodeLogsFun() {},
+        decodeInputfun() { },
+        decodeLogsFun() { },
         handleClick(tab) {
-            if(tab.name =='txReceiptInfo'){
+            if (tab.name == 'txReceiptInfo') {
                 this.getTxReceiptInfo()
             }
         },
@@ -187,14 +187,14 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
         txStatusColor(val) {
-            if(val =='0x0'){
+            if (val == '0x0') {
                 return '#67C23A'
-            }else {
+            } else {
                 return '#F56C6C'
             }
         }
