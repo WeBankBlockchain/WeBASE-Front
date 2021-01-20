@@ -163,7 +163,9 @@ export default {
     },
     mounted() {
         this.$nextTick(function () {
-            this.getContractPaths()
+            if (localStorage.getItem('groupId')) {
+                this.getContractPaths()
+            }
         });
         Bus.$on("compile", data => {
             this.saveContract(data, `${this.$t('text.compilationSucceeded')}`);
