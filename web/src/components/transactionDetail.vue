@@ -13,27 +13,17 @@
                             <div v-show="!showDecode" class="input-data">
                                 <div class="input-label">
                                     <span class="label">function</span>
-                                    <!-- <span>{{funcData + "(" + abiType + ")"}}</span> -->
                                 </div>
                                 <div class="input-label">
                                     <span class="label">methodId</span>
-                                    <!-- <span>{{methodId}}</span> -->
                                 </div>
                                 <div class="input-label">
                                     <span class="label">data</span>
-                                    <!-- <el-table :data="inputData" v-if="inputData.length" style="display:inline-block;width:400px">
-                                        <el-table-column prop="name" label="name" align="left" v-if="inputData[0].name"></el-table-column>
-                                        <el-table-column prop="type" label="type" align="left"></el-table-column>
-                                        <el-table-column prop="data" label="data" align="left" :show-overflow-tooltip="true">
-                                            <template slot-scope="scope">
-                                                <i class="wbs-icon-baocun font-12 copy-public-key" @click="copyPubilcKey(scope.row.data)" title="复制"></i>
-                                                <span>{{scope.row.data}}</span>
-                                            </template>
-                                        </el-table-column>
-                                    </el-table> -->
                                 </div>
                             </div>
-                            <!-- <el-button @click="deCodeInput">{{btnText}}</el-button> -->
+                        </template>
+                        <template v-else-if="item=='to'">
+                            <p class="base-p">{{txInfoMap[item]}} <span v-if="txInfoMap[item]">{{txInfoMap[item] | contractSource}}</span></p>
                         </template>
                         <template v-else>
                             <p class="base-p">{{txInfoMap[item]}}</p>
@@ -49,16 +39,15 @@
                     <el-col :xs='24' :sm="24" :md="18" :lg="20" :xl="22">
                         <template v-if="item == 'logs'">
                             <p class="base-p" v-html="txInfoReceiptMap[item]"></p>
-                            <!-- <el-input v-show="showReceiptDecode" type="textarea" :autosize="autosizeMao" v-model="txInfoReceiptMap[item]">
-                            </el-input> -->
                             <div v-show="!showReceiptDecode">
                                 解码后
                             </div>
-                            <!-- <el-button @click="deCodeLogs">{{btnReceiptText}}</el-button> -->
                         </template>
                         <template v-else-if="item == 'status'">
                             <p class="base-p" :style="{'color': txStatusColor(txInfoReceiptMap[item])}">{{txInfoReceiptMap[item]}}</p>
-
+                        </template>
+                        <template v-else-if="item=='to'">
+                            <p class="base-p">{{txInfoReceiptMap[item]}} <span v-if="txInfoReceiptMap[item]">{{txInfoReceiptMap[item] | contractSource}}</span></p>
                         </template>
                         <template v-else>
                             <p class="base-p">{{txInfoReceiptMap[item]}}</p>

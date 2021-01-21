@@ -138,9 +138,9 @@ export default {
     dialog: {
         addUsername: '添加用户名',
         pleaseEnterUserName: '请输入用户名',
-        rivateKeyVerifyLength: '长度在 3 到 32 个字符',
-        rivateKeyVerifyLength1_32: '长度在 1 到 32 个字符',
-        rivateKeyVerifyFont: '只能是数字或者字母组成',
+        privateKeyVerifyLength: '长度在 3 到 32 个字符',
+        privateKeyVerifyLength1_32: '长度在 1 到 32 个字符',
+        privateKeyVerifyFont: '只能是数字或者字母组成',
         rename: '重命名',
         newFile: '新建',
         delete: '删除',
@@ -340,6 +340,7 @@ export default {
         registered: "已注册",
         updateRegister: "是否要更新注册",
         fileSize_5000: "上传文件大小不能超过 5000kb!",
+        cnsNameVersion: "CNS名或CNS版本不能为空",
     },
     contracts: {
         createFile: "新建文件",
@@ -536,7 +537,7 @@ export default {
         file: '文件',
         drag: "将文件拖到此处，或",
         upload: "点击上传",
-        uploadNumLimit: "只能上传一个文件,且不超过5000kb",
+        uploadNumLimit: "只能上传一个文件,且不超过5000kb。",
         user: "用户"
     }
 }

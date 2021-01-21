@@ -120,7 +120,7 @@ export default {
                     },
                     {
                         pattern: /^[A-za-z0-9]+$/,
-                        message: this.$t('dialog.rivateKeyVerifyFont'),
+                        message: this.$t('dialog.privateKeyVerifyFont'),
                         trigger: "blur",
 
                     },
@@ -128,7 +128,7 @@ export default {
                         trigger: "blur",
                         min: 3,
                         max: 32,
-                        message: this.$t('dialog.rivateKeyVerifyLength'),
+                        message: this.$t('dialog.privateKeyVerifyLength'),
                     }
                 ]
             }
