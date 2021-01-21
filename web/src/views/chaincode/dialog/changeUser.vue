@@ -158,7 +158,7 @@ export default {
                     {
                         min: 1,
                         max: 32,
-                        message: this.$t('dialog.rivateKeyVerifyLength1_32'),
+                        message: this.$t('dialog.privateKeyVerifyLength1_32'),
                         trigger: "blur"
                     },
                 ],

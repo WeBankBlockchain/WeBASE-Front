@@ -138,9 +138,9 @@ export default {
     dialog: {
         addUsername: '添加用户名',
         pleaseEnterUserName: '请输入用户名',
-        rivateKeyVerifyLength: '长度在 3 到 32 个字符',
-        rivateKeyVerifyLength1_32: '长度在 1 到 32 个字符',
-        rivateKeyVerifyFont: '只能是数字或者字母组成',
+        privateKeyVerifyLength: '长度在 3 到 32 个字符',
+        privateKeyVerifyLength1_32: '长度在 1 到 32 个字符',
+        privateKeyVerifyFont: '只能是数字或者字母组成',
         rename: '重命名',
         newFile: '新建',
         delete: '删除',
