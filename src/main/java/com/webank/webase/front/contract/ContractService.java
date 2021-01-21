@@ -26,7 +26,6 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.contract.entity.Cns;
-import com.webank.webase.front.contract.entity.CnsKey;
 import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.contract.entity.ContractPath;
 import com.webank.webase.front.contract.entity.ContractPathKey;
@@ -45,12 +44,14 @@ import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.util.ErrorCodeHandleUtils;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
@@ -83,6 +84,7 @@ import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -100,6 +102,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 /**
  * contract management.
@@ -128,6 +131,8 @@ public class ContractService {
     private PermissionManageService permissionManageService;
     @Autowired
     private PrecompiledWithSignService precompiledWithSignService;
+    @Autowired
+    private PrecompiledService precompiledService;
 
     /**
      * sendAbi.
@@ -314,12 +319,18 @@ public class ContractService {
     /**
      * registerCns.
      */
-    public void registerCns(ReqRegisterCns req) {
+    public void registerCns(ReqRegisterCns req) throws Exception {
         int groupId = req.getGroupId();
         String cnsName = req.getCnsName();
         String version = req.getVersion();
         String contractAddress = req.getContractAddress();
         String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
+        List<CnsInfo> cnsList =
+                precompiledService.queryCnsByNameAndVersion(groupId, cnsName, version);
+        if (!CollectionUtils.isEmpty(cnsList)) {
+            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
+            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
+        }
         if (req.isSaveEnabled()) {
             if (StringUtils.isBlank(req.getContractPath())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING);

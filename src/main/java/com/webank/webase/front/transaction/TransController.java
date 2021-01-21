@@ -101,7 +101,7 @@ public class TransController extends BaseController {
     @ApiOperation(value = "transaction handle locally", notes = "transaction locally")
     @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
     @PostMapping("/handle")
-    public Object transHandleLocal(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) {
+    public Object transHandleLocal(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
         log.info("transHandleLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqTransHandle));
 
         Instant startTime = Instant.now();
