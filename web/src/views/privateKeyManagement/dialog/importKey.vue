@@ -92,7 +92,7 @@ export default {
                     },
                     {
                         pattern: /^[A-za-z0-9]+$/,
-                        message: this.$t('dialog.rivateKeyVerifyFont'),
+                        message: this.$t('dialog.privateKeyVerifyFont'),
                         trigger: "blur",
 
                     },
