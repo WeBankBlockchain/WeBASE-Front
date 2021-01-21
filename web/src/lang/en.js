@@ -526,7 +526,8 @@ export default {
         passwordError: "Password cannot be Chinese",
         file: "File",
         validatorPrivateKey: "Please enter privateKey key",
-        validatorPrivateKey1: "Please enter hexadecimal"
+        validatorPrivateKey1: "Please enter hexadecimal",
+        importFileValidator: "Please upload the file"
     },
     onlineTools: {
         onlineHashCalculator: 'Hash Calculator',

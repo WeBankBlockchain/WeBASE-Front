@@ -347,6 +347,7 @@ public class ContractService {
                 throw new FrontException(ConstantCode.CNS_REGISTER_FAIL);
             }
             Cns cns = new Cns();
+            cns.setContractAbi(abiInfo);
             BeanUtils.copyProperties(req, cns);
             cns.setCreateTime(LocalDateTime.now());
             cns.setModifyTime(LocalDateTime.now());
@@ -975,10 +976,8 @@ public class ContractService {
     /**
      * findCns.
      */
-    public Cns findCns(ReqQueryCns req) throws IOException {
+    public Cns findCns(ReqQueryCns req) {
         // get from database
-        return cnsRepository.findByAddress(req.getGroupId(), req.getContractPath(),
-                req.getContractName(), req.getContractAddress());
+        return cnsRepository.findByAddressLimitOne(req.getGroupId(), req.getContractAddress());
     }
-
 }
