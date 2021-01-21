@@ -27,12 +27,12 @@
                     <el-col :span="7">
                         <div class="font-color-fff">{{item.name}}</div>
                         <el-select v-model="item.type" @change="changeArgType(index)">
-                            <el-option v-for="(it, index) in item.argumentOption" :key="index" :label="it" :value="it"></el-option>
+                            <el-option v-for="(it, num) in item.argumentOption" :key="num" :label="it" :value="it"></el-option>
                         </el-select>
                     </el-col>
                     <el-col :span="17">
                         <span class="font-color-fff text-hidden">value</span>
-                        <input class="input-inner" type="text" v-model="item.argumentValue" @input="inputArgumentValue($event,item.type)"></input>
+                        <input class="input-inner" type="text" v-model="item.argumentValue" @input="inputArgumentValue($event,item.type)" />
                         <span v-if="item.msgObj&&!item.msgObj.is" class="font-color-ed5454">
                             {{item.msgObj.msg}}
                         </span>
@@ -136,8 +136,8 @@ export default {
         console.log(web3Abi.encodeFunctionCall({
             name: 'set',
             type: 'set',
-            inputs: [{type: "string[2]", name: "n"}]
-        }, [['1','1']]));
+            inputs: [{ type: "string[2]", name: "n" }]
+        }, [['1', '1']]));
     },
 
     methods: {

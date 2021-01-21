@@ -16,17 +16,16 @@
 package com.webank.webase.front.contract;
 
 import com.webank.webase.front.contract.entity.Cns;
-import com.webank.webase.front.contract.entity.CnsKey;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-public interface CnsRepository extends CrudRepository<Cns, CnsKey>,
+public interface CnsRepository extends CrudRepository<Cns, Long>,
     JpaSpecificationExecutor<Cns> {
     
     List<Cns> findByGroupIdAndContractName(int groupId, String contractName);
     
-    @Query(value = "select n from Cns n where n.groupId = ?1 and n.contractPath = ?2 and n.contractName = ?3  and n.contractAddress = ?4 ")
-    Cns findByAddress(int groupId, String contractPath, String contractName, String contractAddress);
+    @Query(nativeQuery=true, value = "select * from Cns n where n.group_id = ?1 and n.contract_address = ?2 order by n.modify_time desc limit 1")
+    Cns findByAddressLimitOne(int groupId, String contractAddress);
 }
