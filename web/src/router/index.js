@@ -77,9 +77,9 @@ const routes = [
             { path: '/contractList', component: oldContract, name: '合约列表', enName: 'contractList', menuShow: true, meta: { requireAuth: false } },
             { path: '/contractWarehouse', component: contractWarehouse, name: '合约仓库', enName: 'contractWarehouse', menuShow: true, meta: { requireAuth: false } },
             { path: '/abiList', component: abiList, name: 'Abi列表', enName: "abiList", menuShow: true, meta: { requireAuth: false } },
-            { path: '/parseAbi', component: parseAbi, name: '解析Abi', enName: "parseAbi", menuShow: true, meta: { requireAuth: false } }, 
+            // { path: '/parseAbi', component: parseAbi, name: '解析Abi', enName: "parseAbi", menuShow: true, meta: { requireAuth: false } }, 
             { path: '/privateKeyManagement', component: privateKeyManagement, name: '测试用户', enName: 'testUserList', menuShow: true, meta: { requireAuth: false } },
-            { path: '/eventCheck', component: eventCheck, name: 'Event 查看', enName: 'eventCheck', menuShow: true, meta: { requireAuth: false } },
+            // { path: '/eventCheck', component: eventCheck, name: 'Event 查看', enName: 'eventCheck', menuShow: true, meta: { requireAuth: false } },
             { path: '/onlineTools', component: onlineTools, name: '在线工具', enName: 'onlineTools', menuShow: true, meta: { requireAuth: false } }, 
             { path: '/toolsContract', component: toolsContract, name: '工具合约', enName: 'toolsContract', menuShow: false, meta: { requireAuth: false } },
         ]

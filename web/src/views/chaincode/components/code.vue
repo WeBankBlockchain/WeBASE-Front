@@ -1099,8 +1099,6 @@ export default {
         queryFindCnsInfo() {
             let param = {
                 groupId: localStorage.getItem('groupId'),
-                contractPath: this.data.contractPath,
-                contractName: this.data.contractName,
                 contractAddress: this.data.contractAddress
             }
             findCnsInfo(param)

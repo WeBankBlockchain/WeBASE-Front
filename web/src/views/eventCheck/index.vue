@@ -1,8 +1,7 @@
 <template>
     <div class="rivate-key-management-wrapper">
-        <content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.eventCheck')" @changeGroup="changeGroup"></content-head>
-        <div class="module-wrapper">
-            <div class="search-part ">
+        <div class="">
+            <div class="">
                 <el-form :model="contractEventForm" :rules="rules" ref="contractEventForm" class="demo-ruleForm" label-width="110px">
                     <el-form-item :label="$t('table.contractAddress')" prop="contractAddress">
                         <el-autocomplete v-model.trim="contractEventForm.contractAddress" :fetch-suggestions="querySearch" @select="selectAddress" style="width: 500px;" clearable>

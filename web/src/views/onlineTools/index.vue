@@ -7,7 +7,12 @@
                     <div class="hash-wrapper">
                         <div class="calc-hash">
                             <el-tabs v-model="fileType" @tab-click="handleFileType">
-                                <el-tab-pane :label="$t('onlineTools.file')" name="file-first">
+                                <el-tab-pane :label="$t('onlineTools.text')" name="file-first">
+                                    <div>
+                                        <el-input type="textarea" v-model="inputText" @input="textFocus" style="margin-bottom: 20px;"></el-input>
+                                    </div>
+                                </el-tab-pane>
+                                <el-tab-pane :label="$t('onlineTools.file')" name="file-second">
                                     <div>
                                         <div>
                                             <el-upload ref="upload" class="upload-file-hash" :file-list="fileList" :show-file-list="true" :limit="1" drag action :http-request="uploadCrt" :before-upload="onBeforeUpload" :on-success="uploadSuccess">
@@ -22,11 +27,7 @@
                                         </div>
                                     </div>
                                 </el-tab-pane>
-                                <el-tab-pane :label="$t('onlineTools.text')" name="file-second">
-                                    <div>
-                                        <el-input type="textarea" v-model="inputText" @input="textFocus" style="margin-bottom: 20px;"></el-input>
-                                    </div>
-                                </el-tab-pane>
+
                             </el-tabs>
                             <div style="margin-top: 10px;">
                                 <span class="font-color-fff">{{$t('onlineTools.algorithm')}}</span>
@@ -46,13 +47,13 @@
                         </div>
                     </div>
                 </el-tab-pane>
-                <el-tab-pane :label="$t('onlineTools.sign')" name="second">
+                <el-tab-pane :label="$t('onlineTools.sign')" name="second" v-if="encryptionId==0">
                     <div class="hash-wrapper">
                         <p class="font-color-fff text-title">Hash</p>
                         <el-input type="textarea" v-model="inputSignHash" style="margin-bottom: 20px;"></el-input>
                         <div>
                             <span>{{$t('onlineTools.user')}}</span>
-                            <el-select v-model="privateKey" placeholder="">
+                            <el-select v-model="privateKey" :placeholder="placeholderText">
                                 <el-option v-for="item in privateKeyList" :key="item.address" :label="item.userName" :value="item.address">
                                 </el-option>
                             </el-select>
@@ -74,6 +75,12 @@
                         </div>
                     </div>
                 </el-tab-pane>
+                <el-tab-pane :label="$t('route.parseAbi')" name="third">
+                    <parse-abi></parse-abi>
+                </el-tab-pane>
+                <el-tab-pane :label="$t('route.eventCheck')" name="fourth">
+                    <event-check></event-check>
+                </el-tab-pane>
             </el-tabs>
         </div>
     </div>
@@ -81,6 +88,8 @@
 
 <script>
 import contentHead from "@/components/contentHead";
+import parseAbi from "../parseAbi/index.vue";
+import eventCheck from "../eventCheck/index.vue";
 import { queryLocalKeyStores, signHash } from "@/util/api";
 const gm = require('@/util/SM2Sign');
 import CryptoJS from 'crypto-js'
@@ -88,7 +97,9 @@ export default {
     name: 'onlineTools',
 
     components: {
-        contentHead
+        contentHead,
+        parseAbi,
+        eventCheck
     },
 
     props: {
@@ -114,7 +125,9 @@ export default {
             loading: false,
             activeName: 'first',
             fileList: [],
-            fileType: "file-first"
+            fileType: "file-first",
+            placeholderText: this.$t('placeholder.selectedAccountAddress'),
+            encryptionId: localStorage.getItem('encryptionId')
         }
     },
 
@@ -165,6 +178,11 @@ export default {
                     const { data, status } = res;
                     if (status === 200) {
                         this.privateKeyList = data;
+                        if (this.privateKeyList.length) {
+                            this.privateKey = this.privateKeyList[0]['address']
+                        } else {
+                            this.placeholderText = this.$t('placeholder.selectedNoUser')
+                        }
                     } else {
                         this.$message({
                             type: "error",
@@ -174,6 +192,7 @@ export default {
                 })
         },
         querySignHash() {
+            if (!this.privateKey || !this.inputSignHash) return;
             this.loading = true;
             let param = {
                 hash: this.inputSignHash,

@@ -1,7 +1,6 @@
 <template>
     <div>
-        <content-head :headTitle="$t('route.parseAbi')" @changGroup="changGroup"></content-head>
-        <div class="module-wrapper">
+        <div class="">
             <div class="ace-wrapper">
                 <h2 class="h2-inscription font-color-fff">{{this.$t('text.parseTitle')}}</h2>
                 <div class="ace-editor" ref="ace"></div>
@@ -439,10 +438,10 @@ export default {
     text-rendering: geometricPrecision;
 }
 .h2-inscription {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 600;
     text-align: left;
-    padding: 20px 0;
+    padding-bottom: 20px;
     margin: 0;
 }
 .ace-wrapper {

@@ -342,6 +342,7 @@ export default {
         registered: "Registered",
         updateRegister: "Do you want to update the registration",
         fileSize_5000: "The upload file size cannot exceed 5000kb!",
+        cnsNameVersion: "CNS name or CNS version cannot be empty",
     },
     contracts: {
         createFile: "Create File",
@@ -537,7 +538,7 @@ export default {
         file: 'File',
         drag: "Drag the file here, Or",
         upload: " click upload",
-        uploadNumLimit: "Only one file can be uploaded, and no more than 5000kb",
+        uploadNumLimit: "Only one file can be uploaded, and no more than 5000kb.",
         user: "User"
     }
 }

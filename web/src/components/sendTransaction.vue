@@ -162,7 +162,20 @@ export default {
     },
     methods: {
         submit: function (formName) {
-            this.send();
+            if (this.isCNS) {
+                if (!this.cnsName || !this.cnsVersion) {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.cnsNameVersion')
+                    })
+                    return
+                } else {
+                    this.send();
+                }
+            } else {
+                this.send();
+            }
+
         },
         close: function (formName) {
             this.$emit("close", false);
@@ -282,14 +295,14 @@ export default {
                 user: this.constant || this.stateMutability === 'view' || this.stateMutability === 'pure' ? '' : this.transation.userName,
                 contractName: this.data.contractName,
                 contractPath: this.data.contractPath,
-                version: this.isCNS ? this.cnsVersion : '',
+                version: this.isCNS && this.cnsVersion ? this.cnsVersion : '',
                 funcName: functionName || "",
                 funcParam: this.transation.funcValue,
                 contractAddress: this.isCNS ? "" : this.contractAddress,
                 contractAbi: [this.pramasObj],
                 useAes: false,
                 useCns: this.isCNS,
-                cnsName: this.isCNS ? this.cnsName : ""
+                cnsName: this.isCNS && this.cnsName ? this.cnsName : ""
             };
             sendTransation(data)
                 .then(res => {
@@ -353,8 +366,6 @@ export default {
         queryFindCnsInfo() {
             let param = {
                 groupId: localStorage.getItem('groupId'),
-                contractPath: this.data.contractPath,
-                contractName: this.data.contractName,
                 contractAddress: this.data.contractAddress
             }
             findCnsInfo(param)
