@@ -340,6 +340,7 @@ export default {
         registered: "已注册",
         updateRegister: "是否要更新注册",
         fileSize_5000: "上传文件大小不能超过 5000kb!",
+        cnsNameVersion: "CNS名或CNS版本不能为空",
     },
     contracts: {
         createFile: "新建文件",
@@ -535,7 +536,7 @@ export default {
         file: '文件',
         drag:"将文件拖到此处，或",
         upload: "点击上传",
-        uploadNumLimit: "只能上传一个文件,且不超过5000kb",
+        uploadNumLimit: "只能上传一个文件,且不超过5000kb。",
         user: "用户"
     }
 }

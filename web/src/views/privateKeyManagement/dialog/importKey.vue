@@ -90,6 +90,12 @@ export default {
                         trigger: "blur"
                     },
                     {
+                        pattern: /^[A-za-z0-9]+$/,
+                        message: this.$t('dialog.rivateKeyVerifyFont'),
+                        trigger: "blur",
+
+                    },
+                    {
                         min: 1,
                         max: 12,
                         message: this.$t('rule.textLong1_12'),
@@ -142,7 +148,7 @@ export default {
             this.$store.state.importRivateKey = false;
         },
         changeFileType() {
-            if(this.$refs.upload) this.$refs.upload.clearFiles();
+            if (this.$refs.upload) this.$refs.upload.clearFiles();
             this.$refs['keyForm'].clearValidate();
             this.keyForm.fileName = '';
         },

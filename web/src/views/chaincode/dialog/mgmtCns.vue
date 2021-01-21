@@ -213,8 +213,6 @@ export default {
         queryFindCnsInfo() {
             let param = {
                 groupId: localStorage.getItem('groupId'),
-                contractPath: this.mgmtCnsItem.contractPath,
-                contractName: this.mgmtCnsItem.contractName,
                 contractAddress: this.mgmtCnsItem.contractAddress
             }
             findCnsInfo(param)
