@@ -17,9 +17,13 @@ package com.webank.webase.front.contract.entity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import lombok.Data;
 
 /**
@@ -27,18 +31,30 @@ import lombok.Data;
  */
 @Data
 @Entity
-@IdClass(CnsKey.class)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "unique_version", columnNames = {"group_id", "cns_name",
+            "version"})
+    })
 public class Cns implements Serializable {
     private static final long serialVersionUID = 3286516914027062194L;
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @Column(name = "group_id")
     private Integer groupId;
-    @Id
+    @Column(name = "contract_path")
     private String contractPath;
-    @Id
+    @Column(name = "contract_name")
     private String contractName;
+    @Column(name = "contract_address")
+    private String contractAddress;
+    @Column(name = "contract_abi", columnDefinition = "mediumtext")
+    private String contractAbi;
+    @Column(name = "cns_name")
     private String cnsName;
     private String version;
-    private String contractAddress;
+    @Column(name = "create_time")
     private LocalDateTime createTime;
+    @Column(name = "modify_time")
     private LocalDateTime modifyTime;
 }
