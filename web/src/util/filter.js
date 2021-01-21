@@ -22,3 +22,38 @@ Vue.filter('formatErrorMessage', function (value) {
         console.warn(error);
     }
 });
+
+Vue.filter('contractSource', function (value) {
+    switch (value) {
+        case "0x0000000000000000000000000000000000001000":
+            return "SystemConfig"
+            break;
+        case "0x0000000000000000000000000000000000001001":
+            return "TableFactory"
+            break;
+        case "0x0000000000000000000000000000000000001002":
+            return "CRUD"
+            break;
+        case "0x0000000000000000000000000000000000001003":
+            return "Consensus"
+            break;
+        case "0x0000000000000000000000000000000000001004":
+            return "CNS"
+            break;
+        case "0x0000000000000000000000000000000000001005":
+            return "Permission"
+            break;
+        case "0x0000000000000000000000000000000000001007":
+            return "CSM"
+            break;
+        case "0x0000000000000000000000000000000000001008":
+            return "ChainGovern"
+            break;
+        case "0x0000000000000000000000000000000000001009":
+            return "ChainCharge"
+            break;
+        default:
+            return ""
+            break;
+    }
+});

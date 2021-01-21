@@ -138,9 +138,9 @@ export default {
     dialog: {
         addUsername: 'Add Username',
         pleaseEnterUserName: 'Please type in username',
-        rivateKeyVerifyLength: 'The length is between 3 and 32 characters',
-        rivateKeyVerifyLength1_32: 'The length is between 1 and 32 characters',
-        rivateKeyVerifyFont: 'Can only be composed of numbers or letters',
+        privateKeyVerifyLength: 'The length is between 3 and 32 characters',
+        privateKeyVerifyLength1_32: 'The length is between 1 and 32 characters',
+        privateKeyVerifyFont: 'Can only be composed of numbers or letters',
         rename: 'Rename',
         newFile: 'Create',
         delete: 'Delete',
@@ -169,7 +169,6 @@ export default {
         cnsVersion: 'Please enter cns version',
         cnsVersionPattern: "It can only be numbers, letters and '.'",
         cnsName: 'Please enter CNS name',
-        rivateKeyVerifyLength1_32: 'The length is between 1 and 32 character',
         length1_10: 'The length is between 1 and 10 character',
     },
     placeholder: {
@@ -342,6 +341,7 @@ export default {
         registered: "Registered",
         updateRegister: "Do you want to update the registration",
         fileSize_5000: "The upload file size cannot exceed 5000kb!",
+        cnsNameVersion: "CNS name or CNS version cannot be empty",
     },
     contracts: {
         createFile: "Create File",
@@ -538,7 +538,7 @@ export default {
         file: 'File',
         drag: "Drag the file here, Or",
         upload: " click upload",
-        uploadNumLimit: "Only one file can be uploaded, and no more than 5000kb",
+        uploadNumLimit: "Only one file can be uploaded, and no more than 5000kb.",
         user: "User"
     }
 }
