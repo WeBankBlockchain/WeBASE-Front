@@ -47,7 +47,7 @@
 
 <script>
 import sidebar from "./sidebar";
-import { resetPassword, addnodes,encryption } from "@/util/api";
+import { resetPassword, addnodes, encryption } from "@/util/api";
 import router from "@/router";
 const sha256 = require("js-sha256").sha256;
 import errcode from "@/util/errcode";
@@ -149,25 +149,25 @@ export default {
         this.getEncryption()
     },
     methods: {
-        getEncryption: function(){
+        getEncryption: function () {
             encryption().then(res => {
-                if(res.status == 200){
-                    if(res.data != localStorage.getItem("encryptionId")){
+                if (res.status == 200) {
+                    if (res.data != localStorage.getItem("encryptionId")) {
                         localStorage.removeItem('solcName')
                         localStorage.removeItem('versionId')
                     }
-                    localStorage.setItem("encryptionId",res.data)
-                }else {
+                    localStorage.setItem("encryptionId", res.data)
+                } else {
                     this.$message({
-                            type: "error",
-                            message: this.$chooseLang(res.data.code)
-                        });
-                    }
-                })
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },

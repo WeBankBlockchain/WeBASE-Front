@@ -434,8 +434,8 @@ let errCode = {
         zh: 'CNS注册失败'
     },
     "201224": {
-        en: "contract version not exists",
-        zh: '合约版本不存在'
+        en: "Version not exists",
+        zh: '版本不存在'
     },
     "201225": {
         en: "CNS name cannot be empty",
@@ -589,7 +589,7 @@ let errCode = {
         zh: '合约状态异常，调用合约constant方法失败'
     },
     "201518": {
-        en: "get message's hash fail", 
+        en: "get message's hash fail",
         zh: "获取哈希失败"
     },
     "201521": {
@@ -837,8 +837,8 @@ let errCode = {
         zh: "不支持发交易"
     },
 
-    
-    
+
+
     "201232": {
         en: "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----",
         zh: "Pem文件格式错误，必须包含-----XXXXX PRIVATE KEY----- "

@@ -136,7 +136,13 @@ export default {
                         pattern: /^[A-Za-z0-9.]+$/,
                         message: this.$t('dialog.cnsVersionPattern'),
                         trigger: "blur"
-                    }
+                    },
+                    {
+                        min: 1,
+                        max: 10,
+                        message: this.$t('dialog.length1_10'),
+                        trigger: "blur"
+                    },
                 ],
                 cnsName: [
                     {
@@ -148,7 +154,13 @@ export default {
                         pattern: /^[A-Za-z0-9.]+$/,
                         message: this.$t('dialog.cnsVersionPattern'),
                         trigger: "blur"
-                    }
+                    },
+                    {
+                        min: 1,
+                        max: 32,
+                        message: this.$t('dialog.privateKeyVerifyLength1_32'),
+                        trigger: "blur"
+                    },
                 ],
             }
             return obj
@@ -182,7 +194,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 })
         },
@@ -207,7 +219,7 @@ export default {
         },
         submit: function () {
             if (this.isCNS) {
-                if(!this.cnsVersionFrom.cnsName) return;
+                if (!this.cnsVersionFrom.cnsName) return;
                 this.$refs['cnsVersionFrom'].validate((valid) => {
                     if (valid) {
                         this.queryDeploy()

@@ -19,7 +19,7 @@
         <div class="module-wrapper">
             <div class="search-part">
                 <div class="search-part-right">
-                    <el-input :placeholder="$t('placeholder.contractListSearch')" v-model="contractData" class="input-with-select">
+                    <el-input :placeholder="$t('placeholder.contractListSearch')" v-model="contractData" class="input-with-select" clearable @clear="clearInput">
                         <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
                     </el-input>
                 </div>
@@ -79,7 +79,7 @@
             <check-event-result @checkEventResultSuccess="checkEventResultSuccess($event)" @checkEventResultClose="checkEventResultClose" :checkEventResult="checkEventResult" :contractInfo="contractInfo"></check-event-result>
         </el-dialog>
         <el-dialog v-if="mgmtCnsVisible" :title="$t('text.cns')" :visible.sync="mgmtCnsVisible" width="470px" center class="send-dialog">
-            <mgmt-cns :mgmtCnsItem="mgmtCnsItem" @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)" @mgmtCnsResultClose="mgmtCnsResultClose" ></mgmt-cns>
+            <mgmt-cns :mgmtCnsItem="mgmtCnsItem" @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)" @mgmtCnsResultClose="mgmtCnsResultClose"></mgmt-cns>
         </el-dialog>
     </div>
 </template>
@@ -132,7 +132,7 @@ export default {
             sendConstant: null,
             editorInput: null,
             editorOutput: null,
-            mgmtCnsVisible:false,
+            mgmtCnsVisible: false,
             mgmtCnsItem: {}
 
         }
@@ -169,10 +169,10 @@ export default {
                     console.time("耗时");
                     dataArray.forEach(item => {
                         item.haveEvent = false
-                        if(item.contractAbi) {
-                            let contractAbi  = JSON.parse(item.contractAbi)
+                        if (item.contractAbi) {
+                            let contractAbi = JSON.parse(item.contractAbi)
                             for (let index = 0; index < contractAbi.length; index++) {
-                                if(contractAbi[index]['type'] === "event") {
+                                if (contractAbi[index]['type'] === "event") {
                                     item.haveEvent = true
                                     break;
                                 }
@@ -280,7 +280,7 @@ export default {
         handleEvent: function (val) {
             this.contractInfo = val;
             this.$router.push({
-                path:'/eventCheck',
+                path: '/eventCheck',
                 query: {
                     groupId: this.groupId,
                     type: 'contract',
@@ -291,27 +291,34 @@ export default {
         },
         checkEventSuccess(msg) {
             this.checkEventResult = msg
-            
+
             this.checkEventResultVisible = true
         },
         checkEventClose() {
             this.checkEventVisible = false;
         },
-        checkEventResultSuccess(){
+        checkEventResultSuccess() {
             this.checkEventResultVisible = false
         },
-        checkEventResultClose(){
+        checkEventResultClose() {
             this.checkEventResultVisible = false
         },
-        handleMgmtCns(item){
+        handleMgmtCns(item) {
             this.mgmtCnsVisible = true;
             this.mgmtCnsItem = item;
         },
-        mgmtCnsResultSuccess(){
+        mgmtCnsResultSuccess() {
             this.mgmtCnsVisible = false;
         },
-        mgmtCnsResultClose(){
+        mgmtCnsResultClose() {
             this.mgmtCnsVisible = false;
+        },
+        clearInput() {
+            this.contractName = "";
+            this.contractAddress = "";
+            this.contractData = "";
+            this.currentPage = 1;
+            this.getContracts()
         }
     }
 }

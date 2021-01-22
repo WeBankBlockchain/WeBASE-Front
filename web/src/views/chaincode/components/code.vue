@@ -870,7 +870,6 @@ export default {
                         this.data.contractSource = Base64.encode(this.content);
                         this.data.contractAddress = this.contractAddress;
                         this.data.contractVersion = this.version;
-                        this.queryFindCnsInfo()
                         if (cns.saveEnabled) {
                             this.queryRegisterCns(val, cns)
                         }
@@ -1004,7 +1003,7 @@ export default {
                 .catch(err => {
                     this.closeJavaClass()
                     this.$message({
-                        message: this.$t('text.systemError'),
+                        message: err.data || this.$t('text.systemError'),
                         type: "error"
                     });
                 });
@@ -1100,8 +1099,6 @@ export default {
         queryFindCnsInfo() {
             let param = {
                 groupId: localStorage.getItem('groupId'),
-                contractPath: this.data.contractPath,
-                contractName: this.data.contractName,
                 contractAddress: this.data.contractAddress
             }
             findCnsInfo(param)

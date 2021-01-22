@@ -7,11 +7,15 @@
                     <div class="hash-wrapper">
                         <div class="calc-hash">
                             <el-tabs v-model="fileType" @tab-click="handleFileType">
-                                <el-tab-pane :label="$t('onlineTools.file')" name="file-first">
+                                <el-tab-pane :label="$t('onlineTools.text')" name="file-first">
                                     <div>
-                                        <!-- <p class="font-color-fff text-title">{{$t('onlineTools.file')}}</p> -->
+                                        <el-input type="textarea" v-model="inputText" @input="textFocus" style="margin-bottom: 20px;"></el-input>
+                                    </div>
+                                </el-tab-pane>
+                                <el-tab-pane :label="$t('onlineTools.file')" name="file-second">
+                                    <div>
                                         <div>
-                                            <el-upload ref="upload" class="upload-file-hash" :file-list="fileList" :show-file-list="true" :limit="1" drag action :http-request="uploadCrt" :on-success="uploadSuccess">
+                                            <el-upload ref="upload" class="upload-file-hash" :file-list="fileList" :show-file-list="true" :limit="1" drag action :http-request="uploadCrt" :before-upload="onBeforeUpload" :on-success="uploadSuccess">
                                                 <i class="el-icon-upload"></i>
                                                 <div class="el-upload__text">{{$t('onlineTools.drag')}}<em>{{$t('onlineTools.upload')}}</em></div>
                                                 <div slot="tip" class="el-upload__tip">
@@ -23,12 +27,7 @@
                                         </div>
                                     </div>
                                 </el-tab-pane>
-                                <el-tab-pane :label="$t('onlineTools.text')" name="file-second">
-                                    <div>
-                                        <!-- <p class="font-color-fff text-title">{{$t('onlineTools.text')}}</p> -->
-                                        <el-input type="textarea" v-model="inputText" @input="textFocus" style="margin-bottom: 20px;"></el-input>
-                                    </div>
-                                </el-tab-pane>
+
                             </el-tabs>
                             <div style="margin-top: 10px;">
                                 <span class="font-color-fff">{{$t('onlineTools.algorithm')}}</span>
@@ -48,13 +47,13 @@
                         </div>
                     </div>
                 </el-tab-pane>
-                <el-tab-pane :label="$t('onlineTools.sign')" name="second">
+                <el-tab-pane :label="$t('onlineTools.sign')" name="second" v-if="encryptionId==0">
                     <div class="hash-wrapper">
                         <p class="font-color-fff text-title">Hash</p>
                         <el-input type="textarea" v-model="inputSignHash" style="margin-bottom: 20px;"></el-input>
                         <div>
-                            <span>用户</span>
-                            <el-select v-model="privateKey" placeholder="">
+                            <span>{{$t('onlineTools.user')}}</span>
+                            <el-select v-model="privateKey" :placeholder="placeholderText">
                                 <el-option v-for="item in privateKeyList" :key="item.address" :label="item.userName" :value="item.address">
                                 </el-option>
                             </el-select>
@@ -76,6 +75,12 @@
                         </div>
                     </div>
                 </el-tab-pane>
+                <el-tab-pane :label="$t('route.parseAbi')" name="third">
+                    <parse-abi></parse-abi>
+                </el-tab-pane>
+                <el-tab-pane :label="$t('route.eventCheck')" name="fourth">
+                    <event-check></event-check>
+                </el-tab-pane>
             </el-tabs>
         </div>
     </div>
@@ -83,6 +88,8 @@
 
 <script>
 import contentHead from "@/components/contentHead";
+import parseAbi from "../parseAbi/index.vue";
+import eventCheck from "../eventCheck/index.vue";
 import { queryLocalKeyStores, signHash } from "@/util/api";
 const gm = require('@/util/SM2Sign');
 import CryptoJS from 'crypto-js'
@@ -90,7 +97,9 @@ export default {
     name: 'onlineTools',
 
     components: {
-        contentHead
+        contentHead,
+        parseAbi,
+        eventCheck
     },
 
     props: {
@@ -116,7 +125,9 @@ export default {
             loading: false,
             activeName: 'first',
             fileList: [],
-            fileType: "file-first"
+            fileType: "file-first",
+            placeholderText: this.$t('placeholder.selectedAccountAddress'),
+            encryptionId: localStorage.getItem('encryptionId')
         }
     },
 
@@ -167,6 +178,11 @@ export default {
                     const { data, status } = res;
                     if (status === 200) {
                         this.privateKeyList = data;
+                        if (this.privateKeyList.length) {
+                            this.privateKey = this.privateKeyList[0]['address']
+                        } else {
+                            this.placeholderText = this.$t('placeholder.selectedNoUser')
+                        }
                     } else {
                         this.$message({
                             type: "error",
@@ -176,6 +192,7 @@ export default {
                 })
         },
         querySignHash() {
+            if (!this.privateKey || !this.inputSignHash) return;
             this.loading = true;
             let param = {
                 hash: this.inputSignHash,
@@ -249,28 +266,37 @@ export default {
             var chunks = Math.ceil(contractFile.size / chunkSize);
             // 指定当前块指针
             var currentChunk = 0;
+
             var hasher = CryptoJS.algo.SHA256.create();
+            console.log(1111, hasher);
+
             // FileReader分片式读取文件
             // 计算开始读取的位置
             var start = currentChunk * chunkSize;
             // 计算结束读取的位置
             var end = start + chunkSize >= contractFile.size ? contractFile.size : start + chunkSize;
             reader.readAsArrayBuffer(blobSlice.call(contractFile, start, end));
+            console.log(2222, hasher);
             reader.onload = function (evt) {
-                var fileStr = evt.target.result;
-                var tmpWordArray = self.arrayBufferToWordArray(fileStr);
-                hasher.update(tmpWordArray);
-                currentChunk += 1;
-                fileStr = null;
-                tmpWordArray = null;
-                // 判断文件是否都已经读取完
-                if (currentChunk < chunks) {
-                    // 计算开始读取的位置
-                    var start = currentChunk * chunkSize;
-                    // 计算结束读取的位置
-                    var end = start + chunkSize >= contractFile.size ? contractFile.size : start + chunkSize;
-                    reader.readAsArrayBuffer(blobSlice.call(contractFile, start, end));
+                if (evt.target.readyState == 2) {
+                    console.log(333, hasher);
+                    var fileStr = evt.target.result;
+                    var tmpWordArray = self.arrayBufferToWordArray(fileStr);
+                    hasher.update(tmpWordArray);
+                    currentChunk += 1;
+                    fileStr = null;
+                    tmpWordArray = null;
+                    // 判断文件是否都已经读取完
+                    if (currentChunk < chunks) {
+                        // 计算开始读取的位置
+                        var start = currentChunk * chunkSize;
+                        // 计算结束读取的位置
+                        var end = start + chunkSize >= contractFile.size ? contractFile.size : start + chunkSize;
+                        reader.readAsArrayBuffer(blobSlice.call(contractFile, start, end));
+                    }
                 }
+
+
             }
             reader.onloadend = function () {
                 contractFile = null;
@@ -306,7 +332,14 @@ export default {
             this.inputText = ""
             this.inputHash = ""
             this.$refs.upload.clearFiles()
-        }
+        },
+        onBeforeUpload(file) {
+            const isLt1M = Math.ceil(file.size / 1024) < 5000;
+            if (!isLt1M) {
+                this.$message.error(this.$t('text.fileSize_5000'));
+            }
+            return isLt1M;
+        },
     }
 }
 </script>

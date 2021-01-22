@@ -46,9 +46,9 @@ export default {
                 if (value === '') {
                     callback(new Error(_this.$t("rule.contractAbi")));
                 } else {
-                    if(!isJson(value)){
+                    if (!isJson(value)) {
                         callback(new Error('Invalid input: Unexpected end of JSON input'));
-                    }else {
+                    } else {
                         callback()
                     }
 
@@ -119,11 +119,11 @@ export default {
                     this.loading = false;
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     })
                 })
         },
-        close() { 
+        close() {
             this.$emit("closeUpdate")
         }
     }

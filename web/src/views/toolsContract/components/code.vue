@@ -21,7 +21,7 @@
                 <span ref="setReadOnly">{{contractName + '.sol'}}</span>
             </span>
             <span class="contract-code-handle" v-show="codeShow&&urlQuery.storeType =='1'">
-                <el-button type="primary" size="mini" @click="exportToIde">导出到IDE</el-button>
+                <el-button type="primary" size="mini" @click="exportToIde">{{$t('contracts.exportToIde')}}</el-button>
             </span>
         </div>
         <div class="contract-code-content" :class="{infoHide: !successHide}">

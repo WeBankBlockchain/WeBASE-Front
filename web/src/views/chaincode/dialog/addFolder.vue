@@ -31,7 +31,7 @@
     </div>
 </template>
 <script>
-import {addContractPath} from "@/util/api"
+import { addContractPath } from "@/util/api"
 export default {
     name: "addFolder",
     props: ['foldershow'],
@@ -47,7 +47,7 @@ export default {
                     {
                         min: 1,
                         max: 32,
-                        message: this.$t('dialog.rivateKeyVerifyLength1_32'),
+                        message: this.$t('dialog.privateKeyVerifyLength1_32'),
                         trigger: "blur"
                     },
                     {
@@ -93,19 +93,19 @@ export default {
                 groupId: localStorage.getItem("groupId")
             }
             addContractPath(reqData).then(res => {
-                if(res.status === 200){
+                if (res.status === 200) {
                     this.$emit("success")
-                }else {
-                        this.$message({
-                            type: "error",
-                            message: this.$chooseLang(res.data.code)
-                        });
-                    }
-                })
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         }
