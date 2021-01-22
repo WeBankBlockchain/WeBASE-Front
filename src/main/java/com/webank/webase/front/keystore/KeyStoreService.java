@@ -439,7 +439,7 @@ public class KeyStoreService {
      */
     public KeyStoreInfo importPrivateKeyToSign(String privateKeyEncoded, String signUserId, String appId) {
         // post private and save in sign
-        RspUserInfo rspUserInfo = getSignUserEntity(privateKeyEncoded, signUserId, appId);
+        RspUserInfo rspUserInfo = postSignUserEntity(privateKeyEncoded, signUserId, appId);
         // save in local as external
         KeyStoreInfo keyStoreInfo = saveSignKeyStore(rspUserInfo);
         return keyStoreInfo;
@@ -463,6 +463,11 @@ public class KeyStoreService {
                     new HttpEntity<String>(null, headers);
             ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.GET, formEntity, BaseResponse.class);
             BaseResponse baseResponse = response.getBody();
+            // check return null
+            if (baseResponse == null) {
+                log.error("getSignUserEntity fail restTemplateExchange, return :{}", baseResponse);
+                throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+            }
             log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
             if (baseResponse.getCode() == 0) {
                 rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
@@ -491,7 +496,7 @@ public class KeyStoreService {
      * @param privateKeyEncoded base64 encoded
      * @return RspUserInfo
      */
-    public RspUserInfo getSignUserEntity(String privateKeyEncoded, String signUserId, String appId) {
+    public RspUserInfo postSignUserEntity(String privateKeyEncoded, String signUserId, String appId) {
         try {
             RspUserInfo rspUserInfo = new RspUserInfo();
             String urlSpilt = Constants.WEBASE_SIGN_USER_URI.split("\\?")[0];
@@ -508,7 +513,7 @@ public class KeyStoreService {
             BaseResponse baseResponse = response.getBody();
             // check return null
             if (baseResponse == null) {
-                log.error("getSignUserEntity fail restTemplateExchange, return null");
+                log.error("getSignUserEntity fail restTemplateExchange, return :{}", baseResponse);
                 throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
             }
             log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
