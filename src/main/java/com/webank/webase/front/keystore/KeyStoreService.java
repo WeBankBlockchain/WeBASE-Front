@@ -439,7 +439,7 @@ public class KeyStoreService {
      */
     public KeyStoreInfo importPrivateKeyToSign(String privateKeyEncoded, String signUserId, String appId) {
         // post private and save in sign
-        RspUserInfo rspUserInfo = postSignUserEntity(privateKeyEncoded, signUserId, appId);
+        RspUserInfo rspUserInfo = postForSignUserEntity(privateKeyEncoded, signUserId, appId);
         // save in local as external
         KeyStoreInfo keyStoreInfo = saveSignKeyStore(rspUserInfo);
         return keyStoreInfo;
@@ -452,41 +452,20 @@ public class KeyStoreService {
      * @return
      */
     public RspUserInfo getSignUserEntity(String signUserId, String appId) {
-        try {
-            // webase-sign api(v1.3.0) support
-            RspUserInfo rspUserInfo = new RspUserInfo();
-            String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
-                    EncryptType.encryptType, signUserId, appId);
-            log.info("getSignUserEntity url:{}", url);
-            HttpHeaders headers = CommonUtils.buildHeaders();
-            HttpEntity<String> formEntity =
-                    new HttpEntity<String>(null, headers);
-            ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.GET, formEntity, BaseResponse.class);
-            BaseResponse baseResponse = response.getBody();
-            // check return null
-            if (baseResponse == null) {
-                log.error("getSignUserEntity fail restTemplateExchange, return :{}", baseResponse);
-                throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
-            }
-            log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
-            if (baseResponse.getCode() == 0) {
-                rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
-            }
-            return rspUserInfo;
-        } catch (ResourceAccessException ex) {
-            log.error("fail restTemplateExchange", ex);
-            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
-        } catch (HttpStatusCodeException e) {
-            JsonNode error = JsonUtils.stringToJsonNode(e.getResponseBodyAsString());
-            if (error == null) {
-                throw e;
-            }
-            log.error("http request fail. error:{}", JsonUtils.toJSONString(error));
-            // if return 404, no code or errorMessage
-            int code = error.get("code").intValue();
-            String errorMessage = error.get("errorMessage").asText();
-            throw new FrontException(code, errorMessage);
+        // webase-sign api(v1.3.0) support
+        String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
+                EncryptType.encryptType, signUserId, appId);
+        log.info("getSignUserEntity url:{}", url);
+        BaseResponse baseResponse = getForEntity(url);
+        log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
+        RspUserInfo rspUserInfo;
+        if (baseResponse.getCode() == 0) {
+            rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+        } else {
+            log.error("getSignUserEntity fail for:{}", baseResponse.getMessage());
+            throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
         }
+        return rspUserInfo;
     }
 
     /**
@@ -496,34 +475,62 @@ public class KeyStoreService {
      * @param privateKeyEncoded base64 encoded
      * @return RspUserInfo
      */
-    public RspUserInfo postSignUserEntity(String privateKeyEncoded, String signUserId, String appId) {
-        try {
-            RspUserInfo rspUserInfo = new RspUserInfo();
-            String urlSpilt = Constants.WEBASE_SIGN_USER_URI.split("\\?")[0];
-            String url = String.format(urlSpilt, constants.getKeyServer());
-            log.info("getSignUserEntity url:{}", url);
-            Map<String, Object> params = new HashMap<>();
-            params.put("privateKey", privateKeyEncoded);
-            params.put("signUserId", signUserId);
-            params.put("appId", appId);
-            params.put("encryptType", EncryptType.encryptType);
-            HttpEntity entity = CommonUtils.buildHttpEntity(params);
+    public RspUserInfo postForSignUserEntity(String privateKeyEncoded, String signUserId, String appId) {
+        String urlSpilt = Constants.WEBASE_SIGN_USER_URI.split("\\?")[0];
+        String url = String.format(urlSpilt, constants.getKeyServer());
+        log.info("getSignUserEntity url:{}", url);
+        Map<String, Object> params = new HashMap<>();
+        params.put("privateKey", privateKeyEncoded);
+        params.put("signUserId", signUserId);
+        params.put("appId", appId);
+        params.put("encryptType", EncryptType.encryptType);
 
-            ResponseEntity<BaseResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity, BaseResponse.class);
-            BaseResponse baseResponse = response.getBody();
-            // check return null
-            if (baseResponse == null) {
-                log.error("getSignUserEntity fail restTemplateExchange, return :{}", baseResponse);
-                throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
-            }
-            log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
-            if (baseResponse.getCode() == 0) {
-                rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
-            } else {
-                log.error("getSignUserEntity fail for:{}", baseResponse.getMessage());
-                throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
-            }
-            return rspUserInfo;
+        BaseResponse baseResponse = postForEntity(url, params);
+
+        log.info("postSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
+        RspUserInfo rspUserInfo;
+        if (baseResponse.getCode() == 0) {
+            rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+        } else {
+            log.error("getSignUserEntity fail for:{}", baseResponse.getMessage());
+            throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
+        }
+        return rspUserInfo;
+
+    }
+
+    /**
+     * post from front for entity.
+     */
+    private BaseResponse getForEntity(String url) {
+        BaseResponse response = restTemplateExchange(url, HttpMethod.GET, null, BaseResponse.class);
+        // check return null
+        if (response == null) {
+            log.error("getForEntity fail, return null");
+            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+        }
+        return response;
+    }
+
+    /**
+     * post from front for entity.
+     */
+    private BaseResponse postForEntity(String url, Object params) {
+        BaseResponse response = restTemplateExchange(url, HttpMethod.POST, params, BaseResponse.class);
+        // check return null
+        if (response == null) {
+            log.error("postForEntity fail, return null");
+            throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
+        }
+        return response;
+    }
+
+    private <T> T restTemplateExchange(String url, HttpMethod method, Object param, Class<T> clazz) {
+        try{
+            log.info("restTemplateExchange url:{}, param:{}", url, param);
+            HttpEntity entity = CommonUtils.buildHttpEntity(param);
+            ResponseEntity<T> response = restTemplate.exchange(url, method, entity, clazz);
+            return response.getBody();
         } catch (ResourceAccessException ex) {
             log.error("getSignUserEntity fail restTemplateExchange", ex);
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
