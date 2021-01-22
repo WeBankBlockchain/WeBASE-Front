@@ -686,14 +686,13 @@ public class Web3ApiService {
     public Object searchByCriteria(int groupId, String input) {
         if (StringUtils.isBlank(input)) {
             log.warn("fail searchByCriteria. input is null");
-            return null;
+            throw new FrontException(ConstantCode.PARAM_ERROR);
         }
         if (StringUtils.isNumeric(input)) {
             return getBlockByNumber(groupId, new BigInteger(input));
         } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
             return getTransactionByHash(groupId, input);
         }
-
         return null;
     }
 
