@@ -185,13 +185,12 @@ export default {
                 contractPath: this.folderName,
                 groupId: localStorage.getItem("groupId")
             }
-            console.log(param);
             batchSaveContract(param)
                 .then(res => {
                     if (res.data.code === 0) {
                         this.$message({
                             type: 'success',
-                            message: this.$t('text.importSuccessed')
+                            message: this.$t('text.exportSuccessed')
                         })
                         this.$router.push({
                             path: "/contract",

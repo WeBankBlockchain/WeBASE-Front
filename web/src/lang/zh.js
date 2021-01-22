@@ -27,7 +27,7 @@ export default {
         parseAbi: 'ABI编码',
         eventCheck: 'Event查看',
         onlineTools: '在线工具',
-        contractWarehouse: '合约仓库', 
+        contractWarehouse: '合约仓库',
         toolsContract: '工具合约'
     },
     navbar: {
@@ -138,9 +138,9 @@ export default {
     dialog: {
         addUsername: '添加用户名',
         pleaseEnterUserName: '请输入用户名',
-        rivateKeyVerifyLength: '长度在 3 到 32 个字符',
-        rivateKeyVerifyLength1_32: '长度在 1 到 32 个字符',
-        rivateKeyVerifyFont: '只能是数字或者字母组成',
+        privateKeyVerifyLength: '长度在 3 到 32 个字符',
+        privateKeyVerifyLength1_32: '长度在 1 到 32 个字符',
+        privateKeyVerifyFont: '只能是数字或者字母组成',
         rename: '重命名',
         newFile: '新建',
         delete: '删除',
@@ -168,7 +168,8 @@ export default {
         exportSol: '导出',
         cnsVersion: '请输入CNS版本',
         cnsVersionPattern: "数字字母和英文字母'.'组成",
-        cnsName: '请输入名称',
+        cnsName: '请输入CNS名称',
+        length1_10: '长度在 1 到 10 个字符',
     },
     placeholder: {
         globalSearch: '请输入 Block Number 或 Tx Hash',
@@ -280,6 +281,7 @@ export default {
         searchEmpty: '查询结果为空',
         noData: '暂无数据',
         importSuccessed: '导入成功',
+        exportSuccessed: '导出成功',
         updateSuccess: '成功',
         importFailed: '导入失败',
         addUserSuccessed: '新增成功',
@@ -320,7 +322,7 @@ export default {
         searchMessage: "查询成功",
         haveAbiAndBin: "缺少abi和bin",
         emptyFolder: "空文件夹",
-        folderIsExists:"目录已存在",
+        folderIsExists: "目录已存在",
         previewAndDescription: "预览和说明",
         developing: "更多精彩，敬请期待。。。",
         appIntroduction: "合约仓库",
@@ -337,6 +339,8 @@ export default {
         registerCnsTips: "如果版本号为空，则当前合约地址没有注册过CNS，可以输入版本号进行注册",
         registered: "已注册",
         updateRegister: "是否要更新注册",
+        fileSize_5000: "上传文件大小不能超过 5000kb!",
+        cnsNameVersion: "CNS名或CNS版本不能为空",
     },
     contracts: {
         createFile: "新建文件",
@@ -520,7 +524,8 @@ export default {
         passwordError: "密码不能是汉字",
         file: "文件",
         validatorPrivateKey: "请输入私钥",
-        validatorPrivateKey1: "请输入十六进制"
+        validatorPrivateKey1: "请输入十六进制",
+        importFileValidator: "请上传文件"
     },
     onlineTools: {
         onlineHashCalculator: 'Hash计算器',
@@ -528,10 +533,11 @@ export default {
         result: '结果',
         encryption: '加密',
         sign: '签名',
-        text: '文本', 
+        text: '文本',
         file: '文件',
-        drag:"将文件拖到此处，或",
+        drag: "将文件拖到此处，或",
         upload: "点击上传",
-        uploadNumLimit: "只能上传一个文件",
+        uploadNumLimit: "只能上传一个文件,且不超过5000kb。",
+        user: "用户"
     }
 }
