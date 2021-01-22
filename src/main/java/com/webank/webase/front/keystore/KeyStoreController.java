@@ -131,7 +131,7 @@ public class KeyStoreController extends BaseController {
     public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
         String pemContent = reqImportPem.getPemContent();
         String userName = reqImportPem.getUserName();
-        if(!pemContent.startsWith(PemUtils.crtContentHead)) {
+        if(!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
             throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
         }
         keyStoreService.importKeyStoreFromPem(pemContent, userName);
