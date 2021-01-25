@@ -532,7 +532,7 @@ export default {
         onlineHashCalculator: 'Hash Calculator',
         algorithm: 'algorithm',
         result: 'Result',
-        encryption: 'Encryption',
+        encryption: 'Encrypt',
         sign: 'Sign',
         text: 'Text',
         file: 'File',
