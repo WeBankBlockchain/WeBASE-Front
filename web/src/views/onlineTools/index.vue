@@ -1,6 +1,6 @@
 <template>
     <div>
-        <content-head :headTitle="$t('route.onlineTools')"></content-head>
+        <content-head :headTitle="$t('route.onlineTools')" @changeGroup="changeGroup"></content-head>
         <div class="module-wrapper" style="padding: 20px 20px 20px 20px;">
             <el-tabs v-model="activeName" @tab-click="handleClick">
                 <el-tab-pane :label="$t('onlineTools.onlineHashCalculator')" name="first">
@@ -79,7 +79,7 @@
                     <parse-abi></parse-abi>
                 </el-tab-pane>
                 <el-tab-pane :label="$t('route.eventCheck')" name="fourth">
-                    <event-check></event-check>
+                    <event-check ref="event" :groupId="groupId"></event-check>
                 </el-tab-pane>
             </el-tabs>
         </div>
@@ -92,7 +92,8 @@ import parseAbi from "../parseAbi/index.vue";
 import eventCheck from "../eventCheck/index.vue";
 import { queryLocalKeyStores, signHash } from "@/util/api";
 const gm = require('@/util/SM2Sign');
-import CryptoJS from 'crypto-js'
+import CryptoJS from 'crypto-js';
+import Bus from "@/bus";
 export default {
     name: 'onlineTools',
 
@@ -127,7 +128,8 @@ export default {
             fileList: [],
             fileType: "file-first",
             placeholderText: this.$t('placeholder.selectedAccountAddress'),
-            encryptionId: localStorage.getItem('encryptionId')
+            encryptionId: localStorage.getItem('encryptionId'),
+            groupId: localStorage.getItem("groupId"),
         }
     },
 
@@ -135,16 +137,36 @@ export default {
     },
 
     watch: {
+        $route() {
+            this.queryInit()
+        }
     },
 
     created() {
     },
-
+    beforeDestroy: function () {
+        Bus.$off("changeGroup")
+    },
     mounted() {
+        Bus.$on("changeGroup", data => {
+            this.changeGroup(data)
+        })
+        this.queryInit();
         this.getLocalKeyStores();
     },
 
     methods: {
+        changeGroup(data){
+            this.groupId = data;
+            this.$refs.event.$emit('changeGroup', data)
+        },
+        queryInit() {
+            if (this.$route.query.type) {
+                this.activeName = "fourth";
+            } else {
+                this.activeName = "first";
+            }
+        },
         encryption() {
             if (this.algorithm === 'sha256') {
                 let content;
@@ -203,7 +225,6 @@ export default {
                     this.loading = false;
                     const { data, status } = res;
                     if (status === 200) {
-                        console.log(res.data);
                         this.inputSign = res.data;
                     } else {
                         this.$message({
@@ -268,18 +289,14 @@ export default {
             var currentChunk = 0;
 
             var hasher = CryptoJS.algo.SHA256.create();
-            console.log(1111, hasher);
-
             // FileReader分片式读取文件
             // 计算开始读取的位置
             var start = currentChunk * chunkSize;
             // 计算结束读取的位置
             var end = start + chunkSize >= contractFile.size ? contractFile.size : start + chunkSize;
             reader.readAsArrayBuffer(blobSlice.call(contractFile, start, end));
-            console.log(2222, hasher);
             reader.onload = function (evt) {
                 if (evt.target.readyState == 2) {
-                    console.log(333, hasher);
                     var fileStr = evt.target.result;
                     var tmpWordArray = self.arrayBufferToWordArray(fileStr);
                     hasher.update(tmpWordArray);
@@ -325,7 +342,7 @@ export default {
             this.$refs.upload.clearFiles()
         },
         uploadSuccess(response, file, fileList) {
-            console.log(response, file, fileList);
+
         },
         handleFileType() {
             this.inputFile = ""
