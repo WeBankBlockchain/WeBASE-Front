@@ -32,13 +32,13 @@ public class PresetDataService {
                 "Toolbox Contract suite","Toolbox Contract suite");
 
         insertStoreItem(evidenceId,"存证应用","Evidence","2","evidenceId",
-                "一套区块链存证合约，使用智能合约对存证进行管理",
-                "一套区块链存证合约，使用智能合约对存证进行管理",
+                "一套区块链存证合约，实现区块链存证、取证",
+                "一套区块链存证合约，实现区块链存证、取证",
                 "Evidence Contract suite","Evidence Contract suite");
 
         insertStoreItem(pointsId,"积分应用","Points","3","pointsId",
-                "一套积分合约,具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
-                "一套积分合约,具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+                "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+                "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
                 "Points Contract suite","Points Contract suite");
     }
 
@@ -70,14 +70,14 @@ public class PresetDataService {
                 "Toolbox Contract suite");
 
         insertContractFolderItem(contractFolderIndex++,evidenceId,"Evidence",
-                "一套区块链存证合约，使用智能合约对存证进行管理",
-                "一套区块链存证合约，使用智能合约对存证进行管理",
+                "一套区块链存证合约，实现区块链存证、取证",
+                "一套区块链存证合约，实现区块链存证、取证",
                 "Evidence Contract suite",
                 "Evidence Contract suite");
 
         insertContractFolderItem(contractFolderIndex++,pointsId,"Points",
-                "一套积分合约,具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
-                "一套积分合约,具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+                "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+                "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
                 "Points Contract suite",
                 "Points Contract suite");
     }
