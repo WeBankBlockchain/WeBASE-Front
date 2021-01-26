@@ -280,7 +280,7 @@ export default {
         handleEvent: function (val) {
             this.contractInfo = val;
             this.$router.push({
-                path: '/eventCheck',
+                path: '/onlineTools',
                 query: {
                     groupId: this.groupId,
                     type: 'contract',
