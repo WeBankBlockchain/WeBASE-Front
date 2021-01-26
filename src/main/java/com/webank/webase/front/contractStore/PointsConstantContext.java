@@ -20,7 +20,7 @@ public class PointsConstantContext {
     public static final String BAC001_MD = "# 积分合约\n" +
             "\n" +
             "## 简介\n" +
-            " BAC001 是一套区块链积分合约，可以积分相关的增发，销毁，暂停合约，黑白名单等权限控制。\n" +
+            " BAC001 是一套区块链积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能。\n" +
             "\n" +
             "## 四个基本元素\n" +
             "\n" +
