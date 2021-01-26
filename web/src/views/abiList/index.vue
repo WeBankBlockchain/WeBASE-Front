@@ -310,7 +310,7 @@ export default {
         },
         checkEvent: function (val) {
             this.$router.push({
-                path: '/eventCheck',
+                path: '/onlineTools',
                 query: {
                     groupId: this.groupId,
                     type: 'abi',
