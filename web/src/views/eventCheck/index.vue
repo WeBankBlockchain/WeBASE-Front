@@ -236,7 +236,9 @@ export default {
             this.groupId = data
             this.changeGroup()
         })
-        this.queryInit()
+        if(localStorage.getItem("groupId")){
+            this.queryInit()
+        }
     },
 
     methods: {
