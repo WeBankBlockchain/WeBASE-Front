@@ -72,7 +72,7 @@ export default {
     },
     mounted() {
         this.getContractPaths();
-        if(this.folderItem){
+        if (this.folderItem) {
             this.folderFrom.folderName = this.folderItem.storeName_en
         }
     },
@@ -96,15 +96,18 @@ export default {
 
         submit(formName) {
             this.$refs[formName].validate(valid => {
-                if (valid && !this.pathList.includes(this.folderFrom.folderName)) {
-                    this.$emit("success", this.folderFrom.folderName)
-                } else {
-                    this.$message({
-                        type: 'error',
-                        message: this.$t('text.folderIsExists')
-                    })
-                    return false
+                if (valid) {
+                    if (valid && !this.pathList.includes(this.folderFrom.folderName)) {
+                        this.$emit("success", this.folderFrom.folderName)
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: this.$t('text.folderIsExists')
+                        })
+                        return false
+                    }
                 }
+
             })
         },
         close() {

@@ -3,7 +3,7 @@
         <content-head :headTitle="$t('route.contractWarehouse')"></content-head>
         <div class="module-wrapper" style="padding: 20px;" v-loading="loading">
             <div class="contract-introduction">
-                <p>{{$t('text.appIntroduction')}}</p>
+                <!-- <p>{{$t('text.appIntroduction')}}</p> -->
                 <p>{{$t('text.warehouseDes')}}</p>
             </div>
 
