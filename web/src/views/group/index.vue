@@ -49,7 +49,7 @@ export default {
     },
     computed: {
         nodeHead() {
-            var arr =  [
+            var arr = [
                 {
                     enName: "nodeId",
                     name: this.$t('table.nodeId'),
@@ -71,7 +71,7 @@ export default {
                     width: 150
                 }
             ]
-            return arr 
+            return arr
         }
     },
     data() {
@@ -113,7 +113,7 @@ export default {
                 })
                 .catch(err => {
                     this.$message({
-                        message: this.$t('text.systemError'),
+                        message: err.data || this.$t('text.systemError'),
                         type: "error",
                         duration: 2000
                     });

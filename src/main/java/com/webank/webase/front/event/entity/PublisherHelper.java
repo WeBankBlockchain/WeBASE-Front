@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PublisherHelper {
 
-	private Integer groupId;
-	private String exchangeName;
-	private String routingKey;
+    private Integer groupId;
+    private String exchangeName;
+    private String routingKey;
 }

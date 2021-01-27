@@ -1,0 +1,88 @@
+name: Docker Build And Push To Docker Hub
+
+on:
+#  schedule:
+#    - cron: '0 10 * * *' # everyday at 10am
+  push:
+    tags:
+      - 'v*.*.*'
+#  pull_request:
+
+env:
+  DOCKER_REPOSITORY: webase-front
+
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: clean build -x test
+
+      - name: Get branch name
+        uses: nelonoel/branch-name@v1.0.1
+
+      - name: Fetch tag
+        run: |
+          git fetch --tags --force
+
+      - name: Get git tag
+        uses: little-core-labs/get-git-tag@v3.0.1
+        id: tag_data
+        with:
+          tagRegex: (.*)  # Optional. Returns specified group text as tag name. Full tag string is returned if regex is not defined.
+          tagRegexGroup: 1 # Optional. Default is 1.
+
+      - name: Set docker tag from tag
+        id: set_docker_tag
+        run: |
+          [[ ${{github.ref}} == */tags/* ]] && DOCKER_TAG="${GIT_TAG_NAME}" || DOCKER_TAG="${BRANCH_NAME}"
+          DOCKER_TAG="${{ secrets.DOCKERHUB_ORG }}/${DOCKER_REPOSITORY}:${DOCKER_TAG}"
+
+
+          echo "New docker tag is ${DOCKER_TAG}"
+          echo "::set-output name=docker_tag::$(echo ${DOCKER_TAG})"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+            # - name: Copy nginx config file
+            #   id: copy-nginx-file
+            #   run: |
+            #     cp ./docker/weoracle-web.conf dist/
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./dist
+          push: true
+          file: ./docker/build/Dockerfile
+          platforms: linux/amd64
+          tags: ${{ steps.set_docker_tag.outputs.docker_tag }}
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+
+      - name: send custom message with args
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          args: ${{ steps.set_docker_tag.outputs.docker_tag }} of ${{github.repository }} build success.

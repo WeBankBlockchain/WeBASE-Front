@@ -14,12 +14,12 @@
 
 package com.webank.webase.front.util;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.webank.webase.front.base.code.ConstantCode;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.web3j.abi.EventValues;
 import org.fisco.bcos.web3j.abi.TypeReference;
@@ -32,7 +32,6 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tx.Contract;
 import org.fisco.bcos.web3j.tx.txdecode.ConstantProperties;
-import com.webank.webase.front.base.exception.FrontException;
 
 /**
  * ContractAbiUtil.
@@ -151,15 +150,19 @@ public class AbiUtil {
                     throw new FrontException(ConstantCode.PARAM_ERROR);
                 }
                 List<Type> arrParams = new ArrayList<>();
-                for (int j = 0; j < arrList.size(); j++) {
-                    inputType = AbiTypes.getType(
-                            funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")));
-                    input = ContractTypeUtil.parseByType(
-                            funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")),
-                            arrList.get(j).toString());
-                    arrParams.add(ContractTypeUtil.generateClassFromInput(input.toString(), inputType));
+                if (arrList.size() > 0) {
+                    for (int j = 0; j < arrList.size(); j++) {
+                        inputType = AbiTypes.getType(
+                                funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")));
+                        input = ContractTypeUtil.parseByType(
+                                funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")),
+                                arrList.get(j).toString());
+                        arrParams.add(ContractTypeUtil.generateClassFromInput(input.toString(), inputType));
+                    }
+                    finalInputs.add(new DynamicArray<>(arrParams));
+                } else {
+                    finalInputs.add(DynamicArray.empty(funcInputTypes.get(i)));
                 }
-                finalInputs.add(new DynamicArray<>(arrParams));
             } else {
                 inputType = AbiTypes.getType(funcInputTypes.get(i));
                 input = ContractTypeUtil.parseByType(funcInputTypes.get(i),

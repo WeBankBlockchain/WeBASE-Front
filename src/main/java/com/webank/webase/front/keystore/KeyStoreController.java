@@ -24,8 +24,11 @@ import com.webank.webase.front.keystore.entity.*;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.PemUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.crypto.Sign;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.response.BaseResponse;
@@ -128,7 +131,7 @@ public class KeyStoreController extends BaseController {
     public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
         String pemContent = reqImportPem.getPemContent();
         String userName = reqImportPem.getUserName();
-        if(!pemContent.startsWith(PemUtils.crtContentHead)) {
+        if(!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
             throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
         }
         keyStoreService.importKeyStoreFromPem(pemContent, userName);
@@ -162,6 +165,28 @@ public class KeyStoreController extends BaseController {
     public KeyStoreInfo importPrivateKeyWithSign(@Valid @RequestBody ReqImportWithSign reqImportWithSign) {
         return keyStoreService.importPrivateKeyToSign(reqImportWithSign.getPrivateKey(),
                 reqImportWithSign.getSignUserId(), reqImportWithSign.getAppId());
+    }
+
+    /**
+     * sign MessageHash by ecdsa or guomi encryption
+     *
+     * @param req parameter
+     */
+    @ApiOperation(value = "sign MessageHash by ecdsa(default) or guomi",
+            notes = "获取ECDSA或国密SM2 hash的签名数据，默认ECDSA")
+    @ApiImplicitParam(name = "req", value = "Message", required = true,
+            dataType = "MessageHashInfo")
+    @PostMapping("/signMessageHash")
+    public BaseResponse signMessageHash(@Valid @RequestBody MessageHashInfo req) {
+        String str = keyStoreService.getMessageHashSignData(req);
+        Sign.SignatureData signData = CommonUtils.stringToSignatureData(str);
+        RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+        rspMessageHashSignature.setP(Numeric.toHexString(signData.getPub()));
+        rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
+        rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
+        rspMessageHashSignature.setV(signData.getV());
+        return new BaseResponse(ConstantCode.RET_SUCCESS,rspMessageHashSignature);
+
     }
 
 }

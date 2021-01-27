@@ -686,14 +686,13 @@ public class Web3ApiService {
     public Object searchByCriteria(int groupId, String input) {
         if (StringUtils.isBlank(input)) {
             log.warn("fail searchByCriteria. input is null");
-            return null;
+            throw new FrontException(ConstantCode.PARAM_ERROR);
         }
         if (StringUtils.isNumeric(input)) {
             return getBlockByNumber(groupId, new BigInteger(input));
         } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
             return getTransactionByHash(groupId, input);
         }
-
         return null;
     }
 
@@ -938,9 +937,9 @@ public class Web3ApiService {
         try {
             return getWeb3j(groupId).getBlockHeaderByHash(blockHash, returnSealers).send();
         } catch (IOException e) {
-        log.error("getBlockHeaderByHash fail:[]", e);
-        throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
-    }
+            log.error("getBlockHeaderByHash fail:[]", e);
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
     }
 
     public BcosBlockHeader getBlockHeaderByNumber(Integer groupId, BigInteger blockNumber,

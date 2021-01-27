@@ -25,5 +25,5 @@ import java.util.List;
  */
 @Data
 public class ReqGroupStatus {
-	private List<Integer> groupIdList;
+    private List<Integer> groupIdList;
 }

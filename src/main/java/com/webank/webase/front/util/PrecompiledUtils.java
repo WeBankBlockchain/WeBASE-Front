@@ -53,24 +53,17 @@ import static org.fisco.bcos.web3j.precompile.common.PrecompiledCommon.TableName
 import static org.fisco.bcos.web3j.precompile.common.PrecompiledCommon.TableNameAndAddressNotExist_RC3;
 import static org.fisco.bcos.web3j.precompile.common.PrecompiledCommon.TableNameLengthOverflow;
 import static org.fisco.bcos.web3j.precompile.common.PrecompiledCommon.VersionExceeds;
-
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import java.math.BigInteger;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
-
 import java.io.IOException;
-import java.util.List;
+import java.math.BigInteger;
 import java.util.Map;
-import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
-import org.fisco.bcos.web3j.protocol.Web3j;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
 
 /**
  * Constants and tool function related with Precompiled module
@@ -131,7 +124,9 @@ public class PrecompiledUtils {
 
     public static boolean checkVersion(String version) {
 
-        if (version.length() > CnsService.MAX_VERSION_LENGTH) { // length exceeds
+        if (StringUtils.isBlank(version)) {
+            return false;
+        }else if (version.length() > CnsService.MAX_VERSION_LENGTH) { // length exceeds
             return false;
         }else if (!version.matches("^[A-Za-z0-9.]+$")) { // check version's character
             return false;

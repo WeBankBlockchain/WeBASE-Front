@@ -14,21 +14,30 @@
  * limitations under the License.
  */
 <template>
-    <div id="app" class="web-font">
-        <router-view></router-view>
+    <div id="app" class="web-font" v-loading='loading'>
+        <!-- <div v-if="!show"  >页面加载中...</div> -->
+        <router-view v-if="show"></router-view>
     </div>
 </template>
 
 <script>
-import {VueLoading } from 'vue-loading-template'
+import { VueLoading } from 'vue-loading-template'
+import {
+    queryGroup
+} from "@/util/api";
 export default {
     name: "App",
     components: {
-        VueLoading 
+        VueLoading
     },
     data() {
         return {
+            group: null,
+            groupName: '',
+            groupList: [],
             load: this.$root.load,
+            show: false,
+            loading: false,
             userForm: {
                 password: ""
             },
@@ -49,7 +58,63 @@ export default {
             }
         };
     },
-    methods: {}
+    mounted() {
+        this.getGroup()
+    },
+    methods: {
+        getGroup() {
+            this.loading = true
+            queryGroup()
+                .then(res => {
+                    this.loading = false
+                    const { data, status, statusText } = res;
+                    if (status === 200 && data && data.length) {
+                        let arr = data.sort((a, b) => {
+                            return a - b
+                        }),
+                            list = [];
+                        for (let i = 0; i < arr.length; i++) {
+                            list.push({
+                                group: arr[i],
+                                groupName: `group${arr[i]}`
+                            });
+                        }
+                        this.groupList = list;
+                        if (!this.group) {
+                            this.group = this.groupList[0].group;
+                            this.groupName = this.groupList[0].groupName;
+                        } else {
+
+                        }
+                        localStorage.setItem("groupName", this.groupName)
+                        localStorage.setItem('groupId', this.group);
+                        this.show = true
+                        localStorage.setItem("cluster", JSON.stringify(list));
+                    } else {
+                        this.show = true
+                        localStorage.setItem("groupName", "")
+                        localStorage.setItem('groupId', "");
+                        if(res.data.code){
+                            this.$message({
+                                type: "error",
+                                message: this.$chooseLang(res.data.code)
+                            });
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.log(err)
+                    this.loading = false
+                    this.show = true
+                    localStorage.setItem("groupName", "")
+                    localStorage.setItem('groupId', "");
+                    this.$message({
+                        type: "error",
+                        message: err.data || this.$t('text.systemError')
+                    });
+                });
+        },
+    }
 };
 </script>
 

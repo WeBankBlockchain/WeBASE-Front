@@ -47,34 +47,34 @@ public class NewBlockEventCallback implements BlockNotifyCallBack {
         logger.info("NewBlockEventCallBack groupID:{}, blockNumber:{}",
                 groupID, blockNumber);
         // register map
-		if (BLOCK_ROUTING_KEY_MAP.isEmpty()) {
-			logger.debug("block notify register list is empty. ");
-			return;
-		}
-		BlockPushMessage blockPushMessage = new BlockPushMessage();
-		blockPushMessage.setBlockNumber(blockNumber);
-		blockPushMessage.setGroupId(groupID);
-		blockPushMessage.setEventType(EventTypes.BLOCK_NOTIFY.getValue());
-		for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
-			blockPushMessage.setAppId(appId);
-			PublisherHelper blockPublishInfo = BLOCK_ROUTING_KEY_MAP.get(appId);
-			if (groupID == blockPublishInfo.getGroupId()) {
-				pushMessage2MQ(blockPublishInfo.getExchangeName(),
-						blockPublishInfo.getRoutingKey(), blockPushMessage);
-			}
-		}
+        if (BLOCK_ROUTING_KEY_MAP.isEmpty()) {
+            logger.debug("block notify register list is empty. ");
+            return;
+        }
+        BlockPushMessage blockPushMessage = new BlockPushMessage();
+        blockPushMessage.setBlockNumber(blockNumber);
+        blockPushMessage.setGroupId(groupID);
+        blockPushMessage.setEventType(EventTypes.BLOCK_NOTIFY.getValue());
+        for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
+            blockPushMessage.setAppId(appId);
+            PublisherHelper blockPublishInfo = BLOCK_ROUTING_KEY_MAP.get(appId);
+            if (groupID == blockPublishInfo.getGroupId()) {
+                pushMessage2MQ(blockPublishInfo.getExchangeName(),
+                        blockPublishInfo.getRoutingKey(), blockPushMessage);
+            }
+        }
 
 
     }
 
-	/**
-	 * push message to mq
-	 * @param exchangeName
-	 * @param routingKey
-	 * @param blockPushMessage
-	 */
+    /**
+     * push message to mq
+     * @param exchangeName
+     * @param routingKey
+     * @param blockPushMessage
+     */
     private void pushMessage2MQ(String exchangeName, String routingKey,
-								BlockPushMessage blockPushMessage) {
+                                BlockPushMessage blockPushMessage) {
         logger.debug("NewBlockEventCallBack pushMessage2MQ blockPushMessage:{}",
                 blockPushMessage.toString());
         MQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,

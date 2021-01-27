@@ -24,12 +24,14 @@ import axios from 'axios'
 import { getCookie, setCookie, delCookie } from './util/util'
 import VueClipboard from 'vue-clipboard2'
 import JsonViewer from 'vue-json-viewer'
+import filters from './util/filter.js'
 import Cookies from 'js-cookie'
 import 'element-ui/lib/theme-chalk/index.css'
 /*iconfont*/
 import '@/assets/icon/iconfont.css'
 import '@/assets/icon/iconfont.js'
 import '@/assets/icon/iconfont_webaas.css'
+import './svgIcons'
 /*public css moudle */
 import '@/assets/css/common.css'
 import i18n from './lang' // internationalization
@@ -65,6 +67,9 @@ import _ from 'lodash'
 Vue.prototype._ = _
 import { message } from '@/util/message.js';
 Vue.prototype.$message = message;
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
+Vue.use(mavonEditor)
 /* eslint-disable no-new */
 new Vue({
     el: '#app',

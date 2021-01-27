@@ -15,38 +15,38 @@ repositories {
     maven {
         url "http://maven.aliyun.com/nexus/content/groups/public/"
     }
-	mavenCentral()
-	maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-	maven { url 'https://dl.bintray.com/ethereum/maven/' }
-	maven { url 'http://repo.typesafe.com/typesafe/maven-releases/' }
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url 'https://dl.bintray.com/ethereum/maven/' }
+    maven { url 'http://repo.typesafe.com/typesafe/maven-releases/' }
     mavenLocal()
 
 }
 
 def spring_version="4.3.27.RELEASE"
 List spring =[
-	"org.springframework:spring-core:$spring_version",
-	"org.springframework:spring-beans:$spring_version",
-	"org.springframework:spring-context:$spring_version",
-	"org.springframework:spring-tx:$spring_version",
-	"org.springframework:spring-web:$spring_version",
-	"org.springframework:spring-webmvc:$spring_version",
-	"org.springframework:spring-jdbc:$spring_version",
-	// cover old version
-	"org.springframework:spring-aspects:$spring_version",
-	"org.springframework:spring-messaging:$spring_version",
-	"org.springframework:spring-orm:$spring_version",
-	"org.springframework:spring-test:$spring_version"
+    "org.springframework:spring-core:$spring_version",
+    "org.springframework:spring-beans:$spring_version",
+    "org.springframework:spring-context:$spring_version",
+    "org.springframework:spring-tx:$spring_version",
+    "org.springframework:spring-web:$spring_version",
+    "org.springframework:spring-webmvc:$spring_version",
+    "org.springframework:spring-jdbc:$spring_version",
+    // cover old version
+    "org.springframework:spring-aspects:$spring_version",
+    "org.springframework:spring-messaging:$spring_version",
+    "org.springframework:spring-orm:$spring_version",
+    "org.springframework:spring-test:$spring_version"
 
 ]
 
 def spring_boot_version="1.5.22.RELEASE"
 List spring_boot =[
-	"org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
-	"org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
-	"org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
-	"org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version",
-	"org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version"
+    "org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
+    "org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
+    "org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
+    "org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version",
+    "org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version"
 ]
 
 
@@ -58,10 +58,10 @@ List swagger = [
 
 def log4j_version="2.13.3"
 List logger = [
-	"org.apache.logging.log4j:log4j-api:$log4j_version",
-	"org.apache.logging.log4j:log4j-core:$log4j_version",
-	"org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
-	"org.apache.logging.log4j:log4j-web:$log4j_version"
+    "org.apache.logging.log4j:log4j-api:$log4j_version",
+    "org.apache.logging.log4j:log4j-core:$log4j_version",
+    "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
+    "org.apache.logging.log4j:log4j-web:$log4j_version"
 ]
 
 List jaxb = [
@@ -73,44 +73,46 @@ List jaxb = [
 
 def jackson_version = "2.11.0"
 List jackson = [
-	"com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
-	"com.fasterxml.jackson.core:jackson-core:$jackson_version",
-	"com.fasterxml.jackson.core:jackson-databind:$jackson_version",
-	"com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
+    "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
+    "com.fasterxml.jackson.core:jackson-core:$jackson_version",
+    "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
+    "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
 ]
 
 // cover old version
 def tomcat_version = "8.5.56"
 List tomcat = [
-	"org.apache.tomcat.embed:tomcat-embed-core:$tomcat_version",
-	"org.apache.tomcat.embed:tomcat-embed-el:$tomcat_version",
-	"org.apache.tomcat.embed:tomcat-embed-websocket:$tomcat_version",
-	"org.apache.tomcat:tomcat-jdbc:$tomcat_version",
-	"org.apache.tomcat:tomcat-juli:$tomcat_version"
+    "org.apache.tomcat.embed:tomcat-embed-core:$tomcat_version",
+    "org.apache.tomcat.embed:tomcat-embed-el:$tomcat_version",
+    "org.apache.tomcat.embed:tomcat-embed-websocket:$tomcat_version",
+    "org.apache.tomcat:tomcat-jdbc:$tomcat_version",
+    "org.apache.tomcat:tomcat-juli:$tomcat_version"
 ]
 
 dependencies {
-  	compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat
-	compile 'org.fisco-bcos:web3sdk:2.6.2'
-	// support guomi/ecdsa same time, support solcJ-0.5.2
-	compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
-	compile 'com.h2database:h2:1.4.197'
-        compile 'org.fusesource:sigar:1.6.4'
-        annotationProcessor 'org.projectlombok:lombok:1.18.6'
-	compile 'org.projectlombok:lombok:1.18.6'
-	compile 'com.github.jsqlparser:jsqlparser:2.0'
-	compile 'org.apache.commons:commons-lang3:3.8.1'
-	compile 'org.slf4j:jcl-over-slf4j:1.7.30'
-	// cover low version guava
-	compile 'com.google.guava:guava:29.0-jre'
-	testCompile('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
-	testCompile 'junit:junit:4.12',
-				'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
-				'com.github.macdao:moscow:0.1.0',
-				'com.squareup.okhttp3:okhttp:3.1.2'
-				'org.springframework.amqp:spring-rabbit-test'
+      compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat
+    compile 'org.fisco-bcos:web3sdk:2.6.2'
+    // support guomi/ecdsa same time, support solcJ-0.5.2
+    compile 'org.fisco-bcos.java-sdk:fisco-bcos-sdk-crypto:2.7.1-SNAPSHOT'
+    compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
+    compile 'com.h2database:h2:1.4.200'
+    compile 'org.fusesource:sigar:1.6.4'
+    annotationProcessor 'org.projectlombok:lombok:1.18.6'
+    compile 'org.projectlombok:lombok:1.18.6'
+    compile 'com.github.jsqlparser:jsqlparser:2.0'
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+    compile 'org.slf4j:jcl-over-slf4j:1.7.30'
+    // cover low version guava
+    compile 'com.google.guava:guava:29.0-jre'
+    testCompile('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testCompile 'junit:junit:4.12',
+                'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
+                'com.github.macdao:moscow:0.1.0',
+                'com.squareup.okhttp3:okhttp:3.1.2'
+                'org.springframework.amqp:spring-rabbit-test'
+
 }
 
 configurations {
@@ -122,7 +124,7 @@ configurations {
 }
 
 configurations.all {
-	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
 clean {
@@ -132,34 +134,34 @@ clean {
 }
 
 jar {
-	destinationDir file('dist/apps')
-	archiveName project.name + '.jar'
-	exclude '**/*.xml'
-	exclude '**/*.properties'
+    destinationDir file('dist/apps')
+    archiveName project.name + '.jar'
+    exclude '**/*.xml'
+    exclude '**/*.properties'
 
     doLast {
         copy {
             from file('src/main/resources/')
             into 'dist/conf_template'
-			exclude '**/static'
+            exclude '**/static'
         }
-		copy {
-			from file('src/main/resources/static')
-			into 'dist/static'
-		}
+        copy {
+            from file('src/main/resources/static')
+            into 'dist/static'
+        }
         copy {
             from file('report/')
             into 'dist/report'
         }
-		copy {
-			from configurations.runtime
-			into 'dist/lib'
-		}
-		copy {
-			from file('.').listFiles().findAll{File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env'))}
-			into 'dist'
-		}
-	copy {
+        copy {
+            from configurations.runtime
+            into 'dist/lib'
+        }
+        copy {
+            from file('.').listFiles().findAll{File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env'))}
+            into 'dist'
+        }
+    copy {
             from file('release_note.txt')
             into 'dist'
         }

@@ -21,7 +21,7 @@
                 <div style="display: flex;">
                     <el-button type="primary" class="search-part-left-btn" @click="creatUserBtn">{{$t('table.addUser')}}</el-button>
                     <el-button type="primary" class="search-part-left-btn" @click="$store.dispatch('switch_import_rivate_key_dialog')">{{this.$t('table.importPrivateKey')}}</el-button>
-                     <el-tooltip class="item" effect="dark" :content="$t('text.privateKeyManagementInfo')" placement="top-start">
+                    <el-tooltip class="item" effect="dark" :content="$t('text.privateKeyManagementInfo')" placement="top-start">
                         <i class="el-icon-info" style="color: #fff;font-size: 18px;margin: 12px 0 0 15px;"></i>
                     </el-tooltip>
                 </div>
@@ -64,7 +64,7 @@
             </div>
         </el-dialog>
         <el-dialog :visible.sync="$store.state.importRivateKey" :title="$t('table.importPrivateKey')" width="640px" :append-to-body="true" class="dialog-wrapper" v-if='$store.state.importRivateKey' center>
-            <import-key @importRivateKeySuccess="importRivateKeySuccess" ref="importKey"></import-key>
+            <import-key @importPrivateKeySuccess="importPrivateKeySuccess" ref="importKey"></import-key>
         </el-dialog>
     </div>
 </template>
@@ -73,7 +73,7 @@
 <script>
 import contentHead from "@/components/contentHead";
 import importKey from "./dialog/importKey"
-import { queryCreatePrivateKey, queryLocalKeyStores, queryDeletePrivateKey,encryption } from "@/util/api";
+import { queryCreatePrivateKey, queryLocalKeyStores, queryDeletePrivateKey, encryption } from "@/util/api";
 import { unique } from "@/util/util";
 const FileSaver = require("file-saver");
 import Bus from "@/bus";
@@ -120,7 +120,7 @@ export default {
                     },
                     {
                         pattern: /^[A-za-z0-9]+$/,
-                        message: this.$t('dialog.rivateKeyVerifyFont'),
+                        message: this.$t('dialog.privateKeyVerifyFont'),
                         trigger: "blur",
 
                     },
@@ -128,7 +128,7 @@ export default {
                         trigger: "blur",
                         min: 3,
                         max: 32,
-                        message: this.$t('dialog.rivateKeyVerifyLength'),
+                        message: this.$t('dialog.privateKeyVerifyLength'),
                     }
                 ]
             }
@@ -152,21 +152,21 @@ export default {
         this.getEncryption()
     },
     methods: {
-        getEncryption: function(){
+        getEncryption: function () {
             encryption().then(res => {
-                if(res.status == 200){
-                    localStorage.setItem("encryptionId",res.data)
-                }else {
+                if (res.status == 200) {
+                    localStorage.setItem("encryptionId", res.data)
+                } else {
                     this.$message({
-                            type: "error",
-                            message: this.$chooseLang(res.data.code)
-                        });
-                    }
-                })
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -200,7 +200,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 })
         },
@@ -245,7 +245,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -281,7 +281,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -309,8 +309,8 @@ export default {
             var blob = new Blob([str], { type: "text;charset=utf-8" });
             FileSaver.saveAs(blob, params.userName);
         },
-       
-        importRivateKeySuccess(){
+
+        importPrivateKeySuccess() {
             this.getLocalKeyStores();
         }
     }

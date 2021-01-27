@@ -32,6 +32,41 @@
                     </div>
                 </td>
             </tr>
+            <tr>
+                <td style="width: 100px;text-align: right" class="text-td"><span class="font-color-fff">CNS：</span></td>
+                <td>
+                    <el-checkbox v-model="isCNS" @change="changeCns"></el-checkbox>
+                </td>
+            </tr>
+
+            <tr v-if="isCNS">
+                <td style="width: 100px;text-align: right" class="text-td"><span class="font-color-fff"></span></td>
+                <td>
+                    <el-form :model="cnsVersionFrom" :rules="rules" ref="cnsVersionFrom" class="demo-ruleForm">
+                        <el-form-item prop="cnsName">
+                            <el-input v-model="cnsVersionFrom.cnsName" style="width: 310px;" :placeholder="$t('placeholder.inputCnsName')">
+                                <template slot="prepend" style="width: 51px;">
+                                    <span class="parame-item-name" title="name">name</span>
+                                </template>
+                            </el-input>
+                        </el-form-item>
+                    </el-form>
+                </td>
+            </tr>
+            <tr v-if="isCNS">
+                <td style="width: 100px;text-align: right" class="text-td"><span class="font-color-fff"></span></td>
+                <td>
+                    <el-form :model="cnsVersionFrom" :rules="rules" ref="cnsVersionFrom" class="demo-ruleForm">
+                        <el-form-item prop="cnsVersion">
+                            <el-input v-model="cnsVersionFrom.cnsVersion" style="width: 310px;" :placeholder="$t('dialog.cnsVersion')">
+                                <template slot="prepend" style="width: 51px;">
+                                    <span class="parame-item-name" title="version">version</span>
+                                </template>
+                            </el-input>
+                        </el-form-item>
+                    </el-form>
+                </td>
+            </tr>
             <tr v-if='inputs.length'>
                 <td style="vertical-align: top;width: 100px;text-align: right" class="text-td">
                     <span class="font-color-fff">
@@ -40,7 +75,7 @@
                 </td>
                 <td>
                     <div v-for='(item,index) in inputs' :key='item.name'>
-                        <el-input v-model.trim="parameter[index]" style="width: 310px;margin-bottom:10px;" :placeholder="item.type">
+                        <el-input v-model.trim="parameter[index]" style="width: 310px;margin-bottom:15px;" :placeholder="item.type">
                             <template slot="prepend">
                                 <span class="parame-item-name" :title="item.name">{{item.name}}</span>
                             </template>
@@ -68,7 +103,7 @@ import { queryLocalKeyStores } from "@/util/api";
 import { isJson } from "@/util/util"
 export default {
     name: "changeUser",
-    props: ["abi"],
+    props: ["abi", "contractName"],
     data: function () {
         return {
             userName: "",
@@ -80,8 +115,57 @@ export default {
             version: "",
             versionShow: false,
             errorInfo: "",
-            placeholderText: this.$t('placeholder.selectedAccountAddress')
+            placeholderText: this.$t('placeholder.selectedAccountAddress'),
+            isCNS: false,
+            cnsVersionFrom: {
+                cnsVersion: "",
+                cnsName: this.contractName
+            }
         };
+    },
+    computed: {
+        rules() {
+            var obj = {
+                cnsVersion: [
+                    {
+                        required: true,
+                        message: this.$t('dialog.cnsVersion'),
+                        trigger: "blur"
+                    },
+                    {
+                        pattern: /^[A-Za-z0-9.]+$/,
+                        message: this.$t('dialog.cnsVersionPattern'),
+                        trigger: "blur"
+                    },
+                    {
+                        min: 1,
+                        max: 10,
+                        message: this.$t('dialog.length1_10'),
+                        trigger: "blur"
+                    },
+                ],
+                cnsName: [
+                    {
+                        required: true,
+                        message: this.$t('dialog.cnsName'),
+                        trigger: "blur"
+                    },
+                    {
+                        pattern: /^[A-Za-z0-9.]+$/,
+                        message: this.$t('dialog.cnsVersionPattern'),
+                        trigger: "blur"
+                    },
+                    {
+                        min: 1,
+                        max: 32,
+                        message: this.$t('dialog.privateKeyVerifyLength1_32'),
+                        trigger: "blur"
+                    },
+                ],
+            }
+            return obj
+        },
+
     },
     mounted: function () {
         this.changeConstructor();
@@ -110,7 +194,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 })
         },
@@ -134,6 +218,20 @@ export default {
             this.$emit("close");
         },
         submit: function () {
+            if (this.isCNS) {
+                if (!this.cnsVersionFrom.cnsName) return;
+                this.$refs['cnsVersionFrom'].validate((valid) => {
+                    if (valid) {
+                        this.queryDeploy()
+                    } else {
+                        return false;
+                    }
+                });
+            } else {
+                this.queryDeploy()
+            }
+        },
+        queryDeploy() {
             this.versionShow = false;
             this.errorInfo = "";
             var params = []
@@ -152,8 +250,21 @@ export default {
                 userId: this.userId,
                 params: params
             };
-            this.$emit("change", data);
+            let cnsObj = {
+                version: this.cnsVersionFrom.cnsVersion,
+                saveEnabled: this.isCNS,
+                cnsName: this.cnsVersionFrom.cnsName
+            }
+            this.$emit("change", data, cnsObj);
             this.$emit("close");
+        },
+        changeCns(val) {
+            if (!val) {
+                this.cnsVersionFrom.cnsVersion = "";
+                this.cnsVersionFrom.cnsName = "";
+            } else {
+                this.cnsVersionFrom.cnsName = this.contractName;
+            }
         }
     }
 };
@@ -195,6 +306,14 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.demo-ruleForm >>> .el-form-item {
+    margin-bottom: 0;
+}
+.demo-ruleForm >>> .el-form-item__error {
+    padding-top: 0;
+    transform: scale(0.9);
+    top: 93%;
 }
 </style>
 

@@ -124,7 +124,7 @@
                             <span class="overview-more cursor-pointer" @click="goRouter('blocks')">更多</span>
                         </p>
                         <div class="overview-item-base" v-loading="loadingBlock">
-                            <div class="block-item font-color-2e384d" v-for="item in blockData">
+                            <div class="block-item font-color-2e384d" v-for="(item ,index) in blockData" :key='index'>
                                 <div class="block-amount">
                                     <span>
                                         <router-link :to="{'path': 'transactionInfo', 'query': {blockNumber: item.blockNumber}}" class="node-ip">块高 {{item.blockNumber}}</router-link>
@@ -152,7 +152,7 @@
                             <span class="overview-more cursor-pointer" @click="goRouter('transactions')">更多</span>
                         </p>
                         <div class="overview-item-base" v-loading="loadingTransaction">
-                            <div class="block-item font-color-2e384d" v-for="item in transactionList">
+                            <div class="block-item font-color-2e384d" v-for="(item, index) in transactionList" :key='index'>
                                 <div class="block-amount">
                                     <p class="trans-hash" :title="`${item.transHash}`">
                                         <router-link :to="{'path': 'transactionInfo', 'query': {blockNumber: item.transHash}}" class="node-ip">{{item.transHash}}</router-link>
@@ -331,18 +331,21 @@ export default {
             queryGroup()
                 .then(res => {
                     const { data, status } = res;
-                    if (status === 200) {
-                        let arr = data.sort((a, b) => {
-                            return a - b
-                        })
-                        this.group = arr[0]
-                        this.getAllOverview()
+                    if (status === 200 && data && data.length) {
+                        if(data && data.length){
+                            let arr = data.sort((a, b) => {
+                                return a - b
+                            })
+                            this.group = arr[0]
+                            this.getAllOverview()
+                        }
                     }
                 })
                 .catch(err => {
+                    console.log(err)
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 })
         },
@@ -378,7 +381,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -398,7 +401,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -418,7 +421,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -438,7 +441,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -490,7 +493,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -519,7 +522,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -551,7 +554,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -588,7 +591,7 @@ export default {
                 })
                 .catch(err => {
                     this.$message({
-                        message: this.$t('text.systemError'),
+                        message: err.data || this.$t('text.systemError'),
                         type: "error",
                         duration: 2000
                     });
@@ -619,7 +622,7 @@ export default {
                 })
                 .catch(err => {
                     this.$message({
-                        message: this.$t('text.systemError'),
+                        message: err.data || this.$t('text.systemError'),
                         type: "error",
                         duration: 2000
                     });

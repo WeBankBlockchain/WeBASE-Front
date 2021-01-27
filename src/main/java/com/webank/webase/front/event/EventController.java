@@ -104,10 +104,10 @@ public class EventController extends BaseController {
         checkParamResult(result);
         int groupId = reqContractEventRegister.getGroupId();
         String appId = reqContractEventRegister.getAppId();
-		if (!CommonUtils.isLetterDigit(appId)) {
-			throw new FrontException(ConstantCode.PARAM_INVALID);
-		}
-		String fromBlock = reqContractEventRegister.getFromBlock();
+        if (!CommonUtils.isLetterDigit(appId)) {
+            throw new FrontException(ConstantCode.PARAM_INVALID);
+        }
+        String fromBlock = reqContractEventRegister.getFromBlock();
         String toBlock = reqContractEventRegister.getToBlock();
         // 0 < fromBlock <= toBlock, latest means latest block
         if ("0".equals(fromBlock) || "0".equals(toBlock)) {
@@ -311,10 +311,6 @@ public class EventController extends BaseController {
     @ApiImplicitParams({
         @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
             dataType = "Integer"),
-        @ApiImplicitParam(name = "type", value = "type", required = true,
-            dataType = "String"),
-        @ApiImplicitParam(name = "contractAddress", value = "contractAddress", required = true,
-            dataType = "String")
     })
     @GetMapping("/listAddress/{groupId}")
     public BaseResponse listAbi(@PathVariable Integer groupId) throws IOException {

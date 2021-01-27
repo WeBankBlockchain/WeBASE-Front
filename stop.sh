@@ -21,22 +21,22 @@ checkProcess(){
 }
 
 stop(){
-	checkProcess
-	echo "==============================================================================================="
-	if [ $processPid -ne 0 ]; then
-	    echo -n "Stopping Server $APP_MAIN Port $SERVER_PORT PID($processPid)..."
-	    kill -9 $processPid
-	    if [ $? -eq 0 ]; then
-	        echo "[Success]"
-	        echo "==============================================================================================="
-	    else
-	        echo "[Failed]"
-	        echo "==============================================================================================="
-	    fi
-	else
-	    echo "Server $APP_MAIN Port $SERVER_PORT is not running"
-	    echo "==============================================================================================="
-	fi
+    checkProcess
+    echo "==============================================================================================="
+    if [ $processPid -ne 0 ]; then
+        echo -n "Stopping Server $APP_MAIN Port $SERVER_PORT PID($processPid)..."
+        kill -9 $processPid
+        if [ $? -eq 0 ]; then
+            echo "[Success]"
+            echo "==============================================================================================="
+        else
+            echo "[Failed]"
+            echo "==============================================================================================="
+        fi
+    else
+        echo "Server $APP_MAIN Port $SERVER_PORT is not running"
+        echo "==============================================================================================="
+    fi
 }
 
 stop

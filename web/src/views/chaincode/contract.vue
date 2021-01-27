@@ -212,7 +212,9 @@ export default {
             if (this.$store.state.versionData && this.$store.state.versionData.net == 0) {
                 this.$router.go(0)
             }
-            this.$refs.menu.getContractPaths()
+            if (localStorage.getItem('groupId')) {
+                this.$refs.menu.getContractPaths()
+            }
         },
         getEncryption: function (callback) {
             this.loading = true
@@ -230,7 +232,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -273,7 +275,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },

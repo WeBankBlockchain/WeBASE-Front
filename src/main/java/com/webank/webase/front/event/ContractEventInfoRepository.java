@@ -26,15 +26,15 @@ public interface ContractEventInfoRepository extends CrudRepository<ContractEven
 
     List<ContractEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
 
-	List<ContractEventInfo> findByGroupId(int groupId, Pageable pageable);
+    List<ContractEventInfo> findByGroupId(int groupId, Pageable pageable);
 
-	List<ContractEventInfo> findByGroupIdAndAppId(int groupId, String appId);
+    List<ContractEventInfo> findByGroupIdAndAppId(int groupId, String appId);
 
-	/**
-	 * check unique by appId exchangeName queueName and contractAddress
-	 */
-	@Query(value = "select c from ContractEventInfo c where c.appId = ?1 and c.exchangeName = ?2 "
-		+ "and c.queueName = ?3 and c.contractAddress = ?4")
-	ContractEventInfo findContractEventInfo(
-			String appId, String exchangeName, String queueName, String contractAddress);
+    /**
+     * check unique by appId exchangeName queueName and contractAddress
+     */
+    @Query(value = "select c from ContractEventInfo c where c.appId = ?1 and c.exchangeName = ?2 "
+        + "and c.queueName = ?3 and c.contractAddress = ?4")
+    ContractEventInfo findContractEventInfo(
+            String appId, String exchangeName, String queueName, String contractAddress);
 }

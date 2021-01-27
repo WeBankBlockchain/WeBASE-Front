@@ -31,33 +31,33 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class ReqNewBlockEventRegister {
 
-	/**
-	 * id in database
-	 */
-	private String infoId;
+    /**
+     * id in database
+     */
+    private String infoId;
 
-	/**
-	 * application which register new block event
-	 */
-	@NotEmpty(message = "appId cannot be empty")
-	private String appId;
+    /**
+     * application which register new block event
+     */
+    @NotEmpty(message = "appId cannot be empty")
+    private String appId;
 
-	/**
-	 * group id
-	 */
-	@NotNull(message = "groupId cannot be empty")
-	private Integer groupId;
+    /**
+     * group id
+     */
+    @NotNull(message = "groupId cannot be empty")
+    private Integer groupId;
 
-	/**
-	 * MQ info: exchange name
-	 */
-	@NotEmpty(message = "exchangeName cannot be empty")
-	private String exchangeName;
+    /**
+     * MQ info: exchange name
+     */
+    @NotEmpty(message = "exchangeName cannot be empty")
+    private String exchangeName;
 
-	/**
-	 * appId as queue name
-	 */
-	@NotEmpty(message = "queueName cannot be empty, usually use appId as queueName")
-	private String queueName;
+    /**
+     * appId as queue name
+     */
+    @NotEmpty(message = "queueName cannot be empty, usually use appId as queueName")
+    private String queueName;
 
 }
