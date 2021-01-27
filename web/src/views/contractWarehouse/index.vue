@@ -92,7 +92,9 @@ export default {
         Bus.$off("chooselanguage")
     },
     mounted() {
-        this.queryContractStore()
+        if(localStorage.getItem("groupId")){
+            this.queryContractStore()
+        }
         Bus.$on("chooselanguage", data => {
             this.language = data
             this.queryContractStore()

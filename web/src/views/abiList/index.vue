@@ -151,7 +151,9 @@ export default {
             this.groupId = data
             this.changeGroup()
         })
-        this.queryAbiList()
+        if (localStorage.getItem('groupId')) {
+            this.queryAbiList()
+        }
     },
 
     methods: {
