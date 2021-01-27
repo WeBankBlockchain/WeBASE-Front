@@ -67,7 +67,7 @@ export default {
             content: "",
             code: "",
             contractName: "",
-            infoHeight: 100,
+            infoHeight: 300,
             aceEditor: null,
             themePath: "ace/theme/monokai",
             modePath: "ace/mode/solidity",
@@ -90,7 +90,7 @@ export default {
         },
         successHide(val) {
             if (val) {
-                this.infoHeight = 250;
+                this.infoHeight = 300;
             } else {
                 this.infoHeight = 0;
             }
