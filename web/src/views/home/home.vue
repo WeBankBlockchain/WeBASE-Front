@@ -331,15 +331,18 @@ export default {
             queryGroup()
                 .then(res => {
                     const { data, status } = res;
-                    if (status === 200) {
-                        let arr = data.sort((a, b) => {
-                            return a - b
-                        })
-                        this.group = arr[0]
-                        this.getAllOverview()
+                    if (status === 200 && data && data.length) {
+                        if(data && data.length){
+                            let arr = data.sort((a, b) => {
+                                return a - b
+                            })
+                            this.group = arr[0]
+                            this.getAllOverview()
+                        }
                     }
                 })
                 .catch(err => {
+                    console.log(err)
                     this.$message({
                         type: "error",
                         message: err.data || this.$t('text.systemError')
