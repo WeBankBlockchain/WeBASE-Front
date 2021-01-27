@@ -226,12 +226,16 @@ let errCode = {
     },
 
     "201112": {
-        en: "sql syntax error",
-        zh: 'sql语法错误'
+        en: "contract address cannot be empty",
+        zh: '合同地址不能为空'
     },
     "201154": {
         en: "contract path is exists.",
         zh: '目录已存在。'
+    },
+    "201155": {
+        en: "contract path cannot be empty.",
+        zh: '合约路径不能为空'
     },
     "201213": {
         en: "address is invalid",
@@ -345,10 +349,6 @@ let errCode = {
         en: "Sign user Id cannot be empty",
         zh: '签名用户Id不能为空'
     },
-    "201112": {
-        en: "sql syntax error",
-        zh: 'sql语法错误'
-    },
     "201120": {
         en: "Group operate fail",
         zh: '群组操作失败'
@@ -429,7 +429,18 @@ let errCode = {
         en: "Version of contract is out of length",
         zh: '合约版本过长'
     },
-
+    "201223": {
+        en: "CNS register fail ",
+        zh: 'CNS注册失败'
+    },
+    "201224": {
+        en: "Version not exists",
+        zh: '版本不存在'
+    },
+    "201225": {
+        en: "CNS name cannot be empty",
+        zh: 'CNS名称不能为空'
+    },
     "201226": {
         en: "sql syntax error",
         zh: 'sql语法错误'
@@ -576,6 +587,10 @@ let errCode = {
     "201517": {
         en: "call contract constant method fail",
         zh: '合约状态异常，调用合约constant方法失败'
+    },
+    "201518": {
+        en: "get message's hash fail",
+        zh: "获取哈希失败"
     },
     "201521": {
         en: "get list of manager on chain fail",
@@ -822,8 +837,8 @@ let errCode = {
         zh: "不支持发交易"
     },
 
-    
-    
+
+
     "201232": {
         en: "Pem file format error, must surrounded by -----XXXXX PRIVATE KEY-----",
         zh: "Pem文件格式错误，必须包含-----XXXXX PRIVATE KEY----- "
@@ -844,7 +859,10 @@ let errCode = {
         en: "access denied",
         zh: "没有权限"
     },
-
+    "-1": {
+        en: "no active connection available with node, please check node status",
+        zh: "与节点没有可用的主连接，请检查节点状态"
+    },
     "-32600": {
         en: "Invalid json request",
         zh: "发送无效的请求对象"

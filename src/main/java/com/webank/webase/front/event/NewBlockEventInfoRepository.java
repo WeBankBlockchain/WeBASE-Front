@@ -25,26 +25,26 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEventInfo, String>,
-		JpaSpecificationExecutor<NewBlockEventInfo> {
+        JpaSpecificationExecutor<NewBlockEventInfo> {
 
-	NewBlockEventInfo findById(String id);
+    NewBlockEventInfo findById(String id);
 
-	List<NewBlockEventInfo> findByGroupIdAndAppId(int groupId, String appId);
+    List<NewBlockEventInfo> findByGroupIdAndAppId(int groupId, String appId);
 
-	List<NewBlockEventInfo> findByAppId(String appId);
+    List<NewBlockEventInfo> findByAppId(String appId);
 
-	List<NewBlockEventInfo> findByGroupId(int groupId);
+    List<NewBlockEventInfo> findByGroupId(int groupId);
 
-	List<NewBlockEventInfo> findByQueueName(String queueName);
+    List<NewBlockEventInfo> findByQueueName(String queueName);
 
-	List<NewBlockEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
+    List<NewBlockEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
 
-	List<NewBlockEventInfo> findByGroupId(int groupId, Pageable pageable);
+    List<NewBlockEventInfo> findByGroupId(int groupId, Pageable pageable);
 
-	/**
-	 * check unique by appId exchangeName queueName
-	 */
-	@Query(value = "select n from NewBlockEventInfo n where n.appId = ?1 and n.exchangeName = ?2 and n.queueName = ?3 ")
-	NewBlockEventInfo findNewBlockEventInfo(
-			String appId, String exchangeName, String queueName);
+    /**
+     * check unique by appId exchangeName queueName
+     */
+    @Query(value = "select n from NewBlockEventInfo n where n.appId = ?1 and n.exchangeName = ?2 and n.queueName = ?3 ")
+    NewBlockEventInfo findNewBlockEventInfo(
+            String appId, String exchangeName, String queueName);
 }

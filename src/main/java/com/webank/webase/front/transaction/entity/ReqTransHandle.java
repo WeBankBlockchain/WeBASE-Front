@@ -44,4 +44,7 @@ public class ReqTransHandle {
     private List<Object> funcParam = new ArrayList<>();
     @Deprecated
     private boolean useAes;
+    // 1.4.3
+    private boolean useCns = false;
+    private String cnsName;
 }

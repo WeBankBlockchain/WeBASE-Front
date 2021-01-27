@@ -23,7 +23,7 @@
                 <el-tooltip class="item" effect="dark" :content="$t('text.eventParam')" placement="right">
                     <i class="el-icon-info"></i>
                 </el-tooltip>
-                <li v-for="item in inputList" class="event-info">
+                <li v-for="(item,index) in inputList" class="event-info" :key='index'>
                     <div v-if="item.indexed">
                         <div>{{item.name}}:</div>
                         <el-input v-model="item.value" :placeholder="item.type" style="width: 240px;" @input="e => (item.msgObj = isType(e,item.type))"></el-input>
@@ -247,11 +247,11 @@ export default {
                         this.modelClose()
                         var eventList = res.data.data;
                         var newEventList = [];
-                        if(!eventList.length){
+                        if (!eventList.length) {
                             this.eventList = newEventList
                             return
                         }
-                        eventList.forEach(item=>{
+                        eventList.forEach(item => {
                             newEventList.push(item.log)
                         })
                         this.$emit("checkEventSuccess", newEventList, this.contractEventForm.eventName)
@@ -265,7 +265,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },

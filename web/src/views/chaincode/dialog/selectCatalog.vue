@@ -97,7 +97,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -124,7 +124,10 @@ export default {
                     folderId: 1,
                 }];
             }
-            this.folderFrom.folderName = this.options[0].folderName
+            this.folderFrom.folderName = this.options[0].folderName;
+            this.options = this.options.filter(item => {
+                return item.folderName != "template"
+            })
         },
         submit: function (formName) {
             this.$refs[formName].validate(valid => {

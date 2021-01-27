@@ -18,16 +18,20 @@ import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.contract.entity.Cns;
 import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.contract.entity.ContractPath;
 import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.contract.entity.ReqContractCompile;
 import com.webank.webase.front.contract.entity.ReqContractPath;
 import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqCopyContracts;
 import com.webank.webase.front.contract.entity.ReqDeploy;
 import com.webank.webase.front.contract.entity.ReqListContract;
 import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
 import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqQueryCns;
+import com.webank.webase.front.contract.entity.ReqRegisterCns;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
@@ -85,7 +89,8 @@ public class ContractController extends BaseController {
     @PostMapping("/deployWithSign")
     public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
             throws Exception {
-        log.info("contract deployWithSign start. ReqDeploy:[{}]", JsonUtils.toJSONString(reqDeploy));
+        log.info("contract deployWithSign start. ReqDeploy:[{}]",
+                JsonUtils.toJSONString(reqDeploy));
         checkParamResult(result);
         if (StringUtils.isBlank(reqDeploy.getSignUserId())) {
             log.error("contract deployWithSign error: signUserId is empty");
@@ -188,6 +193,21 @@ public class ContractController extends BaseController {
     }
 
     /**
+     * copy Contracts.
+     */
+    @ApiOperation(value = "copy Contracts", notes = "copy Contracts ")
+    @ApiImplicitParam(name = "req", value = "contract info", required = true,
+            dataType = "ReqCopyContracts")
+    @PostMapping(value = "/copyContracts")
+    public BaseResponse copyContracts(@RequestBody @Valid ReqCopyContracts req,
+            BindingResult result) throws FrontException {
+        log.info("copyContracts start. req:{}", JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        contractService.copyContracts(req);
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    /**
      * delete by contractId.
      */
     @ApiOperation(value = "delete by contractId", notes = "delete by contractId")
@@ -279,7 +299,8 @@ public class ContractController extends BaseController {
      * query by groupId.
      */
     @GetMapping(value = "/findPathList/{groupId}")
-    public List<ContractPath> findPathList(@PathVariable("groupId") Integer groupId) throws IOException {
+    public List<ContractPath> findPathList(@PathVariable("groupId") Integer groupId)
+            throws IOException {
         log.info("start findPathList. groupId:{}", groupId);
         return contractService.findPathList(groupId);
     }
@@ -303,14 +324,16 @@ public class ContractController extends BaseController {
     /**
      * query list of contract only contain groupId and contractAddress and contractName
      */
-    @ApiOperation(value = "query list of all contract without abi/bin", notes = "query list of contract without abi/bin")
-    @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
-        dataType = "Integer")
+    @ApiOperation(value = "query list of all contract without abi/bin",
+            notes = "query list of contract without abi/bin")
+    @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "Integer")
     @GetMapping(value = "/contractList/all/light")
     public BasePageResponse findAll(@RequestParam("groupId") Integer groupId,
-        @RequestParam("contractStatus") Integer contractStatus) throws FrontException, IOException {
-        log.info("findAll start. groupId:{},contractStatus:{}", groupId,contractStatus);
-        List<RspContractNoAbi> contractNoAbiList = contractService.findAllContractNoAbi(groupId, contractStatus);
+            @RequestParam("contractStatus") Integer contractStatus)
+            throws FrontException, IOException {
+        log.info("findAll start. groupId:{},contractStatus:{}", groupId, contractStatus);
+        List<RspContractNoAbi> contractNoAbiList =
+                contractService.findAllContractNoAbi(groupId, contractStatus);
         BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
         response.setTotalCount(contractNoAbiList.size());
         response.setData(contractNoAbiList);
@@ -322,7 +345,7 @@ public class ContractController extends BaseController {
      */
     @ApiOperation(value = "get one contract", notes = "get one contract")
     @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
-        dataType = "Integer")
+            dataType = "Integer")
     @GetMapping(value = "/findOne/{contractId}")
     public BaseResponse findOne(@PathVariable Integer contractId) {
         log.info("findOne start. contractId:{}", contractId);
@@ -335,18 +358,52 @@ public class ContractController extends BaseController {
     /**
      * query list of contract by multi contract path
      */
-    @ApiOperation(value = "query list of contract by multi path", notes = "query list of contract by multi path")
+    @ApiOperation(value = "query list of contract by multi path",
+            notes = "query list of contract by multi path")
     @ApiImplicitParam(name = "req", value = "param info", required = true,
-        dataType = "ReqListContract")
+            dataType = "ReqListContract")
     @PostMapping(value = "/contractList/multiPath")
     public BasePageResponse listByMultiPath(@RequestBody @Valid ReqListContract req,
-        BindingResult result) {
+            BindingResult result) {
         log.info("listByMultiPath start. ReqListContract:{}", req);
         checkParamResult(result);
         List<Contract> resList = contractService.listContractByMultiPath(req);
         BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
         response.setTotalCount(resList.size());
         response.setData(resList);
+        return response;
+    }
+
+    /**
+     * registerCns.
+     *
+     * @param req request data
+     * @param result checkResult
+     */
+    @PostMapping("/registerCns")
+    public BaseResponse registerCns(@Valid @RequestBody ReqRegisterCns req, BindingResult result)
+            throws Exception {
+        log.info("registerCns start. req:[{}]", JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        contractService.registerCns(req);
+        log.info("success registerCns.");
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    /**
+     * findCns.
+     * 
+     * @param req
+     * @param result
+     * @return
+     */
+    @PostMapping(value = "/findCns")
+    public BaseResponse findCns(@Valid @RequestBody ReqQueryCns req, BindingResult result) throws IOException {
+        log.info("findCns start. req:[{}]", JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        Cns cns = contractService.findCns(req);
+        response.setData(cns);
         return response;
     }
 }

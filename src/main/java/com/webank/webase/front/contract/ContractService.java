@@ -18,7 +18,6 @@ import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
-
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
@@ -26,26 +25,33 @@ import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.contract.entity.Cns;
 import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.contract.entity.ContractPath;
 import com.webank.webase.front.contract.entity.ContractPathKey;
 import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.contract.entity.ReqContractPath;
 import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqCopyContracts;
 import com.webank.webase.front.contract.entity.ReqDeploy;
 import com.webank.webase.front.contract.entity.ReqListContract;
 import com.webank.webase.front.contract.entity.ReqMultiContractCompile;
 import com.webank.webase.front.contract.entity.ReqPageContract;
+import com.webank.webase.front.contract.entity.ReqQueryCns;
+import com.webank.webase.front.contract.entity.ReqRegisterCns;
 import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precompiledapi.PrecompiledService;
+import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.util.ErrorCodeHandleUtils;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
@@ -78,6 +84,8 @@ import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
@@ -94,6 +102,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 /**
  * contract management.
@@ -109,6 +118,8 @@ public class ContractService {
     @Autowired
     private ContractPathRepository contractPathRepository;
     @Autowired
+    private CnsRepository cnsRepository;
+    @Autowired
     private TransService transService;
     @Autowired
     private KeyStoreService keyStoreService;
@@ -118,6 +129,10 @@ public class ContractService {
     private Constants constants;
     @Autowired
     private PermissionManageService permissionManageService;
+    @Autowired
+    private PrecompiledWithSignService precompiledWithSignService;
+    @Autowired
+    private PrecompiledService precompiledService;
 
     /**
      * sendAbi.
@@ -210,7 +225,8 @@ public class ContractService {
             }
             contractAddress = deployWithSign(req);
         }
-        if (StringUtils.isNotBlank(contractAddress) || !Address.DEFAULT.getValue().equals(contractAddress)) {
+        if (StringUtils.isNotBlank(contractAddress)
+                || !Address.DEFAULT.getValue().equals(contractAddress)) {
             // save address
             BeanUtils.copyProperties(req, contract);
             contract.setContractAddress(contractAddress);
@@ -268,7 +284,8 @@ public class ContractService {
             throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
         }
         String contractAddress = receipt.getContractAddress();
-        log.info("success deploy. contractAddress:{}", contractAddress);
+
+        log.info("success deployWithSign. contractAddress:{}", contractAddress);
         return contractAddress;
     }
 
@@ -299,6 +316,50 @@ public class ContractService {
         return contractAddress;
     }
 
+    /**
+     * registerCns.
+     */
+    public void registerCns(ReqRegisterCns req) throws Exception {
+        int groupId = req.getGroupId();
+        String cnsName = req.getCnsName();
+        String version = req.getVersion();
+        String contractAddress = req.getContractAddress();
+        String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
+        List<CnsInfo> cnsList =
+                precompiledService.queryCnsByNameAndVersion(groupId, cnsName, version);
+        if (!CollectionUtils.isEmpty(cnsList)) {
+            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
+            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
+        }
+        if (req.isSaveEnabled()) {
+            if (StringUtils.isBlank(req.getContractPath())) {
+                throw new FrontException(ConstantCode.PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING);
+            }
+            if (StringUtils.isBlank(req.getUserAddress())) {
+                throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
+            }
+            Credentials credentials = keyStoreService.getCredentials(req.getUserAddress());
+            CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId), credentials);
+            try {
+                cnsService.registerCns(cnsName, version, contractAddress, abiInfo);
+            } catch (Exception e) {
+                log.error("fail registerCns. cnsName:{}", cnsName);
+                throw new FrontException(ConstantCode.CNS_REGISTER_FAIL);
+            }
+            Cns cns = new Cns();
+            cns.setContractAbi(abiInfo);
+            BeanUtils.copyProperties(req, cns);
+            cns.setCreateTime(LocalDateTime.now());
+            cns.setModifyTime(LocalDateTime.now());
+            cnsRepository.save(cns);
+        } else {
+            if (StringUtils.isBlank(req.getSignUserId())) {
+                throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
+            }
+            precompiledWithSignService.registerCns(groupId, req.getSignUserId(), cnsName,
+                    req.getVersion(), contractAddress, abiInfo);
+        }
+    }
 
     public static String constructorEncodedByContractNameAndVersion(String contractName,
             String version, List<Object> params) throws FrontException {
@@ -425,7 +486,8 @@ public class ContractService {
         return new FileContentHandle(contractName + ".java", targetStream);
     }
 
-    private static synchronized void generateJavaFile(String packageName, File abiFile, File binFile) {
+    private static synchronized void generateJavaFile(String packageName, File abiFile,
+            File binFile) {
         try {
             MySecurityManagerConfig.forbidSystemExitCall();
             SolidityFunctionWrapperGenerator
@@ -461,6 +523,23 @@ public class ContractService {
             // update
             return updateContract(contractReq);
         }
+    }
+
+    /**
+     * copyContracts
+     */
+    @Transactional
+    public void copyContracts(ReqCopyContracts reqCopyContracts) {
+        log.debug("start saveContractBatch ReqContractList:{}",
+                JsonUtils.toJSONString(reqCopyContracts));
+        reqCopyContracts.getContractItems().forEach(c -> {
+            ReqContractSave reqContractSave = new ReqContractSave();
+            reqContractSave.setContractName(c.getContractName());
+            reqContractSave.setContractSource(c.getContractSource());
+            reqContractSave.setContractPath(reqCopyContracts.getContractPath());
+            reqContractSave.setGroupId(reqCopyContracts.getGroupId());
+            newContract(reqContractSave);
+        });
     }
 
 
@@ -525,26 +604,28 @@ public class ContractService {
         // findContractByPage
         // page start from index 1 instead of 0
         int pageNumber = param.getPageNumber() - 1;
-        Pageable pageable = new PageRequest(pageNumber, param.getPageSize(),
-            Direction.DESC, "modifyTime");
+        Pageable pageable =
+                new PageRequest(pageNumber, param.getPageSize(), Direction.DESC, "modifyTime");
         Page<Contract> contractPage = contractRepository.findAll(
-            (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
-                // v1.4.2, param add contractPath to filter
-                Predicate predicate = FrontUtils.buildPredicate(root, criteriaBuilder, param);
-                query.where(predicate);
-                return query.getRestriction();
-            }, pageable);
+                (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                    // v1.4.2, param add contractPath to filter
+                    Predicate predicate = FrontUtils.buildPredicate(root, criteriaBuilder, param);
+                    query.where(predicate);
+                    return query.getRestriction();
+                }, pageable);
         return contractPage;
     }
 
     /**
      * find all contract without contract content
      */
-    public List<RspContractNoAbi> findAllContractNoAbi(int groupId, int contractStatus) throws IOException {
+    public List<RspContractNoAbi> findAllContractNoAbi(int groupId, int contractStatus)
+            throws IOException {
         // init templates
         initDefaultContract(groupId);
         // find all
-        List<Contract> contractList = contractRepository.findByGroupIdAndContractStatus(groupId, contractStatus);
+        List<Contract> contractList =
+                contractRepository.findByGroupIdAndContractStatus(groupId, contractStatus);
         List<RspContractNoAbi> resultList = new ArrayList<>();
         contractList.forEach(c -> {
             RspContractNoAbi rsp = new RspContractNoAbi();
@@ -557,24 +638,25 @@ public class ContractService {
 
     /**
      * save default contract in path '/template' to db
+     * 
      * @param groupId
      * @throws IOException
      */
     private void initDefaultContract(Integer groupId) throws IOException {
         String contractPath = "template";
         List<Contract> contracts =
-            contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
+                contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
         // if no template contracts in db, load contract file in template; else, not load
         List<String> templates = null;
         if (contracts.isEmpty()) {
-           templates = CommonUtils.readFileToList(Constants.TEMPLATE);
+            templates = CommonUtils.readFileToList(Constants.TEMPLATE);
         }
-        if ((contracts.isEmpty() && !Objects.isNull(templates))
-            || (!contracts.isEmpty() && !Objects.isNull(templates) && templates.size() != contracts.size())) {
+        if ((contracts.isEmpty() && !Objects.isNull(templates)) || (!contracts.isEmpty()
+                && !Objects.isNull(templates) && templates.size() != contracts.size())) {
             for (String template : templates) {
                 Contract localContract =
-                    contractRepository.findByGroupIdAndContractPathAndContractName(
-                        groupId, contractPath, template.split(",")[0]);
+                        contractRepository.findByGroupIdAndContractPathAndContractName(groupId,
+                                contractPath, template.split(",")[0]);
                 if (Objects.isNull(localContract)) {
                     log.info("init template contract:{}", template.split(",")[0]);
                     Contract contract = new Contract();
@@ -686,11 +768,12 @@ public class ContractService {
             contractFile = new File(contractFilePath);
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
             // compile
-            SolidityCompiler.Result res =
-                    SolidityCompiler.compile(contractFile, useSM2, true, ABI, BIN, INTERFACE, METADATA);
+            SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, useSM2, true, ABI,
+                    BIN, INTERFACE, METADATA);
             if ("".equals(res.getOutput())) {
                 log.error("contractCompile error", res.getErrors());
-                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.getErrors());
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(),
+                        res.getErrors());
             }
             // compile result
             CompilationResult result = CompilationResult.parse(res.getOutput());
@@ -739,13 +822,14 @@ public class ContractService {
             String contractName =
                     solFile.getName().substring(0, solFile.getName().lastIndexOf("."));
             // compile
-            SolidityCompiler.Result res =
-                    SolidityCompiler.compile(solFile, useSM2, true, ABI, SolidityCompiler.Options.BIN);
+            SolidityCompiler.Result res = SolidityCompiler.compile(solFile, useSM2, true, ABI,
+                    SolidityCompiler.Options.BIN);
             // check result
             if (res.isFailed()) {
                 log.error("multiContractCompile fail. contract:{} compile error. {}", contractName,
                         res.getErrors());
-                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.getErrors());
+                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(),
+                        res.getErrors());
             }
             // parse result
             CompilationResult result = CompilationResult.parse(res.getOutput());
@@ -815,14 +899,16 @@ public class ContractService {
      */
     private void checkDeployPermission(int groupId, String userAddress) {
         // get deploy permission list
-        List<PermissionInfo> deployUserList = permissionManageService.listDeployAndCreateManager(groupId);
+        List<PermissionInfo> deployUserList =
+                permissionManageService.listDeployAndCreateManager(groupId);
 
         // check user in the list,
         if (deployUserList.isEmpty()) {
             return;
         } else {
             long count = 0;
-            count = deployUserList.stream().filter( admin -> admin.getAddress().equals(userAddress)).count();
+            count = deployUserList.stream().filter(admin -> admin.getAddress().equals(userAddress))
+                    .count();
             // if not in the list, permission denied
             if (count == 0) {
                 log.error("checkDeployPermission permission denied for user:{}", userAddress);
@@ -833,15 +919,16 @@ public class ContractService {
     }
 
     /**
-     * batch delete contract by path
-     * if path contain deployed
+     * batch delete contract by path if path contain deployed
+     * 
      * @param groupId
      * @param contractPath
      * @return
      */
     public void batchDeleteByPath(int groupId, String contractPath) {
         log.debug("start batchDeleteByPath groupId:{},contractPath:{}", groupId, contractPath);
-        List<Contract> contractList = contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
+        List<Contract> contractList =
+                contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
         log.debug("batchDeleteByPath delete contracts");
         contractList.forEach(c -> contractRepository.delete(c.getId()));
         log.debug("batchDeleteByPath delete contracts");
@@ -858,7 +945,8 @@ public class ContractService {
     }
 
     public Contract findByGroupIdAndAddress(int groupId, String contractAddress) {
-        Contract contract = contractRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
+        Contract contract =
+                contractRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
         if (Objects.isNull(contract)) {
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
@@ -867,6 +955,7 @@ public class ContractService {
 
     /**
      * list contract by path list
+     * 
      * @param param
      * @return
      */
@@ -875,13 +964,20 @@ public class ContractService {
         List<Contract> resultList = new ArrayList<>();
         int groupId = param.getGroupId();
         List<String> contractPathList = param.getContractPathList();
-        for (String contractPath: contractPathList) {
-            List<Contract> contractList = contractRepository
-                .findByGroupIdAndContractPath(groupId, contractPath);
+        for (String contractPath : contractPathList) {
+            List<Contract> contractList =
+                    contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
             resultList.addAll(contractList);
         }
         log.debug("end listContractByMultiPath result size:{},", resultList.size());
         return resultList;
     }
 
+    /**
+     * findCns.
+     */
+    public Cns findCns(ReqQueryCns req) {
+        // get from database
+        return cnsRepository.findByAddressLimitOne(req.getGroupId(), req.getContractAddress());
+    }
 }

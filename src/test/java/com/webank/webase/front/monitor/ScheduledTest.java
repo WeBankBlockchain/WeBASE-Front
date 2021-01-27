@@ -26,6 +26,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.PendingTxSize;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
 public class ScheduledTest extends TestBase {

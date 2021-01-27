@@ -19,7 +19,7 @@
                     <i class="el-icon-info"></i>
                 </el-tooltip>
             </el-form-item>
-            
+
             <el-form-item :label="$t('table.contractAddress')" prop="contractAddress">
                 <el-input v-model.trim="contractEventForm.contractAddress" style="width: 240px;" clearable></el-input>
                 <el-tooltip class="item" effect="dark" :content="$t('text.contractAddress')" placement="right">
@@ -180,7 +180,7 @@ export default {
         submit(formName) {
             this.$refs[formName].validate(valid => {
                 if (valid) {
-                        this.queryAdd()
+                    this.queryAdd()
                 } else {
                     return false;
                 }
@@ -198,7 +198,7 @@ export default {
             }
             var list = this.contractEventForm.topicList.split(';')
             this.loading = true;
-            let param = Object.assign({},this.contractEventForm, {
+            let param = Object.assign({}, this.contractEventForm, {
                 contractAbi: JSON.parse(this.contractEventForm.contractAbi),
                 topicList: list,
                 groupId: this.groupId
@@ -219,7 +219,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },

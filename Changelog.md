@@ -1,3 +1,24 @@
+### v1.4.3(2021-01-27)
+
+**Add**
+- 合约仓库
+- 在线工具
+- 
+
+**Fix**
+- 合约IDE支持空数组
+- 合约编译结果信息显示优化
+- 私钥支持明文导入
+- 支持CNS
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Node-Manager v1.4.1+
+- WeBASE-Sign v1.4.3+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.4.2(2020-12-03)
 
 **Add**

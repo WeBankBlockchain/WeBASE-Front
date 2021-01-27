@@ -62,7 +62,7 @@ import org.springframework.http.MediaType;
 public class CommonUtils {
 
     public static final int PUBLIC_KEY_LENGTH_64 = 64;
-
+    public static final int HASH_LENGTH_64 = 64;
     private CommonUtils() {
         throw new IllegalStateException("Utility class");
     }
@@ -626,6 +626,31 @@ public class CommonUtils {
 
     public static String utf8StringToHex(String utf8String) {
         return Numeric.toHexStringNoPrefix(utf8String.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static boolean isHexNumber(byte value) {
+        if (!(value >= '0' && value <= '9') && !(value >= 'A' && value <= 'F')
+                && !(value >= 'a' && value <= 'f')) {
+            return false;
+        }
+        return true;
+    }
+
+
+    public static boolean isHexNumber(String string) {
+        if (string == null)
+            throw new NullPointerException("string was null");
+
+        boolean flag = true;
+
+        for (int i = 0; i < string.length(); i++) {
+            char cc = string.charAt(i);
+            if (!isHexNumber((byte) cc)) {
+                flag = false;
+                break;
+            }
+        }
+        return flag;
     }
 
 }

@@ -20,10 +20,10 @@ import lombok.Data;
 
 @Data
 public class RspUserInfo {
-	private String signUserId;
-	private String appId;
-	private String address;
-	private String publicKey;
-	private String description;
-	private Integer encryptType;
+    private String signUserId;
+    private String appId;
+    private String address;
+    private String publicKey;
+    private String description;
+    private Integer encryptType;
 }

@@ -84,7 +84,7 @@ export function reviseParam(necessary, query) {
         arr.push(params[i])
     }
     str = arr.join('/');
-    
+
     return { str, querys }
 }
 
@@ -210,12 +210,12 @@ export function completionDateData(startTime, endTime, data) {
 
 
 export function unique(array, onlyKey) {
-    let result = {}, finalResult=[], oneKey = onlyKey;
-    for(let i=0;i<array.length;i++){
+    let result = {}, finalResult = [], oneKey = onlyKey;
+    for (let i = 0; i < array.length; i++) {
         result[array[i][oneKey]] = array[i];
-        
+
     }
-    for(let key in result){
+    for (let key in result) {
         finalResult.push(result[key]);
     }
     return finalResult;
@@ -316,7 +316,13 @@ export function dataType(type, value) {
             }
             break;
         default:
-            return value
+            try {
+                var value = value.replace(/\^\[.*\]\$/, '')
+                return JSON.parse(value)
+            } catch (error) {
+                console.log('error：' + value + '!!!' + error);
+                return
+            }
             break;
     }
 }

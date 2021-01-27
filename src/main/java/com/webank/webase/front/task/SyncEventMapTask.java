@@ -40,60 +40,60 @@ import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK
 @Component
 public class SyncEventMapTask {
 
-	@Autowired
-	NewBlockEventInfoRepository newBlockEventInfoRepository;
-	@Autowired
-	ContractEventInfoRepository contractEventInfoRepository;
+    @Autowired
+    NewBlockEventInfoRepository newBlockEventInfoRepository;
+    @Autowired
+    ContractEventInfoRepository contractEventInfoRepository;
 
-	@Scheduled(fixedDelayString = "${constant.syncEventMapTaskFixedDelay}")
-	public void taskStart() {
-		syncEventMapTask();
-	}
+    @Scheduled(fixedDelayString = "${constant.syncEventMapTaskFixedDelay}")
+    public void taskStart() {
+        syncEventMapTask();
+    }
 
-	public synchronized void syncEventMapTask() {
-		log.debug("start syncEventMapStart task");
-		cleanNewBlockEventMap();
-		cleanContractEventMap();
-		log.debug("end syncEventMapStart task");
+    public synchronized void syncEventMapTask() {
+        log.debug("start syncEventMapStart task");
+        cleanNewBlockEventMap();
+        cleanContractEventMap();
+        log.debug("end syncEventMapStart task");
 
-	}
+    }
 
-	private void cleanNewBlockEventMap() {
-		log.debug("start cleanNewBlockEventMap. ");
-		int removeCount = 0;
-		List<NewBlockEventInfo> blockInfoList = Lists.newArrayList(newBlockEventInfoRepository.findAll());
-		for(String appId : BLOCK_ROUTING_KEY_MAP.keySet()){
-			long equalCount = 0;
-			equalCount = blockInfoList.stream()
-					.filter(info -> appId.equals(info.getAppId()))
-					.count();
-			// remove from map that not in db's list
-			if(equalCount == 0) {
-				BLOCK_ROUTING_KEY_MAP.remove(appId);
-				removeCount++;
-			}
-		}
-		log.debug("end cleanNewBlockEventMap. removeCount:{}", removeCount);
-	}
+    private void cleanNewBlockEventMap() {
+        log.debug("start cleanNewBlockEventMap. ");
+        int removeCount = 0;
+        List<NewBlockEventInfo> blockInfoList = Lists.newArrayList(newBlockEventInfoRepository.findAll());
+        for(String appId : BLOCK_ROUTING_KEY_MAP.keySet()){
+            long equalCount = 0;
+            equalCount = blockInfoList.stream()
+                    .filter(info -> appId.equals(info.getAppId()))
+                    .count();
+            // remove from map that not in db's list
+            if(equalCount == 0) {
+                BLOCK_ROUTING_KEY_MAP.remove(appId);
+                removeCount++;
+            }
+        }
+        log.debug("end cleanNewBlockEventMap. removeCount:{}", removeCount);
+    }
 
-	private void cleanContractEventMap() {
-		log.debug("start cleanContractEventMap. ");
-		int removeCount = 0;
-		List<ContractEventInfo> contractEventInfoList = Lists.newArrayList(contractEventInfoRepository.findAll());
-		for (String infoId : CONTRACT_EVENT_CALLBACK_MAP.keySet()) {
-			long equalCount = 0;
-			equalCount = contractEventInfoList.stream()
-					.filter(info -> infoId.equals(info.getId()))
-					.count();
-			// remove from map that not in db's list
-			if (equalCount == 0) {
-				ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(infoId);
-				callback.setRunning(false);
-				CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
-				removeCount++;
-			}
-		}
-		log.debug("end cleanContractEventMap. removeCount:{}", removeCount);
-	}
+    private void cleanContractEventMap() {
+        log.debug("start cleanContractEventMap. ");
+        int removeCount = 0;
+        List<ContractEventInfo> contractEventInfoList = Lists.newArrayList(contractEventInfoRepository.findAll());
+        for (String infoId : CONTRACT_EVENT_CALLBACK_MAP.keySet()) {
+            long equalCount = 0;
+            equalCount = contractEventInfoList.stream()
+                    .filter(info -> infoId.equals(info.getId()))
+                    .count();
+            // remove from map that not in db's list
+            if (equalCount == 0) {
+                ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(infoId);
+                callback.setRunning(false);
+                CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
+                removeCount++;
+            }
+        }
+        log.debug("end cleanContractEventMap. removeCount:{}", removeCount);
+    }
 
 }

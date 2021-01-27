@@ -34,9 +34,9 @@ contract Ok{
         if (from.balance < num || to.balance + num < to.balance)
             return; // Deny overflow
 
-    	from.balance=from.balance-num;
-    	to.balance+=num;
+        from.balance=from.balance-num;
+        to.balance+=num;
         TransEvent(num);
-    	log.push(Translog("20170413",from.account,to.account,num));
+        log.push(Translog("20170413",from.account,to.account,num));
     }
 }

@@ -15,9 +15,9 @@ package com.webank.webase.front.transaction;
 
 
 import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
+import static com.webank.webase.front.base.code.ConstantCode.VERSION_NOT_EXISTS;
 import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_PURE;
 import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_VIEW;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.webase.front.base.code.ConstantCode;
@@ -30,10 +30,12 @@ import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
+import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.precompiledapi.PrecompiledCommonInfo;
 import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.transaction.entity.ContractFunction;
 import com.webank.webase.front.transaction.entity.ContractOfTrans;
+import com.webank.webase.front.transaction.entity.ReqSignMessageHash;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import com.webank.webase.front.util.AbiUtil;
@@ -55,7 +57,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.TransactionSucCallback;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.exceptions.HashException;
+import org.fisco.bcos.sdk.crypto.exceptions.SignatureException;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.web3j.abi.FunctionEncoder;
 import org.fisco.bcos.web3j.abi.FunctionReturnDecoder;
 import org.fisco.bcos.web3j.abi.TypeReference;
@@ -63,11 +74,13 @@ import org.fisco.bcos.web3j.abi.Utils;
 import org.fisco.bcos.web3j.abi.datatypes.Function;
 import org.fisco.bcos.web3j.abi.datatypes.Type;
 import org.fisco.bcos.web3j.crypto.Credentials;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.ExtendedRawTransaction;
 import org.fisco.bcos.web3j.crypto.ExtendedTransactionEncoder;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.crypto.RawTransaction;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.crypto.TransactionEncoder;
 import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
 import org.fisco.bcos.web3j.protocol.Web3j;
@@ -84,6 +97,7 @@ import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.fisco.bcos.web3j.tx.txdecode.ConstantProperties;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -103,6 +117,12 @@ public class TransService {
     @Autowired
     private ContractRepository contractRepository;
     @Autowired
+    @Qualifier(value = "sm")
+    private CryptoSuite smCryptoSuite;
+    @Autowired
+    @Qualifier(value = "ecdsa")
+    private CryptoSuite ecdsaCryptoSuite;
+    @Autowired
     private PrecompiledService precompiledService;
 
     /**
@@ -110,7 +130,7 @@ public class TransService {
      *
      * @param req request
      */
-    public Object transHandleWithSign(ReqTransHandleWithSign req) {
+    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
         // get signUserId
         String signUserId = req.getSignUserId();
         ContractOfTrans contractOfTrans = new ContractOfTrans(req);
@@ -121,11 +141,21 @@ public class TransService {
         Web3j web3j = web3ApiService.getWeb3j(groupId);
         // check contractAddress
         String contractAddress = contractOfTrans.getContractAddress();
+        if (req.isUseCns()) {
+            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
+                    req.getCnsName(), req.getVersion());
+            if (CollectionUtils.isEmpty(cnsList)) {
+                throw new FrontException(VERSION_NOT_EXISTS);
+            }
+            contractAddress = cnsList.iterator().next().getAddress();
+            log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
+        }
         // encode function
-        Function function = new Function(req.getFuncName(),
-                contractFunction.getFinalInputs(), contractFunction.getFinalOutputs());
+        Function function = new Function(req.getFuncName(), contractFunction.getFinalInputs(),
+                contractFunction.getFinalOutputs());
 
-        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function, contractFunction);
+        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function,
+                contractFunction);
     }
 
     /**
@@ -167,10 +197,9 @@ public class TransService {
             KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
             String callOutput;
             try {
-                callOutput = web3j
-                    .call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
-                        contractAddress, encodedFunction), DefaultBlockParameterName.LATEST)
-                    .send().getValue().getOutput();
+                callOutput =
+                        web3j.call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
+                                contractAddress, encodedFunction)).send().getValue().getOutput();
             } catch (IOException e) {
                 log.error("send constant tx error:[]", e);
                 throw new FrontException(ConstantCode.CALL_CONTRACT_IO_EXCEPTION, e.getMessage());
@@ -195,13 +224,13 @@ public class TransService {
             final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
             TransactionReceipt responseReceipt;
             sendMessage(web3j, signMsg, transFuture);
-            try{
+            try {
                 responseReceipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
                 // cover null message
                 String receiptMsg = FrontUtils.handleReceiptMsg(responseReceipt);
                 responseReceipt.setMessage(receiptMsg);
                 response = responseReceipt;
-            } catch (InterruptedException | ExecutionException  e) {
+            } catch (InterruptedException | ExecutionException e) {
                 log.error("get tx receipt error for interrupted or exec:[]", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
             } catch (TimeoutException e) {
@@ -235,8 +264,8 @@ public class TransService {
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
         List<AbiDefinition> abiDefinitionList;
         try {
-            abiDefinitionList = objectMapper.readValue(contract.getContractAbi(), objectMapper.getTypeFactory()
-                .constructCollectionType(List.class, AbiDefinition.class));
+            abiDefinitionList = objectMapper.readValue(contract.getContractAbi(), objectMapper
+                    .getTypeFactory().constructCollectionType(List.class, AbiDefinition.class));
         } catch (JsonProcessingException e) {
             log.error("parse abi to json error:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_ABI_PARSE_JSON_ERROR);
@@ -459,14 +488,12 @@ public class TransService {
 
         // fit in solidity 0.6
         boolean isConstant = (STATE_MUTABILITY_VIEW.equals(abiDefinition.getStateMutability())
-            || STATE_MUTABILITY_PURE.equals(abiDefinition.getStateMutability()));
+                || STATE_MUTABILITY_PURE.equals(abiDefinition.getStateMutability()));
         // build ContractFunction
-        ContractFunction cf =
-                ContractFunction.builder().funcName(funcName)
-                    .constant(isConstant)
-                    //.constant(abiDefinition.isConstant())
-                    .inputList(funcInputTypes).outputList(funOutputTypes)
-                    .finalInputs(finalInputs).finalOutputs(finalOutputs).build();
+        ContractFunction cf = ContractFunction.builder().funcName(funcName).constant(isConstant)
+                // .constant(abiDefinition.isConstant())
+                .inputList(funcInputTypes).outputList(funOutputTypes).finalInputs(finalInputs)
+                .finalOutputs(finalOutputs).build();
         return cf;
     }
 
@@ -487,9 +514,9 @@ public class TransService {
         }
         // deprecated cns in front
         // check if contractAbi existed in cns
-//        if (!ifExisted) {
-//            ifExisted = checkAndSaveAbiFromCns(contract);
-//        }
+        // if (!ifExisted) {
+        // ifExisted = checkAndSaveAbiFromCns(contract);
+        // }
         // check if contractAbi existed in db
         if (!ifExisted) {
             ifExisted = checkAndSaveAbiFromDb(contract);
@@ -505,7 +532,7 @@ public class TransService {
     /**
      * send transaction locally
      */
-    public Object transHandleLocal(ReqTransHandle req) {
+    public Object transHandleLocal(ReqTransHandle req) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(req));
 
         // init contract params
@@ -515,6 +542,15 @@ public class TransService {
 
         // address
         String address = cof.getContractAddress();
+        if (req.isUseCns()) {
+            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(cof.getGroupId(),
+                    req.getCnsName(), cof.getVersion());
+            if (CollectionUtils.isEmpty(cnsList)) {
+                throw new FrontException(VERSION_NOT_EXISTS);
+            }
+            address = cnsList.iterator().next().getAddress();
+            log.info("transHandleLocal cns contractAddress:{}", address);
+        }
 
         // web3j
         Web3j web3j = web3ApiService.getWeb3j(cof.getGroupId());
@@ -523,7 +559,8 @@ public class TransService {
         // contract load
         ContractGasProvider contractGasProvider =
                 new StaticGasProvider(Constants.GAS_PRICE, Constants.GAS_LIMIT);
-        CommonContract commonContract = CommonContract.load(address, web3j, credentials, contractGasProvider);
+        CommonContract commonContract =
+                CommonContract.load(address, web3j, credentials, contractGasProvider);
 
         // request
         Object result;
@@ -541,23 +578,23 @@ public class TransService {
     }
 
 
-    public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, int groupId)  {
+    public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, int groupId) {
 
         Web3j web3j = web3ApiService.getWeb3j(groupId);
         if (sync) {
             final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
             TransactionReceipt receipt;
             sendMessage(web3j, signedStr, transFuture);
-            try{
+            try {
                 receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException  e) {
+            } catch (InterruptedException | ExecutionException e) {
                 log.error("send call tx error for interrupted or exec:[]", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
             } catch (TimeoutException e) {
                 log.error("send call tx error for timeout:[]", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
             }
-             return receipt;
+            return receipt;
         } else {
             TransactionReceipt transactionReceipt = new TransactionReceipt();
             web3j.sendRawTransaction(signedStr).sendAsync();
@@ -568,12 +605,15 @@ public class TransService {
 
 
 
-    public Object sendQueryTransaction(String encodeStr, String contractAddress, String funcName, String contractAbi, int groupId, String userAddress) {
+    public Object sendQueryTransaction(String encodeStr, String contractAddress, String funcName,
+            String contractAbi, int groupId, String userAddress) {
 
         Web3j web3j = web3ApiService.getWeb3j(groupId);
-        String callOutput ;
+        String callOutput;
         try {
-           callOutput = web3j.call(Transaction.createEthCallTransaction(userAddress, contractAddress, encodeStr), DefaultBlockParameterName.LATEST)
+            callOutput = web3j
+                    .call(Transaction.createEthCallTransaction(userAddress, contractAddress,
+                            encodeStr), DefaultBlockParameterName.LATEST)
                     .send().getValue().getOutput();
         } catch (IOException e) {
             log.error("sendQueryTransaction fail for contract status error:[]", e);
@@ -601,10 +641,11 @@ public class TransService {
     }
 
     public static AbiDefinition getFunctionAbiDefinition(String functionName, String contractAbi) {
-        if(functionName == null) {
+        if (functionName == null) {
             throw new FrontException(IN_FUNCTION_ERROR);
         }
-        List<AbiDefinition> abiDefinitionList = JsonUtils.toJavaObjectList(contractAbi, AbiDefinition.class);
+        List<AbiDefinition> abiDefinitionList =
+                JsonUtils.toJavaObjectList(contractAbi, AbiDefinition.class);
         if (abiDefinitionList == null) {
             throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
         }
@@ -621,6 +662,7 @@ public class TransService {
         }
         return result;
     }
+
     /**
      * get Credentials by keyUser locally
      */
@@ -635,6 +677,62 @@ public class TransService {
         return credentials;
     }
 
+    public SignatureResult signMessageHashByType(String messageHash, CryptoKeyPair cryptoKeyPair,
+            int encryptType) {
+        try {
+            if (encryptType == CryptoType.SM_TYPE) {
+                return smCryptoSuite.sign(messageHash, cryptoKeyPair);
+            } else {
+                return ecdsaCryptoSuite.sign(messageHash, cryptoKeyPair);
+            }
+        } catch (SignatureException e) {
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+        } catch (HashException e) {
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+        } catch (Exception e) {
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
+        }
+    }
+
+    public CryptoKeyPair getKeyPairByType(BigInteger privateKeyRaw, int encryptType) {
+        if (encryptType == CryptoType.SM_TYPE) {
+            return smCryptoSuite.getKeyPairFactory().createKeyPair(privateKeyRaw);
+        } else {
+            return ecdsaCryptoSuite.getKeyPairFactory().createKeyPair(privateKeyRaw);
+        }
+    }
+
+    /**
+     * signMessageLocal
+     */
+    public Object signMessageLocal(ReqSignMessageHash req) {
+        log.info("transHandle start. ReqSignMessageHash:[{}]", JsonUtils.toJSONString(req));
+
+        Credentials credentials = keyStoreService.getCredentials(req.getUser());
+        CryptoKeyPair cryptoKeyPair = getKeyPairByType(credentials.getEcKeyPair().getPrivateKey(),
+                EncryptType.encryptType);
+
+        SignatureResult signResult = signMessageHashByType(
+                org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()), cryptoKeyPair,
+                EncryptType.encryptType);
+        if (EncryptType.encryptType == CryptoType.SM_TYPE) {
+            SM2SignatureResult sm2SignatureResult = (SM2SignatureResult) signResult;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+            rspMessageHashSignature.setP(Numeric.toHexString(sm2SignatureResult.getPub()));
+            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) 0);
+            return rspMessageHashSignature;
+        } else {
+            ECDSASignatureResult sm2SignatureResult = (ECDSASignatureResult) signResult;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+            rspMessageHashSignature.setP("0x");
+            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) (sm2SignatureResult.getV()+27));
+            return rspMessageHashSignature;
+        }
+    }
 }
 
 

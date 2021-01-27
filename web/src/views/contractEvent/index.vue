@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-content-head  :headTitle="$t('route.subscribeEvent')" :headSubTitle="$t('route.contractEvent')"  @changeGroup="changeGroup"></v-content-head>
+        <v-content-head :headTitle="$t('route.subscribeEvent')" :headSubTitle="$t('route.contractEvent')" @changeGroup="changeGroup"></v-content-head>
         <div class="module-wrapper">
             <div class="search-part">
                 <div style="display: flex;">
@@ -161,7 +161,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -198,7 +198,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -228,7 +228,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
 

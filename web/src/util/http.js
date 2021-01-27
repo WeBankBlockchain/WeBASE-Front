@@ -80,6 +80,11 @@ axiosIns.interceptors.response.use(
         return response;
     },
     error => {
+        if (localStorage.getItem('lang') === "en") {
+            error.data = 'Timeout'
+        } else {
+            error.data = '请求超时'
+        }
         // if (error.response) {
         //     switch (error.response.status) {
         //         case 401:

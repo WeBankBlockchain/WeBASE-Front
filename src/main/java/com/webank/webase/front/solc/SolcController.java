@@ -49,74 +49,74 @@ import java.util.List;
 @RequestMapping("solc")
 public class SolcController {
 
-	@Autowired
-	private SolcService solcService;
+    @Autowired
+    private SolcService solcService;
 
-	@ApiOperation(value = "upload solc js file", notes = "upload solc js file")
-//	@PostMapping("/upload")
-	public BaseResponse upload(@RequestParam("fileName") String fileName,
-							   @RequestParam("solcFile") MultipartFile solcFile,
-							   @RequestParam(value = "description", required = false, defaultValue = "") String description) throws IOException {
-		if (StringUtils.isBlank(fileName)) {
-			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
-		}
-		if (solcFile.getSize() == 0L) {
-			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_EMPTY);
-		}
-		solcService.saveSolcFile(fileName, solcFile, description);
-		return new BaseResponse(ConstantCode.RET_SUCCESS);
-	}
+    @ApiOperation(value = "upload solc js file", notes = "upload solc js file")
+//    @PostMapping("/upload")
+    public BaseResponse upload(@RequestParam("fileName") String fileName,
+                               @RequestParam("solcFile") MultipartFile solcFile,
+                               @RequestParam(value = "description", required = false, defaultValue = "") String description) throws IOException {
+        if (StringUtils.isBlank(fileName)) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
+        }
+        if (solcFile.getSize() == 0L) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_EMPTY);
+        }
+        solcService.saveSolcFile(fileName, solcFile, description);
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
+    }
 
-	@ApiOperation(value = "get solc file name in solcjs dir", notes = "list solc file info")
-	@GetMapping("/list")
-	public BaseResponse getSolcList() {
-		// get list
-		List<String> resList = solcService.checkSolcFile();
-		return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
-	}
+    @ApiOperation(value = "get solc file name in solcjs dir", notes = "list solc file info")
+    @GetMapping("/list")
+    public BaseResponse getSolcList() {
+        // get list
+        List<String> resList = solcService.checkSolcFile();
+        return new BaseResponse(ConstantCode.RET_SUCCESS, resList);
+    }
 
-	@ApiOperation(value = "delete uploaded solc js", notes = "delete uploaded solc js file")
-	@ApiImplicitParam(name = "solcId", value = "solc info id", required = true,
-			dataType = "Integer", paramType = "path")
-//	@DeleteMapping("/{solcId}")
-	public BaseResponse deleteSolcFile(@PathVariable("solcId") Integer solcId) {
+    @ApiOperation(value = "delete uploaded solc js", notes = "delete uploaded solc js file")
+    @ApiImplicitParam(name = "solcId", value = "solc info id", required = true,
+            dataType = "Integer", paramType = "path")
+//    @DeleteMapping("/{solcId}")
+    public BaseResponse deleteSolcFile(@PathVariable("solcId") Integer solcId) {
 
-		boolean deleteRsp = solcService.deleteFile(solcId);
-		return new BaseResponse(ConstantCode.RET_SUCCESS);
-	}
+        boolean deleteRsp = solcService.deleteFile(solcId);
+        return new BaseResponse(ConstantCode.RET_SUCCESS);
+    }
 
 
-	/**
-	 * download Solc js file
-	 * @return fileName in headers, file InputStream in body
-	 */
-	@ApiOperation(value = "download existed solc js", notes = "download solc js file")
-	@ApiImplicitParam(name = "fileName", value = "solc file name", required = true,
-			dataType = "String")
-//	@PostMapping("/download")
-	public ResponseEntity<InputStreamResource> downloadSolcFile(@RequestParam("fileName") String fileName) {
-		if (StringUtils.isBlank(fileName)) {
-			throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
-		}
-		log.info("downloadSolcFile start. fileName:{}", fileName);
-		RspDownload rspDownload = solcService.getSolcFile(fileName);
-		return ResponseEntity.ok().headers(headers(rspDownload.getFileName()))
-				.body(new InputStreamResource(rspDownload.getInputStream()));
-	}
+    /**
+     * download Solc js file
+     * @return fileName in headers, file InputStream in body
+     */
+    @ApiOperation(value = "download existed solc js", notes = "download solc js file")
+    @ApiImplicitParam(name = "fileName", value = "solc file name", required = true,
+            dataType = "String")
+//    @PostMapping("/download")
+    public ResponseEntity<InputStreamResource> downloadSolcFile(@RequestParam("fileName") String fileName) {
+        if (StringUtils.isBlank(fileName)) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_SOLC_FILE_NAME_EMPTY);
+        }
+        log.info("downloadSolcFile start. fileName:{}", fileName);
+        RspDownload rspDownload = solcService.getSolcFile(fileName);
+        return ResponseEntity.ok().headers(headers(rspDownload.getFileName()))
+                .body(new InputStreamResource(rspDownload.getInputStream()));
+    }
 
-	private HttpHeaders headers(String fileName) {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-				"attachment;filename*=UTF-8''" + encode(fileName));
-		return httpHeaders;
-	}
+    private HttpHeaders headers(String fileName) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment;filename*=UTF-8''" + encode(fileName));
+        return httpHeaders;
+    }
 
-	private String encode(String name) {
-		try {
-			return URLEncoder.encode(name, StandardCharsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    private String encode(String name) {
+        try {
+            return URLEncoder.encode(name, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -23,11 +23,11 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface SolcRepository extends CrudRepository<SolcInfo, Integer>,
-		JpaSpecificationExecutor<SolcInfo> {
+        JpaSpecificationExecutor<SolcInfo> {
 
-	List<SolcInfo> findAll();
+    List<SolcInfo> findAll();
 
-	SolcInfo findBySolcName(String fileName);
+    SolcInfo findBySolcName(String fileName);
 
-	SolcInfo findByMd5(String md5);
+    SolcInfo findByMd5(String md5);
 }

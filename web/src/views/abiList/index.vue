@@ -151,7 +151,9 @@ export default {
             this.groupId = data
             this.changeGroup()
         })
-        this.queryAbiList()
+        if (localStorage.getItem('groupId')) {
+            this.queryAbiList()
+        }
     },
 
     methods: {
@@ -214,7 +216,7 @@ export default {
                     this.loading = false;
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     })
                 })
         },
@@ -300,17 +302,17 @@ export default {
                         })
                     }
                 })
-                .catch(error => {
+                .catch(err => {
                     this.loading = false;
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     })
                 })
         },
         checkEvent: function (val) {
             this.$router.push({
-                path: '/eventCheck',
+                path: '/onlineTools',
                 query: {
                     groupId: this.groupId,
                     type: 'abi',

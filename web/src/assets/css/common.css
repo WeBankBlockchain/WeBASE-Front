@@ -26,6 +26,7 @@
     background-color: #2f3b52;
     /* box-shadow: 0 4px 12px 0 #dfe2e9; */
     border-radius: 10px;
+    color: #fff;
 }
 
 .module-wrapper-small {
@@ -120,6 +121,10 @@
 
 .font-color-58cb7d {
     color: #58cb7d
+}
+
+.font-120 {
+    font-size: 120px;
 }
 
 .font-46 {

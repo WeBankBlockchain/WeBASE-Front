@@ -15,9 +15,19 @@
             vertical-align: -0.15em;
             fill: currentColor;
             overflow: hidden;
-        }</style></head><body><body><div id=app style="height: 100% !important;"></div><script type=text/javascript src=./static/js/0.305e9d6ce2d80587d4a2.js></script><script type=text/javascript src=./static/js/3.a131b4f11cc362aa88ea.js></script><script type=text/javascript src=./static/js/runtime.7c8fae0f43085c527a21.js></script><script type=text/javascript src=./static/js/5.2faa81b1f18d3a914f1e.js></script></body><script>if (self == top) {
+        }</style></head><body><body><div id=app style="height: 100% !important;"></div><script type=text/javascript src=./static/js/0.10d191346a2dd91a4ff4.js></script><script type=text/javascript src=./static/js/2.814e2ececbaebf0a0c41.js></script><script type=text/javascript src=./static/js/runtime.f0befb1aaf6100a51dc3.js></script><script type=text/javascript src=./static/js/4.f5061a29a2963ac7b24c.js></script></body><script>if (self == top) {
             var antiClickjack = document.getElementById("antiClickjack");
             antiClickjack.parentNode.removeChild(antiClickjack);
         } else {
             top.location = self.location;
-        }</script></body></html>
+        }
+        var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
+        var jsSrc = (navigator.language || navigator.browserLanguage).toLowerCase();
+        console.log(userAgent, jsSrc)
+        //判断是否IE浏览器
+        if ((!!window.ActiveXObject || "ActiveXObject" in window) && jsSrc == 'zh-cn') {
+            alert("本系统不支持IE浏览器，请选择Chrome、Safari、火狐或者QQ浏览器、搜狗浏览器的非兼容版");
+        };
+        if ((!!window.ActiveXObject || "ActiveXObject" in window) && jsSrc != 'zh-cn') {
+            alert("This system does not support IE browser, please use Chrome, Firefox, Safari or Opera.");
+        };</script></body></html>

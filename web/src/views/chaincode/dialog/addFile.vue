@@ -38,6 +38,7 @@
 </template>
 <script>
 import { getContractPathList } from "@/util/api"
+import { filter } from 'jszip'
 export default {
     name: "addFile",
     props: ['fileshow', 'data', 'id'],
@@ -53,7 +54,7 @@ export default {
                     {
                         min: 1,
                         max: 32,
-                        message: this.$t('dialog.rivateKeyVerifyLength1_32'),
+                        message: this.$t('dialog.privateKeyVerifyLength1_32'),
                         trigger: "blur"
                     },
                     {
@@ -84,38 +85,38 @@ export default {
         this.getContractPaths();
     },
     methods: {
-        getContractPaths () {
+        getContractPaths() {
             getContractPathList(localStorage.getItem("groupId")).then(res => {
-                if(res.status == 200){
+                if (res.status == 200) {
                     this.pathList = res.data;
-                     let num = 0;
-                     this.folderList = []
-                        for(let i = 0;i < this.pathList.length; i++){
-                                let item = {
-                                    folderName: this.pathList[i].contractPath,
-                                    folderId: new Date().getTime() + this.pathList[i].contractPath,
-                                    folderActive: false,
-                                    groupId: localStorage.getItem("groupId"),
-                                    modifyTime: this.pathList[i].modifyTime
-                                };
-                                this.folderList.push(item)
-                            if(this.pathList[i].contractPath == this.userFolader){
-                                num++
-                            }
+                    let num = 0;
+                    this.folderList = []
+                    for (let i = 0; i < this.pathList.length; i++) {
+                        let item = {
+                            folderName: this.pathList[i].contractPath,
+                            folderId: new Date().getTime() + this.pathList[i].contractPath,
+                            folderActive: false,
+                            groupId: localStorage.getItem("groupId"),
+                            modifyTime: this.pathList[i].modifyTime
+                        };
+                        this.folderList.push(item)
+                        if (this.pathList[i].contractPath == this.userFolader) {
+                            num++
                         }
-                        
-                    this.changeOptions();
-                }else {
-                        this.$message({
-                            type: "error",
-                            message: this.$chooseLang(res.data.code)
-                        });
                     }
-                })
+
+                    this.changeOptions();
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code)
+                    });
+                }
+            })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -132,7 +133,7 @@ export default {
             //         }
             //     }
             // this.fileFrom.contractType = this.options[0].folderName
-             
+
             // if (this.folderId) {
             //     this.options.forEach(value => {
             //         if (value.folderId == this.folderId) {
@@ -141,14 +142,14 @@ export default {
             //         }
             //     })
             // } 
-            if(this.folderList.length){
+            if (this.folderList.length) {
                 let num = 0;
-                for(let i = 0; i < this.folderList.length; i++){
-                    if(this.folderList[i].folderName === "/"){
+                for (let i = 0; i < this.folderList.length; i++) {
+                    if (this.folderList[i].folderName === "/") {
                         num++
                     }
                 }
-                if(num  == 0){
+                if (num == 0) {
                     let data = {
                         folderName: "/",
                         folderId: 1,
@@ -156,18 +157,21 @@ export default {
                     this.folderList.unshift(data)
                 }
                 this.options = this.folderList
-            }else{
+            } else {
                 this.options = [{
-                folderName: "/",
-                folderId: 1,
-            }];
+                    folderName: "/",
+                    folderId: 1,
+                }];
             }
             this.fileFrom.contractType = this.options[0].folderName
-            for(let i = 0; i < this.options.length; i++){
-                if(this.data && this.options[i].folderName == this.data.contractName){
+            for (let i = 0; i < this.options.length; i++) {
+                if (this.data && this.options[i].folderName == this.data.contractName) {
                     this.fileFrom.contractType = this.options[i].folderName
                 }
             }
+            this.options = this.options.filter(item => {
+                return item.folderName != "template"
+            })
         },
         submit: function (formName) {
             this.$refs[formName].validate(valid => {

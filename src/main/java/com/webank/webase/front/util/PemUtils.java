@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PemUtils {
+    public static final String crtContentHeadNoLF = "-----BEGIN PRIVATE KEY-----" ;
     public static final String crtContentHead = "-----BEGIN PRIVATE KEY-----\n" ;
     public static final String crtContentTail = "-----END PRIVATE KEY-----\n" ;
     public static final String crtTailForConcat = "\n-----END PRIVATE KEY-----\n" ;
@@ -35,7 +36,7 @@ public class PemUtils {
      */
     public static List<String> getPemBareContentList(String certContent) {
         List<String> list = new ArrayList<>();
-        if(!certContent.startsWith(crtContentHead)){
+        if(!certContent.startsWith(crtContentHeadNoLF)){
             throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
         }
         String[] nodeCrtStrArray = certContent.split(crtContentHead);

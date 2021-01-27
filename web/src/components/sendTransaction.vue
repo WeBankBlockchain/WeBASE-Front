@@ -24,9 +24,35 @@
                 </td>
             </tr>
             <tr>
+                <td class="text-right text-td" style="padding: 5px 0;"><span class="font-color-fff ">CNS：</span></td>
+                <td>
+                    <el-checkbox v-model="isCNS" @change="changeCns"></el-checkbox>
+                </td>
+            </tr>
+            <tr v-if="isCNS">
+                <td style="padding: 11px 0;" class="text-right text-td"><span class="font-color-fff"></span></td>
+                <td>
+                    <el-input v-model.trim="cnsName" style="width: 260px;" :placeholder="$t('dialog.cnsName')">
+                        <template slot="prepend" style="width: 51px;">
+                            <span>name</span>
+                        </template>
+                    </el-input>
+                </td>
+            </tr>
+            <tr v-if="isCNS">
+                <td style="padding: 11px 0;" class="text-right text-td"><span class="font-color-fff"></span></td>
+                <td>
+                    <el-input v-model.trim="cnsVersion" style="width: 260px;" :placeholder="$t('dialog.cnsVersion')">
+                        <template slot="prepend" style="width: 51px;">
+                            <span>version</span>
+                        </template>
+                    </el-input>
+                </td>
+            </tr>
+            <tr v-else>
                 <td class="text-right text-td"><span class="font-color-fff">{{$t('text.contractAddress')}}：</span></td>
                 <td>
-                    <el-input v-model.trim="contractAddress" style="width: 240px;margin-bottom:4px;" :placeholder="$t('placeholder.selectedContractAddress')"></el-input>
+                    <el-input v-model.trim="contractAddress" style="width: 260px;margin-bottom:4px;" :placeholder="$t('placeholder.selectedContractAddress')"></el-input>
                     <el-tooltip class="font-color-fff" effect="dark" :content="$t('title.txnContractAddExp')" placement="top-start">
                         <i class="el-icon-info"></i>
                     </el-tooltip>
@@ -37,7 +63,7 @@
                     <span class="font-color-fff">{{$t('text.sendFunction')}}：</span>
                 </td>
                 <td>
-                    <el-select v-model="transation.funcName" filterable :placeholder="$t('placeholder.functionName')" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width:240px">
+                    <el-select v-model="transation.funcName" filterable :placeholder="$t('placeholder.functionName')" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width: 260px">
                         <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList">
                             <span :class=" {'func-color': !item.constant}">{{item.name}}</span>
                         </el-option>
@@ -49,7 +75,7 @@
                     <span class="font-color-fff">{{$t('text.acountAddress')}}：</span>
                 </td>
                 <td>
-                    <el-select v-model="transation.userName" :placeholder="placeholderText" style="width:240px;margin-bottom:4px;" class="plac-op" @change="changeId">
+                    <el-select v-model="transation.userName" :placeholder="placeholderText" style="width: 260px;margin-bottom:4px;" class="plac-op" @change="changeId">
                         <el-option :label="item.address" :value="item.address" :key="item.address" v-for='(item,index) in userList'>
                             <span class="font-12">{{item.userName}}</span>
                             <span>{{item.address}}</span>
@@ -67,7 +93,7 @@
                 <td>
                     <ul>
                         <li v-for="(item,index) in pramasData">
-                            <el-input v-model.trim="transation.funcValue[index]" style="width: 240px;" :placeholder="item.type">
+                            <el-input v-model.trim="transation.funcValue[index]" style="width: 260px;" :placeholder="item.type">
                                 <template slot="prepend" style="width: 51px;">
                                     <span>{{item.name}}</span>
                                 </template>
@@ -87,7 +113,7 @@
     </div>
 </template>
 <script>
-import { sendTransation, queryLocalKeyStores } from "@/util/api";
+import { sendTransation, queryLocalKeyStores, findCnsInfo } from "@/util/api";
 import { isJson } from "@/util/util"
 export default {
     name: "sendTransation",
@@ -112,13 +138,17 @@ export default {
             errorMessage: '',
             placeholderText: this.$t('placeholder.selectedAccountAddress'),
             pramasObj: null,
-            stateMutability: ''
+            stateMutability: '',
+            isCNS: false,
+            cnsList: [],
+            cnsVersion: "",
+            cnsName: "",
         };
     },
     computed: {
-        showUser(){
+        showUser() {
             let showUser = true;
-            if(this.constant || this.stateMutability==='view' || this.stateMutability==='pure'){
+            if (this.constant || this.stateMutability === 'view' || this.stateMutability === 'pure') {
                 showUser = false
             }
             return showUser
@@ -132,7 +162,20 @@ export default {
     },
     methods: {
         submit: function (formName) {
-            this.send();
+            if (this.isCNS) {
+                if (!this.cnsName || !this.cnsVersion) {
+                    this.$message({
+                        type: "error",
+                        message: this.$t('text.cnsNameVersion')
+                    })
+                    return
+                } else {
+                    this.send();
+                }
+            } else {
+                this.send();
+            }
+
         },
         close: function (formName) {
             this.$emit("close", false);
@@ -159,7 +202,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 })
         },
@@ -230,13 +273,13 @@ export default {
             if (this.transation.funcValue.length) {
                 for (let i = 0; i < this.transation.funcValue.length; i++) {
                     let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
-                    if(data && isJson(data)){
+                    if (data && isJson(data)) {
                         try {
                             this.transation.funcValue[i] = JSON.parse(data)
                         } catch (error) {
                             console.log(error)
                         }
-                    }else {
+                    } else {
                         this.transation.funcValue[i] = data;
                     }
                 }
@@ -249,15 +292,17 @@ export default {
             })
             let data = {
                 groupId: localStorage.getItem("groupId"),
-                user: this.constant || this.stateMutability==='view' || this.stateMutability==='pure' ? '' : this.transation.userName,
+                user: this.constant || this.stateMutability === 'view' || this.stateMutability === 'pure' ? '' : this.transation.userName,
                 contractName: this.data.contractName,
                 contractPath: this.data.contractPath,
-                version: this.contractVersion,
+                version: this.isCNS && this.cnsVersion ? this.cnsVersion : '',
                 funcName: functionName || "",
                 funcParam: this.transation.funcValue,
-                contractAddress: this.contractAddress,
+                contractAddress: this.isCNS ? "" : this.contractAddress,
                 contractAbi: [this.pramasObj],
-                useAes: false
+                useAes: false,
+                useCns: this.isCNS,
+                cnsName: this.isCNS && this.cnsName ? this.cnsName : ""
             };
             sendTransation(data)
                 .then(res => {
@@ -274,10 +319,10 @@ export default {
                             },
                             data: this.pramasObj
                         }
-                        this.$emit("success", Object.assign({},successData,{
+                        this.$emit("success", Object.assign({}, successData, {
                             constant: this.constant
-                        }) );
-                        if (this.constant || this.stateMutability==='view' || this.stateMutability==='pure') {
+                        }));
+                        if (this.constant || this.stateMutability === 'view' || this.stateMutability === 'pure') {
                             this.$message({
                                 type: "success",
                                 message: this.$t('text.searchSucceeded')
@@ -312,6 +357,32 @@ export default {
                         message: this.$t('text.sendFailed')
                     });
                 });
+        },
+        changeCns(val) {
+            if (val) {
+                this.queryFindCnsInfo()
+            }
+        },
+        queryFindCnsInfo() {
+            let param = {
+                groupId: localStorage.getItem('groupId'),
+                contractAddress: this.data.contractAddress
+            }
+            findCnsInfo(param)
+                .then(res => {
+                    const { data, status } = res
+                    if (status === 200) {
+                        if (data.data) {
+                            this.cnsVersion = data.data.version
+                            this.cnsName = data.data.cnsName
+                        }
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
         }
     }
 };
@@ -348,7 +419,6 @@ export default {
 .text-td {
     white-space: nowrap;
 }
-.el-input .el-input--medium{
-
+.el-input .el-input--medium {
 }
 </style>

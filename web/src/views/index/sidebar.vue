@@ -111,8 +111,8 @@ export default {
                         item.name = this.$t('route.systemMonitoring')
                         break;
                     case 'subscribeEvent':
-                    item.name = this.$t('route.subscribeEvent')
-                    break;
+                        item.name = this.$t('route.subscribeEvent')
+                        break;
 
                 }
                 if (item.children) {
@@ -153,6 +153,12 @@ export default {
                                 break;
                             case 'eventCheck':
                                 it.name = this.$t('route.eventCheck')
+                                break;
+                            case 'onlineTools':
+                                it.name = this.$t('route.onlineTools')
+                                break;
+                            case 'contractWarehouse':
+                                it.name = this.$t('route.contractWarehouse')
                                 break;
                         }
                     })
@@ -216,7 +222,7 @@ export default {
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },
@@ -224,7 +230,7 @@ export default {
             queryGroup()
                 .then(res => {
                     const { data, status, statusText } = res;
-                    if (status === 200) {
+                    if (status === 200 && data && data.length) {
                         let arr = data.sort((a, b) => {
                             return a - b
                         }),
@@ -247,16 +253,18 @@ export default {
                         localStorage.setItem("cluster", JSON.stringify(list));
                         callback()
                     } else {
-                        this.$message({
-                            type: "error",
-                            message: this.$chooseLang(res.data.code)
-                        });
+                        if(res.data.code){
+                            this.$message({
+                                type: "error",
+                                message: this.$chooseLang(res.data.code)
+                            });
+                        }
                     }
                 })
                 .catch(err => {
                     this.$message({
                         type: "error",
-                        message: this.$t('text.systemError')
+                        message: err.data || this.$t('text.systemError')
                     });
                 });
         },

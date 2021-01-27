@@ -899,3 +899,82 @@ export function eventContractInfo(data, list) {
         method: 'get'
     })
 }
+// 仓库列表
+export function getContractStore() {
+    return get({
+        url: `${HANDLE}contractStore/getContractStoreList`,
+        method: 'get'
+    })
+}
+
+export function getContractStoreById(storeId) {
+    return get({
+        url: `${HANDLE}contractStore/getContractStoreById/${storeId}`,
+        method: 'get'
+    })
+}
+//
+export function getContractItemById(contractId) {
+    return get({
+        url: `${HANDLE}contractStore/getContractItemById/${contractId}`,
+        method: 'get'
+    })
+}
+
+export function getContractFolderById(contractFolderId) {
+    return get({
+        url: `${HANDLE}contractStore/getContractFolderById/${contractFolderId}`,
+        method: 'get'
+    })
+}
+// 通过文件ID获取文件下的合约
+export function getContractItemByFolderId(folderId) {
+    return get({
+        url: `${HANDLE}contractStore/getContractItemByFolderId/${folderId}`,
+        method: 'get'
+    })
+}
+
+export function getFolderItemListByStoreId(storeId) {
+    return get({
+        url: `${HANDLE}contractStore/getFolderItemListByStoreId/${storeId}`,
+        method: 'get'
+    })
+}
+
+//在线工具
+//生成sign
+export function signHash(data) {
+    return post({
+        url: `${HANDLE}trans/signMessageHash`,
+        method: 'post',
+        data: data
+    })
+}
+
+export function batchSaveContract(data) {
+    return post({
+        url: `${HANDLE}contract/copyContracts`,
+        method: 'post',
+        data: data
+    })
+}
+
+//注册cns
+export function registerCns(data) {
+    return post({
+        url: `${HANDLE}contract/registerCns`,
+        method: 'post',
+        data: data
+    })
+}
+
+//cns查询
+
+export function findCnsInfo(data) {
+    return post({
+        url: `${HANDLE}contract/findCns`,
+        method: 'post',
+        data: data
+    })
+}
