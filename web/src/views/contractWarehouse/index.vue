@@ -20,11 +20,11 @@
                                 </el-image> -->
                             </div>
                             <div class="right-warehouse">
-                                <div class="right-warehouse-item">
+                                <div class="right-warehouse-item store-name">
                                     <p v-if="language=='zh'">{{item.storeName}}</p>
                                     <p v-else>{{item.storeName_en}}</p>
                                 </div>
-                                <div class="right-warehouse-item">
+                                <div class="right-warehouse-item store-desc">
                                     <p v-if="language=='zh'">{{item.storeDesc}}</p>
                                     <p v-else>{{item.storeDetail_en}}</p>
                                 </div>
@@ -244,5 +244,11 @@ export default {
 }
 .right-btn-item {
     margin-left: 0px;
+}
+.store-name {
+    font-size: 14px;
+}
+.store-desc {
+    font-size: 12px;
 }
 </style>
