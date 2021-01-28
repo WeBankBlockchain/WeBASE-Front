@@ -77,8 +77,7 @@ export default {
         decodeLog
     },
 
-    props: {
-    },
+    props: ['groupId'],
 
     data() {
         return {
@@ -91,7 +90,6 @@ export default {
                 toBlock: '',
                 eventName: ''
             },
-            groupId: localStorage.getItem("groupId"),
             inputList: [],
             addressList: [],
             contractId: '',
@@ -227,42 +225,48 @@ export default {
     watch: {
         $route() {
             this.queryInit()
-        },
+        }
     },
 
     created() {
     },
-    beforeDestroy: function () {
-        Bus.$off("changeGroup")
-    },
+    
     mounted() {
-        Bus.$on("changeGroup", data => {
-            this.changeGroup(data)
+        this.$on("changeGroup", data => {
+            this.groupId = data
+            this.changeGroup()
         })
-        this.queryInit()
+        if(localStorage.getItem("groupId")){
+            this.queryInit()
+        }
     },
 
     methods: {
         queryInit() {
-            if (this.$route.query.type) {
-                console.log(this.$route.query.type)
+            if (this.$route && this.$route.query.type) {
                 this.queryTypeParam = this.$route.query
                 this.queryContractAbi(this.queryTypeParam)
+            } else {
+                this.contractEventForm = {
+                    contractAbi: '',
+                    contractAddress: '',
+                    fromBlock: 1,
+                }
             }
             this.queryAllAddress()
             this.getBlockNumber()
         },
-        changeGroup(data) {
-            this.groupId = data
+        changeGroup() {
             this.contractEventForm = {
                 groupId: '',
                 contractAbi: '',
                 contractAddress: '',
-                fromBlock: '',
+                fromBlock: 1,
                 toBlock: '',
                 eventName: ''
             }
-            this.queryInit()
+            this.queryAllAddress()
+            this.getBlockNumber()
         },
         queryAllAddress() {
             listAddress(this.groupId)

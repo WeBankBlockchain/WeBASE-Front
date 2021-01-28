@@ -32,11 +32,13 @@ public class PresetDataService {
                 "Toolbox Contract suite","Toolbox Contract suite");
 
         insertStoreItem(evidenceId,"存证应用","Evidence","2","evidenceId",
-                "一套区块链存证合约","一套区块链存证合约",
+                "一套区块链存证合约，实现区块链存证、取证",
+                "一套区块链存证合约，实现区块链存证、取证",
                 "Evidence Contract suite","Evidence Contract suite");
 
         insertStoreItem(pointsId,"积分应用","Points","3","pointsId",
-                "一套积分合约","一套积分合约",
+                "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+                "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
                 "Points Contract suite","Points Contract suite");
     }
 
@@ -68,14 +70,14 @@ public class PresetDataService {
                 "Toolbox Contract suite");
 
         insertContractFolderItem(contractFolderIndex++,evidenceId,"Evidence",
-                "一套区块链存证合约",
-                "一套区块链存证合约",
+                "一套区块链存证合约，实现区块链存证、取证",
+                "一套区块链存证合约，实现区块链存证、取证",
                 "Evidence Contract suite",
                 "Evidence Contract suite");
 
         insertContractFolderItem(contractFolderIndex++,pointsId,"Points",
-                "一套积分合约",
-                "一套积分合约",
+                "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+                "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
                 "Points Contract suite",
                 "Points Contract suite");
     }
@@ -115,25 +117,25 @@ public class PresetDataService {
         //evidence
         insertContractItem(contractIndex++,evidenceId,"Evidence",
                 EvidenceConstantContext.EVIDENCE_SOURCE,
-                EvidenceConstantContext.EVIDENCE_MD,EvidenceConstantContext.EVIDENCE_MD);
+                EvidenceConstantContext.EVIDENCE_MD,"");
         insertContractItem(contractIndex++,evidenceId,"EvidenceSignersData",
                 EvidenceConstantContext.EVIDENCE_SIGNERS_DATA_SOURCE,
-                EvidenceConstantContext.EVIDENCE_MD,EvidenceConstantContext.EVIDENCE_MD);
+                EvidenceConstantContext.EVIDENCE_MD,"");
 
 
         //Points
         insertContractItem(contractIndex++,pointsId,"BAC001",
                 PointsConstantContext.BAC001_SOURCE,
-                PointsConstantContext.BAC001_MD,PointsConstantContext.BAC001_MD);
+                PointsConstantContext.BAC001_MD,"");
         insertContractItem(contractIndex++,pointsId,"IBAC001",
                 PointsConstantContext.I_BAC001_SOURCE,
-                PointsConstantContext.BAC001_MD,PointsConstantContext.BAC001_MD);
+                PointsConstantContext.BAC001_MD,"");
         insertContractItem(contractIndex++,pointsId,"Roles",ToolsConstantContext.ROLES_SOURCE,
-                ToolsConstantContext.ROLES_MD,ToolsConstantContext.ROLES_MD);
+                ToolsConstantContext.ROLES_MD,"");
         insertContractItem(contractIndex++,pointsId,"SafeMath",ToolsConstantContext.SAFE_MATH_SOURCE,
-                ToolsConstantContext.SAFE_MATH_MD,ToolsConstantContext.SAFE_MATH_MD);
+                ToolsConstantContext.SAFE_MATH_MD,"");
         insertContractItem(contractIndex++,pointsId,"Address",ToolsConstantContext.ADDRESS_SOURCE,
-                ToolsConstantContext.ADDRESS_MD,ToolsConstantContext.ADDRESS_MD);
+                ToolsConstantContext.ADDRESS_MD,"");
     }
 
 

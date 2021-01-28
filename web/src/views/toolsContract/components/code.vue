@@ -33,8 +33,8 @@
             </div>
             <div class="contract-info" v-show="successHide" :style="{height:infoHeight + 'px'}">
                 <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
-                <div style="padding: 5px 20px;" v-if="contractDesc">
-                    <mavon-editor :toolbars="toolbars" v-model="contractDesc" :subfield="prop.subfield" :defaultOpen="prop.defaultOpen" :toolbarsFlag="prop.toolbarsFlag" :editable="prop.editable" :scrollStyle="prop.scrollStyle" :boxShadow="prop.boxShadow" ref=md />
+                <div v-if="contractDesc" class="md-text">
+                    <mavon-editor :previewBackground="prop.previewBackground" :toolbars="toolbars" v-model="contractDesc" :subfield="prop.subfield" :defaultOpen="prop.defaultOpen" :toolbarsFlag="prop.toolbarsFlag" :editable="prop.editable" :scrollStyle="prop.scrollStyle" :boxShadow="prop.boxShadow" ref=md />
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@ export default {
             content: "",
             code: "",
             contractName: "",
-            infoHeight: 100,
+            infoHeight: 300,
             aceEditor: null,
             themePath: "ace/theme/monokai",
             modePath: "ace/mode/solidity",
@@ -90,7 +90,7 @@ export default {
         },
         successHide(val) {
             if (val) {
-                this.infoHeight = 250;
+                this.infoHeight = 300;
             } else {
                 this.infoHeight = 0;
             }
@@ -121,7 +121,8 @@ export default {
                 editable: false,
                 toolbarsFlag: false,
                 scrollStyle: false,
-                boxShadow: false//边框
+                boxShadow: false,
+                previewBackground: '#20293c'
             }
             return data
         }
@@ -308,6 +309,9 @@ export default {
     text-align: left;
     border-top: 1px solid #242e42;
     box-sizing: border-box;
+}
+.md-text {
+    height: 100%;
     overflow: auto;
 }
 .contract-info-content {
@@ -434,5 +438,11 @@ export default {
 .visibility-wrapper {
     position: absolute;
     bottom: 10px;
+}
+.contract-info >>> .markdown-body {
+    color: #9da2ab;
+}
+.contract-info >>> .v-note-wrapper {
+    border: inherit
 }
 </style>
