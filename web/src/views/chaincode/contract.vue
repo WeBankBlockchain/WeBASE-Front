@@ -212,7 +212,9 @@ export default {
             if (this.$store.state.versionData && this.$store.state.versionData.net == 0) {
                 this.$router.go(0)
             }
-            this.$refs.menu.getContractPaths()
+            if (localStorage.getItem('groupId')) {
+                this.$refs.menu.getContractPaths()
+            }
         },
         getEncryption: function (callback) {
             this.loading = true

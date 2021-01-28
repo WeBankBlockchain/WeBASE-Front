@@ -30,7 +30,7 @@ const contractEvent = resolve => require(['@/views/contractEvent'], resolve);
 const abiList = resolve => require(['@/views/abiList'], resolve);
 const parseAbi = resolve => require(['@/views/parseAbi'], resolve);
 const blank = resolve => require(['@/views/blank'], resolve);
-const eventCheck = resolve => require(['@/views/eventCheck'], resolve);
+// const eventCheck = resolve => require(['@/views/eventCheck'], resolve);
 const onlineTools = resolve => require(['@/views/onlineTools'], resolve); 
 const contractWarehouse = resolve => require(['@/views/contractWarehouse'], resolve);
 const toolsContract = resolve => require(['@/views/toolsContract'], resolve);

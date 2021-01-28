@@ -122,11 +122,11 @@ export default {
                     name: this.$t("contracts.contractAbi"),
                     width: ''
                 },
-                {
-                    enName: "contractBin",
-                    name: this.$t("contracts.runtimeBin"),
-                    width: ''
-                },
+                // {
+                //     enName: "contractBin",
+                //     name: this.$t("contracts.runtimeBin"),
+                //     width: ''
+                // },
                 {
                     enName: "operation",
                     name: this.$t('contracts.operation'),
@@ -151,7 +151,9 @@ export default {
             this.groupId = data
             this.changeGroup()
         })
-        this.queryAbiList()
+        if (localStorage.getItem('groupId')) {
+            this.queryAbiList()
+        }
     },
 
     methods: {
@@ -310,7 +312,7 @@ export default {
         },
         checkEvent: function (val) {
             this.$router.push({
-                path: '/eventCheck',
+                path: '/onlineTools',
                 query: {
                     groupId: this.groupId,
                     type: 'abi',

@@ -93,7 +93,7 @@ export default {
             this.storeId = this.$route.query.storeId;
             this.queryContractFolder()
         }
-        Bus.$on('code', (data, type)=>{
+        Bus.$on('code', (data, type) => {
             this.exportToIde(data, type)
         })
     },
@@ -114,15 +114,21 @@ export default {
                 .then(res => {
                     if (res.data.code === 0) {
                         let list = res.data.data;
-                        list.forEach(item => {
-                            item.folderIcon = 'el-icon-caret-right';
-                            item.contractActive = false;
-                            item.folderActive = false;
-                            item.child = [];
-                            item.handleModel = false;
-                            item.handleFile = false;
-                        })
-                        this.folderList = list;
+                        if (list.length) {
+                            list.forEach(item => {
+                                item.folderIcon = 'el-icon-caret-bottom';
+                                item.contractActive = false;
+                                item.folderActive = false;
+                                item.child = [];
+                                item.handleModel = false;
+                                item.handleFile = false;
+                            })
+                            this.folderList = list;
+                            var contractFolderId = list[0];
+                            this.open(contractFolderId)
+                            this.queryContract(contractFolderId)
+                        }
+
                     } else {
                         this.$message({
                             type: "error",
@@ -168,6 +174,7 @@ export default {
                                 item.child = folderContract;
                             }
                         })
+                        this.select(folderContract[0])
                         if (type === 'export') {
                             this.queryBatchSaveContract(folderContract)
                         }

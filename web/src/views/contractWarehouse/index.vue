@@ -3,7 +3,7 @@
         <content-head :headTitle="$t('route.contractWarehouse')"></content-head>
         <div class="module-wrapper" style="padding: 20px;" v-loading="loading">
             <div class="contract-introduction">
-                <p>{{$t('text.appIntroduction')}}</p>
+                <!-- <p>{{$t('text.appIntroduction')}}</p> -->
                 <p>{{$t('text.warehouseDes')}}</p>
             </div>
 
@@ -20,11 +20,11 @@
                                 </el-image> -->
                             </div>
                             <div class="right-warehouse">
-                                <div class="right-warehouse-item">
+                                <div class="right-warehouse-item store-name">
                                     <p v-if="language=='zh'">{{item.storeName}}</p>
                                     <p v-else>{{item.storeName_en}}</p>
                                 </div>
-                                <div class="right-warehouse-item">
+                                <div class="right-warehouse-item store-desc">
                                     <p v-if="language=='zh'">{{item.storeDesc}}</p>
                                     <p v-else>{{item.storeDetail_en}}</p>
                                 </div>
@@ -92,7 +92,9 @@ export default {
         Bus.$off("chooselanguage")
     },
     mounted() {
-        this.queryContractStore()
+        if(localStorage.getItem("groupId")){
+            this.queryContractStore()
+        }
         Bus.$on("chooselanguage", data => {
             this.language = data
             this.queryContractStore()
@@ -244,5 +246,11 @@ export default {
 }
 .right-btn-item {
     margin-left: 0px;
+}
+.store-name {
+    font-size: 14px;
+}
+.store-desc {
+    font-size: 12px;
 }
 </style>
