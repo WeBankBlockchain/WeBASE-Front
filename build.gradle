@@ -94,6 +94,7 @@ dependencies {
     compile 'org.fisco-bcos:web3sdk:2.6.2'
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos.java-sdk:fisco-bcos-sdk-crypto:2.7.1-SNAPSHOT'
+    compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.1'
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
     compile 'com.h2database:h2:1.4.200'
     compile 'org.fusesource:sigar:1.6.4'
