@@ -17,6 +17,7 @@ package com.webank.webase.front.base.config;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +27,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.config.ConfigOption;
+import org.fisco.bcos.sdk.config.exceptions.ConfigException;
+import org.fisco.bcos.sdk.config.model.AmopTopic;
+import org.fisco.bcos.sdk.config.model.ConfigProperty;
+import org.fisco.bcos.sdk.config.model.CryptoMaterialConfig;
+import org.fisco.bcos.sdk.config.model.NetworkConfig;
+import org.fisco.bcos.sdk.config.model.ThreadPoolConfig;
 import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
@@ -47,6 +56,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class Web3Config {
 
     public static String orgName;
+    public String certPath = "conf";
     private List<Integer> groupIdList;
     private int corePoolSize;
     private int maxPoolSize;
@@ -58,6 +68,8 @@ public class Web3Config {
     private int encryptType;
 
     private int independentGroupId = Integer.MAX_VALUE;
+
+
     /**
      * 覆盖EncryptType构造函数
      * @return
@@ -203,5 +215,53 @@ public class Web3Config {
         }
         return web3jMap;
     }
+
+
+    @Bean
+    public org.fisco.bcos.sdk.config.model.ConfigProperty getConfigProperty() {
+        log.info("start init ConfigProperty");
+        // cert config, encrypt type
+        Map<String, Object> cryptoMaterial = new HashMap<>();
+        // cert use conf
+        cryptoMaterial.put("certPath", certPath);
+        //cryptoMaterial.put("sslCryptoType", encryptType);
+        log.info("init cert cryptoMaterial:{}, (using conf as cert path)", cryptoMaterial);
+
+        // peers, default one node in front
+        Map<String, Object> network = new HashMap<>();
+        List<String> peers = new ArrayList<>();
+        peers.add(ip + ":" + channelPort);
+        network.put("peers", peers);
+        log.info("init node network property :{}", peers);
+
+        // thread pool config
+        log.info("init thread pool property");
+        Map<String, Object> threadPool = new HashMap<>();
+        threadPool.put("channelProcessorThreadSize", corePoolSize);
+        threadPool.put("receiptProcessorThreadSize", corePoolSize);
+        threadPool.put("maxBlockingQueueSize", queueCapacity);
+        log.info("init thread pool property:{}", threadPool);
+
+        // init property
+        ConfigProperty configProperty = new ConfigProperty();
+        configProperty.setCryptoMaterial(cryptoMaterial);
+        configProperty.setNetwork(network);
+        configProperty.setThreadPool(threadPool);
+        return configProperty;
+    }
+
+    @Bean
+    public org.fisco.bcos.sdk.config.ConfigOption getConfig(ConfigProperty configProperty)
+        throws ConfigException {
+        log.info("init ConfigOption encrypt type:{}", encryptType);
+        return new ConfigOption(configProperty, encryptType);
+    }
+
+    @Bean
+    public org.fisco.bcos.sdk.BcosSDK getBcosSDK(ConfigOption configOption) {
+        log.info("init bcos sdk instance, please check sdk.log");
+        return new BcosSDK(configOption);
+    }
+
 
 }

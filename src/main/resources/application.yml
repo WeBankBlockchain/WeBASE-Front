@@ -64,6 +64,7 @@ sdk:
   ip: 127.0.0.1
   channelPort: 20200
   encryptType: 0  # 0:ecdsa, 1:guomi
+  certPath: conf  # cert path of relative or absolute
 
 logging:
   config: classpath:log4j2.xml

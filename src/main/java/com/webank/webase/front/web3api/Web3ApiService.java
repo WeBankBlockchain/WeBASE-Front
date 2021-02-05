@@ -38,17 +38,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
-import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
-import org.fisco.bcos.web3j.protocol.core.methods.response.GroupPeers;
-import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.client.Client;
+//import org.fisco.bcos.web3j.protocol.Web3j;
+//import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
+//import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
+//import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
+//import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlockHeader;
+//import org.fisco.bcos.web3j.protocol.core.methods.response.GroupPeers;
+//import org.fisco.bcos.web3j.protocol.core.methods.response.NodeVersion.Version;
+//import org.fisco.bcos.web3j.protocol.core.methods.response.Peers;
+//import org.fisco.bcos.web3j.protocol.core.methods.response.TotalTransactionCount;
+//import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
+//import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.request.Transaction;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
+import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
+import org.fisco.bcos.sdk.contract.precompiled.model.Version;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -61,8 +70,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class Web3ApiService {
 
-    @Autowired
-    Map<Integer, Web3j> web3jMap;
+//    @Autowired
+//    Map<Integer, Web3j> web3jMap;
     @Autowired
     NodeConfig nodeConfig;
     @Autowired
@@ -73,8 +82,8 @@ public class Web3ApiService {
     Constants constants;
     @Autowired
     Web3Config web3Config;
-    @Autowired
-    Web3j independentWeb3j;
+//    @Autowired
+//    Web3j independentWeb3j;
     @Autowired
     Map<Integer, org.fisco.bcos.channel.client.Service> serviceMap;
     @Autowired
@@ -84,18 +93,16 @@ public class Web3ApiService {
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
     private static final int HASH_OF_TRANSACTION_LENGTH = 66;
 
+    @Autowired
+    BcosSDK bcosSDK;
+
     /**
      * getBlockNumber.
      */
     public BigInteger getBlockNumber(int groupId) {
 
         BigInteger blockNumber;
-        try {
-            blockNumber = getWeb3j(groupId).getBlockNumber().send().getBlockNumber();
-        } catch (IOException e) {
-            log.error("getBlockNumber fail.", e);
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
-        }
+        blockNumber = getWeb3j(groupId).getBlockNumber().getBlockNumber();
         return blockNumber;
     }
 
@@ -109,16 +116,9 @@ public class Web3ApiService {
             throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
         }
         BcosBlock.Block block;
-        try {
-            block = getWeb3j(groupId)
-                    .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
-                    .send()
-                    .getBlock();
-        } catch (IOException e) {
-            log.info("get blocknumber failed" + e.getMessage());
-            log.error("getBlAockByNumber fail. blockNumber:{} , groupID: {}", blockNumber, groupId);
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
-        }
+        block = getWeb3j(groupId)
+                .getBlockByNumber(blockNumber, true)
+                .getBlock();
         return block;
     }
 
@@ -129,15 +129,8 @@ public class Web3ApiService {
      */
     public BcosBlock.Block getBlockByHash(int groupId, String blockHash) {
         BcosBlock.Block block;
-        try {
-
-            block = getWeb3j(groupId).getBlockByHash(blockHash, true)
-                    .send()
-                    .getBlock();
-        } catch (IOException e) {
-            log.error("getBlockByHash fail. blockHash:{} ", blockHash);
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
-        }
+        block = getWeb3j(groupId).getBlockByHash(blockHash, true)
+                .getBlock();
         return block;
     }
 
@@ -148,19 +141,13 @@ public class Web3ApiService {
      */
     public int getBlockTransCntByNumber(int groupId, BigInteger blockNumber) {
         int transCnt;
-        try {
-            if (blockNumberCheck(groupId, blockNumber)) {
-                throw new FrontException("ConstantCode.NODE_REQUEST_FAILED");
-            }
-            BcosBlock.Block block = getWeb3j(groupId)
-                    .getBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
-                    .send()
-                    .getBlock();
-            transCnt = block.getTransactions().size();
-        } catch (IOException e) {
-            log.error("getBlockTransCntByNumber fail. blockNumber:{} ", blockNumber);
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        if (blockNumberCheck(groupId, blockNumber)) {
+            throw new FrontException("ConstantCode.NODE_REQUEST_FAILED");
         }
+        Block block = getWeb3j(groupId)
+                .getBlockByNumber(blockNumber, true)
+                .getBlock();
+        transCnt = block.getTransactions().size();
         return transCnt;
     }
 
@@ -170,12 +157,7 @@ public class Web3ApiService {
     public BigInteger getPbftView(int groupId) {
 
         BigInteger result;
-        try {
-            result = getWeb3j(groupId).getPbftView().send().getPbftView();
-        } catch (IOException e) {
-            log.error("getPbftView fail.");
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
-        }
+        result = getWeb3j(groupId).getPbftView().getPbftView();
         return result;
     }
 
@@ -187,15 +169,10 @@ public class Web3ApiService {
     public TransactionReceipt getTransactionReceipt(int groupId, String transHash) {
 
         TransactionReceipt transactionReceipt = null;
-        try {
-            Optional<TransactionReceipt> opt = getWeb3j(groupId)
-                    .getTransactionReceipt(transHash).send().getTransactionReceipt();
-            if (opt.isPresent()) {
-                transactionReceipt = opt.get();
-            }
-        } catch (IOException e) {
-            log.error("getTransactionReceipt fail. transHash:{} ", transHash);
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        Optional<TransactionReceipt> opt = getWeb3j(groupId)
+                .getTransactionReceipt(transHash).getTransactionReceipt();
+        if (opt.isPresent()) {
+            transactionReceipt = opt.get();
         }
         return transactionReceipt;
     }
@@ -205,18 +182,13 @@ public class Web3ApiService {
      *
      * @param transHash transHash
      */
-    public Transaction getTransactionByHash(int groupId, String transHash) {
+    public JsonTransactionResponse getTransactionByHash(int groupId, String transHash) {
 
-        Transaction transaction = null;
-        try {
-            Optional<Transaction> opt =
-                    getWeb3j(groupId).getTransactionByHash(transHash).send().getTransaction();
-            if (opt.isPresent()) {
-                transaction = opt.get();
-            }
-        } catch (IOException e) {
-            log.error("getTransactionByHash fail. transHash:{} ", transHash);
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        JsonTransactionResponse transaction = null;
+        Optional<JsonTransactionResponse> opt =
+                getWeb3j(groupId).getTransactionByHash(transHash).getTransaction();
+        if (opt.isPresent()) {
+            transaction = opt.get();
         }
         return transaction;
     }
@@ -248,7 +220,7 @@ public class Web3ApiService {
                 throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
             }
             code = getWeb3j(groupId)
-                    .getCode(address, DefaultBlockParameter.valueOf(blockNumber)).send().getCode();
+                    .getCode(address).getCode();
         } catch (IOException e) {
             log.error("getCode fail.", e);
             throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
@@ -259,11 +231,11 @@ public class Web3ApiService {
     /**
      * get transaction counts.
      */
-    public TotalTransactionCount.TransactionCount getTransCnt(int groupId) {
-        TotalTransactionCount.TransactionCount transactionCount;
+    public TotalTransactionCount.TransactionCountInfo getTransCnt(int groupId) {
+        TotalTransactionCount.TransactionCountInfo transactionCount;
         try {
             transactionCount = getWeb3j(groupId)
-                    .getTotalTransactionCount().send()
+                    .getTotalTransactionCount()
                     .getTotalTransactionCount();
         } catch (IOException e) {
             log.error("getTransCnt fail.", e);
@@ -311,9 +283,8 @@ public class Web3ApiService {
             }
             Optional<Transaction> opt =
                     getWeb3j(groupId)
-                            .getTransactionByBlockNumberAndIndex(
-                                    DefaultBlockParameter.valueOf(blockNumber), transactionIndex)
-                            .send().getTransaction();
+                            .getTransactionByBlockNumberAndIndex(blockNumber, transactionIndex)
+                            .getTransaction();
             if (opt.isPresent()) {
                 transaction = opt.get();
             }
@@ -327,7 +298,7 @@ public class Web3ApiService {
     private boolean blockNumberCheck(int groupId, BigInteger blockNumber) {
         BigInteger currentNumber = null;
         try {
-            currentNumber = getWeb3j(groupId).getBlockNumber().send().getBlockNumber();
+            currentNumber = getWeb3j(groupId).getBlockNumber().getBlockNumber();
         } catch (IOException e) {
             log.error("blockNumberCheck error:{}", e.getMessage());
         }
@@ -655,7 +626,7 @@ public class Web3ApiService {
 
     public BigInteger getPendingTransactionsSize(int groupId) {
         try {
-            return getWeb3j(groupId).getPendingTxSize().send().getPendingTxSize();
+            return getWeb3j(groupId).getPendingTxSize().getPendingTxSize();
         } catch (IOException e) {
             log.error("getPendingTransactionsSize error:[]", e);
             throw new FrontException(e.getMessage());
@@ -663,17 +634,12 @@ public class Web3ApiService {
     }
 
     public List<String> getSealerList(int groupId) {
-        try {
-            return getWeb3j(groupId).getSealerList().send().getSealerList();
-        } catch (IOException e) {
-            log.error("getSealerList error:[]", e);
-            throw new FrontException(e.getMessage());
-        }
+        return getWeb3j(groupId).getSealerList().getSealerList();
     }
 
     public List<String> getObserverList(int groupId) {
         try {
-            return getWeb3j(groupId).getObserverList().send().getObserverList();
+            return getWeb3j(groupId).getObserverList().getObserverList();
         } catch (IOException e) {
             log.error("getObserverList error:[]", e);
             throw new FrontException(e.getMessage());
@@ -901,7 +867,7 @@ public class Web3ApiService {
         if (iSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             // get default web3j of integer max value
-            return independentWeb3j;
+            return bcosSDK.getClient(MAX);
         }
         // get random index to get web3j
         Integer index = iSet.iterator().next();
@@ -913,14 +879,14 @@ public class Web3ApiService {
      * @param groupId
      * @return
      */
-    public Web3j getWeb3j(Integer groupId) {
+    public Client getWeb3j(Integer groupId) {
         if (web3jMap.isEmpty()) {
             // refresh group list
             getGroupList();
             log.error("web3jMap is empty, groupList empty! please check your node status");
             throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
         }
-        Web3j web3j = web3jMap.get(groupId);
+        Client web3j = bcosSDK.getClient(groupId);
         if (Objects.isNull(web3j)) {
             log.error("web3j of {} is null, please call /{}/web3/refresh to refresh", groupId, groupId);
             // refresh group list
