@@ -45,6 +45,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -131,6 +133,37 @@ public class PerformanceService {
                 }
                 return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
             }
+        };
+        return performanceRepository.findAll(queryParam, pageable);
+    }
+
+    /**
+     * less than beginDate or larger than endDate
+     * order by id desc
+     * @param pageNumber
+     * @param pageSize
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    public Page<Performance> pagingQueryStat(Integer pageNumber, Integer pageSize,
+        LocalDateTime beginDate, LocalDateTime endDate) {
+        Sort sort = new Sort(Direction.DESC, "id");
+        Pageable pageable = new PageRequest(pageNumber - 1, pageSize, sort);
+        Specification<Performance> queryParam = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (endDate != null) {
+                // larger than
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                    endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            if (beginDate != null) {
+                // less than begin
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                    beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            // less than beginDate or larger than endDate
+            return criteriaBuilder.or(predicates.toArray(new Predicate[predicates.size()]));
         };
         return performanceRepository.findAll(queryParam, pageable);
     }
