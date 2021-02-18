@@ -68,7 +68,7 @@ public class MonitorController {
             @RequestParam(required = false, defaultValue = "1") int gap,
             @RequestParam(defaultValue = "1") int groupId) {
         Instant startTime = Instant.now();
-        log.info("getChainMonitor start. groupId:[{}]", groupId,
+        log.info("getChainMonitor startTime:{} groupId:[{}]", groupId,
                 startTime.toEpochMilli());
 
         List<PerformanceData> performanceList = monitorService.findContrastDataByTime(groupId,
@@ -115,10 +115,37 @@ public class MonitorController {
     @GetMapping("/getGroupSizeInfos")
     public List<GroupSizeInfo> getGroupSizeInfos() {
         Instant startTime = Instant.now();
-        log.info("getGroupSizeInfos start", startTime.toEpochMilli());
+        log.info("getGroupSizeInfos start:{}", startTime.toEpochMilli());
         List<GroupSizeInfo> groupSizeInfos = monitorService.getGroupSizeInfos();
         log.info("getGroupSizeInfos end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return groupSizeInfos;
+    }
+
+    /**
+     * get by less than begin or larger than end order by id desc
+     */
+    @ApiOperation(value = "开区间分页查询", notes = "分页查询，获取时间范围以外的")
+    @GetMapping("/pagingQuery/stat")
+    public BasePageResponse getNodeMonitorForStat(@RequestParam(defaultValue = "1") int groupId,
+        @RequestParam(defaultValue = "1") Integer pageNumber,
+        @RequestParam(defaultValue = "10") Integer pageSize,
+        @RequestParam(required = false) @DateTimeFormat(
+            iso = DATE_TIME) LocalDateTime beginDate,
+        @RequestParam(required = false) @DateTimeFormat(
+            iso = DATE_TIME) LocalDateTime endDate) {
+        Instant startTime = Instant.now();
+        log.info("pagingQuery start. groupId:{},startTime:{}", groupId, startTime.toEpochMilli());
+
+        Page<Monitor> page =
+            monitorService.pagingQueryStat(groupId, pageNumber, pageSize, beginDate, endDate);
+
+        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
+        response.setTotalCount(page.getTotalElements());
+        response.setData(page.getContent());
+
+        log.info("pagingQuery end. useTime:{}",
+            Duration.between(startTime, Instant.now()).toMillis());
+        return response;
     }
 }

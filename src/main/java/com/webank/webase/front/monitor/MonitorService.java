@@ -18,6 +18,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.monitor.entity.GroupSizeInfo;
 import com.webank.webase.front.monitor.entity.Monitor;
+import com.webank.webase.front.performance.entity.Performance;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
@@ -44,6 +45,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -89,22 +92,18 @@ public class MonitorService {
     public Page<Monitor> pagingQuery(int groupId, Integer pageNumber, Integer pageSize,
             LocalDateTime beginDate, LocalDateTime endDate) {
         Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
-        Specification<Monitor> queryParam = new Specification<Monitor>() {
-            @Override
-            public Predicate toPredicate(Root<Monitor> root, CriteriaQuery<?> criteriaQuery,
-                    CriteriaBuilder criteriaBuilder) {
-                List<Predicate> predicates = new ArrayList<>();
-                predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
-                if (beginDate != null) {
-                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
-                            beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-                }
-                if (endDate != null) {
-                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
-                            endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-                }
-                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        Specification<Monitor> queryParam = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
+            if (beginDate != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                        beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
             }
+            if (endDate != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                        endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return monitorRepository.findAll(queryParam, pageable);
     }
@@ -253,5 +252,35 @@ public class MonitorService {
             groupSizeInfo.setSize(groupSizeInfo.getSize() / 1024L);
         }
         return data;
+    }
+
+    /**
+     * less than beginDate or larger than endDate
+     * order by id desc
+     * @param groupId
+     * @param pageNumber
+     * @param pageSize
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    public Page<Monitor> pagingQueryStat(int groupId, Integer pageNumber, Integer pageSize,
+        LocalDateTime beginDate, LocalDateTime endDate) {
+        Sort sort = new Sort(Direction.DESC, "id");
+        Pageable pageable = new PageRequest(pageNumber - 1, pageSize, sort);
+        Specification<Monitor> queryParam = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
+            if (endDate != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                    endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            if (beginDate != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                    beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            return criteriaBuilder.or(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return monitorRepository.findAll(queryParam, pageable);
     }
 }
