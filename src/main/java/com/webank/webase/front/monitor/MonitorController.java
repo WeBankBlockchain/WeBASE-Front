@@ -16,6 +16,7 @@ package com.webank.webase.front.monitor;
 import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.monitor.entity.GroupSizeInfo;
 import com.webank.webase.front.monitor.entity.Monitor;
@@ -135,16 +136,15 @@ public class MonitorController {
         @RequestParam(required = false) @DateTimeFormat(
             iso = DATE_TIME) LocalDateTime endDate) {
         Instant startTime = Instant.now();
-        log.info("pagingQuery start. groupId:{},startTime:{}", groupId, startTime.toEpochMilli());
-
-        Page<Monitor> page =
+        log.info("getNodeMonitorForStat start. groupId:{},startTime:{}", groupId, startTime.toEpochMilli());
+        if (beginDate == null && endDate == null) {
+            log.error("getNodeMonitorForStat beginDate endDate cannot be both null!");
+            throw new FrontException(ConstantCode.PARAM_ERROR);
+        }
+        BasePageResponse response =
             monitorService.pagingQueryStat(groupId, pageNumber, pageSize, beginDate, endDate);
 
-        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
-        response.setTotalCount(page.getTotalElements());
-        response.setData(page.getContent());
-
-        log.info("pagingQuery end. useTime:{}",
+        log.info("getNodeMonitorForStat end. useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
         return response;
     }

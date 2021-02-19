@@ -154,13 +154,12 @@ public class PerformanceController {
         throws Exception {
         Instant startTime = Instant.now();
         log.info("getPerformanceByTimeForStat start:{}", startTime.toEpochMilli());
-
-        Page<Performance> page =
+        if (beginDate == null && endDate == null) {
+            log.error("getPerformanceByTimeForStat beginDate endDate cannot be both null!");
+            throw new FrontException(ConstantCode.PARAM_ERROR);
+        }
+        BasePageResponse response =
             performanceService.pagingQueryStat(pageNumber, pageSize, beginDate, endDate);
-
-        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
-        response.setTotalCount(page.getTotalElements());
-        response.setData(page.getContent());
 
         log.info("getPerformanceByTimeForStat end. useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
