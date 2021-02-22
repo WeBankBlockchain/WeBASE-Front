@@ -101,17 +101,19 @@ public class Web3Config {
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections.setConnectionsStr(connectionsList);
         channelConnections.setGroupId(independentGroupId);
-        PathMatchingResourcePatternResolver resolver =
-            new PathMatchingResourcePatternResolver();
-        Resource sslCert = resolver.getResource(SSL_CERT);
-        Resource sslKey = resolver.getResource(SSL_KEY);
-        channelConnections.setSslCert(sslCert);
-        channelConnections.setSslKey(sslKey);
 
         channelConnectionsList.add(channelConnections);
         GroupChannelConnectionsConfig groupChannelConnectionsConfig =
             new GroupChannelConnectionsConfig();
         groupChannelConnectionsConfig.setAllChannelConnections(channelConnectionsList);
+        PathMatchingResourcePatternResolver resolver =
+            new PathMatchingResourcePatternResolver();
+        Resource caCert = resolver.getResource(CA_CERT);
+        Resource sslCert = resolver.getResource(SSL_CERT);
+        Resource sslKey = resolver.getResource(SSL_KEY);
+        groupChannelConnectionsConfig.setCaCert(caCert);
+        groupChannelConnectionsConfig.setSslCert(sslCert);
+        groupChannelConnectionsConfig.setSslKey(sslKey);
         return groupChannelConnectionsConfig;
     }
 
