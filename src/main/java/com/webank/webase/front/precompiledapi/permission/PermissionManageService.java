@@ -25,10 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
+import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionService;
+import org.fisco.bcos.sdk.model.PrecompiledConstant;
 import org.fisco.bcos.web3j.precompile.crud.CRUDService;
-import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
-import org.fisco.bcos.web3j.precompile.permission.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -306,14 +307,14 @@ public class PermissionManageService {
     public String grantPermissionManager(int groupId, String signUserId, String userAddress)
             {
         String res = precompiledWithSignService.grant(groupId, signUserId,
-                PrecompiledCommon.SYS_TABLE_ACCESS, userAddress);
+            PrecompiledConstant.SYS_TABLE_ACCESS, userAddress);
         return res;
     }
 
     public String revokePermissionManager(int groupId, String signUserId, String userAddress)
             {
         String res = precompiledWithSignService.revoke(groupId, signUserId,
-                PrecompiledCommon.SYS_TABLE_ACCESS, userAddress);
+                PrecompiledConstant.SYS_TABLE_ACCESS, userAddress);
         return res;
     }
 
@@ -338,14 +339,14 @@ public class PermissionManageService {
     public String grantDeployAndCreateManager(int groupId, String signUserId, String userAddress)
             {
         String res = precompiledWithSignService.grant(groupId, signUserId,
-                PrecompiledCommon.SYS_TABLE, userAddress);
+                PrecompiledConstant.SYS_TABLE, userAddress);
         return res;
     }
 
     public String revokeDeployAndCreateManager(int groupId, String signUserId, String userAddress)
             {
         String res = precompiledWithSignService.revoke(groupId, signUserId,
-                PrecompiledCommon.SYS_TABLE, userAddress);
+                PrecompiledConstant.SYS_TABLE, userAddress);
         return res;
     }
 
@@ -362,13 +363,13 @@ public class PermissionManageService {
 
     /**
      * manage userTableManager related
-     * 
+     * todo grantWrite revokeWrite
      * @throws Exception
      */
     public Object grantUserTableManager(int groupId, String signUserId, String tableName,
             String userAddress) throws Exception {
         // CRUD.desc to check table exists
-        CRUDService crudService = new CRUDService(web3ApiService.getWeb3j(groupId),
+        TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         crudService.desc(tableName);
         String res = precompiledWithSignService.grant(groupId, signUserId, tableName, userAddress);
@@ -386,7 +387,8 @@ public class PermissionManageService {
         PermissionService permissionService = new PermissionService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         try {
-            return permissionService.listUserTableManager(tableName);
+            // return permissionService.listUserTableManager(tableName);
+            return permissionService.queryPermissionByTableName(tableName);
         } catch (Exception e) {
             log.error("listUserTableManager fail:[]", e);
             throw new FrontException(ConstantCode.GET_LIST_MANAGER_FAIL);
@@ -401,14 +403,14 @@ public class PermissionManageService {
     public String grantNodeManager(int groupId, String signUserId, String userAddress)
             {
         String res = precompiledWithSignService.grant(groupId, signUserId,
-                PrecompiledCommon.SYS_CONSENSUS, userAddress);
+                PrecompiledConstant.SYS_CONSENSUS, userAddress);
         return res;
     }
 
     public String revokeNodeManager(int groupId, String signUserId, String userAddress)
             {
         String res = precompiledWithSignService.revoke(groupId, signUserId,
-                PrecompiledCommon.SYS_CONSENSUS, userAddress);
+                PrecompiledConstant.SYS_CONSENSUS, userAddress);
         return res;
     }
 
@@ -431,14 +433,14 @@ public class PermissionManageService {
     public String grantSysConfigManager(int groupId, String signUserId, String userAddress)
             {
         String res = precompiledWithSignService.grant(groupId, signUserId,
-                PrecompiledCommon.SYS_CONFIG, userAddress);
+                PrecompiledConstant.SYS_CONFIG, userAddress);
         return res;
     }
 
     public String revokeSysConfigManager(int groupId, String signUserId, String userAddress)
             {
         String res = precompiledWithSignService.revoke(groupId, signUserId,
-                PrecompiledCommon.SYS_CONFIG, userAddress);
+                PrecompiledConstant.SYS_CONFIG, userAddress);
         return res;
     }
 
@@ -460,13 +462,13 @@ public class PermissionManageService {
      */
     public String grantCNSManager(int groupId, String signUserId, String userAddress) {
         String res = precompiledWithSignService.grant(groupId, signUserId,
-                PrecompiledCommon.SYS_CNS, userAddress);
+                PrecompiledConstant.SYS_CNS, userAddress);
         return res;
     }
 
     public String revokeCNSManager(int groupId, String signUserId, String userAddress) {
         String res = precompiledWithSignService.revoke(groupId, signUserId,
-                PrecompiledCommon.SYS_CNS, userAddress);
+                PrecompiledConstant.SYS_CNS, userAddress);
         return res;
     }
 

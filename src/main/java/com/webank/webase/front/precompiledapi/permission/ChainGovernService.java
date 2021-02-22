@@ -18,14 +18,12 @@ import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
-import com.webank.webase.front.util.JsonUtils;
-import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.math.BigInteger;
 import java.util.List;
-import org.fisco.bcos.web3j.precompile.permission.ChainGovernanceService;
-import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
-import org.fisco.bcos.web3j.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernanceService;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -82,13 +80,13 @@ public class ChainGovernService {
         ChainGovernanceService chainGovernanceService = new ChainGovernanceService(web3ApiService.getWeb3j(groupId),
             keyStoreService.getCredentialsForQuery());
 
-        Tuple2<Boolean, BigInteger> res = chainGovernanceService.queryCommitteeMemberWeight(userAddress);
-        if (res.getValue1()) {
-            return res.getValue2();
-        } else {
-            throw new FrontException(new RetCode(res.getValue2().intValue(), "address not committee"));
-        }
-
+        return chainGovernanceService.queryCommitteeMemberWeight(userAddress);
+//        Tuple2<Boolean, BigInteger> res = chainGovernanceService.queryCommitteeMemberWeight(userAddress);
+//        if (res.getValue1()) {
+//            return res.getValue2();
+//        } else {
+//            throw new FrontException(new RetCode(res.getValue2().intValue(), "address not committee"));
+//        }
     }
 
     /**

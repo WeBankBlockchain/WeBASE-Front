@@ -736,20 +736,13 @@ public class PrecompiledController {
         Instant startTime = Instant.now();
         log.info("start contractManagerList startTime:{}", startTime.toEpochMilli());
         try {
-            String res = precompiledService.contractManagerList(contractStatusHandle.getGroupId(),
+            List<String> res = precompiledService.contractManagerList(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getContractAddress());
-            if (res.contains("code")) {
-                ContractManageResult contractManageResult =
-                        JsonUtils.toJavaObject(res, ContractManageResult.class);
-                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
-                        contractManageResult.getMsg());
-            } else {
-                BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
-                response.setData(res);
-                log.info("end contractManagerList useTime:{} response:{}",
-                        Duration.between(startTime, Instant.now()).toMillis(), response);
-                return response;
-            }
+            BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+            response.setData(res);
+            log.info("end contractManagerList useTime:{} response:{}",
+                    Duration.between(startTime, Instant.now()).toMillis(), response);
+            return response;
         } catch (Exception e) {
             log.error("contractManagerList exception:", e);
             throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
