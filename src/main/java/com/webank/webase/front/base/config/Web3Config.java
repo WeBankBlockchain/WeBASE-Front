@@ -34,6 +34,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
@@ -45,6 +47,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 @ConfigurationProperties(prefix = "sdk")
 public class Web3Config {
+
+    private static final String CA_CERT = "classpath:ca.crt";
+    private static final String SSL_CERT = "classpath:sdk.crt";
+    private static final String SSL_KEY = "classpath:sdk.key";
 
     public static String orgName;
     private List<Integer> groupIdList;
@@ -83,6 +89,7 @@ public class Web3Config {
 
     /**
      * get a new config instance
+     * fix: add ssl key of sdk.key and sdk.crt
      * @return
      */
     private GroupChannelConnectionsConfig getGroupChannelConnectionsConfig() {
@@ -94,8 +101,14 @@ public class Web3Config {
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections.setConnectionsStr(connectionsList);
         channelConnections.setGroupId(independentGroupId);
-        channelConnectionsList.add(channelConnections);
+        PathMatchingResourcePatternResolver resolver =
+            new PathMatchingResourcePatternResolver();
+        Resource sslCert = resolver.getResource(SSL_CERT);
+        Resource sslKey = resolver.getResource(SSL_KEY);
+        channelConnections.setSslCert(sslCert);
+        channelConnections.setSslKey(sslKey);
 
+        channelConnectionsList.add(channelConnections);
         GroupChannelConnectionsConfig groupChannelConnectionsConfig =
             new GroupChannelConnectionsConfig();
         groupChannelConnectionsConfig.setAllChannelConnections(channelConnectionsList);
@@ -197,8 +210,8 @@ public class Web3Config {
             channelEthereumService.setTimeout(timeout);
             channelEthereumService.setChannelService(service);
             Web3j web3jSync = Web3j.build(channelEthereumService, service.getGroupId());
-            // for getClockNumber local
-            web3jSync.getBlockNumberCache();
+            // for getBlockNumber local
+            web3jSync.getBlockLimit();
             web3jMap.put(i, web3jSync);
         }
         return web3jMap;
