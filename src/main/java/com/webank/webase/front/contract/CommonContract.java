@@ -15,18 +15,15 @@
  */
 package com.webank.webase.front.contract;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
-import org.fisco.bcos.web3j.abi.datatypes.Function;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.core.RemoteCall;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
-import org.fisco.bcos.web3j.tx.Contract;
-import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
+import org.fisco.bcos.sdk.abi.datatypes.Function;
+import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.contract.Contract;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+
 
 /**
  * Contract's common functions
@@ -34,35 +31,27 @@ import org.fisco.bcos.web3j.tx.gas.ContractGasProvider;
  */
 public final class CommonContract extends Contract {
 
-    protected CommonContract(String contractAddress, Web3j web3j, Credentials credentials,
-            ContractGasProvider gasProvider) {
-        super("", contractAddress, web3j, credentials, gasProvider);
+    protected CommonContract(String contractAddress, Client web3j, CryptoKeyPair credentials) {
+        //todo check no binary whether matters
+        super("", contractAddress, web3j, credentials);
     }
 
-    public TransactionReceipt execTransaction(Function function)
-            throws IOException, TransactionException {
+    public TransactionReceipt execTransaction(Function function) {
         return executeTransaction(function);
     }
 
     @SuppressWarnings("rawtypes")
-    public List<Type> execCall(Function function) throws IOException {
-        return executeCallMultipleValueReturn(function);
+    public List<Type> execCall(Function function) throws ContractException {
+        return executeCallWithMultipleValueReturn(function);
     }
 
-    public static RemoteCall<CommonContract> deploy(Web3j web3j, Credentials credentials,
-            BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue,
-            String contractBin, String encodedConstructor) {
-        return deployRemoteCall(CommonContract.class, web3j, credentials, gasPrice, gasLimit,
-                contractBin, encodedConstructor, initialWeiValue);
+    public static CommonContract deploy(Client web3j, CryptoKeyPair credentials,
+            String contractBin, String encodedConstructor) throws ContractException {
+        return deploy(CommonContract.class, web3j, credentials, contractBin, encodedConstructor);
     }
 
-    public static CommonContract load(String contractAddress, Web3j web3j, Credentials credentials,
-            ContractGasProvider gasProvider) {
-        return new CommonContract(contractAddress, web3j, credentials, gasProvider);
+    public static CommonContract load(String contractAddress, Client web3j, CryptoKeyPair credentials) {
+        return new CommonContract(contractAddress, web3j, credentials);
     }
 
-    public static CommonContract loadByName(String contractName, Web3j web3j,
-            Credentials credentials, ContractGasProvider gasProvider) {
-        return new CommonContract(contractName, web3j, credentials, gasProvider);
-    }
 }
