@@ -22,7 +22,6 @@ import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
-import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
@@ -90,6 +89,7 @@ import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
 import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.solc.compiler.CompilationResult;
@@ -277,7 +277,7 @@ public class ContractService {
         String signMsg = transService.signMessage(groupId, web3j, signUserId, "", data);
         // send transaction
         final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-        transService.sendMessage(web3j, signMsg, transFuture);
+        transService.sendMessage(web3j, signMsg);
         TransactionReceipt receipt;
         try {
             receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
@@ -768,7 +768,7 @@ public class ContractService {
 
         try {
             // whether use guomi to compile
-            boolean useSM2 = cryptoSuite.cryptoTypeConfig == GMStatus.GUOMI.getValue();
+            boolean useSM2 = cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE;
             // decode
             byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
             String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
@@ -823,7 +823,7 @@ public class ContractService {
             throw new FrontException(ConstantCode.NO_SOL_FILES);
         }
         // whether use guomi to compile
-        boolean useSM2 = cryptoSuite.cryptoTypeConfig == GMStatus.GUOMI.getValue();
+        boolean useSM2 = cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE;
 
         List<RspMultiContractCompile> compileInfos = new ArrayList<>();
         for (File solFile : solFiles) {
