@@ -61,7 +61,8 @@ public class Web3Config {
     private String caCert = "classpath:ca.crt";
     private String sslCert = "classpath:sdk.crt";
     private String sslKey = "classpath:sdk.key";
-
+    private static final String sslNodeCert = "classpath:node.crt";
+    private static final String sslNodeKey = "classpath:node.key";
     private int independentGroupId = Integer.MAX_VALUE;
     /**
      * 覆盖EncryptType构造函数
@@ -105,11 +106,24 @@ public class Web3Config {
         GroupChannelConnectionsConfig groupChannelConnectionsConfig =
             new GroupChannelConnectionsConfig();
         groupChannelConnectionsConfig.setAllChannelConnections(channelConnectionsList);
+        // set sdk ssl cert and key
         PathMatchingResourcePatternResolver resolver =
             new PathMatchingResourcePatternResolver();
+        // set ca.crt
         Resource caCertResource = resolver.getResource(caCert);
+        if (!caCertResource.exists()) {
+            log.error("ca.crt not exist in: {}", caCert);
+        }
+        // set ssl cert and key
         Resource sslCertResource = resolver.getResource(sslCert);
         Resource sslKeyResource = resolver.getResource(sslKey);
+        // if exist sdk.key, set it
+        // if not exist, read node.key
+        if (!sslCertResource.exists() || !sslKeyResource.exists()) {
+            log.warn("sdk.key or sdk.crt not exist in :{}; now try to use [classpath:node.key]", sslKey);
+            sslCertResource = resolver.getResource(sslNodeCert);
+            sslKeyResource = resolver.getResource(sslNodeKey);
+        }
         groupChannelConnectionsConfig.setCaCert(caCertResource);
         groupChannelConnectionsConfig.setSslCert(sslCertResource);
         groupChannelConnectionsConfig.setSslKey(sslKeyResource);
