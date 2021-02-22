@@ -48,10 +48,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @ConfigurationProperties(prefix = "sdk")
 public class Web3Config {
 
-    private static final String CA_CERT = "classpath:ca.crt";
-    private static final String SSL_CERT = "classpath:sdk.crt";
-    private static final String SSL_KEY = "classpath:sdk.key";
-
     public static String orgName;
     private List<Integer> groupIdList;
     private int corePoolSize;
@@ -62,6 +58,9 @@ public class Web3Config {
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
     private int encryptType;
+    private String caCert = "classpath:ca.crt";
+    private String sslCert = "classpath:sdk.crt";
+    private String sslKey = "classpath:sdk.key";
 
     private int independentGroupId = Integer.MAX_VALUE;
     /**
@@ -108,12 +107,12 @@ public class Web3Config {
         groupChannelConnectionsConfig.setAllChannelConnections(channelConnectionsList);
         PathMatchingResourcePatternResolver resolver =
             new PathMatchingResourcePatternResolver();
-        Resource caCert = resolver.getResource(CA_CERT);
-        Resource sslCert = resolver.getResource(SSL_CERT);
-        Resource sslKey = resolver.getResource(SSL_KEY);
-        groupChannelConnectionsConfig.setCaCert(caCert);
-        groupChannelConnectionsConfig.setSslCert(sslCert);
-        groupChannelConnectionsConfig.setSslKey(sslKey);
+        Resource caCertResource = resolver.getResource(caCert);
+        Resource sslCertResource = resolver.getResource(sslCert);
+        Resource sslKeyResource = resolver.getResource(sslKey);
+        groupChannelConnectionsConfig.setCaCert(caCertResource);
+        groupChannelConnectionsConfig.setSslCert(sslCertResource);
+        groupChannelConnectionsConfig.setSslKey(sslKeyResource);
         return groupChannelConnectionsConfig;
     }
 

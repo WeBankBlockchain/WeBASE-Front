@@ -64,6 +64,10 @@ sdk:
   ip: 127.0.0.1
   channelPort: 20200
   encryptType: 0  # 0:ecdsa, 1:guomi
+  caCert: classpath:ca.crt
+  sslCert: classpath:sdk.crt
+  sslKey: classpath:sdk.key
+
 
 logging:
   config: classpath:log4j2.xml
