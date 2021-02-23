@@ -17,12 +17,16 @@
 package com.webank.webase.front.util;
 
 import com.webank.webase.front.event.callback.ContractEventCallback;
+import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.EventTopicParam.IndexedParamType;
 import com.webank.webase.front.event.entity.PublisherHelper;
+import java.math.BigInteger;
 import java.util.Optional;
-import org.fisco.bcos.channel.event.filter.EventLogUserParams;
-import org.fisco.bcos.channel.event.filter.TopicTools;
+import org.fisco.bcos.sdk.abi.tools.TopicTools;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.eventsub.EventLogParams;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 
@@ -40,12 +44,12 @@ public class RabbitMQUtils {
     public static final String ROUTING_KEY_EVENT = "event";
     public static final String ROUTING_KEY_BLOCK = "block";
     /**
-     * map of (appId, "group_id,exchange_name,routing_key"), one app only needs one block notify
+     * map of (registerId, "group_id,exchange_name,routing_key"), one app only needs one block notify
      */
-    public static Map<String, PublisherHelper> BLOCK_ROUTING_KEY_MAP = new ConcurrentHashMap<>();
+    public static Map<String, NewBlockEventCallback> BLOCK_ROUTING_KEY_MAP = new ConcurrentHashMap<>();
 
     /**
-     * map of ("ContractEventInfo id", ContractEventCallback instance)
+     * map of ("registerId", ContractEventCallback instance)
      */
     public static Map<String, ContractEventCallback> CONTRACT_EVENT_CALLBACK_MAP = new ConcurrentHashMap<>();
 
@@ -94,9 +98,9 @@ public class RabbitMQUtils {
      * @param topicList
      * @return
      */
-    public static EventLogUserParams initSingleEventLogUserParams(String fromBlock, String toBlock,
-                                                            String contractAddress, List<String> topicList) {
-        EventLogUserParams params = new EventLogUserParams();
+    public static EventLogParams initSingleEventLogUserParams(String fromBlock, String toBlock,
+        String contractAddress, List<String> topicList, CryptoSuite cryptoSuite) {
+        EventLogParams params = new EventLogParams();
         params.setFromBlock(fromBlock);
         params.setToBlock(toBlock);
 
@@ -107,7 +111,8 @@ public class RabbitMQUtils {
         List<Object> topics = new ArrayList<>();
         // put multiple event in topics[0]
         List<String> topicSigList = new ArrayList<>();
-        topicList.forEach(t -> topicSigList.add(TopicTools.stringToTopic(t)));
+        TopicTools tool = new TopicTools(cryptoSuite);
+        topicList.forEach(t -> topicSigList.add(tool.stringToTopic(t)));
         topics.add(topicSigList);
         params.setTopics(topics);
 
@@ -122,9 +127,9 @@ public class RabbitMQUtils {
      * @param topicList
      * @return
      */
-    public static EventLogUserParams initMultipleEventLogUserParams(String fromBlock, String toBlock,
-                                                                  List<String> contractAddressList, List<Object> topicList) {
-        EventLogUserParams params = new EventLogUserParams();
+    public static EventLogParams initMultipleEventLogUserParams(String fromBlock, String toBlock,
+        List<String> contractAddressList, List<Object> topicList, CryptoSuite cryptoSuite) {
+        EventLogParams params = new EventLogParams();
         params.setFromBlock(fromBlock);
         params.setToBlock(toBlock);
 
@@ -133,10 +138,11 @@ public class RabbitMQUtils {
         params.setAddresses(addresses);
         List<Object> topics = new ArrayList<>();
         // put multiple event in topics[0]
+        TopicTools tool = new TopicTools(cryptoSuite);
         List<String> topicSigList = new ArrayList<>();
         topicList.forEach(t -> {
             if (t instanceof String) {
-                topicSigList.add(TopicTools.stringToTopic((String)t));
+                topicSigList.add(tool.stringToTopic((String)t));
             }// instanceof others, convert by TopicTools before add
         });
         topics.add(topicSigList);
@@ -144,10 +150,15 @@ public class RabbitMQUtils {
         return params;
     }
 
-    // eventTopicParam to topics
-    public static EventLogUserParams initEventTopicParam(Integer fromBlock, Integer toBlock,
-        String contractAddress, EventTopicParam eventTopicParam) {
-        EventLogUserParams params = new EventLogUserParams();
+    /**
+     * eventTopicParam to topics
+     * for sync get event log
+      */
+    public static EventLogParams initEventTopicParam(Integer fromBlock, Integer toBlock,
+        String contractAddress, EventTopicParam eventTopicParam, CryptoSuite cryptoSuite) {
+        TopicTools tool = new TopicTools(cryptoSuite);
+
+        EventLogParams params = new EventLogParams();
         params.setFromBlock(String.valueOf(fromBlock));
         params.setToBlock(String.valueOf(toBlock));
 
@@ -157,16 +168,52 @@ public class RabbitMQUtils {
         params.setAddresses(addresses);
         List<Object> topics = new ArrayList<>();
         // put event name in topics[0],
-        topics.add(eventTopicParam.getEventNameSig());
+        topics.add(tool.stringToTopic(eventTopicParam.getEventName()));
         // if indexed param is null, add null, else add its sig value
-        topics.add(Optional.ofNullable(eventTopicParam.getIndexed1()).map(
-            IndexedParamType::getValueSig).orElse(null));
-        topics.add(Optional.ofNullable(eventTopicParam.getIndexed2()).map(
-            IndexedParamType::getValueSig).orElse(null));
-        topics.add(Optional.ofNullable(eventTopicParam.getIndexed3()).map(
-            IndexedParamType::getValueSig).orElse(null));
+        topics.add(Optional
+                .ofNullable(eventTopicParam.getIndexed1())
+                .map(i -> getIndexedParamTypeSig(i, tool))
+                .orElse(null));
+        topics.add(Optional
+            .ofNullable(eventTopicParam.getIndexed2())
+            .map(i -> getIndexedParamTypeSig(i, tool))
+            .orElse(null));
+        topics.add(Optional
+            .ofNullable(eventTopicParam.getIndexed3())
+            .map(i -> getIndexedParamTypeSig(i, tool))
+            .orElse(null));
         params.setTopics(topics);
 
         return params;
+    }
+
+    private static String getIndexedParamTypeSig(IndexedParamType paramType, TopicTools tool) {
+
+        String type = paramType.getType();
+        String value = paramType.getValue();
+        // if null, not filer
+        if (value == null || "".equals(value)) {
+            return null;
+        }
+
+        if (type.contains("int")) {
+            return tool.integerToTopic(new BigInteger(value));
+        } else if ("string".equals(type)) {
+            return tool.stringToTopic(value);
+        } else if ("bool".equals(type)) {
+            return tool.boolToTopic(Boolean.parseBoolean(value));
+        } else if ("address".equals(type)){
+            return tool.addressToTopic(value);
+        } else if (type.contains("bytes")) {
+            if ("bytes".equals(type)) {
+                return tool.bytesToTopic(Numeric.hexStringToByteArray(value));
+            } else {
+                // bytesN
+                return tool.byteNToTopic(Numeric.hexStringToByteArray(value));
+            }
+        } else {
+            return null;
+        }
+
     }
 }

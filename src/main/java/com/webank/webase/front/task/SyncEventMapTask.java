@@ -16,21 +16,24 @@
 
 package com.webank.webase.front.task;
 
+import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
+import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
+
 import com.google.common.collect.Lists;
 import com.webank.webase.front.event.ContractEventInfoRepository;
+import com.webank.webase.front.event.EventService;
 import com.webank.webase.front.event.NewBlockEventInfoRepository;
 import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.eventsub.EventSubscribe;
+import org.fisco.bcos.sdk.service.GroupManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-
-import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
-import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
 
 /**
  * sync event registered map with db's data
@@ -44,6 +47,10 @@ public class SyncEventMapTask {
     NewBlockEventInfoRepository newBlockEventInfoRepository;
     @Autowired
     ContractEventInfoRepository contractEventInfoRepository;
+    @Autowired
+    private BcosSDK bcosSDK;
+    @Autowired
+    private EventService eventService;
 
     @Scheduled(fixedDelayString = "${constant.syncEventMapTaskFixedDelay}")
     public void taskStart() {
@@ -61,15 +68,18 @@ public class SyncEventMapTask {
     private void cleanNewBlockEventMap() {
         log.debug("start cleanNewBlockEventMap. ");
         int removeCount = 0;
+        GroupManagerService groupManagerService = bcosSDK.getGroupManagerService();
         List<NewBlockEventInfo> blockInfoList = Lists.newArrayList(newBlockEventInfoRepository.findAll());
-        for(String appId : BLOCK_ROUTING_KEY_MAP.keySet()){
-            long equalCount = 0;
-            equalCount = blockInfoList.stream()
-                    .filter(info -> appId.equals(info.getAppId()))
+        for (String registerId : BLOCK_ROUTING_KEY_MAP.keySet()) {
+            // check whether map contains callback that not in db
+            long equalCount = blockInfoList.stream()
+                    .filter(info -> registerId.equals(info.getRegisterId()))
                     .count();
             // remove from map that not in db's list
-            if(equalCount == 0) {
-                BLOCK_ROUTING_KEY_MAP.remove(appId);
+            if (equalCount == 0) {
+                log.debug("remove new block callback of registerId:{}", registerId);
+                groupManagerService.eraseBlockNotifyCallback(registerId);
+                BLOCK_ROUTING_KEY_MAP.remove(registerId);
                 removeCount++;
             }
         }
@@ -80,16 +90,18 @@ public class SyncEventMapTask {
         log.debug("start cleanContractEventMap. ");
         int removeCount = 0;
         List<ContractEventInfo> contractEventInfoList = Lists.newArrayList(contractEventInfoRepository.findAll());
-        for (String infoId : CONTRACT_EVENT_CALLBACK_MAP.keySet()) {
-            long equalCount = 0;
-            equalCount = contractEventInfoList.stream()
-                    .filter(info -> infoId.equals(info.getId()))
+        for (String registerId : CONTRACT_EVENT_CALLBACK_MAP.keySet()) {
+            // check whether map contains callback that not in db
+            long equalCount = contractEventInfoList.stream()
+                    .filter(info -> registerId.equals(info.getRegisterId()))
                     .count();
             // remove from map that not in db's list
             if (equalCount == 0) {
-                ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(infoId);
-                callback.setRunning(false);
-                CONTRACT_EVENT_CALLBACK_MAP.remove(infoId);
+                log.debug("remove event callback of registerId:{}", registerId);
+                ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(registerId);
+                EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(callback.getGroupId());
+                eventSubscribe.unsubscribeEvent(registerId, callback);
+                CONTRACT_EVENT_CALLBACK_MAP.remove(registerId);
                 removeCount++;
             }
         }
