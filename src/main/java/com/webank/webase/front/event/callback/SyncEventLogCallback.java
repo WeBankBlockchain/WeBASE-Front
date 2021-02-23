@@ -18,43 +18,47 @@ import com.webank.webase.front.util.JsonUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
-import org.fisco.bcos.web3j.tx.txdecode.BaseException;
-import org.fisco.bcos.web3j.tx.txdecode.LogResult;
-import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
+import org.fisco.bcos.sdk.abi.ABICodec;
+import org.fisco.bcos.sdk.eventsub.EventCallback;
+import org.fisco.bcos.sdk.model.EventLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * use CompleteFuture to get all callback of event
  */
-public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
+public class SyncEventLogCallback implements EventCallback {
 
     private static final Logger logger =
         LoggerFactory.getLogger(SyncEventLogCallback.class);
-    private CompletableFuture<List<LogResult>> future;
-    private List<LogResult> finalList;
 
-    public SyncEventLogCallback(TransactionDecoder decoder,
-        final CompletableFuture<List<LogResult>> future) {
+    private ABICodec abiCodec;
+    private String contractAbi;
+    private String eventName;
 
+    private CompletableFuture<List<EventLog>> future;
+    private List<EventLog> finalList;
+
+    public SyncEventLogCallback(ABICodec abiCodec, String contractAbi, String eventName,
+        final CompletableFuture<List<EventLog>> future) {
+        this.abiCodec = abiCodec;
+        this.contractAbi = contractAbi;
+        this.eventName = eventName;
         this.future = future;
         this.finalList = new ArrayList<>();
-        // onPush will call father class's decoder, init EventLogPushWithDecodeCallback's decoder
-        this.setDecoder(decoder);
     }
 
     /**
-     * 根据Log对象中的blockNumber，transactionIndex，logIndex进行去重
-     * @param status
-     * @param logs
+     * onReceiveLog called when sdk receive any response of the target subscription. logs will be
+     * parsed by the user through the ABI module.
+     *
+     * @param status the status that peer response to sdk.
+     * @param logs   logs from the message.
      */
     @Override
-    public void onPushEventLog(int status, List<LogResult> logs) {
+    public void onReceiveLog(int status, List<EventLog> logs) {
         logger.info(
-            "SyncEventLogCallback onPushEventLog params: {}, status: {}, logs: {}",
-            getFilter().getParams(), status, logs);
+            "SyncEventLogCallback onPushEventLog status: {}, logs: {}", status, logs);
         // status == 0 push not finish,
         if (status == 0) {
             // add in resultList
@@ -81,15 +85,24 @@ public class SyncEventLogCallback extends EventLogPushWithDecodeCallback {
         }
     }
 
-    @Override
-    public LogResult transferLogToLogResult(Log log) {
-        try {
-            LogResult logResult = getDecoder().decodeEventLogReturnObject(log);
-            return logResult;
-        } catch (BaseException e) {
-            logger.error(" event log decode failed, log: {}", log);
-            return null;
-        }
-    }
+    /**
+     * 根据Log对象中的blockNumber，transactionIndex，logIndex进行去重
+     */
+
+//    private void decodeEvent(List<EventLog> logs, String eventName) {
+//        for (EventLog log : logs) {
+//            logger.debug(
+//                " blockNumber:" + log.getBlockNumber()
+//                    + ",txIndex:" + log.getTransactionIndex()
+//                    + " data:" + log.getData());
+//            try {
+//                List<String> list = abiCodec.decodeEventToString(contractAbi, eventName, log);
+//                logger.debug("decode event of :{}, log content:{} ", eventName, list);
+//            } catch (ABICodecException e) {
+//                logger.error("decode event log error:{} ", e.getMessage());
+//            }
+//
+//        }
+//    }
 
 }
