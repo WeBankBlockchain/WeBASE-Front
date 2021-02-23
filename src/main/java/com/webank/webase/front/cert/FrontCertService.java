@@ -15,15 +15,16 @@
  */
 package com.webank.webase.front.cert;
 
-import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +63,9 @@ public class FrontCertService {
 
     @Autowired
     Constants constants;
+    @Autowired
+    @Qualifier("common")
+    private CryptoSuite cryptoSuite;
     /**
      * 设置了front对应的节点的目录，如/data/fisco/nodes/127.0.0.1/node0
      * 则获取 ${path}/conf 中的ca.crt, node.crt
@@ -76,7 +80,7 @@ public class FrontCertService {
         log.debug("start getNodeCerts in {}" + nodePath);
         getCertListByPathAndType(nodePath, CertTypes.NODE.getValue(), resList);
         // gm cert added to resList
-        if (EncryptType.encryptType == GMStatus.GUOMI.getValue()) {
+        if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
             getCertListByPathAndType(nodePath, CertTypes.OTHERS.getValue(), resList);
         }
         log.debug("end getNodeCerts in {}" + nodePath);
@@ -197,12 +201,12 @@ public class FrontCertService {
      */
     public Path getCertPath(String nodePath, int certType) {
         if (certType == CertTypes.CHAIN.getValue()) {
-            if (EncryptType.encryptType == 1){
+            if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
                 return Paths.get(nodePath.concat(gmCaCrtPath));
             }
             return Paths.get(nodePath.concat(caCrtPath));
         } else if (certType == CertTypes.NODE.getValue()) {
-            if (EncryptType.encryptType == 1){
+            if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
                 return Paths.get(nodePath.concat(gmNodeCrtPath));
             }
             return Paths.get(nodePath.concat(nodeCrtPath));
@@ -213,7 +217,7 @@ public class FrontCertService {
     }
 
     public Path getEncrytCertPath(String nodePath) {
-        if (EncryptType.encryptType == 1){
+        if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
             return Paths.get(nodePath.concat(gmEncryptCrtPath));
         } else {
             return null;
