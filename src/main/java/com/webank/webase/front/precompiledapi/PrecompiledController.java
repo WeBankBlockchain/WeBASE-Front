@@ -17,12 +17,13 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.precompiledapi.crud.CRUDParseUtils;
+import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.precompiledapi.entity.ConsensusHandle;
 import com.webank.webase.front.precompiledapi.entity.ContractManageResult;
 import com.webank.webase.front.precompiledapi.entity.ContractStatusHandle;
 import com.webank.webase.front.precompiledapi.entity.CrudHandle;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
-import com.webank.webase.front.util.CRUDParseUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
@@ -33,6 +34,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +42,9 @@ import java.util.Set;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
-import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
-import org.fisco.bcos.web3j.precompile.crud.Condition;
-import org.fisco.bcos.web3j.precompile.crud.Entry;
-import org.fisco.bcos.web3j.precompile.crud.Table;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -275,15 +275,8 @@ public class PrecompiledController {
         if (result == 0) {
             return new BaseResponse(ConstantCode.RET_SUCCESS,
                     "Create '" + table.getTableName() + "' Ok.");
-        } else if (result == PrecompiledCommon.TableExist_RC3) {
-            log.debug("createTable " + "Table already exists");
-            return new BaseResponse(PrecompiledCommon.TableExist_RC3, "Table already exists",
-                    "Table already exists");
-        } else if (result == PrecompiledCommon.PermissionDenied_RC3) {
-            log.debug("createTable " + "Permission denied");
-            return new BaseResponse(PrecompiledCommon.PermissionDenied_RC3, "Permission denied",
-                    "Permission denied");
         } else {
+            // TODO check if result contain not valid error code
             log.debug("createTable " + "code: " + result + "Create '" + table.getTableName()
                     + "' failed.");
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
@@ -297,7 +290,6 @@ public class PrecompiledController {
         Instant startTime = Instant.now();
         log.info("start descTable startTime:{}, groupId:{},sql:{}", startTime.toEpochMilli(),
                 groupId, sql);
-        Table table = new Table();
         String[] sqlParams = sql.split(" ");
         // "desc t_demo"
         String tableName = sqlParams[1];
@@ -314,7 +306,7 @@ public class PrecompiledController {
             tableName = tableName.substring(0, tableName.length() - 1);
         }
         try {
-            table = precompiledService.desc(groupId, tableName);
+            Table table = precompiledService.desc(groupId, tableName);
             log.info("end descTable useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), table);
             return new BaseResponse(ConstantCode.RET_SUCCESS, table);
@@ -410,7 +402,7 @@ public class PrecompiledController {
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
         }
 
-        Set<String> entryFields = entry.getFields().keySet();
+        Set<String> entryFields = entry.getFieldNameToValue().keySet();
 
         String tableName = table.getTableName();
         Table descTable;
@@ -427,18 +419,20 @@ public class PrecompiledController {
 
         // ex: insert into t_test values (fruit, 1, apple)
         if (useValues) {
-            if (entry.getFields().size() != fieldsList.size()) {
+            if (entry.getFieldNameToValue().size() != fieldsList.size()) {
                 return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                         "Column count doesn't match value count.",
                         "Column count doesn't match value count.");
             } else {
                 Entry entryValue = table.getEntry();
-                for (int i = 0; i < entry.getFields().size(); i++) {
+                for (int i = 0; i < entry.getFieldNameToValue().size(); i++) {
                     for (String entryField : entryFields) {
                         if ((i + "").equals(entryField)) {
-                            entryValue.put(fieldsList.get(i), entry.get(i + ""));
+                            Map<String, String> map = new HashMap<>();
+                            map.put(fieldsList.get(i), entry.getFieldNameToValue().get(i + ""));
+                            entryValue.setFieldNameToValue(map);
                             if (keyName.equals(fieldsList.get(i))) {
-                                table.setKey(entry.get(i + ""));
+                                table.setKey(entry.getFieldNameToValue().get(i + ""));
                             }
                         }
                     }
@@ -472,7 +466,7 @@ public class PrecompiledController {
                             strBuilder.toString());
                 }
             }
-            String keyValue = entry.get(keyName);
+            String keyValue = entry.getFieldNameToValue().get(keyName);
             if (keyValue == null) {
                 return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                         "Column count doesn't match value count.",
@@ -522,7 +516,7 @@ public class PrecompiledController {
         }
 
         String keyName = descTable.getKey();
-        if (entry.getFields().containsKey(keyName)) {
+        if (entry.getFieldNameToValue().containsKey(keyName)) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Please don't set the key field '" + keyName + "'.",
                     "Please don't set the key field '" + keyName + "'.");
@@ -531,7 +525,7 @@ public class PrecompiledController {
         CRUDParseUtils.handleKey(table, conditions);
         String fields = descTable.getKey() + "," + descTable.getValueFields();
         List<String> fieldsList = Arrays.asList(fields.split(","));
-        Set<String> entryFields = entry.getFields().keySet();
+        Set<String> entryFields = entry.getFieldNameToValue().keySet();
         Set<String> conditonFields = conditions.getConditions().keySet();
         Set<String> allFields = new HashSet<>();
         allFields.addAll(entryFields);

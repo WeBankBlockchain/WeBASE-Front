@@ -14,8 +14,6 @@
 
 package com.webank.webase.front.precompiledapi;
 
-
-import static com.webank.webase.front.base.code.ConstantCode.TX_RECEIPT_CODE_ERROR;
 import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDOBSERVER;
 import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDSEALER;
 import static org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCyclePrecompiled.FUNC_FREEZE;
@@ -36,20 +34,21 @@ import static org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernance
 import static org.fisco.bcos.sdk.contract.precompiled.permission.PermissionPrecompiled.FUNC_GRANTWRITE;
 import static org.fisco.bcos.sdk.contract.precompiled.permission.PermissionPrecompiled.FUNC_REVOKEWRITE;
 import static org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.transaction.TransService;
-import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
+import org.fisco.bcos.sdk.model.PrecompiledConstant;
 import org.fisco.bcos.sdk.model.PrecompiledRetCode;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
@@ -258,7 +257,7 @@ public class PrecompiledWithSignService {
         String entryJsonStr;
         try {
             entryJsonStr =
-                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFields());
+                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFieldNameToValue());
         } catch (JsonProcessingException e) {
             log.error("remove JsonProcessingException:[]", e);
             throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
@@ -284,7 +283,7 @@ public class PrecompiledWithSignService {
         String entryJsonStr, conditionStr;
         try {
             entryJsonStr =
-                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFields());
+                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFieldNameToValue());
             conditionStr = ObjectMapperFactory.getObjectMapper()
                     .writeValueAsString(condition.getConditions());
         } catch (JsonProcessingException e) {
@@ -329,10 +328,10 @@ public class PrecompiledWithSignService {
     }
 
     private void checkTableKeyLength(Table table) {
-        if (table.getKey().length() > PrecompiledCommon.TABLE_KEY_MAX_LENGTH) {
+        if (table.getKey().length() > PrecompiledConstant.TABLE_KEY_MAX_LENGTH) {
             throw new FrontException(ConstantCode.CRUD_TABLE_KEY_LENGTH_ERROR.getCode(),
                     "The value of the table key exceeds the maximum limit("
-                            + PrecompiledCommon.TABLE_KEY_MAX_LENGTH + ").");
+                            + PrecompiledConstant.TABLE_KEY_MAX_LENGTH + ").");
         }
     }
 
@@ -493,7 +492,7 @@ public class PrecompiledWithSignService {
 //            if (receipt.getOutput() != null) {
 //                try {
 //                    String codeMsgFromOutput =
-//                            PrecompiledCommon.getJsonStr(receipt.getOutput(), web3j);
+//                            PrecompiledConstant.getJsonStr(receipt.getOutput(), web3j);
 //                    return PrecompiledUtils.handleReceiptOutput(codeMsgFromOutput);
 //                } catch (IOException e) {
 //                    log.error("handleTransactionReceipt getJsonStr of error tx receipt fail:[]", e);

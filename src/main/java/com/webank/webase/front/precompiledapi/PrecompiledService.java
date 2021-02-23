@@ -16,10 +16,11 @@ package com.webank.webase.front.precompiledapi;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
+
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
 import com.webank.webase.front.web3api.Web3ApiService;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,9 @@ import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
 import org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCycleService;
 import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
+import org.fisco.bcos.sdk.model.PrecompiledConstant;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -151,8 +155,10 @@ public class PrecompiledService {
     public Table desc(int groupId, String tableName) throws Exception {
         TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
-        Table descRes = crudService.desc(tableName);
-        return descRes;
+        List<Map<String, String>> descRes = crudService.desc(tableName);
+        String tableKey = descRes.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
+        String valueFields = descRes.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME);
+        return new Table(tableName, tableKey, valueFields);
     }
 
     /**
@@ -162,7 +168,7 @@ public class PrecompiledService {
                                             Condition conditions) throws Exception {
         TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
-        List<Map<String, String>> selectRes = crudService.select(table, conditions);
+        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), table.getKey(), conditions);
         return selectRes;
     }
 

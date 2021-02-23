@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.util;
+package com.webank.webase.front.precompiledapi.crud;
 
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.util.PrecompiledUtils;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
@@ -31,12 +32,11 @@ import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.util.TablesNamesFinder;
-import org.fisco.bcos.web3j.precompile.crud.Condition;
-import org.fisco.bcos.web3j.precompile.crud.Entry;
-import org.fisco.bcos.web3j.precompile.crud.EnumOP;
-import org.fisco.bcos.web3j.precompile.crud.Table;
 
 import java.util.*;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.ConditionOperator;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
 
 /**
  * Handle CRUD operation on chain's table
@@ -163,12 +163,16 @@ public class CRUDParseUtils {
                 }
             }
             for (int i = 0; i < columnNames.size(); i++) {
-                entry.put(columnNames.get(i), trimQuotes(itemArr[i]));
+                Map<String, String> map = new HashMap<>();
+                map.put(columnNames.get(i), trimQuotes(itemArr[i]));
+                entry.setFieldNameToValue(map);
             }
             return false;
         } else {
             for (int i = 0; i < itemArr.length; i++) {
-                entry.put(i + "", trimQuotes(itemArr[i]));
+                Map<String, String> map = new HashMap<>();
+                map.put(i + "", trimQuotes(itemArr[i]));
+                entry.setFieldNameToValue(map);
             }
             return true;
         }
@@ -256,11 +260,11 @@ public class CRUDParseUtils {
         if (expr instanceof IsNullExpression) {
             throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The IsNullExpression is not supported.");
         }
-        Map<String, Map<EnumOP, String>> conditions = condition.getConditions();
+        Map<String, Map<ConditionOperator, String>> conditions = condition.getConditions();
         Set<String> keys = conditions.keySet();
         for (String key : keys) {
-            Map<EnumOP, String> value = conditions.get(key);
-            EnumOP operation = value.keySet().iterator().next();
+            Map<ConditionOperator, String> value = conditions.get(key);
+            ConditionOperator operation = value.keySet().iterator().next();
             String itemValue = value.values().iterator().next();
             String newValue = trimQuotes(itemValue);
             value.put(operation, newValue);
@@ -305,7 +309,9 @@ public class CRUDParseUtils {
             values[i] = expressions.get(i).toString();
         }
         for (int i = 0; i < columns.size(); i++) {
-            entry.put(trimQuotes(columns.get(i).toString()), trimQuotes(values[i]));
+            Map<String, String> map = new HashMap<>();
+            map.put(trimQuotes(columns.get(i).toString()), trimQuotes(values[i]));
+            entry.setFieldNameToValue(map);
         }
 
         // parse where clause
@@ -459,7 +465,7 @@ public class CRUDParseUtils {
 
     public static void checkUserTableParam(Entry entry, Table descTable)
             throws FrontException {
-        Map<String, String> fieldsMap = entry.getFields();
+        Map<String, String> fieldsMap = entry.getFieldNameToValue();
         Set<String> keys = fieldsMap.keySet();
         for (String key : keys) {
             if (key.equals(descTable.getKey())) {
@@ -481,16 +487,16 @@ public class CRUDParseUtils {
 
         String keyName = table.getKey();
         String keyValue = "";
-        Map<EnumOP, String> keyMap = condition.getConditions().get(keyName);
+        Map<ConditionOperator, String> keyMap = condition.getConditions().get(keyName);
         if (keyMap == null) {
             throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Please provide a equal condition for the key field '"
                             + keyName
                             + "' in where clause.");
         } else {
-            Set<EnumOP> keySet = keyMap.keySet();
-            for (EnumOP enumOP : keySet) {
-                if (enumOP != EnumOP.eq) {
+            Set<ConditionOperator> keySet = keyMap.keySet();
+            for (ConditionOperator enumOP : keySet) {
+                if (enumOP != ConditionOperator.eq) {
                     throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
                             "Please provide a equal condition for the key field '"
                                     + keyName
