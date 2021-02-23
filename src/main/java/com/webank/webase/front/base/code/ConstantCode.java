@@ -236,4 +236,13 @@ public class ConstantCode {
     public static final RetCode CRUD_TABLE_KEY_LENGTH_ERROR = RetCode.mark(201522, "table key length error");
     public static final RetCode CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR = RetCode.mark(201523, "crud's param parse json error");
     public static final RetCode PRECOMPILED_COMMON_TRANSFER_JSON_FAIL = RetCode.mark(201524, "precompiled common transfer to json fail");
+
+    /* java sdk missing web3sdk's retcode */
+    public static final RetCode ALREADY_REMOVED_FROM_THE_GROUP = RetCode.mark(-51103, "The node already has been removed from the group");
+    public static final RetCode ALREADY_EXISTS_IN_SEALER_LIST = RetCode.mark(-51104, "The node already exists in the sealerList");
+    public static final RetCode ALREADY_EXISTS_IN_OBSERVER_LIST = RetCode.mark(-51105, "The node already exists in the observerList");
+    //public static final RetCode ALREADY_EXISTS_IN_OBSERVER_LIST = RetCode.mark(51105, "The");
+
+
+
 }

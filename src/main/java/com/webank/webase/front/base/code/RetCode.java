@@ -42,6 +42,6 @@ public class RetCode {
 
     @Override
     public String toString() {
-        return "RetCode [code=" + code + ", message=" + message + "]";
+        return "{" + "\"code\":" + code + ", \"msg\":\"" + message + "\"}";
     }
 }

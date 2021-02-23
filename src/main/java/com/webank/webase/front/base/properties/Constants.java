@@ -37,7 +37,7 @@ public class Constants {
     public static final String DIAGONAL = "/";
     public static final String SYMPOL = ":";
     public static final String TYPE_EVENT = "event";
-    public static final String TYPE_FUNCTION = "function";
+    public static final String ContractLifeCycleServiceUNCTION = "function";
     public static final String TYPE_CONSTRUCTOR = "constructor";
     public static final String NODE_CONNECTION = "node@%s:%s";
     public static final String CONFIG_FILE = "/config.ini";
