@@ -29,8 +29,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.web3j.protocol.channel.StatusCode;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 

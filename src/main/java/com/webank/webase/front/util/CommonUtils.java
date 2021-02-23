@@ -35,7 +35,6 @@ import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
@@ -46,9 +45,10 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -69,49 +69,54 @@ public class CommonUtils {
 
     /**
      * stringToSignatureData. 19/12/24 support guomi： add byte[] pub in signatureData
-     * 
      * @param signatureData signatureData
      * @return
      */
-    public static SignatureData stringToSignatureData(String signatureData) {
+    public static SignatureResult stringToSignatureData(String signatureData, int encryptType) {
         byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+        // 从1开始，因为0是v；注：在javasdk中v放在了最后一位
         byte[] signR = new byte[32];
         System.arraycopy(byteArr, 1, signR, 0, signR.length);
         byte[] signS = new byte[32];
         System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
-        if (EncryptType.encryptType == 1) {
+        if (encryptType == 1) {
             byte[] pub = new byte[64];
             System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
-            return new SignatureData(byteArr[0], signR, signS, pub);
+            // return new SignatureData(byteArr[0], signR, signS, pub);
+            return new SM2SignatureResult(pub, signR, signS);
         } else {
-            return new SignatureData(byteArr[0], signR, signS);
+            return new ECDSASignatureResult(byteArr[0], signR, signS);
         }
     }
 
     /**
      * signatureDataToString. 19/12/24 support guomi： add byte[] pub in signatureData
-     * 
      * @param signatureData signatureData
      */
-    public static String signatureDataToString(SignatureData signatureData) {
+    public static String signatureDataToString(SM2SignatureResult signatureData) {
         byte[] byteArr;
-        if (EncryptType.encryptType == 1) {
-            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length
-                    + PUBLIC_KEY_LENGTH_64];
-            byteArr[0] = signatureData.getV();
-            System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
-            System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
-                    signatureData.getS().length);
-            System.arraycopy(signatureData.getPub(), 0, byteArr,
-                    signatureData.getS().length + signatureData.getR().length + 1,
-                    signatureData.getPub().length);
-        } else {
-            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length];
-            byteArr[0] = signatureData.getV();
-            System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
-            System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
-                    signatureData.getS().length);
-        }
+        byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length
+                + PUBLIC_KEY_LENGTH_64];
+        // v
+        byteArr[0] = 0;
+        // r s
+        System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
+        System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
+                signatureData.getS().length);
+        System.arraycopy(signatureData.getPub(), 0, byteArr,
+                signatureData.getS().length + signatureData.getR().length + 1,
+                signatureData.getPub().length);
+
+        return Numeric.toHexString(byteArr, 0, byteArr.length, false);
+    }
+
+    public static String signatureDataToString(ECDSASignatureResult signatureData) {
+        byte[] byteArr;
+        byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length];
+        byteArr[0] = signatureData.getV();
+        System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
+        System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
+            signatureData.getS().length);
         return Numeric.toHexString(byteArr, 0, byteArr.length, false);
     }
 
