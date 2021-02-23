@@ -50,6 +50,11 @@ public class BlockPushMessage implements MQObject {
     private BigInteger blockNumber;
 
     /**
+     * message from which peer(ip:port)
+     */
+    private String peerIpPort;
+
+    /**
      * optimize serialization method for deserializing more easily
      * @return
      */

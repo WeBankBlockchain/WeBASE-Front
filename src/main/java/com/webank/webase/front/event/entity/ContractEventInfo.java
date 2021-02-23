@@ -87,10 +87,15 @@ public class ContractEventInfo {
      */
     private String contractAddress;
     /**
-     * List<String>
+     * List<String> event name list
      */
     @Column(columnDefinition = "text")
     private String topicList;
+
+    /**
+     * registerId when register callback in groupManagerService
+     */
+    private String registerId;
 
     private LocalDateTime createTime;
 

@@ -70,4 +70,9 @@ public class NewBlockEventInfo {
 
     private LocalDateTime createTime;
 
+    /**
+     * registerId when register callback in groupManagerService
+     */
+    private String registerId;
+
 }

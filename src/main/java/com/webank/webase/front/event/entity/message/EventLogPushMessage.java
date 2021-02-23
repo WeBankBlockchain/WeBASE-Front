@@ -17,11 +17,10 @@
 package com.webank.webase.front.event.entity.message;
 
 import com.webank.webase.front.util.JsonUtils;
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.fisco.bcos.web3j.tx.txdecode.LogResult;
-
-import java.util.List;
+import org.fisco.bcos.sdk.model.EventLog;
 
 /**
  * @author marsli
@@ -47,7 +46,7 @@ public class EventLogPushMessage implements MQObject {
      */
     private int status;
 
-    private List<LogResult> logs;
+    private List<EventLog> logs;
 
     @Override
     public String toString() {
