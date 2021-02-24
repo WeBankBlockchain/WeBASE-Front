@@ -16,11 +16,6 @@
 package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.channel.test.TestBase;
-import org.fisco.bcos.channel.client.PEMManager;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.precompile.config.SystemConfigService;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -38,13 +33,13 @@ public class SysConfigDbTest extends TestBase {
     @Test
     public void setSysConfigValueByKey() throws Exception {
         context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        PEMManager pem = context.getBean(PEMManager.class);
-        ECKeyPair pemKeyPair = pem.getECKeyPair();
-        //链管理员私钥加载
-        Credentials credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
-        SystemConfigService systemConfigService = new SystemConfigService(web3j, credentialsPEM);
-
-        systemConfigService.setValueByKey(key, value);
+//        PEMManager pem = context.getBean(PEMManager.class);
+//        ECKeyPair pemKeyPair = pem.getECKeyPair();
+//        //链管理员私钥加载
+//        Credentials credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
+//        SystemConfigService systemConfigService = new SystemConfigService(web3j, credentialsPEM);
+//
+//        systemConfigService.setValueByKey(key, value);
     }
 
 }

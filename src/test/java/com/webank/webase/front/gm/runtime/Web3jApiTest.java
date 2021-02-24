@@ -15,7 +15,7 @@ public class Web3jApiTest extends BaseTest {
     private Web3ApiService web3ApiService;
     @Test
     public void getBlockNumber() throws IOException {
-        BigInteger blockNumber = web3ApiService.getWeb3j(1).getBlockNumber().send().getBlockNumber();
+        BigInteger blockNumber = web3ApiService.getWeb3j(1).getBlockNumber().getBlockNumber();
         assertTrue(blockNumber.compareTo(new BigInteger("0")) >= 0);
     }
 }
