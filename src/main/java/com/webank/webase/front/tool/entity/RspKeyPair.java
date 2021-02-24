@@ -16,6 +16,7 @@ package com.webank.webase.front.tool.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.utils.Numeric;
@@ -29,12 +30,12 @@ public class RspKeyPair {
     private String address;
     private Integer encryptType;
 
-    public RspKeyPair(ECKeyPair ecKeyPair, Integer encryptType) {
+    public RspKeyPair(CryptoKeyPair keyPair, Integer encryptType) {
         // no prefix
-        this.privateKey = Numeric.toHexStringNoPrefix(ecKeyPair.getPrivateKey());
+        this.privateKey = keyPair.getHexPrivateKey();
         // with prefix
-        this.publicKey = Numeric.toHexStringWithPrefix(ecKeyPair.getPublicKey());
-        this.address = "0x" + Keys.getAddress(ecKeyPair.getPublicKey());
+        this.publicKey = keyPair.getHexPublicKey();
+        this.address = keyPair.getAddress();
         this.encryptType = encryptType;
     }
 }

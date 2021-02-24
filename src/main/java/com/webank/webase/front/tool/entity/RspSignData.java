@@ -16,11 +16,12 @@ package com.webank.webase.front.tool.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.web3j.crypto.Sign;
 
 @Data
 @AllArgsConstructor
 public class RspSignData {
-    private Sign.SignatureData signatureData;
+    private SignatureResult signatureData;
     private Integer encryptType;
 }
