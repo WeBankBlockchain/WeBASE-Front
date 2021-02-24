@@ -1,10 +1,7 @@
 package com.webank.webase.front.util;
 
 import java.math.BigInteger;
-
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.utils.Numeric;
 
 /** Keys generated for unit testing purposes. */
 public class SampleKeys {
@@ -22,9 +19,9 @@ public class SampleKeys {
   public static final BigInteger PRIVATE_KEY = Numeric.toBigInt(PRIVATE_KEY_STRING);
   public static final BigInteger PUBLIC_KEY = Numeric.toBigInt(PUBLIC_KEY_STRING);
 
-  public static final ECKeyPair KEY_PAIR = new ECKeyPair(PRIVATE_KEY, PUBLIC_KEY);
-
-    public static final Credentials CREDENTIALS = Credentials.create(KEY_PAIR);
+//  public static final ECKeyPair KEY_PAIR = new ECKeyPair(PRIVATE_KEY, PUBLIC_KEY);
+//
+//    public static final Credentials CREDENTIALS = Credentials.create(KEY_PAIR);
 
     private SampleKeys() {}
 }

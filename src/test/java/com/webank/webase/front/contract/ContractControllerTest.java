@@ -22,7 +22,7 @@ import com.webank.webase.front.util.JsonUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -102,7 +102,7 @@ public class ContractControllerTest {
     @Test
     public void testDeploy() throws Exception {
         String abiInfo = "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"type\":\"constructor\"}]";
-        List<AbiDefinition> list = JsonUtils.toJavaObjectList(abiInfo, AbiDefinition.class);
+        List<ABIDefinition> list = JsonUtils.toJavaObjectList(abiInfo, ABIDefinition.class);
         //param
         ReqDeploy deployInputParam = new ReqDeploy();
         deployInputParam.setGroupId(groupId);
