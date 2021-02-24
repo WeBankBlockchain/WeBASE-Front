@@ -19,6 +19,7 @@ package com.webank.webase.front.gm.runtime;
 
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.channel.test.SpringTestBase;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
@@ -35,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.client.RestTemplate;
 
-public class SignDataTest extends BaseTest {
+public class SignDataTestBase extends SpringTestBase {
     @Autowired
     KeyStoreService keyStoreService;
     @Autowired

@@ -16,6 +16,7 @@
 
 package com.webank.webase.front.event;
 
+import com.webank.webase.front.channel.test.SpringTestBase;
 import com.webank.webase.front.event.entity.ReqNewBlockEventRegister;
 import com.webank.webase.front.event.entity.ReqContractEventRegister;
 import com.webank.webase.front.util.JsonUtils;
@@ -40,7 +41,7 @@ import java.util.List;
 @WebAppConfiguration
 @Transactional
 @Rollback
-public class EventControllerTest extends BaseTest {
+public class EventControllerTestBase extends SpringTestBase {
 
     private MockMvc mockMvc;
     private Integer groupId = 1;
