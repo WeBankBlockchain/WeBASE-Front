@@ -45,17 +45,14 @@ public class Web3Config {
     public static String orgName;
     public String certPath = "conf";
     private List<Integer> groupIdList;
-    private int corePoolSize;
-    private int maxPoolSize;
-    private int queueCapacity;
-    public int timeout = 30000;
-    private int keepAlive;
+    /* use String in java sdk*/
+    private String corePoolSize;
+    private String maxPoolSize;
+    private String queueCapacity;
+    /* use String in java sdk*/
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
     private int encryptType;
-
-    private int independentGroupId = Integer.MAX_VALUE;
-
 
     /**
      * 覆盖EncryptType构造函数
@@ -66,141 +63,6 @@ public class Web3Config {
         log.info("init encrypt type:{}", encryptType);
         return new CryptoSuite(encryptType);
     }
-
-
-    /**
-     * singleton instance of config
-     * @case1: if add new web3j in web3jmap, add connection to channelConnectionsList of this bean
-     * @case2: if create a brand new web3j of new connections config,
-     * use getGroupChannelConnectionsConfig method to create new config
-     * @return
-     */
-//    @Bean
-//    public GroupChannelConnectionsConfig initGroupChannelConnectionsConfig() {
-//        return getGroupChannelConnectionsConfig();
-//    }
-
-    /**
-     * get a new config instance
-     * @return
-     */
-//    private GroupChannelConnectionsConfig getGroupChannelConnectionsConfig() {
-//        List<ChannelConnections> channelConnectionsList = new ArrayList<>();
-//
-//        List<String> connectionsList = new ArrayList<>();
-//        connectionsList.add(ip + ":" + channelPort);
-//        log.info("*****" + ip + ":" + channelPort);
-//        ChannelConnections channelConnections = new ChannelConnections();
-//        channelConnections.setConnectionsStr(connectionsList);
-//        channelConnections.setGroupId(independentGroupId);
-//        channelConnectionsList.add(channelConnections);
-//
-//        GroupChannelConnectionsConfig groupChannelConnectionsConfig =
-//            new GroupChannelConnectionsConfig();
-//        groupChannelConnectionsConfig.setAllChannelConnections(channelConnectionsList);
-//        return groupChannelConnectionsConfig;
-//    }
-
-    /**
-     * init Web3j of default group id 1
-     */
-//    @Bean
-//    public Web3j getWeb3j(GroupChannelConnectionsConfig groupChannelConnectionsConfig)
-//            throws Exception {
-//        Service service = new Service();
-//        service.setOrgID(orgName);
-//        service.setGroupId(independentGroupId);
-//        service.setThreadPool(sdkThreadPool());
-//        service.setAllChannelConnections(groupChannelConnectionsConfig);
-//        service.run();
-//        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-//        channelEthereumService.setTimeout(timeout);
-//        channelEthereumService.setChannelService(service);
-//        Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
-//        // init node version
-//        NodeVersion version = web3j.getNodeVersion().send();
-//        Constants.version = version.getNodeVersion().getVersion();
-//        Constants.chainId = version.getNodeVersion().getChainID();
-//        log.info("Chain's clientVersion:{}", Constants.version);
-//        return web3j;
-//    }
-
-    /**
-     * set sdk threadPool.
-     *
-     * @return
-     */
-//    @Bean
-//    public ThreadPoolTaskExecutor sdkThreadPool() {
-//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-//        executor.setCorePoolSize(corePoolSize);
-//        executor.setMaxPoolSize(maxPoolSize);
-//        executor.setQueueCapacity(queueCapacity);
-//        executor.setKeepAliveSeconds(keepAlive);
-//        executor.setRejectedExecutionHandler(new AbortPolicy());
-//        executor.setThreadNamePrefix("sdkThreadPool-");
-//        executor.initialize();
-//        return executor;
-//    }
-
-    /**
-     * init channel service. set setBlockNotifyCallBack
-     * todo event callback setter
-     * @return
-     */
-//    @Bean(name = "serviceMap")
-//    @DependsOn("encryptType")
-//    public Map<Integer, Service> serviceMap(Web3j web3j, NewBlockEventCallback newBlockEventCallBack)
-//        throws Exception {
-//        List<String> groupIdList = web3j.getGroupList().send().getGroupList();
-//        GroupChannelConnectionsConfig groupChannelConnectionsConfig = getGroupChannelConnectionsConfig();
-//        List<ChannelConnections> channelConnectionsList  = groupChannelConnectionsConfig.getAllChannelConnections();
-//        channelConnectionsList.clear();
-//        for (int i = 0; i < groupIdList.size(); i++) {
-//            List<String> connectionsList = new ArrayList<>();
-//            connectionsList.add(ip + ":" + channelPort);
-//            ChannelConnections channelConnections = new ChannelConnections();
-//            channelConnections.setConnectionsStr(connectionsList);
-//            channelConnections.setGroupId(Integer.parseInt(groupIdList.get(i)));
-//            log.info("***** groupId:{}", groupIdList.get(i));
-//            channelConnectionsList.add(channelConnections);
-//        }
-//        Map serviceMap = new ConcurrentHashMap<Integer, Service>(groupIdList.size());
-//        for (int i = 0; i < groupIdList.size(); i++) {
-//            Service service = new Service();
-//            service.setOrgID(orgName);
-//            service.setGroupId(Integer.parseInt(groupIdList.get(i)));
-//            service.setThreadPool(sdkThreadPool());
-//            service.setAllChannelConnections(groupChannelConnectionsConfig);
-//            // newBlockEventCallBack message enqueues in MQ
-//            service.setBlockNotifyCallBack(newBlockEventCallBack);
-//            service.run();
-//            serviceMap.put(Integer.valueOf(groupIdList.get(i)), service);
-//        }
-//        return serviceMap;
-//    }
-
-    /**
-     * init Web3j
-     * 
-     * @return
-     */
-//    @Bean
-//    @DependsOn("encryptType")
-//    public Map<Integer, Web3j> web3jMap(Map<Integer, Service> serviceMap) {
-//        Map web3jMap = new ConcurrentHashMap<Integer, Web3j>(serviceMap.size());
-//        for (Integer i : serviceMap.keySet()) {
-//            Service service = serviceMap.get(i);
-//            ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-//            channelEthereumService.setTimeout(timeout);
-//            channelEthereumService.setChannelService(service);
-//            Web3j web3jSync = Web3j.build(channelEthereumService, service.getGroupId());
-//            // for getClockNumber local
-//            web3jSync.getBlockNumberCache();
-//            web3jMap.put(i, web3jSync);
-//        }
-//        return web3jMap;
-//    }
 
 
     @Bean
@@ -247,18 +109,18 @@ public class Web3Config {
     public org.fisco.bcos.sdk.BcosSDK getBcosSDK(ConfigOption configOption) {
         log.info("init bcos sdk instance, please check sdk.log");
         BcosSDK bcosSDK = new BcosSDK(configOption);
-
+        ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
+            .getNodeVersion();
+        Constants.version = version.getVersion();
+        Constants.chainId = version.getChainId();
         return bcosSDK;
     }
 
     @Bean
-    public Client getIndependentWeb3j(BcosSDK bcosSDK) {
-        Client iClient = Client.build(bcosSDK.getChannel());
-        // init node version
-        ClientVersion version = iClient.getNodeVersion().getNodeVersion();
-        Constants.version = version.getVersion();
-        Constants.chainId = version.getChainId();
-        return iClient;
+    public Client getRpcWeb3j(BcosSDK bcosSDK) {
+        Client rpcWeb3j = Client.build(bcosSDK.getChannel());
+        log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
+        return rpcWeb3j;
     }
 
 

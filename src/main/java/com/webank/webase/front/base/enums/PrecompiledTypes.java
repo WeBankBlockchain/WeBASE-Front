@@ -47,13 +47,17 @@ public enum PrecompiledTypes {
      */
     PERMISSION(1005),
     /**
-     * Contract status Manage
+     * Contract status Manage (Contract life cycle)
      */
     CSM(1007),
     /**
      * Chain governance
      */
-    CHAIN_GOVERN(1008);
+    CHAIN_GOVERN(1008),
+    /**
+     * Chain governance
+     */
+    KV_TABLE(1010);
 
     private int value;
 

@@ -19,22 +19,13 @@ package com.webank.webase.front.event.callback;
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.message.EventLogPushMessage;
-import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
-import lombok.Setter;
-import org.fisco.bcos.channel.event.filter.EventLogPushWithDecodeCallback;
 import org.fisco.bcos.sdk.abi.ABICodec;
-import org.fisco.bcos.sdk.abi.ABICodecException;
 import org.fisco.bcos.sdk.eventsub.EventCallback;
 import org.fisco.bcos.sdk.model.EventLog;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
-import org.fisco.bcos.web3j.tx.txdecode.BaseException;
-import org.fisco.bcos.web3j.tx.txdecode.LogResult;
-import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * 指定exchangeName和routingKey, callback后直接push到对应的mq中

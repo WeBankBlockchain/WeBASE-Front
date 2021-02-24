@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.BcosSDK;
@@ -47,8 +48,12 @@ import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
 import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
@@ -67,13 +72,11 @@ public class Web3ApiService {
     @Autowired
     private NodeConfig nodeConfig;
     @Autowired
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
-    @Autowired
     private Constants constants;
     @Autowired
     private BcosSDK bcosSDK;
     @Autowired
-    private Client independentWeb3j;
+    private Client rpcWeb3j;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -272,8 +275,8 @@ public class Web3ApiService {
             List<NodeStatusInfo> statusList = new ArrayList<>();
             List<String> peerStrList = getGroupPeers(groupId);
             List<String> observerList = getObserverList(groupId);
-            SyncStatus syncStatus = JsonUtils.toJavaObject(getSyncStatus(groupId), SyncStatus.class);
-            List<PeerOfConsensusStatus> consensusList = getPeerOfConsensusStatus(groupId);
+            SyncStatusInfo syncStatusInfo = this.getSyncStatus(groupId);
+            List<ViewInfo> viewInfoList = getPeerOfConsensusStatus(groupId);
             if (Objects.isNull(peerStrList) || peerStrList.isEmpty()) {
                 log.info("end getNodeStatusList. peerStrList is empty");
                 return Collections.emptyList();
@@ -285,13 +288,13 @@ public class Web3ApiService {
                     nodeType = observerList.stream().filter(peer::equals)
                             .map(c -> 1).findFirst().orElse(0);
                 }
-                BigInteger blockNumberOnChain = getBlockNumberOfNodeOnChain(syncStatus, peer);
-                BigInteger latestView =
-                        consensusList.stream().filter(cl -> peer.equals(cl.getNodeId()))
-                                .map(PeerOfConsensusStatus::getView).findFirst().orElse(BigInteger.ZERO);// pbftView
+                BigInteger blockNumberOnChain = getBlockNumberOfNodeOnChain(syncStatusInfo, peer);
+                String latestView =
+                    viewInfoList.stream().filter(cl -> peer.equals(cl.getNodeId()))
+                                .map(ViewInfo::getView).findFirst().orElse("0");// pbftView
                 // check node status
                 statusList.add(
-                        checkNodeStatus(groupId, peer, blockNumberOnChain, latestView, nodeType));
+                        checkNodeStatus(groupId, peer, blockNumberOnChain, new BigInteger(latestView), nodeType));
             }
 
             nodeStatusMap.put(groupId, statusList);
@@ -368,7 +371,7 @@ public class Web3ApiService {
     /**
      * get latest number of peer on chain.
      */
-    private BigInteger getBlockNumberOfNodeOnChain(SyncStatus syncStatus, String nodeId) {
+    private BigInteger getBlockNumberOfNodeOnChain(SyncStatusInfo syncStatus, String nodeId) {
         if (Objects.isNull(syncStatus)) {
             log.warn("fail getBlockNumberOfNodeOnChain. SyncStatus is null");
             return BigInteger.ZERO;
@@ -378,42 +381,42 @@ public class Web3ApiService {
             return BigInteger.ZERO;
         }
         if (nodeId.equals(syncStatus.getNodeId())) {
-            return syncStatus.getBlockNumber();
+            return new BigInteger(syncStatus.getBlockNumber());
         }
-        List<PeerOfSyncStatus> peerList = syncStatus.getPeers();
+        List<PeersInfo> peerList = syncStatus.getPeers();
         // blockNumber
-        BigInteger latestNumber = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
-                .map(s -> s.getBlockNumber()).findFirst().orElse(BigInteger.ZERO);
-        return latestNumber;
+        String latestNumber = peerList.stream().filter(peer -> nodeId.equals(peer.getNodeId()))
+                .map(PeersInfo::getBlockNumber).findFirst().orElse("0");
+        return new BigInteger(latestNumber);
     }
 
 
     /**
      * get peer of consensusStatus
      */
-    private List<PeerOfConsensusStatus> getPeerOfConsensusStatus(int groupId) {
-        String consensusStatusJson = getConsensusStatus(groupId);
-        if (StringUtils.isBlank(consensusStatusJson)) {
-            return Collections.emptyList();
-        }
-        List jsonArr = JsonUtils.toJavaObject(consensusStatusJson, List.class);
-        if (jsonArr == null) {
-            log.error("getPeerOfConsensusStatus error");
-            throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
-        }
-        List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
-        for (int i = 0; i < jsonArr.size(); i++ ) {
-            if (jsonArr.get(i) instanceof List) {
-                List<PeerOfConsensusStatus> tempList = JsonUtils.toJavaObjectList(
-                    JsonUtils.toJSONString(jsonArr.get(i)), PeerOfConsensusStatus.class);
-                if (tempList != null) {
-                    dataIsList.addAll(tempList);
-                } else {
-                    throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
-                }
-            }
-        }
-        return dataIsList;
+    private List<ViewInfo> getPeerOfConsensusStatus(int groupId) {
+        ConsensusInfo consensusStatus = getConsensusStatus(groupId);
+        return consensusStatus.getViewInfos();
+//        if (StringUtils.isBlank(consensusStatusJson)) {
+//            return Collections.emptyList();
+//        }
+//        List jsonArr = JsonUtils.toJavaObject(consensusStatusJson, List.class);
+//        if (jsonArr == null) {
+//            log.error("getPeerOfConsensusStatus error");
+//            throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
+//        }
+//        List<PeerOfConsensusStatus> dataIsList = new ArrayList<>();
+//        for (int i = 0; i < jsonArr.size(); i++ ) {
+//            if (jsonArr.get(i) instanceof List) {
+//                List<PeerOfConsensusStatus> tempList = ;
+//                if (tempList != null) {
+//                    dataIsList.addAll(tempList);
+//                } else {
+//                    throw new FrontException(ConstantCode.FAIL_PARSE_JSON);
+//                }
+//            }
+//        }
+//        return dataIsList;
     }
 
 
@@ -514,15 +517,13 @@ public class Web3ApiService {
     }
 
     // todo check status info same string
-    public String getConsensusStatus(int groupId) {
-        return getWeb3j(groupId)
-                .getConsensusStatus().getConsensusStatus().toString();
+    public ConsensusInfo getConsensusStatus(int groupId) {
+        return getWeb3j(groupId).getConsensusStatus().getConsensusStatus();
     }
 
     // todo check status info same string
-    public String getSyncStatus(int groupId) {
-        return getWeb3j(groupId)
-                .getSyncStatus().getSyncStatus().toString();
+    public SyncStatusInfo getSyncStatus(int groupId) {
+        return getWeb3j(groupId).getSyncStatus().getSyncStatus();
     }
 
     // todo check status info same string
@@ -757,7 +758,15 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j() {
-        return independentWeb3j;
+        Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList();
+        if (groupIdSet.isEmpty()) {
+            log.error("web3jMap is empty, groupList empty! please check your node status");
+            // get default web3j of integer max value
+            return rpcWeb3j;
+        }
+        // get random index to get web3j
+        Integer index = groupIdSet.iterator().next();
+        return bcosSDK.getClient(index);
     }
 
     /**

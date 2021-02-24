@@ -58,7 +58,7 @@ public class FrontCertService {
     // 国密加密证书
     private static final String gmEncryptCrtPath = "/conf/gmennode.crt";
 
-    private static final String frontSdkCaCrt = "ca.crt";
+    private static final String frontSdkCaCrt = "conf/ca.crt";
     private static final String frontSdkNodeCrt = "node.crt";
 
     @Autowired
