@@ -14,12 +14,13 @@
 
 package com.webank.webase.front.event;
 
+import com.webank.webase.front.channel.test.SpringTestBase;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class EventServiceTest extends BaseTest {
+public class EventServiceTestBase extends SpringTestBase {
 
     @Autowired
     private ContractEventInfoRepository eventInfoRepository;

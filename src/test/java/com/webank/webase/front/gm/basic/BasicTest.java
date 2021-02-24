@@ -17,6 +17,7 @@ package com.webank.webase.front.gm.basic;
 
 import static org.junit.Assert.assertTrue;
 
+import com.webank.webase.front.channel.test.TestBase;
 import java.io.IOException;
 import java.math.BigInteger;
 import org.fisco.bcos.sdk.abi.datatypes.Address;

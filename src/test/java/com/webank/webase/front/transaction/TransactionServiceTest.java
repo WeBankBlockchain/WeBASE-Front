@@ -19,6 +19,7 @@ package com.webank.webase.front.transaction;
 
 import com.webank.webase.front.Application;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
+import com.webank.webase.front.channel.test.SpringTestBase;
 import com.webank.webase.front.precompiledapi.PrecompiledCommonInfo;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import org.junit.Test;
@@ -29,9 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class TransactionServiceTest {
+public class TransactionServiceTest extends SpringTestBase {
 
     @Autowired
     TransService transService;

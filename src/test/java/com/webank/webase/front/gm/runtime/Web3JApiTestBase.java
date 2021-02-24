@@ -1,5 +1,6 @@
 package com.webank.webase.front.gm.runtime;
 
+import com.webank.webase.front.channel.test.SpringTestBase;
 import com.webank.webase.front.web3api.Web3ApiService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,7 @@ import java.math.BigInteger;
 
 import static org.junit.Assert.assertTrue;
 
-public class Web3jApiTest extends BaseTest {
+public class Web3JApiTestBase extends SpringTestBase {
 
     @Autowired
     private Web3ApiService web3ApiService;
