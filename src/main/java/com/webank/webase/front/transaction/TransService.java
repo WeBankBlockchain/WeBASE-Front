@@ -600,7 +600,7 @@ public class TransService {
             if (abiDefinition == null) {
                 throw new FrontException(IN_FUNCTION_ERROR);
             }
-            if (org.fisco.bcos.sdk.abi.tools.ContractAbiUtil.TYPE_FUNCTION.equals(abiDefinition.getType())
+            if (Constants.TYPE_FUNCTION.equals(abiDefinition.getType())
                     && functionName.equals(abiDefinition.getName())) {
                 result = abiDefinition;
                 break;

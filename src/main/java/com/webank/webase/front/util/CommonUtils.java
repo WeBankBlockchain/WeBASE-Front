@@ -45,18 +45,18 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 /**
  * CommonUtils.
- *
+ * todo use java sdk
  */
 @Slf4j
 public class CommonUtils {
