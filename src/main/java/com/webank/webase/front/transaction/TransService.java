@@ -352,12 +352,7 @@ public class TransService {
         String signDataStr = keyStoreService.getSignData(encodeInfo);
         log.info("get signdatastr cost time: {}",
                 Duration.between(startTime, Instant.now()).toMillis());
-        SignatureResult signData;
-        if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
-            signData = CommonUtils.stringToSM2SignatureData(signDataStr);
-        } else {
-            signData = CommonUtils.stringToECDSASignatureData(signDataStr);
-        }
+        SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, cryptoSuite.cryptoTypeConfig);
         byte[] signedMessage = encoderService.encode(extendedRawTransaction, signData);
         return Numeric.toHexString(signedMessage);
 

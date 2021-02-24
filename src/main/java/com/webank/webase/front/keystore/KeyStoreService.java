@@ -49,6 +49,7 @@ import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -279,14 +280,19 @@ public class KeyStoreService {
                 throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
             }
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+
             if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
-                SM2SignatureResult signData = CommonUtils.stringToSM2SignatureData(signDataStr);
+                SM2SignatureResult signData = (SM2SignatureResult) CommonUtils.stringToSignatureData(signDataStr,
+                    cryptoSuite.cryptoTypeConfig);
+                // SM2SignatureResult signData = CommonUtils.stringToSM2SignatureData(signDataStr);
                 rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
                 rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
                 rspMessageHashSignature.setV(new Byte("0"));
                 rspMessageHashSignature.setP(Numeric.toHexString(signData.getPub()));
             } else {
-                ECDSASignatureResult signData = CommonUtils.stringToECDSASignatureData(signDataStr);
+                ECDSASignatureResult signData = (ECDSASignatureResult) CommonUtils.stringToSignatureData(signDataStr,
+                    cryptoSuite.cryptoTypeConfig);
+                // ECDSASignatureResult signData = CommonUtils.stringToECDSASignatureData(signDataStr);
                 rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
                 rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
                 rspMessageHashSignature.setV(signData.getV());
