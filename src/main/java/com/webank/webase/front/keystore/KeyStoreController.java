@@ -20,29 +20,23 @@ import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.keystore.entity.*;
+import com.webank.webase.front.keystore.entity.KeyStoreInfo;
+import com.webank.webase.front.keystore.entity.MessageHashInfo;
+import com.webank.webase.front.keystore.entity.ReqImportPem;
+import com.webank.webase.front.keystore.entity.ReqImportWithSign;
+import com.webank.webase.front.keystore.entity.RspKeyStoreInfo;
+import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.PemUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Sign;
-import org.fisco.bcos.web3j.utils.Numeric;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import com.webank.webase.front.base.controller.BaseController;
-import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.enums.KeyTypes;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-
 import java.io.IOException;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -178,14 +172,8 @@ public class KeyStoreController extends BaseController {
             dataType = "MessageHashInfo")
     @PostMapping("/signMessageHash")
     public BaseResponse signMessageHash(@Valid @RequestBody MessageHashInfo req) {
-        String str = keyStoreService.getMessageHashSignData(req);
-        Sign.SignatureData signData = CommonUtils.stringToSignatureData(str);
-        RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
-        rspMessageHashSignature.setP(Numeric.toHexString(signData.getPub()));
-        rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
-        rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
-        rspMessageHashSignature.setV(signData.getV());
-        return new BaseResponse(ConstantCode.RET_SUCCESS,rspMessageHashSignature);
+        RspMessageHashSignature rspSignData = keyStoreService.getMessageHashSignData(req);
+        return new BaseResponse(ConstantCode.RET_SUCCESS, rspSignData);
 
     }
 

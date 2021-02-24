@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
 import org.fisco.bcos.sdk.model.PrecompiledConstant;
@@ -467,8 +468,7 @@ public class PrecompiledWithSignService {
         funcParams.add(abiInfo);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
-                        signUserId, PrecompiledTypes.CNS,
-                        org.fisco.bcos.web3j.precompile.cns.CNS.FUNC_INSERT, funcParams);
+                        signUserId, PrecompiledTypes.CNS, CNSPrecompiled.FUNC_INSERT, funcParams);
         return this.handleTransactionReceipt(receipt);
     }
 

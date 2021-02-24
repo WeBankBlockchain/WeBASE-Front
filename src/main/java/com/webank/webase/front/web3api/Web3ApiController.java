@@ -29,7 +29,9 @@ import java.util.List;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
@@ -217,13 +219,13 @@ public class Web3ApiController {
 
     @ApiOperation(value = "getConsensusStatus", notes = "get consensus status of group")
     @GetMapping("/consensusStatus")
-    public String getConsensusStatus(@PathVariable int groupId) {
+    public ConsensusInfo getConsensusStatus(@PathVariable int groupId) {
         return web3ApiService.getConsensusStatus(groupId);
     }
 
     @ApiOperation(value = "getSyncStatus", notes = "get sync status of group")
     @GetMapping("/syncStatus")
-    public String getSyncStatus(@PathVariable int groupId) {
+    public SyncStatusInfo getSyncStatus(@PathVariable int groupId) {
         return web3ApiService.getSyncStatus(groupId);
     }
 

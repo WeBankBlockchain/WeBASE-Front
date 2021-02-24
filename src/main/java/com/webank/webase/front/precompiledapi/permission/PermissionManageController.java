@@ -15,12 +15,18 @@
  */
 package com.webank.webase.front.precompiledapi.permission;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_CNS;
+import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_DEPLOY_AND_CREATE;
+import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_NODE;
+import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_PERMISSION;
+import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_SYS_CONFIG;
+import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_USERTABLE;
+
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.precompiledapi.entity.PermissionHandle;
 import com.webank.webase.front.precompiledapi.entity.PermissionState;
 import com.webank.webase.front.util.AddressUtils;
@@ -29,25 +35,23 @@ import com.webank.webase.front.util.pageutils.List2Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_PERMISSION;
-import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_DEPLOY_AND_CREATE;
-import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_USERTABLE;
-import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_NODE;
-import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_SYS_CONFIG;
-import static com.webank.webase.front.util.PrecompiledUtils.PERMISSION_TYPE_CNS;
+import javax.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 
 /**

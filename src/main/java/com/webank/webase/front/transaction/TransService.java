@@ -77,6 +77,7 @@ import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
 import org.fisco.bcos.sdk.transaction.model.CommonConstant;
@@ -211,6 +212,7 @@ public class TransService {
             String signMsg =
                     signMessage(groupId, web3j, signUserId, contractAddress, encodedFunction);
             Instant nodeStartTime = Instant.now();
+            TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
             // send transaction
             final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
             TransactionReceipt responseReceipt;
@@ -218,7 +220,8 @@ public class TransService {
             try {
                 responseReceipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
                 // cover null message
-                String receiptMsg = FrontUtils.handleReceiptMsg(responseReceipt);
+                // String receiptMsg = FrontUtils.handleReceiptMsg(transactionReceipt);
+                String receiptMsg = txDecoder.decodeReceiptStatus(responseReceipt).getReceiptMessages();
                 responseReceipt.setMessage(receiptMsg);
                 response = responseReceipt;
             } catch (InterruptedException | ExecutionException e) {
@@ -297,13 +300,13 @@ public class TransService {
      * @param commonContract contract
      */
     public static TransactionReceipt execTransaction(Function function,
-            CommonContract commonContract) throws FrontException {
-        TransactionReceipt transactionReceipt = null;
+            CommonContract commonContract, TransactionDecoderService txDecoder) throws FrontException {
         Instant startTime = Instant.now();
         log.info("execTransaction start startTime:{}", startTime.toEpochMilli());
-        transactionReceipt = commonContract.execTransaction(function);
+        TransactionReceipt transactionReceipt = commonContract.execTransaction(function);
         // cover null message through statusCode
-        String receiptMsg = FrontUtils.handleReceiptMsg(transactionReceipt);
+        // String receiptMsg = FrontUtils.handleReceiptMsg(transactionReceipt);
+        String receiptMsg = txDecoder.decodeReceiptStatus(transactionReceipt).getReceiptMessages();
         transactionReceipt.setMessage(receiptMsg);
         log.info("execTransaction end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
@@ -349,8 +352,12 @@ public class TransService {
         String signDataStr = keyStoreService.getSignData(encodeInfo);
         log.info("get signdatastr cost time: {}",
                 Duration.between(startTime, Instant.now()).toMillis());
-
-        SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, cryptoSuite.cryptoTypeConfig);
+        SignatureResult signData;
+        if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+            signData = CommonUtils.stringToSM2SignatureData(signDataStr);
+        } else {
+            signData = CommonUtils.stringToECDSASignatureData(signDataStr);
+        }
         byte[] signedMessage = encoderService.encode(extendedRawTransaction, signData);
         return Numeric.toHexString(signedMessage);
 
@@ -527,7 +534,8 @@ public class TransService {
         CryptoKeyPair credentials = getCredentials(contractFunction.getConstant(), req.getUser());
         CommonContract commonContract =
                 CommonContract.load(address, web3j, credentials);
-
+        // tx decoder
+        TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
         // request
         Object result;
         Function function = new Function(cof.getFuncName(), contractFunction.getFinalInputs(),
@@ -535,7 +543,7 @@ public class TransService {
         if (contractFunction.getConstant()) {
             result = execCall(contractFunction.getOutputList(), function, commonContract);
         } else {
-            result = execTransaction(function, commonContract);
+            result = execTransaction(function, commonContract, txDecoder);
         }
 
         log.info("transHandle end. name:{} func:{} result:{}", cof.getContractName(),

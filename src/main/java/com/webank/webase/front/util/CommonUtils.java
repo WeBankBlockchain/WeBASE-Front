@@ -72,23 +72,29 @@ public class CommonUtils {
      * @param signatureData signatureData
      * @return
      */
-    public static SignatureResult stringToSignatureData(String signatureData, int encryptType) {
+    public static SM2SignatureResult stringToSM2SignatureData(String signatureData) {
+        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+        // 从1开始，因为此处byteArr第0位是v； 注: 在java sdk中, v放在了最后一位
+        byte[] signR = new byte[32];
+        System.arraycopy(byteArr, 1, signR, 0, signR.length);
+        byte[] signS = new byte[32];
+        System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
+        byte[] pub = new byte[64];
+        System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
+        // return new SignatureData(byteArr[0], signR, signS, pub);
+        return new SM2SignatureResult(pub, signR, signS);
+    }
+
+    public static ECDSASignatureResult stringToECDSASignatureData(String signatureData) {
         byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
         // 从1开始，因为0是v；注：在javasdk中v放在了最后一位
         byte[] signR = new byte[32];
         System.arraycopy(byteArr, 1, signR, 0, signR.length);
         byte[] signS = new byte[32];
         System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
-        if (encryptType == 1) {
-            byte[] pub = new byte[64];
-            System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
-            // return new SignatureData(byteArr[0], signR, signS, pub);
-            return new SM2SignatureResult(pub, signR, signS);
-        } else {
-            return new ECDSASignatureResult(byteArr[0], signR, signS);
-        }
+        // return new SignatureData(byteArr[0], signR, signS, pub);
+        return new ECDSASignatureResult(byteArr[0], signR, signS);
     }
-
     /**
      * signatureDataToString. 19/12/24 support guomi： add byte[] pub in signatureData
      * @param signatureData signatureData

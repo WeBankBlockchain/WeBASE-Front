@@ -29,8 +29,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.web3j.protocol.channel.StatusCode;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -156,13 +154,13 @@ public class FrontUtils {
      * else, return original message
      * @return
      */
-    public static String handleReceiptMsg(TransactionReceipt receipt) {
-        if (receipt.getMessage() == null) {
-            return StatusCode.getStatusMessage(receipt.getStatus());
-        } else {
-            return receipt.getMessage();
-        }
-    }
+//    public static String handleReceiptMsg(TransactionReceipt receipt) {
+//        if (receipt.getMessage() == null) {
+//            return StatusCode.getStatusMessage(receipt.getStatus());
+//        } else {
+//            return receipt.getMessage();
+//        }
+//    }
 
     public static HttpHeaders headers(String fileName) {
         HttpHeaders httpHeaders = new HttpHeaders();

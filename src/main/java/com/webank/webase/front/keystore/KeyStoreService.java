@@ -22,6 +22,7 @@ import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.MessageHashInfo;
+import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
 import com.webank.webase.front.util.AesUtils;
@@ -46,6 +47,10 @@ import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
@@ -248,11 +253,10 @@ public class KeyStoreService {
     /**
      * getMessageHashSignData from sign service. (webase-sign)
      * @param params params
-     * @return
+     * @return RspMessageHashSignature
      */
-    public String getMessageHashSignData(MessageHashInfo params) throws FrontException {
+    public RspMessageHashSignature getMessageHashSignData(MessageHashInfo params) throws FrontException {
         try {
-            SignInfo signInfo = new SignInfo();
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             log.info("getSignData url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
@@ -261,6 +265,7 @@ public class KeyStoreService {
             BaseResponse response =
                     restTemplate.postForObject(url, formEntity, BaseResponse.class);
             log.info("getSignData response:{}", JsonUtils.toJSONString(response));
+            SignInfo signInfo = new SignInfo();
             if (response.getCode() == 0) {
                 signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
             } else {
@@ -273,7 +278,21 @@ public class KeyStoreService {
                 log.warn("get sign data error and get blank string.");
                 throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
             }
-            return signDataStr;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+            if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+                SM2SignatureResult signData = CommonUtils.stringToSM2SignatureData(signDataStr);
+                rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
+                rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
+                rspMessageHashSignature.setV(new Byte("0"));
+                rspMessageHashSignature.setP(Numeric.toHexString(signData.getPub()));
+            } else {
+                ECDSASignatureResult signData = CommonUtils.stringToECDSASignatureData(signDataStr);
+                rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
+                rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
+                rspMessageHashSignature.setV(signData.getV());
+                rspMessageHashSignature.setP(null);
+            }
+            return rspMessageHashSignature;
         } catch (ResourceAccessException ex) {
             log.error("getSignData fail restTemplateExchange", ex);
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
