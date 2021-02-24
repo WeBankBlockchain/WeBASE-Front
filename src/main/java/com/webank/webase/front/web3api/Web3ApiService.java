@@ -15,12 +15,10 @@ package com.webank.webase.front.web3api;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.NodeConfig;
-import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
@@ -66,20 +64,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class Web3ApiService {
 
-//    @Autowired
-//    Map<Integer, Web3j> web3jMap;
     @Autowired
-    NodeConfig nodeConfig;
+    private NodeConfig nodeConfig;
     @Autowired
-    ThreadPoolTaskExecutor threadPoolTaskExecutor;
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
     @Autowired
-    Constants constants;
+    private Constants constants;
     @Autowired
-    BcosSDK bcosSDK;
+    private BcosSDK bcosSDK;
     @Autowired
-    Client independentWeb3j;
-    @Autowired
-    NewBlockEventCallback newBlockEventCallback;
+    private Client independentWeb3j;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
