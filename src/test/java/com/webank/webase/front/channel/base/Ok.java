@@ -16,15 +16,24 @@
 //package com.webank.webase.front.channel.test;
 //
 //import io.reactivex.Flowable;
+//import java.rmi.server.RemoteCall;
 //import org.fisco.bcos.channel.client.TransactionSucCallback;
+//import org.fisco.bcos.sdk.abi.TypeReference;
+//import org.fisco.bcos.sdk.abi.datatypes.Event;
+//import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
+//import org.fisco.bcos.sdk.client.Client;
+//import org.fisco.bcos.sdk.contract.Contract;
+//import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+//import org.fisco.bcos.sdk.model.TransactionReceipt;
+//import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
 //import org.fisco.bcos.web3j.abi.EventEncoder;
 //import org.fisco.bcos.web3j.abi.TypeReference;
 //import org.fisco.bcos.web3j.abi.datatypes.Event;
 //import org.fisco.bcos.web3j.abi.datatypes.Function;
 //import org.fisco.bcos.web3j.abi.datatypes.Type;
 //import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
-//import org.fisco.bcos.web3j.crypto.Credentials;
-//import org.fisco.bcos.web3j.protocol.Web3j;
+//import org.fisco.bcos.web3j.crypto.CryptoKeyPair;
+//import org.fisco.bcos.web3j.protocol.Client;
 //import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameter;
 //import org.fisco.bcos.web3j.protocol.core.RemoteCall;
 //import org.fisco.bcos.web3j.protocol.core.methods.request.BcosFilter;
@@ -65,37 +74,18 @@
 //  @Deprecated
 //  protected Ok(
 //      String contractAddress,
-//      Web3j web3j,
-//      Credentials credentials,
-//      BigInteger gasPrice,
-//      BigInteger gasLimit) {
-//    super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
-//  }
-//
-//  protected Ok(
-//      String contractAddress,
-//      Web3j web3j,
-//      Credentials credentials,
-//      ContractGasProvider contractGasProvider) {
-//    super(BINARY, contractAddress, web3j, credentials, contractGasProvider);
+//      Client web3j,
+//      CryptoKeyPair credentials) {
+//    super(BINARY, contractAddress, web3j, credentials);
 //  }
 //
 //  @Deprecated
 //  protected Ok(
 //      String contractAddress,
-//      Web3j web3j,
-//      TransactionManager transactionManager,
-//      BigInteger gasPrice,
-//      BigInteger gasLimit) {
-//    super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
-//  }
-//
-//  protected Ok(
-//      String contractAddress,
-//      Web3j web3j,
-//      TransactionManager transactionManager,
-//      ContractGasProvider contractGasProvider) {
-//    super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
+//      Client web3j,
+//      CryptoKeyPair credentials,
+//      TransactionProcessor transactionProcessor) {
+//    super(BINARY, contractAddress, web3j, credentials, transactionProcessor);
 //  }
 //
 //  public RemoteCall<TransactionReceipt> trans(BigInteger num) {
@@ -167,8 +157,8 @@
 //  @Deprecated
 //  public static Ok load(
 //      String contractAddress,
-//      Web3j web3j,
-//      Credentials credentials,
+//      Client web3j,
+//      CryptoKeyPair credentials,
 //      BigInteger gasPrice,
 //      BigInteger gasLimit) {
 //    return new Ok(contractAddress, web3j, credentials, gasPrice, gasLimit);
@@ -177,7 +167,7 @@
 //  @Deprecated
 //  public static Ok load(
 //      String contractAddress,
-//      Web3j web3j,
+//      Client web3j,
 //      TransactionManager transactionManager,
 //      BigInteger gasPrice,
 //      BigInteger gasLimit) {
@@ -186,39 +176,39 @@
 //
 //  public static Ok load(
 //      String contractAddress,
-//      Web3j web3j,
-//      Credentials credentials,
+//      Client web3j,
+//      CryptoKeyPair credentials,
 //      ContractGasProvider contractGasProvider) {
 //    return new Ok(contractAddress, web3j, credentials, contractGasProvider);
 //  }
 //
 //  public static Ok load(
 //      String contractAddress,
-//      Web3j web3j,
+//      Client web3j,
 //      TransactionManager transactionManager,
 //      ContractGasProvider contractGasProvider) {
 //    return new Ok(contractAddress, web3j, transactionManager, contractGasProvider);
 //  }
 //
 //  public static RemoteCall<Ok> deploy(
-//          Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
+//          Client web3j, CryptoKeyPair credentials, ContractGasProvider contractGasProvider) {
 //    return deployRemoteCall(Ok.class, web3j, credentials, contractGasProvider, BINARY, "");
 //  }
 //
 //  public static RemoteCall<Ok> deploy(
-//          Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+//          Client web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
 //    return deployRemoteCall(Ok.class, web3j, transactionManager, contractGasProvider, BINARY, "");
 //  }
 //
 //  @Deprecated
 //  public static RemoteCall<Ok> deploy(
-//          Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
+//          Client web3j, CryptoKeyPair credentials, BigInteger gasPrice, BigInteger gasLimit) {
 //    return deployRemoteCall(Ok.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
 //  }
 //
 //  @Deprecated
 //  public static RemoteCall<Ok> deploy(
-//      Web3j web3j,
+//      Client web3j,
 //      TransactionManager transactionManager,
 //      BigInteger gasPrice,
 //      BigInteger gasLimit) {
