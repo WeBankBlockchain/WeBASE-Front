@@ -1,6 +1,7 @@
 [cryptoMaterial]
 
 certPath = "conf"                           # The certification path
+                                            # when running UT, put certs in src/test/java/resources/conf
 
 # The following configurations take the certPath by default if commented
 # caCert = "conf/ca.crt"                    # CA cert file path
