@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.gm.runtime;
+package com.webank.webase.front.keystore;
 
 
 import com.webank.webase.front.base.properties.Constants;

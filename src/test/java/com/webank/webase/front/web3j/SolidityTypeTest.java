@@ -36,11 +36,13 @@
 //
 //import java.math.BigInteger;
 //import org.bouncycastle.util.encoders.Hex;
+//import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
 //import org.fisco.bcos.web3j.solidity.SolidityType;
 //import org.junit.Test;
 //
 ///** Created by Maximilian Schmidt on 25.09.2018. */
 //public class SolidityTypeTest {
+//
 //  @Test
 //  public void ensureUnsignedInteger_isDecodedWithCorrectSignum() {
 //    byte[] bigNumberByteArray = {
@@ -48,6 +50,7 @@
 //      43, 11, -17, -52, 0, 3, -65, 14, -67, -40, 65, 119
 //    };
 //    SolidityType testObject = new SolidityType.UnsignedIntType("uint256");
+//  //  Uint256 uint256 = new Uint256(bigNumberByteArray);
 //    Object decode = testObject.decode(bigNumberByteArray);
 //    assertEquals(decode.getClass(), BigInteger.class);
 //    BigInteger actualBigInteger = (BigInteger) decode;
