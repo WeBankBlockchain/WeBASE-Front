@@ -13,14 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.channel.test;
+package com.webank.webase.front.channel.base;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigInteger;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.request.Transaction;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransaction;
+import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
 import org.fisco.bcos.sdk.client.protocol.response.GroupList;
 import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -28,79 +36,72 @@ public class BasicTest extends TestBase {
 
   @Ignore
   @Test
-  public void pbftViewTest() throws Exception {
+  public void pbftViewTest() {
     int i = web3j.getPbftView().getPbftView().intValue();
     System.out.println(i);
     assertNotNull(i > 0);
   }
 
   @Test
-  public void consensusStatusTest() throws Exception {
+  public void consensusStatusTest() {
     System.out.println(web3j.getConsensusStatus().getConsensusStatus());
     assertNotNull(web3j.getConsensusStatus().getConsensusStatus());
   }
 
-//  @Test
-//  public void getBlockNumber() throws Exception {
-//    BcosBlock bcosBlock = web3j.getBlockByNumber(DefaultBlockParameter.valueOf("latest"),true).send();
-//    System.out.println(bcosBlock.getBlock());
-//    Block block = bcosBlock.getBlock();
-//    System.out.println(bcosBlock.getBlock().getNonce());
-//    System.out.println(web3j.getBlockByNumber(DefaultBlockParameter.valueOf("latest"),true).send());
-//    assertNotNull(web3j.getConsensusStatus().sendForReturnString());
-//  }
+  @Test
+  public void getBlockByNumber() {
+    BigInteger blockNumber = web3j.getBlockNumber().getBlockNumber();
+    BcosBlock bcosBlock = web3j.getBlockByNumber(blockNumber,true);
+    System.out.println(bcosBlock.getBlock());
+  }
 
   @Test
-  public void syncTest() throws Exception {
+  public void syncTest() {
     System.out.println(web3j.getSyncStatus().getSyncStatus());
     assertNotNull(web3j.getSyncStatus().getSyncStatus());
   }
 
-//  @Test
-//  public void versionTest() throws Exception {
-//    String web3ClientVersion = web3j.getNodeVersion().sendForReturnString();
-//    System.out.println(web3ClientVersion);
-//    assertNotNull(web3ClientVersion);
-//  }
+  @Test
+  public void versionTest() {
+    ClientVersion web3ClientVersion = web3j.getNodeVersion().getNodeVersion();
+    System.out.println(web3ClientVersion);
+    assertNotNull(web3ClientVersion);
+  }
 
   // getPeers
   @Ignore
   @Test
-  public void peersTest() throws Exception {
+  public void peersTest() {
     Peers ethPeers = web3j.getPeers();
     System.out.println(ethPeers.getPeers().get(0).getNodeID());
     assertNotNull(ethPeers);
   }
 
   @Test
-  public void groupPeersTest() throws Exception {
+  public void groupPeersTest() {
     GroupPeers groupPeers = web3j.getGroupPeers();
     groupPeers.getGroupPeers().forEach(System.out::println);
     assertNotNull(groupPeers.getResult());
   }
 
   @Test
-  public void groupListTest() throws Exception {
+  public void groupListTest() {
     GroupList groupList = web3j.getGroupList();
     groupList.getGroupList().stream().forEach(System.out::println);
     assertTrue((groupList.getGroupList().size() > 0));
   }
 
-//  @Ignore
+  @Ignore
+  @Test
+  public void getTransactionByBlockNumberAndIndexTest() {
+    BigInteger blockNumber = web3j.getBlockNumber().getBlockNumber();
+    JsonTransactionResponse transaction =
+        web3j.getTransactionByBlockNumberAndIndex(blockNumber, new BigInteger("0")).getTransaction().get();
+    System.out.println(transaction.calculateHash(web3j.getCryptoSuite()));
+  }
+
 //  @Test
-//  public void getTransactionByBlockNumberAndIndexTest() throws IOException {
-//    Transaction transaction =
-//        web3j
-//            .getTransactionByBlockNumberAndIndex(
-//                DefaultBlockParameter.valueOf(new BigInteger("1")), new BigInteger("0"))
-//            .send()
-//            .getTransaction()
-//            .get();
-//    assertTrue(transaction.get().intValue() == 1);
-//  }
-//
-//  @Test
-//  public void basicTest() throws Exception {
+//  public void basicTest() {
 //    try {
 //      testDeployContract(web3j, credentials);
 //    } catch (Exception e) {
@@ -109,7 +110,7 @@ public class BasicTest extends TestBase {
 //    }
 //  }
 //
-//  private void testDeployContract(Web3j web3j, Credentials credentials) throws Exception {
+//  private void testDeployContract(Web3j web3j, Credentials credentials) {
 //    Ok okDemo = Ok.deploy(web3j, credentials, gasPrice, gasLimit).send();
 //    if (okDemo != null) {
 //      System.out.println(

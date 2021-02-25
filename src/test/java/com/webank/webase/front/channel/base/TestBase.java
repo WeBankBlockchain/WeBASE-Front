@@ -13,56 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.channel.test;
+package com.webank.webase.front.channel.base;
 
 import java.math.BigInteger;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class TestBase {
-  public static ApplicationContext context = null;
-  // 初始化交易签名私钥
-//  public static  Credentials credentials =
-//      Credentials.create("b83261efa42895c38c6c2364ca878f43e77f3cddbc922bf57d0d48070f79feb6");
+  protected static BcosSDK bcosSDK;
   protected static Client web3j;
-  public static BigInteger gasPrice = new BigInteger("300000000");
-  public static BigInteger gasLimit = new BigInteger("300000000");
+  protected static CryptoSuite cryptoSuite;
+  protected static CryptoKeyPair cryptoKeyPair;
+  protected static BigInteger chainId = new BigInteger("1");
+  protected static Integer groupId = 1;
 
   protected static String address;
   protected static BigInteger blockNumber;
   protected static String blockHash;
-  protected static String txHash;
 
   @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    // 获取spring配置文件，生成上下文
-    context = new ClassPathXmlApplicationContext("applicationContext.xml");
-    //   ((ClassPathXmlApplicationContext) context).start();
+  public static void setUpBeforeClass() {
+    // 绝对路径
+    String configFile = "D:\\projects\\v1.4.3\\new\\WeBASE-Front\\src\\test\\resources\\config-example.toml";
+    bcosSDK =  BcosSDK.build(configFile);
+    web3j = bcosSDK.getClient(groupId);
+    cryptoSuite = web3j.getCryptoSuite();
+    cryptoKeyPair = web3j.getCryptoSuite().createKeyPair("71f1479d9051e8d6b141a3b3ef9c01a7756da823a0af280c6bf62d18ee0cc978");
 
-//    Service service = context.getBean(Service.class);
-//    service.run();
-//
-//    System.out.println("start...");
-//    System.out.println("===================================================================");
-//
-//    ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-//    channelEthereumService.setChannelService(service);
-
-//    web3j = Web3j.build(channelEthereumService, service.getGroupId());
-    // EthBlockNumber ethBlockNumber = web3.ethBlockNumber().send();
-
-//    Ok ok = Ok.deploy(web3j, credentials, new StaticGasProvider(gasPrice, gasLimit)).send();
-//    address = ok.getContractAddress();
-//    blockNumber = ok.getTransactionReceipt().get().getBlockNumber();
-//    blockHash = ok.getTransactionReceipt().get().getBlockHash();
-//    txHash = ok.getTransactionReceipt().get().getTransactionHash();
+    //todo deploy ok.sol
+    blockHash = web3j.getBlockHashByNumber(blockNumber).getBlockHashByNumber();
   }
 
-  @AfterClass
-  public static void setUpAfterClass() throws Exception {
-    ((ClassPathXmlApplicationContext) context).destroy();
-  }
 }
