@@ -336,12 +336,12 @@ public class TransService {
         // to encode raw tx
         TransactionEncoderService encoderService = new TransactionEncoderService(cryptoSuite);
         String chainId = Constants.chainId;
-        RawTransaction extendedRawTransaction =
+        RawTransaction rawTransaction =
             RawTransaction.createTransaction(randomid, Constants.GAS_PRICE,
                 Constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, data,
                 new BigInteger(chainId), BigInteger.valueOf(groupId), "");
 
-        byte[] encodedTransaction = encoderService.encode(extendedRawTransaction, null);
+        byte[] encodedTransaction = encoderService.encode(rawTransaction, null);
         String encodedDataStr = Numeric.toHexString(encodedTransaction);
 
         EncodeInfo encodeInfo = new EncodeInfo();
@@ -353,7 +353,7 @@ public class TransService {
         log.info("get signdatastr cost time: {}",
                 Duration.between(startTime, Instant.now()).toMillis());
         SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, cryptoSuite.cryptoTypeConfig);
-        byte[] signedMessage = encoderService.encode(extendedRawTransaction, signData);
+        byte[] signedMessage = encoderService.encode(rawTransaction, signData);
         return Numeric.toHexString(signedMessage);
 
     }
