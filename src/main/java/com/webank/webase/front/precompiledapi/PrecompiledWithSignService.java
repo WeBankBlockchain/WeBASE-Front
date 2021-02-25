@@ -234,7 +234,6 @@ public class PrecompiledWithSignService {
         return flag;
     }
 
-    //todo 复制控制台的格式化接工具类
     /**
      * CRUD: create table through webase-sign
      */
