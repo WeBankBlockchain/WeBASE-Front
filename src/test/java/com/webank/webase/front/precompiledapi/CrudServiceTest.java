@@ -16,22 +16,22 @@
 package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.channel.test.TestBase;
+import com.webank.webase.front.channel.base.TestBase;
 import com.webank.webase.front.precompiledapi.crud.CRUDParseUtils;
 import com.webank.webase.front.precompiledapi.crud.Table;
-import java.security.KeyPair;
+import com.webank.webase.front.util.JsonUtils;
 import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.ConditionOperator;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.model.PrecompiledConstant;
+import org.fisco.bcos.sdk.model.RetCode;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.*;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -58,105 +58,99 @@ public class CrudServiceTest extends TestBase {
      */
     @Test
     public void testCrud() throws Exception {
-//        tableName = "t_demo3";
-//        table = new Table();
-//        entry = new Entry();
-//
-//        // 链管理员私钥加载
-//        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-//        PEMKeyStore pem = context.getBean(PEMKeyStore.class);
-//        KeyPair pemKeyPair = pem.getKeyPair();
-//        CryptoKeyPair credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
-//
-//        TableCRUDService crudService = new TableCRUDService(web3j, credentialsPEM);
-//
-//        // sql转换
-//        CRUDParseUtils.parseCreateTable(sqlCreate, table);
-//        CRUDParseUtils.checkTableParams(table);
-////        int createRes = crudService.createTable(table);
-////        System.out.println(createRes);
-////        assertTrue(createRes == 0);
-//
-//        // desc
-//        System.out.println("tablename: " + crudService.desc(tableName).getTableName());
-//        assertNotNull(crudService.desc(tableName).getTableName());
-//
-//        // Insert
-//        entry = table.getEntry();
-//        CRUDParseUtils.parseInsert(sqlInsert, table, entry);
-//        String tableName1 = table.getTableName();
-//        Table descTable = crudService.desc(tableName1);
-//        String keyName = descTable.getKey();
-//        String fields = keyName + "," + descTable.getValueFields();
-//        List<String> fieldsList = Arrays.asList(fields.split(","));
-//        Set<String> entryFields = entry.getFields().keySet();
-//
-//        Entry entryValue = table.getEntry();
-//        for (int i = 0; i < entry.getFields().size(); i++) {
-//            for (String entryField : entryFields) {
-//                if ((i + "").equals(entryField)) {
-//                    entryValue.put(fieldsList.get(i), entry.get(i + ""));
-//                    if (keyName.equals(fieldsList.get(i))) {
-//                        table.setKey(entry.get(i + ""));
-//                    }
-//                }
-//            }
-//        }
-//        entry = entryValue;
-//        CRUDParseUtils.checkUserTableParam(entry, descTable);
-//        int insertResult = crudService.insert(table, entry);
-//        System.out.println("insertResult " + insertResult);
-//        assertTrue(insertResult== 0 || insertResult == 1);
-//
-//        //select
-//        condition = table.getCondition();
-//        List<String> selectColumns = new ArrayList<>();
-//        CRUDParseUtils.parseSelect(sqlSelect, table, condition, selectColumns);
-//        descTable = crudService.desc(table.getTableName());
-//        table.setKey(descTable.getKey());
-//        handleKey(table, condition);
-//        fields = descTable.getKey() + "," + descTable.getValueFields();
-//        fieldsList = Arrays.asList(fields.split(","));
-//
-//        List<Map<String, String>> result = crudService.select(table, condition);
-//        System.out.println("table select: " + result.size());
-//        assertTrue(result.size() > 0);
-//
-//        // update
-//        entry = table.getEntry();
-//        condition = table.getCondition();
-//        CRUDParseUtils.parseUpdate(sqlUpdate, table, entry, condition);
-//        String tableName = table.getTableName();
-//        descTable = crudService.desc(tableName);
-//        keyName = descTable.getKey();
-//        table.setKey(descTable.getKey());
-//        handleKey(table, condition);
-//        Set<String> conditonFields = condition.getConditions().keySet();
-//        Set<String> allFields = new HashSet<>();
-//        allFields.addAll(entryFields);
-//        allFields.addAll(conditonFields);
-//        CRUDParseUtils.checkUserTableParam(entry, descTable);
-//        int updateResult = crudService.update(table, entry, condition);
-//        System.out.println("updateResult: " + updateResult);
+        tableName = "t_demo3";
+        table = new Table();
+        entry = new Entry();
+        
+        TableCRUDService crudService = new TableCRUDService(web3j, cryptoKeyPair);
+
+        // sql转换
+        CRUDParseUtils.parseCreateTable(sqlCreate, table);
+        CRUDParseUtils.checkTableParams(table);
+        RetCode createRes = crudService.createTable(table.getTableName(), table.getKey(), 
+            JsonUtils.toJavaObject(table.getValueFields(), List.class));
+        System.out.println(createRes);
+        assertEquals(0, createRes);
+
+        // desc
+        List<Map<String, String>> descRes = crudService.desc(tableName);
+        String descKeyName = descRes.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
+        String descFields = descRes.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME);
+        
+        System.out.println("tablename: " + descRes);
+        assertNotNull(descRes);
+        
+        // Insert
+        entry = table.getEntry();
+        CRUDParseUtils.parseInsert(sqlInsert, table, entry);
+        String tableName1 = table.getTableName();
+        List<String> fieldsList = Arrays.asList(descFields.split(","));
+        Set<String> entryFields = entry.getFieldNameToValue().keySet();
+
+        Entry entryValue = table.getEntry();
+        for (int i = 0; i < entry.getFieldNameToValue().size(); i++) {
+            for (String entryField : entryFields) {
+                if ((i + "").equals(entryField)) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put(fieldsList.get(i), entry.getFieldNameToValue().get(i + ""));
+                    entryValue.setFieldNameToValue(map);
+                    if (descKeyName.equals(fieldsList.get(i))) {
+                        table.setKey(entry.getFieldNameToValue().get(i + ""));
+                    }
+                }
+            }
+        }
+        entry = entryValue;
+        //CRUDParseUtils.checkUserTableParam(entry, );
+        RetCode insertResult = crudService.insert(table.getTableName(), table.getKey(), entry);
+        System.out.println("insertResult " + insertResult);
+
+        //select
+        condition = table.getCondition();
+        List<String> selectColumns = new ArrayList<>();
+        CRUDParseUtils.parseSelect(sqlSelect, table, condition, selectColumns);
+        table.setKey(descKeyName);
+        handleKey(table, condition);
+        descFields = descKeyName + "," + descFields;
+        fieldsList = Arrays.asList(descFields.split(","));
+
+        List<Map<String, String>> result = crudService.select(table.getTableName(), table.getKey(), condition);
+        System.out.println("table select: " + result.size());
+        assertTrue(result.size() > 0);
+
+        // update
+        entry = table.getEntry();
+        condition = table.getCondition();
+        CRUDParseUtils.parseUpdate(sqlUpdate, table, entry, condition);
+        String tableName = table.getTableName();
+
+        table.setKey(descKeyName);
+        handleKey(table, condition);
+        Set<String> conditonFields = condition.getConditions().keySet();
+        Set<String> allFields = new HashSet<>();
+        allFields.addAll(entryFields);
+        allFields.addAll(conditonFields);
+        //CRUDParseUtils.checkUserTableParam(entry, descTable);
+        RetCode updateResult = crudService.update(table.getTableName(), table.getKey(), entry, condition);
+        System.out.println("updateResult: " + updateResult);
 //        assertTrue(updateResult >= 0);
-////        System.out.println(crudService.select(table, condition));
-////        assertNotNull(crudService.select(table, condition));
-//        condition = table.getCondition();
-//        CRUDParseUtils.parseRemove(sqlRemove, table, condition);
-//        // remove
-//        int removeResult = crudService.remove(table, condition);
-//        System.out.println("removeResult " + removeResult);
+        condition = table.getCondition();
+        CRUDParseUtils.parseRemove(sqlRemove, table, condition);
+        // remove
+        RetCode removeResult = crudService.remove(table.getTableName(), table.getKey(), condition);
+        System.out.println("removeResult " + removeResult);
 //        assertTrue(removeResult >= 0 );
     }
-    private void handleKey(Table table, Condition condition) throws Exception {
 
-        String keyName = table.getKey();
+    private void handleKey(Table table, Condition condition) {
+
+        String descKeyName = table.getKey();
         String keyValue = "";
-        Map<ConditionOperator, String> keyMap = condition.getConditions().get(keyName);
+        Map<ConditionOperator, String> keyMap = condition.getConditions().get(descKeyName);
         if (keyMap == null) {
             throw new FrontException(
                     "Please provide a equal condition for the key field '"
-                            + keyName
+                            + descKeyName
                             + "' in where clause.");
         } else {
             Set<ConditionOperator> keySet = keyMap.keySet();
@@ -164,7 +158,7 @@ public class CrudServiceTest extends TestBase {
                 if (enumOP != ConditionOperator.eq) {
                     throw new FrontException(
                             "Please provide a equal condition for the key field '"
-                                    + keyName
+                                    + descKeyName
                                     + "' in where clause.");
                 } else {
                     keyValue = keyMap.get(enumOP);
