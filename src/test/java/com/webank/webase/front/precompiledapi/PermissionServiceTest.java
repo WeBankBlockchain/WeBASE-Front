@@ -18,7 +18,7 @@ package com.webank.webase.front.precompiledapi;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import com.webank.webase.front.channel.base.TestBase;
+import com.webank.webase.front.base.TestBase;
 import java.util.List;
 import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionService;

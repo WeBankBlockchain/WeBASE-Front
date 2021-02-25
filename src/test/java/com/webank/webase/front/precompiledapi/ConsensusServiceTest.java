@@ -17,7 +17,7 @@ package com.webank.webase.front.precompiledapi;
 
 import static org.junit.Assert.assertNotNull;
 
-import com.webank.webase.front.channel.base.TestBase;
+import com.webank.webase.front.base.TestBase;
 import org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusService;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.junit.Test;

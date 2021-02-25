@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.webank.webase.front.channel.base;
+package com.webank.webase.front.base;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.client.protocol.request.Transaction;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransaction;
-import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
 import org.fisco.bcos.sdk.client.protocol.response.GroupList;
 import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;

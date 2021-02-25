@@ -16,7 +16,7 @@
 package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.channel.base.TestBase;
+import com.webank.webase.front.base.TestBase;
 import com.webank.webase.front.precompiledapi.crud.CRUDParseUtils;
 import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.util.JsonUtils;
