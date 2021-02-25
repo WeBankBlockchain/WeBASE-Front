@@ -13,7 +13,7 @@
  */
 package com.webank.webase.front.web3j;
 
-import com.webank.webase.front.channel.test.SpringTestBase;
+import com.webank.webase.front.channel.base.SpringTestBase;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.ReqGroupStatus;

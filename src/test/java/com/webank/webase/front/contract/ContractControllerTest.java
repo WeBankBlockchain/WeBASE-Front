@@ -13,7 +13,7 @@
  */
 package com.webank.webase.front.contract;
 
-import com.webank.webase.front.channel.test.SpringTestBase;
+import com.webank.webase.front.channel.base.SpringTestBase;
 import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
 import com.webank.webase.front.contract.entity.ReqPageContract;

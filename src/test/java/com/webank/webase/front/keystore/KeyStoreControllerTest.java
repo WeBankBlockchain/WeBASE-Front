@@ -13,7 +13,7 @@
  */
 package com.webank.webase.front.keystore;
 
-import com.webank.webase.front.channel.test.SpringTestBase;
+import com.webank.webase.front.channel.base.SpringTestBase;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

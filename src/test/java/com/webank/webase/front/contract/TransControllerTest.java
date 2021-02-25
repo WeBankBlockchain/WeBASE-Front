@@ -14,7 +14,7 @@
 package com.webank.webase.front.contract;
 
 
-import com.webank.webase.front.channel.test.SpringTestBase;
+import com.webank.webase.front.channel.base.SpringTestBase;
 import com.webank.webase.front.transaction.entity.ReqQueryTransHandle;
 import com.webank.webase.front.transaction.entity.ReqSignedTransHandle;
 import com.webank.webase.front.util.JsonUtils;
