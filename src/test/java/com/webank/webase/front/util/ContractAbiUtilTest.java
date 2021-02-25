@@ -19,7 +19,7 @@ import static com.webank.webase.front.util.AbiUtil.outputFormat;
 import static com.webank.webase.front.util.ContractAbiUtil.contractEventMap;
 import static org.junit.Assert.assertEquals;
 
-import com.webank.webase.front.channel.base.TestBase;
+import com.webank.webase.front.base.TestBase;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.ContractService;
 import java.io.File;

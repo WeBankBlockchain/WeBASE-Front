@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.event;
 
-import com.webank.webase.front.channel.base.SpringTestBase;
+import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.event.entity.message.BlockPushMessage;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

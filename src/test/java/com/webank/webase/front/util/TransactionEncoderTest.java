@@ -3,7 +3,7 @@ package com.webank.webase.front.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.webank.webase.front.channel.base.TestBase;
+import com.webank.webase.front.base.TestBase;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;

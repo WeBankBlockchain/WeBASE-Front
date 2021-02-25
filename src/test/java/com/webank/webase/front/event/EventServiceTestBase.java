@@ -14,7 +14,7 @@
 
 package com.webank.webase.front.event;
 
-import com.webank.webase.front.channel.base.SpringTestBase;
+import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import org.junit.Test;

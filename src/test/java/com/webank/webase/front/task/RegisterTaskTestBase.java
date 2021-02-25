@@ -16,7 +16,7 @@
 
 package com.webank.webase.front.task;
 
-import com.webank.webase.front.channel.base.SpringTestBase;
+import com.webank.webase.front.base.SpringTestBase;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

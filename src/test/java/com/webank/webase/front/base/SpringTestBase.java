@@ -1,4 +1,4 @@
-package com.webank.webase.front.channel.base;
+package com.webank.webase.front.base;
 
 import com.webank.webase.front.Application;
 import org.junit.runner.RunWith;

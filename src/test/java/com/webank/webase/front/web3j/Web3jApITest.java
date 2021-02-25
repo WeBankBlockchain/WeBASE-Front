@@ -18,11 +18,12 @@ package com.webank.webase.front.web3j;
 
 import static org.junit.Assert.assertNotNull;
 
-import com.webank.webase.front.channel.base.TestBase;
+import com.webank.webase.front.base.TestBase;
 import java.math.BigInteger;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransaction;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
 import org.fisco.bcos.sdk.client.protocol.response.BlockHash;
 import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
 import org.fisco.bcos.sdk.client.protocol.response.Code;
@@ -40,6 +41,8 @@ import org.fisco.bcos.sdk.client.protocol.response.SyncStatus;
 import org.fisco.bcos.sdk.client.protocol.response.SystemConfig;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class Web3jApITest extends TestBase {
@@ -136,50 +139,57 @@ public class Web3jApITest extends TestBase {
       assertNotNull(count.getTotalTransactionCount());
   }
 
+    @Ignore
   @Test
   public void getBlockByHash() {
       BcosBlock bcosBlock = web3j.getBlockByHash(blockHash, true);
       assertNotNull(bcosBlock.getBlock());
   }
 
+  @Ignore
   @Test
   public void getBlockByNumber() {
       BcosBlock bcosBlock = web3j.getBlockByNumber(blockNumber, true);
       assertNotNull(bcosBlock.getBlock());
   }
 
+  @Ignore
   @Test
   public void getBlockHashByNumber() {
       BlockHash blockHash = web3j.getBlockHashByNumber(blockNumber);
       assertNotNull(blockHash.getBlockHashByNumber());
   }
 
+  @Ignore
   @Test
   public void getTransactionByHash() {
       BcosTransaction bcosTransaction = web3j.getTransactionByHash(blockHash);
       assertNotNull(bcosTransaction.getTransaction());
   }
 
-  @Test
+    @Ignore
+    @Test
     public void getTransactionByBlockNumberAndIndex() {
       BcosTransaction bcosTransaction = web3j.getTransactionByBlockNumberAndIndex(blockNumber, new BigInteger("0"));
       JsonTransactionResponse transaction = bcosTransaction.getTransaction().get();
       assertNotNull(transaction);
     }
 
-  @Test
-  public void getTransactionByBlockHashAndIndex() {
+    @Ignore
+    @Test
+    public void getTransactionByBlockHashAndIndex() {
       BcosTransaction bcosTransaction = web3j.getTransactionByBlockHashAndIndex(blockHash, new BigInteger("0"));
       JsonTransactionResponse transaction = bcosTransaction.getTransaction().get();
       assertNotNull(transaction);
-  }
+    }
 
-//  @Test
-//  public void getTransactionReceipt() {
-//      BcosTransactionReceipt bcosTransactionReceipt = web3j.getTransactionReceipt(txHash);
-//      TransactionReceipt transactionReceipt = bcosTransactionReceipt.getTransactionReceipt().get();
-//        assertNotNull(transactionReceipt);
-//  }
+  @Ignore
+  @Test
+  public void getTransactionReceipt() {
+      BcosTransactionReceipt bcosTransactionReceipt = web3j.getTransactionReceipt(blockHash);
+      TransactionReceipt transactionReceipt = bcosTransactionReceipt.getTransactionReceipt().get();
+        assertNotNull(transactionReceipt);
+  }
 
   @Test
   public void getPendingTransaction() {

@@ -13,7 +13,7 @@
  */
 package com.webank.webase.front.logparse;
 
-import com.webank.webase.front.channel.base.SpringTestBase;
+import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.logparse.entity.CurrentState;
 import com.webank.webase.front.logparse.entity.NetWorkData;
 import com.webank.webase.front.logparse.entity.TxGasData;
