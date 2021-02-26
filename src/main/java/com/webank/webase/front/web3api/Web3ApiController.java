@@ -20,6 +20,7 @@ import com.webank.webase.front.util.Address;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.ReqGroupStatus;
+import com.webank.webase.front.web3api.entity.RspTransCountInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -149,7 +150,7 @@ public class Web3ApiController {
             @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
                     dataType = "int", paramType = "path"))
     @GetMapping("/transaction-total")
-    public TotalTransactionCount.TransactionCountInfo  getTransTotalCnt(@PathVariable int groupId) {
+    public RspTransCountInfo getTransTotalCnt(@PathVariable int groupId) {
         return web3ApiService.getTransCnt(groupId);
     }
 
