@@ -14,6 +14,8 @@
 package com.webank.webase.front.base.config;
 
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.GroupList;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
@@ -36,7 +39,6 @@ import org.springframework.context.annotation.DependsOn;
 
 /**
  * init web3sdk getService.
- *
  */
 @Data
 @Slf4j
@@ -100,25 +102,35 @@ public class Web3Config {
         return bcosSDK;
     }
 
+    /**
+     * 覆盖EncryptType构造函数
+     * @return
+     */
+    @Bean(name = "common")
+    public CryptoSuite getCommonSuite(BcosSDK bcosSDK) {
+        int encryptType = bcosSDK.getClient(1).getGroupManagerService().getCryptoType(ip + ":" + channelPort);
+        log.info("init encrypt type:{}", encryptType);
+        return new CryptoSuite(encryptType);
+//        List<String> groupList = Client
+//            .build(bcosSDK.getChannel())
+//            .getGroupList()
+//            .getGroupList();
+//        if (groupList.isEmpty()) {
+//            log.error("no group belongs to this node!");
+//            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+//        }
+//        int randomGroupId = Integer.parseInt(groupList.get(0));
+//        CryptoSuite cryptoSuite = bcosSDK.getClient(randomGroupId).getCryptoSuite();
+//        log.info("init encrypt type:{}", cryptoSuite.getCryptoTypeConfig());
+//        return cryptoSuite;
+    }
+
     @Bean(name = "rpcClient")
     public Client getRpcWeb3j(BcosSDK bcosSDK) {
         // init rpc client(web3j)
         Client rpcWeb3j = Client.build(bcosSDK.getChannel());
         log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
         return rpcWeb3j;
-    }
-
-    /**
-     * 覆盖EncryptType构造函数
-     * @return
-     */
-    @Bean(name = "common")
-    @DependsOn("rpcClient")
-    public CryptoSuite getCommonSuite(Client rpcClient) {
-        // int encryptType = rpcClient.getGroupManagerService().getCryptoType(ip + ":" + channelPort);
-        CryptoSuite ledgerCryptoSuite = rpcClient.getCryptoSuite();
-        log.info("init encrypt type:{}", ledgerCryptoSuite.getCryptoTypeConfig());
-        return ledgerCryptoSuite;
     }
 
 }
