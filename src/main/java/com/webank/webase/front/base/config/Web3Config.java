@@ -28,9 +28,11 @@ import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 /**
  * init web3sdk getService.
@@ -52,27 +54,15 @@ public class Web3Config {
     /* use String in java sdk*/
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
-    private int encryptType;
-
-    /**
-     * 覆盖EncryptType构造函数
-     * @return
-     */
-    @Bean(name = "common")
-    public CryptoSuite getCommonSuite() {
-        log.info("init encrypt type:{}", encryptType);
-        return new CryptoSuite(encryptType);
-    }
-
 
     @Bean
-    public org.fisco.bcos.sdk.config.model.ConfigProperty getConfigProperty() {
+    public BcosSDK getBcosSDK() throws ConfigException {
         log.info("start init ConfigProperty");
         // cert config, encrypt type
         Map<String, Object> cryptoMaterial = new HashMap<>();
         // cert use conf
         cryptoMaterial.put("certPath", certPath);
-        //cryptoMaterial.put("sslCryptoType", encryptType);
+        // user no need set this:cryptoMaterial.put("sslCryptoType", encryptType);
         log.info("init cert cryptoMaterial:{}, (using conf as cert path)", cryptoMaterial);
 
         // peers, default one node in front
@@ -95,20 +85,14 @@ public class Web3Config {
         configProperty.setCryptoMaterial(cryptoMaterial);
         configProperty.setNetwork(network);
         configProperty.setThreadPool(threadPool);
-        return configProperty;
-    }
-
-    @Bean
-    public org.fisco.bcos.sdk.config.ConfigOption getConfig(ConfigProperty configProperty)
-        throws ConfigException {
-        log.info("init ConfigOption encrypt type:{}", encryptType);
-        return new ConfigOption(configProperty, encryptType);
-    }
-
-    @Bean
-    public org.fisco.bcos.sdk.BcosSDK getBcosSDK(ConfigOption configOption) {
+        // init config option
+        log.info("init configOption from configProperty");
+        ConfigOption configOption = new ConfigOption(configProperty);
+        // init bcosSDK
         log.info("init bcos sdk instance, please check sdk.log");
         BcosSDK bcosSDK = new BcosSDK(configOption);
+
+        log.info("init client version");
         ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
             .getNodeVersion();
         Constants.version = version.getVersion();
@@ -116,12 +100,25 @@ public class Web3Config {
         return bcosSDK;
     }
 
-    @Bean
+    @Bean(name = "rpcClient")
     public Client getRpcWeb3j(BcosSDK bcosSDK) {
+        // init rpc client(web3j)
         Client rpcWeb3j = Client.build(bcosSDK.getChannel());
         log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
         return rpcWeb3j;
     }
 
+    /**
+     * 覆盖EncryptType构造函数
+     * @return
+     */
+    @Bean(name = "common")
+    @DependsOn("rpcClient")
+    public CryptoSuite getCommonSuite(Client rpcClient) {
+        // int encryptType = rpcClient.getGroupManagerService().getCryptoType(ip + ":" + channelPort);
+        CryptoSuite ledgerCryptoSuite = rpcClient.getCryptoSuite();
+        log.info("init encrypt type:{}", ledgerCryptoSuite.getCryptoTypeConfig());
+        return ledgerCryptoSuite;
+    }
 
 }
