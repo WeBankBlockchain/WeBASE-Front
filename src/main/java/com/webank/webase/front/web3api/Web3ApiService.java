@@ -25,6 +25,7 @@ import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.PeerOfConsensusStatus;
 import com.webank.webase.front.web3api.entity.PeerOfSyncStatus;
+import com.webank.webase.front.web3api.entity.RspTransCountInfo;
 import com.webank.webase.front.web3api.entity.SyncStatus;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -57,6 +58,7 @@ import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -208,12 +210,17 @@ public class Web3ApiService {
     /**
      * get transaction counts.
      */
-    public TotalTransactionCount.TransactionCountInfo getTransCnt(int groupId) {
+    public RspTransCountInfo getTransCnt(int groupId) {
         TotalTransactionCount.TransactionCountInfo transactionCount;
         transactionCount = getWeb3j(groupId)
                 .getTotalTransactionCount()
                 .getTotalTransactionCount();
-        return transactionCount;
+        String txSumHex = transactionCount.getTxSum();
+        String blockNumberHex = transactionCount.getBlockNumber();
+        String failedTxSumHex = transactionCount.getFailedTxSum();
+        RspTransCountInfo txCountResult = new RspTransCountInfo(Numeric.toBigInt(txSumHex),
+            Numeric.toBigInt(blockNumberHex), Numeric.toBigInt(failedTxSumHex));
+        return txCountResult;
     }
 
     /**
