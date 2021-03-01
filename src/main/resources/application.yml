@@ -65,6 +65,8 @@ sdk:
 
 logging:
   config: classpath:log4j2.xml
+  level:
+    com.webank.webase.front: info
 
 constant:
   keyServer: 127.0.0.1:5004 # webase-sign服务的IP:Port（单个）
