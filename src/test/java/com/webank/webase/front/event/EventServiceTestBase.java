@@ -26,6 +26,8 @@ public class EventServiceTestBase extends SpringTestBase {
     private ContractEventInfoRepository eventInfoRepository;
     @Autowired
     private NewBlockEventInfoRepository blockEventInfoRepository;
+    @Autowired
+    private EventService eventService;
 
     @Test
     public void testFindContractEvent() {
@@ -38,6 +40,12 @@ public class EventServiceTestBase extends SpringTestBase {
         NewBlockEventInfo n = blockEventInfoRepository.findNewBlockEventInfo("app_006", "group003", "test_queue");
         System.out.println("NewBlockEventInfo: " + n);
 
+    }
+
+    @Test
+    public void testGetEventSync() {
+        // eventService.getContractEventLog(groupId, contractAddress, abiStr,
+        //            fromBlock, toBlock, eventTopicParam·);
     }
 
 }
