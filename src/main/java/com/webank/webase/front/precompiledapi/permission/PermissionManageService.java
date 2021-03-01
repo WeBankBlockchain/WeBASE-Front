@@ -362,7 +362,6 @@ public class PermissionManageService {
 
     /**
      * manage userTableManager related
-     * todo grantWrite revokeWrite
      * @throws Exception
      */
     public Object grantUserTableManager(int groupId, String signUserId, String tableName,
@@ -371,13 +370,13 @@ public class PermissionManageService {
         TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         crudService.desc(tableName);
-        String res = precompiledWithSignService.grant(groupId, signUserId, tableName, userAddress);
+        String res = precompiledWithSignService.grantWrite(groupId, signUserId, tableName, userAddress);
         return res;
     }
 
     public Object revokeUserTableManager(int groupId, String signUserId, String tableName,
             String userAddress) {
-        String res = precompiledWithSignService.revoke(groupId, signUserId, tableName, userAddress);
+        String res = precompiledWithSignService.revokeWrite(groupId, signUserId, tableName, userAddress);
         return res;
     }
 
