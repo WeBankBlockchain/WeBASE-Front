@@ -39,6 +39,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.web3api.Web3ApiService;
@@ -51,6 +52,7 @@ import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
 import org.fisco.bcos.sdk.model.PrecompiledConstant;
 import org.fisco.bcos.sdk.model.PrecompiledRetCode;
+import org.fisco.bcos.sdk.model.RetCode;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
@@ -90,7 +92,7 @@ public class PrecompiledWithSignService {
 
     /**
      * permission: grant through webase-sign
-     * 
+     *
      * @return String result {"code":0,"msg":"success"}
      */
     public String grant(int groupId, String signUserId, String tableName, String toAddress) {
@@ -105,7 +107,7 @@ public class PrecompiledWithSignService {
 
     /**
      * permission: revoke through webase-sign
-     * 
+     *
      * @return String result {"code":0,"msg":"success"}
      */
     public String revoke(int groupId, String signUserId, String tableName, String toAddress) {
@@ -472,14 +474,20 @@ public class PrecompiledWithSignService {
     }
 
     /**
+     * todo 预编译合约 返回值为null
      * handle receipt of precompiled
      * @related: PrecompiledRetCode and ReceiptParser
-     * @throws IOException
+     * return: {"code":1,"msg":"Success"} => {"code":0,"message":"Success"}
      */
     private String handleTransactionReceipt(TransactionReceipt receipt) {
         log.debug("handle tx receipt of precompiled");
         try {
-            return ReceiptParser.parseTransactionReceipt(receipt).toString();
+            RetCode sdkRetCode = ReceiptParser.parseTransactionReceipt(receipt);
+            if (sdkRetCode.getCode() == 1) {
+                return new BaseResponse(ConstantCode.RET_SUCCESS).toString();
+            } else {
+                return new BaseResponse(sdkRetCode.getCode(), sdkRetCode.getMessage()).toString();
+            }
         } catch (ContractException e) {
             throw new FrontException(e.getErrorCode(), e.getResponseOutput().getOutput());
         }

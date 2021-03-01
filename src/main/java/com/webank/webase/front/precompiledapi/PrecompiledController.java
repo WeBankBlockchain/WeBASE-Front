@@ -252,7 +252,7 @@ public class PrecompiledController {
     }
 
 
-    public Object createTable(int groupId, String fromAddress, String sql) throws Exception {
+    public Object createTable(int groupId, String fromAddress, String sql) {
         Instant startTime = Instant.now();
         log.info("start createTable startTime:{}, groupId:{},fromAddress:{},sql:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, sql);
@@ -276,17 +276,16 @@ public class PrecompiledController {
             return new BaseResponse(ConstantCode.RET_SUCCESS,
                     "Create '" + table.getTableName() + "' Ok.");
         } else {
-            // TODO check if result contain not valid error code
-            log.debug("createTable " + "code: " + result + "Create '" + table.getTableName()
+            log.error("createTable " + "code: " + result + "Create '" + table.getTableName()
                     + "' failed.");
-            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+            return new BaseResponse(result,
                     "code: " + result + "Create '" + table.getTableName() + "' failed.",
                     "code: " + result + "Create '" + table.getTableName() + "' failed.");
         }
     }
 
     // check table name exist by desc(tableName)
-    public Object desc(int groupId, String sql) throws Exception {
+    public Object desc(int groupId, String sql) {
         Instant startTime = Instant.now();
         log.info("start descTable startTime:{}, groupId:{},sql:{}", startTime.toEpochMilli(),
                 groupId, sql);
@@ -379,10 +378,9 @@ public class PrecompiledController {
             return new BaseResponse(ConstantCode.RET_SUCCESS, selectedResult);
         }
 
-        // return new BaseResponse(ConstantCode.RET_SUCCESS, rows + " row(s) in set.");
     }
 
-    public Object insert(int groupId, String fromAddress, String sql) throws Exception {
+    public Object insert(int groupId, String fromAddress, String sql) {
         Instant startTime = Instant.now();
         log.info("start insert startTime:{}, groupId:{},fromAddress:{},sql:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, sql);
@@ -482,7 +480,7 @@ public class PrecompiledController {
             return new BaseResponse(ConstantCode.RET_SUCCESS,
                     "Insert OK, " + insertResult + " row(s) affected.");
         } else {
-            return new BaseResponse(ConstantCode.SQL_ERROR, "Insert failed.");
+            return new BaseResponse(insertResult, "Insert failed.");
         }
     }
 
@@ -546,7 +544,7 @@ public class PrecompiledController {
             return new BaseResponse(ConstantCode.RET_SUCCESS,
                     "Update OK, " + updateResult + " row(s) affected.");
         } else {
-            return new BaseResponse(ConstantCode.SQL_ERROR, "Update failed.");
+            return new BaseResponse(updateResult, "Update failed.");
         }
 
     }
@@ -585,7 +583,7 @@ public class PrecompiledController {
             return new BaseResponse(ConstantCode.RET_SUCCESS,
                     "Remove OK, " + removeResult + " row(s) affected.");
         } else {
-            return new BaseResponse(ConstantCode.SQL_ERROR, "Remove failed.");
+            return new BaseResponse(removeResult, "Remove failed.");
         }
     }
 
