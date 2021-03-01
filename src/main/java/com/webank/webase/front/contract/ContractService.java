@@ -276,18 +276,18 @@ public class ContractService {
         String data = bytecodeBin + encodedConstructor;
         String signMsg = transService.signMessage(groupId, web3j, signUserId, "", data);
         // send transaction
-        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-        transService.sendMessage(web3j, signMsg);
-        TransactionReceipt receipt;
-        try {
-            receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("get tx receipt error for interrupted or exec:[]", e);
-            throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
-        } catch (TimeoutException e) {
-            log.error("get tx receipt error for timeout:[]", e);
-            throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
-        }
+        TransactionReceipt receipt = transService.sendMessage(web3j, signMsg);
+//        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+//        transService.sendMessage(web3j, signMsg);
+//        try {
+//            receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+//        } catch (InterruptedException | ExecutionException e) {
+//            log.error("get tx receipt error for interrupted or exec:[]", e);
+//            throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
+//        } catch (TimeoutException e) {
+//            log.error("get tx receipt error for timeout:[]", e);
+//            throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
+//        }
         String contractAddress = receipt.getContractAddress();
 
         log.info("success deployWithSign. contractAddress:{}", contractAddress);
