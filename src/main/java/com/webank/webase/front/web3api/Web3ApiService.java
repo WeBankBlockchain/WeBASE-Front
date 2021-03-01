@@ -23,10 +23,7 @@ import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
-import com.webank.webase.front.web3api.entity.PeerOfConsensusStatus;
-import com.webank.webase.front.web3api.entity.PeerOfSyncStatus;
 import com.webank.webase.front.web3api.entity.RspTransCountInfo;
-import com.webank.webase.front.web3api.entity.SyncStatus;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -61,7 +58,6 @@ import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -117,9 +113,14 @@ public class Web3ApiService {
      * @param blockHash blockHash
      */
     public BcosBlock.Block getBlockByHash(int groupId, String blockHash) {
-        BcosBlock.Block block;
-        block = getWeb3j(groupId).getBlockByHash(blockHash, true)
+        BcosBlock.Block block = getWeb3j(groupId).getBlockByHash(blockHash, true)
                 .getBlock();
+        String gasLimit = block.getGasLimit();
+        String gasUsed = block.getGasUsed();
+        String timestamp = block.getTimestamp();
+        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
         return block;
     }
 
@@ -163,6 +164,7 @@ public class Web3ApiService {
         if (opt.isPresent()) {
             transactionReceipt = opt.get();
         }
+        CommonUtils.processReceiptHexNumber(transactionReceipt);
         return transactionReceipt;
     }
 
@@ -523,17 +525,25 @@ public class Web3ApiService {
                 .getPeers();
     }
 
-    // todo check status info same string
+    /**
+     * get BasicConsensusInfo and List of ViewInfo
+     * @param groupId
+     * @return
+     */
     public ConsensusInfo getConsensusStatus(int groupId) {
         return getWeb3j(groupId).getConsensusStatus().getConsensusStatus();
     }
 
-    // todo check status info same string
     public SyncStatusInfo getSyncStatus(int groupId) {
         return getWeb3j(groupId).getSyncStatus().getSyncStatus();
     }
 
-    // todo check status info same string
+    /**
+     * get getSystemConfigByKey of tx_count_limit/tx_gas_limit
+     * @param groupId
+     * @param key
+     * @return value for config, ex: return 1000
+     */
     public String getSystemConfigByKey(int groupId, String key) {
         return getWeb3j(groupId)
                 .getSystemConfigByKey(key)

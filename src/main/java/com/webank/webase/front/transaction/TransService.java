@@ -42,7 +42,6 @@ import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
-import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.math.BigInteger;
@@ -52,10 +51,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.abi.FunctionEncoder;
@@ -69,8 +64,6 @@ import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.request.Transaction;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.exceptions.HashException;
-import org.fisco.bcos.sdk.crypto.exceptions.SignatureException;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
@@ -80,7 +73,6 @@ import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
-import org.fisco.bcos.sdk.transaction.model.CommonConstant;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.transaction.model.po.RawTransaction;
 import org.fisco.bcos.sdk.transaction.pusher.TransactionPusherService;
@@ -214,23 +206,27 @@ public class TransService {
             Instant nodeStartTime = Instant.now();
             TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
             // send transaction
-            final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-            TransactionReceipt responseReceipt;
-            sendMessage(web3j, signMsg);
-            try {
-                responseReceipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-                // cover null message
-                // String receiptMsg = FrontUtils.handleReceiptMsg(transactionReceipt);
-                String receiptMsg = txDecoder.decodeReceiptStatus(responseReceipt).getReceiptMessages();
-                responseReceipt.setMessage(receiptMsg);
-                response = responseReceipt;
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("get tx receipt error for interrupted or exec:[]", e);
-                throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
-            } catch (TimeoutException e) {
-                log.error("get tx receipt error for timeout:[]", e);
-                throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
-            }
+            TransactionReceipt responseReceipt = sendMessage(web3j, signMsg);
+            String receiptMsg = txDecoder.decodeReceiptStatus(responseReceipt).getReceiptMessages();
+            responseReceipt.setMessage(receiptMsg);
+            response = responseReceipt;
+//            final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+//            TransactionReceipt responseReceipt;
+//            sendMessage(web3j, signMsg);
+//            try {
+//                responseReceipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+//                // cover null message
+//                // String receiptMsg = FrontUtils.handleReceiptMsg(transactionReceipt);
+//                String receiptMsg = txDecoder.decodeReceiptStatus(responseReceipt).getReceiptMessages();
+//                responseReceipt.setMessage(receiptMsg);
+//                response = responseReceipt;
+//            } catch (InterruptedException | ExecutionException e) {
+//                log.error("get tx receipt error for interrupted or exec:[]", e);
+//                throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
+//            } catch (TimeoutException e) {
+//                log.error("get tx receipt error for timeout:[]", e);
+//                throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
+//            }
             log.info("***node cost time***: {}",
                     Duration.between(nodeStartTime, Instant.now()).toMillis());
         }
@@ -367,6 +363,7 @@ public class TransService {
     public TransactionReceipt sendMessage(Client web3j, String signMsg) {
         TransactionPusherService txPusher = new TransactionPusherService(web3j);
         TransactionReceipt receipt = txPusher.push(signMsg);
+        CommonUtils.processReceiptHexNumber(receipt);
         return receipt;
 //        Request<?, SendTransaction> request = web3j.sendRawTransaction(signMsg);
 //        request.setNeedTransCallback(true);
@@ -552,6 +549,7 @@ public class TransService {
         Client web3j = web3ApiService.getWeb3j(groupId);
         if (sync) {
             TransactionReceipt receipt = sendMessage(web3j, signedStr);
+            CommonUtils.processReceiptHexNumber(receipt);
             return receipt;
         } else {
             TransactionPusherService txPusher = new TransactionPusherService(web3j);

@@ -46,10 +46,13 @@ import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -688,6 +691,56 @@ public class CommonUtils {
             }
         }
         return flag;
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param receipt
+     */
+    public static void processReceiptHexNumber(TransactionReceipt receipt) {
+        if (receipt == null) {
+            return;
+        }
+        String gasUsed = receipt.getGasUsed();
+        String blockNumber = receipt.getBlockNumber();
+        receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
+        log.info("processTransHexNumber :{}", receipt);
+    }
+
+
+    /**
+     * convert hex number string to decimal number string
+     * @param block
+     */
+    public static void processBlockHexNumber(BcosBlock.Block block) {
+        if (block == null) {
+            return;
+        }
+        String gasLimit = block.getGasLimit();
+        String gasUsed = block.getGasUsed();
+        String timestamp = block.getTimestamp();
+        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+        log.info("processBlockHexNumber :{}", block);
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param trans
+     */
+    public static void processTransHexNumber(JsonTransactionResponse trans) {
+        if (trans == null) {
+            return;
+        }
+        String gas = trans.getGas();
+        String gasPrice = trans.getGasPrice();
+        String groupId = trans.getGroupId();
+        trans.setGas(Numeric.toBigInt(gas).toString(10));
+        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
+        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+        log.info("processTransHexNumber :{}", trans);
     }
 
 }
