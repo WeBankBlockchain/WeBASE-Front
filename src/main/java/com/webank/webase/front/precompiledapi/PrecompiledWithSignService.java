@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
+import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
 import org.fisco.bcos.sdk.model.PrecompiledConstant;
@@ -239,21 +240,22 @@ public class PrecompiledWithSignService {
     /**
      * CRUD: create table through webase-sign
      */
-    public int createTable(int groupId, String signUserId, Table table) {
+    public String createTable(int groupId, String signUserId, Table table) {
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
         funcParams.add(table.getKey());
-        funcParams.add(table.getValueFields());
+        String valueFieldsString = TableCRUDService.convertValueFieldsToString(table.getValueFields());
+        funcParams.add(valueFieldsString);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.TABLE_FACTORY, FUNC_CREATETABLE, funcParams);
-        return this.handleTransactionReceiptCRUD(receipt);
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
      * CRUD: insert table through webase-sign
      */
-    public int insert(int groupId, String signUserId, Table table, Entry entry) {
+    public String insert(int groupId, String signUserId, Table table, Entry entry) {
         checkTableKeyLength(table);
         // trans
         String entryJsonStr;
@@ -272,13 +274,13 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CRUD, FUNC_INSERT, funcParams);
-        return this.handleTransactionReceiptCRUD(receipt);
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
      * CRUD: update table through webase-sign
      */
-    public int update(int groupId, String signUserId, Table table, Entry entry,
+    public String update(int groupId, String signUserId, Table table, Entry entry,
             Condition condition) {
         checkTableKeyLength(table);
         // trans
@@ -301,13 +303,13 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CRUD, FUNC_UPDATE, funcParams);
-        return this.handleTransactionReceiptCRUD(receipt);
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
      * CRUD: remove table through webase-sign
      */
-    public int remove(int groupId, String signUserId, Table table, Condition condition) {
+    public String remove(int groupId, String signUserId, Table table, Condition condition) {
         checkTableKeyLength(table);
         // trans
         String conditionStr;
@@ -326,7 +328,7 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CRUD, FUNC_REMOVE, funcParams);
-        return this.handleTransactionReceiptCRUD(receipt);
+        return this.handleTransactionReceipt(receipt);
     }
 
     private void checkTableKeyLength(Table table) {
@@ -474,7 +476,6 @@ public class PrecompiledWithSignService {
     }
 
     /**
-     * todo 预编译合约 返回值为null
      * handle receipt of precompiled
      * @related: PrecompiledRetCode and ReceiptParser
      * return: {"code":1,"msg":"Success"} => {"code":0,"message":"Success"}
@@ -483,56 +484,16 @@ public class PrecompiledWithSignService {
         log.debug("handle tx receipt of precompiled");
         try {
             RetCode sdkRetCode = ReceiptParser.parseTransactionReceipt(receipt);
-            if (sdkRetCode.getCode() == 1) {
-                return new BaseResponse(ConstantCode.RET_SUCCESS).toString();
+            log.info("handleTransactionReceipt sdkRetCode:{}", sdkRetCode);
+            if (sdkRetCode.getCode() >= 0) {
+                return new BaseResponse(ConstantCode.RET_SUCCESS, sdkRetCode.getMessage()).toString();
             } else {
-                return new BaseResponse(sdkRetCode.getCode(), sdkRetCode.getMessage()).toString();
+                throw new FrontException(sdkRetCode.getCode(), sdkRetCode.getMessage());
             }
         } catch (ContractException e) {
-            throw new FrontException(e.getErrorCode(), e.getResponseOutput().getOutput());
+            log.error("handleTransactionReceipt e:[]", e);
+            throw new FrontException(e.getErrorCode(), e.getMessage());
         }
-//        String status = receipt.getStatus();
-//        if (!"0x0".equals(status)) {
-//            throw new FrontException(TX_RECEIPT_CODE_ERROR.getCode(),
-//                    StatusCode.getStatusMessage(receipt.getStatus(), receipt.getMessage()));
-//        } else {
-//            if (receipt.getOutput() != null) {
-//                try {
-//                    String codeMsgFromOutput =
-//                            PrecompiledConstant.getJsonStr(receipt.getOutput(), web3j);
-//                    return PrecompiledUtils.handleReceiptOutput(codeMsgFromOutput);
-//                } catch (IOException e) {
-//                    log.error("handleTransactionReceipt getJsonStr of error tx receipt fail:[]", e);
-//                    throw new FrontException(
-//                            ConstantCode.TX_RECEIPT_OUTPUT_PARSE_JSON_FAIL.getCode(),
-//                            e.getMessage());
-//                }
-//            } else {
-//                throw new FrontException(ConstantCode.TX_RECEIPT_OUTPUT_NULL);
-//            }
-//        }
-    }
-
-    public int handleTransactionReceiptCRUD(TransactionReceipt receipt) {
-        try {
-            return ReceiptParser.parseTransactionReceipt(receipt).getCode();
-        } catch (ContractException e) {
-            throw new FrontException(e.getErrorCode(), e.getResponseOutput().getOutput());
-        }
-
-
-//
-//        String status = receipt.getStatus();
-//        if (!"0x0".equals(status)) {
-//            throw new FrontException(TX_RECEIPT_CODE_ERROR.getCode(),
-//                    StatusCode.getStatusMessage(status, receipt.getMessage()));
-//        }
-//        String output = receipt.getOutput();
-//        if (!"0x".equals(output)) {
-//            return new BigInteger(output.substring(2, output.length()), 16).intValue();
-//        } else {
-//            throw new FrontException(ConstantCode.TX_RECEIPT_OUTPUT_NULL);
-//        }
     }
 
 }
