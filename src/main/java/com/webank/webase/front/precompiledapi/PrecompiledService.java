@@ -17,12 +17,18 @@ import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precompiledapi.crud.CRUDParseUtils;
 import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
@@ -103,9 +109,8 @@ public class PrecompiledService {
         List<NodeInfo> nodeListWithType = new ArrayList<>();
 
         // add all sealer and observer in List
-        sealerList.stream()
-                .forEach(sealer -> nodeListWithType.add(new NodeInfo(sealer, NODE_TYPE_SEALER)));
-        observerList.stream().forEach(
+        sealerList.forEach(sealer -> nodeListWithType.add(new NodeInfo(sealer, NODE_TYPE_SEALER)));
+        observerList.forEach(
                 observer -> nodeListWithType.add(new NodeInfo(observer, NODE_TYPE_OBSERVER)));
         // peer not in sealer/observer but connected is remove node(游离节点)
         peerList.stream().filter(peer -> !sealerList.contains(peer) && !observerList.contains(peer))
@@ -118,47 +123,59 @@ public class PrecompiledService {
     /**
      * CRUD related Table table - validation in controller
      */
-    public int createTable(int groupId, String signUserId, Table table) {
-        int res = precompiledWithSignService.createTable(groupId, signUserId, table);
+    public String createTable(int groupId, String signUserId, Table table) {
+        String res = precompiledWithSignService.createTable(groupId, signUserId, table);
         return res;
     }
 
     /**
      * insert 校验tableName等操作放在controller
      */
-    public int insert(int groupId, String signUserId, Table table, Entry entry) {
-        int res = precompiledWithSignService.insert(groupId, signUserId, table, entry);
+    public String insert(int groupId, String signUserId, Table table, Entry entry) {
+        String res = precompiledWithSignService.insert(groupId, signUserId, table, entry);
         return res;
     }
 
     /**
      * update
      */
-    public int update(int groupId, String signUserId, Table table, Entry entry, Condition condition)
+    public String update(int groupId, String signUserId, Table table, Entry entry, Condition condition)
             {
-        int res = precompiledWithSignService.update(groupId, signUserId, table, entry, condition);
+        String res = precompiledWithSignService.update(groupId, signUserId, table, entry, condition);
         return res;
     }
 
     /**
      * remove
      */
-    public int remove(int groupId, String signUserId, Table table, Condition condition)
-            {
-        int res = precompiledWithSignService.remove(groupId, signUserId, table, condition);
+    public String remove(int groupId, String signUserId, Table table, Condition condition) {
+        String res = precompiledWithSignService.remove(groupId, signUserId, table, condition);
         return res;
     }
 
     /**
      * desc
      */
-    public Table desc(int groupId, String tableName) throws Exception {
+    public List<Map<String, String>> desc(int groupId, String tableName) throws Exception {
         TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
         List<Map<String, String>> descRes = crudService.desc(tableName);
-        String tableKey = descRes.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
-        String valueFields = descRes.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME);
-        return new Table(tableName, tableKey, valueFields);
+        if (!CRUDParseUtils.checkTableExistence(descRes)) {
+            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+        }
+        return descRes;
+//        String tableKey = descRes.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
+//        String valueFields = descRes.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME);
+//        return new Table(tableName, tableKey, valueFields);
+    }
+
+    public String descTable(int groupId, String tableName) throws Exception {
+        List<Map<String, String>> descRes = this.desc(groupId, tableName);
+        if (!CRUDParseUtils.checkTableExistence(descRes)) {
+            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+        }
+        String tableInfo = JsonUtils.objToString(descRes);
+        return CRUDParseUtils.formatJson(tableInfo);
     }
 
     /**
