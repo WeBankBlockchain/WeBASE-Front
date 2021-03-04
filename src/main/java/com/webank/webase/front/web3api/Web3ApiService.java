@@ -104,6 +104,7 @@ public class Web3ApiService {
         block = getWeb3j(groupId)
                 .getBlockByNumber(blockNumber, true)
                 .getBlock();
+        CommonUtils.processBlockHexNumber(block);
         return block;
     }
 
@@ -115,12 +116,7 @@ public class Web3ApiService {
     public BcosBlock.Block getBlockByHash(int groupId, String blockHash) {
         BcosBlock.Block block = getWeb3j(groupId).getBlockByHash(blockHash, true)
                 .getBlock();
-        String gasLimit = block.getGasLimit();
-        String gasUsed = block.getGasUsed();
-        String timestamp = block.getTimestamp();
-        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
-        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
-        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+        CommonUtils.processBlockHexNumber(block);
         return block;
     }
 
@@ -181,6 +177,7 @@ public class Web3ApiService {
         if (opt.isPresent()) {
             transaction = opt.get();
         }
+        CommonUtils.processTransHexNumber(transaction);
         return transaction;
     }
 
@@ -241,6 +238,7 @@ public class Web3ApiService {
         if (opt.isPresent()) {
             transaction = opt.get();
         }
+        CommonUtils.processTransHexNumber(transaction);
         return transaction;
     }
 
@@ -263,6 +261,7 @@ public class Web3ApiService {
         if (opt.isPresent()) {
             transaction = opt.get();
         }
+        CommonUtils.processTransHexNumber(transaction);
         return transaction;
     }
 
