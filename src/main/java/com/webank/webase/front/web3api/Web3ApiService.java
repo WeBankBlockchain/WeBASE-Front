@@ -23,6 +23,7 @@ import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
+import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.RspTransCountInfo;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -128,10 +129,10 @@ public class Web3ApiService {
     public int getBlockTransCntByNumber(int groupId, BigInteger blockNumber) {
         int transCnt;
         if (blockNumberCheck(groupId, blockNumber)) {
-            throw new FrontException("ConstantCode.NODE_REQUEST_FAILED");
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
         }
         Block block = getWeb3j(groupId)
-                .getBlockByNumber(blockNumber, true)
+                .getBlockByNumber(blockNumber, false)
                 .getBlock();
         transCnt = block.getTransactions().size();
         return transCnt;
@@ -767,6 +768,24 @@ public class Web3ApiService {
         return getWeb3j(groupId).getBlockHeaderByNumber(blockNumber, returnSealers);
     }
     /* above v2.6.1*/
+
+    /**
+     * getBlockTransCntByNumber.
+     *
+     * @param blockNumber blockNumber
+     */
+    public RspStatBlock getBlockStatisticByNumber(int groupId, BigInteger blockNumber) {
+        if (blockNumberCheck(groupId, blockNumber)) {
+            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+        }
+        Block block = getWeb3j(groupId)
+            .getBlockByNumber(blockNumber, false)
+            .getBlock();
+        CommonUtils.processBlockHexNumber(block);
+        int transCnt = block.getTransactions().size();
+        String timestamp = block.getTimestamp();
+        return new RspStatBlock(blockNumber.intValue(), timestamp, transCnt);
+    }
 
     /**
      * get first web3j in web3jMap
