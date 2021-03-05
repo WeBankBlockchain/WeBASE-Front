@@ -20,6 +20,7 @@ import com.webank.webase.front.util.Address;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.ReqGroupStatus;
+import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.RspTransCountInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -90,6 +91,8 @@ public class Web3ApiController {
             @PathVariable BigInteger blockNumber) {
         return web3ApiService.getBlockTransCntByNumber(groupId, blockNumber);
     }
+
+
 
     @ApiOperation(value = "getPbftView", notes = "Get PbftView")
     @GetMapping("/pbftView")
@@ -318,4 +321,13 @@ public class Web3ApiController {
         return web3ApiService.getBlockHeaderByNumber(groupId, blockNumber, true);
     }
 
+    @ApiOperation(value = "getBlockTransCntByNumber",
+        notes = "Get the number of transactions in the block based on the block height")
+    @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
+        dataType = "BigInteger", paramType = "path")
+    @GetMapping("/blockStat/{blockNumber}")
+    public RspStatBlock getBlockStatByNumber(@PathVariable int groupId,
+        @PathVariable BigInteger blockNumber) {
+        return web3ApiService.getBlockStatisticByNumber(groupId, blockNumber);
+    }
 }
