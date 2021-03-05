@@ -346,7 +346,7 @@ public class KeyStoreService {
 
         // get from local db
         KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByAddress(user);
-        if (Objects.isNull(keyStoreInfoLocal)) {
+        if (Objects.isNull(keyStoreInfoLocal) || StringUtils.isBlank(keyStoreInfoLocal.getPrivateKey())) {
             log.warn("fail getPrivateKey. user:{} privateKey is null", user);
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
         }
