@@ -119,19 +119,6 @@ public class FrontCertService {
         }
         return resList.get(0);
     }
-
-    /**
-     * get Cert from crt file through nodePath and certType
-     * @param nodePath
-     * @param certType
-     * @param targetList
-     */
-    private void getCertListByPathAndType(String nodePath, int certType, List<String> targetList) {
-        log.debug("start tools: getCertList in nodePath:{},certType:{}", nodePath, certType);
-        Path certPath = getCertPath(nodePath, certType);
-        loadCrtContentByPath(certPath, targetList);
-    }
-
     /**
      * get SDK crts in directory ~/resource/
      * including agency's crt, node.crt
@@ -148,6 +135,20 @@ public class FrontCertService {
         log.debug("end getSDKNodeCerts sdkCertStr []" + sdkCertMap);
         return sdkCertMap;
     }
+
+    /**
+     * get Cert from crt file through nodePath and certType
+     * @param nodePath
+     * @param certType
+     * @param targetList
+     */
+    private void getCertListByPathAndType(String nodePath, int certType, List<String> targetList) {
+        log.debug("start tools: getCertList in nodePath:{},certType:{}", nodePath, certType);
+        Path certPath = getCertPath(nodePath, certType);
+        loadCrtContentByPath(certPath, targetList);
+    }
+
+
 
     /**
      * get crt file content in dir(String)
@@ -289,7 +290,14 @@ public class FrontCertService {
         log.debug("start loadBareSdkContent sdkFileStr:{}", sdkFileStr);
         try(InputStream nodeCrtInput = new ClassPathResource(sdkFileStr).getInputStream()){
             String nodeCrtStr = inputStream2String(nodeCrtInput);
-            targetMap.put(sdkFileStr, nodeCrtStr);
+            String fileName = sdkFileStr;
+            if (sdkFileStr.contains("/")) {
+                String[] gmCertStrArr = sdkFileStr.split("/");
+                if (gmCertStrArr.length >= 2) {
+                    fileName = gmCertStrArr[gmCertStrArr.length - 1];
+                }
+            }
+            targetMap.put(fileName, nodeCrtStr);
             log.debug("end tools: loadBareSdkContent resultList:{}", targetMap);
         } catch (IOException e) {
             log.error("FrontCertService loadBareSdkContent, cert(.crt) path prefix error, Exception:[]", e);
