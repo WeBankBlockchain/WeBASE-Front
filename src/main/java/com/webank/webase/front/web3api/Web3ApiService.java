@@ -129,7 +129,7 @@ public class Web3ApiService {
     public int getBlockTransCntByNumber(int groupId, BigInteger blockNumber) {
         int transCnt;
         if (blockNumberCheck(groupId, blockNumber)) {
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
         }
         Block block = getWeb3j(groupId)
                 .getBlockByNumber(blockNumber, false)
@@ -253,7 +253,7 @@ public class Web3ApiService {
                                                      BigInteger transactionIndex) {
         JsonTransactionResponse transaction = null;
         if (blockNumberCheck(groupId, blockNumber)) {
-            throw new FrontException("ConstantCode.NODE_REQUEST_FAILED");
+            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
         }
         Optional<JsonTransactionResponse> opt =
                 getWeb3j(groupId)
@@ -776,7 +776,7 @@ public class Web3ApiService {
      */
     public RspStatBlock getBlockStatisticByNumber(int groupId, BigInteger blockNumber) {
         if (blockNumberCheck(groupId, blockNumber)) {
-            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
+            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
         }
         Block block = getWeb3j(groupId)
             .getBlockByNumber(blockNumber, false)
@@ -784,7 +784,7 @@ public class Web3ApiService {
         CommonUtils.processBlockHexNumber(block);
         int transCnt = block.getTransactions().size();
         String timestamp = block.getTimestamp();
-        return new RspStatBlock(blockNumber.intValue(), timestamp, transCnt);
+        return new RspStatBlock(blockNumber, Long.parseLong(timestamp), transCnt);
     }
 
     /**

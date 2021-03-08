@@ -14,6 +14,7 @@
 
 package com.webank.webase.front.web3api.entity;
 
+import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RspStatBlock {
-    private int blockNumber;
-    private String timestamp;
+    private BigInteger blockNumber;
+    private Long timestamp;
     private int txCount;
 }
