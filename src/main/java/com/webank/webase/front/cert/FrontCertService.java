@@ -15,12 +15,17 @@
  */
 package com.webank.webase.front.cert;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +54,7 @@ import java.util.List;
 public class FrontCertService {
     private static final String crtContentHead = "-----BEGIN CERTIFICATE-----\n";
     private static final String crtContentTail = "-----END CERTIFICATE-----\n";
+    // 前置配置的节点目录下的证书
     private static final String nodeCrtPath = "/conf/node.crt";
     private static final String caCrtPath = "/conf/ca.crt";
     // 国密双证书模式
@@ -58,14 +64,28 @@ public class FrontCertService {
     // 国密加密证书
     private static final String gmEncryptCrtPath = "/conf/gmennode.crt";
 
-    private static final String frontSdkCaCrt = "conf/ca.crt";
-    private static final String frontSdkNodeCrt = "node.crt";
+    // 前置的sdk证书
+    private static final String frontSdkCaCrt = "ca.crt";
+    private static final String frontSdkNodeCrt = "sdk.crt";
+    // add in v1.5.0
+    private static final String frontSdkNodeKey = "sdk.key";
+    private static final String frontGmSdkCaCrt = "gm/gmca.crt";
+    private static final String frontGmSdkNodeCrt = "gm/gmsdk.crt";
+    private static final String frontGmSdkNodeKey = "gm/gmsdk.key";
+    private static final String frontGmEnSdkNodeCrt = "gm/gmensdk.crt";
+    private static final String frontGmEnSdkNodeKey = "gm/gmensdk.key";
+
+    // v1.5.0 add sdk key
+
 
     @Autowired
     Constants constants;
     @Autowired
     @Qualifier("common")
     private CryptoSuite cryptoSuite;
+    @Autowired
+    private BcosSDK bcosSDK;
+
     /**
      * 设置了front对应的节点的目录，如/data/fisco/nodes/127.0.0.1/node0
      * 则获取 ${path}/conf 中的ca.crt, node.crt
@@ -119,13 +139,14 @@ public class FrontCertService {
      * @return
      */
     public List<String> getSDKNodeCert() {
-        List<String> sdkCertStrList = new ArrayList<>();
+        List<String> sdkCertMap = new ArrayList<>();
         log.debug("start getSDKNodeCerts.");
         // add sdk cert: node.crt
-        loadCrtContentByStringPath(frontSdkNodeCrt, sdkCertStrList);
-        loadCrtContentByStringPath(frontSdkCaCrt, sdkCertStrList);
-        log.debug("end getSDKNodeCerts sdkCertStrt []" + sdkCertStrList);
-        return sdkCertStrList;
+        // v1.5.0 change node.crt to sdk.crt
+        loadCrtContentByStringPath(frontSdkNodeCrt, sdkCertMap);
+        loadCrtContentByStringPath(frontSdkCaCrt, sdkCertMap);
+        log.debug("end getSDKNodeCerts sdkCertStr []" + sdkCertMap);
+        return sdkCertMap;
     }
 
     /**
@@ -189,12 +210,12 @@ public class FrontCertService {
     }
 
     public String inputStream2String(InputStream inputStream) throws IOException {
-        return IOUtils.toString(inputStream,"UTF-8");
+        return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
     }
 
     /**
-     * get cert file's path through concatting nodePath with certType
-     * @param nodePath
+     * get cert file's path through concat nodePath with certType
+     * @param nodePath the fisco node front connecting with, ex: /data/fisco/nodes/127.0.0.1/node0
      * @param certType
      * @return
      * 2019/12 support guomi
@@ -210,18 +231,14 @@ public class FrontCertService {
                 return Paths.get(nodePath.concat(gmNodeCrtPath));
             }
             return Paths.get(nodePath.concat(nodeCrtPath));
-        } else if(certType == CertTypes.OTHERS.getValue()){
-            return getEncrytCertPath(nodePath);
+        } else if(certType == CertTypes.OTHERS.getValue()) {
+            if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+                return Paths.get(nodePath.concat(gmEncryptCrtPath));
+            } else {
+                return null;
+            }
         }
         return null;
-    }
-
-    public Path getEncrytCertPath(String nodePath) {
-        if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
-            return Paths.get(nodePath.concat(gmEncryptCrtPath));
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -234,4 +251,55 @@ public class FrontCertService {
         }
         return input.substring(0, input.length() - 1);
     }
+
+    /* v1.5.0: add read sdk cert and key file for node-manager */
+
+    /**
+     * read sdk key and cert file (ca.crt, sdk.key, sdk.crt)
+     * get SDK crts in directory ~/resource/
+     * including agency's crt, node.crt
+     * excluding ca.crt because node's certs already including ca.crt
+     * @return
+     */
+    public Map<String, String> getSDKCertList() {
+        Map<String, String> sdkCertMap = new HashMap<>();
+        log.debug("start getSDKCertKeyStrList.");
+        // add sdk cert: node.crt
+        loadBareSdkContent(frontSdkNodeCrt, sdkCertMap);
+        loadBareSdkContent(frontSdkNodeKey, sdkCertMap);
+        loadBareSdkContent(frontSdkCaCrt, sdkCertMap);
+        // if use gm ssl
+        if (bcosSDK.getSSLCryptoType() == CryptoType.SM_TYPE) {
+            loadBareSdkContent(frontGmSdkCaCrt, sdkCertMap);
+            loadBareSdkContent(frontGmSdkNodeCrt, sdkCertMap);
+            loadBareSdkContent(frontGmSdkNodeKey, sdkCertMap);
+            loadBareSdkContent(frontGmEnSdkNodeCrt, sdkCertMap);
+            loadBareSdkContent(frontGmEnSdkNodeKey, sdkCertMap);
+        }
+        log.debug("end getSDKCertKeyStrList sdkCertStr:{}", sdkCertMap);
+        return sdkCertMap;
+    }
+
+    /**
+     * get crt file content in dir(String)
+     * @param sdkFileStr
+     * @param targetMap as return result
+     */
+    private void loadBareSdkContent(String sdkFileStr, Map<String, String> targetMap) {
+        log.debug("start loadBareSdkContent sdkFileStr:{}", sdkFileStr);
+        try(InputStream nodeCrtInput = new ClassPathResource(sdkFileStr).getInputStream()){
+            String nodeCrtStr = inputStream2String(nodeCrtInput);
+            targetMap.put(sdkFileStr, nodeCrtStr);
+            log.debug("end tools: loadBareSdkContent resultList:{}", targetMap);
+        } catch (IOException e) {
+            log.error("FrontCertService loadBareSdkContent, cert(.crt) path prefix error, Exception:[]", e);
+            throw new FrontException(ConstantCode.CERT_FILE_NOT_FOUND.getCode(),
+                "loadBareSdkContent error:" + e.getMessage());
+        } catch (Exception e) {
+            log.error("FrontCertService loadBareSdkContent error:[]", e);
+            throw new FrontException(ConstantCode.CERT_FILE_NOT_FOUND.getCode(),
+                "loadBareSdkContent error:" + e.getMessage());
+        }
+    }
+
 }

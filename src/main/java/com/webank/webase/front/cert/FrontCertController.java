@@ -125,4 +125,18 @@ public class FrontCertController {
         return map;
     }
 
+    /**
+     * ecdsa ssl: get <"sdk.key", {sdkKeyContent}>
+     * gm ssl: get <"gm/gmsdk.key", {sdkKeyContent}>
+     * @return
+     */
+    @GetMapping("sdk")
+    public Map<String, String> getSdkFiles() {
+        Map<String, String> certList = certService.getSDKCertList();
+        if (certList.isEmpty()) {
+            log.error("getSdkFiles error return empty!");
+            throw new FrontException(ConstantCode.SDK_CERT_FILE_NOT_FOUND);
+        }
+        return certList;
+    }
 }

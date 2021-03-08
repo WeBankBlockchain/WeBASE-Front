@@ -183,6 +183,8 @@ public class ConstantCode {
     public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201235, "p12's password cannot be chinese");
     public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(201236, "p12's password not match");
     public static final RetCode P12_FILE_ERROR = RetCode.mark(201237, "P12 file content error");
+    public static final RetCode SDK_CERT_FILE_NOT_FOUND = RetCode.mark(201238, "Sdk cert file not found, please check front's conf directory");
+    public static final RetCode SDK_KEY_FILE_NOT_FOUND = RetCode.mark(201239, "Sdk key file not found, please check front's conf directory");
 
     // mq error
     public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
