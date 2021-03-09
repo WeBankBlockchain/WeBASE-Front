@@ -705,7 +705,6 @@ public class CommonUtils {
         String blockNumber = receipt.getBlockNumber();
         receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
         receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
-        log.info("processTransHexNumber :{}", receipt);
     }
 
 
@@ -723,7 +722,6 @@ public class CommonUtils {
         block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
         block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
         block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
-        log.info("processBlockHexNumber :{}", block);
     }
 
     /**
@@ -740,7 +738,6 @@ public class CommonUtils {
         trans.setGas(Numeric.toBigInt(gas).toString(10));
         trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
         trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
-        log.info("processTransHexNumber :{}", trans);
     }
 
 }
