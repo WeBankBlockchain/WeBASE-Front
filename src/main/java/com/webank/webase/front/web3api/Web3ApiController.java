@@ -239,6 +239,12 @@ public class Web3ApiController {
         return web3ApiService.getSystemConfigByKey(groupId, key);
     }
 
+    @ApiOperation(value = "getNodeConfig", notes = "Get node config info")
+    @GetMapping("/nodeConfig")
+    public Object getNodeConfig() {
+        return web3ApiService.getNodeInfo();
+    }
+
     @ApiOperation(value = "getNodeInfo", notes = "Get node information")
     @GetMapping("/nodeInfo")
     public Object getNodeInfo() {

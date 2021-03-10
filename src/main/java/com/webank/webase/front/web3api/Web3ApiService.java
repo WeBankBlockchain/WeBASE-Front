@@ -15,6 +15,7 @@ package com.webank.webase.front.web3api;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.NodeConfig;
+import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
@@ -50,6 +51,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
 import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
@@ -76,6 +78,8 @@ public class Web3ApiService {
     private BcosSDK bcosSDK;
     @Autowired
     private Client rpcWeb3j;
+    @Autowired
+    private Web3Config web3ConfigConstants;
 
     private static Map<Integer, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -553,7 +557,16 @@ public class Web3ApiService {
     /**
      * getNodeInfo.
      */
-    public Object getNodeInfo() {
+    public NodeInfo getNodeInfo() {
+        String nodeIpPort = web3ConfigConstants.getIp() + ":" + web3ConfigConstants.getChannelPort();
+        return getWeb3j().getNodeInfo(nodeIpPort);
+    }
+
+    /**
+     * get node config info
+     * @return
+     */
+    public Object getNodeConfig() {
         return JsonUtils.toJavaObject(nodeConfig.toString(), Object.class);
     }
 
@@ -727,7 +740,7 @@ public class Web3ApiService {
         }
     }
 
-    private BaseResponse querySingleGroupStatus(int groupId) {
+    public BaseResponse querySingleGroupStatus(int groupId) {
         GroupStatus status = getWeb3j()
             .queryGroupStatus(groupId, bcosSDK.getConfig().getNetworkConfig().getPeers().get(0))
             .getGroupStatus();
