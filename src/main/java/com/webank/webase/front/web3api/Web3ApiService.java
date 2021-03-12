@@ -806,6 +806,7 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j() {
+        this.checkConnection();
         Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList();
         if (groupIdSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
@@ -823,6 +824,7 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j(Integer groupId) {
+        this.checkConnection();
         Client web3j;
         try {
             web3j= bcosSDK.getClient(groupId);
@@ -850,5 +852,11 @@ public class Web3ApiService {
             // getGroupList();
         }
         return web3j;
+    }
+
+    private void checkConnection() {
+        if (!Web3Config.PEER_CONNECTED) {
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_NODE_INACTIVE);
+        }
     }
 }

@@ -76,6 +76,9 @@ public class ErrorCodeHandleUtils {
      */
     public static RetCode handleErrorMsg(String errorMsg) {
         // node inactive exception
+        if (errorMsg == null) {
+            return null;
+        }
         if (errorMsg.contains(NODE_INACTIVE_MSG)) {
             return NODE_NOT_ACTIVE;
         }

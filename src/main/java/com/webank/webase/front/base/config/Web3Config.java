@@ -17,6 +17,7 @@ package com.webank.webase.front.base.config;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import io.netty.channel.ChannelHandlerContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,9 @@ import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.model.Message;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
+import org.fisco.bcos.sdk.network.MsgHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -56,6 +59,28 @@ public class Web3Config {
     /* use String in java sdk*/
     private String ip = "127.0.0.1";
     private String channelPort = "20200";
+
+    // add channel disconnect
+    public static boolean PEER_CONNECTED = true;
+    static class Web3ChannelMsg implements MsgHandler {
+        @Override
+        public void onConnect(ChannelHandlerContext ctx) {
+            PEER_CONNECTED = true;
+            log.info("Web3ChannelMsg onConnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
+        }
+
+        @Override
+        public void onMessage(ChannelHandlerContext ctx, Message msg) {
+            // not added in message handler, ignore this override
+            log.info("Web3ChannelMsg onMessage:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
+        }
+
+        @Override
+        public void onDisconnect(ChannelHandlerContext ctx) {
+            PEER_CONNECTED = false;
+            log.error("Web3ChannelMsg onDisconnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
+        }
+    }
 
     @Bean
     public BcosSDK getBcosSDK() throws ConfigException {
@@ -99,8 +124,14 @@ public class Web3Config {
             .getNodeVersion();
         Constants.version = version.getVersion();
         Constants.chainId = version.getChainId();
+
+        Web3ChannelMsg disconnectMsg = new Web3ChannelMsg();
+        bcosSDK.getChannel().addConnectHandler(disconnectMsg);
+        bcosSDK.getChannel().addDisconnectHandler(disconnectMsg);
+
         return bcosSDK;
     }
+
 
     /**
      * 覆盖EncryptType构造函数
