@@ -35,14 +35,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -67,7 +66,7 @@ public class LogParseService {
     @Autowired
     CurrentStateRepository currentStateRepository;
     @Autowired
-    Map<Integer, Web3j> web3jMap;
+    BcosSDK bcosSDK;
     @Autowired
     Constants constants;
 
@@ -232,8 +231,7 @@ public class LogParseService {
     }
 
     private Boolean checkCountLimit() {
-        for (Map.Entry<Integer, Web3j> entry : web3jMap.entrySet()) {
-            Integer groupId = entry.getKey();
+        for (Integer groupId : bcosSDK.getGroupManagerService().getGroupList()) {
             long netWorkDataCount = netWorkDataRepository.count((Root<NetWorkData> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                 Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);

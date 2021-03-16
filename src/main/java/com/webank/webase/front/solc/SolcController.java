@@ -21,6 +21,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.solc.entity.RspDownload;
 import com.webank.webase.front.solc.entity.SolcInfo;
+import com.webank.webase.front.util.FrontUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -100,23 +101,8 @@ public class SolcController {
         }
         log.info("downloadSolcFile start. fileName:{}", fileName);
         RspDownload rspDownload = solcService.getSolcFile(fileName);
-        return ResponseEntity.ok().headers(headers(rspDownload.getFileName()))
+        return ResponseEntity.ok().headers(FrontUtils.headers(rspDownload.getFileName()))
                 .body(new InputStreamResource(rspDownload.getInputStream()));
     }
 
-    private HttpHeaders headers(String fileName) {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment;filename*=UTF-8''" + encode(fileName));
-        return httpHeaders;
-    }
-
-    private String encode(String name) {
-        try {
-            return URLEncoder.encode(name, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

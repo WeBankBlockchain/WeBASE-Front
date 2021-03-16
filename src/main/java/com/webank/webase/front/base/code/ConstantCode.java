@@ -95,6 +95,9 @@ public class ConstantCode {
     public static final RetCode PARAM_VAILD_FAIL = RetCode.mark(101002, "param valid fail");
     public static final RetCode SYSTEM_ERROR_WEB3J_NULL = RetCode.mark(101003, "web3j instance of groupId is null, please try again");
     public static final RetCode SYSTEM_ERROR_GROUP_LIST_EMPTY = RetCode.mark(101004, "No group belongs to this groupId(node not belongs to this group)");
+    public static final RetCode SYSTEM_ERROR_NODE_INACTIVE = RetCode.mark(101005, "No available node to connect");
+    public static final RetCode SYSTEM_ERROR_NO_NODE_IN_GROUP = RetCode.mark(101005, "No nodes belong to this group");
+    public static final RetCode WEB3J_CLIENT_IS_NULL = RetCode.mark(101006, "get web3j client failed!");
 
     /* precompiled success */
     public static final RetCode RET_SUCCESS = RetCode.mark(0, "success");
@@ -144,6 +147,9 @@ public class ConstantCode {
     public static final RetCode CONTRACT_PATH_IS_EXISTS = RetCode.mark(201154, "contract path is exists.");
     // add in v1.4.3
     public static final String PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING = "{\"code\":201155,\"message\":\"contract path cannot be empty\"}";
+    // add in v1.5.0
+    public static final RetCode WRITE_SDK_CRT_KEY_FILE_FAIL = RetCode.mark(202512,"Write front's sdk cert and key fail!");
+
 
     /* precompiled runtime check or error */
     // param
@@ -181,6 +187,8 @@ public class ConstantCode {
     public static final RetCode P12_PASSWORD_NOT_CHINESE = RetCode.mark(201235, "p12's password cannot be chinese");
     public static final RetCode P12_PASSWORD_ERROR = RetCode.mark(201236, "p12's password not match");
     public static final RetCode P12_FILE_ERROR = RetCode.mark(201237, "P12 file content error");
+    public static final RetCode SDK_CERT_FILE_NOT_FOUND = RetCode.mark(201238, "Sdk cert file not found, please check front's conf directory");
+    public static final RetCode SDK_KEY_FILE_NOT_FOUND = RetCode.mark(201239, "Sdk key file not found, please check front's conf directory");
 
     // mq error
     public static final RetCode EXCHANGE_OR_QUEUE_NOT_EXIST_ERROR = RetCode.mark(201241, "Exchange or message queue not exists, please check mq server or mq configuration");
@@ -234,4 +242,13 @@ public class ConstantCode {
     public static final RetCode CRUD_TABLE_KEY_LENGTH_ERROR = RetCode.mark(201522, "table key length error");
     public static final RetCode CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR = RetCode.mark(201523, "crud's param parse json error");
     public static final RetCode PRECOMPILED_COMMON_TRANSFER_JSON_FAIL = RetCode.mark(201524, "precompiled common transfer to json fail");
+
+    /* java sdk missing web3sdk's retcode */
+    public static final RetCode ALREADY_REMOVED_FROM_THE_GROUP = RetCode.mark(-51103, "The node already has been removed from the group");
+    public static final RetCode ALREADY_EXISTS_IN_SEALER_LIST = RetCode.mark(-51104, "The node already exists in the sealerList");
+    public static final RetCode ALREADY_EXISTS_IN_OBSERVER_LIST = RetCode.mark(-51105, "The node already exists in the observerList");
+    //public static final RetCode ALREADY_EXISTS_IN_OBSERVER_LIST = RetCode.mark(51105, "The");
+
+
+
 }

@@ -16,6 +16,7 @@
 
 package com.webank.webase.front.event;
 
+import com.webank.webase.front.base.SpringTestBase;
 import org.junit.Test;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -24,7 +25,7 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class MQServiceTest extends BaseTest{
+public class MQServiceTestBase extends SpringTestBase {
 
     @Autowired
     private RabbitAdmin rabbitAdmin;

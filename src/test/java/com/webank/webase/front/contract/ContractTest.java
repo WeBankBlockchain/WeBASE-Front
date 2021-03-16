@@ -1,4 +1,4 @@
-package com.webank.webase.front.gm.basic;
+package com.webank.webase.front.contract;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;

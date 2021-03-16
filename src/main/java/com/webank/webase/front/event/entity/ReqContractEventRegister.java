@@ -83,7 +83,7 @@ public class ReqContractEventRegister {
     private String contractAddress;
 
     /**
-     * List of topics
+     * event name list
      */
     private List<String> topicList;
 

@@ -29,12 +29,12 @@ public class ReqDecodeParam {
      */
     @NotNull
     private Integer decodeType;
-    /**
-     * 1-entity(default), 2-json
-     */
-    private Integer returnType;
 
     private String input;
     private String output;
     private List<Object> abiList;
+    /**
+     * add in 1.5.0, not null if decode output
+     */
+    private String methodName;
 }

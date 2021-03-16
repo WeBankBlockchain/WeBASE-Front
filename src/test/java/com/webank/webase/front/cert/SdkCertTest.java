@@ -16,19 +16,14 @@
 
 package com.webank.webase.front.cert;
 
-import com.webank.webase.front.Application;
+import com.webank.webase.front.base.SpringTestBase;
+import java.util.List;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
-import java.util.List;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
-public class SdkCertTest {
+public class SdkCertTest extends SpringTestBase {
 
     @Autowired
     FrontCertService frontCertService;
@@ -38,7 +33,7 @@ public class SdkCertTest {
     public void testSdkCertService() {
         List<String> sdkList = frontCertService.getSDKNodeCert();
         Assert.notNull(sdkList, "load sdk crt error");
-        sdkList.stream().forEach(c -> System.out.println(c));
+        sdkList.forEach(c -> System.out.println(c));
     }
 
     @Test
@@ -52,7 +47,7 @@ public class SdkCertTest {
     public void testNodeCertsService() {
         List<String> sdkList = frontCertService.getNodeCerts();
         Assert.notNull(sdkList, "load sdk crt error");
-        sdkList.stream().forEach(c -> System.out.println(c));
+        sdkList.forEach(c -> System.out.println(c));
     }
 
 }

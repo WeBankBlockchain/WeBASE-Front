@@ -24,21 +24,21 @@ import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import javax.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
-import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
-import org.fisco.bcos.web3j.protocol.core.methods.response.PendingTxSize;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
+import org.fisco.bcos.sdk.client.protocol.response.PbftView;
+import org.fisco.bcos.sdk.client.protocol.response.PendingTxSize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -58,7 +58,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MonitorService {
     @Autowired
-    Map<Integer, Web3j> web3jMap;
+    BcosSDK bcosSDK;
+    @Autowired
+    private Web3ApiService web3ApiService;
     @Autowired
     MonitorRepository monitorRepository;
     @Autowired
@@ -200,19 +202,17 @@ public class MonitorService {
         }
         Long currentTime = System.currentTimeMillis();
         // to do add more group
-        for (Map.Entry<Integer, Web3j> entry : web3jMap.entrySet()) {
+        for (Integer groupId : bcosSDK.getGroupManagerService().getGroupList()) {
+            Client web3j = web3ApiService.getWeb3j(groupId);
             Monitor monitor = new Monitor();
-            CompletableFuture<BlockNumber> blockHeightFuture =
-                    entry.getValue().getBlockNumber().sendAsync();
-            CompletableFuture<PbftView> pbftViewFuture = entry.getValue().getPbftView().sendAsync();
-            CompletableFuture<PendingTxSize> pendingTxSizeFuture =
-                    entry.getValue().getPendingTxSize().sendAsync();
-
-            monitor.setBlockHeight(blockHeightFuture.get().getBlockNumber());
-            monitor.setPbftView(pbftViewFuture.get().getPbftView());
-            monitor.setPendingTransactionCount(pendingTxSizeFuture.get().getPendingTxSize());
+            BlockNumber blockHeight = web3j.getBlockNumber();
+            PbftView pbftView = web3j.getPbftView();
+            PendingTxSize pendingTxSize = web3j.getPendingTxSize();
+            monitor.setBlockHeight(blockHeight.getBlockNumber());
+            monitor.setPbftView(pbftView.getPbftView());
+            monitor.setPendingTransactionCount(pendingTxSize.getPendingTxSize());
             monitor.setTimestamp(currentTime);
-            monitor.setGroupId(entry.getKey());
+            monitor.setGroupId(groupId);
             monitorRepository.save(monitor);
             log.debug("insert success =  " + monitor.getId());
         }

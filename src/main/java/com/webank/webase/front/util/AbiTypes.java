@@ -15,9 +15,9 @@
  */
 package com.webank.webase.front.util;
 
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.abi.datatypes.*;
-import org.fisco.bcos.web3j.abi.datatypes.generated.*;
+import org.fisco.bcos.sdk.abi.datatypes.*;
+import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.abi.datatypes.generated.*;
 
 /**
  * DataTypes for abi in web3j
@@ -29,7 +29,7 @@ public class AbiTypes {
     public static Class<? extends Type> getType(String type) {
         switch (type) {
             case "address":
-                return Address.class;
+                return org.fisco.bcos.sdk.abi.datatypes.Address.class;
             case "bool":
                 return Bool.class;
             case "string":

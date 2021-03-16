@@ -14,12 +14,9 @@
 
 package com.webank.webase.front.event.entity;
 
-import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.fisco.bcos.channel.event.filter.TopicTools;
-import org.fisco.bcos.web3j.utils.Numeric;
 
 /**
  * event's topics, one eventName topic (sha name(type) as topic) and most 3 indexed param topic(sha value as topic)
@@ -33,9 +30,6 @@ public class EventTopicParam {
     private IndexedParamType indexed2;
     private IndexedParamType indexed3;
 
-    public String getEventNameSig() {
-        return TopicTools.stringToTopic(eventName);
-    }
 
     @Data
     @AllArgsConstructor
@@ -45,30 +39,5 @@ public class EventTopicParam {
         // indexed value
         private String value;
 
-        public String getValueSig() {
-            // if null, not filer
-            if (this.value == null || "".equals(this.value)) {
-                return null;
-            }
-
-            if (type.contains("int")) {
-                return TopicTools.integerToTopic(new BigInteger(value));
-            } else if ("string".equals(type)) {
-                return TopicTools.stringToTopic(value);
-            } else if ("bool".equals(type)) {
-                return TopicTools.boolToTopic(Boolean.parseBoolean(value));
-            } else if ("address".equals(type)){
-                return TopicTools.addressToTopic(value);
-            } else if (type.contains("bytes")) {
-                if ("bytes".equals(type)) {
-                    return TopicTools.bytesToTopic(Numeric.hexStringToByteArray(value));
-                } else {
-                    // bytesN
-                    return TopicTools.byteNToTopic(Numeric.hexStringToByteArray(value));
-                }
-            } else {
-                return null;
-            }
-        }
     }
 }

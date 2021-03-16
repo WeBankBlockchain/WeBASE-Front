@@ -1,25 +1,28 @@
-/*
- * Copyright 2014-2020 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.webank.webase.front.util;
+package com.webank.webase.front.precompiledapi.crud;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.util.PrecompiledUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.NotExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.*;
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.ItemsList;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
@@ -28,22 +31,23 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.Index;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.select.*;
+import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.util.TablesNamesFinder;
-import org.fisco.bcos.web3j.precompile.crud.Condition;
-import org.fisco.bcos.web3j.precompile.crud.Entry;
-import org.fisco.bcos.web3j.precompile.crud.EnumOP;
-import org.fisco.bcos.web3j.precompile.crud.Table;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.ConditionOperator;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
+import org.fisco.bcos.sdk.model.PrecompiledConstant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
-/**
- * Handle CRUD operation on chain's table
- * parse sql(string type) to Table, Condition etc.
- */
 public class CRUDParseUtils {
-
+    private static final Logger logger = LoggerFactory.getLogger(CRUDParseUtils.class);
     public static final String PRIMARY_KEY = "primary key";
 
     public static void parseCreateTable(String sql, Table table)
@@ -60,7 +64,7 @@ public class CRUDParseUtils {
         List<Index> indexes = createTable.getIndexes();
         if (indexes != null) {
             if (indexes.size() > 1) {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
+                throw new FrontException(ConstantCode.SQL_ERROR,
                         "Please provide only one primary key for the table.");
             }
             keyFlag = true;
@@ -68,8 +72,9 @@ public class CRUDParseUtils {
             String type = index.getType().toLowerCase();
             if (PRIMARY_KEY.equals(type)) {
                 table.setKey(index.getColumnsNames().get(0));
+                table.setKeyFieldName(index.getColumnsNames().get(0));
             } else {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
+                throw new FrontException(ConstantCode.SQL_ERROR,
                         "Please provide only one primary key for the table.");
             }
         }
@@ -86,7 +91,7 @@ public class CRUDParseUtils {
                     String key = columnDefinitions.get(i).getColumnName();
                     if (keyFlag) {
                         if (!table.getKey().equals(key)) {
-                            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
+                            throw new FrontException(ConstantCode.SQL_ERROR,
                                     "Please provide only one primary key for the table.");
                         }
                     } else {
@@ -98,42 +103,53 @@ public class CRUDParseUtils {
             }
         }
         if (!keyFlag) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "Please provide a primary key for the table.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "Please provide a primary key for the table.");
         }
         // parse value field
         List<String> fieldsList = new ArrayList<>();
         for (int i = 0; i < columnDefinitions.size(); i++) {
             String columnName = columnDefinitions.get(i).getColumnName();
             if (fieldsList.contains(columnName)) {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Please provide the field '" + columnName + "' only once.");
+                throw new FrontException(ConstantCode.SQL_ERROR,
+                    "Please provide the field '" + columnName + "' only once.");
             } else {
                 fieldsList.add(columnName);
             }
         }
         if (!fieldsList.contains(table.getKey())) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Please provide the field '" + table.getKey() + "' in column definition.");
+            throw new FrontException(ConstantCode.SQL_ERROR,
+                "Please provide the field '" + table.getKey() + "' in column definition.");
         } else {
             fieldsList.remove(table.getKey());
         }
-        StringBuffer fields = new StringBuffer();
-        for (int i = 0; i < fieldsList.size(); i++) {
-            fields.append(fieldsList.get(i));
-            if (i != fieldsList.size() - 1) {
-                fields.append(",");
-            }
-        }
-        table.setValueFields(fields.toString());
+        table.setValueFields(fieldsList);
     }
 
-    public static boolean parseInsert(String sql, Table table, Entry entry)
+    public static String parseInsertedTableName(String sql)
             throws JSQLParserException, FrontException {
         Statement statement = CCJSqlParserUtil.parse(sql);
         Insert insert = (Insert) statement;
 
         if (insert.getSelect() != null) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The insert select clause is not supported.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "The insert select clause is not supported.");
+        }
+        // parse table name
+        return insert.getTable().getName();
+    }
+
+    public static boolean parseInsert(
+            String sql, Table table, Entry entry, Map<String, String> tableDesc)
+            throws JSQLParserException, FrontException {
+        Statement statement = CCJSqlParserUtil.parse(sql);
+        Insert insert = (Insert) statement;
+        String valueFieldString = tableDesc.get(PrecompiledConstant.VALUE_FIELD_NAME);
+        String[] valueFields = valueFieldString.split(",");
+        String expectedValueField =
+                tableDesc.get(PrecompiledConstant.KEY_FIELD_NAME) + ", " + valueFieldString;
+        int expectedValueNum = valueFields.length + 1;
+
+        if (insert.getSelect() != null) {
+            throw new FrontException(ConstantCode.SQL_ERROR, "The insert select clause is not supported.");
         }
         // parse table name
         String tableName = insert.getTable().getName();
@@ -142,33 +158,57 @@ public class CRUDParseUtils {
         // parse columns
         List<Column> columns = insert.getColumns();
         ItemsList itemsList = insert.getItemsList();
-        String items = itemsList.toString();
-        String[] rawItem = items.substring(1, items.length() - 1).split(",");
-        String[] itemArr = new String[rawItem.length];
-        for (int i = 0; i < rawItem.length; i++) {
-            itemArr[i] = rawItem[i].trim();
+
+        ExpressionList expressionList = (ExpressionList) itemsList;
+        List<Expression> expressions = expressionList.getExpressions();
+
+        String[] itemArr = new String[expressions.size()];
+        for (int i = 0; i < expressions.size(); i++) {
+            itemArr[i] = expressions.get(i).toString().trim();
         }
         if (columns != null) {
             if (columns.size() != itemArr.length) {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "Column count doesn't match value count.");
+                throw new FrontException(ConstantCode.SQL_ERROR, "Column count doesn't match value count.");
+            }
+            if (expectedValueNum != columns.size()) {
+                throw new FrontException(ConstantCode.SQL_ERROR,
+                    "Column count doesn't match value count, fields size: "
+                                + valueFields.length
+                                + ", provided field value size: "
+                                + columns.size()
+                                + ", expected field list: "
+                                + expectedValueField);
             }
             List<String> columnNames = new ArrayList<>();
             for (Column column : columns) {
                 String columnName = trimQuotes(column.toString());
                 if (columnNames.contains(columnName)) {
-                    throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                            "Please provide the field '" + columnName + "' only once.");
+                    throw new FrontException(ConstantCode.SQL_ERROR,
+                        "Please provide the field '" + columnName + "' only once.");
                 } else {
                     columnNames.add(columnName);
                 }
             }
             for (int i = 0; i < columnNames.size(); i++) {
-                entry.put(columnNames.get(i), trimQuotes(itemArr[i]));
+                entry.getFieldNameToValue().put(columnNames.get(i), trimQuotes(itemArr[i]));
             }
             return false;
         } else {
+            String keyField = tableDesc.get(PrecompiledConstant.KEY_FIELD_NAME);
+            if (expectedValueNum != itemArr.length) {
+                throw new FrontException(ConstantCode.SQL_ERROR,
+                    "Column count doesn't match value count, fields size: "
+                                + valueFields.length
+                                + ", provided field value size: "
+                                + itemArr.length
+                                + ", expected field list: "
+                                + expectedValueField);
+            }
+            String[] allFields = new String[itemArr.length];
+            allFields[0] = keyField;
+            System.arraycopy(valueFields, 0, allFields, 1, valueFields.length);
             for (int i = 0; i < itemArr.length; i++) {
-                entry.put(i + "", trimQuotes(itemArr[i]));
+                entry.getFieldNameToValue().put(allFields[i], trimQuotes(itemArr[i]));
             }
             return true;
         }
@@ -185,29 +225,29 @@ public class CRUDParseUtils {
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(selectStatement);
         if (tableList.size() != 1) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "Please provide only one table name.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "Please provide only one table name.");
         }
         table.setTableName(tableList.get(0));
 
         // parse where clause
         PlainSelect selectBody = (PlainSelect) selectStatement.getSelectBody();
         if (selectBody.getOrderByElements() != null) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The order clause is not supported.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "The order clause is not supported.");
         }
         if (selectBody.getGroupBy() != null) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The group clause is not supported.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "The group clause is not supported.");
         }
         if (selectBody.getHaving() != null) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The having clause is not supported.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "The having clause is not supported.");
         }
         if (selectBody.getJoins() != null) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The join clause is not supported.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "The join clause is not supported.");
         }
         if (selectBody.getTop() != null) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The top clause is not supported.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "The top clause is not supported.");
         }
         if (selectBody.getDistinct() != null) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The distinct clause is not supported.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "The distinct clause is not supported.");
         }
         Expression expr = selectBody.getWhere();
         condition = handleExpression(condition, expr);
@@ -225,11 +265,33 @@ public class CRUDParseUtils {
                 Expression expression = selectExpressionItem.getExpression();
                 if (expression instanceof Function) {
                     Function func = (Function) expression;
-                    throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                            "The " + func.getName() + " function is not supported.");
+                    throw new FrontException(ConstantCode.SQL_ERROR,
+                        "The " + func.getName() + " function is not supported.");
                 }
             }
             selectColumns.add(item.toString());
+        }
+    }
+
+    private static void checkExpression(Expression expression) throws FrontException {
+        if (expression instanceof OrExpression) {
+            throw new FrontException(ConstantCode.SQL_ERROR, "The OrExpression is not supported.");
+        }
+        if (expression instanceof NotExpression) {
+            throw new FrontException(ConstantCode.SQL_ERROR, "The NotExpression is not supported.");
+        }
+        if (expression instanceof InExpression) {
+            throw new FrontException(ConstantCode.SQL_ERROR, "The InExpression is not supported.");
+        }
+        if (expression instanceof LikeExpression) {
+            logger.debug("The LikeExpression is not supported.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "The LikeExpression is not supported.");
+        }
+        if (expression instanceof SubSelect) {
+            throw new FrontException(ConstantCode.SQL_ERROR, "The SubSelect is not supported.");
+        }
+        if (expression instanceof IsNullExpression) {
+            throw new FrontException(ConstantCode.SQL_ERROR, "The IsNullExpression is not supported.");
         }
     }
 
@@ -238,29 +300,12 @@ public class CRUDParseUtils {
         if (expr instanceof BinaryExpression) {
             condition = getWhereClause((BinaryExpression) (expr), condition);
         }
-        if (expr instanceof OrExpression) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The OrExpression is not supported.");
-        }
-        if (expr instanceof NotExpression) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The NotExpression is not supported.");
-        }
-        if (expr instanceof InExpression) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The InExpression is not supported.");
-        }
-        if (expr instanceof LikeExpression) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The LikeExpression is not supported.");
-        }
-        if (expr instanceof SubSelect) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The SubSelect is not supported.");
-        }
-        if (expr instanceof IsNullExpression) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "The IsNullExpression is not supported.");
-        }
-        Map<String, Map<EnumOP, String>> conditions = condition.getConditions();
+        checkExpression(expr);
+        Map<String, Map<ConditionOperator, String>> conditions = condition.getConditions();
         Set<String> keys = conditions.keySet();
         for (String key : keys) {
-            Map<EnumOP, String> value = conditions.get(key);
-            EnumOP operation = value.keySet().iterator().next();
+            Map<ConditionOperator, String> value = conditions.get(key);
+            ConditionOperator operation = value.keySet().iterator().next();
             String itemValue = value.values().iterator().next();
             String newValue = trimQuotes(itemValue);
             value.put(operation, newValue);
@@ -296,7 +341,7 @@ public class CRUDParseUtils {
         String tableName = tables.get(0).getName();
         table.setTableName(tableName);
 
-        // parse cloumns
+        // parse columns
         List<Column> columns = update.getColumns();
         List<Expression> expressions = update.getExpressions();
         int size = expressions.size();
@@ -305,7 +350,8 @@ public class CRUDParseUtils {
             values[i] = expressions.get(i).toString();
         }
         for (int i = 0; i < columns.size(); i++) {
-            entry.put(trimQuotes(columns.get(i).toString()), trimQuotes(values[i]));
+            entry.getFieldNameToValue()
+                    .put(trimQuotes(columns.get(i).toString()), trimQuotes(values[i]));
         }
 
         // parse where clause
@@ -351,23 +397,29 @@ public class CRUDParseUtils {
                     condition.Limit(Integer.parseInt(count.toString()));
                 }
             } catch (NumberFormatException e) {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Please provide limit parameters by non-negative integer mode, "
-                                + PrecompiledUtils.NonNegativeIntegerRange
+                throw new FrontException(ConstantCode.SQL_ERROR,
+                    "Please provide limit parameters by non-negative integer mode, "
+                            + PrecompiledUtils.NonNegativeIntegerRange
                                 + ".");
             }
         }
     }
 
-    private static Condition getWhereClause(Expression expr, Condition condition) {
-
+    private static Condition getWhereClause(Expression expr, Condition condition)
+            throws FrontException {
+        Set<String> keySet = new HashSet<>();
+        Set<String> conflictKeys = new HashSet<>();
+        Set<String> unsupportedConditions = new HashSet<>();
         expr.accept(
                 new ExpressionVisitorAdapter() {
-
                     @Override
                     protected void visitBinaryExpression(BinaryExpression expr) {
                         if (expr instanceof ComparisonOperator) {
                             String key = trimQuotes(expr.getLeftExpression().toString());
+                            if (keySet.contains(key)) {
+                                conflictKeys.add(key);
+                            }
+                            keySet.add(key);
                             String operation = expr.getStringExpression();
                             String value = trimQuotes(expr.getRightExpression().toString());
                             switch (operation) {
@@ -392,109 +444,136 @@ public class CRUDParseUtils {
                                 default:
                                     break;
                             }
+                        } else {
+                            try {
+                                checkExpression(expr);
+                            } catch (FrontException e) {
+                                unsupportedConditions.add(e.getMessage());
+                            }
                         }
                         super.visitBinaryExpression(expr);
                     }
                 });
+        if (conflictKeys.size() > 0) {
+            throw new FrontException(ConstantCode.SQL_ERROR,
+                "Wrong condition! There cannot be the same field in the same condition! The conflicting field is: "
+                            + conflictKeys.toString());
+        }
+        if (unsupportedConditions.size() > 0) {
+            throw new FrontException(ConstantCode.SQL_ERROR,
+                "Wrong condition! Find unsupported conditions! message: "
+                            + unsupportedConditions.toString());
+        }
         return condition;
     }
 
-    // change exception to return error message
-    public static String invalidSymbolReturn(String sql)  {
-        if (sql.contains("；")) {
-            return "SyntaxError: Unexpected Chinese semicolon.";
-        } else if (sql.contains("“")
-                || sql.contains("”")
-                || sql.contains("‘")
-                || sql.contains("’")) {
-            return "SyntaxError: Unexpected Chinese quotes.";
-        } else if (sql.contains("，")) {
-            return "SyntaxError: Unexpected Chinese comma.";
-        } else {
-            return "SyntaxError: Please check syntax";
-        }
-    }
     public static void invalidSymbol(String sql) throws FrontException {
         if (sql.contains("；")) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "SyntaxError: Unexpected Chinese semicolon.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "SyntaxError: Unexpected Chinese semicolon.");
         } else if (sql.contains("“")
                 || sql.contains("”")
                 || sql.contains("‘")
                 || sql.contains("’")) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "SyntaxError: Unexpected Chinese quotes.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "SyntaxError: Unexpected Chinese quotes.");
         } else if (sql.contains("，")) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR, "SyntaxError: Unexpected Chinese comma.");
+            throw new FrontException(ConstantCode.SQL_ERROR, "SyntaxError: Unexpected Chinese comma.");
         }
     }
 
-    public static void checkTableParams(Table table) throws FrontException {
-        if (table.getTableName().length() > PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "The table name length is greater than "
-                            + PrecompiledUtils.SYS_TABLE_KEY_MAX_LENGTH
-                            + ".");
+    public static boolean checkTableExistence(List<Map<String, String>> descTable) {
+        if (descTable.size() == 0
+            || descTable.get(0).get(PrecompiledConstant.KEY_FIELD_NAME).equals("")) {
+//            System.out.println("The table \"" + tableName + "\" doesn't exist!");
+            return false;
         }
-        if (table.getKey().length() > PrecompiledUtils.SYS_TABLE_KEY_FIELD_NAME_MAX_LENGTH) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "The table primary key name length is greater than "
-                            + PrecompiledUtils.SYS_TABLE_KEY_FIELD_NAME_MAX_LENGTH
-                            + ".");
-        }
-        String[] valueFields = table.getValueFields().split(",");
-        for (String valueField : valueFields) {
-            if (valueField.length() > PrecompiledUtils.USER_TABLE_FIELD_NAME_MAX_LENGTH) {
-                throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "The table field name length is greater than "
-                                + PrecompiledUtils.USER_TABLE_FIELD_NAME_MAX_LENGTH
-                                + ".");
+        return true;
+    }
+
+
+    public static String formatJson(String jsonStr) {
+        if (null == jsonStr || "".equals(jsonStr)) return "";
+        jsonStr = jsonStr.replace("\\n", "");
+        StringBuilder sb = new StringBuilder();
+        char last = '\0';
+        char current = '\0';
+        int indent = 0;
+        boolean isInQuotationMarks = false;
+        for (int i = 0; i < jsonStr.length(); i++) {
+            last = current;
+            current = jsonStr.charAt(i);
+            switch (current) {
+                case '"':
+                    if (last != '\\') {
+                        isInQuotationMarks = !isInQuotationMarks;
+                    }
+                    sb.append(current);
+                    break;
+                case '{':
+                case '[':
+                    sb.append(current);
+                    if (!isInQuotationMarks) {
+                        sb.append('\n');
+                        indent++;
+                        addIndentBlank(sb, indent);
+                    }
+                    break;
+                case '}':
+                case ']':
+                    if (!isInQuotationMarks) {
+                        sb.append('\n');
+                        indent--;
+                        addIndentBlank(sb, indent);
+                    }
+                    sb.append(current);
+                    break;
+                case ',':
+                    sb.append(current);
+                    if (last != '\\' && !isInQuotationMarks) {
+                        sb.append('\n');
+                        addIndentBlank(sb, indent);
+                    }
+                    break;
+                case ' ':
+                    if (',' != jsonStr.charAt(i - 1)) {
+                        sb.append(current);
+                    }
+                    break;
+                case '\\':
+                    sb.append("\\");
+                    break;
+                default:
+                    if (!(current == " ".charAt(0))) sb.append(current);
             }
         }
-        if (table.getValueFields().length() > PrecompiledUtils.SYS_TABLE_VALUE_FIELD_MAX_LENGTH) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "The table total field name length is greater than "
-                            + PrecompiledUtils.SYS_TABLE_VALUE_FIELD_MAX_LENGTH
-                            + ".");
+
+        return sb.toString();
+    }
+
+    private static void addIndentBlank(StringBuilder sb, int indent) {
+        for (int i = 0; i < indent; i++) {
+            sb.append("    ");
         }
     }
 
-    public static void checkUserTableParam(Entry entry, Table descTable)
-            throws FrontException {
-        Map<String, String> fieldsMap = entry.getFields();
-        Set<String> keys = fieldsMap.keySet();
-        for (String key : keys) {
-            if (key.equals(descTable.getKey())) {
-                if (fieldsMap.get(key).length() > PrecompiledUtils.USER_TABLE_KEY_VALUE_MAX_LENGTH) {
-                    throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                            "The table primary key value length is greater than "
-                                    + PrecompiledUtils.USER_TABLE_KEY_VALUE_MAX_LENGTH
-                                    + ".");
-                }
-            } else {
-                if (fieldsMap.get(key).length() > PrecompiledUtils.USER_TABLE_FIELD_VALUE_MAX_LENGTH) {
-                    throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                            "The table field '" + key + "' value length is greater than 16M - 1.");
-                }
-            }
-        }
-    }
-    public static void handleKey(Table table, Condition condition) throws Exception {
+
+    public static void handleKey(Table table, Condition condition) {
 
         String keyName = table.getKey();
         String keyValue = "";
-        Map<EnumOP, String> keyMap = condition.getConditions().get(keyName);
+        Map<ConditionOperator, String> keyMap = condition.getConditions().get(keyName);
         if (keyMap == null) {
-            throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Please provide a equal condition for the key field '"
+            throw new FrontException(ConstantCode.SQL_ERROR,
+                "Please provide a equal condition for the key field '"
+                    + keyName
+                    + "' in where clause.");
+        } else {
+            Set<ConditionOperator> keySet = keyMap.keySet();
+            for (ConditionOperator enumOP : keySet) {
+                if (enumOP != ConditionOperator.eq) {
+                    throw new FrontException(ConstantCode.SQL_ERROR,
+                        "Please provide a equal condition for the key field '"
                             + keyName
                             + "' in where clause.");
-        } else {
-            Set<EnumOP> keySet = keyMap.keySet();
-            for (EnumOP enumOP : keySet) {
-                if (enumOP != EnumOP.eq) {
-                    throw new FrontException(PrecompiledUtils.CRUD_SQL_ERROR,
-                            "Please provide a equal condition for the key field '"
-                                    + keyName
-                                    + "' in where clause.");
                 } else {
                     keyValue = keyMap.get(enumOP);
                 }
@@ -521,8 +600,8 @@ public class CRUDParseUtils {
         return filteredResult;
     }
 
-    public static List<Map<String, String>> getSeletedColumn(
-            List<String> selectColumns, List<Map<String, String>> result) {
+    public static List<Map<String, String>> getSelectedColumn(
+        List<String> selectColumns, List<Map<String, String>> result) {
         List<Map<String, String>> selectedResult = new ArrayList<>(result.size());
         Map<String, String> selectedRecords;
         for (Map<String, String> records : result) {
@@ -537,8 +616,7 @@ public class CRUDParseUtils {
             }
             selectedResult.add(selectedRecords);
         }
-        selectedResult.stream().forEach(System.out::println);
+        selectedResult.forEach(System.out::println);
         return selectedResult;
     }
-
 }

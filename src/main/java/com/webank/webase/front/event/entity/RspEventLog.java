@@ -17,11 +17,11 @@ package com.webank.webase.front.event.entity;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.fisco.bcos.web3j.tx.txdecode.LogResult;
+import org.fisco.bcos.sdk.model.EventLog;
 
 @Data
 @AllArgsConstructor
 public class RspEventLog {
     private Integer Status;
-    private List<LogResult> logs;
+    private List<EventLog> logs;
 }

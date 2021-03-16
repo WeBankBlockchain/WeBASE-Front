@@ -19,7 +19,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -39,7 +39,7 @@ public class ReqRegisterCns {
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_ADDRESS_EMPTY)
     private String contractAddress;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
-    private List<AbiDefinition> abiInfo;
+    private List<ABIDefinition> abiInfo;
     private String signUserId;
     private String userAddress;
     private String contractPath;

@@ -14,17 +14,20 @@
 
 package com.webank.webase.front.event;
 
+import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class EventServiceTest extends BaseTest {
+public class EventServiceTestBase extends SpringTestBase {
 
     @Autowired
     private ContractEventInfoRepository eventInfoRepository;
     @Autowired
     private NewBlockEventInfoRepository blockEventInfoRepository;
+    @Autowired
+    private EventService eventService;
 
     @Test
     public void testFindContractEvent() {
@@ -37,6 +40,12 @@ public class EventServiceTest extends BaseTest {
         NewBlockEventInfo n = blockEventInfoRepository.findNewBlockEventInfo("app_006", "group003", "test_queue");
         System.out.println("NewBlockEventInfo: " + n);
 
+    }
+
+    @Test
+    public void testGetEventSync() {
+        // eventService.getContractEventLog(groupId, contractAddress, abiStr,
+        //            fromBlock, toBlock, eventTopicParam·);
     }
 
 }

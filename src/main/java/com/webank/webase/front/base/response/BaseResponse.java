@@ -17,6 +17,7 @@
 package com.webank.webase.front.base.response;
 
 import com.webank.webase.front.base.code.RetCode;
+import com.webank.webase.front.util.JsonUtils;
 import lombok.Data;
 
 /**
@@ -64,4 +65,15 @@ public class BaseResponse {
         this.message = message;
         this.data = obj;
     }
+
+    public BaseResponse(int code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.objToString(this);
+    }
+
 }

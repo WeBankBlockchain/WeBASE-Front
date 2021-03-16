@@ -18,11 +18,17 @@ package com.webank.webase.front.cert;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.contract.entity.FileContentHandle;
+import com.webank.webase.front.solc.SolcController;
+import com.webank.webase.front.util.FrontUtils;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -125,4 +131,30 @@ public class FrontCertController {
         return map;
     }
 
+    /**
+     * ecdsa ssl: get <"sdk.key", {sdkKeyContent}>
+     * gm ssl: get <"gm/gmsdk.key", {sdkKeyContent}>
+     * @return
+     */
+    @GetMapping("sdk")
+    public Map<String, String> getSdkFiles() {
+        Map<String, String> certList = certService.getSDKCertKeyMap();
+        if (certList.isEmpty()) {
+            log.error("getSdkFiles error return empty!");
+            throw new FrontException(ConstantCode.SDK_CERT_FILE_NOT_FOUND);
+        }
+        return certList;
+    }
+
+    @GetMapping("sdk/zip")
+    public ResponseEntity<InputStreamResource> getSdkCertZip() {
+        Instant startTime = Instant.now();
+        log.info("start getSdkCertZip startTime:{}", startTime.toEpochMilli());
+        // get file
+        FileContentHandle fileContentHandle = certService.getFrontSdkFiles();
+        log.info("end getSdkCertZip fileContentHandle:{}useTime:{}", fileContentHandle,
+            Duration.between(startTime, Instant.now()).toMillis());
+        return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
+            .body(new InputStreamResource(fileContentHandle.getInputStream()));
+    }
 }
