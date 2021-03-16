@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.task;
+package com.webank.webase.front.event;
 
-import com.webank.webase.front.event.BaseTest;
+import com.webank.webase.front.base.SpringTestBase;
+import com.webank.webase.front.event.entity.message.BlockPushMessage;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class RegisterTaskTest extends BaseTest {
+import java.math.BigInteger;
+
+public class MQPublisherTestBase extends SpringTestBase {
+
     @Autowired
-    EventRegisterInitTask eventRegisterInitTask;
-    @Autowired
-    SyncEventMapTask mapTask;
+    private MQPublisher rabbitMQPublisher;
 
     @Test
-    public void testRegisterEventLogPushTask() {
-        eventRegisterInitTask.syncEventRegisterTask();
-    }
-
-    @Test
-    public void testSyncMapTask() {
-        mapTask.syncEventMapTask();
+    public void testMsg() {
+        String exchangeName = "block_exchange";
+        Integer i = 0;
+        while( i < 10) {
+            i++;
+            BlockPushMessage blockPushMessage = new BlockPushMessage();
+            blockPushMessage.setBlockNumber(new BigInteger(i.toString()));
+            rabbitMQPublisher.sendToTradeFinishedByString(exchangeName, "",
+                    blockPushMessage.toString());
+        }
     }
 }

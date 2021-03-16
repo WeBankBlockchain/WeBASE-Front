@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.gm.runtime;
+package com.webank.webase.front.keystore;
 
+import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.util.AesUtils;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.utils.Numeric;
+import java.io.IOException;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.io.IOException;
-
-public class PublicKeyTest extends BaseTest {
+public class PublicKeyTest extends SpringTestBase {
     @Autowired
     private AesUtils aesUtils;
+    @Autowired
+    @Qualifier("common")
+    private CryptoSuite cryptoSuite;
 
     @Test
     public void checkPubCorrect() throws IOException {
@@ -39,15 +41,13 @@ public class PublicKeyTest extends BaseTest {
         String defaultUserPrivateKey = aesUtils.aesDecrypt(defaultUserPrivateKeyAfterAes);
         System.out.println("decrypt aes");
         System.out.println(defaultUserPrivateKey);
-        Credentials credential = GenCredential.create(defaultUserPrivateKey);
+        CryptoKeyPair credential = cryptoSuite.createKeyPair(defaultUserPrivateKey);
         System.out.println("private: ");
-        System.out.println(credential.getEcKeyPair().getPrivateKey());
-        System.out.println(Numeric.toHexStringNoPrefix(credential.getEcKeyPair().getPrivateKey()));
+        System.out.println(credential.getHexPrivateKey());
         System.out.println("pub: ");
-        System.out.println(credential.getEcKeyPair().getPublicKey());
+        System.out.println(credential.getHexPublicKey());
         System.out.println("address: ");
         System.out.println(credential.getAddress());
-        System.out.println(Keys.getAddress(credential.getEcKeyPair().getPublicKey()));
     }
 
 }

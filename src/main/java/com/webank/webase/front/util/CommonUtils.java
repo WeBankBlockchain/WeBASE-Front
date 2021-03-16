@@ -35,7 +35,6 @@ import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
@@ -46,17 +45,22 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 /**
  * CommonUtils.
- *
+ * todo use java sdk
  */
 @Slf4j
 public class CommonUtils {
@@ -67,51 +71,87 @@ public class CommonUtils {
         throw new IllegalStateException("Utility class");
     }
 
+
     /**
      * stringToSignatureData. 19/12/24 support guomi： add byte[] pub in signatureData
-     * 
      * @param signatureData signatureData
      * @return
      */
-    public static SignatureData stringToSignatureData(String signatureData) {
+    public static SignatureResult stringToSignatureData(String signatureData, int encryptType) {
         byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+        // 从1开始，因为此处byteArr第0位是v； 注: 在java sdk中, v放在了最后一位
         byte[] signR = new byte[32];
         System.arraycopy(byteArr, 1, signR, 0, signR.length);
         byte[] signS = new byte[32];
         System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
-        if (EncryptType.encryptType == 1) {
+        if (encryptType == CryptoType.SM_TYPE) {
             byte[] pub = new byte[64];
             System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
-            return new SignatureData(byteArr[0], signR, signS, pub);
+            // return new SignatureData(byteArr[0], signR, signS, pub);
+            return new SM2SignatureResult(pub, signR, signS);
         } else {
-            return new SignatureData(byteArr[0], signR, signS);
+            return new ECDSASignatureResult(byteArr[0], signR, signS);
         }
     }
 
     /**
+     * stringToSignatureData. 19/12/24 support guomi： add byte[] pub in signatureData
+     * @param signatureData signatureData
+     * @return
+     */
+//    public static SignatureResult stringToSM2SignatureData(String signatureData) {
+//        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+//        // 从1开始，因为此处byteArr第0位是v； 注: 在java sdk中, v放在了最后一位
+//        byte[] signR = new byte[32];
+//        System.arraycopy(byteArr, 1, signR, 0, signR.length);
+//        byte[] signS = new byte[32];
+//        System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
+//        byte[] pub = new byte[64];
+//        System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
+//        // return new SignatureData(byteArr[0], signR, signS, pub);
+//        return new SM2SignatureResult(pub, signR, signS);
+//    }
+//
+//    public static SignatureResult stringToECDSASignatureData(String signatureData) {
+//        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+//        // 从1开始，因为0是v；注：在javasdk中v放在了最后一位
+//        byte[] signR = new byte[32];
+//        System.arraycopy(byteArr, 1, signR, 0, signR.length);
+//        byte[] signS = new byte[32];
+//        System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
+//        // return new SignatureData(byteArr[0], signR, signS, pub);
+//        return new ECDSASignatureResult(byteArr[0], signR, signS);
+//    }
+
+    /**
      * signatureDataToString. 19/12/24 support guomi： add byte[] pub in signatureData
-     * 
      * @param signatureData signatureData
      */
-    public static String signatureDataToString(SignatureData signatureData) {
+
+    public static String signatureDataToString(SM2SignatureResult signatureData) {
         byte[] byteArr;
-        if (EncryptType.encryptType == 1) {
-            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length
-                    + PUBLIC_KEY_LENGTH_64];
-            byteArr[0] = signatureData.getV();
-            System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
-            System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
-                    signatureData.getS().length);
-            System.arraycopy(signatureData.getPub(), 0, byteArr,
-                    signatureData.getS().length + signatureData.getR().length + 1,
-                    signatureData.getPub().length);
-        } else {
-            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length];
-            byteArr[0] = signatureData.getV();
-            System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
-            System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
-                    signatureData.getS().length);
-        }
+        byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length
+                + PUBLIC_KEY_LENGTH_64];
+        // v
+        byteArr[0] = 0;
+        // r s
+        System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
+        System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
+                signatureData.getS().length);
+        System.arraycopy(signatureData.getPub(), 0, byteArr,
+                signatureData.getS().length + signatureData.getR().length + 1,
+                signatureData.getPub().length);
+
+        return Numeric.toHexString(byteArr, 0, byteArr.length, false);
+    }
+
+    public static String signatureDataToString(ECDSASignatureResult signatureData) {
+        byte[] byteArr;
+        byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length];
+        byteArr[0] = signatureData.getV();
+        System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
+        System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
+            signatureData.getS().length);
         return Numeric.toHexString(byteArr, 0, byteArr.length, false);
     }
 
@@ -653,4 +693,70 @@ public class CommonUtils {
         return flag;
     }
 
+    /**
+     * convert hex number string to decimal number string
+     * @param receipt
+     */
+    public static void processReceiptHexNumber(TransactionReceipt receipt) {
+        if (receipt == null) {
+            return;
+        }
+        String gasUsed = receipt.getGasUsed();
+        String blockNumber = receipt.getBlockNumber();
+        receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
+    }
+
+
+    /**
+     * convert hex number string to decimal number string
+     * @param block
+     */
+    public static void processBlockHexNumber(BcosBlock.Block block) {
+        if (block == null) {
+            return;
+        }
+        String gasLimit = block.getGasLimit();
+        String gasUsed = block.getGasUsed();
+        String timestamp = block.getTimestamp();
+        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param trans
+     */
+    public static void processTransHexNumber(JsonTransactionResponse trans) {
+        if (trans == null) {
+            return;
+        }
+        String gas = trans.getGas();
+        String gasPrice = trans.getGasPrice();
+        String groupId = trans.getGroupId();
+        trans.setGas(Numeric.toBigInt(gas).toString(10));
+        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
+        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+    }
+
+    /**
+     * get version number without character
+     * @param verStr ex: v2.4.1, ex 1.5.0
+     * @return ex: 241, 150
+     */
+    public static int getVersionFromStr(String verStr) {
+        log.info("getVersionFromStr verStr:{}", verStr);
+        // remove v and split
+        String[] versionArr = verStr.substring(1).split(".");
+        if (versionArr.length < 3) {
+            log.error("getVersionFromStr versionArr:{}", (Object) versionArr);
+            return 0;
+        }
+        // get num
+        int version = Integer.parseInt(versionArr[0]) * 100
+            + Integer.parseInt(versionArr[1]) * 10 + Integer.parseInt(versionArr[2]);
+        log.info("getVersionFromStr version:{}", version);
+        return version;
+    }
 }

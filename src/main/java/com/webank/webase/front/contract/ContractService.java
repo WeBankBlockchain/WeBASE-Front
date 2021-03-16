@@ -18,10 +18,10 @@ import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
+
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
-import com.webank.webase.front.base.enums.GMStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
@@ -63,7 +63,6 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
@@ -78,23 +77,26 @@ import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.FunctionEncoder;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.codegen.SolidityFunctionWrapperGenerator;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
-import org.fisco.bcos.web3j.precompile.permission.PermissionInfo;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
+import org.fisco.bcos.sdk.abi.FunctionEncoder;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.codegen.SolidityContractGenerator;
+import org.fisco.bcos.sdk.codegen.exceptions.CodeGenException;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -133,6 +135,9 @@ public class ContractService {
     private PrecompiledWithSignService precompiledWithSignService;
     @Autowired
     private PrecompiledService precompiledService;
+    @Autowired
+    @Qualifier(value = "common")
+    private CryptoSuite cryptoSuite;
 
     /**
      * sendAbi.
@@ -143,7 +148,7 @@ public class ContractService {
 
         String contractName = req.getContractName();
         String address = req.getAddress();
-        List<AbiDefinition> abiInfos = req.getAbiInfo();
+        List<ABIDefinition> abiInfos = req.getAbiInfo();
 
         // check address is valid
         addressIsValid(req.getGroupId(), req.getAddress(), req.getContractBin());
@@ -244,12 +249,12 @@ public class ContractService {
     public String deployWithSign(ReqDeploy req) {
         int groupId = req.getGroupId();
         String signUserId = req.getSignUserId();
-        List<AbiDefinition> abiInfos = req.getAbiInfo();
+        List<ABIDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
 
         // check groupId
-        Web3j web3j = web3ApiService.getWeb3j(groupId);
+        Client web3j = web3ApiService.getWeb3j(groupId);
 
         if (web3j == null) {
             throw new FrontException(GROUPID_NOT_EXIST);
@@ -271,18 +276,18 @@ public class ContractService {
         String data = bytecodeBin + encodedConstructor;
         String signMsg = transService.signMessage(groupId, web3j, signUserId, "", data);
         // send transaction
-        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-        transService.sendMessage(web3j, signMsg, transFuture);
-        TransactionReceipt receipt;
-        try {
-            receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("get tx receipt error for interrupted or exec:[]", e);
-            throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
-        } catch (TimeoutException e) {
-            log.error("get tx receipt error for timeout:[]", e);
-            throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
-        }
+        TransactionReceipt receipt = transService.sendMessage(web3j, signMsg);
+//        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
+//        transService.sendMessage(web3j, signMsg);
+//        try {
+//            receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
+//        } catch (InterruptedException | ExecutionException e) {
+//            log.error("get tx receipt error for interrupted or exec:[]", e);
+//            throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
+//        } catch (TimeoutException e) {
+//            log.error("get tx receipt error for timeout:[]", e);
+//            throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
+//        }
         String contractAddress = receipt.getContractAddress();
 
         log.info("success deployWithSign. contractAddress:{}", contractAddress);
@@ -298,7 +303,7 @@ public class ContractService {
         // check deploy permission
         checkDeployPermission(groupId, userAddress);
         String contractName = req.getContractName();
-        List<AbiDefinition> abiInfos = req.getAbiInfo();
+        List<ABIDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
 
@@ -307,7 +312,7 @@ public class ContractService {
         String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
 
         // get privateKey
-        Credentials credentials = keyStoreService.getCredentials(userAddress);
+        CryptoKeyPair credentials = keyStoreService.getCredentials(userAddress);
         // contract deploy
         String contractAddress =
                 deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
@@ -338,10 +343,10 @@ public class ContractService {
             if (StringUtils.isBlank(req.getUserAddress())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
             }
-            Credentials credentials = keyStoreService.getCredentials(req.getUserAddress());
+            CryptoKeyPair credentials = keyStoreService.getCredentials(req.getUserAddress());
             CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId), credentials);
             try {
-                cnsService.registerCns(cnsName, version, contractAddress, abiInfo);
+                cnsService.registerCNS(cnsName, version, contractAddress, abiInfo);
             } catch (Exception e) {
                 log.error("fail registerCns. cnsName:{}", cnsName);
                 throw new FrontException(ConstantCode.CNS_REGISTER_FAIL);
@@ -408,7 +413,7 @@ public class ContractService {
 
 
     private void checkContractAbiExistedAndSave(String contractName, String version,
-            List<AbiDefinition> abiInfos) throws FrontException {
+            List<ABIDefinition> abiInfos) throws FrontException {
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
         if (!ifExisted) {
             ContractAbiUtil.setContractWithAbi(contractName, version, abiInfos, true);
@@ -416,19 +421,17 @@ public class ContractService {
     }
 
     private String deployContract(int groupId, String bytecodeBin, String encodedConstructor,
-            Credentials credentials) throws FrontException {
+            CryptoKeyPair credentials) throws FrontException {
         CommonContract commonContract = null;
-        Web3j web3j = web3ApiService.getWeb3j(groupId);
+        Client web3j = web3ApiService.getWeb3j(groupId);
         if (web3j == null) {
             throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
         }
         try {
             commonContract =
                     CommonContract
-                            .deploy(web3j, credentials, Constants.GAS_PRICE, Constants.GAS_LIMIT,
-                                    Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor)
-                            .send();
-        } catch (TransactionException e) {
+                            .deploy(web3j, credentials, bytecodeBin, encodedConstructor);
+        } catch (ContractException e) {
             log.error("commonContract deploy failed.", e);
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED, e.getMessage());
         } catch (Exception e) {
@@ -459,7 +462,7 @@ public class ContractService {
     }
 
     public static FileContentHandle compileToJavaFile(String contractName,
-            List<AbiDefinition> abiInfo, String contractBin, String packageName)
+            List<ABIDefinition> abiInfo, String contractBin, String packageName)
             throws IOException {
 
 
@@ -470,8 +473,6 @@ public class ContractService {
         FrontUtils.createFileIfNotExist(binFile, true);
         FileUtils.writeStringToFile(binFile, contractBin);
 
-        generateJavaFile(packageName, abiFile, binFile);
-
         String outputDirectory = "";
         if (StringUtils.isNotBlank(packageName)) {
             outputDirectory = packageName.replace(".", File.separator);
@@ -479,20 +480,31 @@ public class ContractService {
         if (contractName.length() > 1) {
             contractName = contractName.substring(0, 1).toUpperCase() + contractName.substring(1);
         }
+//        File outputDir = new File(Constants.JAVA_DIR + File.separator + outputDirectory);
+        File outputDir = new File(Constants.JAVA_DIR);
+
+        generateJavaFile(packageName, abiFile, binFile, outputDir);
+
+        // generated java file is in outputDir/xxx.java
         File file = new File(Constants.JAVA_DIR + File.separator + outputDirectory + File.separator
-                + contractName + ".java");
+            + contractName + ".java");
         FrontUtils.createFileIfNotExist(file, true);
         InputStream targetStream = new FileInputStream(file);
         return new FileContentHandle(contractName + ".java", targetStream);
     }
 
     private static synchronized void generateJavaFile(String packageName, File abiFile,
-            File binFile) {
+            File binFile, File outputDir) {
         try {
             MySecurityManagerConfig.forbidSystemExitCall();
-            SolidityFunctionWrapperGenerator
-                    .main(Arrays.asList("-a", abiFile.getPath(), "-b", binFile.getPath(), "-p",
-                            packageName, "-o", Constants.JAVA_DIR).toArray(new String[0]));
+            // sm bin use same bin
+            SolidityContractGenerator generator = new SolidityContractGenerator(binFile, binFile,
+                abiFile, outputDir, packageName);
+            generator.generateJavaFiles();
+        } catch (IOException | ClassNotFoundException e) {
+            log.error("generateJavaFile error for io error/file not found:[]", e);
+        } catch (CodeGenException e) {
+            log.error("generateJavaFile error code gen:[]", e);
         } finally {
             MySecurityManagerConfig.enableSystemExitCall();
         }
@@ -750,8 +762,6 @@ public class ContractService {
         }
     }
 
-
-
     /**
      * compile contract.
      */
@@ -760,7 +770,7 @@ public class ContractService {
 
         try {
             // whether use guomi to compile
-            boolean useSM2 = EncryptType.encryptType == GMStatus.GUOMI.getValue();
+            boolean useSM2 = cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE;
             // decode
             byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
             String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
@@ -815,7 +825,7 @@ public class ContractService {
             throw new FrontException(ConstantCode.NO_SOL_FILES);
         }
         // whether use guomi to compile
-        boolean useSM2 = EncryptType.encryptType == GMStatus.GUOMI.getValue();
+        boolean useSM2 = cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE;
 
         List<RspMultiContractCompile> compileInfos = new ArrayList<>();
         for (File solFile : solFiles) {

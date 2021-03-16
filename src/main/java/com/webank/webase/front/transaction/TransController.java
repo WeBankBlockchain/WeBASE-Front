@@ -20,6 +20,7 @@ import static com.webank.webase.front.base.code.ConstantCode.INVALID_VERSION;
 import static com.webank.webase.front.base.code.ConstantCode.PARAM_ADDRESS_IS_INVALID;
 import static com.webank.webase.front.base.code.ConstantCode.PARAM_FAIL_CNS_NAME_IS_EMPTY;
 import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL;
+
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
@@ -40,8 +41,8 @@ import java.time.Instant;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -81,7 +82,7 @@ public class TransController extends BaseController {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
         if (!StringUtils.isBlank(address) && (address.length() != Address.ValidLen
-                || org.fisco.bcos.web3j.abi.datatypes.Address.DEFAULT.toString().equals(address))) {
+                || org.fisco.bcos.sdk.abi.datatypes.Address.DEFAULT.toString().equals(address))) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {

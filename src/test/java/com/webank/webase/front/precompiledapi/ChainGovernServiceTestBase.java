@@ -14,12 +14,12 @@
 
 package com.webank.webase.front.precompiledapi;
 
-import com.webank.webase.front.gm.runtime.BaseTest;
+import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.precompiledapi.permission.ChainGovernService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ChainGovernServiceTest extends BaseTest {
+public class ChainGovernServiceTestBase extends SpringTestBase {
 
     @Autowired
     private ChainGovernService chainGovernService;

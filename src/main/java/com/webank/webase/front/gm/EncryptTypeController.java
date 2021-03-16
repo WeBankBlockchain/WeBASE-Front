@@ -18,7 +18,9 @@ package com.webank.webase.front.gm;
 
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.crypto.EncryptType;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,9 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "encrypt")
 public class EncryptTypeController {
+    @Autowired
+    @Qualifier("common")
+    private CryptoSuite cryptoSuite;
+
     @GetMapping("")
     public Integer getEncryptType() {
-        int encrypt = EncryptType.encryptType;
+        int encrypt = cryptoSuite.cryptoTypeConfig;
         log.info("getEncryptType:{}", encrypt);
         return encrypt;
     }

@@ -24,13 +24,6 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
-import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,6 +31,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.fisco.bcos.sdk.abi.datatypes.DynamicArray;
+import org.fisco.bcos.sdk.abi.datatypes.StaticArray;
+import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition.NamedType;
+import org.fisco.bcos.sdk.model.PrecompiledConstant;
+import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 
 /**
  * ContractAbiUtil.
@@ -108,7 +108,7 @@ public class ContractAbiUtil {
             if (arr.length >= 2) {
                 version = arr[1];
             }
-            List<AbiDefinition> abiList = loadContractDefinition(file);
+            List<ABIDefinition> abiList = loadContractDefinition(file);
             setContractWithAbi(arr[0], version, abiList, false);
         }
     }
@@ -118,9 +118,9 @@ public class ContractAbiUtil {
      *
      * @param abiFile file
      */
-    public static List<AbiDefinition> loadContractDefinition(File abiFile) throws IOException {
+    public static List<ABIDefinition> loadContractDefinition(File abiFile) throws IOException {
         ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-        AbiDefinition[] abiDefinition = objectMapper.readValue(abiFile, AbiDefinition[].class);
+        ABIDefinition[] abiDefinition = objectMapper.readValue(abiFile, ABIDefinition[].class);
         return Arrays.asList(abiDefinition);
     }
 
@@ -132,7 +132,7 @@ public class ContractAbiUtil {
      * @param abiDefinitionList abi info
      */
     public static void setContractWithAbi(String contractName, String version,
-                                          List<AbiDefinition> abiDefinitionList, boolean ifSaveFile) throws FrontException {
+                                          List<ABIDefinition> abiDefinitionList, boolean ifSaveFile) throws FrontException {
 
         List<VersionEvent> versionEventList = getAbiVersionList(contractName, version);
         setFunctionFromAbi(contractName, version, abiDefinitionList, versionEventList);
@@ -143,14 +143,14 @@ public class ContractAbiUtil {
     }
 
     public static void setFunctionFromAbi(String contractName, String version,
-                                          List<AbiDefinition> abiDefinitionList, List<VersionEvent> versionEventList) {
+                                          List<ABIDefinition> abiDefinitionList, List<VersionEvent> versionEventList) {
         HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
         HashMap<String, Boolean> functions = new HashMap<>();
         HashMap<String, List<String>> funcInputs = new HashMap<>();
         HashMap<String, List<String>> funcOutputs = new HashMap<>();
 
         // todo fill with solidity type  only need the type
-        for (AbiDefinition abiDefinition : abiDefinitionList) {
+        for (ABIDefinition abiDefinition : abiDefinitionList) {
 
             if (Constants.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {
                 List<NamedType> inputs = abiDefinition.getInputs();
@@ -189,14 +189,14 @@ public class ContractAbiUtil {
     }
 
 
-    public static VersionEvent getVersionEventFromAbi(String contractName, List<AbiDefinition> abiDefinitionList) {
+    public static VersionEvent getVersionEventFromAbi(String contractName, List<ABIDefinition> abiDefinitionList) {
         HashMap<String, List<Class<? extends Type>>> events = new HashMap<>();
         HashMap<String, Boolean> functions = new HashMap<>();
         HashMap<String, List<String>> funcInputs = new HashMap<>();
         HashMap<String, List<String>> funcOutputs = new HashMap<>();
 
         // todo fill with solidity type  only need the type
-        for (AbiDefinition abiDefinition : abiDefinitionList) {
+        for (ABIDefinition abiDefinition : abiDefinitionList) {
 
             if (Constants.TYPE_CONSTRUCTOR.equals(abiDefinition.getType())) {
                 List<NamedType> inputs = abiDefinition.getInputs();
@@ -258,7 +258,7 @@ public class ContractAbiUtil {
      * @param version      version
      */
     public static void saveAbiFile(String contractName, String version,
-                                   List<AbiDefinition> abiDefinitionList)
+                                   List<ABIDefinition> abiDefinitionList)
             throws FrontException {
         FileOutputStream outputStream = null;
         try {
@@ -377,7 +377,7 @@ public class ContractAbiUtil {
         String type = trimStorageDeclaration(typeDeclaration);
         Matcher matcher = PATTERN.matcher(type);
         if (matcher.find()) {
-            Class<?> baseType = org.fisco.bcos.web3j.abi.datatypes.generated.AbiTypes
+            Class<?> baseType = org.fisco.bcos.sdk.abi.datatypes.generated.AbiTypes
                     .getType(matcher.group(1));
             String firstArrayDimension = matcher.group(2);
             String secondArrayDimension = matcher.group(3);

@@ -1,11 +1,10 @@
 package com.webank.webase.front.gm.pressure;
 
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PerformanceCollector {
   public static Logger logger = LoggerFactory.getLogger(PerformanceCollector.class);

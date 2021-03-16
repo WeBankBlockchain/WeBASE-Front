@@ -19,18 +19,41 @@ import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.keystore.entity.*;
+import com.webank.webase.front.keystore.entity.EncodeInfo;
+import com.webank.webase.front.keystore.entity.KeyStoreInfo;
+import com.webank.webase.front.keystore.entity.MessageHashInfo;
+import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
+import com.webank.webase.front.keystore.entity.RspUserInfo;
+import com.webank.webase.front.keystore.entity.SignInfo;
 import com.webank.webase.front.util.AesUtils;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.channel.client.P12Manager;
-import org.fisco.bcos.channel.client.PEMManager;
-import org.fisco.bcos.web3j.crypto.*;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.exceptions.LoadKeyStoreException;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
+import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -41,18 +64,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.*;
 
 
 /**
@@ -70,10 +81,11 @@ public class KeyStoreService {
     @Autowired
     RestTemplate restTemplate;
     @Autowired
-    KeystoreRepository keystoreRepository;
-    static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
+    private KeystoreRepository keystoreRepository;
+    @Autowired
+    @Qualifier(value = "common")
+    private CryptoSuite cryptoSuite;
     private static Map<String, String> PRIVATE_KEY_MAP = new HashMap<>();
-
 
     /**
      * get local user KeyStores with privateKey
@@ -103,7 +115,7 @@ public class KeyStoreService {
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // create keyPair(support guomi)
         KeyStoreInfo keyStoreInfo;
-        ECKeyPair keyPair = GenCredential.createKeyPair();
+        CryptoKeyPair keyPair = cryptoSuite.createKeyPair();
         if (keyPair == null) {
             log.error("fail createKeyStore for null key pair");
             throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
@@ -159,11 +171,10 @@ public class KeyStoreService {
      * convert ECKeyPair to KeyStoreInfo.
      * default aes true
      */
-    private KeyStoreInfo keyPair2KeyStoreInfo(ECKeyPair keyPair, String userName) {
-        String publicKey = Numeric
-                .toHexStringWithPrefixZeroPadded(keyPair.getPublicKey(), PUBLIC_KEY_LENGTH_IN_HEX);
-        String privateKey = Numeric.toHexStringNoPrefix(keyPair.getPrivateKey());
-        String address = "0x" + Keys.getAddress(keyPair.getPublicKey());
+    private KeyStoreInfo keyPair2KeyStoreInfo(CryptoKeyPair keyPair, String userName) {
+        String publicKey = keyPair.getHexPublicKey();
+        String privateKey = keyPair.getHexPrivateKey();
+        String address = keyPair.getAddress();
         log.debug("publicKey:{} privateKey:{} address:{}", publicKey, privateKey, address);
         KeyStoreInfo keyStoreInfo = new KeyStoreInfo();
         keyStoreInfo.setPublicKey(publicKey);
@@ -177,26 +188,22 @@ public class KeyStoreService {
      * get random credential to call transaction(not execute)
      * 2019/11/26 support guomi
      */
-    public Credentials getCredentialsForQuery() {
+    public CryptoKeyPair getCredentialsForQuery() {
         log.debug("start getCredentialsForQuery. ");
         // create keyPair(support guomi)
-        ECKeyPair keyPair = GenCredential.createKeyPair();
+        CryptoKeyPair keyPair = cryptoSuite.createKeyPair();
         if (keyPair == null) {
             log.error("create random Credentials for query failed for null key pair");
             throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
         }
-        KeyStoreInfo keyStoreInfo = keyPair2KeyStoreInfo(keyPair, "");
-        return GenCredential.create(keyStoreInfo.getPrivateKey());
+        // keyPair2KeyStoreInfo(keyPair, "");
+        return keyPair;
     }
 
     public KeyStoreInfo getKeyStoreInfoForQuery() {
         log.debug("start getKeyStoreInfoForQuery. ");
         // create keyPair(support guomi)
-        ECKeyPair keyPair = GenCredential.createKeyPair();
-        if (keyPair == null) {
-            log.error("create random Credentials for query failed for null key pair");
-            throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
-        }
+        CryptoKeyPair keyPair = this.getCredentialsForQuery();
         return keyPair2KeyStoreInfo(keyPair, "");
     }
 
@@ -247,11 +254,10 @@ public class KeyStoreService {
     /**
      * getMessageHashSignData from sign service. (webase-sign)
      * @param params params
-     * @return
+     * @return RspMessageHashSignature
      */
-    public String getMessageHashSignData(MessageHashInfo params) throws FrontException {
+    public RspMessageHashSignature getMessageHashSignData(MessageHashInfo params) throws FrontException {
         try {
-            SignInfo signInfo = new SignInfo();
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             log.info("getSignData url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
@@ -260,6 +266,7 @@ public class KeyStoreService {
             BaseResponse response =
                     restTemplate.postForObject(url, formEntity, BaseResponse.class);
             log.info("getSignData response:{}", JsonUtils.toJSONString(response));
+            SignInfo signInfo = new SignInfo();
             if (response.getCode() == 0) {
                 signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
             } else {
@@ -272,7 +279,26 @@ public class KeyStoreService {
                 log.warn("get sign data error and get blank string.");
                 throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
             }
-            return signDataStr;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+
+            if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+                SM2SignatureResult signData = (SM2SignatureResult) CommonUtils.stringToSignatureData(signDataStr,
+                    cryptoSuite.cryptoTypeConfig);
+                // SM2SignatureResult signData = CommonUtils.stringToSM2SignatureData(signDataStr);
+                rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
+                rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
+                rspMessageHashSignature.setV(new Byte("0"));
+                rspMessageHashSignature.setP(Numeric.toHexString(signData.getPub()));
+            } else {
+                ECDSASignatureResult signData = (ECDSASignatureResult) CommonUtils.stringToSignatureData(signDataStr,
+                    cryptoSuite.cryptoTypeConfig);
+                // ECDSASignatureResult signData = CommonUtils.stringToECDSASignatureData(signDataStr);
+                rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
+                rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
+                rspMessageHashSignature.setV(signData.getV());
+                rspMessageHashSignature.setP(null);
+            }
+            return rspMessageHashSignature;
         } catch (ResourceAccessException ex) {
             log.error("getSignData fail restTemplateExchange", ex);
             throw new FrontException(ConstantCode.DATA_SIGN_NOT_ACCESSIBLE);
@@ -306,10 +332,11 @@ public class KeyStoreService {
      * get credential to send transaction
      * 2019/11/26 support guomi
      */
-    public Credentials getCredentials(String user) throws FrontException {
+    public CryptoKeyPair getCredentials(String user) throws FrontException {
         String privateKey = getPrivateKey(user);
-        return GenCredential.create(privateKey);
+        return cryptoSuite.createKeyPair(privateKey);
     }
+
     /**
      * get PrivateKey.
      * default use aes encrypt
@@ -319,7 +346,7 @@ public class KeyStoreService {
 
         // get from local db
         KeyStoreInfo keyStoreInfoLocal = keystoreRepository.findByAddress(user);
-        if (Objects.isNull(keyStoreInfoLocal)) {
+        if (Objects.isNull(keyStoreInfoLocal) || StringUtils.isBlank(keyStoreInfoLocal.getPrivateKey())) {
             log.warn("fail getPrivateKey. user:{} privateKey is null", user);
             throw new FrontException(ConstantCode.PRIVATEKEY_IS_NULL);
         }
@@ -348,21 +375,9 @@ public class KeyStoreService {
      * @return
      */
     public KeyStoreInfo importKeyStoreFromPem(String pemContent, String userName) {
-        PEMManager pemManager = new PEMManager();
-        String privateKey;
-        try {
-            pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
-            privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
-        } catch (NoSuchAlgorithmException| CertificateException| IOException e) {
-            log.error("importKeyStoreFromPem error:[]", e);
-            throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
-        } catch (UnrecoverableKeyException | InvalidKeySpecException e) {
-            log.error("importKeyStoreFromPem get kepair error:[]", e);
-            throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR.getCode(), e.getMessage());
-        } catch (KeyStoreException | NoSuchProviderException e) {
-            log.error("importKeyStoreFromPem init p12 for dependency error:[]", e);
-            throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR.getCode(), e.getMessage());
-        }
+        PEMKeyStore pemManager = new PEMKeyStore(new ByteArrayInputStream(pemContent.getBytes()));
+        String privateKey = KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate());
+        // throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
         // to store local
         return importFromPrivateKey(privateKey, userName);
     }
@@ -384,25 +399,20 @@ public class KeyStoreService {
             throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
         }
 
-        P12Manager p12Manager = new P12Manager();
         String privateKey;
         try {
             // manually set password and load
-            p12Manager.setPassword(password);
-            p12Manager.load(file.getInputStream(), password);
-            privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
-        } catch (NoSuchAlgorithmException| CertificateException| IOException e) {
+            P12KeyStore p12Manager = new P12KeyStore(file.getInputStream(), password);
+            privateKey = KeyTool.getHexedPrivateKey(p12Manager.getKeyPair().getPrivate());
+        }  catch (IOException e) {
+            log.error("importKeyStoreFromP12 file not found error:[]", e);
+            throw new FrontException(ConstantCode.P12_FILE_ERROR);
+        } catch (LoadKeyStoreException e) {
             log.error("importKeyStoreFromP12 error:[]", e);
             if (e.getMessage().contains("password")) {
                 throw new FrontException(ConstantCode.P12_PASSWORD_ERROR);
             }
             throw new FrontException(ConstantCode.P12_FILE_ERROR);
-        } catch (UnrecoverableKeyException | InvalidKeySpecException e) {
-            log.error("importKeyStoreFromP12 get kepair error:[]", e);
-            throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR.getCode(), e.getMessage());
-        } catch (KeyStoreException | NoSuchProviderException e) {
-            log.error("importKeyStoreFromP12 init p12 for dependency error:[]", e);
-            throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR.getCode(), e.getMessage());
         }
         // to store local
         return importFromPrivateKey(privateKey, userName);
@@ -418,7 +428,7 @@ public class KeyStoreService {
         // check name
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // to store locally
-        ECKeyPair keyPair = GenCredential.createKeyPair(privateKey);
+        CryptoKeyPair keyPair = cryptoSuite.createKeyPair(privateKey);
         if (keyPair == null) {
             log.error("importFromPrivateKey get null keyPair");
             throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
@@ -454,7 +464,7 @@ public class KeyStoreService {
     public RspUserInfo getSignUserEntity(String signUserId, String appId) {
         // webase-sign api(v1.3.0) support
         String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
-                EncryptType.encryptType, signUserId, appId);
+                cryptoSuite.cryptoTypeConfig, signUserId, appId);
         log.info("getSignUserEntity url:{}", url);
         BaseResponse baseResponse = getForEntity(url);
         log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
@@ -483,7 +493,7 @@ public class KeyStoreService {
         params.put("privateKey", privateKeyEncoded);
         params.put("signUserId", signUserId);
         params.put("appId", appId);
-        params.put("encryptType", EncryptType.encryptType);
+        params.put("encryptType", cryptoSuite.cryptoTypeConfig);
 
         BaseResponse baseResponse = postForEntity(url, params);
 

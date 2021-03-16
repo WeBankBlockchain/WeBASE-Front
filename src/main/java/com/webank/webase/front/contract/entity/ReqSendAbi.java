@@ -15,9 +15,8 @@ package com.webank.webase.front.contract.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import java.util.List;
-
 import lombok.Data;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.hibernate.validator.constraints.NotEmpty;
 
 
@@ -32,7 +31,7 @@ public class ReqSendAbi {
    // private String version;
     private String address;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
-    private List<AbiDefinition> abiInfo;
+    private List<ABIDefinition> abiInfo;
     /**
      * 合约编译的runtime-bytecode(runtime-bin)，用于交易解析
      */

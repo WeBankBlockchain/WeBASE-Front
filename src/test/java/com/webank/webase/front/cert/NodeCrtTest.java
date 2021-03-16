@@ -30,7 +30,7 @@ public class NodeCrtTest {
 
     @Test
     public void getChainCrt() throws IOException {
-        InputStream inputStream = new ClassPathResource("ca.crt").getInputStream();
+        InputStream inputStream = new ClassPathResource("conf/ca.crt").getInputStream();
         String str = getString(inputStream);
         String[] strArray = str.split(head); // 一个是空，一个是去除了head的string
         String ca = "";

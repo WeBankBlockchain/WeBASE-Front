@@ -15,18 +15,15 @@
  */
 package com.webank.webase.front.precompiledapi;
 
-import com.webank.webase.front.channel.test.TestBase;
-import org.fisco.bcos.channel.client.PEMManager;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.precompile.permission.PermissionService;
-import org.junit.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import com.webank.webase.front.base.TestBase;
+import java.util.List;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionService;
+import org.fisco.bcos.sdk.model.RetCode;
+import org.junit.Test;
 
 
 /**
@@ -34,7 +31,6 @@ import static org.junit.Assert.assertTrue;
  */
 
 public class PermissionServiceTest extends TestBase {
-    public static ApplicationContext context = null;
 
 
     // 链管理员
@@ -42,34 +38,23 @@ public class PermissionServiceTest extends TestBase {
     public void testPermissionManager() throws Exception{
         address = "0x832f299af98c215f7ada010a966b12126483cd00";
 
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        PEMManager pem = context.getBean(PEMManager.class);
-        ECKeyPair pemKeyPair = pem.getECKeyPair();
-        //生成web3sdk使用的Credentials
-        Credentials credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
-        PermissionService permissionService = new PermissionService(web3j, credentialsPEM);
-
-        System.out.println(permissionService.grantPermissionManager(address));
-        assertNotNull(permissionService.grantPermissionManager(address));
-        System.out.println(permissionService.listPermissionManager().get(0).getAddress());
+        PermissionService permissionService = new PermissionService(web3j, cryptoKeyPair);
+        RetCode retCode = permissionService.grantPermissionManager(address);
+        System.out.println(retCode);
+        assertNotNull(retCode);
+        System.out.println(permissionService.listPermissionManager().size());
         assertTrue(permissionService.listPermissionManager().size() != 0);
-        System.out.println(permissionService.revokePermissionManager(address));
-        assertNotNull(permissionService.revokePermissionManager(address));
+        RetCode revodeCode = permissionService.revokePermissionManager(address);
+        System.out.println(revodeCode);
+        assertNotNull(revodeCode);
     }
 
     // 系统管理员 部署合约
     @Test
     public void testDeployAndCreateManager() throws Exception{
-        // 普通账户
-        address = "0x832f299af98c215f7ada010a966b12126483cd00";
 
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        PEMManager pem = context.getBean(PEMManager.class);
-        ECKeyPair pemKeyPair = pem.getECKeyPair();
-        //生成web3sdk使用的Credentials
-        Credentials credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
         // 链管理员账户签名的PermissionService
-        PermissionService permissionService = new PermissionService(web3j, credentialsPEM);
+        PermissionService permissionService = new PermissionService(web3j, cryptoKeyPair);
 
         // TablePermission
         System.out.println(permissionService.grantDeployAndCreateManager(address));
@@ -78,42 +63,30 @@ public class PermissionServiceTest extends TestBase {
         assertNotNull(permissionService.grantDeployAndCreateManager(address));
         System.out.println(permissionService.listDeployAndCreateManager().get(0).getAddress());
         assertTrue(permissionService.listDeployAndCreateManager().size() != 0);
-//        System.out.println(permissionService.revokeDeployAndCreateManager(address));
-//        assertNotNull(permissionService.revokeDeployAndCreateManager(address));
+        System.out.println(permissionService.revokeDeployAndCreateManager(address));
+        assertNotNull(permissionService.revokeDeployAndCreateManager(address));
     }
 
     // 写用户表
     @Test
     public void testUserTableManager() throws Exception{
         String tableName = "t_test";
-        address = "0xd5bba8fe456fce310f529edecef902e4b63129b1";
-
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        PEMManager pem = context.getBean(PEMManager.class);
-        ECKeyPair pemKeyPair = pem.getECKeyPair();
-        //生成web3sdk使用的Credentials
-        Credentials credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
-        PermissionService permissionService = new PermissionService(web3j, credentialsPEM);
+        PermissionService permissionService = new PermissionService(web3j, cryptoKeyPair);
 
         // TablePermission
-        System.out.println(permissionService.grantUserTableManager(tableName, address));
-        assertNotNull(permissionService.grantUserTableManager(tableName, address));
-//        List<PermissionInfo> list = permissionService.listUserTableManager(tableName);
-//        assertTrue(permissionService.listUserTableManager(tableName).size() != 0);
-//        System.out.println(permissionService.revokeUserTableManager(tableName, address));
-//        assertNotNull(permissionService.revokeUserTableManager(tableName, address));
+        System.out.println(permissionService.grantWrite(tableName, address));
+        assertNotNull(permissionService.grantWrite(tableName, address));
+        List<PermissionInfo> list = permissionService.queryPermissionByTableName(tableName);
+        System.out.println(list);
+        assertTrue(permissionService.queryPermissionByTableName(tableName).size() != 0);
+        System.out.println(permissionService.revokeWrite(tableName, address));
+        assertNotNull(permissionService.revokeWrite(tableName, address));
     }
 
     //节点管理权限
     @Test
     public void testNodeManger() throws Exception {
-        address = "0x832f299af98c215f7ada010a966b12126483cd00";
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        PEMManager pem = context.getBean(PEMManager.class);
-        ECKeyPair pemKeyPair = pem.getECKeyPair();
-        //生成web3sdk使用的Credentials
-        Credentials credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
-        PermissionService permissionService = new PermissionService(web3j, credentialsPEM);
+        PermissionService permissionService = new PermissionService(web3j, cryptoKeyPair);
 
         // TablePermission
         System.out.println(permissionService.grantNodeManager(address));
@@ -127,13 +100,7 @@ public class PermissionServiceTest extends TestBase {
     // CNS权限
     @Test
     public void testCNSManager() throws Exception {
-        address = "0x832f299af98c215f7ada010a966b12126483cd00";
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        PEMManager pem = context.getBean(PEMManager.class);
-        ECKeyPair pemKeyPair = pem.getECKeyPair();
-        //生成web3sdk使用的Credentials
-        Credentials credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
-        PermissionService permissionService = new PermissionService(web3j, credentialsPEM);
+        PermissionService permissionService = new PermissionService(web3j, cryptoKeyPair);
 
         // TablePermission
         System.out.println(permissionService.grantCNSManager(address));
@@ -147,13 +114,7 @@ public class PermissionServiceTest extends TestBase {
     // 系统配置权限
     @Test
     public void testConfigManager() throws Exception {
-        address = "0x832f299af98c215f7ada010a966b12126483cd00";
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        PEMManager pem = context.getBean(PEMManager.class);
-        ECKeyPair pemKeyPair = pem.getECKeyPair();
-        //生成web3sdk使用的Credentials
-        Credentials credentialsPEM = GenCredential.create(pemKeyPair.getPrivateKey().toString(16));
-        PermissionService permissionService = new PermissionService(web3j, credentialsPEM);
+        PermissionService permissionService = new PermissionService(web3j, cryptoKeyPair);
 
         // TablePermission
         System.out.println(permissionService.grantSysConfigManager(address));
