@@ -148,7 +148,7 @@ public class ConstantCode {
     // add in v1.4.3
     public static final String PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING = "{\"code\":201155,\"message\":\"contract path cannot be empty\"}";
     // add in v1.5.0
-    public static final RetCode WRITE_SDK_CRT_KEY_FILE_FAIL = RetCode.mark(202512,"Write front's sdk cert and key fail!");
+    public static final RetCode WRITE_SDK_CRT_KEY_FILE_FAIL = RetCode.mark(201156,"Write front's sdk cert and key fail!");
 
 
     /* precompiled runtime check or error */
