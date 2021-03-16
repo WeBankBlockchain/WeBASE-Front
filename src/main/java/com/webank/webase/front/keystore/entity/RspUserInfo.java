@@ -24,6 +24,7 @@ public class RspUserInfo {
     private String appId;
     private String address;
     private String publicKey;
+    private String privateKey;
     private String description;
     private Integer encryptType;
 }
