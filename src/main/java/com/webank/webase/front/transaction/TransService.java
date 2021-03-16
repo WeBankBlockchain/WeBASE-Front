@@ -45,6 +45,7 @@ import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -319,7 +320,7 @@ public class TransService {
      */
     public String signMessage(int groupId, Client web3j, String signUserId, String contractAddress,
             String data) {
-        Random r = new Random();
+        Random r = new SecureRandom();
         BigInteger randomid = new BigInteger(250, r);
 
         BigInteger blockLimit = web3j.getBlockLimit();
