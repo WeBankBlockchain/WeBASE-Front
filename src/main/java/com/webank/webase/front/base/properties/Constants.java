@@ -53,7 +53,9 @@ public class Constants {
             "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
     public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
     public static final String WEBASE_SIGN_USER_URI =
-            "http://%s/WeBASE-Sign/user/newUser?encryptType=%s&signUserId=%s&appId=%s";
+            "http://%s/WeBASE-Sign/user/newUser?encryptType=%s&signUserId=%s&appId=%s&returnPrivateKey=%s";
+    public static final String WEBASE_SIGN_USER_INFO_URI =
+            "http://%s/WeBASE-Sign/user/%s/userInfo?returnPrivateKey=%s";
     public static final String WEBASE_SIGN_VERSION_URI =
         "http://%s/WeBASE-Sign/version";
     public static final String ACCOUNT1_PATH = "node.key";

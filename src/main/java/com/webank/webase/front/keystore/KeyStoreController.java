@@ -67,17 +67,16 @@ public class KeyStoreController extends BaseController {
     public Object getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
                                     @RequestParam(required = false) String appId,
                                     @RequestParam(required = false) String signUserId,
-                                    @RequestParam String userName) {
+                                    @RequestParam String userName,
+                                    @RequestParam(required = false, defaultValue = "false") boolean returnPrivateKey) {
         // external key store (2)
         if (KeyTypes.EXTERNALUSER.getValue() == type) {
             if (StringUtils.isBlank(signUserId) || StringUtils.isBlank(appId)) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY);
             }
             // create from webase-sign , return keystoreInfo without private key
-            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStoreWithSign(signUserId, appId);
-            RspKeyStoreInfo response = new RspKeyStoreInfo();
-            BeanUtils.copyProperties(keyStoreInfo, response);
-            return response;
+            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStoreWithSign(signUserId, appId, returnPrivateKey);
+            return keyStoreInfo;
         } else if (KeyTypes.LOCALUSER.getValue() == type){
             // local key store (0)
             if (StringUtils.isBlank(userName)) {
@@ -90,6 +89,13 @@ public class KeyStoreController extends BaseController {
             log.error("fail createKeyStore. key store type invalid");
             throw new FrontException(ConstantCode.PARAM_VAILD_FAIL);
         }
+    }
+    
+    @ApiOperation(value = "getUserInfoWithSign", notes = "get key store info from sign")
+    @GetMapping("getUserInfoWithSign")
+    public Object getUserInfoWithSign(@RequestParam(required = true) String signUserId,
+            @RequestParam(required = false, defaultValue = "false") boolean returnPrivateKey) {
+        return keyStoreService.getUserInfoWithSign(signUserId, returnPrivateKey);
     }
 
     @ApiOperation(value = "getKeyStoreList", notes = "get local KeyStore lists")
