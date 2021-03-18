@@ -55,7 +55,6 @@ server:
     max-connections: 10000
 
 sdk:
-  orgName: orgTest
   corePoolSize: 50
   maxPoolSize: 100
   queueCapacity: 100
