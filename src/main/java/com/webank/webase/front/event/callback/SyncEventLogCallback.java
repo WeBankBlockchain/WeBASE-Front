@@ -14,11 +14,13 @@
 
 package com.webank.webase.front.event.callback;
 
+import com.webank.webase.front.event.entity.DecodedEventLog;
 import com.webank.webase.front.util.JsonUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.fisco.bcos.sdk.abi.ABICodec;
+import org.fisco.bcos.sdk.abi.ABICodecException;
 import org.fisco.bcos.sdk.eventsub.EventCallback;
 import org.fisco.bcos.sdk.model.EventLog;
 import org.slf4j.Logger;
@@ -36,11 +38,13 @@ public class SyncEventLogCallback implements EventCallback {
     private String contractAbi;
     private String eventName;
 
-    private CompletableFuture<List<EventLog>> future;
-    private List<EventLog> finalList;
+    // private CompletableFuture<List<EventLog>> future;
+    private CompletableFuture<List<DecodedEventLog>> future;
+    // private List<EventLog> finalList;
+    private List<DecodedEventLog> finalList;
 
     public SyncEventLogCallback(ABICodec abiCodec, String contractAbi, String eventName,
-        final CompletableFuture<List<EventLog>> future) {
+        final CompletableFuture<List<DecodedEventLog>> future) {
         this.abiCodec = abiCodec;
         this.contractAbi = contractAbi;
         this.eventName = eventName;
@@ -63,11 +67,13 @@ public class SyncEventLogCallback implements EventCallback {
         if (status == 0) {
             // add in resultList
             if (logs != null) {
-                finalList.addAll(logs);
+                List<DecodedEventLog> decodedList = this.decodeEvent(logs);
+                finalList.addAll(decodedList);
             }
         } else if (status == 1){
             if (logs != null) {
-                finalList.addAll(logs);
+                List<DecodedEventLog> decodedList = this.decodeEvent(logs);
+                finalList.addAll(decodedList);
             }
             try {
                 Thread.sleep(10);
@@ -89,20 +95,23 @@ public class SyncEventLogCallback implements EventCallback {
      * 根据Log对象中的blockNumber，transactionIndex，logIndex进行去重
      */
 
-//    private void decodeEvent(List<EventLog> logs, String eventName) {
-//        for (EventLog log : logs) {
-//            logger.debug(
-//                " blockNumber:" + log.getBlockNumber()
-//                    + ",txIndex:" + log.getTransactionIndex()
-//                    + " data:" + log.getData());
-//            try {
-//                List<String> list = abiCodec.decodeEventToString(contractAbi, eventName, log);
-//                logger.debug("decode event of :{}, log content:{} ", eventName, list);
-//            } catch (ABICodecException e) {
-//                logger.error("decode event log error:{} ", e.getMessage());
-//            }
-//
-//        }
-//    }
+    private List<DecodedEventLog> decodeEvent(List<EventLog> logs) {
+        List<DecodedEventLog> decodedLogList = new ArrayList<>();
+        for (EventLog log : logs) {
+            logger.debug(
+                " blockNumber:" + log.getBlockNumber()
+                    + ",txIndex:" + log.getTransactionIndex()
+                    + " data:" + log.getData());
+            try {
+                List<String> list = abiCodec.decodeEventToString(contractAbi, eventName, log);
+                DecodedEventLog decodedEventLog = new DecodedEventLog(log, list);
+                logger.debug("decode event of :{}, log content:{} ", eventName, list);
+                decodedLogList.add(decodedEventLog);
+            } catch (ABICodecException e) {
+                logger.error("decode event log error:{} ", e.getMessage());
+            }
+        }
+        return decodedLogList;
+    }
 
 }
