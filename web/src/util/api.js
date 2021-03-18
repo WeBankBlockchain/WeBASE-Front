@@ -978,3 +978,11 @@ export function findCnsInfo(data) {
         data: data
     })
 }
+// sdk证书下载
+export function exportCertSdk() {
+    return get({
+        url: `${HANDLE}/cert/sdk/zip`,
+        method: 'get',
+        responseType: 'blob'
+    })
+}

@@ -204,6 +204,7 @@ export default {
         deploy: 'Deploy',
         callContract: 'Call Contract',
         exportJavaFile: 'Export as Java File',
+        exportSdk: 'SDK Cert Download',
         handleSave: 'Ctrl+s Save',
         handleCompile: 'Alt+c Compile',
         handleDeploy: 'Alt+d Deploy',
