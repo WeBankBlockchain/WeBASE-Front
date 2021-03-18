@@ -38,6 +38,7 @@ import java.util.Base64;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -698,11 +699,12 @@ public class CommonUtils {
      * @param receipt
      */
     public static void processReceiptHexNumber(TransactionReceipt receipt) {
+        log.info("sendMessage. receipt:[{}]", JsonUtils.toJSONString(receipt));
         if (receipt == null) {
             return;
         }
-        String gasUsed = receipt.getGasUsed();
-        String blockNumber = receipt.getBlockNumber();
+        String gasUsed = Optional.ofNullable(receipt.getGasUsed()).orElse("0");
+        String blockNumber = Optional.ofNullable(receipt.getBlockNumber()).orElse("0");
         receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
         receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
     }
@@ -716,9 +718,9 @@ public class CommonUtils {
         if (block == null) {
             return;
         }
-        String gasLimit = block.getGasLimit();
-        String gasUsed = block.getGasUsed();
-        String timestamp = block.getTimestamp();
+        String gasLimit = Optional.ofNullable(block.getGasLimit()).orElse("0");
+        String gasUsed =  Optional.ofNullable(block.getGasUsed()).orElse("0");
+        String timestamp =  Optional.ofNullable(block.getTimestamp()).orElse("0");
         block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
         block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
         block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
@@ -732,9 +734,9 @@ public class CommonUtils {
         if (trans == null) {
             return;
         }
-        String gas = trans.getGas();
-        String gasPrice = trans.getGasPrice();
-        String groupId = trans.getGroupId();
+        String gas = Optional.ofNullable(trans.getGas()).orElse("0");
+        String gasPrice = Optional.ofNullable(trans.getGasPrice()).orElse("0");
+        String groupId = Optional.ofNullable(trans.getGroupId()).orElse("0");
         trans.setGas(Numeric.toBigInt(gas).toString(10));
         trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
         trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
