@@ -77,6 +77,7 @@ import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.transaction.model.po.RawTransaction;
 import org.fisco.bcos.sdk.transaction.pusher.TransactionPusherService;
+import org.fisco.bcos.sdk.utils.ByteUtils;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -623,7 +624,7 @@ public class TransService {
 
     /**
      * get encoded raw transaction
-     * @param req.user userAddress, if not null, return signed raw tx
+     * @param req req.user userAddress, if not null, return signed raw tx
      */
     public String transToRawTxStr(ReqTransHandle req) throws Exception {
         // get signUserId
@@ -649,20 +650,22 @@ public class TransService {
         Function function = new Function(req.getFuncName(), contractFunction.getFinalInputs(),
             contractFunction.getFinalOutputs());
 
-        return createRawTxEncoded(groupId, web3j, contractAddress, function, contractFunction, user);
+        return createRawTxEncoded(groupId, web3j, contractAddress, function, user);
     }
 
     /**
      * handleTransByFunction by whether is constant
+     * if use signed data to send tx, call @send-signed-transaction api
      */
     private String createRawTxEncoded(int groupId, Client web3j, String contractAddress,
-        Function function, ContractFunction contractFunction, String userAddress) {
+        Function function, String userAddress) {
 
         // to encode raw tx
         BigInteger randomId = new BigInteger(250, new SecureRandom());
         BigInteger blockLimit = web3j.getBlockLimit();
         FunctionEncoder functionEncoder = new FunctionEncoder(cryptoSuite);
         String encodedFunction = functionEncoder.encode(function);
+        log.info("createRawTxEncoded encodedFunction:{}", encodedFunction);
         TransactionEncoderService encoderService = new TransactionEncoderService(cryptoSuite);
         String chainId = Constants.chainId;
         RawTransaction rawTransaction =
@@ -672,11 +675,17 @@ public class TransService {
 
         byte[] encodedTransaction = encoderService.encode(rawTransaction, null);
         String encodedDataStr = Numeric.toHexString(encodedTransaction);
+        log.info("createRawTxEncoded encodedDataStr:{}", encodedDataStr);
         // if user not null: sign, else, not sign
         SignatureResult userSignResult = null;
-        if (StringUtils.isBlank(userAddress)) {
-            ReqSignMessageHash signHash = new ReqSignMessageHash(userAddress, encodedDataStr);
-            userSignResult = (SignatureResult) this.signMessageLocal(signHash);
+        if (!StringUtils.isBlank(userAddress)) {
+            log.info("createRawTxEncoded use key of {} to sign message", userAddress);
+            byte[] hashMessage = cryptoSuite.hash(ByteUtils.hexStringToBytes(encodedDataStr));
+            String hashMessageStr = Numeric.toHexString(hashMessage);
+            log.info("createRawTxEncoded hashMessageStr:{}", hashMessageStr);
+            userSignResult = signMessageHashByType(hashMessageStr,
+                getCredentials(false, userAddress),
+                cryptoSuite.cryptoTypeConfig);
         }
         // encode again
         byte[] signedMessage = encoderService.encode(rawTransaction, userSignResult);
