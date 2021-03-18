@@ -354,6 +354,7 @@ public class TransService {
     /**
      * build Function with cns.
      */
+    @Deprecated
     private ContractFunction buildContractFunctionWithCns(String contractName, String funcName,
             String version, List<Object> params) {
         log.debug("start buildContractFunctionWithCns");
@@ -421,6 +422,7 @@ public class TransService {
      * does abi exist in cns or db.
      * @Deprecated: request body contains abi list
      */
+    @Deprecated
     private void checkContractAbiInCnsOrDb(ReqTransHandle req) {
         log.debug("start checkContractAbiInCnsOrDb");
         String version = req.getVersion();
@@ -457,7 +459,6 @@ public class TransService {
      */
     public Object transHandleLocal(ReqTransHandle req) throws Exception {
         log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(req));
-        checkContractAbiInCnsOrDb(req);
         // check param and build function
         ContractFunction contractFunction = buildContractFunctionWithAbi(req.getContractAbi(),
             req.getFuncName(), req.getFuncParam());
@@ -666,13 +667,13 @@ public class TransService {
         FunctionEncoder functionEncoder = new FunctionEncoder(cryptoSuite);
         String encodedFunction = functionEncoder.encode(function);
         log.info("createRawTxEncoded encodedFunction:{}", encodedFunction);
-        TransactionEncoderService encoderService = new TransactionEncoderService(cryptoSuite);
         String chainId = Constants.chainId;
         RawTransaction rawTransaction =
             RawTransaction.createTransaction(randomId, Constants.GAS_PRICE,
                 Constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, encodedFunction,
                 new BigInteger(chainId), BigInteger.valueOf(groupId), "");
 
+        TransactionEncoderService encoderService = new TransactionEncoderService(cryptoSuite);
         byte[] encodedTransaction = encoderService.encode(rawTransaction, null);
         String encodedDataStr = Numeric.toHexString(encodedTransaction);
         log.info("createRawTxEncoded encodedDataStr:{}", encodedDataStr);
