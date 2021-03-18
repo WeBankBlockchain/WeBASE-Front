@@ -204,6 +204,7 @@ export default {
         deploy: '部署',
         callContract: '合约调用',
         exportJavaFile: '导出java文件',
+        exportSdk: 'SDK证书下载',
         handleSave: '按Ctrl+s保存合约内容',
         handleCompile: '按Alt+c 编译合约',
         handleDeploy: '按Alt+d 部署合约',

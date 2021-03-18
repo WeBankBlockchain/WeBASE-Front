@@ -49,6 +49,10 @@
                     <i class="el-icon-download contract-icon-style font-16"></i>
                     <span>{{$t('title.exportJavaFile')}}</span>
                 </span>
+                <span class="contract-code-done" @click="exportSdk">
+                    <i class="el-icon-download contract-icon-style font-16"></i>
+                    <span>{{$t('title.exportSdk')}}</span>
+                </span>
             </span>
             <div class="search-model" v-if="searchVisibility">
                 <el-input v-model="keyword" placeholder="搜索" style="width:266px;margin-left:10px;" ref="searchInput" @keyup.esc.native="closeBtn" @keyup.enter.native="searchBtn" @keyup.down.native="nextBtn" @keyup.up.native="previousBtn"></el-input>
@@ -196,7 +200,8 @@ import {
     addFunctionAbi,
     backgroundCompile,
     registerCns,
-    findCnsInfo
+    findCnsInfo,
+    exportCertSdk
 } from "@/util/api";
 import transaction from "@/components/sendTransaction";
 import changeUser from "../dialog/changeUser";
@@ -1133,7 +1138,28 @@ export default {
         },
         handleChange(val) {
             console.log(val);
-        }
+        },
+        exportSdk(){
+            this.sureExportSdk()
+        },
+        sureExportSdk(){
+            exportCertSdk().then(res => {
+                const blob = new Blob([res.data])
+                const fileName = `sdk.zip`
+                if ('download' in document.createElement('a')) {
+                    const elink = document.createElement('a')
+                    elink.download = fileName
+                    elink.style.display = 'none'
+                    elink.href = URL.createObjectURL(blob)
+                    document.body.appendChild(elink)
+                    elink.click()
+                    URL.revokeObjectURL(elink.href)
+                    document.body.removeChild(elink)
+                } else { 
+                    navigator.msSaveBlob(blob, fileName)
+                }
+            })
+        },
     }
 };
 </script>

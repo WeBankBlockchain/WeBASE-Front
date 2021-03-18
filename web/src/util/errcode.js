@@ -237,6 +237,10 @@ let errCode = {
         en: "contract path cannot be empty.",
         zh: '合约路径不能为空'
     },
+    "201156": {
+        en: "Write front's sdk cert and key fail!",
+        zh: '写入前置的sdk证书和密钥失败！'
+    },
     "201213": {
         en: "address is invalid",
         zh: '地址无效'
