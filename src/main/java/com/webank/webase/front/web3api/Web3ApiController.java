@@ -242,7 +242,7 @@ public class Web3ApiController {
     @ApiOperation(value = "getNodeConfig", notes = "Get node config info")
     @GetMapping("/nodeConfig")
     public Object getNodeConfig() {
-        return web3ApiService.getNodeInfo();
+        return web3ApiService.getNodeConfig();
     }
 
     @ApiOperation(value = "getNodeInfo", notes = "Get node information")

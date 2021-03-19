@@ -205,7 +205,7 @@ export default {
                         var param = [], label = [];
                         item.inputs.forEach(it => {
                             param.push(`${it.type}`)
-                            label.push(this.labelParam(it))
+                            label.push(this.labelParam(it).replace(/(^\s*)|(\s*$)/g, ""))
                         })
                         options.push({
                             label: `${item.name}(${label.join(',')})`,
@@ -230,13 +230,13 @@ export default {
 
     created() {
     },
-    
+
     mounted() {
         this.$on("changeGroup", data => {
             this.groupId = data
             this.changeGroup()
         })
-        if(localStorage.getItem("groupId")){
+        if (localStorage.getItem("groupId")) {
             this.queryInit()
         }
     },
@@ -380,11 +380,13 @@ export default {
                             return
                         }
                         eventList.forEach(item => {
-                            newEventList.push(item.log)
+                            newEventList.push(item);
                         })
-                        newEventList.forEach(item => {
-                            item.eventVal = this.decodeEvent(item)
-                        })
+                        if (newEventList && newEventList.length) {
+                            newEventList.forEach(item => {
+                                item.eventVal = this.decodeEvent(item.log, item.data)
+                            })
+                        }
                         this.eventList = newEventList;
                     } else {
                         this.$message({
@@ -452,7 +454,7 @@ export default {
             }
 
         },
-        decodeEvent(paramVal) {
+        decodeEvent(paramVal, dataList) {
             let Web3EthAbi = require('web3-eth-abi');
             let contractAbi = JSON.parse(this.contractEventForm.contractAbi)
             let inputs = []
@@ -470,7 +472,7 @@ export default {
             inputs.forEach(input => {
                 eventFun.push(`${input.data}`)
             })
-            return `${this.contractEventForm.eventName.replace(/[(][^）]+[\))]/g, '')} (${eventFun.join()})`
+            return `${this.contractEventForm.eventName.replace(/[(][^）]+[\))]/g, '')} (${dataList.join()})`
         },
         copyKey(val) {
             if (!val) {

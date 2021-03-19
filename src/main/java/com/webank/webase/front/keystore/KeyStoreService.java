@@ -49,7 +49,6 @@ import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +84,6 @@ public class KeyStoreService {
     @Autowired
     @Qualifier(value = "common")
     private CryptoSuite cryptoSuite;
-    private static Map<String, String> PRIVATE_KEY_MAP = new HashMap<>();
 
     /**
      * get local user KeyStores with privateKey
@@ -135,10 +133,15 @@ public class KeyStoreService {
      * @param appId
      * @return KeyStoreInfo
      */
-    public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId) {
+    public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId, boolean returnPrivateKey) {
         // get from sign
-        RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId);
-        return saveSignKeyStore(rspUserInfo);
+        RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId, returnPrivateKey);
+        KeyStoreInfo keyStoreInfo = saveSignKeyStore(rspUserInfo);
+        if (returnPrivateKey == true) {
+            keyStoreInfo.setPrivateKey(Base64.getEncoder().encodeToString(
+                    aesUtils.aesDecrypt(rspUserInfo.getPrivateKey()).getBytes()));
+        }
+        return keyStoreInfo;
     }
 
     /**
@@ -461,10 +464,10 @@ public class KeyStoreService {
      * @param signUserId unique user id to call webase-sign
      * @return
      */
-    public RspUserInfo getSignUserEntity(String signUserId, String appId) {
+    public RspUserInfo getSignUserEntity(String signUserId, String appId, boolean returnPrivateKey) {
         // webase-sign api(v1.3.0) support
         String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
-                cryptoSuite.cryptoTypeConfig, signUserId, appId);
+                cryptoSuite.cryptoTypeConfig, signUserId, appId, returnPrivateKey);
         log.info("getSignUserEntity url:{}", url);
         BaseResponse baseResponse = getForEntity(url);
         log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
@@ -475,6 +478,30 @@ public class KeyStoreService {
             log.error("getSignUserEntity fail for:{}", baseResponse.getMessage());
             throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
         }
+        return rspUserInfo;
+    }
+    
+    /**
+     * request (get) user info from webase-sign api(v1.5.0+)
+     * @param signUserId unique user id to call webase-sign
+     * @return
+     */
+    public RspUserInfo getUserInfoWithSign(String signUserId, boolean returnPrivateKey) {
+        // webase-sign api(v1.4.4) support
+        String url = String.format(Constants.WEBASE_SIGN_USER_INFO_URI, constants.getKeyServer(),
+                signUserId, returnPrivateKey);
+        log.info("getUserInfoWithSign url:{}", url);
+        BaseResponse baseResponse = getForEntity(url);
+        log.info("getUserInfoWithSign response:{}", JsonUtils.toJSONString(baseResponse));
+        RspUserInfo rspUserInfo;
+        if (baseResponse.getCode() == 0) {
+            rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+        } else {
+            log.error("getUserInfoWithSign fail for:{}", baseResponse.getMessage());
+            throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
+        }
+        rspUserInfo.setPrivateKey(Base64.getEncoder().encodeToString(
+                    aesUtils.aesDecrypt(rspUserInfo.getPrivateKey()).getBytes()));
         return rspUserInfo;
     }
 

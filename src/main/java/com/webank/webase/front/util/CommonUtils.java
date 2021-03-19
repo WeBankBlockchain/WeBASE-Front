@@ -699,6 +699,7 @@ public class CommonUtils {
      * @param receipt
      */
     public static void processReceiptHexNumber(TransactionReceipt receipt) {
+        log.info("sendMessage. receipt:[{}]", JsonUtils.toJSONString(receipt));
         if (receipt == null) {
             return;
         }
