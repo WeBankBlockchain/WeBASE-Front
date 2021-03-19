@@ -13,9 +13,11 @@
  */
 package com.webank.webase.front.monitor;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.monitor.entity.GroupSizeInfo;
 import com.webank.webase.front.monitor.entity.Monitor;
 import com.webank.webase.front.performance.result.Data;
@@ -30,10 +32,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
@@ -44,9 +43,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Node monitor service distinguished from host monitor: performance
@@ -91,22 +93,18 @@ public class MonitorService {
     public Page<Monitor> pagingQuery(int groupId, Integer pageNumber, Integer pageSize,
             LocalDateTime beginDate, LocalDateTime endDate) {
         Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
-        Specification<Monitor> queryParam = new Specification<Monitor>() {
-            @Override
-            public Predicate toPredicate(Root<Monitor> root, CriteriaQuery<?> criteriaQuery,
-                    CriteriaBuilder criteriaBuilder) {
-                List<Predicate> predicates = new ArrayList<>();
-                predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
-                if (beginDate != null) {
-                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
-                            beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-                }
-                if (endDate != null) {
-                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
-                            endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-                }
-                return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        Specification<Monitor> queryParam = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
+            if (beginDate != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                        beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
             }
+            if (endDate != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                        endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         return monitorRepository.findAll(queryParam, pageable);
     }
@@ -253,5 +251,59 @@ public class MonitorService {
             groupSizeInfo.setSize(groupSizeInfo.getSize() / 1024L);
         }
         return data;
+    }
+
+    /**
+     * less than beginDate or larger than endDate
+     * order by id
+     * @param groupId
+     * @param pageNumber
+     * @param pageSize
+     * @param beginDate
+     * @param endDate
+     * @return BasePageResponse
+     */
+    @Transactional
+    public BasePageResponse pagingQueryStat(int groupId, Integer pageNumber, Integer pageSize,
+        LocalDateTime beginDate, LocalDateTime endDate) {
+        // get larger than endDate
+        Pageable pageableEnd = new PageRequest(pageNumber - 1, pageSize / 2,
+            new Sort(Direction.ASC, "id"));
+        Specification<Monitor> queryEndParam = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
+            if (endDate != null) {
+                // larger than endDate
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                    endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        // get less than beginDate
+        Pageable pageableBegin = new PageRequest(pageNumber - 1, pageSize / 2,
+            new Sort(Direction.DESC, "id"));
+        Specification<Monitor> queryBeginParam = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
+            if (beginDate != null) {
+                // less than begin
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                    beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        // start query
+        Page<Monitor> pageEnd = monitorRepository.findAll(queryEndParam, pageableEnd);
+        Page<Monitor> pageBegin = monitorRepository.findAll(queryBeginParam, pageableBegin);
+        log.debug("pagingQueryStat pageEnd count:{}, pageBegin count:{} ", pageEnd.getSize(), pageBegin.getSize());
+        // concat two list
+        long totalCount = pageEnd.getTotalElements() + pageBegin.getTotalElements();
+        List<Monitor> resultList = new ArrayList<>();
+        resultList.addAll(pageEnd.getContent());
+        resultList.addAll(pageBegin.getContent());
+        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
+        response.setTotalCount(totalCount);
+        response.setData(resultList);
+        return response;
     }
 }
