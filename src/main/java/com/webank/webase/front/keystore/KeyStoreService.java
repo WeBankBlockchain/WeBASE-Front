@@ -19,6 +19,7 @@ import com.webank.webase.front.base.enums.KeyTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.MessageHashInfo;
@@ -29,7 +30,11 @@ import com.webank.webase.front.util.AesUtils;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -84,6 +89,10 @@ public class KeyStoreService {
     @Autowired
     @Qualifier(value = "common")
     private CryptoSuite cryptoSuite;
+    private final static String TEMP_EXPORT_KEYSTORE_PATH = "exportedKey";
+    private final static String PEM_FILE_FORMAT = ".pem";
+    private final static String P12_FILE_FORMAT = ".p12";
+
 
     /**
      * get local user KeyStores with privateKey
@@ -137,9 +146,9 @@ public class KeyStoreService {
         // get from sign
         RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId, returnPrivateKey);
         KeyStoreInfo keyStoreInfo = saveSignKeyStore(rspUserInfo);
-        if (returnPrivateKey == true) {
-            keyStoreInfo.setPrivateKey(Base64.getEncoder().encodeToString(
-                    aesUtils.aesDecrypt(rspUserInfo.getPrivateKey()).getBytes()));
+        if (returnPrivateKey && rspUserInfo.getPrivateKey() != null) {
+            // decrypt private key
+            keyStoreInfo.setPrivateKey(aesUtils.aesDecrypt(rspUserInfo.getPrivateKey()));
         }
         return keyStoreInfo;
     }
@@ -227,7 +236,7 @@ public class KeyStoreService {
                     restTemplate.postForObject(url, formEntity, BaseResponse.class);
             log.info("getSignData response:{}", JsonUtils.toJSONString(response));
             if (response.getCode() == 0) {
-                signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
+                signInfo = JsonUtils.toJavaObject(response.getData(), SignInfo.class);
             } else {
                 log.error("getSignData fail for error response:{}", response);
                 throw new FrontException(response.getCode(), response.getMessage());
@@ -271,7 +280,7 @@ public class KeyStoreService {
             log.info("getSignData response:{}", JsonUtils.toJSONString(response));
             SignInfo signInfo = new SignInfo();
             if (response.getCode() == 0) {
-                signInfo = CommonUtils.object2JavaBean(response.getData(), SignInfo.class);
+                signInfo = JsonUtils.toJavaObject(response.getData(), SignInfo.class);
             } else {
                 log.error("getSignData fail for error response:{}", response);
                 throw new FrontException(response.getCode(), response.getMessage());
@@ -460,7 +469,7 @@ public class KeyStoreService {
 
 
     /**
-     * request (get) user from webase-sign api(v1.3.0+)
+     * request/create (get) user from webase-sign api(v1.3.0+)
      * @param signUserId unique user id to call webase-sign
      * @return
      */
@@ -473,7 +482,7 @@ public class KeyStoreService {
         log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
         RspUserInfo rspUserInfo;
         if (baseResponse.getCode() == 0) {
-            rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+            rspUserInfo = JsonUtils.toJavaObject(baseResponse.getData(), RspUserInfo.class);
         } else {
             log.error("getSignUserEntity fail for:{}", baseResponse.getMessage());
             throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
@@ -495,13 +504,12 @@ public class KeyStoreService {
         log.info("getUserInfoWithSign response:{}", JsonUtils.toJSONString(baseResponse));
         RspUserInfo rspUserInfo;
         if (baseResponse.getCode() == 0) {
-            rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+            rspUserInfo = JsonUtils.toJavaObject(baseResponse.getData(), RspUserInfo.class);
         } else {
             log.error("getUserInfoWithSign fail for:{}", baseResponse.getMessage());
             throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
         }
-        rspUserInfo.setPrivateKey(Base64.getEncoder().encodeToString(
-                    aesUtils.aesDecrypt(rspUserInfo.getPrivateKey()).getBytes()));
+        rspUserInfo.setPrivateKey(aesUtils.aesDecrypt(rspUserInfo.getPrivateKey()));
         return rspUserInfo;
     }
 
@@ -527,7 +535,7 @@ public class KeyStoreService {
         log.info("postSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
         RspUserInfo rspUserInfo;
         if (baseResponse.getCode() == 0) {
-            rspUserInfo = CommonUtils.object2JavaBean(baseResponse.getData(), RspUserInfo.class);
+            rspUserInfo = JsonUtils.toJavaObject(baseResponse.getData(), RspUserInfo.class);
         } else {
             log.error("getSignUserEntity fail for:{}", baseResponse.getMessage());
             throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
@@ -585,20 +593,140 @@ public class KeyStoreService {
     }
 
 
-    // todo get private key encrypted from sign
-//    public void exportPrivateKey(String signUserId, String appId) {
-//        RspUserInfo rspUserInfo = this.getSignUserEntity(signUserId, appId);
-//        // get private key
-//        this.privateKey2P12File();
-//        // remove file after use
-//    }
+    public FileContentHandle exportPemWithSign(String signUserId) {
+        RspUserInfo rspUserInfo = getUserInfoWithSign(signUserId, true);
+        String address = rspUserInfo.getAddress();
+        String rawPrivateKey = rspUserInfo.getPrivateKey();
+        String filePath = this.writePrivateKeyPem(rawPrivateKey, address, "");
+        try {
+            return new FileContentHandle(address + PEM_FILE_FORMAT,
+                new FileInputStream(filePath));
+        } catch (IOException e) {
+            log.error("exportPrivateKeyPem fail:[]", e);
+            throw new FrontException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
+        }
+    }
 
+    public FileContentHandle exportPemLocal(String address) {
+        KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
+        String userName = keyStoreInfo.getUserName();
+        String rawPrivateKey = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+        String filePath = this.writePrivateKeyPem(rawPrivateKey, address, userName);
+        try {
+            return new FileContentHandle(userName + "_" + address + PEM_FILE_FORMAT,
+                new FileInputStream(filePath));
+        } catch (IOException e) {
+            log.error("exportPrivateKeyPem fail:[]", e);
+            throw new FrontException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
+        }
+    }
+
+
+    public FileContentHandle exportP12WithSign(String signUserId, String p12PasswordEncoded) {
+        // decode p12 password
+        String p12Password;
+        try {
+            p12Password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
+        } catch (Exception e) {
+            log.error("decode password error:[]", e);
+            throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
+        }
+
+        RspUserInfo rspUserInfo = getUserInfoWithSign(signUserId, true);
+        String address = rspUserInfo.getAddress();
+        String rawPrivateKey = rspUserInfo.getPrivateKey();
+        String filePath = this.writePrivateKeyP12(p12Password, rawPrivateKey, address, "");
+        try {
+            return new FileContentHandle(address + PEM_FILE_FORMAT,
+                new FileInputStream(filePath));
+        } catch (IOException e) {
+            log.error("exportPrivateKeyPem fail:[]", e);
+            throw new FrontException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
+        }
+    }
+
+    public FileContentHandle exportP12Local(String address, String p12PasswordEncoded) {
+        // decode p12 password
+        String p12Password;
+        try {
+            p12Password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
+        } catch (Exception e) {
+            log.error("decode password error:[]", e);
+            throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
+        }
+
+        KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
+        String userName = keyStoreInfo.getUserName();
+        String rawPrivateKey = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
+        String filePath = this.writePrivateKeyP12(p12Password, rawPrivateKey, address, userName);
+        try {
+            return new FileContentHandle(userName + "_" + address + PEM_FILE_FORMAT,
+                new FileInputStream(filePath));
+        } catch (IOException e) {
+            log.error("exportPrivateKeyPem fail:[]", e);
+            throw new FrontException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
+        }
+    }
+
+    /**
+     * write pem in ./tempKey
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @return
+     */
+    public synchronized String writePrivateKeyPem(String rawPrivateKey, String address, String userName) {
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            keystorePath.delete();
+        }
+        keystorePath.mkdir();
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + PEM_FILE_FORMAT;
+        this.privateKey2PemFile(exportedKeyPath, rawPrivateKey);
+        return exportedKeyPath;
+    }
+
+    /**
+     * write p12 in ./tempKey
+     * @param p12Password
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @return
+     */
+    public synchronized String writePrivateKeyP12(String p12Password, String rawPrivateKey,
+        String address, String userName) {
+
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            keystorePath.delete();
+        }
+        keystorePath.mkdir();
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + P12_FILE_FORMAT;
+        this.privateKey2P12File(exportedKeyPath, p12Password, rawPrivateKey);
+        return exportedKeyPath;
+    }
+
+
+    /**
+     * store pem
+     * @param pemFilePath
+     * @param privateKey
+     */
     public void privateKey2PemFile(String pemFilePath, String privateKey) {
         CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKey);
         cryptoKeyPair.storeKeyPairWithPem(pemFilePath);
     }
 
-    // store p12
+    /**
+     * store p12
+      */
     public void privateKey2P12File(String p12FilePath, String p12Password, String privateKey) {
         CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKey);
         cryptoKeyPair.storeKeyPairWithP12(p12FilePath, p12Password);

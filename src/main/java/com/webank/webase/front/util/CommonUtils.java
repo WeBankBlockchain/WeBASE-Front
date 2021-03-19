@@ -329,20 +329,6 @@ public class CommonUtils {
         return requestEntity;
     }
 
-    /**
-     * Object to JavaBean.
-     * 
-     * @param obj obj
-     * @param clazz clazz
-     * @return
-     */
-    public static <T> T object2JavaBean(Object obj, Class<T> clazz) {
-        if (obj == null || clazz == null) {
-            log.warn("Object2JavaBean. obj or clazz null");
-            return null;
-        }
-        return JsonUtils.toJavaObject(obj, clazz);
-    }
 
     /**
      * get server ip.
