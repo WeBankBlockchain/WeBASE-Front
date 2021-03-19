@@ -556,5 +556,25 @@ public class KeyStoreService {
             throw new FrontException(code, errorMessage);
         }
     }
+
+
+    // todo get private key encrypted from sign
+//    public void exportPrivateKey(String signUserId, String appId) {
+//        RspUserInfo rspUserInfo = this.getSignUserEntity(signUserId, appId);
+//        // get private key
+//        this.privateKey2P12File();
+//        // remove file after use
+//    }
+
+    public void privateKey2PemFile(String pemFilePath, String privateKey) {
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKey);
+        cryptoKeyPair.storeKeyPairWithPem(pemFilePath);
+    }
+
+    // store p12
+    public void privateKey2P12File(String p12FilePath, String p12Password, String privateKey) {
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKey);
+        cryptoKeyPair.storeKeyPairWithP12(p12FilePath, p12Password);
+    }
 }
 
