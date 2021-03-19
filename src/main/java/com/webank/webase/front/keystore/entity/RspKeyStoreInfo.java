@@ -23,6 +23,7 @@ import lombok.Data;
  * @author marsli
  */
 @Data
+@Deprecated
 public class RspKeyStoreInfo {
     private String address;
     private String publicKey;

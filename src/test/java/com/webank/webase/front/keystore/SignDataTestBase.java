@@ -17,12 +17,13 @@
 package com.webank.webase.front.keystore;
 
 
+import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.JsonUtils;
 import java.security.SignatureException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -74,7 +75,7 @@ public class SignDataTestBase extends SpringTestBase {
             BaseResponse response = restTemplate.getForObject(url, BaseResponse.class);
             if (response.getCode() == 0) {
                 keyStoreInfo =
-                        CommonUtils.object2JavaBean(response.getData(), KeyStoreInfo.class);
+                        JsonUtils.toJavaObject(response.getData(), KeyStoreInfo.class);
             }
         } catch (Exception e) {
             return "";
@@ -124,7 +125,7 @@ public class SignDataTestBase extends SpringTestBase {
             BaseResponse response = restTemplate.getForObject(url, BaseResponse.class);
             if (response.getCode() == 0) {
                 keyStoreInfo =
-                        CommonUtils.object2JavaBean(response.getData(), KeyStoreInfo.class);
+                        JsonUtils.toJavaObject(response.getData(), KeyStoreInfo.class);
             }
         } catch (Exception e) {
             return null;
