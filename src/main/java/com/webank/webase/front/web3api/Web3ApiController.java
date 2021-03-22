@@ -31,6 +31,7 @@ import java.util.List;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
@@ -312,7 +313,7 @@ public class Web3ApiController {
     @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true,
         dataType = "String", paramType = "path")
     @GetMapping("/blockHeaderByHash/{blockHash}")
-    public BcosBlockHeader getBlockHeaderByHash(@PathVariable int groupId,
+    public BlockHeader getBlockHeaderByHash(@PathVariable int groupId,
         @PathVariable String blockHash) {
         return web3ApiService.getBlockHeaderByHash(groupId, blockHash, true);
     }
@@ -321,7 +322,7 @@ public class Web3ApiController {
     @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
         dataType = "BigInteger", paramType = "path")
     @GetMapping("/blockHeaderByNumber/{blockNumber}")
-    public BcosBlockHeader getBlockHeaderByNumber(@PathVariable int groupId,
+    public BlockHeader getBlockHeaderByNumber(@PathVariable int groupId,
         @PathVariable BigInteger blockNumber) {
         return web3ApiService.getBlockHeaderByNumber(groupId, blockNumber, true);
     }
