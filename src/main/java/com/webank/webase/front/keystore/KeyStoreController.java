@@ -33,7 +33,6 @@ import com.webank.webase.front.util.PemUtils;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
@@ -99,7 +98,7 @@ public class KeyStoreController extends BaseController {
     }
     
     @ApiOperation(value = "getUserInfoWithSign", notes = "get key store info from sign")
-    @GetMapping("getUserInfoWithSign")
+    @GetMapping("userInfoWithSign")
     public RspUserInfo getUserInfoWithSign(@RequestParam String signUserId,
             @RequestParam(required = false, defaultValue = "false") boolean returnPrivateKey) {
         RspUserInfo rspUserInfo = keyStoreService.getUserInfoWithSign(signUserId, returnPrivateKey);
@@ -201,7 +200,7 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "signUserId", value = "user userId of user in sign",
             required = false, dataType = "String")
     })
-    @GetMapping("/exportPem")
+    @PostMapping("/exportPem")
     public ResponseEntity<InputStreamResource> exportPemPrivateKey(
         @RequestParam(required = false) String userAddress,
         @RequestParam(required = false) String signUserId) {
@@ -232,9 +231,9 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "signUserId", value = "user userId of user in sign",
             dataType = "String")
     })
-    @GetMapping("/exportP12")
+    @PostMapping("/exportP12")
     public ResponseEntity<InputStreamResource> exportP12PrivateKey(
-        @RequestParam(required = false) String p12Password,
+        @RequestParam(required = false, defaultValue = "") String p12Password,
         @RequestParam(required = false) String userAddress,
         @RequestParam(required = false) String signUserId) {
         Instant startTime = Instant.now();
