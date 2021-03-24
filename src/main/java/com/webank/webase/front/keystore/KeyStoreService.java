@@ -33,8 +33,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -432,7 +430,7 @@ public class KeyStoreService {
 
     /**
      * save LOCAL_USER key store by private key
-     * @param privateKey
+     * @param privateKey hex string
      * @param userName
      * @return KeyStoreInfo local user
      */
