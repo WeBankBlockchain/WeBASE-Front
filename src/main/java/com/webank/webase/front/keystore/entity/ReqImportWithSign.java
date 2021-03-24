@@ -24,5 +24,8 @@ import lombok.NoArgsConstructor;
 public class ReqImportWithSign {
     private String signUserId;
     private String appId;
+    /**
+     * encoded in base64 format
+     */
     private String privateKey;
 }

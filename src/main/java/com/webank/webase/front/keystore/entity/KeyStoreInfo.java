@@ -31,6 +31,7 @@ public class KeyStoreInfo {
     private String publicKey;
     /**
      * not store private key in db
+     * v1.5.0 if return private key, use base64 format
      */
     private String privateKey;
     private String userName;

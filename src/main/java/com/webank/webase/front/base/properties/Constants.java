@@ -75,10 +75,10 @@ public class Constants {
     private int transMaxWait = 30;
     private String monitorDisk = "/";
     private boolean monitorEnabled = true;
-    private String aesKey = "4d5dFr4fG446GBde";
+    private String aesKey = "EfdsW23D23d3df43";
     private String nodePath = "/fisco/nodes/127.0.0.1/node0";
-    private Integer eventRegisterTaskFixedDelay;
-    private Integer syncEventMapTaskFixedDelay;
+    private Integer eventRegisterTaskFixedDelay = 5000;
+    private Integer syncEventMapTaskFixedDelay = 60000;
     private boolean statLogEnabled = false;
     private Integer syncStatLogTime = 5000;
     private long syncStatLogCountLimit = 10000;

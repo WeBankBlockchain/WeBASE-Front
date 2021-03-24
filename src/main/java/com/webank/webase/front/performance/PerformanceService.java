@@ -71,6 +71,7 @@ public class PerformanceService {
     private static final String TXBPS = "txbps";
     // host download bps(bit per second)
     private static final String RXBPS = "rxbps";
+    private static final String LOCAL_HOST_IP = "127.0.0.1";
 
     private static Sigar sigar = new Sigar();
 
@@ -444,11 +445,11 @@ public class PerformanceService {
 
     private String getIp() {
         try {
-            InetAddress addr = InetAddress.getLocalHost();
-            return addr.getHostAddress();
+            InetAddress localHost = InetAddress.getLocalHost();
+            return localHost.getHostAddress();
         } catch (Exception e) {
-            log.info("get ip fail, return '127.0.0.1'");
-            return "127.0.0.1";
+            log.debug("get ip fail, return '127.0.0.1', error:{}", e.getMessage());
+            return LOCAL_HOST_IP;
         }
     }
 }
