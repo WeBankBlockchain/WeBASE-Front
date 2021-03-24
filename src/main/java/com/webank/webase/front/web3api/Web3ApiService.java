@@ -24,6 +24,7 @@ import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
+import com.webank.webase.front.web3api.entity.RspSearchTransaction;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.RspTransCountInfo;
 import java.io.IOException;
@@ -48,6 +49,7 @@ import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
 import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
@@ -599,7 +601,10 @@ public class Web3ApiService {
         if (StringUtils.isNumeric(input)) {
             return getBlockByNumber(groupId, new BigInteger(input));
         } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
-            return getTransactionByHash(groupId, input);
+            RspSearchTransaction txResponse = (RspSearchTransaction) getTransactionByHash(groupId, input);
+            BlockHeader blockHeader = getBlockHeaderByNumber(groupId, txResponse.getBlockNumber(), false);
+            txResponse.setTimestamp(blockHeader.getTimestamp());
+            return txResponse;
         }
         return null;
     }
@@ -771,14 +776,18 @@ public class Web3ApiService {
     }
 
     /* above v2.6.1*/
-    public BcosBlockHeader getBlockHeaderByHash(Integer groupId, String blockHash,
+    public BlockHeader getBlockHeaderByHash(Integer groupId, String blockHash,
         boolean returnSealers) {
-        return getWeb3j(groupId).getBlockHeaderByHash(blockHash, returnSealers);
+        BlockHeader blockHeader = getWeb3j(groupId).getBlockHeaderByHash(blockHash, returnSealers).getBlockHeader();
+        CommonUtils.processBlockHeaderHexNumber(blockHeader);
+        return blockHeader;
     }
 
-    public BcosBlockHeader getBlockHeaderByNumber(Integer groupId, BigInteger blockNumber,
+    public BlockHeader getBlockHeaderByNumber(Integer groupId, BigInteger blockNumber,
         boolean returnSealers) {
-        return getWeb3j(groupId).getBlockHeaderByNumber(blockNumber, returnSealers);
+        BlockHeader blockHeader = getWeb3j(groupId).getBlockHeaderByNumber(blockNumber, returnSealers).getBlockHeader();
+        CommonUtils.processBlockHeaderHexNumber(blockHeader);
+        return blockHeader;
     }
     /* above v2.6.1*/
 

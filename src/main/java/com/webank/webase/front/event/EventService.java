@@ -33,6 +33,7 @@ import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.event.callback.SyncEventLogCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
+import com.webank.webase.front.event.entity.DecodedEventLog;
 import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import com.webank.webase.front.event.entity.PublisherHelper;
@@ -372,7 +373,7 @@ public class EventService {
      * sync get history event
      * cannot filter by indexed param, only filter by event name and contractAddress
      */
-    public List<EventLog> getContractEventLog(int groupId, String contractAddress, String abi,
+    public List<DecodedEventLog> getContractEventLog(int groupId, String contractAddress, String abi,
         Integer fromBlock, Integer toBlock, EventTopicParam eventTopicParam) {
         log.info("start getContractEventLog groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventTopicParam:{}",
             groupId, contractAddress, fromBlock, toBlock, eventTopicParam);
@@ -386,14 +387,15 @@ public class EventService {
         EventLogParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
             contractAddress, eventTopicParam, cryptoSuite);
         log.info("getContractEventLog eventParam:{}", eventParam);
-        final CompletableFuture<List<EventLog>> callbackFuture = new CompletableFuture<>();
+        // final CompletableFuture<List<EventLog>> callbackFuture = new CompletableFuture<>();
+        final CompletableFuture<List<DecodedEventLog>> callbackFuture = new CompletableFuture<>();
         ABICodec abiCodec = new ABICodec(cryptoSuite);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
-            eventTopicParam.getEventName(), callbackFuture);
+            eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
         EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
         String registerId = eventSubscribe.subscribeEvent(eventParam, callback);
 
-        List<EventLog> resultList;
+        List<DecodedEventLog> resultList;
         try {
             resultList = callbackFuture.get(constants.getEventCallbackWait(), TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException e) {

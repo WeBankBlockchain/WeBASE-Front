@@ -49,6 +49,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
@@ -329,20 +330,6 @@ public class CommonUtils {
         return requestEntity;
     }
 
-    /**
-     * Object to JavaBean.
-     * 
-     * @param obj obj
-     * @param clazz clazz
-     * @return
-     */
-    public static <T> T object2JavaBean(Object obj, Class<T> clazz) {
-        if (obj == null || clazz == null) {
-            log.warn("Object2JavaBean. obj or clazz null");
-            return null;
-        }
-        return JsonUtils.toJavaObject(obj, clazz);
-    }
 
     /**
      * get server ip.
@@ -724,6 +711,22 @@ public class CommonUtils {
         block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
         block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
         block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param blockHeader
+     */
+    public static void processBlockHeaderHexNumber(BcosBlockHeader.BlockHeader blockHeader) {
+        if (blockHeader == null) {
+            return;
+        }
+        String gasLimit = Optional.ofNullable(blockHeader.getGasLimit()).orElse("0");
+        String gasUsed =  Optional.ofNullable(blockHeader.getGasUsed()).orElse("0");
+        String timestamp =  Optional.ofNullable(blockHeader.getTimestamp()).orElse("0");
+        blockHeader.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        blockHeader.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        blockHeader.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
     }
 
     /**
