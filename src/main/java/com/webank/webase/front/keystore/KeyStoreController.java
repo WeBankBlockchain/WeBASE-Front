@@ -213,7 +213,7 @@ public class KeyStoreController extends BaseController {
         } else {
             fileContentHandle = keyStoreService.exportPemLocal(userAddress);
         }
-        log.info("end getSdkCertZip fileContentHandle:{}useTime:{}", fileContentHandle,
+        log.info("end exportPemPrivateKey fileContentHandle:{}useTime:{}", fileContentHandle,
             Duration.between(startTime, Instant.now()).toMillis());
         return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
             .body(new InputStreamResource(fileContentHandle.getInputStream()));
@@ -242,7 +242,7 @@ public class KeyStoreController extends BaseController {
         } else {
             fileContentHandle = keyStoreService.exportP12Local(userAddress, p12Password);
         }
-        log.info("end getSdkCertZip fileContentHandle:{}useTime:{}", fileContentHandle,
+        log.info("end exportP12PrivateKey fileContentHandle:{}useTime:{}", fileContentHandle,
             Duration.between(startTime, Instant.now()).toMillis());
         return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
             .body(new InputStreamResource(fileContentHandle.getInputStream()));
