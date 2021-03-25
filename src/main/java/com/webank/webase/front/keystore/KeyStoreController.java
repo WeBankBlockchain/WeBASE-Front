@@ -23,6 +23,7 @@ import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.MessageHashInfo;
+import com.webank.webase.front.keystore.entity.ReqExport;
 import com.webank.webase.front.keystore.entity.ReqImportPem;
 import com.webank.webase.front.keystore.entity.ReqImportWithSign;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
@@ -194,18 +195,14 @@ public class KeyStoreController extends BaseController {
 
     @ApiOperation(value = "export PrivateKey by pem",
         notes = "export PrivateKey by pem, address or signUserId cannot both empty")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "userAddress", value = "user address of user locally",
-            required = false, dataType = "String"),
-        @ApiImplicitParam(name = "signUserId", value = "user userId of user in sign",
-            required = false, dataType = "String")
-    })
+    @ApiImplicitParam(name = "param", value = "user address and userId of user",
+            required = true, dataType = "ReqExport")
     @PostMapping("/exportPem")
-    public ResponseEntity<InputStreamResource> exportPemPrivateKey(
-        @RequestParam(required = false) String userAddress,
-        @RequestParam(required = false) String signUserId) {
+    public ResponseEntity<InputStreamResource> exportPemPrivateKey(@RequestBody ReqExport param) {
         Instant startTime = Instant.now();
         log.info("start getSdkCertZip startTime:{}", startTime.toEpochMilli());
+        String userAddress = param.getUserAddress();
+        String signUserId = param.getSignUserId();
         if (StringUtils.isAllBlank(userAddress, signUserId)) {
             throw new FrontException(ConstantCode.PARAM_ERROR);
         }
@@ -223,21 +220,15 @@ public class KeyStoreController extends BaseController {
     }
 
     @ApiOperation(value = "export PrivateKey by p12", notes = "export PrivateKey by p12")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "p12Password", value = "p12 password encoded in base64",
-            dataType = "String"),
-        @ApiImplicitParam(name = "userAddress", value = "user address of user locally",
-            dataType = "String"),
-        @ApiImplicitParam(name = "signUserId", value = "user userId of user in sign",
-            dataType = "String")
-    })
+    @ApiImplicitParam(name = "param", value = "user address and userId and password of p12",
+        required = true, dataType = "ReqExport")
     @PostMapping("/exportP12")
-    public ResponseEntity<InputStreamResource> exportP12PrivateKey(
-        @RequestParam(required = false, defaultValue = "") String p12Password,
-        @RequestParam(required = false) String userAddress,
-        @RequestParam(required = false) String signUserId) {
+    public ResponseEntity<InputStreamResource> exportP12PrivateKey(@RequestBody ReqExport param) {
         Instant startTime = Instant.now();
         log.info("start getSdkCertZip startTime:{}", startTime.toEpochMilli());
+        String userAddress = param.getUserAddress();
+        String signUserId = param.getSignUserId();
+        String p12Password = param.getP12Password();
         if (StringUtils.isAllBlank(userAddress, signUserId)) {
             throw new FrontException(ConstantCode.PARAM_ERROR);
         }
