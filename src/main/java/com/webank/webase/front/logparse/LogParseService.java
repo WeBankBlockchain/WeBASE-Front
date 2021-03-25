@@ -132,7 +132,7 @@ public class LogParseService {
                         lastTimeFileSize = randomFile.getFilePointer();
                         updateCurrentState(currentFileName, lastTimeFileSize);
                     } catch (Exception e) {
-                        log.error("syncLogData readLine Exception.", e);
+                        log.error("syncLogData readLine Exception.error:{}", e);
                         continue;
                     }
                 }
@@ -144,13 +144,13 @@ public class LogParseService {
             log.debug("syncLogData end useTime:{}",
                     Duration.between(startTime, Instant.now()).toMillis());
         } catch (IOException e) {
-            log.error("syncLogData IOException.", e);
+            log.error("syncLogData IOException.error:{}", e);
         } finally {
             if (randomFile != null) {
                 try {
                     randomFile.close();
                 } catch (IOException e) {
-                    log.error("syncLogData IOException.", e);
+                    log.error("syncLogData IOException.error:{}", e);
                 }
             }
         }

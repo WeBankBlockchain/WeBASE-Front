@@ -185,7 +185,7 @@ public class AbiService {
         try {
             binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
         } catch (Exception e) {
-            log.error("fail getAddressRuntimeBin.", e);
+            log.error("fail getAddressRuntimeBin error:{}", e);
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
         log.info("getAddressRuntimeBin address:{} binOnChain:{}", contractAddress, binOnChain);

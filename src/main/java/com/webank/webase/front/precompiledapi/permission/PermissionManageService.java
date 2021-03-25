@@ -327,7 +327,7 @@ public class PermissionManageService {
         try {
             return permissionService.listPermissionManager();
         } catch (Exception e) {
-            log.error("listPermissionManager fail:[]", e);
+            log.error("listPermissionManager fail:{}", e);
             throw new FrontException(ConstantCode.GET_LIST_MANAGER_FAIL);
         }
     }
@@ -355,7 +355,7 @@ public class PermissionManageService {
         try{
             return permissionService.listDeployAndCreateManager();
         } catch (Exception e) {
-            log.error("listDeployAndCreateManager fail:[]", e);
+            log.error("listDeployAndCreateManager fail:{}", e);
             throw new FrontException(ConstantCode.GET_LIST_MANAGER_FAIL);
         }
     }
@@ -388,7 +388,7 @@ public class PermissionManageService {
         try {
             return permissionService.listUserTableManager(tableName);
         } catch (Exception e) {
-            log.error("listUserTableManager fail:[]", e);
+            log.error("listUserTableManager fail:{}", e);
             throw new FrontException(ConstantCode.GET_LIST_MANAGER_FAIL);
         }
     }
@@ -418,7 +418,7 @@ public class PermissionManageService {
         try {
             return permissionService.listNodeManager();
         } catch (Exception e) {
-            log.error("listNodeManager fail:[]", e);
+            log.error("listNodeManager fail:{}", e);
             throw new FrontException(ConstantCode.GET_LIST_MANAGER_FAIL);
         }
     }
@@ -448,7 +448,7 @@ public class PermissionManageService {
         try {
             return permissionService.listSysConfigManager();
         } catch (Exception e) {
-            log.error("listSysConfigManager fail:[]", e);
+            log.error("listSysConfigManager fail:{}", e);
             throw new FrontException(ConstantCode.GET_LIST_MANAGER_FAIL);
         }
     }
@@ -476,7 +476,7 @@ public class PermissionManageService {
         try {
             return permissionService.listCNSManager();
         } catch (Exception e) {
-            log.error("listCNSManager fail:[]", e);
+            log.error("listCNSManager fail:{}", e);
             throw new FrontException(ConstantCode.GET_LIST_MANAGER_FAIL);
         }
     }

@@ -146,10 +146,10 @@ public class FrontCertService {
             }
             log.debug("end tools: loadCrtContentByPath resultList:{}", targetList);
         } catch (IOException e) {
-            log.error("FrontCertService loadCrtContentByPath, cert(.crt) path prefix error, Exception:[]", e);
+            log.error("FrontCertService loadCrtContentByPath, cert(.crt) path prefix error, Exception:{}", e);
             throw new FrontException("loadCrtContentByPath error:" + e.getMessage());
         } catch (Exception e) {
-            log.error("FrontCertService loadCrtContentByPath error:[]", e);
+            log.error("FrontCertService loadCrtContentByPath error:{}", e);
             throw new FrontException("loadCrtContentByPath error:" + e.getMessage());
         }
     }
@@ -176,10 +176,10 @@ public class FrontCertService {
             }
             log.debug("end tools: loadCrtContentByPath resultList:{}", targetList);
         } catch (IOException e) {
-            log.error("FrontCertService loadCrtContentByStringPath, cert(.crt) path prefix error, Exception:[]", e);
+            log.error("FrontCertService loadCrtContentByStringPath, cert(.crt) path prefix error, Exception:{}", e);
             throw new FrontException("loadCrtContentByStringPath error:" + e.getMessage());
         } catch (Exception e) {
-            log.error("FrontCertService loadCrtContentByStringPath error:[]", e);
+            log.error("FrontCertService loadCrtContentByStringPath error:{}", e);
             throw new FrontException("loadCrtContentByStringPath error:" + e.getMessage());
         }
     }

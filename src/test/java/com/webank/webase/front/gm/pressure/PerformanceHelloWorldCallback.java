@@ -34,7 +34,7 @@ public class PerformanceHelloWorldCallback extends TransactionSucCallback {
     try {
       collector.onMessage(receipt, cost);
     } catch (Exception e) {
-      logger.error("onMessage error: ", e);
+      logger.error("onMessage error: {}", e);
     }
   }
 }

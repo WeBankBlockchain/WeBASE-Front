@@ -252,7 +252,7 @@ public class PrecompiledWithSignService {
             entryJsonStr =
                     ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFields());
         } catch (JsonProcessingException e) {
-            log.error("remove JsonProcessingException:[]", e);
+            log.error("remove JsonProcessingException:{}", e);
             throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
         }
         List<Object> funcParams = new ArrayList<>();
@@ -280,7 +280,7 @@ public class PrecompiledWithSignService {
             conditionStr = ObjectMapperFactory.getObjectMapper()
                     .writeValueAsString(condition.getConditions());
         } catch (JsonProcessingException e) {
-            log.error("update JsonProcessingException:[]", e);
+            log.error("update JsonProcessingException:{}", e);
             throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
         }
         List<Object> funcParams = new ArrayList<>();
@@ -306,7 +306,7 @@ public class PrecompiledWithSignService {
             conditionStr = ObjectMapperFactory.getObjectMapper()
                     .writeValueAsString(condition.getConditions());
         } catch (JsonProcessingException e) {
-            log.error("remove JsonProcessingException:[]", e);
+            log.error("remove JsonProcessingException:{}", e);
             throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
         }
         List<Object> funcParams = new ArrayList<>();
@@ -485,7 +485,7 @@ public class PrecompiledWithSignService {
                             PrecompiledCommon.getJsonStr(receipt.getOutput(), web3j);
                     return PrecompiledUtils.handleReceiptOutput(codeMsgFromOutput);
                 } catch (IOException e) {
-                    log.error("handleTransactionReceipt getJsonStr of error tx receipt fail:[]", e);
+                    log.error("handleTransactionReceipt getJsonStr of error tx receipt fail:{}", e);
                     throw new FrontException(
                             ConstantCode.TX_RECEIPT_OUTPUT_PARSE_JSON_FAIL.getCode(),
                             e.getMessage());

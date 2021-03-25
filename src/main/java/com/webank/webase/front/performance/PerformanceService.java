@@ -222,7 +222,7 @@ public class PerformanceService {
             performance.setTxbps(new BigDecimal(map.get(TXBPS)));
             performance.setRxbps(new BigDecimal(map.get(RXBPS)));
         } catch (Exception e) {
-            log.error("get net speed failed.", e);
+            log.error("get net speed failed.error:{}", e);
         }
 
         performanceRepository.save(performance);

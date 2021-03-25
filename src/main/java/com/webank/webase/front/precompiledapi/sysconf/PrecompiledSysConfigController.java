@@ -64,7 +64,7 @@ public class PrecompiledSysConfigController{
             log.info("end querySystemConfigByGroupId useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), list);
         } catch (Exception e) { //get sys config fail
-            log.error("error querySystemConfigByGroupId exception:[]", e);
+            log.error("error querySystemConfigByGroupId exception:{}", e);
             return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
         }
         List2Page<ResSystemConfig> list2Page = new List2Page<>(list, pageSize, pageNumber);
@@ -95,7 +95,7 @@ public class PrecompiledSysConfigController{
                     Duration.between(startTime, Instant.now()).toMillis(), res);
             return res;
         } catch (Exception e) { //parse error
-            log.error("end setSysConfigValueByKey. Exception:[]", e);
+            log.error("end setSysConfigValueByKey. Exception:{}", e);
             return new BaseResponse(ConstantCode.FAIL_SET_SYSTEM_CONFIG, e.getMessage());
         }
     }

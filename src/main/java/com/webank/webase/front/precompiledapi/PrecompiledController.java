@@ -181,7 +181,7 @@ public class PrecompiledController {
                     Duration.between(startTime, Instant.now()).toMillis(), res);
             return res;
         } catch (Exception e) {
-            log.error("addSealer exception:[]", e);
+            log.error("addSealer exception:{}", e);
             return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }
@@ -196,7 +196,7 @@ public class PrecompiledController {
                     Duration.between(startTime, Instant.now()).toMillis(), res);
             return res;
         } catch (Exception e) {
-            log.error("addObserver exception:[]", e);
+            log.error("addObserver exception:{}", e);
             return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }
@@ -211,7 +211,7 @@ public class PrecompiledController {
                     Duration.between(startTime, Instant.now()).toMillis(), res);
             return res;
         } catch (Exception e) { // e.getCause
-            log.error("removeNode exception:[]", e);
+            log.error("removeNode exception:{}", e);
             return new BaseResponse(ConstantCode.FAIL_CHANGE_NODE_TYPE, e.getMessage());
         }
     }
@@ -338,7 +338,7 @@ public class PrecompiledController {
             log.debug("end parseSelect. table:{}, conditions:{}, selectColumns:{}", table,
                     conditions, selectColumns);
         } catch (Exception e) {
-            log.error("parseSelect Error exception:[]", e);
+            log.error("parseSelect Error exception:{}", e);
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
@@ -348,7 +348,7 @@ public class PrecompiledController {
         try {
             descTable = precompiledService.desc(groupId, table.getTableName());
         } catch (Exception e) {
-            log.error("select in descTable Error exception:[]", e);
+            log.error("select in descTable Error exception:{}", e);
             return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists ");
         }
         table.setKey(descTable.getKey());
@@ -404,7 +404,7 @@ public class PrecompiledController {
             useValues = CRUDParseUtils.parseInsert(sql, table, entry);
             log.debug("end parseInsert. table:{}, entry:{}", table, entry);
         } catch (Exception e) {
-            log.error("parseInsert Error exception:[]", e);
+            log.error("parseInsert Error exception:{}", e);
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
@@ -417,7 +417,7 @@ public class PrecompiledController {
         try {
             descTable = precompiledService.desc(groupId, tableName);
         } catch (Exception e) {
-            log.error("insertTable Error exception:[]", e);
+            log.error("insertTable Error exception:{}", e);
             return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists");
         }
         String keyName = descTable.getKey();
@@ -506,7 +506,7 @@ public class PrecompiledController {
             log.debug("end parseUpdate. table:{}, entry:{}, conditions:{}", table, entry,
                     conditions);
         } catch (Exception e) {
-            log.error("parseUpdate error exception:[]", e);
+            log.error("parseUpdate error exception:{}", e);
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
@@ -517,7 +517,7 @@ public class PrecompiledController {
         try {
             descTable = precompiledService.desc(groupId, tableName);
         } catch (Exception e) {
-            log.error("updateTable Error exception:[]", e);
+            log.error("updateTable Error exception:{}", e);
             return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists");
         }
 
@@ -569,7 +569,7 @@ public class PrecompiledController {
             CRUDParseUtils.parseRemove(sql, table, conditions);
             log.debug("end parseRemove. table:{}, conditions:{}", table, conditions);
         } catch (Exception e) {
-            log.error("parseRemove Error exception:[]", e);
+            log.error("parseRemove Error exception:{}", e);
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
                     "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
@@ -579,7 +579,7 @@ public class PrecompiledController {
         try {
             descTable = precompiledService.desc(groupId, table.getTableName());
         } catch (Exception e) {
-            log.error("removeTable Error exception:[]", e);
+            log.error("removeTable Error exception:{}", e);
             return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists");
         }
         table.setKey(descTable.getKey());
@@ -643,7 +643,7 @@ public class PrecompiledController {
                         contractManageResult.getMsg());
             }
         } catch (Exception e) {
-            log.error("contractFreeze exception:", e);
+            log.error("contractFreeze exception:error:{}", e);
             throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
@@ -671,7 +671,7 @@ public class PrecompiledController {
                         contractManageResult.getMsg());
             }
         } catch (Exception e) {
-            log.error("contractUnfreeze exception:", e);
+            log.error("contractUnfreeze exception:{}", e);
             throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
@@ -703,7 +703,7 @@ public class PrecompiledController {
                         contractManageResult.getMsg());
             }
         } catch (Exception e) {
-            log.error("contractGrantManager exception:", e);
+            log.error("contractGrantManager exception:{}", e);
             throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
@@ -727,7 +727,7 @@ public class PrecompiledController {
                 return response;
             }
         } catch (Exception e) {
-            log.error("contractStatus exception:", e);
+            log.error("contractStatus exception:{}", e);
             throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }
@@ -751,7 +751,7 @@ public class PrecompiledController {
                 return response;
             }
         } catch (Exception e) {
-            log.error("contractManagerList exception:", e);
+            log.error("contractManagerList exception:{}", e);
             throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());
         }
     }

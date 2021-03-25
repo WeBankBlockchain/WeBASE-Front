@@ -67,7 +67,7 @@ public class FrontCertController {
             nodeCertList = certService.getNodeCerts();
             chainCertStr = certService.getChainCert();
         }catch (FrontException e) {
-            log.error("FrontCertController load cert error: e:[]", e);
+            log.error("FrontCertController load cert error: e:{}", e);
             return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getMessage());
         }
         Map<String, String> map = new HashMap<>();

@@ -354,13 +354,13 @@ public class KeyStoreService {
             pemManager.load(new ByteArrayInputStream(pemContent.getBytes()));
             privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
         } catch (NoSuchAlgorithmException| CertificateException| IOException e) {
-            log.error("importKeyStoreFromPem error:[]", e);
+            log.error("importKeyStoreFromPem error:{}", e);
             throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
         } catch (UnrecoverableKeyException | InvalidKeySpecException e) {
-            log.error("importKeyStoreFromPem get kepair error:[]", e);
+            log.error("importKeyStoreFromPem get kepair error:{}", e);
             throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR.getCode(), e.getMessage());
         } catch (KeyStoreException | NoSuchProviderException e) {
-            log.error("importKeyStoreFromPem init p12 for dependency error:[]", e);
+            log.error("importKeyStoreFromPem init p12 for dependency error:{}", e);
             throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR.getCode(), e.getMessage());
         }
         // to store local
@@ -380,7 +380,7 @@ public class KeyStoreService {
         try {
             password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
         } catch (Exception e) {
-            log.error("decode password error:[]", e);
+            log.error("decode password error:{}", e);
             throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
         }
 
@@ -392,16 +392,16 @@ public class KeyStoreService {
             p12Manager.load(file.getInputStream(), password);
             privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
         } catch (NoSuchAlgorithmException| CertificateException| IOException e) {
-            log.error("importKeyStoreFromP12 error:[]", e);
+            log.error("importKeyStoreFromP12 error:{}", e);
             if (e.getMessage().contains("password")) {
                 throw new FrontException(ConstantCode.P12_PASSWORD_ERROR);
             }
             throw new FrontException(ConstantCode.P12_FILE_ERROR);
         } catch (UnrecoverableKeyException | InvalidKeySpecException e) {
-            log.error("importKeyStoreFromP12 get kepair error:[]", e);
+            log.error("importKeyStoreFromP12 get kepair error:{}", e);
             throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR.getCode(), e.getMessage());
         } catch (KeyStoreException | NoSuchProviderException e) {
-            log.error("importKeyStoreFromP12 init p12 for dependency error:[]", e);
+            log.error("importKeyStoreFromP12 init p12 for dependency error:{}", e);
             throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR.getCode(), e.getMessage());
         }
         // to store local

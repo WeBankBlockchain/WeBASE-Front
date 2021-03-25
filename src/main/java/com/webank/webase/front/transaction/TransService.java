@@ -201,10 +201,10 @@ public class TransService {
                         web3j.call(Transaction.createEthCallTransaction(keyStoreInfo.getAddress(),
                                 contractAddress, encodedFunction)).send().getValue().getOutput();
             } catch (IOException e) {
-                log.error("send constant tx error:[]", e);
+                log.error("send constant tx error:{}", e);
                 throw new FrontException(ConstantCode.CALL_CONTRACT_IO_EXCEPTION, e.getMessage());
             } catch (ContractCallException e) {
-                log.error("send constant tx fail for contract status error:[]", e);
+                log.error("send constant tx fail for contract status error:{}", e);
                 throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR, e.getMessage());
             }
 
@@ -231,10 +231,10 @@ public class TransService {
                 responseReceipt.setMessage(receiptMsg);
                 response = responseReceipt;
             } catch (InterruptedException | ExecutionException e) {
-                log.error("get tx receipt error for interrupted or exec:[]", e);
+                log.error("get tx receipt error for interrupted or exec:{}", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
             } catch (TimeoutException e) {
-                log.error("get tx receipt error for timeout:[]", e);
+                log.error("get tx receipt error for timeout:{}", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
             }
             log.info("***node cost time***: {}",
@@ -267,7 +267,7 @@ public class TransService {
             abiDefinitionList = objectMapper.readValue(contract.getContractAbi(), objectMapper
                     .getTypeFactory().constructCollectionType(List.class, AbiDefinition.class));
         } catch (JsonProcessingException e) {
-            log.error("parse abi to json error:[]", e);
+            log.error("parse abi to json error:{}", e);
             throw new FrontException(ConstantCode.CONTRACT_ABI_PARSE_JSON_ERROR);
         }
         ContractAbiUtil.setFunctionFromAbi(req.getContractName(), req.getContractPath(),
@@ -293,7 +293,7 @@ public class TransService {
             }
             return result;
         } catch (IOException | ContractCallException e) {
-            log.error("execCall failed.", e);
+            log.error("execCall failed.error:{}", e);
             throw new FrontException(ConstantCode.TRANSACTION_QUERY_FAILED.getCode(),
                     e.getMessage());
         }
@@ -316,7 +316,7 @@ public class TransService {
             String receiptMsg = FrontUtils.handleReceiptMsg(transactionReceipt);
             transactionReceipt.setMessage(receiptMsg);
         } catch (IOException | TransactionException | ContractCallException e) {
-            log.error("execTransaction failed.", e);
+            log.error("execTransaction failed.error:{}", e);
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED.getCode(),
                     e.getMessage());
         }
@@ -410,7 +410,7 @@ public class TransService {
         try {
             request.send();
         } catch (IOException e) {
-            log.error("send call tx error:[]", e);
+            log.error("send call tx error:{}", e);
             throw new FrontException(ConstantCode.TRANSACTION_FAILED);
         }
 
@@ -588,10 +588,10 @@ public class TransService {
             try {
                 receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException e) {
-                log.error("send call tx error for interrupted or exec:[]", e);
+                log.error("send call tx error for interrupted or exec:{}", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
             } catch (TimeoutException e) {
-                log.error("send call tx error for timeout:[]", e);
+                log.error("send call tx error for timeout:{}", e);
                 throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
             }
             return receipt;
@@ -616,10 +616,10 @@ public class TransService {
                             encodeStr), DefaultBlockParameterName.LATEST)
                     .send().getValue().getOutput();
         } catch (IOException e) {
-            log.error("sendQueryTransaction fail for contract status error:[]", e);
+            log.error("sendQueryTransaction fail for contract status error:{}", e);
             throw new FrontException(ConstantCode.CALL_CONTRACT_IO_EXCEPTION, e.getMessage());
         } catch (ContractCallException e) {
-            log.error("sendQueryTransaction fail for contract status error:[]", e);
+            log.error("sendQueryTransaction fail for contract status error:{}", e);
             throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR, e.getMessage());
         }
 

@@ -120,7 +120,7 @@ public class EventService {
             mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
             throw frontException;
         } catch (Exception e) {
-            log.error("register newBlockEvent error:[]", e);
+            log.error("register newBlockEvent error:{}", e);
             mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
             throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
         }
@@ -227,7 +227,7 @@ public class EventService {
             ContractEventInfo saved = contractEventInfoRepository.save(registerInfo);
             return saved.getId();
         } catch (Exception e) {
-            log.error("insert error:[]", e);
+            log.error("insert error:{}", e);
             throw new FrontException(ConstantCode.DATA_REPEAT_IN_DB_ERROR);
         }
     }

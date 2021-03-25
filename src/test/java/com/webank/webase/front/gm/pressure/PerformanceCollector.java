@@ -104,7 +104,7 @@ public class PerformanceCollector {
       //  System.exit(0);
       }
     } catch (Exception e) {
-      logger.error("error:", e);
+      logger.error("error:{}", e);
     }
   }
 

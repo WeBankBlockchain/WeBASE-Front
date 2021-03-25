@@ -277,10 +277,10 @@ public class ContractService {
         try {
             receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException e) {
-            log.error("get tx receipt error for interrupted or exec:[]", e);
+            log.error("get tx receipt error for interrupted or exec:{}", e);
             throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
         } catch (TimeoutException e) {
-            log.error("get tx receipt error for timeout:[]", e);
+            log.error("get tx receipt error for timeout:{}", e);
             throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
         }
         String contractAddress = receipt.getContractAddress();
@@ -429,10 +429,10 @@ public class ContractService {
                                     Constants.INITIAL_WEI_VALUE, bytecodeBin, encodedConstructor)
                             .send();
         } catch (TransactionException e) {
-            log.error("commonContract deploy failed.", e);
+            log.error("commonContract deploy failed.error:{}", e);
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED, e.getMessage());
         } catch (Exception e) {
-            log.error("commonContract deploy failed.", e);
+            log.error("commonContract deploy failed.error:{}", e);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR, e.getMessage());
         }
         log.info("commonContract deploy success. contractAddress:{}",

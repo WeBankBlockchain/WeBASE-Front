@@ -157,13 +157,13 @@ public class ToolController {
             pemManager.load(new ByteArrayInputStream(pemFile.getBytes()));
             privateKey = Numeric.toHexStringNoPrefix(pemManager.getECKeyPair().getPrivateKey());
         } catch (NoSuchAlgorithmException| CertificateException| IOException e) {
-            log.error("decodePem error:[]", e);
+            log.error("decodePem error:{}", e);
             throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
         } catch (UnrecoverableKeyException | InvalidKeySpecException e) {
-            log.error("decodePem get kepair error:[]", e);
+            log.error("decodePem get kepair error:{}", e);
             throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR.getCode(), e.getMessage());
         } catch (KeyStoreException | NoSuchProviderException e) {
-            log.error("decodePem init p12 for dependency error:[]", e);
+            log.error("decodePem init p12 for dependency error:{}", e);
             throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR.getCode(), e.getMessage());
         }
         
@@ -192,16 +192,16 @@ public class ToolController {
             p12Manager.load(p12File.getInputStream(), p12Password);
             privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
         } catch (NoSuchAlgorithmException | CertificateException | IOException e) {
-            log.error("decodeP12 error:[]", e);
+            log.error("decodeP12 error:{}", e);
             if (e.getMessage().contains("password")) {
                 throw new FrontException(ConstantCode.P12_PASSWORD_ERROR);
             }
             throw new FrontException(ConstantCode.P12_FILE_ERROR);
         } catch (UnrecoverableKeyException | InvalidKeySpecException e) {
-            log.error("decodeP12 get kepair error:[]", e);
+            log.error("decodeP12 get kepair error:{}", e);
             throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_GET_KEY_PAIR_ERROR.getCode(), e.getMessage());
         } catch (KeyStoreException | NoSuchProviderException e) {
-            log.error("decodeP12 init p12 for dependency error:[]", e);
+            log.error("decodeP12 init p12 for dependency error:{}", e);
             throw new FrontException(ConstantCode.WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR.getCode(), e.getMessage());
         }
         return getRspKeyPair(privateKey);

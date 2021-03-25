@@ -38,7 +38,7 @@ public class LogParseUtil {
                     Date parse = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(sArray2[0]);
                     timestamp = parse.getTime();
                 } catch (Exception e) {
-                    log.error("getLogData fail.", e);
+                    log.error("getLogData fail.error:{}", e);
                 }
             }
 
