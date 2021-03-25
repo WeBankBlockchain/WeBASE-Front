@@ -14,13 +14,11 @@
 
 package com.webank.webase.front.keystore.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class ReqExport {
     private String userAddress;
     private String signUserId;
