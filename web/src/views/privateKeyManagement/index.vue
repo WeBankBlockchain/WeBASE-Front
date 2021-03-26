@@ -66,6 +66,9 @@
         <el-dialog :visible.sync="$store.state.importRivateKey" :title="$t('table.importPrivateKey')" width="640px" :append-to-body="true" class="dialog-wrapper" v-if='$store.state.importRivateKey' center>
             <import-key @importPrivateKeySuccess="importPrivateKeySuccess" ref="importKey"></import-key>
         </el-dialog>
+        <el-dialog :visible.sync="$store.state.exportRivateKey" :title="$t('table.export')" width="640px" :append-to-body="true" class="dialog-wrapper" v-if='$store.state.exportRivateKey' center>
+            <export-key :exportInfo="exportInfo" @exportPrivateKeySuccess="exportPrivateKeySuccess"></export-key>
+        </el-dialog>
     </div>
 </template>
 
@@ -75,14 +78,16 @@ import contentHead from "@/components/contentHead";
 import importKey from "./dialog/importKey"
 import { queryCreatePrivateKey, queryLocalKeyStores, queryDeletePrivateKey, encryption } from "@/util/api";
 import { unique } from "@/util/util";
-const FileSaver = require("file-saver");
+
 import Bus from "@/bus";
+import ExportKey from './dialog/exportKey.vue';
 
 export default {
     name: "privateKeyManagement",
     components: {
         "v-contentHead": contentHead,
-        importKey
+        importKey,
+        ExportKey
     },
     computed: {
         privateKeyHead() {
@@ -145,6 +150,7 @@ export default {
             privateKeyList: localStorage.getItem("privateKeyList") ? JSON.parse(localStorage.getItem("privateKeyList")) : [],
             fileString: "",
             uploadMap: {},
+            exportInfo: {}
         };
     },
     mounted() {
@@ -305,13 +311,15 @@ export default {
             }
         },
         exportFile(params) {
-            let str = JSON.stringify(params);
-            var blob = new Blob([str], { type: "text;charset=utf-8" });
-            FileSaver.saveAs(blob, params.userName);
+            this.exportInfo = params
+            this.$store.dispatch('switch_export_rivate_key_dialog')
         },
 
         importPrivateKeySuccess() {
             this.getLocalKeyStores();
+        },
+        exportPrivateKeySuccess(){
+            this.$store.dispatch('switch_export_rivate_key_dialog')
         }
     }
 };
