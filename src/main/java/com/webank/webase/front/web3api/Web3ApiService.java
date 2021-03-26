@@ -656,7 +656,6 @@ public class Web3ApiService {
             .getGroupStatus();
         log.info("startGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            bcosSDK.getClient(groupId);
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("startGroup fail:{}", status.getMessage());
@@ -670,7 +669,6 @@ public class Web3ApiService {
             .getGroupStatus();
         log.info("stopGroup. groupId:{} status:{}", groupId, status);
         if (CommonUtils.parseHexStr2Int(status.getCode()) == 0) {
-            bcosSDK.getClient(groupId).stop();
             return new BaseResponse(ConstantCode.RET_SUCCEED);
         } else {
             log.error("stopGroup fail:{}", status.getMessage());
