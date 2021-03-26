@@ -30,6 +30,7 @@ public class RspUserInfo {
     /**
      * using same aesKey to encrypted in sign
      * decrypted in webase-front
+     * and encoded in base64
      */
     private String privateKey;
     private String description;
