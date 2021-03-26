@@ -147,6 +147,8 @@ public class KeyStoreService {
         if (returnPrivateKey && rspUserInfo.getPrivateKey() != null) {
             // decrypt private key
             keyStoreInfo.setPrivateKey(aesUtils.aesDecrypt(rspUserInfo.getPrivateKey()));
+            keyStoreInfo.setPrivateKey(
+                Base64.getEncoder().encodeToString(keyStoreInfo.getPrivateKey().getBytes()));
         }
         return keyStoreInfo;
     }
@@ -507,7 +509,13 @@ public class KeyStoreService {
             log.error("getUserInfoWithSign fail for:{}", baseResponse.getMessage());
             throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
         }
-        rspUserInfo.setPrivateKey(aesUtils.aesDecrypt(rspUserInfo.getPrivateKey()));
+        if (returnPrivateKey && rspUserInfo.getPrivateKey() != null) {
+            // decrypt private key
+            rspUserInfo.setPrivateKey(aesUtils.aesDecrypt(rspUserInfo.getPrivateKey()));
+            // base64
+            rspUserInfo.setPrivateKey(
+                Base64.getEncoder().encodeToString(rspUserInfo.getPrivateKey().getBytes()));
+        }
         return rspUserInfo;
     }
 
