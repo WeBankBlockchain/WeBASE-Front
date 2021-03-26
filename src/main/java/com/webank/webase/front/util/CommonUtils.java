@@ -78,12 +78,14 @@ public class CommonUtils {
 
     /**
      * stringToSignatureData. 19/12/24 support guomi： add byte[] pub in signatureData
+     * byte array: [v + r + s + pub]
      * @param signatureData signatureData
      * @return
      */
     public static SignatureResult stringToSignatureData(String signatureData, int encryptType) {
         byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
-        // 从1开始，因为此处byteArr第0位是v； 注: 在java sdk中, v放在了最后一位
+        // 从1开始，因为此处webase-sign返回的byteArr第0位是v
+        byte signV = byteArr[0];
         byte[] signR = new byte[32];
         System.arraycopy(byteArr, 1, signR, 0, signR.length);
         byte[] signS = new byte[32];
@@ -91,10 +93,9 @@ public class CommonUtils {
         if (encryptType == CryptoType.SM_TYPE) {
             byte[] pub = new byte[64];
             System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
-            // return new SignatureData(byteArr[0], signR, signS, pub);
             return new SM2SignatureResult(pub, signR, signS);
         } else {
-            return new ECDSASignatureResult(byteArr[0], signR, signS);
+            return new ECDSASignatureResult(signV, signR, signS);
         }
     }
 
