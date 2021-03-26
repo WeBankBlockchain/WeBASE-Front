@@ -302,6 +302,7 @@ public class FrontCertService {
         try(InputStream nodeCrtInput = new ClassPathResource(sdkFileStr).getInputStream()){
             String nodeCrtStr = inputStream2String(nodeCrtInput);
             String fileName = sdkFileStr;
+            // if gm/gmca.crt, then fileName=gmca.crt
             if (sdkFileStr.contains("/")) {
                 String[] gmCertStrArr = sdkFileStr.split("/");
                 if (gmCertStrArr.length >= 2) {
@@ -423,7 +424,7 @@ public class FrontCertService {
         // 压缩输出流
         ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(outputStream));
         // 传入输出流，传入需要压缩的file路径
-        String gmDir = useGm ? "" : "gm";
+        String gmDir = useGm ? "gm" : "";
         generateFile(zipOutputStream, file2Zip, gmDir);
 
         log.info("file2Zip:{} and outputFile:{}" ,file2Zip.getAbsolutePath(), generateFileName);

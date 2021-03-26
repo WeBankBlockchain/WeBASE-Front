@@ -50,6 +50,8 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
@@ -76,12 +78,14 @@ public class CommonUtils {
 
     /**
      * stringToSignatureData. 19/12/24 support guomi： add byte[] pub in signatureData
+     * byte array: [v + r + s + pub]
      * @param signatureData signatureData
      * @return
      */
     public static SignatureResult stringToSignatureData(String signatureData, int encryptType) {
         byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
-        // 从1开始，因为此处byteArr第0位是v； 注: 在java sdk中, v放在了最后一位
+        // 从1开始，因为此处webase-sign返回的byteArr第0位是v
+        byte signV = byteArr[0];
         byte[] signR = new byte[32];
         System.arraycopy(byteArr, 1, signR, 0, signR.length);
         byte[] signS = new byte[32];
@@ -89,10 +93,9 @@ public class CommonUtils {
         if (encryptType == CryptoType.SM_TYPE) {
             byte[] pub = new byte[64];
             System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
-            // return new SignatureData(byteArr[0], signR, signS, pub);
             return new SM2SignatureResult(pub, signR, signS);
         } else {
-            return new ECDSASignatureResult(byteArr[0], signR, signS);
+            return new ECDSASignatureResult(signV, signR, signS);
         }
     }
 
@@ -764,4 +767,60 @@ public class CommonUtils {
         log.info("getVersionFromStr version:{}", version);
         return version;
     }
+
+    private final static String TEMP_EXPORT_KEYSTORE_PATH = "exportedKey";
+    private final static String PEM_FILE_FORMAT = ".pem";
+    private final static String P12_FILE_FORMAT = ".p12";
+    /**
+     * write pem in ./tempKey
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @param cryptoSuite
+     * @return
+     */
+    public static String writePrivateKeyPem(String rawPrivateKey, String address, String userName,
+        CryptoSuite cryptoSuite) {
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            keystorePath.delete();
+        }
+        keystorePath.mkdir();
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + PEM_FILE_FORMAT;
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        cryptoKeyPair.storeKeyPairWithPem(exportedKeyPath);
+        return exportedKeyPath;
+    }
+
+    /**
+     * write p12 in ./tempKey
+     * @param p12Password
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @param cryptoSuite
+     * @return
+     */
+    public static String writePrivateKeyP12(String p12Password, String rawPrivateKey,
+        String address, String userName, CryptoSuite cryptoSuite) {
+
+
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            keystorePath.delete();
+        }
+        keystorePath.mkdir();
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + P12_FILE_FORMAT;
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        cryptoKeyPair.storeKeyPairWithP12(exportedKeyPath, p12Password);
+
+        return exportedKeyPath;
+    }
+
 }
