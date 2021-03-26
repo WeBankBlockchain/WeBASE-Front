@@ -6,6 +6,12 @@
                     <el-radio :label="item.enName" :key="item.enName" v-for="item in fileTypeList">{{item.enName}}</el-radio>
                 </el-radio-group>
             </el-form-item>
+            <el-form-item :label="$t('table.fileName')" prop="radio" style="width: 546px;" v-if="keyForm.fileType==='string'">
+                <el-radio-group v-model="keyForm.radio" @change="changeJzType">
+                    <el-radio :label="16">{{$t('text.hexType')}}</el-radio>
+                    <el-radio :label="10">{{$t('text.decimalType')}}</el-radio>
+                </el-radio-group>
+            </el-form-item>
             <el-form-item :label="$t('table.fileName')" prop="fileName" style="width: 546px;">
                 <el-input v-model="keyForm.fileName" :placeholder="$t('privateKey.inputFileName')" maxlength="12"></el-input>
             </el-form-item>
@@ -13,7 +19,7 @@
                 <el-input v-model="keyForm.password" type="password" :placeholder="$t('privateKey.placeholderPassword')"></el-input>
             </el-form-item>
             <el-form-item :label="$t('table.privateKey')" prop="privateKey" style="width: 546px;" v-if="keyForm.fileType=='string'">
-                <el-input v-model="keyForm.privateKey" :placeholder="$t('privateKey.validatorPrivateKey')"></el-input>
+                <el-input v-model="keyForm.privateKey" :placeholder="keyPlaceholderDec"></el-input>
             </el-form-item>
             <el-form-item :label="$t('privateKey.file')" prop="fileList" style="width: 546px;" v-if="keyForm.fileType!='string'" ref="uploadKey">
                 <el-upload ref="upload" :accept="keyForm.fileType" action="" :http-request="uploadFile" :auto-upload="false" :file-list="keyForm.fileList" show-file-list :limit="1" :on-change="uploadChange" :on-remove="removeFile">
@@ -32,6 +38,7 @@
 <script>
 import { queryImportPrivateKey, ImportPemPrivateKey, ImportP12PrivateKey } from "@/util/api";
 let Base64 = require("js-base64").Base64;
+const Web3Utils = require('web3-utils');
 export default {
     name: 'importKey',
 
@@ -51,7 +58,8 @@ export default {
                 fileType: "string",
                 password: "",
                 privateKey: "",
-                fileList: []
+                fileList: [],
+                radio: 16
             },
             fileTypeList: [
                 {
@@ -67,7 +75,8 @@ export default {
                     enName: '.p12',
                 }
             ],
-            fileList: []
+            fileList: [],
+            keyPlaceholderDec: ''
         }
     },
 
@@ -127,6 +136,9 @@ export default {
                 ],
                 fileList: [
                     { required: true, message: this.$t('privateKey.importFileValidator'), trigger: 'change' }
+                ],
+                radio: [
+                    { required: true, message: 'Error', trigger: 'change' }
                 ]
             };
             return data
@@ -140,6 +152,12 @@ export default {
     },
 
     mounted() {
+
+        if (this.keyForm.radio == 16) {
+            this.keyPlaceholderDec = this.$t('privateKey.validatorPrivateKey16')
+        } else {
+            this.keyPlaceholderDec = this.$t('privateKey.validatorPrivateKey')
+        }
     },
 
     methods: {
@@ -151,6 +169,14 @@ export default {
             this.loading = false;
             this.$store.state.importRivateKey = false;
         },
+        changeJzType(val) {
+            if (val == 16) {
+                this.keyPlaceholderDec = this.$t('privateKey.validatorPrivateKey16')
+            } else {
+                this.keyPlaceholderDec = this.$t('privateKey.validatorPrivateKey')
+            }
+        },
+
         changeFileType() {
             if (this.$refs.upload) this.$refs.upload.clearFiles();
             this.$refs['keyForm'].clearValidate();
@@ -175,6 +201,10 @@ export default {
                     if (this.keyForm.fileType == "string") {
                         var reg = /^0x+/i;
                         var privateKey = this.keyForm.privateKey.replace(reg, "");
+                        if (this.keyForm.radio == 10) {
+                            privateKey = Web3Utils.toHex(privateKey).split('0x')[1]
+
+                        }
                         this.textRivateKey(privateKey)
                     } else {
                         var reader = new FileReader(), self = this;

@@ -106,6 +106,7 @@ export default {
         toBlock: 'To',
         topicList: 'Topic List',
         fileType: "Import Type",
+        exportType: "Export Type",
         fileName: "PrivateKey Name",
         eventName: 'Event Name',
         eventValue: 'Event',
@@ -232,6 +233,7 @@ export default {
         mgmtCns: "Mgmt CNS"
     },
     text: {
+        isRedeploy: 'Has the contract been deployed or redeployed?',
         noContract: 'Please create a new contract',
         noStoreContract: 'Please open a contract in the left panel',
         hide: 'Hide',
@@ -343,6 +345,11 @@ export default {
         updateRegister: "Do you want to update the registration",
         fileSize_5000: "The upload file size cannot exceed 5000kb!",
         cnsNameVersion: "CNS name or CNS version cannot be empty",
+        decimal: "Decimal Key",
+        decimalType: "Decimal",
+        hexType: "Hex",
+        exportWeid: "Support import in WeID",
+        title: "Title",
     },
     contracts: {
         createFile: "Create File",
@@ -526,6 +533,7 @@ export default {
         passwordError: "Password cannot be Chinese",
         file: "File",
         validatorPrivateKey: "Please enter privateKey key",
+        validatorPrivateKey16: "Please enter the hex (excluding 0x)",
         validatorPrivateKey1: "Please enter hexadecimal",
         importFileValidator: "Please upload the file"
     },

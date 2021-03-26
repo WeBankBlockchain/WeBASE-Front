@@ -406,6 +406,30 @@ export function ImportP12PrivateKey(data) {
     })
 }
 
+//export pem privateKey 
+export function exportPemPrivateKey(data) {
+    return post({
+        url: `${HANDLE}privateKey/exportPem`,
+        method: 'post',
+        data: data,
+        responseType: 'blob',
+        headers: {
+        }
+    })
+}
+
+//export p12 privateKey
+export function exportP12PrivateKey(data) {
+    return post({
+        url: `${HANDLE}privateKey/exportP12`,
+        method: 'post',
+        data: data,
+        responseType: 'blob',
+        headers: {
+        }
+    })
+}
+
 // localKeyStores
 export function queryLocalKeyStores() {
     return get({
