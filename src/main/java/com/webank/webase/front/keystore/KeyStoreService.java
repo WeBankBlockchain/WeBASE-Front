@@ -33,8 +33,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -432,7 +430,7 @@ public class KeyStoreService {
 
     /**
      * save LOCAL_USER key store by private key
-     * @param privateKey
+     * @param privateKey hex string
      * @param userName
      * @return KeyStoreInfo local user
      */
@@ -597,7 +595,7 @@ public class KeyStoreService {
         RspUserInfo rspUserInfo = getUserInfoWithSign(signUserId, true);
         String address = rspUserInfo.getAddress();
         String rawPrivateKey = rspUserInfo.getPrivateKey();
-        String filePath = this.writePrivateKeyPem(rawPrivateKey, address, "");
+        String filePath = CommonUtils.writePrivateKeyPem(rawPrivateKey, address, "", cryptoSuite);
         try {
             return new FileContentHandle(address + PEM_FILE_FORMAT,
                 new FileInputStream(filePath));
@@ -611,7 +609,7 @@ public class KeyStoreService {
         KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
         String userName = keyStoreInfo.getUserName();
         String rawPrivateKey = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
-        String filePath = this.writePrivateKeyPem(rawPrivateKey, address, userName);
+        String filePath = CommonUtils.writePrivateKeyPem(rawPrivateKey, address, userName, cryptoSuite);
         try {
             return new FileContentHandle(userName + "_" + address + PEM_FILE_FORMAT,
                 new FileInputStream(filePath));
@@ -629,13 +627,13 @@ public class KeyStoreService {
             p12Password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
         } catch (Exception e) {
             log.error("decode password error:[]", e);
-            throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
+            throw new FrontException(ConstantCode.P12_PASSWORD_ERROR);
         }
 
         RspUserInfo rspUserInfo = getUserInfoWithSign(signUserId, true);
         String address = rspUserInfo.getAddress();
         String rawPrivateKey = rspUserInfo.getPrivateKey();
-        String filePath = this.writePrivateKeyP12(p12Password, rawPrivateKey, address, "");
+        String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, "", cryptoSuite);
         try {
             return new FileContentHandle(address + PEM_FILE_FORMAT,
                 new FileInputStream(filePath));
@@ -658,7 +656,7 @@ public class KeyStoreService {
         KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
         String userName = keyStoreInfo.getUserName();
         String rawPrivateKey = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
-        String filePath = this.writePrivateKeyP12(p12Password, rawPrivateKey, address, userName);
+        String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, userName, cryptoSuite);
         try {
             return new FileContentHandle(userName + "_" + address + PEM_FILE_FORMAT,
                 new FileInputStream(filePath));
@@ -668,68 +666,5 @@ public class KeyStoreService {
         }
     }
 
-    /**
-     * write pem in ./tempKey
-     * @param rawPrivateKey raw private key
-     * @param address
-     * @param userName can be empty string
-     * @return
-     */
-    public synchronized String writePrivateKeyPem(String rawPrivateKey, String address, String userName) {
-        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
-        // delete old private key
-        if (keystorePath.exists()) {
-            keystorePath.delete();
-        }
-        keystorePath.mkdir();
-        // get private key
-        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
-            userName + "_" + address + PEM_FILE_FORMAT;
-        this.privateKey2PemFile(exportedKeyPath, rawPrivateKey);
-        return exportedKeyPath;
-    }
-
-    /**
-     * write p12 in ./tempKey
-     * @param p12Password
-     * @param rawPrivateKey raw private key
-     * @param address
-     * @param userName can be empty string
-     * @return
-     */
-    public synchronized String writePrivateKeyP12(String p12Password, String rawPrivateKey,
-        String address, String userName) {
-
-        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
-        // delete old private key
-        if (keystorePath.exists()) {
-            keystorePath.delete();
-        }
-        keystorePath.mkdir();
-        // get private key
-        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
-            userName + "_" + address + P12_FILE_FORMAT;
-        this.privateKey2P12File(exportedKeyPath, p12Password, rawPrivateKey);
-        return exportedKeyPath;
-    }
-
-
-    /**
-     * store pem
-     * @param pemFilePath
-     * @param privateKey
-     */
-    public void privateKey2PemFile(String pemFilePath, String privateKey) {
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKey);
-        cryptoKeyPair.storeKeyPairWithPem(pemFilePath);
-    }
-
-    /**
-     * store p12
-      */
-    public void privateKey2P12File(String p12FilePath, String p12Password, String privateKey) {
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKey);
-        cryptoKeyPair.storeKeyPairWithP12(p12FilePath, p12Password);
-    }
 }
 

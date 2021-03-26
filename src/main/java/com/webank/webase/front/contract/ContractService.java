@@ -252,6 +252,7 @@ public class ContractService {
         List<ABIDefinition> abiInfos = req.getAbiInfo();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam();
+        String contractName = req.getContractName();
 
         // check groupId
         Client web3j = web3ApiService.getWeb3j(groupId);
@@ -266,7 +267,6 @@ public class ContractService {
             checkDeployPermission(req.getGroupId(), userAddress);
         }
 
-        String contractName = req.getContractName();
         ContractAbiUtil.VersionEvent versionEvent =
                 ContractAbiUtil.getVersionEventFromAbi(contractName, abiInfos);
         String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
@@ -277,17 +277,6 @@ public class ContractService {
         String signMsg = transService.signMessage(groupId, web3j, signUserId, "", data);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(web3j, signMsg);
-//        final CompletableFuture<TransactionReceipt> transFuture = new CompletableFuture<>();
-//        transService.sendMessage(web3j, signMsg);
-//        try {
-//            receipt = transFuture.get(constants.getTransMaxWait(), TimeUnit.SECONDS);
-//        } catch (InterruptedException | ExecutionException e) {
-//            log.error("get tx receipt error for interrupted or exec:[]", e);
-//            throw new FrontException(ConstantCode.GET_TX_RECEIPT_EXEC_ERROR);
-//        } catch (TimeoutException e) {
-//            log.error("get tx receipt error for timeout:[]", e);
-//            throw new FrontException(ConstantCode.GET_TX_RECEIPT_TIMEOUT_ERROR);
-//        }
         String contractAddress = receipt.getContractAddress();
 
         log.info("success deployWithSign. contractAddress:{}", contractAddress);

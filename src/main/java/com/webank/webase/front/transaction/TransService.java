@@ -206,9 +206,9 @@ public class TransService {
             String signMsg =
                     signMessage(groupId, web3j, signUserId, contractAddress, encodedFunction);
             Instant nodeStartTime = Instant.now();
-            TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
             // send transaction
             TransactionReceipt responseReceipt = sendMessage(web3j, signMsg);
+            TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
             String receiptMsg = txDecoder.decodeReceiptStatus(responseReceipt).getReceiptMessages();
             responseReceipt.setMessage(receiptMsg);
             response = responseReceipt;
@@ -675,13 +675,11 @@ public class TransService {
 
         TransactionEncoderService encoderService = new TransactionEncoderService(cryptoSuite);
         byte[] encodedTransaction = encoderService.encode(rawTransaction, null);
-        String encodedDataStr = Numeric.toHexString(encodedTransaction);
-        log.info("createRawTxEncoded encodedDataStr:{}", encodedDataStr);
         // if user not null: sign, else, not sign
         SignatureResult userSignResult = null;
         if (!StringUtils.isBlank(userAddress)) {
             log.info("createRawTxEncoded use key of {} to sign message", userAddress);
-            byte[] hashMessage = cryptoSuite.hash(ByteUtils.hexStringToBytes(encodedDataStr));
+            byte[] hashMessage = cryptoSuite.hash(encodedTransaction);
             String hashMessageStr = Numeric.toHexString(hashMessage);
             log.info("createRawTxEncoded hashMessageStr:{}", hashMessageStr);
             userSignResult = signMessageHashByType(hashMessageStr,

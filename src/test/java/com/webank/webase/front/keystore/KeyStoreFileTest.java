@@ -18,6 +18,7 @@ import com.webank.webase.front.util.CommonUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -27,6 +28,7 @@ import java.security.spec.InvalidKeySpecException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
 import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -85,17 +87,13 @@ public class KeyStoreFileTest {
     }
 
     @Test
-    public void testLoadP12() throws UnrecoverableKeyException, InvalidKeySpecException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, CertificateException, IOException {
-//        P12KeyStore p12Manager = new P12KeyStore();
-//        p12Manager.setP12File("0x6399bda67f0ae8d1fdd997a885b8aee32a0c9696.p12");
-//        p12Manager.setPassword("123");
-//        p12Manager.load();
-//        // c5658bbb9b905345e7c057690ec6f50c06dada711d1086820980496b4954fbc7
-//        String privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
-//        System.out.println("load private key: " + privateKey);
-//        String address = GenCredential.create(privateKey).getAddress();
-//        System.out.println("address: " + address);
-//        Assert.assertTrue("pri error", address.equals("0x6399bda67f0ae8d1fdd997a885b8aee32a0c9696"));
+    public void testDecimalPrivateKey() {
+        String decimalKey = "105056100209817976175483366253040865310410704320674863234725386650312386331016";
+        String hexKey = "e843a542a7a8240f9c9e418b9517c2c8f4dc041a11a44e614a3b026c3588c188";
+        String convertedHexKey = Numeric.toHexStringNoPrefix(new BigInteger(decimalKey));
+        System.out.println("convertedHexKey: " + convertedHexKey);
+        Assert.assertEquals(hexKey, convertedHexKey);
+
     }
 
 }
