@@ -82,7 +82,6 @@ public class KeyStoreController extends BaseController {
             }
             // create from webase-sign , return keystoreInfo without private key
             KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStoreWithSign(signUserId, appId, returnPrivateKey);
-            keyStoreInfo.setPrivateKey(Base64.getEncoder().encodeToString(keyStoreInfo.getPrivateKey().getBytes()));
             return keyStoreInfo;
         } else if (KeyTypes.LOCALUSER.getValue() == type) {
             // local key store (0)
@@ -103,7 +102,9 @@ public class KeyStoreController extends BaseController {
     public RspUserInfo getUserInfoWithSign(@RequestParam String signUserId,
             @RequestParam(required = false, defaultValue = "false") boolean returnPrivateKey) {
         RspUserInfo rspUserInfo = keyStoreService.getUserInfoWithSign(signUserId, returnPrivateKey);
-        rspUserInfo.setPrivateKey(Base64.getEncoder().encodeToString(rspUserInfo.getPrivateKey().getBytes()));
+        if (returnPrivateKey) {
+            rspUserInfo.setPrivateKey(Base64.getEncoder().encodeToString(rspUserInfo.getPrivateKey().getBytes()));
+        }
         return rspUserInfo;
     }
 
