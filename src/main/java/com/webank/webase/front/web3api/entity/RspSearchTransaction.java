@@ -26,4 +26,24 @@ import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 @EqualsAndHashCode(callSuper = true)
 public class RspSearchTransaction extends JsonTransactionResponse {
     private String timestamp;
+
+    public RspSearchTransaction(String timestamp, JsonTransactionResponse response) {
+        this.timestamp = timestamp;
+        this.setGas(response.getGas());
+        this.setGasPrice(response.getGasPrice());
+        this.setGroupId(response.getGroupId());
+        this.setBlockNumber(response.getBlockNumber() == null ? "0" : response.getBlockNumber().toString());
+        this.setHash(response.getHash());
+        this.setInput(response.getInput());
+        this.setValue(response.getValue());
+        this.setBlockHash(response.getBlockHash());
+        this.setBlockLimit(response.getBlockLimit());
+        this.setChainId(response.getChainId());
+        this.setExtraData(response.getExtraData());
+        this.setFrom(response.getFrom());
+        this.setNonce(response.getNonce());
+        this.setTo(response.getTo());
+        this.setTransactionIndex(response.getTransactionIndex());
+        this.setSignature(response.getSignature());
+    }
 }
