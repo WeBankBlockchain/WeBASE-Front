@@ -756,7 +756,10 @@ public class CommonUtils {
     public static int getVersionFromStr(String verStr) {
         log.info("getVersionFromStr verStr:{}", verStr);
         // remove v and split
-        String[] versionArr = verStr.substring(1).split(".");
+        if (verStr.toLowerCase().startsWith("v")) {
+            verStr = verStr.substring(1);
+        }
+        String[] versionArr = verStr.split("\\.");
         if (versionArr.length < 3) {
             log.error("getVersionFromStr versionArr:{}", (Object) versionArr);
             return 0;
