@@ -601,9 +601,9 @@ public class Web3ApiService {
         if (StringUtils.isNumeric(input)) {
             return getBlockByNumber(groupId, new BigInteger(input));
         } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
-            RspSearchTransaction txResponse = (RspSearchTransaction) getTransactionByHash(groupId, input);
+            JsonTransactionResponse txResponse = getTransactionByHash(groupId, input);
             BlockHeader blockHeader = getBlockHeaderByNumber(groupId, txResponse.getBlockNumber(), false);
-            txResponse.setTimestamp(blockHeader.getTimestamp());
+            RspSearchTransaction rspSearchTransaction = new RspSearchTransaction(blockHeader.getTimestamp(), txResponse);
             return txResponse;
         }
         return null;
