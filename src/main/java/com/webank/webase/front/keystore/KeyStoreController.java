@@ -102,9 +102,6 @@ public class KeyStoreController extends BaseController {
     public RspUserInfo getUserInfoWithSign(@RequestParam String signUserId,
             @RequestParam(required = false, defaultValue = "false") boolean returnPrivateKey) {
         RspUserInfo rspUserInfo = keyStoreService.getUserInfoWithSign(signUserId, returnPrivateKey);
-        if (returnPrivateKey) {
-            rspUserInfo.setPrivateKey(Base64.getEncoder().encodeToString(rspUserInfo.getPrivateKey().getBytes()));
-        }
         return rspUserInfo;
     }
 
