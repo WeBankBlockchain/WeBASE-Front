@@ -604,7 +604,7 @@ public class Web3ApiService {
             JsonTransactionResponse txResponse = getTransactionByHash(groupId, input);
             BlockHeader blockHeader = getBlockHeaderByNumber(groupId, txResponse.getBlockNumber(), false);
             RspSearchTransaction rspSearchTransaction = new RspSearchTransaction(blockHeader.getTimestamp(), txResponse);
-            return txResponse;
+            return rspSearchTransaction;
         }
         return null;
     }
