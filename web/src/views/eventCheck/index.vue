@@ -325,6 +325,15 @@ export default {
         submit(formName) {
             this.$refs[formName].validate(valid => {
                 if (valid) {
+                    let indexedArr = [];
+                    this.inputList.forEach(item => {
+                        if (item.msgObj) {
+                            indexedArr.push(item.msgObj.is)
+                        }
+                    })
+                    if (indexedArr.includes(false)) {
+                        return
+                    }
                     this.queryAdd()
                 } else {
                     return false;
