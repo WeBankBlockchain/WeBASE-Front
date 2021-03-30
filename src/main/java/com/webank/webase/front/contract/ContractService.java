@@ -548,7 +548,7 @@ public class ContractService {
      * save new contract.
      */
     @Transactional
-    private Contract newContract(ReqContractSave contractReq) {
+    public Contract newContract(ReqContractSave contractReq) {
         // check contract not exist.
         verifyContractNotExist(contractReq.getGroupId(), contractReq.getContractPath(),
                 contractReq.getContractName());
@@ -575,7 +575,7 @@ public class ContractService {
      * update contract.
      */
     @Transactional
-    private Contract updateContract(ReqContractSave contractReq) {
+    public Contract updateContract(ReqContractSave contractReq) {
         // check contract exist
         Contract contract =
                 verifyContractIdExist(contractReq.getContractId(), contractReq.getGroupId());

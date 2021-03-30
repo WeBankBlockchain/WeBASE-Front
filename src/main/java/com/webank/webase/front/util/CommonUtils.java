@@ -472,7 +472,8 @@ public class CommonUtils {
             File file = new File(filePath);
             inputFile = new FileInputStream(file);
             byte[] buffer = new byte[(int) file.length()];
-            inputFile.read(buffer);
+            int size = inputFile.read(buffer);
+            log.debug("fileToBase64 inputFile size:{}", size);
             return Base64.getEncoder().encodeToString(buffer);
         } catch (IOException e) {
             log.error("base64ToFile IOException:[{}]", e.toString());
@@ -501,12 +502,12 @@ public class CommonUtils {
                         srcFile.length());
                 zos.putNextEntry(new ZipEntry(srcFile.getName()));
                 int len;
-                FileInputStream in = new FileInputStream(srcFile);
-                while ((len = in.read(buf)) != -1) {
-                    zos.write(buf, 0, len);
+                try (FileInputStream in = new FileInputStream(srcFile)) {
+                    while ((len = in.read(buf)) != -1) {
+                        zos.write(buf, 0, len);
+                    }
                 }
                 zos.closeEntry();
-                in.close();
             }
             long end = System.currentTimeMillis();
             log.info("fileToZipBase64 cost time：[{}] ms", (end - start));
