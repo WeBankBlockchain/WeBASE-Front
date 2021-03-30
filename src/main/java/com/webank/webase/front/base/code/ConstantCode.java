@@ -47,7 +47,7 @@ public class ConstantCode {
     public static final RetCode CONTRACT_NOT_DEPLOY_ERROR = RetCode.mark(201009, "contract is not deployed");
     public static final RetCode ABI_SAVE_ERROR = RetCode.mark(201010, "save abi error");
     public static final RetCode IN_FUNCPARAM_ERROR = RetCode.mark(201011, "contract funcParam is error");
-    public static final RetCode BLOCK_NUMBER_ERROR = RetCode.mark(201012, "requst blockNumber is greater than latest");
+    public static final RetCode BLOCK_NUMBER_ERROR = RetCode.mark(201012, "request blockNumber is greater than latest");
     public static final RetCode ABI_GET_ERROR = RetCode.mark(201013, "get abi error");
     public static final RetCode CONTRACT_DEPLOY_ERROR = RetCode.mark(201014, "contract deploy error");
     public static final RetCode PRIVATEKEY_IS_NULL = RetCode.mark(201015, "user's privateKey is null");

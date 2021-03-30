@@ -266,7 +266,8 @@ public class CommonUtils {
         boolean flag = false;
         File file = new File(filePath);
         if (file.isFile() && file.exists()) {
-            file.delete();
+            boolean deleteResult = file.delete();
+            log.info("deleteFile deleteResult:{}", deleteResult);
             flag = true;
         }
         return flag;
@@ -787,9 +788,11 @@ public class CommonUtils {
         File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
         // delete old private key
         if (keystorePath.exists()) {
-            keystorePath.delete();
+            boolean deleteResult = keystorePath.delete();
+            log.info("writePrivateKeyPem keystorePath deleteResult:{}", deleteResult);
         }
-        keystorePath.mkdir();
+        boolean mkdirResult = keystorePath.mkdir();
+        log.info("writePrivateKeyPem keystorePath mkdirResult:{}", mkdirResult);
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + PEM_FILE_FORMAT;
@@ -814,7 +817,8 @@ public class CommonUtils {
         File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
         // delete old private key
         if (keystorePath.exists()) {
-            keystorePath.delete();
+            boolean result = keystorePath.delete();
+            log.info("writePrivateKeyPem keystorePath delete result:{}", result);
         }
         keystorePath.mkdir();
         // get private key
