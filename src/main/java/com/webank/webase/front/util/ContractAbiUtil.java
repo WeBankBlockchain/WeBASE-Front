@@ -49,7 +49,7 @@ public class ContractAbiUtil {
         throw new IllegalStateException("Utility class");
     }
 
-    public static HashMap<String, List<VersionEvent>> contractEventMap = new HashMap<>();
+    protected static HashMap<String, List<VersionEvent>> contractEventMap = new HashMap<>();
     private static final String REGEX = "(\\w+)(?:\\[(.*?)\\])(?:\\[(.*?)\\])?";
     private static final Pattern PATTERN = Pattern.compile(REGEX);
     public static final String STATE_MUTABILITY_VIEW = "view";

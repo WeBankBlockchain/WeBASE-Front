@@ -417,7 +417,8 @@ public class FrontCertService {
         File confZip = new File(generateFileName);
         if (confZip.exists() ) {
             log.info("confZip exist, now delete:{}", confZip);
-            confZip.delete();
+            boolean result = confZip.delete();
+            log.info("confZip exist, delete result:{}", result);
         }
         // 输出流
         FileOutputStream outputStream = new FileOutputStream(generateFileName);
