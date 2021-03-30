@@ -1005,7 +1005,7 @@ export function findCnsInfo(data) {
 // sdk证书下载
 export function exportCertSdk() {
     return get({
-        url: `${HANDLE}/cert/sdk/zip`,
+        url: `${HANDLE}cert/sdk/zip`,
         method: 'get',
         responseType: 'blob'
     })
