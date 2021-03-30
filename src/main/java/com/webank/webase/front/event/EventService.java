@@ -194,7 +194,7 @@ public class EventService {
     }
 
     @Transactional
-    private String addNewBlockEventInfo(int eventType, String appId, int groupId,
+    public String addNewBlockEventInfo(int eventType, String appId, int groupId,
         String exchangeName, String queueName, String routingKey, String registerId) {
         checkNewBlockEventExist(appId, exchangeName, queueName);
         NewBlockEventInfo registerInfo = new NewBlockEventInfo();
@@ -221,7 +221,7 @@ public class EventService {
     }
 
     @Transactional
-    private String addContractEventInfo(int eventType, String appId, int groupId,
+    public String addContractEventInfo(int eventType, String appId, int groupId,
         String exchangeName, String queueName, String routingKey, String abi,
         String fromBlock, String toBlock, String contractAddress, List<String> topicList,
         String registerId) throws FrontException {

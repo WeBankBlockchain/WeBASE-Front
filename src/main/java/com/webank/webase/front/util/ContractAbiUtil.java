@@ -259,7 +259,7 @@ public class ContractAbiUtil {
      */
     public static void saveAbiFile(String contractName, String version,
                                    List<ABIDefinition> abiDefinitionList)
-            throws FrontException {
+        throws FrontException {
         FileOutputStream outputStream = null;
         try {
             File file = new File(
@@ -279,7 +279,7 @@ public class ContractAbiUtil {
                     outputStream.close();
                 }
             } catch (IOException e) {
-                throw new FrontException(ConstantCode.ABI_SAVE_ERROR);
+                log.error("saveAbiFile failed.", e);
             }
         }
         return;
