@@ -175,7 +175,10 @@ public class PrecompiledWithSignService {
             return ConstantCode.PEERS_NOT_CONNECTED.toString();
         }
         // check group file
-        this.containsGroupFile(groupId);
+        // check group file
+        if (!containsGroupFile(groupId)) {
+            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+        }
         // trans
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
@@ -198,7 +201,9 @@ public class PrecompiledWithSignService {
             return ConstantCode.ALREADY_EXISTS_IN_OBSERVER_LIST.toString();
         }
         // check group file
-        this.containsGroupFile(groupId);
+        if (!containsGroupFile(groupId)) {
+            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+        }
         // trans
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
