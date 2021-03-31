@@ -399,7 +399,7 @@ let errCode = {
     },
     "201131": {
         en: "Group genesis conf not found",
-        zh: '未找到创世块配置文件'
+        zh: '群组配置文件不存在，无法添加该节点为共识节点'
     },
     "201132": {
         en: "Group config.ini not found",
@@ -855,6 +855,7 @@ let errCode = {
         en: "Fail to parse json",
         zh: "解析json失败"
     },
+
     "302000": {
         en: "user not logged in",
         zh: '未登录的用户'
