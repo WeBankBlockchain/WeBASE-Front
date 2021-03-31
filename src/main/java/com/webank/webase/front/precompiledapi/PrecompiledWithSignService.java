@@ -158,7 +158,7 @@ public class PrecompiledWithSignService {
 
     /**
      * consensus: add sealer through webase-sign
-     * todo 增加校验群组文件是否存在，P2P连接存在
+     * v1.5.0 增加校验群组文件是否存在，P2P连接存在
      */
     public String addSealer(int groupId, String signUserId, String nodeId) {
         // check node id
@@ -175,7 +175,9 @@ public class PrecompiledWithSignService {
             return ConstantCode.PEERS_NOT_CONNECTED.toString();
         }
         // check group file
-        this.containsGroupFile(groupId);
+        if (!containsGroupFile(groupId)) {
+            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+        }
         // trans
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
@@ -197,8 +199,10 @@ public class PrecompiledWithSignService {
         if (observerList.contains(nodeId)) {
             return ConstantCode.ALREADY_EXISTS_IN_OBSERVER_LIST.toString();
         }
-        // check group file
-        this.containsGroupFile(groupId);
+        // check group file, observer not check
+//        if (!containsGroupFile(groupId)) {
+//            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+//        }
         // trans
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(nodeId);

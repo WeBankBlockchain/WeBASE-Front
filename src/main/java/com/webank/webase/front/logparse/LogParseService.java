@@ -99,7 +99,7 @@ public class LogParseService {
             // get currentState
             CurrentState currentState = getCurrentState();
             String currentFileName;
-            long lastTimeFileSize = Long.valueOf(0);
+            long lastTimeFileSize = 0L;
             if (currentState == null) {
                 currentFileName = treeMap.get(treeMap.firstKey());
             } else {
@@ -137,7 +137,7 @@ public class LogParseService {
                 }
                 if (treeMap.size() > 1) {
                     FileUtil.clearCurrentStatFile(treeMap, currentFileName);
-                    updateCurrentState(treeMap.get(treeMap.firstKey()), Long.valueOf(0));
+                    updateCurrentState(treeMap.get(treeMap.firstKey()), 0L);
                 }
             }
             log.debug("syncLogData end useTime:{}",

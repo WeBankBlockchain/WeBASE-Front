@@ -78,7 +78,7 @@ public class SyncEventLogCallback implements EventCallback {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                logger.error("sleep 100ms interrupted:{}", JsonUtils.objToString(e.getStackTrace()));
+                logger.error("sleep 100ms interrupted:[]", e);
             }
             logger.info(
                 "SyncEventLogCallback push finished status: {}, finalList size:{}",

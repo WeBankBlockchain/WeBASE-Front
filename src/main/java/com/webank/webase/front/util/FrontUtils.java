@@ -111,7 +111,8 @@ public class FrontUtils {
         Objects.requireNonNull(targetFile, "fail create file. targetFile is null");
         File parentFile = targetFile.getParentFile();
         if (!parentFile.exists()) {
-            parentFile.mkdirs();
+            boolean mkdirResult = parentFile.mkdirs();
+            log.info("createFileIfNotExist mkdirResult:{}", mkdirResult);
         }
         if (deleteOld) {
             targetFile.deleteOnExit();
@@ -119,9 +120,11 @@ public class FrontUtils {
 
         if (!targetFile.exists()) {
             if (targetFile.isFile()) {
-                targetFile.createNewFile();
+                boolean newFileResult = targetFile.createNewFile();
+                log.info("createFileIfNotExist newFileResult:{}", newFileResult);
             } else if (targetFile.isDirectory()) {
-                targetFile.mkdir();
+                boolean newDirResult = targetFile.mkdir();
+                log.info("createFileIfNotExist mkdirResult:{}", newDirResult);
             }
         }
     }
