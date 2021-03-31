@@ -174,13 +174,12 @@ export default {
         textRivateKey() {
             if (this.keyForm.fileType == 'Decimal Key' || this.keyForm.fileType == '十进制私钥') {
                 const decimalBN = Web3Utils.hexToNumberString(`0x${this.exportInfo.privateKey}`)
-                let str = JSON.stringify(decimalBN);
-                var blob = new Blob([str], { type: "text;charset=utf-8" });
+                var blob = new Blob([decimalBN], { type: "text;charset=utf-8" });
                 FileSaver.saveAs(blob, `${this.keyForm.fileName}_decimal_key_${this.exportInfo.address}`);
                 this.$notify({
                     title: this.$t('text.title'),
                     message: this.$t('text.exportWeid'),
-                    duration: 0
+                    duration: 3000
                 });
             } else {
                 let str = JSON.stringify(this.exportInfo);
