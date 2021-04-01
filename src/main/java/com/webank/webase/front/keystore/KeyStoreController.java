@@ -108,7 +108,7 @@ public class KeyStoreController extends BaseController {
     @ApiOperation(value = "getKeyStoreList", notes = "get local KeyStore lists")
     @GetMapping("localKeyStores")
     public List<KeyStoreInfo> getLocalKeyStoreList() {
-        log.info("start getLocalKeyStores.");
+        log.info("start getLocalKeyStoreList.");
         return keyStoreService.getLocalKeyStoreList();
     }
 

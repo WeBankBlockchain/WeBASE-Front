@@ -187,7 +187,7 @@ public class ContractController extends BaseController {
     @PostMapping(value = "/save")
     public Contract saveContract(@RequestBody @Valid ReqContractSave contract, BindingResult result)
             throws FrontException {
-        log.info("saveContract start. contract:{}", JsonUtils.toJSONString(contract));
+        log.info("saveContract start. contract:{}", contract.getContractName());
         checkParamResult(result);
         return contractService.saveContract(contract);
     }

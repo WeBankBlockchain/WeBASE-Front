@@ -14,6 +14,7 @@
 
 package com.webank.webase.front.logparse.util;
 
+import com.webank.webase.front.util.CleanPathUtil;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,7 +29,7 @@ public class FileUtil {
 
     public static List<String> getFiles(String path) {
         List<String> files = new ArrayList<String>();
-        File file = new File(path);
+        File file = new File(CleanPathUtil.cleanString(path));
         File[] tempList = file.listFiles();
         
         if (tempList == null) {
