@@ -412,7 +412,7 @@ export function exportPemPrivateKey(data) {
         url: `${HANDLE}privateKey/exportPem`,
         method: 'post',
         data: data,
-        responseType: 'blob',
+        responseType: 'blob/application/json',
         headers: {
         }
     })
@@ -424,7 +424,7 @@ export function exportP12PrivateKey(data) {
         url: `${HANDLE}privateKey/exportP12`,
         method: 'post',
         data: data,
-        responseType: 'blob',
+        responseType: 'blob/application/json',
         headers: {
         }
     })
