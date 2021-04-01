@@ -20,6 +20,7 @@ import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.entity.FileContentHandle;
+import com.webank.webase.front.util.CleanPathUtil;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -235,17 +236,17 @@ public class FrontCertService {
     public Path getCertPath(String nodePath, int certType) {
         if (certType == CertTypes.CHAIN.getValue()) {
             if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
-                return Paths.get(nodePath.concat(gmCaCrtPath));
+                return Paths.get(CleanPathUtil.cleanString(nodePath.concat(gmCaCrtPath)));
             }
-            return Paths.get(nodePath.concat(caCrtPath));
+            return Paths.get(CleanPathUtil.cleanString(nodePath.concat(caCrtPath)));
         } else if (certType == CertTypes.NODE.getValue()) {
             if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
-                return Paths.get(nodePath.concat(gmNodeCrtPath));
+                return Paths.get(CleanPathUtil.cleanString(nodePath.concat(gmNodeCrtPath)));
             }
-            return Paths.get(nodePath.concat(nodeCrtPath));
+            return Paths.get(CleanPathUtil.cleanString(nodePath.concat(nodeCrtPath)));
         } else if(certType == CertTypes.OTHERS.getValue()) {
             if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
-                return Paths.get(nodePath.concat(gmEncryptCrtPath));
+                return Paths.get(CleanPathUtil.cleanString(nodePath.concat(gmEncryptCrtPath)));
             } else {
                 return null;
             }
@@ -367,7 +368,7 @@ public class FrontCertService {
         // gm: gmca.crt, gmsdk.crt, gmsdk.key
         // else: ca.crt, sdk.crt, sdk.key
         for (String fileName : sdkContentMap.keySet()) {
-            Path sdkFilePath = Paths.get(sdkDir.getPath() + File.separator + fileName);
+            Path sdkFilePath = Paths.get(CleanPathUtil.cleanString(sdkDir.getPath() + File.separator + fileName));
             String fileContent = sdkContentMap.get(fileName);
             log.info("writeSdkAsFile sdkPath:{}, content:{}", sdkFilePath, fileContent);
             try (BufferedWriter writer = Files.newBufferedWriter(sdkFilePath, StandardCharsets.UTF_8)) {
@@ -381,7 +382,6 @@ public class FrontCertService {
         // zip the directory of conf(guomi: conf/gm)
         try {
             generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR, useGm);
-            log.info("sdk zip from :{} to dir: tempZip", sdkDir.getPath());
         } catch (Exception e) {
             log.error("writeSdkAsFile generateZipFile fail:[]", e);
             throw new FrontException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
@@ -399,7 +399,7 @@ public class FrontCertService {
      */
     public static void generateZipFile(String path, String outputDir, boolean useGm) throws Exception {
 
-        File file2Zip = new File(path);
+        File file2Zip = new File(CleanPathUtil.cleanString(path));
         // 压缩文件的路径不存在
         if (!file2Zip.exists()) {
             log.error("file not exist:{}", path);
@@ -413,7 +413,7 @@ public class FrontCertService {
         }
         // 目的压缩文件，已存在则先删除
         // tempZip/conf.zip
-        String generateFileName = compress.getAbsolutePath() + File.separator + TEMP_ZIP_FILE_NAME;
+        String generateFileName = CleanPathUtil.cleanString(compress.getAbsolutePath() + File.separator + TEMP_ZIP_FILE_NAME);
         File confZip = new File(generateFileName);
         if (confZip.exists() ) {
             log.info("confZip exist, now delete:{}", confZip);

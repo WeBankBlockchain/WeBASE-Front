@@ -1,28 +1,26 @@
 /**
  * Copyright 2014-2020 the original author or authors.
  * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.webank.webase.front.solc;
 
 import static com.webank.webase.front.base.properties.Constants.SOLC_DIR_PATH;
 import static com.webank.webase.front.base.properties.Constants.SOLC_JS_SUFFIX;
-
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.solc.entity.RspDownload;
 import com.webank.webase.front.solc.entity.SolcInfo;
+import com.webank.webase.front.util.CleanPathUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -58,7 +56,7 @@ public class SolcService {
             log.info("checkSolcFile find no solc js file in ./conf/solcjs/");
             return solcList;
         }
-        for (File file: files) {
+        for (File file : files) {
             if (file.isFile()) {
                 solcList.add(file.getName());
             }
@@ -70,7 +68,8 @@ public class SolcService {
     /* deprecated */
 
     @Transactional
-    public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String fileDesc) throws IOException {
+    public void saveSolcFile(String fileNameParam, MultipartFile solcFileParam, String fileDesc)
+            throws IOException {
         // format filename end with js
         String fileName = formatFileName(fileNameParam);
         Long fileSize = solcFileParam.getSize();
@@ -87,18 +86,19 @@ public class SolcService {
         // get solcjs dir and save file
         File solcDir = getSolcDir();
         try {
-            File newFile = new File(solcDir.getAbsolutePath() + File.separator + fileName);
+            File newFile = new File(CleanPathUtil
+                    .cleanString(solcDir.getAbsolutePath() + File.separator + fileName));
             solcFileParam.transferTo(newFile);
             log.info("saveSolcFile success, file name:{}", fileName);
         } catch (IOException e) {
             log.error("saveSolcFile write to file, fileName:{},error:[]", fileName, e);
-            throw new FrontException(ConstantCode.SAVE_SOLC_FILE_ERROR.getCode(),
-                    e.getMessage());
+            throw new FrontException(ConstantCode.SAVE_SOLC_FILE_ERROR.getCode(), e.getMessage());
         }
     }
 
     /**
      * check file's md5 not exist
+     * 
      * @param md5
      */
     private void checkSolcMd5NotExist(String md5) {
@@ -110,6 +110,7 @@ public class SolcService {
 
     /**
      * if exist, throw exception
+     * 
      * @param fileName
      */
     private void checkSolcInfoNotExist(String fileName) {
@@ -121,6 +122,7 @@ public class SolcService {
 
     /**
      * if not exist, throw exception
+     * 
      * @param fileName
      */
     private void checkSolcInfoExist(String fileName) {
@@ -145,15 +147,17 @@ public class SolcService {
     private String formatFileName(String fileName) {
         return fileName.endsWith(SOLC_JS_SUFFIX) ? fileName : (fileName + SOLC_JS_SUFFIX);
     }
+
     /**
      * get solcjs dir's path
+     * 
      * @return File, file instance of dir
      */
     private File getSolcDir() {
 
         File fileDir = new File(SOLC_DIR_PATH);
         // check parent path
-        if(!fileDir.exists()){
+        if (!fileDir.exists()) {
             // 递归生成文件夹
             boolean result = fileDir.mkdirs();
             if (result) {
@@ -165,6 +169,7 @@ public class SolcService {
 
     /**
      * download file
+     * 
      * @param fileNameParam
      * @return
      */
@@ -175,8 +180,9 @@ public class SolcService {
         File solcDir = getSolcDir();
         try {
             String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
-            File file = new File(solcLocate);
-            InputStream targetStream = Files.newInputStream(Paths.get(file.getPath()));
+            File file = new File(CleanPathUtil.cleanString(solcLocate));
+            InputStream targetStream =
+                    Files.newInputStream(Paths.get(CleanPathUtil.cleanString(file.getPath())));
             return new RspDownload(fileName, targetStream);
         } catch (FileNotFoundException e) {
             log.error("getSolcFile: file not found:{}, e:{}", fileName, e.getMessage());
@@ -197,7 +203,7 @@ public class SolcService {
         String fileName = solcInfo.getSolcName();
         File solcDir = getSolcDir();
         String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
-        File file = new File(solcLocate);
+        File file = new File(CleanPathUtil.cleanString(solcLocate));
         removeSolcInfo(solcId);
         if (!file.exists()) {
             throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
