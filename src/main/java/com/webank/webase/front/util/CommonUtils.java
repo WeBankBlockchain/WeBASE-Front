@@ -214,7 +214,7 @@ public class CommonUtils {
      */
     public static String readFile(String filePath) throws IOException {
         log.info("readFile dir:{}", filePath);
-        File dirFile = new File(filePath);
+        File dirFile = new File(CleanPathUtil.cleanString(filePath));
         if (!dirFile.exists()) {
             return null;
         }
@@ -239,7 +239,7 @@ public class CommonUtils {
      */
     public static List<String> readFileToList(String filePath) throws IOException {
         log.debug("readFile dir:{}", filePath);
-        File dirFile = new File(filePath);
+        File dirFile = new File(CleanPathUtil.cleanString(filePath));
         if (!dirFile.exists()) {
             return null;
         }
@@ -264,7 +264,7 @@ public class CommonUtils {
      */
     public static boolean deleteFile(String filePath) {
         boolean flag = false;
-        File file = new File(filePath);
+        File file = new File(CleanPathUtil.cleanString(filePath));
         if (file.isFile() && file.exists()) {
             boolean deleteResult = file.delete();
             log.info("deleteFile deleteResult:{}", deleteResult);
@@ -283,7 +283,7 @@ public class CommonUtils {
         if (!path.endsWith(File.separator)) {
             path = path + File.separator;
         }
-        File dirFile = new File(path);
+        File dirFile = new File(CleanPathUtil.cleanString(path));
         if (!dirFile.exists() || !dirFile.isDirectory()) {
             return false;
         }
@@ -469,7 +469,7 @@ public class CommonUtils {
         }
         FileInputStream inputFile = null;
         try {
-            File file = new File(filePath);
+            File file = new File(CleanPathUtil.cleanString(filePath));
             inputFile = new FileInputStream(file);
             byte[] buffer = new byte[(int) file.length()];
             int size = inputFile.read(buffer);
@@ -548,12 +548,12 @@ public class CommonUtils {
             File fout = null;
             while (entry != null) {
                 if (entry.isDirectory()) {
-                    File subdirectory = new File(path + File.separator + entry.getName());
+                    File subdirectory = new File(CleanPathUtil.cleanString(path + File.separator + entry.getName()));
                     if (!subdirectory.exists() && !subdirectory.isDirectory()) {
                         subdirectory.mkdirs();
                     }
                 } else {
-                    log.info("zipBase64ToFile file name:[{}]", entry.getName());
+                    log.info("zipBase64ToFile fileName:[{}]", entry.getName());
                     String outPath = (path + entry.getName()).replaceAll("\\*", "/");
                     fout = new File(cleanString(outPath));
                     BufferedOutputStream bos = null;

@@ -18,7 +18,6 @@ import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
-
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
@@ -49,6 +48,7 @@ import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.AbiUtil;
+import com.webank.webase.front.util.CleanPathUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.ErrorCodeHandleUtils;
@@ -66,10 +66,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -127,8 +123,6 @@ public class ContractService {
     private KeyStoreService keyStoreService;
     @Autowired
     private Web3ApiService web3ApiService;
-    @Autowired
-    private Constants constants;
     @Autowired
     private PermissionManageService permissionManageService;
     @Autowired
@@ -418,8 +412,7 @@ public class ContractService {
         }
         try {
             commonContract =
-                    CommonContract
-                            .deploy(web3j, credentials, bytecodeBin, encodedConstructor);
+                    CommonContract.deploy(web3j, credentials, bytecodeBin, encodedConstructor);
         } catch (ContractException e) {
             log.error("commonContract deploy failed.", e);
             throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED, e.getMessage());
@@ -455,10 +448,12 @@ public class ContractService {
             throws IOException {
 
 
-        File abiFile = new File(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi");
+        File abiFile = new File(CleanPathUtil
+                .cleanString(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi"));
         FrontUtils.createFileIfNotExist(abiFile, true);
         FileUtils.writeStringToFile(abiFile, JsonUtils.toJSONString(abiInfo));
-        File binFile = new File(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin");
+        File binFile = new File(CleanPathUtil
+                .cleanString(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin"));
         FrontUtils.createFileIfNotExist(binFile, true);
         FileUtils.writeStringToFile(binFile, contractBin);
 
@@ -469,14 +464,15 @@ public class ContractService {
         if (contractName.length() > 1) {
             contractName = contractName.substring(0, 1).toUpperCase() + contractName.substring(1);
         }
-//        File outputDir = new File(Constants.JAVA_DIR + File.separator + outputDirectory);
-        File outputDir = new File(Constants.JAVA_DIR);
+        // File outputDir = new File(Constants.JAVA_DIR + File.separator + outputDirectory);
+        File outputDir = new File(CleanPathUtil.cleanString(Constants.JAVA_DIR));
 
         generateJavaFile(packageName, abiFile, binFile, outputDir);
 
         // generated java file is in outputDir/xxx.java
-        File file = new File(Constants.JAVA_DIR + File.separator + outputDirectory + File.separator
-            + contractName + ".java");
+        String filePath = Constants.JAVA_DIR + File.separator + outputDirectory + File.separator
+                + contractName + ".java";
+        File file = new File(CleanPathUtil.cleanString(filePath));
         FrontUtils.createFileIfNotExist(file, true);
         InputStream targetStream = new FileInputStream(file);
         return new FileContentHandle(contractName + ".java", targetStream);
@@ -488,7 +484,7 @@ public class ContractService {
             MySecurityManagerConfig.forbidSystemExitCall();
             // sm bin use same bin
             SolidityContractGenerator generator = new SolidityContractGenerator(binFile, binFile,
-                abiFile, outputDir, packageName);
+                    abiFile, outputDir, packageName);
             generator.generateJavaFiles();
         } catch (IOException | ClassNotFoundException e) {
             log.error("generateJavaFile error for io error/file not found:[]", e);
@@ -764,7 +760,7 @@ public class ContractService {
             byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
             String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
             // save contract to file
-            contractFile = new File(contractFilePath);
+            contractFile = new File(CleanPathUtil.cleanString(contractFilePath));
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
             // compile
             SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, useSM2, true, ABI,

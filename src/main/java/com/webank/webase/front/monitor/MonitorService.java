@@ -23,6 +23,7 @@ import com.webank.webase.front.monitor.entity.Monitor;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
 import com.webank.webase.front.performance.result.PerformanceData;
+import com.webank.webase.front.util.CleanPathUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.File;
@@ -232,7 +233,8 @@ public class MonitorService {
 
     public List<GroupSizeInfo> getGroupSizeInfos() {
         List<GroupSizeInfo> data = new ArrayList<>();
-        File f = new File(constants.getNodePath() + File.separator + nodeConfig.getGroupDataPath());
+        String groupDataPath = constants.getNodePath() + File.separator + nodeConfig.getGroupDataPath();
+        File f = new File(CleanPathUtil.cleanString(groupDataPath));
         File[] fs = f.listFiles();
         if (fs == null) {
             return data;
