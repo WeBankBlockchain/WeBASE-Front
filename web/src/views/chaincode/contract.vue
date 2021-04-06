@@ -101,7 +101,7 @@ export default {
         Bus.$on("changeGroup", data => {
             this.changeGroup()
         })
-        this.allVersionList = [
+        this.allVersion = [
             {
                 solcName: "v0.4.25",
                 versionId: 0,
@@ -125,8 +125,27 @@ export default {
                 versionId: 3,
                 encryptType: 1,
                 net: 0
+            },
+            {
+                solcName: "v0.6.10",
+                versionId: 4,
+                url: `http://${this.host}/WeBASE-Front/static/js/v0.6.10.js`,
+                encryptType: 0,
+                net: 1,
+            },
+            {
+                solcName: "v0.6.10-gm",
+                versionId: 5,
+                url: `http://${this.host}/WeBASE-Front/static/js/v0.6.10-gm.js`,
+                encryptType: 1,
+                net: 1
             }
         ]
+        if (process.env.NODE_ENV === 'development') {
+            this.allVersion[4].url = `http://${this.host}/static/js/v0.6.10.js`;
+            this.allVersion[5].url = `http://${this.host}/static/js/v0.6.10-gm.js`;
+        }
+        console.log(process.env)
         this.getEncryption(this.querySolcList);
     },
     methods: {
@@ -173,6 +192,11 @@ export default {
                     data: this.versionData.url
                 });
                 w.addEventListener("error", function (ev) {
+                    that.$message({
+                        type: "error",
+                        message: '版本加载失败，请确认是否存在该版本'
+                    });
+                    that.loading = false
                     console.log(ev)
                 })
             } else {
@@ -221,50 +245,8 @@ export default {
             encryption().then(res => {
                 if (res.status == 200) {
                     localStorage.setItem("encryptionId", res.data)
-                    this.getSolcs(callback)
-                } else {
-                    this.$message({
-                        type: "error",
-                        message: this.$chooseLang(res.data.code)
-                    });
-                }
-            })
-                .catch(err => {
-                    this.$message({
-                        type: "error",
-                        message: err.data || this.$t('text.systemError')
-                    });
-                });
-        },
-        getSolcs(callback) {
-            getSolcList().then(res => {
-                this.allVersion = [];
-                this.allVersion = this.allVersionList
-                if (res.data.code === 0) {
-                    this.solcList = res.data.data;
-                    for (let i = 0; i < this.solcList.length; i++) {
-                        if (this.solcList[i] == "v0.6.10.js") {
-                            let data = {
-                                solcName: "v0.6.10",
-                                versionId: 4,
-                                url: `http://${this.host}/WeBASE-Front/solcjs/v0.6.10.js`,
-                                encryptType: 0,
-                                net: 1
-                            }
-                            this.allVersion.push(data)
-                        }
-                        if (this.solcList[i] == "v0.6.10-gm.js") {
-                            let data = {
-                                solcName: "v0.6.10-gm",
-                                versionId: 5,
-                                url: `http://${this.host}/WeBASE-Front/solcjs/v0.6.10-gm.js`,
-                                encryptType: 1,
-                                net: 1
-                            }
-                            this.allVersion.push(data)
-                        }
-                    }
                     callback()
+                    // this.getSolcs(callback)
                 } else {
                     this.$message({
                         type: "error",
@@ -279,6 +261,42 @@ export default {
                     });
                 });
         },
+        // getSolcs(callback) {
+        //     getSolcList().then(res => {
+        //         this.allVersion = [];
+        //         this.allVersion = this.allVersionList
+        //         if (res.data.code === 0) {
+        //                     let data = {
+        //                         solcName: "v0.6.10",
+        //                         versionId: 4,
+        //                         url: `http://${this.host}/WeBASE-Front/static/js/v0.6.10.js`,
+        //                         encryptType: 0,
+        //                         net: 1
+        //                     }
+        //                     this.allVersion.push(data)
+        //                     let data = {
+        //                         solcName: "v0.6.10-gm",
+        //                         versionId: 5,
+        //                         url: `http://${this.host}/WeBASE-Front/static/js/v0.6.10-gm.js`,
+        //                         encryptType: 1,
+        //                         net: 1
+        //                     }
+        //                     this.allVersion.push(data)
+        //             callback()
+        //         } else {
+        //             this.$message({
+        //                 type: "error",
+        //                 message: this.$chooseLang(res.data.code)
+        //             });
+        //         }
+        //     })
+        //         .catch(err => {
+        //             this.$message({
+        //                 type: "error",
+        //                 message: err.data || this.$t('text.systemError')
+        //             });
+        //         });
+        // },
         changeGroup: function () {
             this.$refs.menu.getContractPaths()
         },
