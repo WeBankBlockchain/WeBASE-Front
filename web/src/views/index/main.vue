@@ -144,6 +144,11 @@ export default {
             return this.menuShow;
         }
     },
+    created() {
+        // 清理合约version
+        localStorage.setItem('solcName', '')
+        localStorage.setItem('versionId', null)
+    },
     mounted() {
         this.accountStatus = sessionStorage.getItem("accountStatus");
         this.getEncryption()
