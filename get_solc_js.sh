@@ -3,6 +3,7 @@
 # 在源码编译得到的WeBASE-Front/dist目录中执行
 
 CURRENT_DIR=$(pwd)
+# if before build, target dir is [src/main/resources/static/static/js]
 OUTPUT_DIR="static/static/js"
 
 
