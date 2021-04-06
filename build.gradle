@@ -134,6 +134,10 @@ clean {
     delete 'log'
 }
 
+def isWindows() {
+    return org.gradle.internal.os.OperatingSystem.current().isWindows()
+}
+
 jar {
     destinationDir file('dist/apps')
     archiveName project.name + '.jar'
@@ -146,11 +150,16 @@ jar {
             into 'dist/conf_template'
             exclude '**/static'
         }
-        def command = "bash get_solc_js.sh -o src/main/resources/static/static/js"
-        exec {
-            ExecSpec execSpec ->
-                executable 'bash'
-                args '-c', command
+        if (isWindows()) {
+            println "[WARN]Jump over download solidity js in src/main/resources/static/static/js"
+            println "[WARN]You need to run bash get_solc_js.sh in dist"
+        } else {
+            def command = "bash get_solc_js.sh -o src/main/resources/static/static/js"
+            exec {
+                ExecSpec execSpec ->
+                    executable 'bash'
+                    args '-c', command
+            }
         }
         copy {
             from file('src/main/resources/static')
