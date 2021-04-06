@@ -146,6 +146,12 @@ jar {
             into 'dist/conf_template'
             exclude '**/static'
         }
+        def command = "bash get_solc_js.sh -o src/main/resources/static/static/js"
+        exec {
+            ExecSpec execSpec ->
+                executable 'bash'
+                args '-c', command
+        }
         copy {
             from file('src/main/resources/static')
             into 'dist/static'
@@ -162,9 +168,24 @@ jar {
             from file('.').listFiles().findAll{File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env'))}
             into 'dist'
         }
-    copy {
+        copy {
             from file('release_note.txt')
             into 'dist'
         }
     }
 }
+//
+//task("downloadSolc") {
+//    def command = "bash get_solc_js.sh"
+//    println "downloadSolc command:" + command
+//    try {
+//        exec {
+//            ExecSpec execSpec ->
+//                executable 'bash'
+//                args '-c', command
+//        }
+//        println "downloadSolc success~"
+//    } catch (Exception e) {
+//        e.printStackTrace()
+//    }
+//}
