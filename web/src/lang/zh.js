@@ -349,6 +349,7 @@ export default {
         hexType: "十六进制",
         exportWeid: "支持在WeID中导入",
         title: "提示",
+        versionError: 'Solc版本加载失败，请检查/static/js目录中是否存在对应的合约版本'
     },
     contracts: {
         createFile: "新建文件",

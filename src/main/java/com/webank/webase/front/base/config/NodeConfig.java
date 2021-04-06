@@ -34,7 +34,7 @@ public class NodeConfig implements InitializingBean {
     @JsonIgnore
     @Autowired
     private Constants constants;
-
+    @Deprecated
     private String orgName;
     private String p2pip;
     private String listenip;

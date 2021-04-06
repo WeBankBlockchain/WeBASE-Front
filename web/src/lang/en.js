@@ -350,6 +350,7 @@ export default {
         hexType: "Hex",
         exportWeid: "Support import in WeID",
         title: "Title",
+        versionError: 'The Solc version failed to load. Please check whether the corresponding contract version exists in the "/static/js" directory'
     },
     contracts: {
         createFile: "Create File",

@@ -26,6 +26,7 @@ import com.webank.webase.front.logparse.repository.TxGasDataRepository;
 import com.webank.webase.front.logparse.util.FileUtil;
 import com.webank.webase.front.logparse.util.LogParseUtil;
 import com.webank.webase.front.logparse.util.LogTypes;
+import com.webank.webase.front.util.CleanPathUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -109,7 +110,7 @@ public class LogParseService {
             // clear old files
             FileUtil.clearOldStatFiles(treeMap, currentFileName);
             // read current file
-            File logFile = new File(statPath + currentFileName);
+            File logFile = new File(CleanPathUtil.cleanString(statPath + currentFileName));
             long fileLength = logFile.length();
             if (fileLength < lastTimeFileSize) {
                 return;

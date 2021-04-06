@@ -305,7 +305,7 @@ export default {
         },
         select(index, indexPath) {
             this.activeIndex = indexPath[0];
-            this.activeRoute = index;
+            this.active = index;
         },
         handleOpen(key, keyPath) {
         },
