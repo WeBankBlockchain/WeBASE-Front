@@ -26,6 +26,52 @@ public class AbiTypes {
 
     private AbiTypes() {
     }
+    
+    public static boolean invalidUint(String type) {
+
+        if (!type.startsWith("uint")) {
+            return false;
+        }
+
+        if ("uint".equals(type)) {
+            return true;
+        }
+
+        try {
+            Integer r = Integer.valueOf(type.substring(4));
+            if (r == null) {
+                return false;
+            }
+
+            return (r.intValue() >= 1 && r.intValue() <= 256);
+
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static boolean invalidInt(String type) {
+        if (!type.startsWith("int")) {
+            return false;
+        }
+
+        if ("int".equals(type)) {
+            return true;
+        }
+
+        try {
+            Integer r = Integer.valueOf(type.substring(3));
+            if (r == null) {
+                return false;
+            }
+
+            return (r.intValue() >= 1 && r.intValue() <= 256);
+
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
     public static Class<? extends Type> getType(String type) {
         switch (type) {
             case "address":
