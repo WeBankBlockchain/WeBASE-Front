@@ -424,7 +424,7 @@ export function exportP12PrivateKey(data) {
         url: `${HANDLE}privateKey/exportP12`,
         method: 'post',
         data: data,
-        responseType: 'blob/application/json',
+        responseType: 'blob',
         headers: {
         }
     })
