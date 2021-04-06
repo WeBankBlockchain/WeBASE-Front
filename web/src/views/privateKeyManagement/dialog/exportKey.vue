@@ -218,14 +218,6 @@ export default {
                         });
                     }
                 })
-                .catch(err => {
-                    this.$message({
-                        type: "error",
-                        message: this.$t('text.systemError')
-                    });
-                });
-
-
         },
         p12RivateKey() {
             var form = {
@@ -235,6 +227,7 @@ export default {
             exportP12PrivateKey(form)
                 .then(res => {
                     const { data, status } = res;
+                    console.log(res);
                     if (status === 200) {
                         const blob = new Blob([res.data])
                         const fileName = `${this.keyForm.fileName}_key_${this.exportInfo.address}.p12`
@@ -259,12 +252,6 @@ export default {
                         });
                     }
                 })
-                .catch(err => {
-                    this.$message({
-                        type: "error",
-                        message: this.$t('text.systemError')
-                    });
-                });
         },
     }
 }
