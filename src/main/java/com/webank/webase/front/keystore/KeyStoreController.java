@@ -26,6 +26,7 @@ import com.webank.webase.front.keystore.entity.MessageHashInfo;
 import com.webank.webase.front.keystore.entity.ReqExport;
 import com.webank.webase.front.keystore.entity.ReqImportPem;
 import com.webank.webase.front.keystore.entity.ReqImportWithSign;
+import com.webank.webase.front.keystore.entity.RspKeyFile;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.util.CommonUtils;
@@ -198,7 +199,7 @@ public class KeyStoreController extends BaseController {
     @PostMapping("/exportPem")
     public ResponseEntity<InputStreamResource> exportPemPrivateKey(@RequestBody ReqExport param) {
         Instant startTime = Instant.now();
-        log.info("start getSdkCertZip startTime:{}", startTime.toEpochMilli());
+        log.info("start exportPemPrivateKey startTime:{},param:{}", startTime.toEpochMilli(), param);
         String userAddress = param.getUserAddress();
         String signUserId = param.getSignUserId();
         if (StringUtils.isAllBlank(userAddress, signUserId)) {
@@ -223,7 +224,7 @@ public class KeyStoreController extends BaseController {
     @PostMapping("/exportP12")
     public ResponseEntity<InputStreamResource> exportP12PrivateKey(@RequestBody ReqExport param) {
         Instant startTime = Instant.now();
-        log.info("start getSdkCertZip startTime:{}", startTime.toEpochMilli());
+        log.info("start exportP12PrivateKey startTime:{},param:{}", startTime.toEpochMilli(),param);
         String userAddress = param.getUserAddress();
         String signUserId = param.getSignUserId();
         String p12Password = param.getP12Password();
@@ -242,6 +243,7 @@ public class KeyStoreController extends BaseController {
         }
         log.info("end exportP12PrivateKey fileContentHandle:{}useTime:{}", fileContentHandle,
             Duration.between(startTime, Instant.now()).toMillis());
+//        return new BaseResponse(ConstantCode.RET_SUCCESS, fileContentHandle);
         return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
             .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
