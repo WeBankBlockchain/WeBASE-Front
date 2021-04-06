@@ -134,6 +134,10 @@ clean {
     delete 'log'
 }
 
+def isWindows() {
+    return org.gradle.internal.os.OperatingSystem.current().isWindows()
+}
+
 jar {
     destinationDir file('dist/apps')
     archiveName project.name + '.jar'
@@ -146,6 +150,19 @@ jar {
             into 'dist/conf_template'
             exclude '**/static'
         }
+        downloadJs()
+//        if (isWindows()) {
+//            println "[WARN]Jump over download solidity js in src/main/resources/static/static/js"
+//            downloadForWin()
+//            println "[WARN]You need to run bash get_solc_js.sh in dist"
+//        } else {
+//            def command = "bash get_solc_js.sh -o src/main/resources/static/static/js"
+//            exec {
+//                ExecSpec execSpec ->
+//                    executable 'bash'
+//                    args '-c', command
+//            }
+//        }
         copy {
             from file('src/main/resources/static')
             into 'dist/static'
@@ -162,9 +179,68 @@ jar {
             from file('.').listFiles().findAll{File f -> (f.name.endsWith('.sh') || f.name.endsWith('.env'))}
             into 'dist'
         }
-    copy {
+        copy {
             from file('release_note.txt')
             into 'dist'
         }
     }
 }
+
+// download js file
+def downloadJs() {
+    File solc04 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25.js")
+    File solc04gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.24-gm.js")
+    File solc05 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1.js")
+    File solc05gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1-gm.js")
+    File solc06 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10.js")
+    File solc06gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10-gm.js")
+    if (!solc04.exists()) {
+        exec {
+            ExecSpec execSpec ->
+                executable 'curl'
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.4.25.js",
+                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25.js"
+        }
+    }
+    if (!solc04gm.exists()) {
+        exec {
+            ExecSpec execSpec ->
+                executable 'curl'
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.4.24-gm.js",
+                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.24-gm.js"
+        }
+    }
+    if (!solc05.exists()) {
+        exec {
+            ExecSpec execSpec ->
+                executable 'curl'
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.5.1.js",
+                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1.js"
+        }
+    }
+    if (!solc05gm.exists()) {
+        exec {
+            ExecSpec execSpec ->
+                executable 'curl'
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.5.1-gm.js",
+                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1-gm.js"
+        }
+    }
+    if (!solc06.exists()) {
+        exec {
+            ExecSpec execSpec ->
+                executable 'curl'
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.6.10.js",
+                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10.js"
+        }
+    }
+    if (!solc06gm.exists()) {
+        exec {
+            ExecSpec execSpec ->
+                executable 'curl'
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.6.10-gm.js",
+                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10-gm.js"
+        }
+    }
+}
+

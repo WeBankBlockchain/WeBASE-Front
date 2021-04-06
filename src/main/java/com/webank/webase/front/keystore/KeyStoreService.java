@@ -23,6 +23,7 @@ import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.MessageHashInfo;
+import com.webank.webase.front.keystore.entity.RspKeyFile;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.keystore.entity.SignInfo;
@@ -33,6 +34,7 @@ import com.webank.webase.front.util.JsonUtils;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +45,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.exceptions.LoadKeyStoreException;
@@ -605,6 +608,7 @@ public class KeyStoreService {
         String rawPrivateKey = rspUserInfo.getPrivateKey();
         String filePath = CommonUtils.writePrivateKeyPem(rawPrivateKey, address, "", cryptoSuite);
         try {
+            log.info("exportPemWithSign filePath:{}", filePath);
             return new FileContentHandle(address + PEM_FILE_FORMAT,
                 new FileInputStream(CleanPathUtil.cleanString(filePath)));
         } catch (IOException e) {
@@ -619,6 +623,7 @@ public class KeyStoreService {
         String rawPrivateKey = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
         String filePath = CommonUtils.writePrivateKeyPem(rawPrivateKey, address, userName, cryptoSuite);
         try {
+            log.info("exportPemLocal filePath:{}", filePath);
             return new FileContentHandle(userName + "_" + address + PEM_FILE_FORMAT,
                 new FileInputStream(CleanPathUtil.cleanString(filePath)));
         } catch (IOException e) {
@@ -634,19 +639,20 @@ public class KeyStoreService {
         try {
             p12Password = new String(Base64.getDecoder().decode(p12PasswordEncoded));
         } catch (Exception e) {
-            log.error("decode pwd error:[]", e);
+            log.error("exportP12WithSign decode password error:[]", e);
             throw new FrontException(ConstantCode.P12_PASSWORD_ERROR);
         }
 
         RspUserInfo rspUserInfo = getUserInfoWithSign(signUserId, true);
         String address = rspUserInfo.getAddress();
         String rawPrivateKey = rspUserInfo.getPrivateKey();
-        String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, "", cryptoSuite);
+        String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, "sign", cryptoSuite);
+        log.info("exportP12WithSign filePath:{}", filePath);
         try {
-            return new FileContentHandle(address + PEM_FILE_FORMAT,
+            return new FileContentHandle(address + P12_FILE_FORMAT,
                 new FileInputStream(CleanPathUtil.cleanString(filePath)));
         } catch (IOException e) {
-            log.error("exportPrivateKeyPem fail:[]", e);
+            log.error("exportP12WithSign fail:[]", e);
             throw new FrontException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
         }
     }
@@ -665,13 +671,15 @@ public class KeyStoreService {
         String userName = keyStoreInfo.getUserName();
         String rawPrivateKey = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
         String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, userName, cryptoSuite);
+        log.info("exportP12Local filePath:{}", filePath);
         try {
-            return new FileContentHandle(userName + "_" + address + PEM_FILE_FORMAT,
+            return new FileContentHandle(userName + "_" + address + P12_FILE_FORMAT,
                 new FileInputStream(CleanPathUtil.cleanString(filePath)));
         } catch (IOException e) {
             log.error("exportPrivateKeyPem fail:[]", e);
             throw new FrontException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
         }
+
     }
 
 }
