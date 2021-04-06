@@ -174,18 +174,4 @@ jar {
         }
     }
 }
-//
-//task("downloadSolc") {
-//    def command = "bash get_solc_js.sh"
-//    println "downloadSolc command:" + command
-//    try {
-//        exec {
-//            ExecSpec execSpec ->
-//                executable 'bash'
-//                args '-c', command
-//        }
-//        println "downloadSolc success~"
-//    } catch (Exception e) {
-//        e.printStackTrace()
-//    }
-//}
+
