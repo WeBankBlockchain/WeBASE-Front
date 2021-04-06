@@ -194,7 +194,7 @@ export default {
                 w.addEventListener("error", function (ev) {
                     that.$message({
                         type: "error",
-                        message: '版本加载失败，请确认是否存在该版本'
+                        message: this.$t('text.versionError')
                     });
                     that.loading = false
                     console.log(ev)
