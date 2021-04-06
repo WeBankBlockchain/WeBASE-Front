@@ -1,5 +1,6 @@
 package com.webank.webase.front.util;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import org.fisco.bcos.sdk.abi.TypeReference;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
@@ -152,8 +153,8 @@ public class StaticArrayReference {
                 return create128(type, indexed);
 
             default:
-                throw new FrontException(201201, String
-                        .format("dimensions:%d unsupported encoding static array ", dimension));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s static array unsupported encoding", type));
         }
     }
 
@@ -239,8 +240,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray1<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[1] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[1] static array unsupported encoding", type));
         }
     }
 
@@ -326,8 +327,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray2<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[2] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[2] static array unsupported encoding", type));
         }
     }
 
@@ -413,8 +414,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray3<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[3] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[3] static array unsupported encoding", type));
         }
     }
 
@@ -500,8 +501,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray4<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[4] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[4] static array unsupported encoding", type));
         }
     }
 
@@ -587,8 +588,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray5<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[5] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[5] static array unsupported encoding", type));
         }
     }
 
@@ -674,8 +675,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray6<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[6] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[6] static array unsupported encoding", type));
         }
     }
 
@@ -761,8 +762,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray7<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[7] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[7] static array unsupported encoding", type));
         }
     }
 
@@ -848,8 +849,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray8<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[8] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[8] static array unsupported encoding", type));
         }
     }
 
@@ -935,8 +936,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray9<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[9] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[9] static array unsupported encoding", type));
         }
     }
 
@@ -1022,8 +1023,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray10<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[10] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[10] static array unsupported encoding", type));
         }
     }
 
@@ -1109,8 +1110,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray11<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[11] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[11] static array unsupported encoding", type));
         }
     }
 
@@ -1196,8 +1197,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray12<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[12] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[12] static array unsupported encoding", type));
         }
     }
 
@@ -1283,8 +1284,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray13<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[13] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[13] static array unsupported encoding", type));
         }
     }
 
@@ -1370,8 +1371,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray14<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[14] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[14] static array unsupported encoding", type));
         }
     }
 
@@ -1457,8 +1458,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray15<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[15] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[15] static array unsupported encoding", type));
         }
     }
 
@@ -1544,8 +1545,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray16<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[16] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[16] static array unsupported encoding", type));
         }
     }
 
@@ -1631,8 +1632,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray17<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[17] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[17] static array unsupported encoding", type));
         }
     }
 
@@ -1718,8 +1719,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray18<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[18] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[18] static array unsupported encoding", type));
         }
     }
 
@@ -1805,8 +1806,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray19<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[19] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[19] static array unsupported encoding", type));
         }
     }
 
@@ -1892,8 +1893,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray20<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[20] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[20] static array unsupported encoding", type));
         }
     }
 
@@ -1979,8 +1980,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray21<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[21] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[21] static array unsupported encoding", type));
         }
     }
 
@@ -2066,8 +2067,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray22<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[22] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[22] static array unsupported encoding", type));
         }
     }
 
@@ -2153,8 +2154,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray23<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[23] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[23] static array unsupported encoding", type));
         }
     }
 
@@ -2240,8 +2241,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray24<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[24] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[24] static array unsupported encoding", type));
         }
     }
 
@@ -2327,8 +2328,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray25<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format("%s[25] unsupported encoding array type", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[25] static array unsupported encoding", type));
         }
     }
 
@@ -2414,8 +2415,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray26<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[26] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[26] static array unsupported encoding", type));
         }
     }
 
@@ -2501,8 +2502,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray27<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[27] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[27] static array unsupported encoding", type));
         }
     }
 
@@ -2588,8 +2589,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray28<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[28] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[28] static array unsupported encoding", type));
         }
     }
 
@@ -2675,8 +2676,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray29<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[29] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[29] static array unsupported encoding", type));
         }
     }
 
@@ -2762,8 +2763,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray30<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[30] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[30] static array unsupported encoding", type));
         }
     }
 
@@ -2849,8 +2850,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray31<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[31] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[31] static array unsupported encoding", type));
         }
     }
 
@@ -2936,8 +2937,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray32<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[32] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[32] static array unsupported encoding", type));
         }
     }
 
@@ -3023,8 +3024,8 @@ public class StaticArrayReference {
             case "bytes32":
                 return new TypeReference<StaticArray128<Bytes32>>(indexed) {};
             default:
-                throw new FrontException(201201,
-                        String.format(" %s[128] unsupported encoding array type ", type));
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+                        String.format("type:%s[128] static array unsupported encoding", type));
         }
     }
 }
