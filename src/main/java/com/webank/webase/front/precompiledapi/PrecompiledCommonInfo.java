@@ -18,9 +18,15 @@ package com.webank.webase.front.precompiledapi;
 
 
 import com.webank.webase.front.base.enums.PrecompiledTypes;
-import org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled;
-import org.fisco.bcos.web3j.precompile.permission.ChainGovernance;
-import org.fisco.bcos.web3j.precompile.permission.Permission;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
+import org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled;
+import org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCyclePrecompiled;
+import org.fisco.bcos.sdk.contract.precompiled.crud.CRUD;
+import org.fisco.bcos.sdk.contract.precompiled.crud.table.TableFactory;
+import org.fisco.bcos.sdk.contract.precompiled.model.PrecompiledAddress;
+import org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernancePrecompiled;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionPrecompiled;
+import org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled;
 
 /**
  * precompiled contract address, function name, abi
@@ -28,73 +34,25 @@ import org.fisco.bcos.web3j.precompile.permission.Permission;
  * @author marsli
  */
 public class PrecompiledCommonInfo {
-    /**
-     * System config: setValueByKey
-     */
-    private static final String SystemConfigPrecompileAddress =
-            "0x0000000000000000000000000000000000001000";
-    private static final String ABI_SYSTEM_CONFIG = "[{\"constant\":false,\"inputs\":[{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"value\",\"type\":\"string\"}],\"name\":\"setValueByKey\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-
-    /**
-     * Table Factory : createTable
-     * CRUD: update, select, insert, remove
-     */
-    private static final String TableFactoryPrecompileAddress =
-            "0x0000000000000000000000000000000000001001";
-    private static final String CRUDPrecompileAddress =
-            "0x0000000000000000000000000000000000001002";
-    private static final String ABI_TABLE_FACTORY = "[{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"valueField\",\"type\":\"string\"}],\"name\":\"createTable\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-    private static final String ABI_CRUD = "[{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"entry\",\"type\":\"string\"},{\"name\":\"condition\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"update\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"condition\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"select\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"entry\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"tableName\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"condition\",\"type\":\"string\"},{\"name\":\"optional\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-
-    /**
-     * Consensus: addObserver, remove, addSealer
-     */
-    private static final String ConsensusPrecompileAddress =
-            "0x0000000000000000000000000000000000001003";
-    private static final String ABI_CONSENSUS = "[{\"constant\":false,\"inputs\":[{\"name\":\"nodeID\",\"type\":\"string\"}],\"name\":\"addObserver\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"nodeID\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"nodeID\",\"type\":\"string\"}],\"name\":\"addSealer\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-    /**
-     * CNS: selectByName, selectByNameAndVersion, insert
-      */
-    private static final String CNSAddress =
-            "0x0000000000000000000000000000000000001004";
-    private static final String ABI_CNS = "[{\"constant\":true,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"}],\"name\":\"selectByName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"}],\"name\":\"selectByNameAndVersion\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"},{\"name\":\"abi\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-
-    /**
-     * Permission: insert, queryByName, remove
-     */
-    private static String PermissionPrecompileAddress =
-            "0x0000000000000000000000000000000000001005";
-    private static final String ABI_PERMISSION = "[{\"constant\":false,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"}],\"name\":\"insert\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"}],\"name\":\"queryByName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"table_name\",\"type\":\"string\"},{\"name\":\"addr\",\"type\":\"string\"}],\"name\":\"remove\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-    
-    /**
-     * CSM: freeze, unfreeze, grantManager, getStatus, listManager
-     */
-    private static final String CSMAddress =
-            "0x0000000000000000000000000000000000001007";
-    private static final String ABI_CSM = "[{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"getStatus\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"},{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"unfreeze\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"freeze\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"contractAddr\",\"type\":\"address\"},{\"name\":\"userAddr\",\"type\":\"address\"}],\"name\":\"grantManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"listManager\",\"outputs\":[{\"name\":\"\",\"type\":\"int256\"},{\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]";
-    /**
-     * Chain governance: listOperators, updateCommitteeMemberWeight, queryThreshold, queryCommitteeMemberWeight, grantCommitteeMember, unfreezeAccount, listCommitteeMembers, updateThreshold, revokeCommitteeMember, grantOperator, freezeAccount, revokeOperator, getAccountStatus
-     */
-    private static final String ChainGovernAddress = "0x0000000000000000000000000000000000001008";
 
     public static String getAddress(PrecompiledTypes types) {
         switch (types) {
             case SYSTEM_CONFIG:
-                return SystemConfigPrecompileAddress;
+                return PrecompiledAddress.SYSCONFIG_PRECOMPILED_ADDRESS;
             case TABLE_FACTORY:
-                return TableFactoryPrecompileAddress;
+                return PrecompiledAddress.TABLEFACTORY_PRECOMPILED_ADDRESS;
             case CRUD:
-                return CRUDPrecompileAddress;
+                return PrecompiledAddress.CRUD_PRECOMPILED_ADDRESS;
             case CONSENSUS:
-                return ConsensusPrecompileAddress;
+                return PrecompiledAddress.CONSENSUS_PRECOMPILED_ADDRESS;
             case CNS:
-                return CNSAddress;
+                return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
             case PERMISSION:
-                return PermissionPrecompileAddress;
+                return PrecompiledAddress.PERMISSION_PRECOMPILED_ADDRESS;
             case CSM:
-                return CSMAddress;
+                return PrecompiledAddress.CONTRACT_LIFECYCLE_PRECOMPILED_ADDRESS;
             case CHAIN_GOVERN:
-                return ChainGovernAddress;
+                return PrecompiledAddress.CHAINGOVERNANCE_PRECOMPILED_ADDRESS;
             default:
                 return "";
         }
@@ -103,21 +61,21 @@ public class PrecompiledCommonInfo {
     public static String getAbi(PrecompiledTypes types) {
         switch (types) {
             case SYSTEM_CONFIG:
-                return ABI_SYSTEM_CONFIG;
+                return SystemConfigPrecompiled.ABI;
             case TABLE_FACTORY:
-                return ABI_TABLE_FACTORY;
+                return TableFactory.ABI;
             case CRUD:
-                return ABI_CRUD;
+                return CRUD.ABI;
             case CONSENSUS:
-                return ABI_CONSENSUS;
+                return ConsensusPrecompiled.ABI;
             case CNS:
-                return ABI_CNS;
+                return CNSPrecompiled.ABI;
             case PERMISSION:
-                return Permission.ABI;
+                return PermissionPrecompiled.ABI;
             case CSM:
                 return ContractLifeCyclePrecompiled.ABI;
             case CHAIN_GOVERN:
-                return ChainGovernance.ABI;
+                return ChainGovernancePrecompiled.ABI;
             default:
                 return "";
         }

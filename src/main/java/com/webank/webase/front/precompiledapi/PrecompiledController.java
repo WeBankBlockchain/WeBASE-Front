@@ -17,12 +17,13 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.precompiledapi.crud.CRUDParseUtils;
+import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.precompiledapi.entity.ConsensusHandle;
 import com.webank.webase.front.precompiledapi.entity.ContractManageResult;
 import com.webank.webase.front.precompiledapi.entity.ContractStatusHandle;
 import com.webank.webase.front.precompiledapi.entity.CrudHandle;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
-import com.webank.webase.front.util.CRUDParseUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.PrecompiledUtils;
 import com.webank.webase.front.util.pageutils.List2Page;
@@ -33,18 +34,15 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
-import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
-import org.fisco.bcos.web3j.precompile.crud.Condition;
-import org.fisco.bcos.web3j.precompile.crud.Entry;
-import org.fisco.bcos.web3j.precompile.crud.Table;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
+import org.fisco.bcos.sdk.model.PrecompiledConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -252,7 +250,7 @@ public class PrecompiledController {
     }
 
 
-    public Object createTable(int groupId, String fromAddress, String sql) throws Exception {
+    public Object createTable(int groupId, String fromAddress, String sql) {
         Instant startTime = Instant.now();
         log.info("start createTable startTime:{}, groupId:{},fromAddress:{},sql:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, sql);
@@ -260,44 +258,27 @@ public class PrecompiledController {
         try {
             log.debug("start parseCreateTable.");
             CRUDParseUtils.parseCreateTable(sql, table);
-            log.debug("end parseCreateTable. table:{}", table);
+            log.debug("end parseCreateTable. table:{}, key:{}, keyField:{}, values:{}",
+                table.getTableName(), table.getKey(), table.getKeyFieldName(), table.getValueFields());
         } catch (Exception e) {
             log.error("parseCreateTable. table:{},exception:{}", table, e);
+            CRUDParseUtils.invalidSymbol(sql);
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
+                    "Could not parse SQL statement.");
         }
-        CRUDParseUtils.checkTableParams(table);
-        int result = precompiledService.createTable(groupId, fromAddress, table);
+        // CRUDParseUtils.checkTableParams(table);
+        String result = precompiledService.createTable(groupId, fromAddress, table);
         log.info("end createTable useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), result);
+        return result;
 
-        if (result == 0) {
-            return new BaseResponse(ConstantCode.RET_SUCCESS,
-                    "Create '" + table.getTableName() + "' Ok.");
-        } else if (result == PrecompiledCommon.TableExist_RC3) {
-            log.debug("createTable " + "Table already exists");
-            return new BaseResponse(PrecompiledCommon.TableExist_RC3, "Table already exists",
-                    "Table already exists");
-        } else if (result == PrecompiledCommon.PermissionDenied_RC3) {
-            log.debug("createTable " + "Permission denied");
-            return new BaseResponse(PrecompiledCommon.PermissionDenied_RC3, "Permission denied",
-                    "Permission denied");
-        } else {
-            log.debug("createTable " + "code: " + result + "Create '" + table.getTableName()
-                    + "' failed.");
-            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "code: " + result + "Create '" + table.getTableName() + "' failed.",
-                    "code: " + result + "Create '" + table.getTableName() + "' failed.");
-        }
     }
 
     // check table name exist by desc(tableName)
-    public Object desc(int groupId, String sql) throws Exception {
+    public Object desc(int groupId, String sql) {
         Instant startTime = Instant.now();
         log.info("start descTable startTime:{}, groupId:{},sql:{}", startTime.toEpochMilli(),
                 groupId, sql);
-        Table table = new Table();
         String[] sqlParams = sql.split(" ");
         // "desc t_demo"
         String tableName = sqlParams[1];
@@ -314,7 +295,7 @@ public class PrecompiledController {
             tableName = tableName.substring(0, tableName.length() - 1);
         }
         try {
-            table = precompiledService.desc(groupId, tableName);
+            List<Map<String, String>> table = precompiledService.desc(groupId, tableName);
             log.info("end descTable useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), table);
             return new BaseResponse(ConstantCode.RET_SUCCESS, table);
@@ -329,7 +310,7 @@ public class PrecompiledController {
         log.info("start select startTime:{}, groupId:{},sql:{}", startTime.toEpochMilli(), groupId,
                 sql);
         Table table = new Table();
-        Condition conditions = table.getCondition();
+        Condition conditions = new Condition();
         List<String> selectColumns = new ArrayList<>();
 
         try { // 转化select语句
@@ -339,32 +320,31 @@ public class PrecompiledController {
                     conditions, selectColumns);
         } catch (Exception e) {
             log.error("parseSelect Error exception:[]", e);
-            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
+            CRUDParseUtils.invalidSymbol(sql);
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR, "Could not parse SQL statement.");
         }
 
-        Table descTable;
+        List<Map<String, String>> descTable = null;
         try {
             descTable = precompiledService.desc(groupId, table.getTableName());
         } catch (Exception e) {
             log.error("select in descTable Error exception:[]", e);
             return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists ");
         }
-        table.setKey(descTable.getKey());
+        String keyField = descTable.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
+        table.setKey(keyField);
         CRUDParseUtils.handleKey(table, conditions);
-        String fields = descTable.getKey() + "," + descTable.getValueFields();
-        List<String> fieldsList = Arrays.asList(fields.split(","));
-        for (String column : selectColumns) {
-            if (!fieldsList.contains(column) && !"*".equals(column)) {
-                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Unknown field '" + column + "' in field list.",
-                        "Unknown field '" + column + "' in field list.");
-            }
-        }
-        List<Map<String, String>> result = new ArrayList<>();
+//        String fields = descTable.getKey() + "," + descTable.getValueFields();
+//        List<String> fieldsList = Arrays.asList(fields.split(","));
+//        for (String column : selectColumns) {
+//            if (!fieldsList.contains(column) && !"*".equals(column)) {
+//                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+//                        "Unknown field '" + column + "' in field list.",
+//                        "Unknown field '" + column + "' in field list.");
+//            }
+//        }
 
-        result = precompiledService.select(groupId, table, conditions);
+        List<Map<String, String>> result = precompiledService.select(groupId, table, conditions);
         log.info("end select useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), result);
         if (result.size() == 0) {
@@ -374,123 +354,153 @@ public class PrecompiledController {
         result = CRUDParseUtils.filterSystemColum(result);
         if ("*".equals(selectColumns.get(0))) {
             selectColumns.clear();
-            selectColumns.add(descTable.getKey());
-            String[] valueArr = descTable.getValueFields().split(",");
+            selectColumns.add(keyField);
+            String[] valueArr = descTable.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME).split(",");
             selectColumns.addAll(Arrays.asList(valueArr));
-            result = CRUDParseUtils.getSeletedColumn(selectColumns, result);
+            result = CRUDParseUtils.getSelectedColumn(selectColumns, result);
             log.info("end select. result:{}", result);
             return new BaseResponse(ConstantCode.RET_SUCCESS, result);
         } else {
             List<Map<String, String>> selectedResult =
-                    CRUDParseUtils.getSeletedColumn(selectColumns, result);
+                    CRUDParseUtils.getSelectedColumn(selectColumns, result);
             log.info("end select. selectedResult:{}", selectedResult);
             return new BaseResponse(ConstantCode.RET_SUCCESS, selectedResult);
         }
 
-        // return new BaseResponse(ConstantCode.RET_SUCCESS, rows + " row(s) in set.");
     }
 
     public Object insert(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
         log.info("start insert startTime:{}, groupId:{},fromAddress:{},sql:{}",
-                startTime.toEpochMilli(), groupId, fromAddress, sql);
+            startTime.toEpochMilli(), groupId, fromAddress, sql);
         Table table = new Table();
         Entry entry = new Entry();
+        List<Map<String, String>>  descTable = null;
 
-        // insert sql use "values" or not
-        boolean useValues = false;
-        try {
-            log.debug("start parseInsert. sql:{}", sql);
-            useValues = CRUDParseUtils.parseInsert(sql, table, entry);
-            log.debug("end parseInsert. table:{}, entry:{}", table, entry);
-        } catch (Exception e) {
-            log.error("parseInsert Error exception:[]", e);
-            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
+        String tableName = CRUDParseUtils.parseInsertedTableName(sql);
+        descTable = precompiledService.desc(groupId, tableName);
+        log.debug(
+            "insert, tableName: {}, descTable: {}", tableName, descTable.get(0).toString());
+        CRUDParseUtils.parseInsert(sql, table, entry, descTable.get(0));
+        String keyName = descTable.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
+        String keyValue = entry.getFieldNameToValue().get(keyName);
+        log.debug(
+            "fieldNameToValue: {}, keyName: {}, keyValue: {}", entry.getFieldNameToValue(), keyName, keyValue);
+        if (keyValue == null) {
+            log.error("Please insert the key field '" + keyName + "'.");
+            throw new FrontException("Please insert the key field '" + keyName + "'.");
         }
-
-        Set<String> entryFields = entry.getFields().keySet();
-
-        String tableName = table.getTableName();
-        Table descTable;
-        try {
-            descTable = precompiledService.desc(groupId, tableName);
-        } catch (Exception e) {
-            log.error("insertTable Error exception:[]", e);
-            return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists");
-        }
-        String keyName = descTable.getKey();
-        String fields = keyName + "," + descTable.getValueFields();
-
-        List<String> fieldsList = Arrays.asList(fields.split(","));
-
-        // ex: insert into t_test values (fruit, 1, apple)
-        if (useValues) {
-            if (entry.getFields().size() != fieldsList.size()) {
-                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Column count doesn't match value count.",
-                        "Column count doesn't match value count.");
-            } else {
-                Entry entryValue = table.getEntry();
-                for (int i = 0; i < entry.getFields().size(); i++) {
-                    for (String entryField : entryFields) {
-                        if ((i + "").equals(entryField)) {
-                            entryValue.put(fieldsList.get(i), entry.get(i + ""));
-                            if (keyName.equals(fieldsList.get(i))) {
-                                table.setKey(entry.get(i + ""));
-                            }
-                        }
-                    }
-                }
-                entry = entryValue;
-            }
-        }
-        // ex: insert into t_test (name, item_id, item_name) values (fruit, 1, apple)
-        else {
-            for (String entryField : entryFields) {
-                if (!fieldsList.contains(entryField)) {
-                    return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                            "Unknown field '" + entryField + "' in field list.",
-                            "Unknown field '" + entryField + "' in field list.");
-                }
-                if (fieldsList.size() != entryFields.size()) {
-                    List<String> listString = new ArrayList<String>(fieldsList);
-                    for (String entryItem : entryFields) {
-                        listString.remove(entryItem);
-                    }
-                    StringBuilder strBuilder = new StringBuilder("Please provide field '");
-                    for (int i = 0; i < listString.size(); i++) {
-                        if (i == listString.size() - 1) {
-                            strBuilder.append(listString.get(i)).append("' ");
-                        } else {
-                            strBuilder.append(listString.get(i)).append("', '");
-                        }
-                    }
-                    strBuilder.append("in field list.");
-                    return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR, strBuilder.toString(),
-                            strBuilder.toString());
-                }
-            }
-            String keyValue = entry.get(keyName);
-            if (keyValue == null) {
-                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Column count doesn't match value count.",
-                        "Column count doesn't match value count.");
-            }
-            table.setKey(keyValue);
-        }
-        CRUDParseUtils.checkUserTableParam(entry, descTable);
-        int insertResult = precompiledService.insert(groupId, fromAddress, table, entry);
-        log.info("end insert useTime:{} insertResult:{}",
-                Duration.between(startTime, Instant.now()).toMillis(), insertResult);
-        if (insertResult >= 0) {
-            return new BaseResponse(ConstantCode.RET_SUCCESS,
-                    "Insert OK, " + insertResult + " row(s) affected.");
-        } else {
-            return new BaseResponse(ConstantCode.SQL_ERROR, "Insert failed.");
-        }
+        // table primary key
+        table.setKey(keyValue);
+        String insertResult =
+            precompiledService.insert(groupId, fromAddress, table, entry);
+        return insertResult;
+//        if (insertResult >= 0) {
+//            log.info("Insert OK: {}", insertResult);
+//            return new BaseResponse(insertResult, insertResult + " row affected.");
+//        } else {
+//            log.info("Result of insert for " + table.getTableName() + ":");
+//            return new BaseResponse(insertResult, "insert failed!");
+//        }
     }
+//        Table table = new Table();
+//        Entry entry = new Entry();
+//
+//        // insert sql use "values" or not
+//        boolean useValues = false;
+//        try {
+//            log.debug("start parseInsert. sql:{}", sql);
+//            useValues = CRUDParseUtils.parseInsert(sql, table, entry);
+//            log.debug("end parseInsert. table:{}, entry:{}", table, entry);
+//        } catch (Exception e) {
+//            log.error("parseInsert Error exception:[]", e);
+//            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+//                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbol(sql),
+//                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbol(sql));
+//        }
+//
+//        String tableName = table.getTableName();
+//        Table descTable;
+//        try {
+//            descTable = precompiledService.desc(groupId, tableName);
+//        } catch (Exception e) {
+//            log.error("insertTable Error exception:[]", e);
+//            return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists");
+//        }
+//        String keyName = descTable.getKey();
+//        String fields = keyName + "," + descTable.getValueFields();
+//
+//        List<String> fieldsList = Arrays.asList(fields.split(","));
+//        Set<String> entryFields = entry.getFieldNameToValue().keySet();
+//
+//        // ex: insert into t_test values (fruit, 1, apple)
+//        if (useValues) {
+//            if (entry.getFieldNameToValue().size() != fieldsList.size()) {
+//                log.error("field value size not equal to field size");
+//                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+//                        "Column count doesn't match value count.",
+//                        "Column count doesn't match value count.");
+//            } else {
+//                Entry entryValue = table.getEntry();
+//                for (int i = 0; i < entry.getFieldNameToValue().size(); i++) {
+//                    for (String entryField : entryFields) {
+//                        if ((i + "").equals(entryField)) {
+//                            Map<String, String> map = new HashMap<>();
+//                            map.put(fieldsList.get(i), entry.getFieldNameToValue().get(i + ""));
+//                            entryValue.setFieldNameToValue(map);
+//                            if (keyName.equals(fieldsList.get(i))) {
+//                                table.setKey(entry.getFieldNameToValue().get(i + ""));
+//                            }
+//                        }
+//                    }
+//                }
+//                entry = entryValue;
+//            }
+//        }
+//        // ex: insert into t_test (name, item_id, item_name) values (fruit, 1, apple)
+//        else {
+//            for (String entryField : entryFields) {
+//                if (!fieldsList.contains(entryField)) {
+//                    return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+//                            "Unknown field '" + entryField + "' in field list.",
+//                            "Unknown field '" + entryField + "' in field list.");
+//                }
+//                if (fieldsList.size() != entryFields.size()) {
+//                    List<String> listString = new ArrayList<String>(fieldsList);
+//                    for (String entryItem : entryFields) {
+//                        listString.remove(entryItem);
+//                    }
+//                    StringBuilder strBuilder = new StringBuilder("Please provide field '");
+//                    for (int i = 0; i < listString.size(); i++) {
+//                        if (i == listString.size() - 1) {
+//                            strBuilder.append(listString.get(i)).append("' ");
+//                        } else {
+//                            strBuilder.append(listString.get(i)).append("', '");
+//                        }
+//                    }
+//                    strBuilder.append("in field list.");
+//                    return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR, strBuilder.toString(),
+//                            strBuilder.toString());
+//                }
+//            }
+//            String keyValue = entry.getFieldNameToValue().get(keyName);
+//            if (keyValue == null) {
+//                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
+//                        "Column count doesn't match value count.",
+//                        "Column count doesn't match value count.");
+//            }
+//            table.setKey(keyValue);
+//        }
+//        CRUDParseUtils.checkUserTableParam(entry, descTable);
+//        int insertResult = precompiledService.insert(groupId, fromAddress, table, entry);
+//        log.info("end insert useTime:{} insertResult:{}",
+//                Duration.between(startTime, Instant.now()).toMillis(), insertResult);
+//        if (insertResult >= 0) {
+//            return new BaseResponse(ConstantCode.RET_SUCCESS,
+//                    "Insert OK, " + insertResult + " row(s) affected.");
+//        } else {
+//            return new BaseResponse(insertResult, "Insert failed.");
+//        }
 
     public Object update(int groupId, String fromAddress, String sql) throws Exception {
         Instant startTime = Instant.now();
@@ -507,13 +517,12 @@ public class PrecompiledController {
                     conditions);
         } catch (Exception e) {
             log.error("parseUpdate error exception:[]", e);
-            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
+            CRUDParseUtils.invalidSymbol(sql);
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR, "Could not parse SQL statement.");
         }
 
         String tableName = table.getTableName();
-        Table descTable;
+        List<Map<String, String>> descTable = null;
         try {
             descTable = precompiledService.desc(groupId, tableName);
         } catch (Exception e) {
@@ -521,43 +530,21 @@ public class PrecompiledController {
             return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists");
         }
 
-        String keyName = descTable.getKey();
-        if (entry.getFields().containsKey(keyName)) {
+        String keyName = descTable.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
+        if (entry.getFieldNameToValue().containsKey(keyName)) {
             return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
                     "Please don't set the key field '" + keyName + "'.",
                     "Please don't set the key field '" + keyName + "'.");
         }
-        table.setKey(descTable.getKey());
+        table.setKey(keyName);
         CRUDParseUtils.handleKey(table, conditions);
-        String fields = descTable.getKey() + "," + descTable.getValueFields();
-        List<String> fieldsList = Arrays.asList(fields.split(","));
-        Set<String> entryFields = entry.getFields().keySet();
-        Set<String> conditonFields = conditions.getConditions().keySet();
-        Set<String> allFields = new HashSet<>();
-        allFields.addAll(entryFields);
-        allFields.addAll(conditonFields);
-        for (String entryField : allFields) {
-            if (!fieldsList.contains(entryField)) {
-                return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                        "Unknown field '" + entryField + "' in field list.",
-                        "Unknown field '" + entryField + "' in field list.");
-            }
-        }
-        CRUDParseUtils.checkUserTableParam(entry, descTable);
-        int updateResult =
-                precompiledService.update(groupId, fromAddress, table, entry, conditions);
+        String updateResult = precompiledService.update(groupId, fromAddress, table, entry, conditions);
         log.info("end update useTime:{} updateResult:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), updateResult);
-        if (updateResult >= 0) {
-            return new BaseResponse(ConstantCode.RET_SUCCESS,
-                    "Update OK, " + updateResult + " row(s) affected.");
-        } else {
-            return new BaseResponse(ConstantCode.SQL_ERROR, "Update failed.");
-        }
-
+        return updateResult;
     }
 
-    public Object remove(int groupId, String fromAddress, String sql) throws Exception {
+    public Object remove(int groupId, String fromAddress, String sql) {
         Instant startTime = Instant.now();
         log.info("start remove startTime:{}, groupId:{},fromAddress:{},sql:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, sql);
@@ -570,29 +557,24 @@ public class PrecompiledController {
             log.debug("end parseRemove. table:{}, conditions:{}", table, conditions);
         } catch (Exception e) {
             log.error("parseRemove Error exception:[]", e);
-            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR,
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql),
-                    "Could not parse SQL statement." + CRUDParseUtils.invalidSymbolReturn(sql));
+            CRUDParseUtils.invalidSymbol(sql);
+            return new BaseResponse(PrecompiledUtils.CRUD_SQL_ERROR, "Could not parse SQL statement.");
         }
 
-        Table descTable;
+        List<Map<String, String>> descTable = null;
         try {
             descTable = precompiledService.desc(groupId, table.getTableName());
         } catch (Exception e) {
             log.error("removeTable Error exception:[]", e);
             return new BaseResponse(ConstantCode.FAIL_TABLE_NOT_EXISTS, "Table not exists");
         }
-        table.setKey(descTable.getKey());
+        table.setKey(descTable.get(0).get(PrecompiledConstant.KEY_FIELD_NAME));
         CRUDParseUtils.handleKey(table, conditions);
-        int removeResult = precompiledService.remove(groupId, fromAddress, table, conditions);
+        String removeResult = precompiledService.remove(groupId, fromAddress, table, conditions);
         log.info("end remove useTime:{} removeResult:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), removeResult);
-        if (removeResult >= 0) {
-            return new BaseResponse(ConstantCode.RET_SUCCESS,
-                    "Remove OK, " + removeResult + " row(s) affected.");
-        } else {
-            return new BaseResponse(ConstantCode.SQL_ERROR, "Remove failed.");
-        }
+        return removeResult;
+
     }
 
     @ApiOperation(value = "contractStatusManage", notes = "contract status manage")
@@ -736,20 +718,13 @@ public class PrecompiledController {
         Instant startTime = Instant.now();
         log.info("start contractManagerList startTime:{}", startTime.toEpochMilli());
         try {
-            String res = precompiledService.contractManagerList(contractStatusHandle.getGroupId(),
+            List<String> res = precompiledService.contractManagerList(contractStatusHandle.getGroupId(),
                     contractStatusHandle.getContractAddress());
-            if (res.contains("code")) {
-                ContractManageResult contractManageResult =
-                        JsonUtils.toJavaObject(res, ContractManageResult.class);
-                throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(),
-                        contractManageResult.getMsg());
-            } else {
-                BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
-                response.setData(res);
-                log.info("end contractManagerList useTime:{} response:{}",
-                        Duration.between(startTime, Instant.now()).toMillis(), response);
-                return response;
-            }
+            BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+            response.setData(res);
+            log.info("end contractManagerList useTime:{} response:{}",
+                    Duration.between(startTime, Instant.now()).toMillis(), response);
+            return response;
         } catch (Exception e) {
             log.error("contractManagerList exception:", e);
             throw new FrontException(ConstantCode.FAIL_CONTRACT_HANDLE.getCode(), e.getMessage());

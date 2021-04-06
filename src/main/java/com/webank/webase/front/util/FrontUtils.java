@@ -29,8 +29,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.channel.StatusCode;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -113,7 +111,8 @@ public class FrontUtils {
         Objects.requireNonNull(targetFile, "fail create file. targetFile is null");
         File parentFile = targetFile.getParentFile();
         if (!parentFile.exists()) {
-            parentFile.mkdirs();
+            boolean mkdirResult = parentFile.mkdirs();
+            log.info("createFileIfNotExist mkdirResult:{}", mkdirResult);
         }
         if (deleteOld) {
             targetFile.deleteOnExit();
@@ -121,9 +120,11 @@ public class FrontUtils {
 
         if (!targetFile.exists()) {
             if (targetFile.isFile()) {
-                targetFile.createNewFile();
+                boolean newFileResult = targetFile.createNewFile();
+                log.info("createFileIfNotExist newFileResult:{}", newFileResult);
             } else if (targetFile.isDirectory()) {
-                targetFile.mkdir();
+                boolean newDirResult = targetFile.mkdir();
+                log.info("createFileIfNotExist mkdirResult:{}", newDirResult);
             }
         }
     }
@@ -156,13 +157,13 @@ public class FrontUtils {
      * else, return original message
      * @return
      */
-    public static String handleReceiptMsg(TransactionReceipt receipt) {
-        if (receipt.getMessage() == null) {
-            return StatusCode.getStatusMessage(receipt.getStatus());
-        } else {
-            return receipt.getMessage();
-        }
-    }
+//    public static String handleReceiptMsg(TransactionReceipt receipt) {
+//        if (receipt.getMessage() == null) {
+//            return StatusCode.getStatusMessage(receipt.getStatus());
+//        } else {
+//            return receipt.getMessage();
+//        }
+//    }
 
     public static HttpHeaders headers(String fileName) {
         HttpHeaders httpHeaders = new HttpHeaders();

@@ -31,15 +31,12 @@ nodejs下载地址：https://nodejs.org/en/download/
 
 下载依赖包
 
-> 修改依赖：
+> 执行update修改依赖和下载相关文件：
 
-   在node_modules中找到依赖包`require-from-string`，修改`index.js`文件第2行
-   
-   	var Module = require("module");
-
-   改为
-   
-   	var Module = module.constructor;
+```
+npm run update
+```
+*注意：必须执行update，否则编译打包都是失败，此脚本会修改部分依赖文件并且从cdn下载solc的编译文件，执行成功后，后面无需再执行。*
 
 
 ### 1.3 启动项目
@@ -52,7 +49,7 @@ nodejs下载地址：https://nodejs.org/en/download/
 
     Listening at http ://localhost:3006
 
-> 在浏览器输入"http ://localhost:3006"。
+> 在浏览器输入"http ://127.0.0.1:3006"。
 
 > 默认端口是3006，可在config文件夹index.js中修改。
 
@@ -78,6 +75,7 @@ nodejs下载地址：https://nodejs.org/en/download/
             },
         },
 
+*本地启动服务用127.0.0.1代替localhost，因为部分合约版本使用了web worker*
 
 ### 1.4 模拟数据
 

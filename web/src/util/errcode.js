@@ -237,6 +237,10 @@ let errCode = {
         en: "contract path cannot be empty.",
         zh: '合约路径不能为空'
     },
+    "201156": {
+        en: "Write front's sdk cert and key fail!",
+        zh: '写入前置的sdk证书和密钥失败！'
+    },
     "201213": {
         en: "address is invalid",
         zh: '地址无效'
@@ -395,7 +399,7 @@ let errCode = {
     },
     "201131": {
         en: "Group genesis conf not found",
-        zh: '未找到创世块配置文件'
+        zh: '群组配置文件不存在，无法添加该节点为共识节点'
     },
     "201132": {
         en: "Group config.ini not found",
@@ -851,6 +855,7 @@ let errCode = {
         en: "Fail to parse json",
         zh: "解析json失败"
     },
+
     "302000": {
         en: "user not logged in",
         zh: '未登录的用户'

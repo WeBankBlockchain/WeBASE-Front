@@ -80,7 +80,7 @@ public class PerformanceController {
                     iso = DATE_TIME) LocalDateTime contrastEndDate,
             @RequestParam(required = false, defaultValue = "1") int gap) throws Exception {
         Instant startTime = Instant.now();
-        log.info("getPerformanceRatio start.", startTime.toEpochMilli());
+        log.info("getPerformanceRatio start:{}", startTime.toEpochMilli());
         List<PerformanceData> performanceList = performanceService.findContrastDataByTime(beginDate,
                 endDate, contrastBeginDate, contrastEndDate, gap);
         log.info("getPerformanceRatio end. useTime:{}",
@@ -98,7 +98,7 @@ public class PerformanceController {
             @RequestParam(required = false) @DateTimeFormat(iso = DATE_TIME) LocalDateTime endDate)
             throws Exception {
         Instant startTime = Instant.now();
-        log.info("pagingQuery start.", startTime.toEpochMilli());
+        log.info("pagingQuery start:{}", startTime.toEpochMilli());
 
         Page<Performance> page =
                 performanceService.pagingQuery(pageNumber, pageSize, beginDate, endDate);
@@ -138,6 +138,31 @@ public class PerformanceController {
         } catch (FrontException e) {
             return new BaseResponse(ConstantCode.SYSTEM_ERROR, e.getMessage());
         }
+    }
 
+    /**
+     * get by less than begin or larger than end order by id desc
+     */
+    @ApiOperation(value = "开区间分页查询", notes = "分页查询，获取时间范围以外的")
+    @GetMapping("/pagingQuery/stat")
+    public BasePageResponse getPerformanceByTimeForStat(
+        @RequestParam(defaultValue = "1") Integer pageNumber,
+        @RequestParam(defaultValue = "10") Integer pageSize,
+        @RequestParam(required = false) @DateTimeFormat(
+            iso = DATE_TIME) LocalDateTime beginDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DATE_TIME) LocalDateTime endDate)
+        throws Exception {
+        Instant startTime = Instant.now();
+        log.info("getPerformanceByTimeForStat start:{}", startTime.toEpochMilli());
+        if (beginDate == null && endDate == null) {
+            log.error("getPerformanceByTimeForStat beginDate endDate cannot be both null!");
+            throw new FrontException(ConstantCode.PARAM_ERROR);
+        }
+        BasePageResponse response =
+            performanceService.pagingQueryStat(pageNumber, pageSize, beginDate, endDate);
+
+        log.info("getPerformanceByTimeForStat end. useTime:{}",
+            Duration.between(startTime, Instant.now()).toMillis());
+        return response;
     }
 }

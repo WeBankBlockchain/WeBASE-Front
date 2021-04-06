@@ -15,14 +15,15 @@
  */
 package com.webank.webase.front.monitor;
 
+import com.webank.webase.front.base.TestBase;
 import com.webank.webase.front.monitor.entity.Monitor;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.Date;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
-import org.fisco.bcos.web3j.protocol.core.methods.response.PbftView;
-import org.fisco.bcos.web3j.protocol.core.methods.response.PendingTxSize;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
+import org.fisco.bcos.sdk.client.protocol.response.PbftView;
+import org.fisco.bcos.sdk.client.protocol.response.PendingTxSize;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +35,8 @@ public class ScheduledTest extends TestBase {
     @Autowired
     private ThreadPoolTaskScheduler threadPoolTaskScheduler;
     private ScheduledFuture<?> future;
+    @Autowired
+    private Web3ApiService web3ApiService;
 
 
     public class MyRunnable implements Runnable {
@@ -42,21 +45,18 @@ public class ScheduledTest extends TestBase {
 
             System.out.println("begin sync chain data");
             Long currentTime = System.currentTimeMillis();
-            //to do  add  more group
+            // add  more group
+            Client web3j = web3ApiService.getWeb3j(1);
             Monitor monitor = new Monitor();
-            CompletableFuture<BlockNumber> blockHeightFuture = web3j.getBlockNumber().sendAsync();
-            CompletableFuture<PbftView> pbftViewFuture = web3j.getPbftView().sendAsync();
-            CompletableFuture<PendingTxSize> pendingTxSizeFuture = web3j.getPendingTxSize().sendAsync();
-            try {
-                monitor.setBlockHeight(blockHeightFuture.get().getBlockNumber());
-                monitor.setPbftView(pbftViewFuture.get().getPbftView());
-                monitor.setPendingTransactionCount(pendingTxSizeFuture.get().getPendingTxSize());
-                monitor.setTimestamp(currentTime);
-                monitor.setGroupId(1);
-                System.out.println(monitor);
-            }catch (ExecutionException | InterruptedException e){
-                System.out.println("sync chain data error " + e.getMessage());
-            }
+            BlockNumber blockHeight = web3j.getBlockNumber();
+            PbftView pbftView = web3j.getPbftView();
+            PendingTxSize pendingTxSize = web3j.getPendingTxSize();
+            monitor.setBlockHeight(blockHeight.getBlockNumber());
+            monitor.setPbftView(pbftView.getPbftView());
+            monitor.setPendingTransactionCount(pendingTxSize.getPendingTxSize());
+            monitor.setTimestamp(currentTime);
+            monitor.setGroupId(1);
+            System.out.println(monitor);
             System.out.println("insert success =  " + monitor.getId());
 
         }

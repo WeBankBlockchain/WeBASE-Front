@@ -20,13 +20,12 @@ package com.webank.webase.front.precompiledapi;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.JsonUtils;
-import org.fisco.bcos.web3j.protocol.core.methods.response.AbiDefinition;
+import java.util.List;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionPrecompiled;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.List;
-
-import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
 
 public class PrecompiledCommonTest {
 
@@ -34,9 +33,10 @@ public class PrecompiledCommonTest {
     public void testCommonInfo() {
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.PERMISSION);
         List<Object> contractAbi = JsonUtils.toJavaObjectList(abiStr, Object.class);
-        String funcName = FUNC_INSERT;
-        AbiDefinition abiDefinition = AbiUtil.getAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
-        Assert.assertTrue(!contractAbi.isEmpty());
+        String funcName = PermissionPrecompiled.FUNC_INSERT;
+        ABIDefinition abiDefinition = AbiUtil.getAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
+        Assert.assertFalse(contractAbi.isEmpty());
+
     }
 
 

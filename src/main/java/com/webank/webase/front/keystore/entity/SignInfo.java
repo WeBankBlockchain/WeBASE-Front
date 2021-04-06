@@ -18,7 +18,6 @@ import lombok.Data;
 
 /**
  * SignInfo. get from webase-sign
- * 
  */
 @Data
 public class SignInfo {

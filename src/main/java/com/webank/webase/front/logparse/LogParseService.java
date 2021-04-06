@@ -26,6 +26,7 @@ import com.webank.webase.front.logparse.repository.TxGasDataRepository;
 import com.webank.webase.front.logparse.util.FileUtil;
 import com.webank.webase.front.logparse.util.LogParseUtil;
 import com.webank.webase.front.logparse.util.LogTypes;
+import com.webank.webase.front.util.CleanPathUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -35,14 +36,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.protocol.Web3j;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -67,7 +67,7 @@ public class LogParseService {
     @Autowired
     CurrentStateRepository currentStateRepository;
     @Autowired
-    Map<Integer, Web3j> web3jMap;
+    BcosSDK bcosSDK;
     @Autowired
     Constants constants;
 
@@ -100,7 +100,7 @@ public class LogParseService {
             // get currentState
             CurrentState currentState = getCurrentState();
             String currentFileName;
-            long lastTimeFileSize = Long.valueOf(0);
+            long lastTimeFileSize = 0L;
             if (currentState == null) {
                 currentFileName = treeMap.get(treeMap.firstKey());
             } else {
@@ -110,7 +110,7 @@ public class LogParseService {
             // clear old files
             FileUtil.clearOldStatFiles(treeMap, currentFileName);
             // read current file
-            File logFile = new File(statPath + currentFileName);
+            File logFile = new File(CleanPathUtil.cleanString(statPath + currentFileName));
             long fileLength = logFile.length();
             if (fileLength < lastTimeFileSize) {
                 return;
@@ -138,7 +138,7 @@ public class LogParseService {
                 }
                 if (treeMap.size() > 1) {
                     FileUtil.clearCurrentStatFile(treeMap, currentFileName);
-                    updateCurrentState(treeMap.get(treeMap.firstKey()), Long.valueOf(0));
+                    updateCurrentState(treeMap.get(treeMap.firstKey()), 0L);
                 }
             }
             log.debug("syncLogData end useTime:{}",
@@ -232,8 +232,7 @@ public class LogParseService {
     }
 
     private Boolean checkCountLimit() {
-        for (Map.Entry<Integer, Web3j> entry : web3jMap.entrySet()) {
-            Integer groupId = entry.getKey();
+        for (Integer groupId : bcosSDK.getGroupManagerService().getGroupList()) {
             long netWorkDataCount = netWorkDataRepository.count((Root<NetWorkData> root,
                     CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                 Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);

@@ -15,9 +15,9 @@
  */
 package com.webank.webase.front.util;
 
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.abi.datatypes.*;
-import org.fisco.bcos.web3j.abi.datatypes.generated.*;
+import org.fisco.bcos.sdk.abi.datatypes.*;
+import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.abi.datatypes.generated.*;
 
 /**
  * DataTypes for abi in web3j
@@ -26,10 +26,56 @@ public class AbiTypes {
 
     private AbiTypes() {
     }
+    
+    public static boolean invalidUint(String type) {
+
+        if (!type.startsWith("uint")) {
+            return false;
+        }
+
+        if ("uint".equals(type)) {
+            return true;
+        }
+
+        try {
+            Integer r = Integer.valueOf(type.substring(4));
+            if (r == null) {
+                return false;
+            }
+
+            return (r.intValue() >= 1 && r.intValue() <= 256);
+
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static boolean invalidInt(String type) {
+        if (!type.startsWith("int")) {
+            return false;
+        }
+
+        if ("int".equals(type)) {
+            return true;
+        }
+
+        try {
+            Integer r = Integer.valueOf(type.substring(3));
+            if (r == null) {
+                return false;
+            }
+
+            return (r.intValue() >= 1 && r.intValue() <= 256);
+
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
     public static Class<? extends Type> getType(String type) {
         switch (type) {
             case "address":
-                return Address.class;
+                return org.fisco.bcos.sdk.abi.datatypes.Address.class;
             case "bool":
                 return Bool.class;
             case "string":

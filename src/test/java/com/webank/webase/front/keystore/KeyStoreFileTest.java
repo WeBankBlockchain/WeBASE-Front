@@ -25,11 +25,13 @@ import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import org.fisco.bcos.channel.client.P12Manager;
-import org.fisco.bcos.channel.client.PEMManager;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
+import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -44,35 +46,31 @@ public class KeyStoreFileTest {
         "\n-----END PRIVATE KEY-----\n";
 
     @Test
-    public void testLoadPem() throws CertificateException, InvalidKeySpecException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, IOException, UnrecoverableKeyException {
+    public void testLoadPem() {
         System.out.println(Numeric.toHexString(pemContent.getBytes()));
-        PEMManager pemManager0 = new PEMManager();
-        pemManager0.load(new ByteArrayInputStream(pemContent.getBytes()));
+        PEMKeyStore pemManager0 = new PEMKeyStore(new ByteArrayInputStream(pemContent.getBytes()));
 
-        System.out.println(Numeric.toHexStringNoPrefix(pemManager0.getECKeyPair().getPrivateKey()));
-//        System.out.println(Numeric.toHexStringNoPrefix(pemManager0.getPrivateKey().getEncoded()));
+        System.out.println(KeyTool.getHexedPrivateKey(pemManager0.getKeyPair().getPrivate()));
     }
 
     @Test
     public void testLoadPemFile() throws IOException, InvalidKeySpecException, NoSuchAlgorithmException, NoSuchProviderException, CertificateException, KeyStoreException {
-        PEMManager pemManager = new PEMManager();
         // need pem
         InputStream nodeCrtInput = new ClassPathResource("test.pem").getInputStream();
-        pemManager.load(nodeCrtInput);
-        System.out.println(pemManager.getPrivateKey());
-        System.out.println(Numeric.toHexString(pemManager.getPrivateKey().getEncoded()));
+        PEMKeyStore pemManager = new PEMKeyStore(nodeCrtInput);
+        System.out.println(pemManager.getKeyPair().getPrivate());
+        System.out.println(KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate()));
     }
 
     @Test
     public void loadPrivateKeyTest() throws Exception {
         String privateKey = "71f1479d9051e8d6b141a3b3ef9c01a7756da823a0af280c6bf62d18ee0cc978";
-        Credentials credentials = GenCredential.create(privateKey);
+        CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
+        CryptoKeyPair credentials = cryptoSuite.createKeyPair(privateKey);
         // private key 实例
-        BigInteger privateKeyInstance = credentials.getEcKeyPair().getPrivateKey();
-        System.out.println(Numeric.toHexStringNoPrefix(privateKeyInstance));
+        System.out.println(credentials.getHexPrivateKey());
         // public key 实例
-        BigInteger publicKeyInstance = credentials.getEcKeyPair().getPublicKey();
-        System.out.println(Numeric.toHexString(publicKeyInstance.toByteArray()));
+        System.out.println(credentials.getHexPublicKey());
         String address = credentials.getAddress();
         System.out.println(address);
     }
@@ -89,17 +87,13 @@ public class KeyStoreFileTest {
     }
 
     @Test
-    public void testLoadP12() throws UnrecoverableKeyException, InvalidKeySpecException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, CertificateException, IOException {
-        P12Manager p12Manager = new P12Manager();
-        p12Manager.setP12File("0x6399bda67f0ae8d1fdd997a885b8aee32a0c9696.p12");
-        p12Manager.setPassword("123");
-        p12Manager.load();
-        // c5658bbb9b905345e7c057690ec6f50c06dada711d1086820980496b4954fbc7
-        String privateKey = Numeric.toHexStringNoPrefix(p12Manager.getECKeyPair().getPrivateKey());
-        System.out.println("load private key: " + privateKey);
-        String address = GenCredential.create(privateKey).getAddress();
-        System.out.println("address: " + address);
-        Assert.assertTrue("pri error", address.equals("0x6399bda67f0ae8d1fdd997a885b8aee32a0c9696"));
+    public void testDecimalPrivateKey() {
+        String decimalKey = "105056100209817976175483366253040865310410704320674863234725386650312386331016";
+        String hexKey = "e843a542a7a8240f9c9e418b9517c2c8f4dc041a11a44e614a3b026c3588c188";
+        String convertedHexKey = Numeric.toHexStringNoPrefix(new BigInteger(decimalKey));
+        System.out.println("convertedHexKey: " + convertedHexKey);
+        Assert.assertEquals(hexKey, convertedHexKey);
+
     }
 
 }

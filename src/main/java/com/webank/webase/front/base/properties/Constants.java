@@ -53,7 +53,9 @@ public class Constants {
             "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
     public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
     public static final String WEBASE_SIGN_USER_URI =
-            "http://%s/WeBASE-Sign/user/newUser?encryptType=%s&signUserId=%s&appId=%s";
+            "http://%s/WeBASE-Sign/user/newUser?encryptType=%s&signUserId=%s&appId=%s&returnPrivateKey=%s";
+    public static final String WEBASE_SIGN_USER_INFO_URI =
+            "http://%s/WeBASE-Sign/user/%s/userInfo?returnPrivateKey=%s";
     public static final String WEBASE_SIGN_VERSION_URI =
         "http://%s/WeBASE-Sign/version";
     public static final String ACCOUNT1_PATH = "node.key";
@@ -73,10 +75,10 @@ public class Constants {
     private int transMaxWait = 30;
     private String monitorDisk = "/";
     private boolean monitorEnabled = true;
-    private String aesKey = "4d5dFr4fG446GBde";
+    private String aesKey = "EfdsW23D23d3df43";
     private String nodePath = "/fisco/nodes/127.0.0.1/node0";
-    private Integer eventRegisterTaskFixedDelay;
-    private Integer syncEventMapTaskFixedDelay;
+    private Integer eventRegisterTaskFixedDelay = 5000;
+    private Integer syncEventMapTaskFixedDelay = 60000;
     private boolean statLogEnabled = false;
     private Integer syncStatLogTime = 5000;
     private long syncStatLogCountLimit = 10000;

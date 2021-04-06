@@ -14,47 +14,52 @@
 
 package com.webank.webase.front.precompiledapi;
 
+import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDOBSERVER;
+import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDSEALER;
+import static org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCyclePrecompiled.FUNC_FREEZE;
+import static org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCyclePrecompiled.FUNC_GRANTMANAGER;
+import static org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCyclePrecompiled.FUNC_UNFREEZE;
+import static org.fisco.bcos.sdk.contract.precompiled.crud.CRUD.FUNC_INSERT;
+import static org.fisco.bcos.sdk.contract.precompiled.crud.CRUD.FUNC_REMOVE;
+import static org.fisco.bcos.sdk.contract.precompiled.crud.CRUD.FUNC_UPDATE;
+import static org.fisco.bcos.sdk.contract.precompiled.crud.table.TableFactory.FUNC_CREATETABLE;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernancePrecompiled.FUNC_FREEZEACCOUNT;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernancePrecompiled.FUNC_GRANTCOMMITTEEMEMBER;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernancePrecompiled.FUNC_GRANTOPERATOR;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernancePrecompiled.FUNC_REVOKECOMMITTEEMEMBER;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernancePrecompiled.FUNC_REVOKEOPERATOR;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernancePrecompiled.FUNC_UNFREEZEACCOUNT;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernancePrecompiled.FUNC_UPDATECOMMITTEEMEMBERWEIGHT;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.ChainGovernancePrecompiled.FUNC_UPDATETHRESHOLD;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.PermissionPrecompiled.FUNC_GRANTWRITE;
+import static org.fisco.bcos.sdk.contract.precompiled.permission.PermissionPrecompiled.FUNC_REVOKEWRITE;
+import static org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
 
-import static com.webank.webase.front.base.code.ConstantCode.TX_RECEIPT_CODE_ERROR;
-import static org.fisco.bcos.web3j.precompile.config.SystemConfig.FUNC_SETVALUEBYKEY;
-import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDOBSERVER;
-import static org.fisco.bcos.web3j.precompile.consensus.Consensus.FUNC_ADDSEALER;
-import static org.fisco.bcos.web3j.precompile.crud.CRUD.FUNC_UPDATE;
-import static org.fisco.bcos.web3j.precompile.crud.TableFactory.FUNC_CREATETABLE;
-import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_FREEZE;
-import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_GRANTMANAGER;
-import static org.fisco.bcos.web3j.precompile.csm.ContractLifeCyclePrecompiled.FUNC_UNFREEZE;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_FREEZEACCOUNT;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_GRANTCOMMITTEEMEMBER;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_GRANTOPERATOR;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_REVOKECOMMITTEEMEMBER;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_REVOKEOPERATOR;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_UNFREEZEACCOUNT;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_UPDATECOMMITTEEMEMBERWEIGHT;
-import static org.fisco.bcos.web3j.precompile.permission.ChainGovernance.FUNC_UPDATETHRESHOLD;
-import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_INSERT;
-import static org.fisco.bcos.web3j.precompile.permission.Permission.FUNC_REMOVE;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.transaction.TransService;
-import com.webank.webase.front.util.PrecompiledUtils;
+import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.precompile.common.PrecompiledCommon;
-import org.fisco.bcos.web3j.precompile.crud.Condition;
-import org.fisco.bcos.web3j.precompile.crud.Entry;
-import org.fisco.bcos.web3j.precompile.crud.Table;
-import org.fisco.bcos.web3j.protocol.ObjectMapperFactory;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.channel.StatusCode;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.protocol.exceptions.TransactionException;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
+import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
+import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
+import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
+import org.fisco.bcos.sdk.model.PrecompiledConstant;
+import org.fisco.bcos.sdk.model.PrecompiledRetCode;
+import org.fisco.bcos.sdk.model.RetCode;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -71,6 +76,8 @@ public class PrecompiledWithSignService {
     TransService transService;
     @Autowired
     private Web3ApiService web3ApiService;
+    public static final Integer NODE_LOWEST_SUPPORT_VERSION_INT = 241;
+    public static final String GROUP_FILE_NOT_EXIST = "INEXISTENT";
 
     /**
      * system config: setValueByKey through webase-sign
@@ -85,12 +92,12 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.SYSTEM_CONFIG, FUNC_SETVALUEBYKEY, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
      * permission: grant through webase-sign
-     * 
+     *
      * @return String result {"code":0,"msg":"success"}
      */
     public String grant(int groupId, String signUserId, String tableName, String toAddress) {
@@ -100,12 +107,12 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.PERMISSION, FUNC_INSERT, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
      * permission: revoke through webase-sign
-     * 
+     *
      * @return String result {"code":0,"msg":"success"}
      */
     public String revoke(int groupId, String signUserId, String tableName, String toAddress) {
@@ -115,28 +122,61 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.PERMISSION, FUNC_REMOVE, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
+     * user table permission: grant through webase-sign
+     *
+     * @return String result {"code":0,"msg":"success"}
+     */
+    public String grantWrite(int groupId, String signUserId, String tableName, String toAddress) {
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(tableName);
+        funcParams.add(toAddress);
+        TransactionReceipt receipt =
+            (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                signUserId, PrecompiledTypes.PERMISSION, FUNC_GRANTWRITE, funcParams);
+        return this.handleTransactionReceipt(receipt);
+    }
+
+    /**
+     * user table permission: revoke through webase-sign
+     *
+     * @return String result {"code":0,"msg":"success"}
+     */
+    public String revokeWrite(int groupId, String signUserId, String tableName, String toAddress) {
+        List<Object> funcParams = new ArrayList<>();
+        funcParams.add(tableName);
+        funcParams.add(toAddress);
+        TransactionReceipt receipt =
+            (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
+                signUserId, PrecompiledTypes.PERMISSION, FUNC_REVOKEWRITE, funcParams);
+        return this.handleTransactionReceipt(receipt);
+    }
+
+
+    /**
      * consensus: add sealer through webase-sign
+     * v1.5.0 增加校验群组文件是否存在，P2P连接存在
      */
     public String addSealer(int groupId, String signUserId, String nodeId) {
         // check node id
         if (!isValidNodeID(nodeId)) {
-            try {
-                return PrecompiledCommon.transferToJson(PrecompiledCommon.P2pNetwork);
-            } catch (IOException e) {
-                throw new FrontException(ConstantCode.PRECOMPILED_COMMON_TRANSFER_JSON_FAIL);
-            }
+            return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
         }
         List<String> sealerList = web3ApiService.getSealerList(groupId);
         if (sealerList.contains(nodeId)) {
-            try {
-                return PrecompiledCommon.transferToJson(PrecompiledCommon.SealerList);
-            } catch (IOException e) {
-                throw new FrontException(ConstantCode.PRECOMPILED_COMMON_TRANSFER_JSON_FAIL);
-            }
+            return ConstantCode.ALREADY_EXISTS_IN_SEALER_LIST.toString();
+        }
+        List<String> nodeIdList = web3ApiService.getNodeIdList();
+        if (!nodeIdList.contains(nodeId)) {
+            log.error("nodeId is not connected with others, cannot added as sealer");
+            return ConstantCode.PEERS_NOT_CONNECTED.toString();
+        }
+        // check group file
+        if (!containsGroupFile(groupId)) {
+            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
         }
         // trans
         List<Object> funcParams = new ArrayList<>();
@@ -144,7 +184,7 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CONSENSUS, FUNC_ADDSEALER, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
@@ -153,27 +193,23 @@ public class PrecompiledWithSignService {
     public String addObserver(int groupId, String signUserId, String nodeId) {
         // check node id
         if (!isValidNodeID(nodeId)) {
-            try {
-                return PrecompiledCommon.transferToJson(PrecompiledCommon.P2pNetwork);
-            } catch (IOException e) {
-                throw new FrontException(ConstantCode.PRECOMPILED_COMMON_TRANSFER_JSON_FAIL);
-            }
+            return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
         }
         List<String> observerList = web3ApiService.getObserverList(groupId);
         if (observerList.contains(nodeId)) {
-            try {
-                return PrecompiledCommon.transferToJson(PrecompiledCommon.ObserverList);
-            } catch (IOException e) {
-                throw new FrontException(ConstantCode.PRECOMPILED_COMMON_TRANSFER_JSON_FAIL);
-            }
+            return ConstantCode.ALREADY_EXISTS_IN_OBSERVER_LIST.toString();
         }
+        // check group file, observer not check
+//        if (!containsGroupFile(groupId)) {
+//            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+//        }
         // trans
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CONSENSUS, FUNC_ADDOBSERVER, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
@@ -182,11 +218,7 @@ public class PrecompiledWithSignService {
     public String removeNode(int groupId, String signUserId, String nodeId) {
         List<String> groupPeers = web3ApiService.getGroupPeers(groupId);
         if (!groupPeers.contains(nodeId)) {
-            try {
-                return PrecompiledCommon.transferToJson(PrecompiledCommon.GroupPeers);
-            } catch (IOException e) {
-                throw new FrontException(ConstantCode.PRECOMPILED_COMMON_TRANSFER_JSON_FAIL);
-            }
+            return ConstantCode.ALREADY_REMOVED_FROM_THE_GROUP.toString();
         }
         // trans
         List<Object> funcParams = new ArrayList<>();
@@ -200,16 +232,12 @@ public class PrecompiledWithSignService {
             // susscces
             // because the exception is throwed by getTransactionReceipt, we need ignore it.
             if (e.getMessage().contains("Don't send requests to this group")) {
-                try {
-                    return PrecompiledCommon.transferToJson(0);
-                } catch (IOException ex) {
-                    throw new FrontException(ConstantCode.PRECOMPILED_COMMON_TRANSFER_JSON_FAIL);
-                }
+                return ConstantCode.ALREADY_REMOVED_FROM_THE_GROUP.toString();
             } else {
                 throw e;
             }
         }
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
@@ -230,27 +258,28 @@ public class PrecompiledWithSignService {
     /**
      * CRUD: create table through webase-sign
      */
-    public int createTable(int groupId, String signUserId, Table table) {
+    public String createTable(int groupId, String signUserId, Table table) {
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
         funcParams.add(table.getKey());
-        funcParams.add(table.getValueFields());
+        String valueFieldsString = TableCRUDService.convertValueFieldsToString(table.getValueFields());
+        funcParams.add(valueFieldsString);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.TABLE_FACTORY, FUNC_CREATETABLE, funcParams);
-        return this.handleTransactionReceiptForCRUD(receipt);
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
      * CRUD: insert table through webase-sign
      */
-    public int insert(int groupId, String signUserId, Table table, Entry entry) {
+    public String insert(int groupId, String signUserId, Table table, Entry entry) {
         checkTableKeyLength(table);
         // trans
         String entryJsonStr;
         try {
             entryJsonStr =
-                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFields());
+                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFieldNameToValue());
         } catch (JsonProcessingException e) {
             log.error("remove JsonProcessingException:[]", e);
             throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
@@ -263,20 +292,20 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CRUD, FUNC_INSERT, funcParams);
-        return this.handleTransactionReceiptForCRUD(receipt);
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
      * CRUD: update table through webase-sign
      */
-    public int update(int groupId, String signUserId, Table table, Entry entry,
+    public String update(int groupId, String signUserId, Table table, Entry entry,
             Condition condition) {
         checkTableKeyLength(table);
         // trans
         String entryJsonStr, conditionStr;
         try {
             entryJsonStr =
-                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFields());
+                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFieldNameToValue());
             conditionStr = ObjectMapperFactory.getObjectMapper()
                     .writeValueAsString(condition.getConditions());
         } catch (JsonProcessingException e) {
@@ -292,13 +321,13 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CRUD, FUNC_UPDATE, funcParams);
-        return this.handleTransactionReceiptForCRUD(receipt);
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
      * CRUD: remove table through webase-sign
      */
-    public int remove(int groupId, String signUserId, Table table, Condition condition) {
+    public String remove(int groupId, String signUserId, Table table, Condition condition) {
         checkTableKeyLength(table);
         // trans
         String conditionStr;
@@ -317,14 +346,14 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CRUD, FUNC_REMOVE, funcParams);
-        return this.handleTransactionReceiptForCRUD(receipt);
+        return this.handleTransactionReceipt(receipt);
     }
 
     private void checkTableKeyLength(Table table) {
-        if (table.getKey().length() > PrecompiledCommon.TABLE_KEY_MAX_LENGTH) {
+        if (table.getKey().length() > PrecompiledConstant.TABLE_KEY_MAX_LENGTH) {
             throw new FrontException(ConstantCode.CRUD_TABLE_KEY_LENGTH_ERROR.getCode(),
                     "The value of the table key exceeds the maximum limit("
-                            + PrecompiledCommon.TABLE_KEY_MAX_LENGTH + ").");
+                            + PrecompiledConstant.TABLE_KEY_MAX_LENGTH + ").");
         }
     }
 
@@ -335,7 +364,7 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CSM, FUNC_FREEZE, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String contractUnfreeze(int groupId, String signUserId, String contractAddress) {
@@ -345,7 +374,7 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CSM, FUNC_UNFREEZE, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String contractGrantManager(int groupId, String signUserId, String contractAddress,
@@ -357,7 +386,7 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CSM, FUNC_GRANTMANAGER, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
@@ -371,7 +400,7 @@ public class PrecompiledWithSignService {
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_GRANTCOMMITTEEMEMBER,
                         funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String revokeChainCommittee(int groupId, String signUserId, String toAddress) {
@@ -382,7 +411,7 @@ public class PrecompiledWithSignService {
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_REVOKECOMMITTEEMEMBER,
                         funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String updateChainCommitteeWeight(int groupId, String signUserId, String toAddress,
@@ -395,7 +424,7 @@ public class PrecompiledWithSignService {
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_UPDATECOMMITTEEMEMBERWEIGHT,
                         funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String updateThreshold(int groupId, String signUserId, int threshold) {
@@ -406,7 +435,7 @@ public class PrecompiledWithSignService {
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_UPDATETHRESHOLD,
                         funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String grantOperator(int groupId, String signUserId, String toAddress) {
@@ -416,7 +445,7 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_GRANTOPERATOR, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String revokeOperator(int groupId, String signUserId, String toAddress) {
@@ -426,7 +455,7 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_REVOKEOPERATOR, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String freezeAccount(int groupId, String signUserId, String toAddress) {
@@ -436,7 +465,7 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_FREEZEACCOUNT, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String unfreezeAccount(int groupId, String signUserId, String toAddress) {
@@ -447,7 +476,7 @@ public class PrecompiledWithSignService {
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
                         signUserId, PrecompiledTypes.CHAIN_GOVERN, FUNC_UNFREEZEACCOUNT,
                         funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+        return this.handleTransactionReceipt(receipt);
     }
 
     public String registerCns(int groupId, String signUserId, String contractName, String version,
@@ -460,54 +489,49 @@ public class PrecompiledWithSignService {
         funcParams.add(abiInfo);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSignForPrecompile(groupId,
-                        signUserId, PrecompiledTypes.CNS,
-                        org.fisco.bcos.web3j.precompile.cns.CNS.FUNC_INSERT, funcParams);
-        return this.handleTransactionReceipt(receipt, web3ApiService.getWeb3j(groupId));
+                        signUserId, PrecompiledTypes.CNS, CNSPrecompiled.FUNC_INSERT, funcParams);
+        return this.handleTransactionReceipt(receipt);
     }
 
     /**
      * handle receipt of precompiled
-     * 
-     * @throws TransactionException
-     * @throws IOException
+     * @related: PrecompiledRetCode and ReceiptParser
+     * return: {"code":1,"msg":"Success"} => {"code":0,"message":"Success"}
      */
-    private String handleTransactionReceipt(TransactionReceipt receipt, Web3j web3j)
-            throws FrontException {
+    private String handleTransactionReceipt(TransactionReceipt receipt) {
         log.debug("handle tx receipt of precompiled");
-        String status = receipt.getStatus();
-        if (!"0x0".equals(status)) {
-            throw new FrontException(TX_RECEIPT_CODE_ERROR.getCode(),
-                    StatusCode.getStatusMessage(receipt.getStatus(), receipt.getMessage()));
-        } else {
-            if (receipt.getOutput() != null) {
-                try {
-                    String codeMsgFromOutput =
-                            PrecompiledCommon.getJsonStr(receipt.getOutput(), web3j);
-                    return PrecompiledUtils.handleReceiptOutput(codeMsgFromOutput);
-                } catch (IOException e) {
-                    log.error("handleTransactionReceipt getJsonStr of error tx receipt fail:[]", e);
-                    throw new FrontException(
-                            ConstantCode.TX_RECEIPT_OUTPUT_PARSE_JSON_FAIL.getCode(),
-                            e.getMessage());
-                }
+        try {
+            RetCode sdkRetCode = ReceiptParser.parseTransactionReceipt(receipt);
+            log.info("handleTransactionReceipt sdkRetCode:{}", sdkRetCode);
+            if (sdkRetCode.getCode() >= 0) {
+                return new BaseResponse(ConstantCode.RET_SUCCESS, sdkRetCode.getMessage()).toString();
             } else {
-                throw new FrontException(ConstantCode.TX_RECEIPT_OUTPUT_NULL);
+                throw new FrontException(sdkRetCode.getCode(), sdkRetCode.getMessage());
             }
+        } catch (ContractException e) {
+            log.error("handleTransactionReceipt e:[]", e);
+            throw new FrontException(e.getErrorCode(), e.getMessage());
         }
     }
 
-    public int handleTransactionReceiptForCRUD(TransactionReceipt receipt) {
-        String status = receipt.getStatus();
-        if (!"0x0".equals(status)) {
-            throw new FrontException(TX_RECEIPT_CODE_ERROR.getCode(),
-                    StatusCode.getStatusMessage(status, receipt.getMessage()));
+    /**
+     * check group config file exist before add as sealer/observer
+     */
+    private boolean containsGroupFile(int groupId) {
+        log.info("check front's node contains group file of groupId:{}", groupId);
+        ClientVersion clientVersion = web3ApiService.getClientVersion();
+        int supportVer = CommonUtils.getVersionFromStr(clientVersion.getSupportedVersion());
+        if (supportVer < 241) {
+            log.info("client support version not support dynamic group");
+            return true;
         }
-        String output = receipt.getOutput();
-        if (!"0x".equals(output)) {
-            return new BigInteger(output.substring(2, output.length()), 16).intValue();
-        } else {
-            throw new FrontException(ConstantCode.TX_RECEIPT_OUTPUT_NULL);
+        // INEXISTENT
+        String groupStatus = (String) web3ApiService.querySingleGroupStatus(groupId).getData();
+        if (GROUP_FILE_NOT_EXIST.equals(groupStatus)) {
+            log.error("node contains no group file to add in this group:{}", groupId);
+            return false;
         }
+        return true;
     }
 
 }

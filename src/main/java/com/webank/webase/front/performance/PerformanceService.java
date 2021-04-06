@@ -13,8 +13,10 @@
  */
 package com.webank.webase.front.performance;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.performance.entity.Performance;
 import com.webank.webase.front.performance.result.Data;
 import com.webank.webase.front.performance.result.LineDataList;
@@ -43,11 +45,15 @@ import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Host monitor: monitor computer's performance such as cpu, memory, disk etc.
@@ -65,6 +71,7 @@ public class PerformanceService {
     private static final String TXBPS = "txbps";
     // host download bps(bit per second)
     private static final String RXBPS = "rxbps";
+    private static final String LOCAL_HOST_IP = "127.0.0.1";
 
     private static Sigar sigar = new Sigar();
 
@@ -133,6 +140,59 @@ public class PerformanceService {
             }
         };
         return performanceRepository.findAll(queryParam, pageable);
+    }
+
+    /**
+     * less than beginDate or larger than endDate
+     * order by id
+     * @param pageNumber
+     * @param pageSize
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    @Transactional
+    public BasePageResponse pagingQueryStat(Integer pageNumber, Integer pageSize,
+        LocalDateTime beginDate, LocalDateTime endDate) {
+        // get larger than endDate
+        Pageable pageableEnd = new PageRequest(pageNumber - 1,
+            pageSize / 2,  new Sort(Direction.ASC, "id"));
+        Specification<Performance> queryEndParam = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (endDate != null) {
+                // larger than
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                    endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            // less than beginDate or larger than endDate
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        // get less than beginDate
+        Pageable pageableBegin = new PageRequest(pageNumber - 1,
+            pageSize / 2, new Sort(Direction.DESC, "id"));
+        Specification<Performance> queryBeginParam = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (beginDate != null) {
+                // less than begin
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                    beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            // less than beginDate or larger than endDate
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        // start query
+        Page<Performance> pageEnd = performanceRepository.findAll(queryEndParam, pageableEnd);
+        Page<Performance> pageBegin = performanceRepository.findAll(queryBeginParam, pageableBegin);
+        log.debug("pagingQueryStat pageEnd count:{}, pageBegin count:{} ", pageEnd.getSize(), pageBegin.getSize());
+        // concat two list
+        long totalCount = pageEnd.getTotalElements() + pageBegin.getTotalElements();
+        List<Performance> resultList = new ArrayList<>();
+        resultList.addAll(pageEnd.getContent());
+        resultList.addAll(pageBegin.getContent());
+        BasePageResponse response = new BasePageResponse(ConstantCode.RET_SUCCEED);
+        response.setTotalCount(totalCount);
+        response.setData(resultList);
+        return response;
     }
 
     private List<PerformanceData> transferToPerformanceData(List<Performance> performanceList,
@@ -385,11 +445,11 @@ public class PerformanceService {
 
     private String getIp() {
         try {
-            InetAddress addr = InetAddress.getLocalHost();
-            return addr.getHostAddress();
+            InetAddress localHost = InetAddress.getLocalHost();
+            return localHost.getHostAddress();
         } catch (Exception e) {
-            log.info("get ip fail, return '127.0.0.1'");
-            return "127.0.0.1";
+            log.debug("get ip fail, return '127.0.0.1', error:{}", e.getMessage());
+            return LOCAL_HOST_IP;
         }
     }
 }

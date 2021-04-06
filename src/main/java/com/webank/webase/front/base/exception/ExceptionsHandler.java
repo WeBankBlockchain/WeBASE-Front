@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -54,24 +55,12 @@ public class ExceptionsHandler {
     public ResponseEntity myExceptionHandler(FrontException frontException) {
         log.error("catch frontException: {}",  frontException.getMessage());
         Map<String, Object> map = new HashMap<>();
+        if (frontException.getRetCode() != null) {
+            map.put("code", frontException.getRetCode().getCode());
+        }
         map.put("data", frontException.getDetail());
         map.put("errorMessage", frontException.getMessage());
-        // handle node is down
-        if (frontException.getRetCode() != null) {
-            if (frontException.getRetCode().getMessage().contains(ErrorCodeHandleUtils.NODE_INACTIVE_MSG)
-                || frontException.getRetCode().getCode().equals(ConstantCode.NODE_REQUEST_FAILED.getCode())) {
-                // if retcode is not null or is null but contain no active
-                map.put("code", ErrorCodeHandleUtils.NODE_NOT_ACTIVE.getCode());
-                return ResponseEntity.status(422).body(map);
-            } else {
-                map.put("code", frontException.getRetCode().getCode());
-                return ResponseEntity.status(422).body(map);
-            }
-        } else if (frontException.getMessage().contains(ErrorCodeHandleUtils.NODE_INACTIVE_MSG)) {
-            // if null
-            map.put("code", ErrorCodeHandleUtils.NODE_NOT_ACTIVE.getCode());
-            return ResponseEntity.status(422).body(map);
-        }
+
         return ResponseEntity.status(422).body(map);
     }
 
@@ -122,6 +111,20 @@ public class ExceptionsHandler {
     }
 
     /**
+     * catch java sdk ContractException
+     * @param exc e
+     */
+    @ResponseBody
+    @ExceptionHandler(value = ContractException.class)
+    public ResponseEntity contractExceptionHandler(ContractException exc) {
+        log.info("catch contract exception: ", exc);
+        Map<String, Object> map = new HashMap<>();
+        map.put("errorMessage", exc.getMessage());
+        map.put("code", exc.getErrorCode());
+        return ResponseEntity.status(500).body(map);
+    }
+
+    /**
      * all non-catch exception Handler.
      * v1.4.3: add NODE_NOT_ACTIVE error code
      * @param exc e
@@ -136,6 +139,7 @@ public class ExceptionsHandler {
         map.put("code", errorDetail.getCode());
         return ResponseEntity.status(500).body(map);
     }
+
 
     /**
      * all non-catch exception Handler.
@@ -162,21 +166,4 @@ public class ExceptionsHandler {
         }
     }
 
-    /**
-     * handle node is down
-     * @param frontException
-     * @return
-     */
-    private ResponseEntity nodeInactiveErrorHandle(FrontException frontException) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("data", frontException.getDetail());
-        map.put("errorMessage", frontException.getMessage());
-        map.put("code", frontException.getRetCode().getCode());
-        String codeErrorMessage = frontException.getRetCode().getMessage();
-        if (codeErrorMessage.contains(ErrorCodeHandleUtils.NODE_INACTIVE_MSG)) {
-            map.put("code", ErrorCodeHandleUtils.NODE_NOT_ACTIVE.getCode());
-
-        }
-        return ResponseEntity.status(422).body(map);
-    }
 }

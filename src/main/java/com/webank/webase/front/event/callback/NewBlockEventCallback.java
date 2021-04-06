@@ -20,51 +20,54 @@ import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.event.entity.message.BlockPushMessage;
-import org.fisco.bcos.channel.client.BlockNotifyCallBack;
+import java.math.BigInteger;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.fisco.bcos.sdk.service.callback.BlockNumberNotifyCallback;
+import org.fisco.bcos.sdk.service.model.BlockNumberNotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.math.BigInteger;
-
-import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 
 /**
  * 出块后将Push一个信息到RabbitMQ，并广播到订阅者的队列中
  * @author marsli
  */
-@Component
-public class NewBlockEventCallback implements BlockNotifyCallBack {
+@Data
+@AllArgsConstructor
+public class NewBlockEventCallback implements BlockNumberNotifyCallback {
 
     private static Logger logger = LoggerFactory.getLogger(NewBlockEventCallback.class);
 
-    @Autowired
     private MQPublisher MQPublisher;
+    private int groupId;
+    private PublisherHelper blockPublishInfo;
 
     @Override
-    public void onBlockNotify(int groupID, BigInteger blockNumber) {
-        logger.info("NewBlockEventCallBack groupID:{}, blockNumber:{}",
-                groupID, blockNumber);
-        // register map
-        if (BLOCK_ROUTING_KEY_MAP.isEmpty()) {
-            logger.debug("block notify register list is empty. ");
-            return;
-        }
+    public void onReceiveBlockNumberInfo(String peerIpAndPort,
+        BlockNumberNotification blockNumberNotification) {
+        int groupId = Integer.parseInt(blockNumberNotification.getGroupId());
+        String blockNumber = blockNumberNotification.getBlockNumber();
+        logger.info("NewBlockEventCallBack peerIpAndPort:{}, groupId:{}, blockNumber:{}",
+            peerIpAndPort, groupId, blockNumber);
+
         BlockPushMessage blockPushMessage = new BlockPushMessage();
-        blockPushMessage.setBlockNumber(blockNumber);
-        blockPushMessage.setGroupId(groupID);
+        blockPushMessage.setBlockNumber(new BigInteger(blockNumber));
+        blockPushMessage.setGroupId(groupId);
+        blockPushMessage.setPeerIpPort(peerIpAndPort);
         blockPushMessage.setEventType(EventTypes.BLOCK_NOTIFY.getValue());
-        for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
+        if (groupId == this.groupId) {
+            pushMessage2MQ(blockPublishInfo.getExchangeName(),
+                blockPublishInfo.getRoutingKey(), blockPushMessage);
+        }
+        /*for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
             blockPushMessage.setAppId(appId);
             PublisherHelper blockPublishInfo = BLOCK_ROUTING_KEY_MAP.get(appId);
-            if (groupID == blockPublishInfo.getGroupId()) {
+            if (groupId == blockPublishInfo.getGroupId()) {
                 pushMessage2MQ(blockPublishInfo.getExchangeName(),
-                        blockPublishInfo.getRoutingKey(), blockPushMessage);
+                    blockPublishInfo.getRoutingKey(), blockPushMessage);
             }
-        }
-
-
+        }*/
     }
 
     /**

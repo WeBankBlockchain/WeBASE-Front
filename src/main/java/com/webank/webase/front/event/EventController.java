@@ -22,6 +22,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.event.entity.ContractEventInfo;
+import com.webank.webase.front.event.entity.DecodedEventLog;
 import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import com.webank.webase.front.event.entity.ReqContractEventRegister;
@@ -40,7 +41,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.web3j.tx.txdecode.LogResult;
+import org.fisco.bcos.sdk.model.EventLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -276,7 +277,7 @@ public class EventController extends BaseController {
         String abiStr = JsonUtils.toJSONString(contractAbi);
         AbiUtil.checkAbi(abiStr);
         // get event log from each block's tx receipts
-        List<LogResult> resList = eventService.getContractEventLog(groupId, contractAddress, abiStr,
+        List<DecodedEventLog> resList = eventService.getContractEventLog(groupId, contractAddress, abiStr,
             fromBlock, toBlock, eventTopicParam);
         log.debug("end listContractEventLogs resList:{}. ", resList);
         return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());

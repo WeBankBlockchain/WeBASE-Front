@@ -406,6 +406,30 @@ export function ImportP12PrivateKey(data) {
     })
 }
 
+//export pem privateKey 
+export function exportPemPrivateKey(data) {
+    return post({
+        url: `${HANDLE}privateKey/exportPem`,
+        method: 'post',
+        data: data,
+        responseType: 'blob/application/json',
+        headers: {
+        }
+    })
+}
+
+//export p12 privateKey
+export function exportP12PrivateKey(data) {
+    return post({
+        url: `${HANDLE}privateKey/exportP12`,
+        method: 'post',
+        data: data,
+        responseType: 'blob',
+        headers: {
+        }
+    })
+}
+
 // localKeyStores
 export function queryLocalKeyStores() {
     return get({
@@ -976,5 +1000,13 @@ export function findCnsInfo(data) {
         url: `${HANDLE}contract/findCns`,
         method: 'post',
         data: data
+    })
+}
+// sdk证书下载
+export function exportCertSdk() {
+    return get({
+        url: `${HANDLE}cert/sdk/zip`,
+        method: 'get',
+        responseType: 'blob'
     })
 }

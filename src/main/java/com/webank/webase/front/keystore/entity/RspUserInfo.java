@@ -18,12 +18,21 @@ package com.webank.webase.front.keystore.entity;
 
 import lombok.Data;
 
+/**
+ * entity from webase-sign
+ */
 @Data
 public class RspUserInfo {
     private String signUserId;
     private String appId;
     private String address;
     private String publicKey;
+    /**
+     * using same aesKey to encrypted in sign
+     * decrypted in webase-front
+     * and encoded in base64
+     */
+    private String privateKey;
     private String description;
     private Integer encryptType;
 }

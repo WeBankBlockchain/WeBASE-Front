@@ -106,6 +106,7 @@ export default {
         toBlock: '末区块',
         topicList: '合约event名列表',
         fileType: "导入类型",
+        exportType: "导出类型",
         fileName: "私钥用户名",
         checkEvent: 'Event 查看',
         checkEventResult: 'Event',
@@ -204,6 +205,7 @@ export default {
         deploy: '部署',
         callContract: '合约调用',
         exportJavaFile: '导出java文件',
+        exportSdk: 'SDK证书下载',
         handleSave: '按Ctrl+s保存合约内容',
         handleCompile: '按Alt+c 编译合约',
         handleDeploy: '按Alt+d 部署合约',
@@ -229,6 +231,7 @@ export default {
         mgmtCns: "管理CNS"
     },
     text: {
+        isRedeploy: '合约已部署 是否重新部署？',
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
         noStoreContract: '请在左侧面板点击打开一个合约',
         hide: '隐藏',
@@ -341,6 +344,12 @@ export default {
         updateRegister: "是否要更新注册",
         fileSize_5000: "上传文件大小不能超过 5000kb!",
         cnsNameVersion: "CNS名或CNS版本不能为空",
+        decimal: "十进制私钥",
+        decimalType: "十进制",
+        hexType: "十六进制",
+        exportWeid: "支持在WeID中导入",
+        title: "提示",
+        versionError: 'Solc版本加载失败，请检查/static/js目录中是否存在对应的合约版本'
     },
     contracts: {
         createFile: "新建文件",
@@ -523,7 +532,8 @@ export default {
         placeholderPassword: "请输入密码",
         passwordError: "密码不能是汉字",
         file: "文件",
-        validatorPrivateKey: "请输入私钥",
+        validatorPrivateKey: "请输入十进制私钥",
+        validatorPrivateKey16: "请输入十六进制私钥（不含0x）",
         validatorPrivateKey1: "请输入十六进制",
         importFileValidator: "请上传文件"
     },

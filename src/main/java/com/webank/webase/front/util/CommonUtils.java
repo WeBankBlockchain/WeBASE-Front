@@ -35,10 +35,10 @@ import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -46,17 +46,25 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 /**
  * CommonUtils.
- *
+ * todo use java sdk
  */
 @Slf4j
 public class CommonUtils {
@@ -67,51 +75,88 @@ public class CommonUtils {
         throw new IllegalStateException("Utility class");
     }
 
+
     /**
      * stringToSignatureData. 19/12/24 support guomi： add byte[] pub in signatureData
-     * 
+     * byte array: [v + r + s + pub]
      * @param signatureData signatureData
      * @return
      */
-    public static SignatureData stringToSignatureData(String signatureData) {
+    public static SignatureResult stringToSignatureData(String signatureData, int encryptType) {
         byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+        // 从1开始，因为此处webase-sign返回的byteArr第0位是v
+        byte signV = byteArr[0];
         byte[] signR = new byte[32];
         System.arraycopy(byteArr, 1, signR, 0, signR.length);
         byte[] signS = new byte[32];
         System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
-        if (EncryptType.encryptType == 1) {
+        if (encryptType == CryptoType.SM_TYPE) {
             byte[] pub = new byte[64];
             System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
-            return new SignatureData(byteArr[0], signR, signS, pub);
+            return new SM2SignatureResult(pub, signR, signS);
         } else {
-            return new SignatureData(byteArr[0], signR, signS);
+            return new ECDSASignatureResult(signV, signR, signS);
         }
     }
 
     /**
+     * stringToSignatureData. 19/12/24 support guomi： add byte[] pub in signatureData
+     * @param signatureData signatureData
+     * @return
+     */
+//    public static SignatureResult stringToSM2SignatureData(String signatureData) {
+//        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+//        // 从1开始，因为此处byteArr第0位是v； 注: 在java sdk中, v放在了最后一位
+//        byte[] signR = new byte[32];
+//        System.arraycopy(byteArr, 1, signR, 0, signR.length);
+//        byte[] signS = new byte[32];
+//        System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
+//        byte[] pub = new byte[64];
+//        System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
+//        // return new SignatureData(byteArr[0], signR, signS, pub);
+//        return new SM2SignatureResult(pub, signR, signS);
+//    }
+//
+//    public static SignatureResult stringToECDSASignatureData(String signatureData) {
+//        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+//        // 从1开始，因为0是v；注：在javasdk中v放在了最后一位
+//        byte[] signR = new byte[32];
+//        System.arraycopy(byteArr, 1, signR, 0, signR.length);
+//        byte[] signS = new byte[32];
+//        System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
+//        // return new SignatureData(byteArr[0], signR, signS, pub);
+//        return new ECDSASignatureResult(byteArr[0], signR, signS);
+//    }
+
+    /**
      * signatureDataToString. 19/12/24 support guomi： add byte[] pub in signatureData
-     * 
      * @param signatureData signatureData
      */
-    public static String signatureDataToString(SignatureData signatureData) {
+
+    public static String signatureDataToString(SM2SignatureResult signatureData) {
         byte[] byteArr;
-        if (EncryptType.encryptType == 1) {
-            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length
-                    + PUBLIC_KEY_LENGTH_64];
-            byteArr[0] = signatureData.getV();
-            System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
-            System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
-                    signatureData.getS().length);
-            System.arraycopy(signatureData.getPub(), 0, byteArr,
-                    signatureData.getS().length + signatureData.getR().length + 1,
-                    signatureData.getPub().length);
-        } else {
-            byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length];
-            byteArr[0] = signatureData.getV();
-            System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
-            System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
-                    signatureData.getS().length);
-        }
+        byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length
+                + PUBLIC_KEY_LENGTH_64];
+        // v
+        byteArr[0] = 0;
+        // r s
+        System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
+        System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
+                signatureData.getS().length);
+        System.arraycopy(signatureData.getPub(), 0, byteArr,
+                signatureData.getS().length + signatureData.getR().length + 1,
+                signatureData.getPub().length);
+
+        return Numeric.toHexString(byteArr, 0, byteArr.length, false);
+    }
+
+    public static String signatureDataToString(ECDSASignatureResult signatureData) {
+        byte[] byteArr;
+        byteArr = new byte[1 + signatureData.getR().length + signatureData.getS().length];
+        byteArr[0] = signatureData.getV();
+        System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
+        System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
+            signatureData.getS().length);
         return Numeric.toHexString(byteArr, 0, byteArr.length, false);
     }
 
@@ -169,7 +214,7 @@ public class CommonUtils {
      */
     public static String readFile(String filePath) throws IOException {
         log.info("readFile dir:{}", filePath);
-        File dirFile = new File(filePath);
+        File dirFile = new File(CleanPathUtil.cleanString(filePath));
         if (!dirFile.exists()) {
             return null;
         }
@@ -194,7 +239,7 @@ public class CommonUtils {
      */
     public static List<String> readFileToList(String filePath) throws IOException {
         log.debug("readFile dir:{}", filePath);
-        File dirFile = new File(filePath);
+        File dirFile = new File(CleanPathUtil.cleanString(filePath));
         if (!dirFile.exists()) {
             return null;
         }
@@ -219,9 +264,10 @@ public class CommonUtils {
      */
     public static boolean deleteFile(String filePath) {
         boolean flag = false;
-        File file = new File(filePath);
+        File file = new File(CleanPathUtil.cleanString(filePath));
         if (file.isFile() && file.exists()) {
-            file.delete();
+            boolean deleteResult = file.delete();
+            log.info("deleteFile deleteResult:{}", deleteResult);
             flag = true;
         }
         return flag;
@@ -237,7 +283,7 @@ public class CommonUtils {
         if (!path.endsWith(File.separator)) {
             path = path + File.separator;
         }
-        File dirFile = new File(path);
+        File dirFile = new File(CleanPathUtil.cleanString(path));
         if (!dirFile.exists() || !dirFile.isDirectory()) {
             return false;
         }
@@ -288,20 +334,6 @@ public class CommonUtils {
         return requestEntity;
     }
 
-    /**
-     * Object to JavaBean.
-     * 
-     * @param obj obj
-     * @param clazz clazz
-     * @return
-     */
-    public static <T> T object2JavaBean(Object obj, Class<T> clazz) {
-        if (obj == null || clazz == null) {
-            log.warn("Object2JavaBean. obj or clazz null");
-            return null;
-        }
-        return JsonUtils.toJavaObject(obj, clazz);
-    }
 
     /**
      * get server ip.
@@ -437,10 +469,11 @@ public class CommonUtils {
         }
         FileInputStream inputFile = null;
         try {
-            File file = new File(filePath);
+            File file = new File(CleanPathUtil.cleanString(filePath));
             inputFile = new FileInputStream(file);
             byte[] buffer = new byte[(int) file.length()];
-            inputFile.read(buffer);
+            int size = inputFile.read(buffer);
+            log.debug("fileToBase64 inputFile size:{}", size);
             return Base64.getEncoder().encodeToString(buffer);
         } catch (IOException e) {
             log.error("base64ToFile IOException:[{}]", e.toString());
@@ -469,12 +502,12 @@ public class CommonUtils {
                         srcFile.length());
                 zos.putNextEntry(new ZipEntry(srcFile.getName()));
                 int len;
-                FileInputStream in = new FileInputStream(srcFile);
-                while ((len = in.read(buf)) != -1) {
-                    zos.write(buf, 0, len);
+                try (FileInputStream in = new FileInputStream(srcFile)) {
+                    while ((len = in.read(buf)) != -1) {
+                        zos.write(buf, 0, len);
+                    }
                 }
                 zos.closeEntry();
-                in.close();
             }
             long end = System.currentTimeMillis();
             log.info("fileToZipBase64 cost time：[{}] ms", (end - start));
@@ -515,12 +548,12 @@ public class CommonUtils {
             File fout = null;
             while (entry != null) {
                 if (entry.isDirectory()) {
-                    File subdirectory = new File(path + File.separator + entry.getName());
+                    File subdirectory = new File(CleanPathUtil.cleanString(path + File.separator + entry.getName()));
                     if (!subdirectory.exists() && !subdirectory.isDirectory()) {
                         subdirectory.mkdirs();
                     }
                 } else {
-                    log.info("zipBase64ToFile file name:[{}]", entry.getName());
+                    log.info("zipBase64ToFile fileName:[{}]", entry.getName());
                     String outPath = (path + entry.getName()).replaceAll("\\*", "/");
                     fout = new File(cleanString(outPath));
                     BufferedOutputStream bos = null;
@@ -651,6 +684,152 @@ public class CommonUtils {
             }
         }
         return flag;
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param receipt
+     */
+    public static void processReceiptHexNumber(TransactionReceipt receipt) {
+        log.info("sendMessage. receipt:[{}]", JsonUtils.toJSONString(receipt));
+        if (receipt == null) {
+            return;
+        }
+        String gasUsed = Optional.ofNullable(receipt.getGasUsed()).orElse("0");
+        String blockNumber = Optional.ofNullable(receipt.getBlockNumber()).orElse("0");
+        receipt.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
+    }
+
+
+    /**
+     * convert hex number string to decimal number string
+     * @param block
+     */
+    public static void processBlockHexNumber(BcosBlock.Block block) {
+        if (block == null) {
+            return;
+        }
+        String gasLimit = Optional.ofNullable(block.getGasLimit()).orElse("0");
+        String gasUsed =  Optional.ofNullable(block.getGasUsed()).orElse("0");
+        String timestamp =  Optional.ofNullable(block.getTimestamp()).orElse("0");
+        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param blockHeader
+     */
+    public static void processBlockHeaderHexNumber(BcosBlockHeader.BlockHeader blockHeader) {
+        if (blockHeader == null) {
+            return;
+        }
+        String gasLimit = Optional.ofNullable(blockHeader.getGasLimit()).orElse("0");
+        String gasUsed =  Optional.ofNullable(blockHeader.getGasUsed()).orElse("0");
+        String timestamp =  Optional.ofNullable(blockHeader.getTimestamp()).orElse("0");
+        blockHeader.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
+        blockHeader.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
+        blockHeader.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
+    }
+
+    /**
+     * convert hex number string to decimal number string
+     * @param trans
+     */
+    public static void processTransHexNumber(JsonTransactionResponse trans) {
+        if (trans == null) {
+            return;
+        }
+        String gas = Optional.ofNullable(trans.getGas()).orElse("0");
+        String gasPrice = Optional.ofNullable(trans.getGasPrice()).orElse("0");
+        String groupId = Optional.ofNullable(trans.getGroupId()).orElse("0");
+        trans.setGas(Numeric.toBigInt(gas).toString(10));
+        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
+        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
+    }
+
+    /**
+     * get version number without character
+     * @param verStr ex: v2.4.1, ex 1.5.0
+     * @return ex: 241, 150
+     */
+    public static int getVersionFromStr(String verStr) {
+        log.info("getVersionFromStr verStr:{}", verStr);
+        // remove v and split
+        if (verStr.toLowerCase().startsWith("v")) {
+            verStr = verStr.substring(1);
+        }
+        String[] versionArr = verStr.split("\\.");
+        if (versionArr.length < 3) {
+            log.error("getVersionFromStr versionArr:{}", (Object) versionArr);
+            return 0;
+        }
+        // get num
+        int version = Integer.parseInt(versionArr[0]) * 100
+            + Integer.parseInt(versionArr[1]) * 10 + Integer.parseInt(versionArr[2]);
+        log.info("getVersionFromStr version:{}", version);
+        return version;
+    }
+
+    private final static String TEMP_EXPORT_KEYSTORE_PATH = "exportedKey";
+    private final static String PEM_FILE_FORMAT = ".pem";
+    private final static String P12_FILE_FORMAT = ".p12";
+    /**
+     * write pem in ./tempKey
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @param cryptoSuite
+     * @return
+     */
+    public static String writePrivateKeyPem(String rawPrivateKey, String address, String userName,
+        CryptoSuite cryptoSuite) {
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            boolean deleteResult = keystorePath.delete();
+            log.info("writePrivateKeyPem keystorePath deleteResult:{}", deleteResult);
+        }
+        boolean mkdirResult = keystorePath.mkdir();
+        log.info("writePrivateKeyPem keystorePath mkdirResult:{}", mkdirResult);
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + PEM_FILE_FORMAT;
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        cryptoKeyPair.storeKeyPairWithPem(exportedKeyPath);
+        return exportedKeyPath;
+    }
+
+    /**
+     * write p12 in ./tempKey
+     * @param p12Password
+     * @param rawPrivateKey raw private key
+     * @param address
+     * @param userName can be empty string
+     * @param cryptoSuite
+     * @return
+     */
+    public static String writePrivateKeyP12(String p12Password, String rawPrivateKey,
+        String address, String userName, CryptoSuite cryptoSuite) {
+
+
+        File keystorePath = new File(TEMP_EXPORT_KEYSTORE_PATH);
+        // delete old private key
+        if (keystorePath.exists()) {
+            boolean result = keystorePath.delete();
+            log.info("writePrivateKeyPem keystorePath delete result:{}", result);
+        }
+        boolean mkdirResult = keystorePath.mkdir();
+        log.info("writePrivateKeyPem keystorePath mkdirResult:{}", mkdirResult);
+        // get private key
+        String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
+            userName + "_" + address + P12_FILE_FORMAT;
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        cryptoKeyPair.storeKeyPairWithP12(exportedKeyPath, p12Password);
+
+        return exportedKeyPath;
     }
 
 }
