@@ -821,7 +821,8 @@ public class CommonUtils {
             boolean result = keystorePath.delete();
             log.info("writePrivateKeyPem keystorePath delete result:{}", result);
         }
-        keystorePath.mkdir();
+        boolean mkdirResult = keystorePath.mkdir();
+        log.info("writePrivateKeyPem keystorePath mkdirResult:{}", mkdirResult);
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + P12_FILE_FORMAT;

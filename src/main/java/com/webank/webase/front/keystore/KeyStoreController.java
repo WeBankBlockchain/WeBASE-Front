@@ -26,6 +26,7 @@ import com.webank.webase.front.keystore.entity.MessageHashInfo;
 import com.webank.webase.front.keystore.entity.ReqExport;
 import com.webank.webase.front.keystore.entity.ReqImportPem;
 import com.webank.webase.front.keystore.entity.ReqImportWithSign;
+import com.webank.webase.front.keystore.entity.RspKeyFile;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.util.CommonUtils;
@@ -198,7 +199,7 @@ public class KeyStoreController extends BaseController {
     @PostMapping("/exportPem")
     public ResponseEntity<InputStreamResource> exportPemPrivateKey(@RequestBody ReqExport param) {
         Instant startTime = Instant.now();
-        log.info("start getSdkCertZip startTime:{}", startTime.toEpochMilli());
+        log.info("start exportPemPrivateKey startTime:{},param:{}", startTime.toEpochMilli(), param);
         String userAddress = param.getUserAddress();
         String signUserId = param.getSignUserId();
         if (StringUtils.isAllBlank(userAddress, signUserId)) {
@@ -221,9 +222,9 @@ public class KeyStoreController extends BaseController {
     @ApiImplicitParam(name = "param", value = "user address and userId and password of p12",
         required = true, dataType = "ReqExport")
     @PostMapping("/exportP12")
-    public ResponseEntity<InputStreamResource> exportP12PrivateKey(@RequestBody ReqExport param) {
+    public BaseResponse exportP12PrivateKey(@RequestBody ReqExport param) {
         Instant startTime = Instant.now();
-        log.info("start getSdkCertZip startTime:{}", startTime.toEpochMilli());
+        log.info("start exportP12PrivateKey startTime:{},param:{}", startTime.toEpochMilli(),param);
         String userAddress = param.getUserAddress();
         String signUserId = param.getSignUserId();
         String p12Password = param.getP12Password();
@@ -234,16 +235,17 @@ public class KeyStoreController extends BaseController {
             throw new FrontException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
         // get file
-        FileContentHandle fileContentHandle;
+        RspKeyFile rspKeyFile;
         if (StringUtils.isNotBlank(signUserId)) {
-            fileContentHandle = keyStoreService.exportP12WithSign(signUserId, p12Password);
+            rspKeyFile = keyStoreService.exportP12WithSign(signUserId, p12Password);
         } else {
-            fileContentHandle = keyStoreService.exportP12Local(userAddress, p12Password);
+            rspKeyFile = keyStoreService.exportP12Local(userAddress, p12Password);
         }
-        log.info("end exportP12PrivateKey fileContentHandle:{}useTime:{}", fileContentHandle,
+        log.info("end exportP12PrivateKey rspKeyFile:{}useTime:{}", rspKeyFile,
             Duration.between(startTime, Instant.now()).toMillis());
-        return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
-            .body(new InputStreamResource(fileContentHandle.getInputStream()));
+        return new BaseResponse(ConstantCode.RET_SUCCESS, rspKeyFile);
+//        return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
+//            .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
 
