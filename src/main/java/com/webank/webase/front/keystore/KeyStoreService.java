@@ -633,7 +633,7 @@ public class KeyStoreService {
     }
 
 
-    public RspKeyFile exportP12WithSign(String signUserId, String p12PasswordEncoded) {
+    public FileContentHandle exportP12WithSign(String signUserId, String p12PasswordEncoded) {
         // decode p12 password
         String p12Password;
         try {
@@ -648,16 +648,15 @@ public class KeyStoreService {
         String rawPrivateKey = rspUserInfo.getPrivateKey();
         String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, "sign", cryptoSuite);
         log.info("exportP12WithSign filePath:{}", filePath);
-        try (InputStream is = new FileInputStream(filePath)) {
-            byte[] fileStreamBytes = IOUtils.toByteArray(is);
-            return new RspKeyFile( address + PEM_FILE_FORMAT, fileStreamBytes);
+        try {
+            return new FileContentHandle(address + P12_FILE_FORMAT, new FileInputStream(filePath));
         } catch (IOException e) {
             log.error("exportP12WithSign fail:[]", e);
             throw new FrontException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);
         }
     }
 
-    public RspKeyFile exportP12Local(String address, String p12PasswordEncoded) {
+    public FileContentHandle exportP12Local(String address, String p12PasswordEncoded) {
         // decode p12 password
         String p12Password;
         try {
@@ -672,9 +671,9 @@ public class KeyStoreService {
         String rawPrivateKey = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
         String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, userName, cryptoSuite);
         log.info("exportP12Local filePath:{}", filePath);
-        try (InputStream is = new FileInputStream(filePath)) {
-            byte[] fileStreamBytes = IOUtils.toByteArray(is);
-            return new RspKeyFile(userName + "_" + address + PEM_FILE_FORMAT, fileStreamBytes);
+        try {
+            return new FileContentHandle(userName + "_" + address + P12_FILE_FORMAT,
+                new FileInputStream(filePath));
         } catch (IOException e) {
             log.error("exportPrivateKeyPem fail:[]", e);
             throw new FrontException(ConstantCode.WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL);

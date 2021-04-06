@@ -222,7 +222,7 @@ public class KeyStoreController extends BaseController {
     @ApiImplicitParam(name = "param", value = "user address and userId and password of p12",
         required = true, dataType = "ReqExport")
     @PostMapping("/exportP12")
-    public BaseResponse exportP12PrivateKey(@RequestBody ReqExport param) {
+    public ResponseEntity<InputStreamResource> exportP12PrivateKey(@RequestBody ReqExport param) {
         Instant startTime = Instant.now();
         log.info("start exportP12PrivateKey startTime:{},param:{}", startTime.toEpochMilli(),param);
         String userAddress = param.getUserAddress();
@@ -235,17 +235,17 @@ public class KeyStoreController extends BaseController {
             throw new FrontException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
         // get file
-        RspKeyFile rspKeyFile;
+        FileContentHandle fileContentHandle;
         if (StringUtils.isNotBlank(signUserId)) {
-            rspKeyFile = keyStoreService.exportP12WithSign(signUserId, p12Password);
+            fileContentHandle = keyStoreService.exportP12WithSign(signUserId, p12Password);
         } else {
-            rspKeyFile = keyStoreService.exportP12Local(userAddress, p12Password);
+            fileContentHandle = keyStoreService.exportP12Local(userAddress, p12Password);
         }
-        log.info("end exportP12PrivateKey rspKeyFile:{}useTime:{}", rspKeyFile,
+        log.info("end exportP12PrivateKey fileContentHandle:{}useTime:{}", fileContentHandle,
             Duration.between(startTime, Instant.now()).toMillis());
-        return new BaseResponse(ConstantCode.RET_SUCCESS, rspKeyFile);
-//        return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
-//            .body(new InputStreamResource(fileContentHandle.getInputStream()));
+//        return new BaseResponse(ConstantCode.RET_SUCCESS, fileContentHandle);
+        return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
+            .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }
 
 
