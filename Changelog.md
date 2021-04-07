@@ -6,7 +6,7 @@
 - 支持导出Pem/P12/WeID私钥
 
 **Fix**
-- 支持导出JavaSDK的java合约文件
+- 支持导出JavaSDK的合约Java文件
 
 **兼容性**
 - 支持FISCO-BCOS v2.4.x 及以上版本
