@@ -1,3 +1,22 @@
+### v1.5.0(2021-04-06)
+
+**Add**
+- 切换到Java SDK
+- 支持导出前置的SDK证书与私钥
+- 支持导出Pem/P12/WeID私钥
+
+**Fix**
+- 支持导出JavaSDK的合约Java文件
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Node-Manager v1.4.1+
+- WeBASE-Sign v1.5.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 ### v1.4.3(2021-01-27)
 
 **Add**
