@@ -42,5 +42,6 @@ h2
 /lib/
 solcjs
 v*.js
+/output/
 
 
