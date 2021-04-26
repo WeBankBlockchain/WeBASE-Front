@@ -89,7 +89,7 @@
                         {{$t('text.expand')}}
                     </template>
                 </div>
-                <div>
+                <div v-if='showCompileText'>
                     <div class="contract-info-list1" v-html="compileinfo">
                     </div>
                     <div class="contract-info-list1" style="color: #F56C6C" v-show="errorInfo">
