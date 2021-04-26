@@ -28,7 +28,9 @@ const state = {
     exportRivateKey: false,
     contractDataList: [],
     worker: null,
-    versionData: null
+    versionData: null,
+    versionId: null,
+    solcName: null
 }
 export default new Vuex.Store({
     state,
@@ -69,6 +71,12 @@ export default new Vuex.Store({
         },
         set_version_data (state,data){
             state.versionData = data
+        },
+        set_versionId(state,data) {
+            state.versionId = data
+        },
+        set_solcName(state,data) {
+            state.solcName = data
         }
     },
     actions: {
@@ -95,6 +103,12 @@ export default new Vuex.Store({
         },
         set_version_data_action(context,data){
             context.commit("set_version_data",data)
+        },
+        set_versionId_action(context,data) {
+            context.commit('set_versionId',data)
+        },
+        set_solcName_action(context,data) {
+            context.commit('set_solcName',data)
         }
     }
 })
