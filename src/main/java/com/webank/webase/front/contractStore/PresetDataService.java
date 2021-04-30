@@ -44,51 +44,20 @@ public class PresetDataService {
             "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
             "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
             "Points Contract suite", "Points Contract suite");
-        insertStoreItem(smartDevId, "SmartDev应用", "Smart_Dev Template", "4", "smartDevId",
-            "Smart-Dev-Contracts仓库中的应用模板",
-            "Smart-Dev-Contract\'s Contract suite of business_template",
-            "Smart-Dev-Contracts仓库中的应用模板",
-                    "Smart-Dev-Contract\'s Contract suite of business_template");
+        insertStoreItem(smartDevId, "SmartDev存证应用", "Smart_Dev_Evidence", "4", "evidenceId",
+            "Smart-Dev-Contracts仓库中的存证应用模板",
+            "Smart-Dev-Contract\'s Evidence Contract suite of business_template",
+            "Smart-Dev-Contracts仓库中的存证应用模板",
+                    "Smart-Dev-Contract\'s Evidence Contract suite of business_template");
     }
-//    public void initStoreItem(int storeId) {
-//        switch (storeId) {
-//            // tool
-//            case 1:
-//                insertStoreItem(toolboxId, "工具箱", "Toolbox", "1", "toolboxId",
-//                "工具箱中有常用的工具合约", "工具箱中有常用的工具合约",
-//                "Toolbox Contract suite", "Toolbox Contract suite");
-//                break;
-//            case 2:
-//                insertStoreItem(evidenceId, "存证应用", "Evidence", "2", "evidenceId",
-//                    "一套区块链存证合约，实现区块链存证、取证",
-//                    "一套区块链存证合约，实现区块链存证、取证",
-//                    "Evidence Contract suite", "Evidence Contract suite");
-//                break;
-//            case 3:
-//                insertStoreItem(pointsId, "积分应用", "Points", "3", "pointsId",
-//                    "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
-//                    "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
-//                    "Points Contract suite", "Points Contract suite");
-//                break;
-//            case 4:
-//                insertStoreItem(smartDevId, "SmartDev应用", "Smart_Dev Template", "4", "smartDevId",
-//                "Smart-Dev-Contracts仓库中的应用模板",
-//                "Smart-Dev-Contract\'s Contract suite of business_template",
-//                "Smart-Dev-Contracts仓库中的应用模板",
-//                "Smart-Dev-Contract\'s Contract suite of business_template");
-//                break;
-//            default:
-//                log.error("not exit storeId:{}", storeId);
-//                break;
-//        }
-//    }
 
     public void insertStoreItem(long storeId, String storeName, String StoreName_en, String StoreType,
                                 String StoreIcon, String StoreDesc, String StoreDetail,String StoreDesc_en,
                                 String StoreDetail_en)
     {
-        if (!contractStoreRepository.exists(storeId)) {
+        if (contractStoreRepository.exists(storeId)) {
             log.info("insertStoreItem skip storeId:{} storeName:{} already exist", storeId, storeName);
+            return;
         }
         StoreItem storeItem = new StoreItem();
         storeItem.setStoreId(storeId);
@@ -141,9 +110,10 @@ public class PresetDataService {
     public void insertContractFolderItem(long contractFolderId, long storeId, String contractFolderName, String contractFolderDesc, String contractFolderDetail,
                                          String contractFolderDesc_en, String contractFolderDetail_en)
     {
-        if (!contractFolderRepository.exists(storeId)) {
+        if (contractFolderRepository.exists(contractFolderId)) {
             log.info("insertContractFolderItem skip contractFolderId:{} contractFolderName:{} storeId:{} already exist",
                 contractFolderId, contractFolderName, storeId);
+            return;
         }
         ContractFolderItem contractFolderItem = new ContractFolderItem();
         contractFolderItem.setContractFolderId(contractFolderId);
@@ -225,9 +195,10 @@ public class PresetDataService {
     public void insertContractItem(long contractId, long contractFolderId, String contractName, String contractSrc,
                                 String contractDesc, String contractDesc_en)
     {
-        if (!contractItemRepository.exists(contractId)) {
+        if (contractItemRepository.exists(contractId)) {
             log.info("insertContractItem skip contractId:{} contractName:{} contractFolderId:{} already exist",
                 contractId, contractName, contractFolderId);
+            return;
         }
         ContractItem contractItem = new ContractItem();
         contractItem.setContractId(contractId);
