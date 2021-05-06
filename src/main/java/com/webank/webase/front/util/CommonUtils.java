@@ -832,4 +832,27 @@ public class CommonUtils {
         return exportedKeyPath;
     }
 
+    /**
+     * delete dir or file whatever
+     * @param dir
+     * @return
+     */
+    public static boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            if (children == null) {
+                return dir.delete();
+            }
+            // recursive delete until dir is emtpy to delete
+            for (int i=0; i<children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        // delete empty dir
+        return dir.delete();
+    }
+
 }
