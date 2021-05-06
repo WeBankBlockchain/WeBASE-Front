@@ -33,8 +33,6 @@ public class ReqProject {
     @NotBlank
     private String artifactName;
     @NotNull
-    private Integer frontId;
-    @NotNull
     private Integer groupId;
     /**
      * channel ip for exported project to connect node
