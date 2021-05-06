@@ -277,7 +277,7 @@ public class FrontCertService {
      */
     public Map<String, String> getSDKCertKeyMap() {
         Map<String, String> sdkCertMap = new HashMap<>();
-        log.debug("start getSDKCertKeyMap.");
+        log.info("start getSDKCertKeyMap sslType:{}.", bcosSDK.getSSLCryptoType() );
         // add sdk cert: node.crt
         loadBareSdkContent(frontSdkNodeCrt, sdkCertMap);
         loadBareSdkContent(frontSdkNodeKey, sdkCertMap);

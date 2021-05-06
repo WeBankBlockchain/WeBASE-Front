@@ -43,6 +43,5 @@ public class ReqProject {
     /**
      * select multi user to export in project by p12 format
      */
-    @NotNull
     private List<String> userAddressList;
 }

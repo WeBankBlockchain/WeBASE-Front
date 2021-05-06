@@ -39,6 +39,7 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -51,6 +52,7 @@ import org.springframework.stereotype.Service;
 public class ScaffoldService {
     @Autowired
     private ContractService contractService;
+    @Qualifier("common")
     @Autowired
     private CryptoSuite cryptoSuite;
     @Autowired
