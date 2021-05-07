@@ -151,7 +151,7 @@ public class ConstantCode {
     public static final RetCode WRITE_SDK_CRT_KEY_FILE_FAIL = RetCode.mark(201156,"Write front's sdk cert and key fail!");
     public static final RetCode WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL = RetCode.mark(201157,"Write private key file fail!");
     // add in v1.5.1
-    public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(201161, "directory of project's artifact name already exist");
+    public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(201161, "generate project failed in scaffold");
 
 
     /* precompiled runtime check or error */
