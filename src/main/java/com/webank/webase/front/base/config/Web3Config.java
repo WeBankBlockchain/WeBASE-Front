@@ -18,6 +18,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import io.netty.channel.ChannelHandlerContext;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -142,18 +143,6 @@ public class Web3Config {
         int encryptType = bcosSDK.getClient(1).getGroupManagerService().getCryptoType(ip + ":" + channelPort);
         log.info("init encrypt type:{}", encryptType);
         return new CryptoSuite(encryptType);
-//        List<String> groupList = Client
-//            .build(bcosSDK.getChannel())
-//            .getGroupList()
-//            .getGroupList();
-//        if (groupList.isEmpty()) {
-//            log.error("no group belongs to this node!");
-//            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-//        }
-//        int randomGroupId = Integer.parseInt(groupList.get(0));
-//        CryptoSuite cryptoSuite = bcosSDK.getClient(randomGroupId).getCryptoSuite();
-//        log.info("init encrypt type:{}", cryptoSuite.getCryptoTypeConfig());
-//        return cryptoSuite;
     }
 
     @Bean(name = "rpcClient")
