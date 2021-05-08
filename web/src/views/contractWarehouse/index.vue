@@ -56,7 +56,7 @@
 <script>
 import contentHead from "@/components/contentHead";
 import Bus from "@/bus"
-import { getContractStore, getContractItemByFolderId, batchSaveContract } from "@/util/api"
+import { getContractStore, getContractItemByFolderId, batchSaveContract, getFolderItemListByStoreId } from "@/util/api"
 import Folder from "@/components/Folder";
 export default {
     name: 'contractWarehouse',
@@ -147,7 +147,7 @@ export default {
                 query: {
                     storeId: val.storeId,
                     storeType: val.storeType,
-                    storeName: val.storeName
+                    storeName: this.language != 'en'? val.storeName : val.storeName_en 
                 }
             })
 
@@ -158,10 +158,29 @@ export default {
         success(val) {
             this.folderVisible = false;
             this.folderName = val;
-            this.queryContract()
+            this.queryContractFolder()
         },
-        queryContract() {
-            getContractItemByFolderId(this.folderItem.storeId)
+        //通过合约仓库id 获取合约文件夹
+        queryContractFolder() {
+            getFolderItemListByStoreId(this.folderItem.storeId)
+                .then(res => {
+                    if (res.data.code === 0) {
+                        let list = res.data.data;
+                        if (list.length) {
+                            var contractFolderId = list[0]['contractFolderId'];
+                            this.queryContract(contractFolderId)
+                        }
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+                })
+        },
+        //通过合约文件夹id 获取合约列表
+        queryContract(contractFolderId) {
+            getContractItemByFolderId(contractFolderId)
                 .then(res => {
                     if (res.data.code === 0) {
                         var folderContract = res.data.data;
@@ -222,12 +241,16 @@ export default {
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
+    height: 125px;
 }
 .left-warehouse {
     margin-left: 10px;
+    height: 100%;
 }
 .right-warehouse {
     margin-left: 20px;
+    padding-right: 10px;
+    
 }
 .el-row {
     /* margin-bottom: 20px; */
@@ -252,5 +275,6 @@ export default {
 }
 .store-desc {
     font-size: 12px;
+    height: 34px;
 }
 </style>

@@ -15,7 +15,7 @@
  */
 <template>
     <div class="contract-content" v-loading="loading">
-        <v-content-head :headTitle="$t('route.toolsContract')" @changeGroup="changeGroup" :icon="true"></v-content-head>
+        <v-content-head :headTitle="urlQuery.storeName" @changeGroup="changeGroup" :icon="true"></v-content-head>
         <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}">
             <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide" :urlQuery="urlQuery">
             </v-menu>

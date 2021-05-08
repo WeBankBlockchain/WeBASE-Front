@@ -115,8 +115,8 @@ export default {
                     if (res.data.code === 0) {
                         let list = res.data.data;
                         if (list.length) {
-                            list.forEach(item => {
-                                item.folderIcon = 'el-icon-caret-bottom';
+                            list.forEach((item, index) => {
+                                item.folderIcon = index ==0 ? 'el-icon-caret-bottom':'el-icon-caret-right';
                                 item.contractActive = false;
                                 item.folderActive = false;
                                 item.child = [];
@@ -146,7 +146,7 @@ export default {
                 this.$set(val, 'folderIcon', 'el-icon-caret-bottom')
                 this.queryContract(val, 'open');
             }
-            this.$set(val, 'contractActive', true);
+            // this.$set(val, 'contractActive', true);
         },
         select(val) {
             this.folderList.forEach(value => {
@@ -370,7 +370,7 @@ export default {
 .contract-menu-handle {
     position: fixed;
     font-size: 0;
-    width: 70px;
+    width: 84px;
     cursor: pointer;
     font-size: 12px;
     text-align: center;

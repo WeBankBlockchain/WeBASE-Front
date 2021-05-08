@@ -68,7 +68,7 @@ export default {
             menuHide: true,
             changeWidth: false,
             contractHide: false,
-            menuWidth: 240,
+            menuWidth: 290,
             urlQuery: this.$root.$route.query,
             loading: false,
             allVersion: [],
