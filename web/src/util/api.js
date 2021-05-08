@@ -1010,3 +1010,17 @@ export function exportCertSdk() {
         responseType: 'blob'
     })
 }
+
+/**
+ * @method 导出合约项目
+ */
+export function exportJavaProject(data) {
+    return get({
+        url: `${HANDLE}scaffold/export`,
+        method: 'post',
+        data: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || "",
+        }
+    })
+}

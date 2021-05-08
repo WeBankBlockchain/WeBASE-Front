@@ -146,7 +146,7 @@ export default {
         }
     },
     created() {
-      this.encryptionId = localStorage.getItem("encryptionId")
+        this.encryptionId = localStorage.getItem("encryptionId")
       this.$store.dispatch('set_versionId_action',localStorage.getItem("versionId"))
       this.$store.dispatch('set_versionId_action',localStorage.getItem("solcName"))
     },
@@ -158,14 +158,13 @@ export default {
         getEncryption: function () {
             encryption().then(res => {
                 if (res.status == 200) {
-                    if (res.data != this.encryptionId) {
+                     if (res.data != this.encryptionId) {
                         localStorage.setItem('solcName', '')
                         localStorage.setItem('versionId', null)
                         this.$store.dispatch('set_versionId_action',localStorage.getItem("versionId"))
                         this.$store.dispatch('set_versionId_action',localStorage.getItem("solcName"))
                     }
                     localStorage.setItem("encryptionId", res.data)
-
                 } else {
                     this.$message({
                         type: "error",
