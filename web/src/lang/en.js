@@ -230,7 +230,8 @@ export default {
         checkEventResult: 'Event',
         eventName: 'Event Name',
         transactionReceipt: 'Transactions Receipt',
-        mgmtCns: "Mgmt CNS"
+        mgmtCns: "Mgmt CNS",
+        exportJavaProject: "Export java project",
     },
     text: {
         isRedeploy: 'Has the contract been deployed or redeployed?',
@@ -350,7 +351,23 @@ export default {
         hexType: "Hex",
         exportWeid: "Support import in WeID",
         title: "Title",
-        versionError: 'The Solc version failed to load. Please check whether the corresponding contract version exists in the "/static/js" directory'
+        versionError: 'The Solc version failed to load. Please check whether the corresponding contract version exists in the "/static/js" directory',
+        exportJavaProject: "Export java project",
+        exportJavaProjectInfo1: 'Please select the relevant contract to export and generate java project',
+        exportJavaProjectInfo2: 'Note: only compiled contracts can be used to export Java projects',
+        projectName: "Project nmae",
+        projectGroupName: 'Group name',
+        projectUser: 'user',
+        projectFront: 'front',
+        projectContract: 'Select contract',
+        compileStatus: 'Compilation status',
+        compiled: 'Compiled',
+        uncomplie: 'Not compiled',
+        projectFolder: 'Folder',
+        importSuccessed: 'Import Successed',
+        exportSuccessed: 'export Successed',
+        updateSuccess: 'update Success',
+        select: "select",
     },
     contracts: {
         createFile: "Create File",
@@ -412,7 +429,10 @@ export default {
         operation: "Operate",
         limit_1: "Only one file can be uploaded at a time",
         exportToIde: "Export To IDE",
-        folder: "Folder"
+        folder: "Folder",
+        importContractTitle: 'Import from Github',
+        importContractDec: 'Enter the github URL you would like to load.',
+        importContractEg: 'e.g',
     },
     rule: {
         textLong: "1 to 32 characters in length",
@@ -435,6 +455,7 @@ export default {
         contractAbi: "Please enter the contract ABI",
         contractLong: "1 to 32 characters in length",
         contractRule: "Contract name does not conform to the rules",
+        IpRule: "Please enter the correct IP",
         folderName: "Please enter a folder name",
         folderLong: "1 to 12 characters in length",
         folderRule: "Folder name does not conform to the rules",
@@ -456,6 +477,10 @@ export default {
         inputIsNumber: 'Input is not a number',
         inputIsAddress: 'Input is not address',
         inputIsJson: 'Input is not JSON',
+        artifactName: 'Please enter project name',
+        group: 'Please enter group name',
+        frontId: 'Please check front',
+        checkContract: 'Please check contract'
     },
     nodes: {
         nodeFront: "Front Node",

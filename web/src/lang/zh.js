@@ -228,7 +228,8 @@ export default {
         uploadSolc: '上传不同版本编译器',
         checkEvent: 'Event查看',
         transactionReceipt: '交易回执',
-        mgmtCns: "管理CNS"
+        mgmtCns: "管理CNS",
+        exportJavaProject: "导出java项目",
     },
     text: {
         isRedeploy: '合约已部署 是否重新部署？',
@@ -349,7 +350,23 @@ export default {
         hexType: "十六进制",
         exportWeid: "支持在WeID中导入",
         title: "提示",
-        versionError: 'Solc版本加载失败，请检查/static/js目录中是否存在对应的合约版本'
+        versionError: 'Solc版本加载失败，请检查/static/js目录中是否存在对应的合约版本',
+        exportJavaProject: "导出java项目",
+        exportJavaProjectInfo1: '请选择相关合约导出生成java项目',
+        exportJavaProjectInfo2: '注意：已编译的合约才能用于导出Java项目',
+        projectName: "项目名称",
+        projectGroupName: '包名',
+        projectUser: '用户',
+        projectFront: 'front前置',
+        projectContract: '选择合约',
+        compileStatus: '编译状态',
+        compiled: '已编译',
+        uncomplie: '未编译',
+        projectFolder: '文件夹名',
+        importSuccessed: '导入成功',
+        exportSuccessed: '导出成功',
+        updateSuccess: '成功',
+        select: "请选择",
     },
     contracts: {
         createFile: "新建文件",
@@ -411,7 +428,10 @@ export default {
         operation: "操作",
         limit_1: "每次最多只能上传一个文件",
         exportToIde: "导出到IDE",
-        folder: "目录"
+        folder: "目录",
+        importContractTitle: '从Github导入',
+        importContractDec: '输入要加载的github URL。',
+        importContractEg: '例如',
     },
     rule: {
         textLong: "长度在 1 到 32 个字符",
@@ -434,6 +454,7 @@ export default {
         contractAbi: "请输入合约ABI",
         contractLong: "长度在 1 到 32 个字符",
         contractRule: "合约名不符合规则",
+        IpRule: "请输入正确的IP",
         folderName: "请输入文件夹名称",
         folderLong: "长度在 1 到 12 个字符",
         folderRule: "文件夹名不符合规则",
@@ -455,6 +476,10 @@ export default {
         inputIsNumber: '输入不是数字',
         inputIsAddress: '输入不是Address',
         inputIsJson: '输入不是JSON',
+        artifactName: '请输入项目名称',
+        group: '请输入包名称',
+        frontId: '请选择前置',
+        checkContract: '请选择合约'
     },
     nodes: {
         nodeFront: "节点前置",
