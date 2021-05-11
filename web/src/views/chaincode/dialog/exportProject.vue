@@ -236,6 +236,24 @@ export default {
                         }
                     });
                     this.$set(this.tableData, num, row)
+                    var selectedDirectoryInfo = {}
+                    var rootDirectoryInfo = {}
+                    for (var i = 0; i < this.tableData.length; i++) {
+                        if (this.tableData[i]['contractPath'] == row.contractPath) {
+                            selectedDirectoryInfo = this.tableData[i]
+                            this.tableData.splice(i, 1); 
+                            break;
+                        }
+                    }
+                    this.tableData.unshift(selectedDirectoryInfo);
+                    for (var i = 0; i < this.tableData.length; i++) {
+                        if (this.tableData[i]['contractPath'] == '/') {
+                            rootDirectoryInfo = this.tableData[i]
+                            this.tableData.splice(i, 1); 
+                            break;
+                        }
+                    }
+                    this.tableData.unshift(rootDirectoryInfo);
                 } else {
                     this.$message({
                         type: "error",
