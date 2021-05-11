@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=./static/image/webase_35x35.png type=image/x-icon><title>节点控制台</title><script src=./static/js/base-loading.js></script><link rel=stylesheet type=text/css href=./static/css/reset.css><link rel=stylesheet type=text/css href=./static/css/base.css><style id=antiClickjack>body {
+<!DOCTYPE html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=./static/image/webase_35x35.png type=image/x-icon><title>节点控制台</title><script src=./static/js/base-loading.js></script><script src=./static/js/browserfs.min.js></script><link rel=stylesheet type=text/css href=./static/css/reset.css><link rel=stylesheet type=text/css href=./static/css/base.css><style id=antiClickjack>body {
             display: none !important;
         }</style><style type=text/css>.icon {
             width: 1em;
@@ -15,7 +15,7 @@
             vertical-align: -0.15em;
             fill: currentColor;
             overflow: hidden;
-        }</style></head><body><body><div id=app style="height: 100% !important;"></div><script type=text/javascript src=./static/js/0.e08ae2f7ee218c26f369.js></script><script type=text/javascript src=./static/js/2.65b5f81a99b9b01486d2.js></script><script type=text/javascript src=./static/js/runtime.ea40d4519459d9490382.js></script><script type=text/javascript src=./static/js/4.645cd1ac17b20edb9407.js></script></body><script>if (self == top) {
+        }</style></head><body><body><div id=app style="height: 100% !important;"></div><script type=text/javascript src=./static/js/0.a4fc07ad6326e36f2dbd.js></script><script type=text/javascript src=./static/js/2.af59676c85797c2757cc.js></script><script type=text/javascript src=./static/js/runtime.116f9c3b22f1a7c55522.js></script><script type=text/javascript src=./static/js/4.1d1bffd57756b3936b5e.js></script></body><script>if (self == top) {
             var antiClickjack = document.getElementById("antiClickjack");
             antiClickjack.parentNode.removeChild(antiClickjack);
         } else {
@@ -30,4 +30,13 @@
         };
         if ((!!window.ActiveXObject || "ActiveXObject" in window) && jsSrc != 'zh-cn') {
             alert("This system does not support IE browser, please use Chrome, Firefox, Safari or Opera.");
-        };</script></body></html>
+        }; 
+        window.onload = () => {
+                BrowserFS.install(window)
+                BrowserFS.configure({
+                    fs: "LocalStorage"
+                }, function (e) {
+                    if (e) console.log(e)
+                    window.remixFileSystem = require('fs')
+                })
+            }</script></body></html>

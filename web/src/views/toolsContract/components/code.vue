@@ -149,6 +149,7 @@ export default {
             }
         })
         Bus.$on('select', data => {
+            console.log(data.contractSrc);
             this.codeShow = true;
             this.code = "";
             this.contractName = "";

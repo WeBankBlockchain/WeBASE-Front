@@ -1,7 +1,7 @@
 <template>
     <div>
         <el-dialog :title="$t('text.exportJavaProject')" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="750px">
-            <h3 style="padding-left: 18px">项目信息</h3>
+            <h3 style="padding-left: 18px">{{$t('text.projectTitle')}}</h3>
             <el-form :model="projectFrom" :rules="rules" ref="projectFrom" label-width="116px" class="demo-ruleForm">
                 <el-form-item :label="$t('text.projectName')" prop="artifactName">
                     <el-input v-model="projectFrom.artifactName" style="width: 300px"></el-input>
@@ -9,8 +9,12 @@
                 <el-form-item :label="$t('text.projectGroupName')" prop="group">
                     <el-input v-model="projectFrom.group" style="width: 300px"></el-input>
                 </el-form-item>
+                
                 <el-form-item label="channelIp" prop="channelIp">
                     <el-input v-model="projectFrom.channelIp" style="width: 300px"></el-input>
+                     <el-tooltip effect="dark" :content="$t('text.actualChannelIp')" placement="top-start">
+                        <i class="el-icon-info"></i>
+                    </el-tooltip>
                 </el-form-item>
                 <el-form-item :label="$t('text.projectUser')">
                     <el-select v-model="projectFrom.userAddress" :placeholder="$t('text.select')" style="width: 300px">
@@ -94,7 +98,7 @@ export default {
                 artifactName: "demo",
                 group: 'org_example',
                 userAddress: [],
-                channelIp: '',
+                channelIp: '127.0.0.1',
             },
             rules: {
                 artifactName: [
