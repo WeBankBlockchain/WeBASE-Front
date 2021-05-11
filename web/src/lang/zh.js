@@ -171,6 +171,8 @@ export default {
         cnsVersionPattern: "数字字母和英文字母'.'组成",
         cnsName: '请输入CNS名称',
         length1_10: '长度在 1 到 10 个字符',
+        outUrl: "地址",
+
     },
     placeholder: {
         globalSearch: '请输入 Block Number 或 Tx Hash',
@@ -367,6 +369,9 @@ export default {
         exportSuccessed: '导出成功',
         updateSuccess: '成功',
         select: "请选择",
+        overtime: '超时',
+        actualChannelIp: '根据实际channelIp修改',
+        projectTitle: '项目信息'
     },
     contracts: {
         createFile: "新建文件",
@@ -453,7 +458,7 @@ export default {
         contractAddress: "请输入合约地址",
         contractAbi: "请输入合约ABI",
         contractLong: "长度在 1 到 32 个字符",
-        contractRule: "合约名不符合规则",
+        contractRule: "请输入数字、字母或下划线",
         IpRule: "请输入正确的IP",
         folderName: "请输入文件夹名称",
         folderLong: "长度在 1 到 12 个字符",
@@ -479,7 +484,8 @@ export default {
         artifactName: '请输入项目名称',
         group: '请输入包名称',
         frontId: '请选择前置',
-        checkContract: '请选择合约'
+        checkContract: '请选择合约',
+        urlRule: "请输入正确的地址",
     },
     nodes: {
         nodeFront: "节点前置",

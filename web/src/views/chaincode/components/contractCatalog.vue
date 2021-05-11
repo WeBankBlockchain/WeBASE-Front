@@ -96,7 +96,7 @@
         :folderList='pathList'
         @close='exportProjectShowClose'></export-project>
         <el-dialog v-if="importFromDialog" :title="$t('contracts.importContractTitle')" :visible.sync="importFromDialog" width="470px" center class="send-dialog">
-            <import-from></import-from>
+            <import-from @modelClose="modelClose" @exportSuccessed="exportSuccessed"></import-from>
         </el-dialog>
         
     </div>
@@ -1227,6 +1227,13 @@ export default {
         },
         fromGitHub() {
             this.importFromDialog = true;
+        },
+        modelClose(){
+            this.importFromDialog = false;
+        },
+        exportSuccessed() {
+            this.importFromDialog = false;
+            this.getContractPaths()
         }
     }
 };

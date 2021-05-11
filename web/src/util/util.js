@@ -326,3 +326,21 @@ export function dataType(type, value) {
             break;
     }
 }
+
+export function getUrlLastValue(url) {
+    var index = url.lastIndexOf("\/");
+    var str = url.substring(index + 1, url.length);
+    var name = str.substring(0, str.lastIndexOf("."))
+    return name;
+}
+
+export function timestampUrl(url) {
+    //  var getTimestamp=Math.random();
+    var getTimestamp = new Date().getTime();
+    if (url.indexOf("?") > -1) {
+        url = url + "&timestamp=" + getTimestamp
+    } else {
+        url = url + "?timestamp=" + getTimestamp
+    }
+    return url;
+}

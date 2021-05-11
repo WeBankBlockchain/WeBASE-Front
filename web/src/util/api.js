@@ -1024,3 +1024,16 @@ export function exportJavaProject(data) {
         }
     })
 }
+
+
+/**
+ * 
+ */
+export function exportOutContract(url) {
+    console.log('url', url);
+    return get({
+        url: `${url}`,
+        method: 'get',
+        responseType: 'application/json;charset=UTF-8'
+    })
+}

@@ -171,6 +171,7 @@ export default {
         cnsVersionPattern: "It can only be numbers, letters and '.'",
         cnsName: 'Please enter CNS name',
         length1_10: 'The length is between 1 and 10 character',
+        outUrl: "Url"
     },
     placeholder: {
         globalSearch: 'Search by Block Number / Tx Hash',
@@ -368,6 +369,9 @@ export default {
         exportSuccessed: 'export Successed',
         updateSuccess: 'update Success',
         select: "select",
+        overtime: 'overtime',
+        actualChannelIp: 'Modify according to the actual channelip',
+        projectTitle: 'Project Info'
     },
     contracts: {
         createFile: "Create File",
@@ -454,7 +458,7 @@ export default {
         contractAddress: "Please enter the contract address",
         contractAbi: "Please enter the contract ABI",
         contractLong: "1 to 32 characters in length",
-        contractRule: "Contract name does not conform to the rules",
+        contractRule: "Please enter numbers, letters or underscores",
         IpRule: "Please enter the correct IP",
         folderName: "Please enter a folder name",
         folderLong: "1 to 12 characters in length",
@@ -480,7 +484,8 @@ export default {
         artifactName: 'Please enter project name',
         group: 'Please enter group name',
         frontId: 'Please check front',
-        checkContract: 'Please check contract'
+        checkContract: 'Please check contract',
+        urlRule: "Please enter the URL",
     },
     nodes: {
         nodeFront: "Front Node",

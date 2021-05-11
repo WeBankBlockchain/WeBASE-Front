@@ -71,8 +71,6 @@ import mavonEditor from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 Vue.use(mavonEditor)
 /* eslint-disable no-new */
-const fs = require('fs');
-console.log('main:', fs);
 new Vue({
     el: '#app',
     router,
