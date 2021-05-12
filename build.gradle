@@ -105,6 +105,9 @@ dependencies {
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
     // cover low version guava
     compile 'com.google.guava:guava:29.0-jre'
+    // add scaffold
+    compile ('com.webank.webase:solscaffold:1.0.0-SNAPSHOT')
+    compile ('com.webank:solc-gradle-plugin:1.0.0-SNAPSHOT')
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
@@ -134,9 +137,6 @@ clean {
     delete 'log'
 }
 
-def isWindows() {
-    return org.gradle.internal.os.OperatingSystem.current().isWindows()
-}
 
 jar {
     destinationDir file('dist/apps')
@@ -151,18 +151,10 @@ jar {
             exclude '**/static'
         }
         downloadJs()
-//        if (isWindows()) {
-//            println "[WARN]Jump over download solidity js in src/main/resources/static/static/js"
-//            downloadForWin()
-//            println "[WARN]You need to run bash get_solc_js.sh in dist"
-//        } else {
-//            def command = "bash get_solc_js.sh -o src/main/resources/static/static/js"
-//            exec {
-//                ExecSpec execSpec ->
-//                    executable 'bash'
-//                    args '-c', command
-//            }
-//        }
+        copy {
+            from file('gradle')
+            into 'dist/gradle'
+        }
         copy {
             from file('src/main/resources/static')
             into 'dist/static'
