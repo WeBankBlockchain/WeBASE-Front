@@ -89,9 +89,14 @@ List tomcat = [
     "org.apache.tomcat:tomcat-juli:$tomcat_version"
 ]
 
-dependencies {
-    compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat
+List scaffold = [
+    'com.webank.webase:solscaffold:1.0.0-SNAPSHOT',
+    'com.webank:SmartDev-Scaffold:1.0.0-SNAPSHOT',
+    'com.webank:solc-gradle-plugin:1.0.0-SNAPSHOT'
+]
 
+dependencies {
+    compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat,scaffold
     compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2'
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
@@ -133,9 +138,6 @@ clean {
     delete 'log'
 }
 
-def isWindows() {
-    return org.gradle.internal.os.OperatingSystem.current().isWindows()
-}
 
 jar {
     destinationDir file('dist/apps')
@@ -150,18 +152,10 @@ jar {
             exclude '**/static'
         }
         downloadJs()
-//        if (isWindows()) {
-//            println "[WARN]Jump over download solidity js in src/main/resources/static/static/js"
-//            downloadForWin()
-//            println "[WARN]You need to run bash get_solc_js.sh in dist"
-//        } else {
-//            def command = "bash get_solc_js.sh -o src/main/resources/static/static/js"
-//            exec {
-//                ExecSpec execSpec ->
-//                    executable 'bash'
-//                    args '-c', command
-//            }
-//        }
+        copy {
+            from file('gradle')
+            into 'dist/gradle'
+        }
         copy {
             from file('src/main/resources/static')
             into 'dist/static'
