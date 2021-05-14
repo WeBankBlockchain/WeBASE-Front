@@ -245,7 +245,9 @@ export default {
                             break;
                         }
                     }
-                    this.tableData.unshift(selectedDirectoryInfo);
+                    if(Object.keys(selectedDirectoryInfo).length > 0){
+                        this.tableData.unshift(selectedDirectoryInfo);
+                    }
                     for (var i = 0; i < this.tableData.length; i++) {
                         if (this.tableData[i]['contractPath'] == '/') {
                             rootDirectoryInfo = this.tableData[i]
@@ -253,7 +255,10 @@ export default {
                             break;
                         }
                     }
-                    this.tableData.unshift(rootDirectoryInfo);
+                    if(Object.keys(rootDirectoryInfo).length > 0){
+                        this.tableData.unshift(rootDirectoryInfo);
+                    }
+                    
                 } else {
                     this.$message({
                         type: "error",

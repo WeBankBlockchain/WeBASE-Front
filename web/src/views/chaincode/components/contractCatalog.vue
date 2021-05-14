@@ -241,7 +241,6 @@ export default {
             this.handleModel = false;
         },
         handle(e, list) {
-            console.log(e, list);
             this.checkNull()
             list.handleModel = true
             if (e.clientX > 201) {
@@ -690,7 +689,6 @@ export default {
                 // pageNumber: 1,
                 // pageSize: 500
             };
-            console.log(path)
             if (path && this.$store.state.contractDataList.length > 0) {
                 data.contractPathList = [path]
             } else if (path && this.$store.state.contractDataList.length == 0) {
@@ -820,7 +818,6 @@ export default {
             this.fileClose();
         },
         createFolder(val) {
-            console.log(val)
             let result = [];
             this.folderList.forEach((value, index) => {
                 let num = 0;
@@ -854,7 +851,6 @@ export default {
             return result;
         },
         open(val) {
-            console.log(val)
             sessionStorage.setItem("selectData", "")
             if (val.contractName != "/" && val.contractPath != "/") {
                 this.getContracts(val.contractName, val);
@@ -1151,7 +1147,6 @@ export default {
             return false;
         },
         deleteSloc(val) {
-            console.log(val)
         },
         exportFile(val) {
             this.$confirm(`${this.$t('dialog.sureExport')}？`)

@@ -658,7 +658,8 @@ export default {
         },
         //v0.4.25 v0.5.1
         compileLowVersion: function (callback) {
-
+            console.log('656:wrapper:', wrapper);
+            console.log('656:Module:', window, window.Module);
             let wrapper = require("solc/wrapper");
             let solc = wrapper(window.Module);
 
