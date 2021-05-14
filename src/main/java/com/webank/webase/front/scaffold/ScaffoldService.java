@@ -14,8 +14,8 @@
 
 package com.webank.webase.front.scaffold;
 
-import com.webank.scaffold.artifact.webase.NewMainResourceDir.ContractInfo;
-import com.webank.scaffold.factory.ProjectFactory;
+import com.webank.scaffold.artifact.NewMainResourceDir.ContractInfo;
+import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.exception.FrontException;
@@ -143,7 +143,7 @@ public class ScaffoldService {
         log.info("generateProject sdkMap size:{}", sdkMap.size());
         List<ContractInfo> contractInfoList = this.handleContractList(tbContractList);
         String frontChannelIpPort = nodeConfig.getP2pip() + ":" + nodeConfig.getChannelPort();
-        ProjectFactory projectFactory = new ProjectFactory();
+        WebaseProjectFactory projectFactory = new WebaseProjectFactory();
         log.info("generateProject projectGroup:{},artifactName:{},OUTPUT_DIR:{},frontChannelIpPort:{},groupId:{}",
             projectGroup, artifactName, OUTPUT_DIR, frontChannelIpPort, groupId);
         try {

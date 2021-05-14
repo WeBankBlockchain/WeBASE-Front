@@ -89,8 +89,14 @@ List tomcat = [
     "org.apache.tomcat:tomcat-juli:$tomcat_version"
 ]
 
+List scaffold = [
+    'com.webank.webase:solscaffold:1.0.0-SNAPSHOT',
+    'com.webank:SmartDev-Scaffold:1.0.0-SNAPSHOT',
+    'com.webank:solc-gradle-plugin:1.0.0-SNAPSHOT'
+]
+
 dependencies {
-    compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat
+    compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat,scaffold
     compile 'org.fisco-bcos.java-sdk:fisco-bcos-sdk-crypto:2.7.1-SNAPSHOT'
 
     compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2'
@@ -105,9 +111,6 @@ dependencies {
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
     // cover low version guava
     compile 'com.google.guava:guava:29.0-jre'
-    // add scaffold
-    compile ('com.webank.webase:solscaffold:1.0.0-SNAPSHOT')
-    compile ('com.webank:solc-gradle-plugin:1.0.0-SNAPSHOT')
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }

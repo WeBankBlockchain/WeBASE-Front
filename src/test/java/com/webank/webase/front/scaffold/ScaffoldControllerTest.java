@@ -47,7 +47,6 @@ public class ScaffoldControllerTest extends SpringTestBase {
         param.setArtifactName("demo");
         param.setGroup("org.webank");
         param.setContractIdList(Collections.singletonList(1));
-        param.setFrontId(1);
         param.setGroupId(1);
         ResultActions resultActions = mockMvc.perform(
             MockMvcRequestBuilders.post( "/scaffold/export").
