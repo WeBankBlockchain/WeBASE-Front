@@ -59,6 +59,10 @@ export default {
             } else {
                 this.menuWidth = 0;
             }
+        },
+        getVersionId() {
+            this.version = localStorage.getItem('solcName');
+            this.versionId = localStorage.getItem('versionId')
         }
     },
     data: function () {
@@ -68,7 +72,7 @@ export default {
             menuHide: true,
             changeWidth: false,
             contractHide: false,
-            menuWidth: 240,
+            menuWidth: 290,
             urlQuery: this.$root.$route.query,
             loading: false,
             allVersion: [],
@@ -88,6 +92,9 @@ export default {
             } else {
                 return `100%`;
             }
+        },
+        getVersionId() {
+            return this.$store.state.versionId
         }
     },
     beforeDestroy: function () {
