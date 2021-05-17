@@ -21,6 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
@@ -140,7 +141,10 @@ public class Web3Config {
      */
     @Bean(name = "common")
     public CryptoSuite getCommonSuite(BcosSDK bcosSDK) {
-        int encryptType = bcosSDK.getClient(1).getGroupManagerService().getCryptoType(ip + ":" + channelPort);
+        Iterator<Integer> groupIdList = bcosSDK.getGroupManagerService().getGroupList().iterator();
+        int tempGroupId = groupIdList.hasNext() ? groupIdList.next() : 1;
+        log.info("init encrypt type tempGroupId:{}", tempGroupId);
+        int encryptType = bcosSDK.getClient(tempGroupId).getGroupManagerService().getCryptoType(ip + ":" + channelPort);
         log.info("init encrypt type:{}", encryptType);
         return new CryptoSuite(encryptType);
     }
