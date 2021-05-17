@@ -86,6 +86,7 @@ export default {
             loading: false,
             accountStatus: sessionStorage.getItem("accountStatus"),
             account: localStorage.getItem("user"),
+            encryptionId: null,
             rulePasswordForm: {
                 oldPass: "",
                 pass: "",
@@ -145,9 +146,9 @@ export default {
         }
     },
     created() {
-        // 清理合约version
-        localStorage.setItem('solcName', '')
-        localStorage.setItem('versionId', null)
+        this.encryptionId = localStorage.getItem("encryptionId")
+      this.$store.dispatch('set_versionId_action',localStorage.getItem("versionId"))
+      this.$store.dispatch('set_versionId_action',localStorage.getItem("solcName"))
     },
     mounted() {
         this.accountStatus = sessionStorage.getItem("accountStatus");
@@ -157,9 +158,11 @@ export default {
         getEncryption: function () {
             encryption().then(res => {
                 if (res.status == 200) {
-                    if (res.data != localStorage.getItem("encryptionId")) {
-                        localStorage.removeItem('solcName')
-                        localStorage.removeItem('versionId')
+                     if (res.data != this.encryptionId) {
+                        localStorage.setItem('solcName', '')
+                        localStorage.setItem('versionId', null)
+                        this.$store.dispatch('set_versionId_action',localStorage.getItem("versionId"))
+                        this.$store.dispatch('set_versionId_action',localStorage.getItem("solcName"))
                     }
                     localStorage.setItem("encryptionId", res.data)
                 } else {
