@@ -448,6 +448,8 @@ export default {
         ipRule: "ip不符合规则",
         portName: "请输入端口名称",
         portLong: "长度在 1 到 12 个数字",
+        portRule: "端口请输入1-65535之内的数字",
+        isPort: "请输入端口",
         portRule: "端口不符合规则",
         agencyName: "请输入机构名称",
         agencyLong: "长度在 1 到 16 位",

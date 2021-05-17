@@ -448,6 +448,8 @@ export default {
         ipRule: "IP does not comply with rules",
         portName: "Please enter the port name",
         portLong: "1 to 12 digits in length",
+        portRule: "Please enter a number from 1 to 65535",
+        isPort: "Please enter port",
         portRule: "Port does not comply with rules",
         agencyName: "Please enter the agency name",
         agencyLong: "1 to 16 digits in length",

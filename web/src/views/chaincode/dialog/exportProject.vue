@@ -9,12 +9,15 @@
                 <el-form-item :label="$t('text.projectGroupName')" prop="group">
                     <el-input v-model="projectFrom.group" style="width: 300px"></el-input>
                 </el-form-item>
-                
+
                 <el-form-item label="channelIp" prop="channelIp">
                     <el-input v-model="projectFrom.channelIp" style="width: 300px"></el-input>
-                     <el-tooltip effect="dark" :content="$t('text.actualChannelIp')" placement="top-start">
+                    <el-tooltip effect="dark" :content="$t('text.actualChannelIp')" placement="top-start">
                         <i class="el-icon-info"></i>
                     </el-tooltip>
+                </el-form-item>
+                <el-form-item label="channelPort" prop="channelPort">
+                    <el-input v-model="projectFrom.channelPort" :disabled="queryPort ? true : false " style="width: 300px"></el-input>
                 </el-form-item>
                 <el-form-item :label="$t('text.projectUser')">
                     <el-select v-model="projectFrom.userAddress" :placeholder="$t('text.select')" style="width: 300px">
@@ -62,7 +65,7 @@
 </template>
 
 <script>
-import { searchContract, queryLocalKeyStores, exportJavaProject } from "@/util/api";
+import { searchContract, queryLocalKeyStores, exportJavaProject, fetchChannelPort } from "@/util/api";
 let Base64 = require("js-base64").Base64;
 export default {
     name: 'exportProject',
@@ -77,6 +80,21 @@ export default {
         }
     },
     data() {
+        var isPort = (rule, value, callback) => {
+            var parten = /^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
+
+            if (value === '') {
+                callback(new Error(this.$t('rule.isPort')))
+            } else {
+
+                if (!parten.test(value)) {
+                    callback(new Error(this.$t('rule.portRule')))
+                } else {
+                    callback()
+                }
+            }
+
+        }
         return {
             tableData: [],
             dialogVisible: this.show,
@@ -99,7 +117,9 @@ export default {
                 group: 'org_example',
                 userAddress: [],
                 channelIp: '127.0.0.1',
+                channelPort: ''
             },
+            queryPort: '',
             rules: {
                 artifactName: [
                     {
@@ -137,7 +157,7 @@ export default {
                         trigger: "blur",
                     },
                 ],
-                
+
                 p12Password: [
                     {
                         required: true,
@@ -156,16 +176,20 @@ export default {
                         message: this.$t("rule.IpRule"),
                         trigger: "blur",
                     },
+                ],
+                channelPort: [
+                    { validator: isPort, trigger: 'change' }
                 ]
             }
         }
     },
-    destroyed(){
+    destroyed() {
         this.$store.state.exportProjectShow = false
     },
     mounted() {
         this.getList();
         this.getUserInfoData()
+        this.queryChannelPort()
     },
     methods: {
         getList() {
@@ -184,7 +208,7 @@ export default {
         },
         getUserInfoData() {
             queryLocalKeyStores()
-            .then(res => {
+                .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
                         this.userList = data
@@ -241,24 +265,24 @@ export default {
                     for (var i = 0; i < this.tableData.length; i++) {
                         if (this.tableData[i]['contractPath'] == row.contractPath) {
                             selectedDirectoryInfo = this.tableData[i]
-                            this.tableData.splice(i, 1); 
+                            this.tableData.splice(i, 1);
                             break;
                         }
                     }
-                    if(Object.keys(selectedDirectoryInfo).length > 0){
+                    if (Object.keys(selectedDirectoryInfo).length > 0) {
                         this.tableData.unshift(selectedDirectoryInfo);
                     }
                     for (var i = 0; i < this.tableData.length; i++) {
                         if (this.tableData[i]['contractPath'] == '/') {
                             rootDirectoryInfo = this.tableData[i]
-                            this.tableData.splice(i, 1); 
+                            this.tableData.splice(i, 1);
                             break;
                         }
                     }
-                    if(Object.keys(rootDirectoryInfo).length > 0){
+                    if (Object.keys(rootDirectoryInfo).length > 0) {
                         this.tableData.unshift(rootDirectoryInfo);
                     }
-                    
+
                 } else {
                     this.$message({
                         type: "error",
@@ -327,6 +351,22 @@ export default {
                 }
             })
         },
+        queryChannelPort() {
+            fetchChannelPort(localStorage.getItem("groupId"))
+                .then(res => {
+                    const { data, status } = res;
+                    if (status === 200) {
+                        this.queryPort = true
+                        this.projectFrom.channelPort = data.channelPort
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: this.$chooseLang(res.data.code)
+                        });
+                    }
+
+                })
+        }
     }
 }
 </script>
