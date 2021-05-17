@@ -135,11 +135,8 @@ public class Web3Config {
      */
     @Bean(name = "common")
     public CryptoSuite getCommonSuite(BcosSDK bcosSDK) {
-        Iterator<Integer> groupIdList = bcosSDK.getGroupManagerService().getGroupList().iterator();
-        int tempGroupId = groupIdList.hasNext() ? groupIdList.next() : 1;
-        log.info("init encrypt type tempGroupId:{}", tempGroupId);
-        int encryptType = bcosSDK.getClient(tempGroupId).getGroupManagerService().getCryptoType(ip + ":" + channelPort);
-        log.info("init encrypt type:{}", encryptType);
+        int encryptType = bcosSDK.getGroupManagerService().getCryptoType(ip + ":" + channelPort);
+        log.info("getCommonSuite init encrypt type:{}", encryptType);
         return new CryptoSuite(encryptType);
     }
 
