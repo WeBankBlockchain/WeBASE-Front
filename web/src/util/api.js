@@ -1024,10 +1024,21 @@ export function exportJavaProject(data) {
         }
     })
 }
-
+/**
+ * @method 获取channelport
+ */
+export function fetchChannelPort(groupId) {
+    return get({
+        url: `${HANDLE}${groupId}/web3/nodeConfig`,
+        method: 'get',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || "",
+        }
+    })
+}
 
 /**
- * 
+ * @method fromGithubContract
  */
 export function exportOutContract(url) {
     console.log('url', url);
@@ -1037,3 +1048,5 @@ export function exportOutContract(url) {
         responseType: 'application/json;charset=UTF-8'
     })
 }
+
+
