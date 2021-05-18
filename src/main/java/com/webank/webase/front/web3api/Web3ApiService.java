@@ -276,7 +276,7 @@ public class Web3ApiService {
     private boolean blockNumberCheck(int groupId, BigInteger blockNumber) {
         BigInteger currentNumber = null;
         currentNumber = getWeb3j(groupId).getBlockNumber().getBlockNumber();
-        log.info("**** currentNumber:{}", currentNumber);
+        log.debug("**** currentNumber:{}", currentNumber);
         return (blockNumber.compareTo(currentNumber) > 0);
 
     }
