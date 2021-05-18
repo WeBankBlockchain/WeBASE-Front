@@ -855,4 +855,19 @@ public class CommonUtils {
         return dir.delete();
     }
 
+    /**
+     * 字母开头
+     * @param input
+     * @return
+     */
+    public static boolean startWithLetter(String input) {
+        if (StringUtils.isBlank(input)) {
+            return false;
+        }
+        if (!isLetterDigit(input)) {
+            return false;
+        }
+        String regex = "^[a-zA-Z]+$";
+        return (input.charAt(0)+"").matches(regex);
+    }
 }

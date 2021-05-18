@@ -16,11 +16,14 @@ package com.webank.webase.front.scaffold;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.scaffold.entity.ReqProject;
 import com.webank.webase.front.scaffold.entity.RspFile;
+import com.webank.webase.front.util.CommonUtils;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.regex.Pattern;
 import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +51,34 @@ public class ScaffoldController extends BaseController {
         if (StringUtils.isBlank(param.getChannelIp())) {
             param.setChannelIp("127.0.0.1");
         }
+        // check artifact name and group name
+        if (!CommonUtils.startWithLetter(param.getArtifactName())) {
+            log.error("must start with letter");
+            throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
+        }
+        // validate group name, ex: org.example
+        if (!param.getGroup().contains("\\.")) {
+            // only org
+            if (!CommonUtils.startWithLetter(param.getGroup())) {
+                log.error("must start with letter");
+                throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
+            }
+        } else {
+            // include org.xxx
+            String[] groupNameArray = param.getGroup().split("\\.");
+            for (String group: groupNameArray) {
+                // not start or end with dot "."
+                if (group.isEmpty()) {
+                    log.error("cannot start or end with dot");
+                    throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
+                }
+                if (!CommonUtils.startWithLetter(group)) {
+                    log.error("must start with letter");
+                    throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
+                }
+            }
+        }
+        // start export
         RspFile rspFile = scaffoldService.exportProject(param);
         log.info("end exportProjectApi useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), rspFile);
