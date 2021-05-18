@@ -68,12 +68,12 @@ public class ScaffoldController extends BaseController {
             String[] groupNameArray = param.getGroup().split("\\.");
             for (String group: groupNameArray) {
                 // not start or end with dot "."
-                if (group.isEmpty()) {
-                    log.error("cannot start or end with dot");
+                if (StringUtils.isBlank(group)) {
+                    log.error("group cannot start or end with dot");
                     throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
                 }
                 if (!CommonUtils.startWithLetter(group)) {
-                    log.error("must start with letter");
+                    log.error("package name must start with letter");
                     throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
                 }
             }
