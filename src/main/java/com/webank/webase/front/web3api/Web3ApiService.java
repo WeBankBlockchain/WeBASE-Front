@@ -54,6 +54,7 @@ import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
 import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
 import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
@@ -559,9 +560,9 @@ public class Web3ApiService {
     /**
      * getNodeInfo.
      */
-    public NodeInfo getNodeInfo() {
+    public NodeInformation getNodeInfo() {
         String nodeIpPort = web3ConfigConstants.getIp() + ":" + web3ConfigConstants.getChannelPort();
-        return getWeb3j().getNodeInfo(nodeIpPort);
+        return getWeb3j().getNodeInfo(nodeIpPort).getNodeInfo();
     }
 
     /**

@@ -33,6 +33,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
@@ -248,7 +249,7 @@ public class Web3ApiController {
 
     @ApiOperation(value = "getNodeInfo", notes = "Get node information")
     @GetMapping("/nodeInfo")
-    public Object getNodeInfo() {
+    public NodeInformation getNodeInfo() {
         return web3ApiService.getNodeInfo();
     }
 
