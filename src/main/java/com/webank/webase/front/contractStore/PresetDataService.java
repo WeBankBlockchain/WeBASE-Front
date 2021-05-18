@@ -196,7 +196,7 @@ public class PresetDataService {
                                 String contractDesc, String contractDesc_en)
     {
         if (contractItemRepository.exists(contractId)) {
-            log.info("insertContractItem skip contractId:{} contractName:{} contractFolderId:{} already exist",
+            log.debug("insertContractItem skip contractId:{} contractName:{} contractFolderId:{} already exist",
                 contractId, contractName, contractFolderId);
             return;
         }
