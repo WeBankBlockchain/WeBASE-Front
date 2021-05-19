@@ -441,6 +441,7 @@ export default {
     rule: {
         textLong: "长度在 1 到 32 个字符",
         textLong1_12: "长度在 1 到 12 位",
+        textLong1_100: "100个字符以内",
         textLong1_32767: "必须小于或等于32767",
         passwordError: "登录密码错误",
         loginPasswordType: "请正确输入密码",
@@ -461,6 +462,7 @@ export default {
         contractAbi: "请输入合约ABI",
         contractLong: "长度在 1 到 32 个字符",
         contractRule: "请输入数字、字母或下划线",
+        contractGroupRule: "请输入数字、字母或点",
         IpRule: "请输入正确的IP",
         folderName: "请输入文件夹名称",
         folderLong: "长度在 1 到 12 个字符",
@@ -523,6 +525,7 @@ export default {
         frontIp: "前置IP",
         modifyGroup: "修改群组",
         addAbi: "导入ABI",
+        updateAbi: "更新ABI",
         groupStatus: "群组状态",
         status: "状态",
         groupTimestamp: "创世块时间戳"

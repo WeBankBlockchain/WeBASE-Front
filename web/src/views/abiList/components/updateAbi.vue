@@ -33,7 +33,7 @@ export default {
         return {
             abiContent: '',
             abiForm: {
-                contractAbi: null,
+                contractAbi: this.updateItem.contractAbi,
             },
             loading: false
         }

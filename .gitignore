@@ -41,8 +41,8 @@ h2
 
 /lib/
 solcjs
-web/static/js/v0.*.js
-web/static/js/v0.*.js.gz
+v0.*.js
+v0.*.js.gz
 /output/
 
 
