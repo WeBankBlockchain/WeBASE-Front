@@ -45,7 +45,8 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "sdk")
 public class Web3Config {
 
-    public static String orgName;
+    // deprecated org name, use agency from /web3/nodeInfo api instead
+    public static String orgName = "fisco";
     public String certPath = "conf";
     private List<Integer> groupIdList;
     /* use String in java sdk*/
