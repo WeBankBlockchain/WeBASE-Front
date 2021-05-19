@@ -14,20 +14,17 @@
 package com.webank.webase.front.base.config;
 
 
-import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import io.netty.channel.ChannelHandlerContext;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.response.GroupList;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
@@ -35,11 +32,9 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.Message;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.network.MsgHandler;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 /**
  * init web3sdk getService.
@@ -140,8 +135,8 @@ public class Web3Config {
      */
     @Bean(name = "common")
     public CryptoSuite getCommonSuite(BcosSDK bcosSDK) {
-        int encryptType = bcosSDK.getClient(1).getGroupManagerService().getCryptoType(ip + ":" + channelPort);
-        log.info("init encrypt type:{}", encryptType);
+        int encryptType = bcosSDK.getGroupManagerService().getCryptoType(ip + ":" + channelPort);
+        log.info("getCommonSuite init encrypt type:{}", encryptType);
         return new CryptoSuite(encryptType);
     }
 

@@ -20,6 +20,7 @@ import com.webank.scaffold.artifact.ProjectArtifact;
 import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.scaffold.util.IOUtil;
 import com.webank.webase.front.util.CleanPathUtil;
+import com.webank.webase.front.util.CommonUtils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.junit.Test;
 
 public class ScaffoldBuildTest {
@@ -167,6 +169,25 @@ public class ScaffoldBuildTest {
         File srcConf = new File("./src/main/resources/conf");
         File targetConf = new File(confDir);
         IOUtil.copyFolder(srcConf, targetConf);
+    }
+
+    @Test
+    public void testStartWith() {
+        String start = "Z123";
+        String startF = "f_23a";
+        String start2 = "123a";
+        String start3 = "_a23a";
+        System.out.println(CommonUtils.startWithLetter(start));
+        System.out.println(CommonUtils.startWithLetter(startF));
+        System.out.println(CommonUtils.startWithLetter(start2));
+        System.out.println(CommonUtils.startWithLetter(start3));
+//        Pattern pattern = Pattern.compile("^[a-zA-Z]+[a-zA-Z0-9_]");
+//        if (pattern.matcher(start.charAt(0)+"").matches()) {
+//            System.out.println(start + "true");
+//        }
+//        if (pattern.matcher(startF.charAt(0)+"").matches()) {
+//            System.out.println(startF + "true");
+//        }
     }
 
 }

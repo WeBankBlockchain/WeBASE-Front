@@ -82,7 +82,7 @@ public class EventController extends BaseController {
         checkParamResult(result);
         String appId = reqNewBlockEventRegister.getAppId();
         if (!CommonUtils.isLetterDigit(appId)) {
-            throw new FrontException(ConstantCode.PARAM_INVALID);
+            throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
         }
         int groupId = reqNewBlockEventRegister.getGroupId();
         String exchangeName = reqNewBlockEventRegister.getExchangeName();
@@ -106,7 +106,7 @@ public class EventController extends BaseController {
         int groupId = reqContractEventRegister.getGroupId();
         String appId = reqContractEventRegister.getAppId();
         if (!CommonUtils.isLetterDigit(appId)) {
-            throw new FrontException(ConstantCode.PARAM_INVALID);
+            throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
         }
         String fromBlock = reqContractEventRegister.getFromBlock();
         String toBlock = reqContractEventRegister.getToBlock();
