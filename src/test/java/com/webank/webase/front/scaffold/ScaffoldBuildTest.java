@@ -193,12 +193,14 @@ public class ScaffoldBuildTest {
 
     private static void check(String groupList) {
         System.out.println("groupList " + groupList);
-        if (!groupList.contains("\\.")) {
+        if (!groupList.contains(".")) {
+            System.out.println("not contain dot");
             // only org
             if (!CommonUtils.startWithLetter(groupList)) {
                 System.out.println(groupList + " not start with letter");
             }
         } else {
+            System.out.println("contain dot");
             String[] groupNameArray = groupList.split("\\.");
             for (String group : groupNameArray) {
                 // not start or end with dot "."
