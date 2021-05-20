@@ -35,7 +35,7 @@ public class NodeConfig implements InitializingBean {
     @Autowired
     private Constants constants;
     @Deprecated
-    private String orgName;
+    private String orgName = "fisco";
     private String p2pip;
     private String listenip;
     private String rpcport;
@@ -80,7 +80,7 @@ public class NodeConfig implements InitializingBean {
                 continue;
             }
             if (str.contains(" enable_statistic")) {
-                this.enableStatistic = Boolean.valueOf(str.substring(str.indexOf("=") + 1));
+                this.enableStatistic = Boolean.parseBoolean(str.substring(str.indexOf("=") + 1));
             }
         }
     }

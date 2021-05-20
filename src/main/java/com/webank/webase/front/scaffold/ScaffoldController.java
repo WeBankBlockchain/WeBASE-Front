@@ -57,10 +57,10 @@ public class ScaffoldController extends BaseController {
             throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
         }
         // validate group name, ex: org.example
-        if (!param.getGroup().contains("\\.")) {
+        if (!param.getGroup().contains(".")) {
             // only org
             if (!CommonUtils.startWithLetter(param.getGroup())) {
-                log.error("must start with letter");
+                log.error("group name must start with letter");
                 throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
             }
         } else {

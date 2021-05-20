@@ -191,7 +191,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.4.25.js",
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25.js",
                         "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25.js"
         }
     }
@@ -199,7 +199,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.4.24-gm.js",
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25-gm.js",
                         "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.24-gm.js"
         }
     }
@@ -207,7 +207,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.5.1.js",
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2.js",
                         "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1.js"
         }
     }
@@ -215,7 +215,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.5.1-gm.js",
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2-gm.js",
                         "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1-gm.js"
         }
     }
@@ -223,7 +223,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.6.10.js",
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10.js",
                         "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10.js"
         }
     }
@@ -231,7 +231,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.6.10-gm.js",
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10-gm.js",
                         "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10-gm.js"
         }
     }
