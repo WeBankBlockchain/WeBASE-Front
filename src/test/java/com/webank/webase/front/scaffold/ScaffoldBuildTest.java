@@ -19,6 +19,8 @@ import com.webank.scaffold.artifact.NewMainResourceDir.ContractInfo;
 import com.webank.scaffold.artifact.ProjectArtifact;
 import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.scaffold.util.IOUtil;
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.CleanPathUtil;
 import com.webank.webase.front.util.CommonUtils;
 import java.io.BufferedWriter;
@@ -33,6 +35,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 public class ScaffoldBuildTest {
@@ -173,21 +176,39 @@ public class ScaffoldBuildTest {
 
     @Test
     public void testStartWith() {
-        String start = "Z123";
-        String startF = "f_23a";
-        String start2 = "123a";
-        String start3 = "_a23a";
-        System.out.println(CommonUtils.startWithLetter(start));
-        System.out.println(CommonUtils.startWithLetter(startF));
-        System.out.println(CommonUtils.startWithLetter(start2));
-        System.out.println(CommonUtils.startWithLetter(start3));
-//        Pattern pattern = Pattern.compile("^[a-zA-Z]+[a-zA-Z0-9_]");
-//        if (pattern.matcher(start.charAt(0)+"").matches()) {
-//            System.out.println(start + "true");
-//        }
-//        if (pattern.matcher(startF.charAt(0)+"").matches()) {
-//            System.out.println(startF + "true");
-//        }
+        String start = "org";
+        String start1 = "org.example2";
+        String start2 = "org.2example";
+        String start3 = "2org.example2";
+        String start4 = "org.example2.";
+        String start5 = ".org.example2.";
+        check(start);
+        check(start1);
+        check(start2);
+        check(start3);
+        check(start4);
+        check(start5);
+
     }
 
+    private static void check(String groupList) {
+        System.out.println("groupList " + groupList);
+        if (!groupList.contains("\\.")) {
+            // only org
+            if (!CommonUtils.startWithLetter(groupList)) {
+                System.out.println(groupList + " not start with letter");
+            }
+        } else {
+            String[] groupNameArray = groupList.split("\\.");
+            for (String group : groupNameArray) {
+                // not start or end with dot "."
+                if (StringUtils.isBlank(group)) {
+                    System.out.println(group + " not end with dot");
+                }
+                if (!CommonUtils.startWithLetter(group)) {
+                    System.out.println(group + " not start with letter");
+                }
+            }
+        }
+    }
 }
