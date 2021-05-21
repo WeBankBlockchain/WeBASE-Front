@@ -93,11 +93,21 @@
                 <td>
                     <ul>
                         <li v-for="(item,index) in pramasData">
-                            <el-input v-model.trim="transation.funcValue[index]" style="width: 260px;" :placeholder="item.type">
-                                <template slot="prepend" style="width: 51px;">
-                                    <span>{{item.name}}</span>
-                                </template>
-                            </el-input>
+                            <template v-if="item.type=='string'">
+                                <el-input v-model="transation.funcValue[index]" style="width: 260px;" :placeholder="item.type">
+                                    <template slot="prepend" style="width: 51px;">
+                                        <span>{{item.name}}</span>
+                                    </template>
+                                </el-input>
+                            </template>
+                            <template v-else>
+                                <el-input v-model.trim="transation.funcValue[index]" style="width: 260px;" :placeholder="item.type">
+                                    <template slot="prepend" style="width: 51px;">
+                                        <span>{{item.name}}</span>
+                                    </template>
+                                </el-input>
+                            </template>
+
                         </li>
                         <p class="font-color-ed5454" style="padding-top: 4px;">
                             <i class="el-icon-info" style="padding-right: 4px;"></i>{{$t('contracts.paramsInfo')}}

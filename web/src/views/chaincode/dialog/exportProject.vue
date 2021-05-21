@@ -33,7 +33,7 @@
             <h3 style="padding-left: 18px">{{$t('text.projectContract')}}</h3>
             <p style="padding-left: 28px">{{$t('text.exportJavaProjectInfo1')}}</p>
             <p style="padding:5px 0;color: #F56C6C;padding-left: 28px">{{$t('text.exportJavaProjectInfo2')}}</p>
-            <el-table :show-header='false' :data="tableData" class="block-table-content" style="width: 100%;padding: 0 20px" :row-key="getRowKeys" :expand-row-keys="expands" @row-click="clickTable" ref="refTable">
+            <el-table :show-header='false' :data="tableData" class="block-table-content" style="width: 100%;padding: 0 20px" :row-key="getRowKeys" :expand-row-keys="expands" @expand-change="handleExpand" @row-click="clickTable" ref="refTable">
                 <el-table-column type="expand">
                     <template slot-scope="scope">
                         <!-- <span>{{contractList}}</span> -->
@@ -234,7 +234,9 @@ export default {
         modelClose() {
             this.$emit('close')
         },
-
+        handleExpand (row){
+            this.getContractList(row, 'ExpandEvent')
+        },
         clickTable: function (row, column, $event) {
             // if (expandedRows.length) {
             //     this.expands = []
