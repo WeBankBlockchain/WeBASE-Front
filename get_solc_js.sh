@@ -47,22 +47,22 @@ get_solc_js(){
     else
         echo "Now download all solidity js in ${STATIC_JS_DIR}, if offline, download js file and put them in this dir"
         if [[ ! -f "${STATIC_JS_DIR}/v0.4.25.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.4.25.js -o "${STATIC_JS_DIR}"/v0.4.25.js
+            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25.js -o "${STATIC_JS_DIR}"/v0.4.25.js
         fi
-        if [[ ! -f "${STATIC_JS_DIR}/v0.4.24-gm.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.4.24-gm.js -o "${STATIC_JS_DIR}"/v0.4.24-gm.js
+        if [[ ! -f "${STATIC_JS_DIR}/v0.4.25-gm.js" ]]; then
+            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25-gm.js -o "${STATIC_JS_DIR}"/v0.4.25-gm.js
         fi
-        if [[ ! -f "${STATIC_JS_DIR}/v0.5.1.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.5.1.js -o "${STATIC_JS_DIR}"/v0.5.1.js
+        if [[ ! -f "${STATIC_JS_DIR}/v0.5.2.js" ]]; then
+            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2.js -o "${STATIC_JS_DIR}"/v0.5.2.js
         fi
-        if [[ ! -f "${STATIC_JS_DIR}/v0.5.1-gm.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.5.1-gm.js -o "${STATIC_JS_DIR}"/v0.5.1-gm.js
+        if [[ ! -f "${STATIC_JS_DIR}/v0.5.2-gm.js" ]]; then
+            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2-gm.js -o "${STATIC_JS_DIR}"/v0.5.2-gm.js
         fi
         if [[ ! -f "${STATIC_JS_DIR}/v0.6.10.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.6.10.js -o "${STATIC_JS_DIR}"/v0.6.10.js
+            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10.js -o "${STATIC_JS_DIR}"/v0.6.10.js
         fi
         if [[ ! -f "${STATIC_JS_DIR}/v0.6.10-gm.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/v0.6.10-gm.js -o "${STATIC_JS_DIR}"/v0.6.10-gm.js
+            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10-gm.js -o "${STATIC_JS_DIR}"/v0.6.10-gm.js
         fi
     fi
 }

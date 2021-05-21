@@ -181,18 +181,24 @@ jar {
 
 // download js file
 def downloadJs() {
-    File solc04 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25.js")
-    File solc04gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25-gm.js")
-    File solc05 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.2.js")
-    File solc05gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.2-gm.js")
-    File solc06 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10.js")
-    File solc06gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10-gm.js")
+    String solc04Path = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25.js";
+    String solc04gmPath = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25-gm.js";
+    String solc05Path = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.2.js";
+    String solc05gmPath = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.2-gm.js";
+    String solc06Path = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10.js";
+    String solc06gmPath = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10-gm.js";
+    File solc04 = new File(solc04Path);
+    File solc04gm = new File(solc04gmPath);
+    File solc05 = new File(solc05Path);
+    File solc05gm = new File(solc05gmPath);
+    File solc06 = new File(solc06Path);
+    File solc06gm = new File(solc06gmPath);
     if (!solc04.exists()) {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
                 args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25.js",
-                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25.js"
+                        "-o", solc04Path
         }
     }
     if (!solc04gm.exists()) {
@@ -200,7 +206,7 @@ def downloadJs() {
             ExecSpec execSpec ->
                 executable 'curl'
                 args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25-gm.js",
-                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.24-gm.js"
+                        "-o", solc04gmPath
         }
     }
     if (!solc05.exists()) {
@@ -208,7 +214,7 @@ def downloadJs() {
             ExecSpec execSpec ->
                 executable 'curl'
                 args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2.js",
-                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1.js"
+                        "-o", solc05Path
         }
     }
     if (!solc05gm.exists()) {
@@ -216,7 +222,7 @@ def downloadJs() {
             ExecSpec execSpec ->
                 executable 'curl'
                 args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2-gm.js",
-                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1-gm.js"
+                        "-o", solc05gmPath
         }
     }
     if (!solc06.exists()) {
@@ -224,7 +230,7 @@ def downloadJs() {
             ExecSpec execSpec ->
                 executable 'curl'
                 args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10.js",
-                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10.js"
+                        "-o", solc06Path
         }
     }
     if (!solc06gm.exists()) {
@@ -232,7 +238,7 @@ def downloadJs() {
             ExecSpec execSpec ->
                 executable 'curl'
                 args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10-gm.js",
-                        "-o", "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10-gm.js"
+                        "-o", solc06gmPath
         }
     }
 }
