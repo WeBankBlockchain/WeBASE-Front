@@ -182,9 +182,9 @@ jar {
 // download js file
 def downloadJs() {
     File solc04 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25.js")
-    File solc04gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.24-gm.js")
-    File solc05 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1.js")
-    File solc05gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.1-gm.js")
+    File solc04gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.4.25-gm.js")
+    File solc05 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.2.js")
+    File solc05gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.2-gm.js")
     File solc06 = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10.js")
     File solc06gm = new File("src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10-gm.js")
     if (!solc04.exists()) {
