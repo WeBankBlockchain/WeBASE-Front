@@ -110,7 +110,7 @@ let errCode = {
     },
     "201020": {
         en: "transaction query from chain failed",
-        zh: '链中的事务查询失败'
+        zh: '链上查询交易失败'
     },
     "201021": {
         en: "transaction send to chain failed",
