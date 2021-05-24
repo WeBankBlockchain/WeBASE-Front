@@ -94,7 +94,7 @@ public class PresetDataService {
                 "Points Contract suite",
                 "Points Contract suite");
 
-        insertContractFolderItem(contractFolderIndex++,toolboxId,"Smart_Dev_Tools",
+        insertContractFolderItem(contractFolderIndex++,toolboxId,"Smart_Dev_Basic",
             "SmartDev基础合约，包含Table/KVTable/Sha/Crypto/HelloWorld等",
             "SmartDev基础合约，包含Table/KVTable/Sha/Crypto/HelloWorld等",
             "Smart-Dev-Contract basic contract suite, including Table/KVTable/Sha/Crypto/HelloWorld etc.",
