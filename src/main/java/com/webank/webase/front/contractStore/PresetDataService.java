@@ -14,8 +14,6 @@ import java.util.List;
 @Service
 public class PresetDataService {
 
-    //todo 修改插入判断条件
-
     @Autowired
     private ContractItemRepository contractItemRepository;
     @Autowired
