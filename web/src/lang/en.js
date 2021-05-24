@@ -112,7 +112,6 @@ export default {
         eventValue: 'Event',
         contractName: 'Contract Name',
         cnsVersion: 'CNS Version',
-        contractAddress: 'Contract Address',
         privateKey: 'PrivateKey',
     },
     errorLog: {
@@ -441,6 +440,7 @@ export default {
     rule: {
         textLong: "1 to 32 characters in length",
         textLong1_12: "1 to 12 digits in length",
+        textLong1_100: "100 characters or less",
         textLong1_32767: "Must be less than or equal to 32767",
         passwordError: "Login password error",
         loginPasswordType: "Please input the password correctly",
@@ -461,6 +461,7 @@ export default {
         contractAbi: "Please enter the contract ABI",
         contractLong: "1 to 32 characters in length",
         contractRule: "Please enter numbers, letters or underscores",
+        contractGroupRule: "Please enter a number, letter or dot",
         IpRule: "Please enter the correct IP",
         folderName: "Please enter a folder name",
         folderLong: "1 to 12 characters in length",
@@ -523,6 +524,7 @@ export default {
         frontIp: "Front ID",
         modifyGroup: "Modify Group",
         addAbi: "Import ABI",
+        updateAbi: "Update ABI",
         groupStatus: "Status",
         status: "Status",
         groupTimestamp: "Timestamp"

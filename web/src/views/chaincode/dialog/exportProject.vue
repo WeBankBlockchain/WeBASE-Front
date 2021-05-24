@@ -33,12 +33,12 @@
             <h3 style="padding-left: 18px">{{$t('text.projectContract')}}</h3>
             <p style="padding-left: 28px">{{$t('text.exportJavaProjectInfo1')}}</p>
             <p style="padding:5px 0;color: #F56C6C;padding-left: 28px">{{$t('text.exportJavaProjectInfo2')}}</p>
-            <el-table :show-header='false' :data="tableData" style="width: 100%;padding: 0 20px" :row-key="getRowKeys" :expand-row-keys="expands" @expand-change="clickTable" ref="refTable">
+            <el-table :show-header='false' :data="tableData" class="block-table-content" style="width: 100%;padding: 0 20px" :row-key="getRowKeys" :expand-row-keys="expands" @expand-change="handleExpand" @row-click="clickTable" ref="refTable">
                 <el-table-column type="expand">
                     <template slot-scope="scope">
                         <!-- <span>{{contractList}}</span> -->
                         <div class="table-content">
-                            <el-table ref="multipleTable" :data="scope.row.contractList" :show-header='true' @selection-change="handleSelectionChange" :default-sort="{prop: 'contractPath', order: 'descending'}">
+                            <el-table ref="multipleTable" :data="scope.row.contractList" :show-header='true' @selection-change="handleSelectionChange($event, scope.row)" :default-sort="{prop: 'contractPath', order: 'descending'}">
                                 <el-table-column type="selection" :selectable='selectDisabled' width="55">
                                 </el-table-column>
                                 <el-table-column prop="contractName" show-overflow-tooltip :label="$t('contracts.contractName')"></el-table-column>
@@ -79,6 +79,8 @@ export default {
             default: false
         }
     },
+    computed: {
+    },
     data() {
         var isPort = (rule, value, callback) => {
             var parten = /^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;
@@ -114,12 +116,15 @@ export default {
             userList: [],
             projectFrom: {
                 artifactName: "demo",
-                group: 'org_example',
+                group: 'org.example',
                 userAddress: [],
                 channelIp: '127.0.0.1',
                 channelPort: ''
             },
             queryPort: '',
+            dynamicObject: {},
+            selectedParentPath: '',
+            multipleSelectedId: [],
             rules: {
                 artifactName: [
                     {
@@ -152,8 +157,8 @@ export default {
                         trigger: "blur",
                     },
                     {
-                        pattern: /^[A-Za-z0-9_]+$/,
-                        message: this.$t("rule.contractRule"),
+                        pattern: /^[A-Za-z0-9.]+$/,
+                        message: this.$t("rule.contractGroupRule"),
                         trigger: "blur",
                     },
                 ],
@@ -229,21 +234,28 @@ export default {
         modelClose() {
             this.$emit('close')
         },
-
-        clickTable: function (row, expandedRows) {
-            if (expandedRows.length) {
-                this.expands = []
-                if (row) {
-                    this.expands.push(row.contractPath)
-                }
-            } else {
-                this.expands = []
-            }
+        handleExpand (row){
+            this.getContractList(row, 'ExpandEvent')
+        },
+        clickTable: function (row, column, $event) {
+            // if (expandedRows.length) {
+            //     this.expands = []
+            //     if (row) {
+            //         this.expands.push(row.contractPath)
+            //     }
+            // } else {
+            //     this.expands = []
+            // }
             this.$nextTick(() => {
-                this.getContractList(row)
+                let nodeName = $event.target.nodeName;
+                if (nodeName === "I") {
+                    return
+                }
+                this.$refs.refTable.toggleRowExpansion(row);
+                this.getContractList(row, 'ExpandEvent')
             })
         },
-        getContractList(row) {
+        getContractList(row, handleType) {
             const reqData = {
                 groupId: localStorage.getItem("groupId"),
                 contractPathList: [row.contractPath]
@@ -260,28 +272,31 @@ export default {
                         }
                     });
                     this.$set(this.tableData, num, row)
-                    var selectedDirectoryInfo = {}
-                    var rootDirectoryInfo = {}
-                    for (var i = 0; i < this.tableData.length; i++) {
-                        if (this.tableData[i]['contractPath'] == row.contractPath) {
-                            selectedDirectoryInfo = this.tableData[i]
-                            this.tableData.splice(i, 1);
-                            break;
+                    if (!handleType) {
+                        var selectedDirectoryInfo = {}
+                        var rootDirectoryInfo = {}
+                        for (var i = 0; i < this.tableData.length; i++) {
+                            if (this.tableData[i]['contractPath'] == row.contractPath) {
+                                selectedDirectoryInfo = this.tableData[i]
+                                this.tableData.splice(i, 1);
+                                break;
+                            }
+                        }
+                        if (Object.keys(selectedDirectoryInfo).length > 0) {
+                            this.tableData.unshift(selectedDirectoryInfo);
+                        }
+                        for (var i = 0; i < this.tableData.length; i++) {
+                            if (this.tableData[i]['contractPath'] == '/') {
+                                rootDirectoryInfo = this.tableData[i]
+                                this.tableData.splice(i, 1);
+                                break;
+                            }
+                        }
+                        if (Object.keys(rootDirectoryInfo).length > 0) {
+                            this.tableData.unshift(rootDirectoryInfo);
                         }
                     }
-                    if (Object.keys(selectedDirectoryInfo).length > 0) {
-                        this.tableData.unshift(selectedDirectoryInfo);
-                    }
-                    for (var i = 0; i < this.tableData.length; i++) {
-                        if (this.tableData[i]['contractPath'] == '/') {
-                            rootDirectoryInfo = this.tableData[i]
-                            this.tableData.splice(i, 1);
-                            break;
-                        }
-                    }
-                    if (Object.keys(rootDirectoryInfo).length > 0) {
-                        this.tableData.unshift(rootDirectoryInfo);
-                    }
+
 
                 } else {
                     this.$message({
@@ -297,10 +312,21 @@ export default {
                     });
                 });
         },
-        handleSelectionChange(val) {
+        handleSelectionChange($event, val) {
+            this.selectedParentPath = val.contractPath
+            this.multipleSelection = $event;
+            if (this.selectedParentPath) {
+                this.dynamicObject[this.selectedParentPath] = this.multipleSelection
+            }
+            const dynamicObject = Object.values(this.dynamicObject)
+            this.multipleSelectedId = []
+            dynamicObject.forEach(item => {
 
-            this.multipleSelection = val;
-            console.log(val)
+                item.forEach(it => {
+                    this.multipleSelectedId.push(it.id)
+                })
+            })
+            this.multipleSelectedId = Array.from(new Set(this.multipleSelectedId))
         },
         submit(formName) {
             if (this.multipleSelection.length === 0) {
@@ -318,11 +344,11 @@ export default {
             })
         },
         export() {
-            const idList = this.multipleSelection.map(value => {
-                return value.id
-            })
+            // const idList = this.multipleSelection.map(value => {
+            //     return value.id
+            // })
             const reqData = {
-                contractIdList: idList,
+                contractIdList: this.multipleSelectedId,
                 group: this.projectFrom.group,
                 artifactName: this.projectFrom.artifactName,
                 groupId: localStorage.getItem("groupId"),
@@ -375,5 +401,8 @@ export default {
 .table-content {
     max-height: 270px;
     overflow: auto;
+}
+.block-table-content >>> .el-table__row {
+    cursor: pointer;
 }
 </style>
