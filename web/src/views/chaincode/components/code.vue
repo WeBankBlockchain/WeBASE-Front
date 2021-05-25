@@ -755,11 +755,19 @@ export default {
             this.bin = "";
         },
         deploying: function () {
-            if (this.abiFile) {
-                this.compile(this.deploy)
+            if (JSON.parse(this.abiFile).length == 0 || !this.abiFile) {
+                this.$message({
+                    type: 'error',
+                    message: this.$t('text.haveAbi')
+                })
             } else {
-                this.$message.error(`${this.$t('text.compilationFailed')}`);
+                if (this.abiFile) {
+                    this.compile(this.deploy)
+                } else {
+                    this.$message.error(`${this.$t('text.compilationFailed')}`);
+                }
             }
+
 
         },
         deploy: function () {
@@ -922,19 +930,27 @@ export default {
             this.successHide = val;
         },
         send: function () {
-            ifChangedDepaloy(localStorage.getItem("groupId"), this.data.id).then(res => {
+            if (JSON.parse(this.abiFile).length == 0 || !this.abiFile) {
+                this.$message({
+                    type: 'error',
+                    message: this.$t('text.haveAbi')
+                })
+            } else {
+                ifChangedDepaloy(localStorage.getItem("groupId"), this.data.id).then(res => {
 
-                const { data, status } = res
-                if (status === 200) {
-                    if (data) {
-                        this.sendErrorMessage = this.$t('text.redeploy')
-                        this.dialogVisible = true;
-                    } else {
-                        this.dialogVisible = true;
-                        this.sendErrorMessage = ''
+                    const { data, status } = res
+                    if (status === 200) {
+                        if (data) {
+                            this.sendErrorMessage = this.$t('text.redeploy')
+                            this.dialogVisible = true;
+                        } else {
+                            this.dialogVisible = true;
+                            this.sendErrorMessage = ''
+                        }
                     }
-                }
-            })
+                })
+            }
+
 
         },
         handleClose: function () {
@@ -1144,10 +1160,10 @@ export default {
         handleChange(val) {
             console.log(val);
         },
-        exportSdk(){
+        exportSdk() {
             this.sureExportSdk()
         },
-        sureExportSdk(){
+        sureExportSdk() {
             exportCertSdk().then(res => {
                 const blob = new Blob([res.data])
                 const fileName = `sdk.zip`
@@ -1160,14 +1176,14 @@ export default {
                     elink.click()
                     URL.revokeObjectURL(elink.href)
                     document.body.removeChild(elink)
-                } else { 
+                } else {
                     navigator.msSaveBlob(blob, fileName)
                 }
             })
         },
         // 导出java项目
         exportJava() {
-            this.$store.dispatch('set_exportProject_show_action',true)
+            this.$store.dispatch('set_exportProject_show_action', true)
         },
     }
 };

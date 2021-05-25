@@ -370,7 +370,9 @@ export default {
         select: "select",
         overtime: 'overtime',
         actualChannelIp: 'Modify according to the actual channelip',
-        projectTitle: 'Project Info'
+        projectTitle: 'Project Info',
+        haveAbi: 'The ABI information cannot be empty',
+        haveSelectionAll: 'The contract is not compiled at all'
     },
     contracts: {
         createFile: "Create File",
@@ -460,8 +462,8 @@ export default {
         contractAddress: "Please enter the contract address",
         contractAbi: "Please enter the contract ABI",
         contractLong: "1 to 32 characters in length",
-        contractRule: "Please enter numbers, letters or underscores",
-        contractGroupRule: "Please enter a number, letter or dot",
+        contractRule: "Contains letters or letters and '_', begins with a letter, cannot end with '_'",
+        contractGroupRule: "Contains letters or letters and '. ', cannot begin with a letter, cannot begin with '. ' Endings, such as com.webank",
         IpRule: "Please enter the correct IP",
         folderName: "Please enter a folder name",
         folderLong: "1 to 12 characters in length",

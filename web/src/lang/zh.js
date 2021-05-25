@@ -371,7 +371,9 @@ export default {
         select: "请选择",
         overtime: '超时',
         actualChannelIp: '根据实际channelIp修改',
-        projectTitle: '项目信息'
+        projectTitle: '项目信息',
+        haveAbi: 'abi信息不能为空',
+        haveSelectionAll: '合约全未编译'
     },
     contracts: {
         createFile: "新建文件",
@@ -461,8 +463,8 @@ export default {
         contractAddress: "请输入合约地址",
         contractAbi: "请输入合约ABI",
         contractLong: "长度在 1 到 32 个字符",
-        contractRule: "请输入数字、字母或下划线",
-        contractGroupRule: "请输入数字、字母或点",
+        contractRule: "包含字母或字母和‘_’，以字母开头，不能以“_”结尾,如com_webank",
+        contractGroupRule: "包含字母或字母和‘.’，以字母开头，不能以“.”结尾,如com.webank",
         IpRule: "请输入正确的IP",
         folderName: "请输入文件夹名称",
         folderLong: "长度在 1 到 12 个字符",
