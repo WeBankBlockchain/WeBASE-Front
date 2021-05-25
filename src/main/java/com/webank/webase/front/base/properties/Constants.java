@@ -68,6 +68,7 @@ public class Constants {
     public static final String SOLC_DIR_PATH_CONFIG = "solcjs";
     public static final String SOLC_DIR_PATH = "./conf/solcjs";
     public static final String SOLC_JS_SUFFIX = ".js";
+    public static final String RECEIPT_STATUS_0X0 = "0x0";
 
     public static String version;
     public static String chainId;
