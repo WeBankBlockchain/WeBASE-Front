@@ -16,6 +16,7 @@ package com.webank.webase.front.transaction;
 
 import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
 import static com.webank.webase.front.base.code.ConstantCode.VERSION_NOT_EXISTS;
+import static com.webank.webase.front.base.properties.Constants.RECEIPT_STATUS_0X0;
 import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_PURE;
 import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_VIEW;
 
@@ -63,6 +64,7 @@ import org.fisco.bcos.sdk.abi.datatypes.Type;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.request.Transaction;
+import org.fisco.bcos.sdk.client.protocol.response.Call.CallOutput;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -188,14 +190,17 @@ public class TransService {
             TransactionProcessor transactionProcessor = new TransactionProcessor(
                 web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(),
                 groupId, Constants.chainId);
-            String callOutput = transactionProcessor
-                .executeCall(keyStoreInfo.getAddress(),
-                            contractAddress, encodedFunction)
-                .getCallResult().getOutput();
-            // throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR, e.getMessage());
+            CallOutput callOutput = transactionProcessor
+                .executeCall(keyStoreInfo.getAddress(), contractAddress, encodedFunction)
+                .getCallResult();
+            if (!RECEIPT_STATUS_0X0.equals(callOutput.getStatus())) {
+                log.error("call contract error:{}", callOutput.getStatus());
+                 throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR,
+                     "call contract error status: " + callOutput.getStatus());
+            }
 
             List<Type> typeList =
-                    FunctionReturnDecoder.decode(callOutput, function.getOutputParameters());
+                    FunctionReturnDecoder.decode(callOutput.getOutput(), function.getOutputParameters());
             if (typeList.size() > 0) {
                 response = AbiUtil.callResultParse(contractFunction.getOutputList(), typeList);
             } else {
