@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-dialog :title="$t('text.exportJavaProject')" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="750px">
+        <el-dialog :modal="true" :modal-append-to-body="false" :title="$t('text.exportJavaProject')" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="750px">
             <h3 style="padding-left: 18px">{{$t('text.projectTitle')}}</h3>
             <el-form :model="projectFrom" :rules="rules" ref="projectFrom" label-width="116px" class="demo-ruleForm">
                 <el-form-item :label="$t('text.projectName')" prop="artifactName">
@@ -38,7 +38,7 @@
                     <template slot-scope="scope">
                         <!-- <span>{{contractList}}</span> -->
                         <div class="table-content">
-                            <el-table ref="multipleTable" :data="scope.row.contractList" :show-header='true' @selection-change="handleSelectionChange($event, scope.row)" :default-sort="{prop: 'contractPath', order: 'descending'}">
+                            <el-table ref="multipleTable" :data="scope.row.contractList" :show-header='true' @select-all="handleSelectAll" @selection-change="handleSelectionChange($event, scope.row)" :default-sort="{prop: 'contractPath', order: 'descending'}">
                                 <el-table-column type="selection" :selectable='selectDisabled' width="55">
                                 </el-table-column>
                                 <el-table-column prop="contractName" show-overflow-tooltip :label="$t('contracts.contractName')"></el-table-column>
@@ -333,7 +333,8 @@ export default {
             if (this.multipleSelection.length === 0) {
                 this.$message({
                     type: "error",
-                    message: this.$t('rule.checkContract')
+                    message: this.$t('rule.checkContract'),
+                    customClass:'zZindex'
                 });
             }
             this.$refs[formName].validate((valid) => {
@@ -343,6 +344,14 @@ export default {
                     return false;
                 }
             })
+        },
+        handleSelectAll(selection){
+            if(!selection.length){
+                this.$message({
+                    type:"error",
+                    message: this.$t('text.haveSelectionAll')
+                })
+            }
         },
         export() {
             // const idList = this.multipleSelection.map(value => {
@@ -405,5 +414,8 @@ export default {
 }
 .block-table-content >>> .el-table__row {
     cursor: pointer;
+}
+.zZindex {
+    z-index:3000 !important;
 }
 </style>

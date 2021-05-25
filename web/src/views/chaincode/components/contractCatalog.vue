@@ -90,11 +90,7 @@
         <add-folder v-if="foldershow" :foldershow="foldershow" @close='folderClose' @success='folderSuccess'></add-folder>
         <add-file v-if="fileshow" :data='selectFolderData' :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
         <select-catalog v-if='cataLogShow' :show='cataLogShow' @success='catalogSuccess($event)' @close='catalogClose'></select-catalog>
-        <export-project 
-        v-if='$store.state.exportProjectShow' 
-        :show='$store.state.exportProjectShow'
-        :folderList='pathList'
-        @close='exportProjectShowClose'></export-project>
+        <export-project v-if='$store.state.exportProjectShow' :show='$store.state.exportProjectShow' :folderList='pathList' @close='exportProjectShowClose'></export-project>
         <el-dialog v-if="importFromDialog" :title="$t('contracts.importContractTitle')" :visible.sync="importFromDialog" width="470px" center class="send-dialog">
             <import-from @modelClose="modelClose" @exportSuccessed="exportSuccessed"></import-from>
         </el-dialog>
