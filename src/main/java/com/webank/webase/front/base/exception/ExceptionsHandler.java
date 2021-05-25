@@ -16,7 +16,6 @@
 package com.webank.webase.front.base.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.util.ErrorCodeHandleUtils;
 import com.webank.webase.front.util.JsonUtils;
