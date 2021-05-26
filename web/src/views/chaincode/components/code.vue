@@ -1165,20 +1165,29 @@ export default {
         },
         sureExportSdk() {
             exportCertSdk().then(res => {
-                const blob = new Blob([res.data])
-                const fileName = `sdk.zip`
-                if ('download' in document.createElement('a')) {
-                    const elink = document.createElement('a')
-                    elink.download = fileName
-                    elink.style.display = 'none'
-                    elink.href = URL.createObjectURL(blob)
-                    document.body.appendChild(elink)
-                    elink.click()
-                    URL.revokeObjectURL(elink.href)
-                    document.body.removeChild(elink)
-                } else {
-                    navigator.msSaveBlob(blob, fileName)
+                const { status } = res;
+                if (status === 200) {
+                    const blob = new Blob([res.data])
+                    const fileName = `sdk.zip`
+                    if ('download' in document.createElement('a')) {
+                        const elink = document.createElement('a')
+                        elink.download = fileName
+                        elink.style.display = 'none'
+                        elink.href = URL.createObjectURL(blob)
+                        document.body.appendChild(elink)
+                        elink.click()
+                        URL.revokeObjectURL(elink.href)
+                        document.body.removeChild(elink)
+                    } else {
+                        navigator.msSaveBlob(blob, fileName)
+                    }
+                }else {
+                    this.$message({
+                        type: 'error',
+                        message: this.$t('text.haveCertSdk')
+                    })
                 }
+
             })
         },
         // 导出java项目
