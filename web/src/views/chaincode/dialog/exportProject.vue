@@ -346,12 +346,13 @@ export default {
             })
         },
         handleSelectAll(selection){
-            if(!selection.length){
-                this.$message({
-                    type:"error",
-                    message: this.$t('text.haveSelectionAll')
-                })
-            }
+            // console.log(selection);
+            // if(!selection.length){
+            //     this.$message({
+            //         type:"error",
+            //         message: this.$t('text.haveSelectionAll')
+            //     })
+            // }
         },
         export() {
             // const idList = this.multipleSelection.map(value => {
@@ -392,8 +393,13 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.queryPort = true
-                        this.projectFrom.channelPort = data.channelPort
+                        if(data.channelPort == "null"){
+                            this.projectFrom.channelPort = ""
+                        }else {
+                             this.queryPort = true
+                            this.projectFrom.channelPort = data.channelPort
+                        }
+                        
                     } else {
                         this.$message({
                             type: "error",

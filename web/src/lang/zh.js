@@ -373,7 +373,8 @@ export default {
         actualChannelIp: '根据实际channelIp修改',
         projectTitle: '项目信息',
         haveAbi: 'abi信息不能为空',
-        haveSelectionAll: '合约全未编译'
+        haveSelectionAll: '合约全未编译',
+        haveCertSdk: '获取SDK证书失败，请检查证书文件'
     },
     contracts: {
         createFile: "新建文件",
