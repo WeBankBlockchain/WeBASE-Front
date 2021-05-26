@@ -26,6 +26,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.ContractRepository;
 import com.webank.webase.front.contract.entity.Contract;
@@ -49,9 +50,12 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import javax.persistence.Tuple;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.BcosSDK;
@@ -61,6 +65,7 @@ import org.fisco.bcos.sdk.abi.TypeReference;
 import org.fisco.bcos.sdk.abi.Utils;
 import org.fisco.bcos.sdk.abi.datatypes.Function;
 import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.request.Transaction;
@@ -73,6 +78,7 @@ import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.RevertMessageParser;
 import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
@@ -194,17 +200,19 @@ public class TransService {
                 .executeCall(keyStoreInfo.getAddress(), contractAddress, encodedFunction)
                 .getCallResult();
             if (!RECEIPT_STATUS_0X0.equals(callOutput.getStatus())) {
-                log.error("call contract error:{}", callOutput.getStatus());
-                 throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR,
-                     "call contract error status: " + callOutput.getStatus());
-            }
-
-            List<Type> typeList =
-                    FunctionReturnDecoder.decode(callOutput.getOutput(), function.getOutputParameters());
-            if (typeList.size() > 0) {
-                response = AbiUtil.callResultParse(contractFunction.getOutputList(), typeList);
+                Tuple2<Boolean, String> parseResult =
+                    RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
+                log.error("call contract error:{}", parseResult);
+                String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
+                response = Collections.singletonList("Call contract return error: " + parseResultStr);
             } else {
-                response = typeList;
+                List<Type> typeList = FunctionReturnDecoder
+                        .decode(callOutput.getOutput(), function.getOutputParameters());
+                if (typeList.size() > 0) {
+                    response = AbiUtil.callResultParse(contractFunction.getOutputList(), typeList);
+                } else {
+                    response = typeList;
+                }
             }
         } else {
             // data sign
