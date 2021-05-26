@@ -594,7 +594,7 @@ let errCode = {
     },
     "201517": {
         en: "call contract constant method fail",
-        zh: '合约状态异常，调用合约constant方法失败'
+        zh: '调用合约constant方法失败'
     },
     "201518": {
         en: "get message's hash fail",
