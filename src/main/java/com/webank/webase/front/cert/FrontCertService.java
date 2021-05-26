@@ -281,34 +281,38 @@ public class FrontCertService {
         Map<String, String> sdkCertMap = new HashMap<>();
         log.info("start getSDKCertKeyMap sslType:{}.", bcosSDK.getSSLCryptoType());
         // add sdk cert: node.crt
+        // v1.5.1 return all sdk cert in conf
         loadBareSdkContent(frontSdkNodeCrt, sdkCertMap);
         loadBareSdkContent(frontSdkNodeKey, sdkCertMap);
         loadBareSdkContent(frontSdkCaCrt, sdkCertMap);
         // if use gm ssl
-        if (bcosSDK.getSSLCryptoType() == CryptoType.SM_TYPE) {
-            loadBareSdkContent(frontGmSdkCaCrt, sdkCertMap);
-            loadBareSdkContent(frontGmSdkNodeCrt, sdkCertMap);
-            loadBareSdkContent(frontGmSdkNodeKey, sdkCertMap);
-            loadBareSdkContent(frontGmEnSdkNodeCrt, sdkCertMap);
-            loadBareSdkContent(frontGmEnSdkNodeKey, sdkCertMap);
-        }
+        loadBareSdkContent(frontGmSdkCaCrt, sdkCertMap);
+        loadBareSdkContent(frontGmSdkNodeCrt, sdkCertMap);
+        loadBareSdkContent(frontGmSdkNodeKey, sdkCertMap);
+        loadBareSdkContent(frontGmEnSdkNodeCrt, sdkCertMap);
+        loadBareSdkContent(frontGmEnSdkNodeKey, sdkCertMap);
         log.debug("end getSDKCertKeyMap sdkCertStr:{}", sdkCertMap);
         return sdkCertMap;
     }
 
     /**
      * get crt file content in dir(String)
-     * @param sdkFileStr
+     * @param sdkFilePath
      * @param targetMap as return result
      */
-    private void loadBareSdkContent(String sdkFileStr, Map<String, String> targetMap) {
-        log.debug("start loadBareSdkContent sdkFileStr:{}", sdkFileStr);
-        try(InputStream nodeCrtInput = new ClassPathResource(sdkFileStr).getInputStream()){
+    private void loadBareSdkContent(String sdkFilePath, Map<String, String> targetMap) {
+        log.debug("start loadBareSdkContent sdkFileStr:{}", sdkFilePath);
+        File checkFile = new File("conf/" + sdkFilePath);
+        if (!checkFile.exists()) {
+            log.warn("loadBareSdkContent sdk of [{}] not exist, jump over", checkFile);
+            return;
+        }
+        try(InputStream nodeCrtInput = new ClassPathResource(sdkFilePath).getInputStream()){
             String nodeCrtStr = inputStream2String(nodeCrtInput);
-            String fileName = sdkFileStr;
+            String fileName = sdkFilePath;
             // if gm/gmca.crt, then fileName=gmca.crt
-            if (sdkFileStr.contains("/")) {
-                String[] gmCertStrArr = sdkFileStr.split("/");
+            if (sdkFilePath.contains("/")) {
+                String[] gmCertStrArr = sdkFilePath.split("/");
                 if (gmCertStrArr.length >= 2) {
                     fileName = gmCertStrArr[gmCertStrArr.length - 1];
                 }
