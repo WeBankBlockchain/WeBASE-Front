@@ -21,6 +21,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.util.CleanPathUtil;
+import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ZipUtils;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -35,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -277,36 +279,40 @@ public class FrontCertService {
      */
     public Map<String, String> getSDKCertKeyMap() {
         Map<String, String> sdkCertMap = new HashMap<>();
-        log.info("start getSDKCertKeyMap sslType:{}.", bcosSDK.getSSLCryptoType() );
+        log.info("start getSDKCertKeyMap sslType:{}.", bcosSDK.getSSLCryptoType());
         // add sdk cert: node.crt
+        // v1.5.1 return all sdk cert in conf
         loadBareSdkContent(frontSdkNodeCrt, sdkCertMap);
         loadBareSdkContent(frontSdkNodeKey, sdkCertMap);
         loadBareSdkContent(frontSdkCaCrt, sdkCertMap);
         // if use gm ssl
-        if (bcosSDK.getSSLCryptoType() == CryptoType.SM_TYPE) {
-            loadBareSdkContent(frontGmSdkCaCrt, sdkCertMap);
-            loadBareSdkContent(frontGmSdkNodeCrt, sdkCertMap);
-            loadBareSdkContent(frontGmSdkNodeKey, sdkCertMap);
-            loadBareSdkContent(frontGmEnSdkNodeCrt, sdkCertMap);
-            loadBareSdkContent(frontGmEnSdkNodeKey, sdkCertMap);
-        }
+        loadBareSdkContent(frontGmSdkCaCrt, sdkCertMap);
+        loadBareSdkContent(frontGmSdkNodeCrt, sdkCertMap);
+        loadBareSdkContent(frontGmSdkNodeKey, sdkCertMap);
+        loadBareSdkContent(frontGmEnSdkNodeCrt, sdkCertMap);
+        loadBareSdkContent(frontGmEnSdkNodeKey, sdkCertMap);
         log.debug("end getSDKCertKeyMap sdkCertStr:{}", sdkCertMap);
         return sdkCertMap;
     }
 
     /**
      * get crt file content in dir(String)
-     * @param sdkFileStr
+     * @param sdkFilePath
      * @param targetMap as return result
      */
-    private void loadBareSdkContent(String sdkFileStr, Map<String, String> targetMap) {
-        log.debug("start loadBareSdkContent sdkFileStr:{}", sdkFileStr);
-        try(InputStream nodeCrtInput = new ClassPathResource(sdkFileStr).getInputStream()){
+    private void loadBareSdkContent(String sdkFilePath, Map<String, String> targetMap) {
+        log.debug("start loadBareSdkContent sdkFileStr:{}", sdkFilePath);
+        File checkFile = new File("conf/" + sdkFilePath);
+        if (!checkFile.exists()) {
+            log.warn("loadBareSdkContent sdk of [{}] not exist, jump over", checkFile);
+            return;
+        }
+        try(InputStream nodeCrtInput = new ClassPathResource(sdkFilePath).getInputStream()){
             String nodeCrtStr = inputStream2String(nodeCrtInput);
-            String fileName = sdkFileStr;
+            String fileName = sdkFilePath;
             // if gm/gmca.crt, then fileName=gmca.crt
-            if (sdkFileStr.contains("/")) {
-                String[] gmCertStrArr = sdkFileStr.split("/");
+            if (sdkFilePath.contains("/")) {
+                String[] gmCertStrArr = sdkFilePath.split("/");
                 if (gmCertStrArr.length >= 2) {
                     fileName = gmCertStrArr[gmCertStrArr.length - 1];
                 }
@@ -330,25 +336,20 @@ public class FrontCertService {
      * @return
      */
     public synchronized FileContentHandle getFrontSdkZipFile() {
+        File tempZipFile = new File(TEMP_ZIP_FILE_PATH);
+        if (tempZipFile.exists()) {
+            boolean result = CommonUtils.deleteDir(tempZipFile);
+            log.info("getFrontSdkZipFile delete old zip file[{}] before create new, result:{}", tempZipFile, result);
+        }
         // get sdk cert content
         Map<String, String> sdkContentMap = this.getSDKCertKeyMap();
         if (sdkContentMap.isEmpty()) {
+            log.error("getFrontSdkZipFile sdk key file not found!");
             throw new FrontException(ConstantCode.SDK_KEY_FILE_NOT_FOUND);
         }
-        // get if guomi sdk
-        String key = sdkContentMap.keySet().iterator().next();
-        boolean useGm = key.contains("gm");
 
-        // if guomi, create conf/gm, else create conf/
-        File sdkDir;
-        if (useGm) {
-            sdkDir = new File(TEMP_SDK_DIR + File.separator + "gm");
-        } else {
-            sdkDir = new File(TEMP_SDK_DIR);
-        }
-        log.info("writeSdkAsFile sdkDir:{}", sdkDir);
         // create dir and zip
-        writeSdkFilesAndZip(sdkContentMap, sdkDir, useGm);
+        writeSdkFilesAndZip(sdkContentMap);
         try {
             // FileInputStream would be closed by web
             return new FileContentHandle(TEMP_ZIP_FILE_NAME, new FileInputStream(TEMP_ZIP_FILE_PATH));
@@ -358,44 +359,64 @@ public class FrontCertService {
         }
     }
 
-    private void writeSdkFilesAndZip(Map<String, String> sdkContentMap, File sdkDir, boolean useGm) {
-        this.writeSdkAsFile(sdkContentMap, sdkDir);
-        // zip the directory of conf(guomi: conf/gm)
-        String gmDirInZip = useGm ? "gm" : "";
+    private void writeSdkFilesAndZip(Map<String, String> sdkContentMap) {
+        this.writeSdkAsFile(sdkContentMap);
+        // zip the directory of sdk
+        //sdk
+        //├── ca.crt
+        //├── gm
+        //│   ├── gmca.crt
+        //│   ├── gmensdk.crt
+        //│   ├── gmensdk.key
+        //│   ├── gmsdk.crt
+        //│   └── gmsdk.key
+        //├── sdk.crt
+        //└── sdk.key
         try {
-            ZipUtils.generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR, gmDirInZip, TEMP_ZIP_FILE_NAME);
+            ZipUtils.generateZipFile(TEMP_SDK_DIR, TEMP_ZIP_DIR, "", TEMP_ZIP_FILE_NAME);
         } catch (Exception e) {
             log.error("writeSdkAsFile generateZipFile fail:[]", e);
             throw new FrontException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
         }
 
-        // rm conf dir
-        boolean resultDel = sdkDir.delete();
-        log.info("delete for temp sdk file, result:{}", resultDel);
+        // after zip, delete sdk dir
+        File sdkDir = new File(TEMP_SDK_DIR);
+        boolean resultDel = CommonUtils.deleteDir(sdkDir);
+        log.info("delete for temp sdk dir[{}], result:{}", sdkDir, resultDel);
     }
 
     /**
      * write sdk file of ca.crt, sdk.crt, sdk.key
      * @param sdkContentMap
-     * @param sdkDir sdk file output directory
      * @return
      */
-    public void writeSdkAsFile(Map<String, String> sdkContentMap, File sdkDir) {
-
-        // create sdk dir
-        if (sdkDir.exists()) {
-            boolean result = sdkDir.delete();
-            log.info("delete existed gm dir, result:{}", result);
-        }
-        boolean result = sdkDir.mkdirs();
-        log.info("mkdir for temp sdk file, result:{}", result);
+    public void writeSdkAsFile(Map<String, String> sdkContentMap) {
 
         // write each content to each file in conf/ or conf/gm/
         // gm: gmca.crt, gmsdk.crt, gmsdk.key
         // else: ca.crt, sdk.crt, sdk.key
+        File sdkDir = new File(TEMP_SDK_DIR);
+        File gmSdkDir = new File(TEMP_SDK_DIR + File.separator + "gm");
+        if (sdkDir.exists()) {
+            boolean result = CommonUtils.deleteDir(sdkDir);
+            log.info("writeSdkAsFile delete sdk dir[{}], result:{}", sdkDir, result);
+        }
+        boolean sdkDirRes =  sdkDir.mkdirs();
+        log.info("writeSdkAsFile re-create sdk dir result:{}", sdkDirRes);
+
         for (String fileName : sdkContentMap.keySet()) {
+            // if sdk.key, save in sdk/sdk.key
             Path sdkFilePath = Paths
-                .get(CleanPathUtil.cleanString(sdkDir.getPath() + File.separator + fileName));
+                .get(CleanPathUtil.cleanString(TEMP_SDK_DIR + File.separator + fileName));
+            // if gmsdk.key, save in sdk/gm/gmsdk.key
+            if (fileName.contains("gm")) {
+                sdkFilePath = Paths.get(CleanPathUtil.cleanString(TEMP_SDK_DIR + File.separator
+                    + "gm" + File.separator + fileName));
+                if (!gmSdkDir.exists()) {
+                    boolean gmSdkDirRes = gmSdkDir.mkdirs();
+                    log.info("writeSdkAsFile create gmSdkDir[{}] result:{}", sdkFilePath, gmSdkDirRes);
+                }
+            }
             String fileContent = sdkContentMap.get(fileName);
             log.info("writeSdkAsFile sdkPath:{}, content:{}", sdkFilePath, fileContent);
             try (BufferedWriter writer = Files

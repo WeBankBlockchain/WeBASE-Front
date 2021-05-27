@@ -44,7 +44,7 @@ public class ZipUtils {
         // 用于存放压缩文件的文件夹
         File compress = new File(outputDir);
         // 如果文件夹不存在，进行创建
-        if (!compress.exists() ){
+        if (!compress.exists()) {
             compress.mkdirs();
         }
         // 目的压缩文件，已存在则先删除
