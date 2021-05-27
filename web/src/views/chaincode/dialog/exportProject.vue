@@ -425,3 +425,8 @@ export default {
     z-index:3000 !important;
 }
 </style>
+<style>
+    .zZindex {
+        z-index:3000 !important;
+    }
+</style>
