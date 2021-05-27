@@ -74,7 +74,7 @@ public class ExceptionsHandler {
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", ex.getMessage());
         map.put("code", 400);
-        log.error("typeMismatchException return:{}", JsonUtils.toJSONString(map));
+        log.warn("typeMismatchException return:{}", JsonUtils.toJSONString(map));
         return ResponseEntity.status(400).body(map);
     }
 
@@ -86,7 +86,7 @@ public class ExceptionsHandler {
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", ex.getMessage());
         map.put("code", 400);
-        log.error("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
+        log.warn("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
         return ResponseEntity.status(400).body(map);
     }
 
@@ -103,7 +103,7 @@ public class ExceptionsHandler {
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", ex.getMessage());
         map.put("code", 400);
-        log.error("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
+        log.warn("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
         return ResponseEntity.status(400).body(map);
     }
 
@@ -114,10 +114,11 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = ContractException.class)
     public ResponseEntity contractExceptionHandler(ContractException exc) {
-        log.error("catch contract exception: []", exc);
+        log.error("catch contractExceptionHandler: []", exc);
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", exc.getMessage());
         map.put("code", exc.getErrorCode());
+        log.warn("contractExceptionHandler return:{}", JsonUtils.toJSONString(map));
         return ResponseEntity.status(500).body(map);
     }
 
@@ -129,11 +130,12 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = IOException.class)
     public ResponseEntity exceptionHandler(IOException exc) {
-        log.error("catch  exception: []", exc);
+        log.error("catch IOException: []", exc);
         RetCode errorDetail = chainErrorHandle(exc.getMessage());
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", errorDetail.getMessage());
         map.put("code", errorDetail.getCode());
+        log.warn("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
         return ResponseEntity.status(500).body(map);
     }
 
@@ -151,6 +153,7 @@ public class ExceptionsHandler {
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", errorDetail.getMessage());
         map.put("code", errorDetail.getCode());
+        log.warn("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
         return ResponseEntity.status(500).body(map);
     }
 
