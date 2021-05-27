@@ -462,6 +462,9 @@ export default {
             }
             await saveChaincode(reqData).then(res => {
                 if (res.status === 200) {
+                    setTimeout(() => {
+                            this.getContractPaths()
+                    }, 200);
                     try {
                         if (type) {
                             this.$refs.file.value = "";
