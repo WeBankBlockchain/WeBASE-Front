@@ -319,6 +319,7 @@ public class ContractService {
             log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
             throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
         }
+        // locally
         if (req.isSaveEnabled()) {
             if (StringUtils.isBlank(req.getContractPath())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING);
@@ -341,6 +342,7 @@ public class ContractService {
             cns.setModifyTime(LocalDateTime.now());
             cnsRepository.save(cns);
         } else {
+            // from node mgr
             if (StringUtils.isBlank(req.getSignUserId())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
             }
