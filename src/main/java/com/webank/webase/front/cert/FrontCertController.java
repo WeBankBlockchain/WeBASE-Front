@@ -151,7 +151,7 @@ public class FrontCertController {
         Instant startTime = Instant.now();
         log.info("start getSdkCertZip startTime:{}", startTime.toEpochMilli());
         // get file
-        FileContentHandle fileContentHandle = certService.getFrontSdkFiles();
+        FileContentHandle fileContentHandle = certService.getFrontSdkZipFile();
         log.info("end getSdkCertZip fileContentHandle:{}useTime:{}", fileContentHandle,
             Duration.between(startTime, Instant.now()).toMillis());
         return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))

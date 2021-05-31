@@ -110,7 +110,7 @@ let errCode = {
     },
     "201020": {
         en: "transaction query from chain failed",
-        zh: '链中的事务查询失败'
+        zh: '链上查询交易失败'
     },
     "201021": {
         en: "transaction send to chain failed",
@@ -227,7 +227,7 @@ let errCode = {
 
     "201112": {
         en: "contract address cannot be empty",
-        zh: '合同地址不能为空'
+        zh: '合约地址不能为空'
     },
     "201154": {
         en: "contract path is exists.",
@@ -240,6 +240,10 @@ let errCode = {
     "201156": {
         en: "Write front's sdk cert and key fail!",
         zh: '写入前置的sdk证书和密钥失败！'
+    },
+    "201161": {
+        en: "Generate project failed in scaffold",
+        zh: '项目Scaffold脚手架生成失败'
     },
     "201213": {
         en: "address is invalid",
@@ -423,7 +427,7 @@ let errCode = {
     },
     "201153": {
         en: "Unable to create instance of type, check input params",
-        zh: '无法创建类型的实例，请检查输入参数'
+        zh: '输入参数格式错误'
     },
     "201221": {
         en: "Contract version should only contains 'A-Z' or 'a-z' or '0-9' or dot mark ",
@@ -513,7 +517,7 @@ let errCode = {
     },
     "201255": {
         en: "Contract address already exists",
-        zh: '合同地址已存在'
+        zh: '合约地址已存在'
     },
     "201256": {
         en: "Abi info of this id not exists",
@@ -590,7 +594,7 @@ let errCode = {
     },
     "201517": {
         en: "call contract constant method fail",
-        zh: '合约状态异常，调用合约constant方法失败'
+        zh: '调用合约constant方法失败'
     },
     "201518": {
         en: "get message's hash fail",

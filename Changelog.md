@@ -1,3 +1,25 @@
+### v1.5.1(2021-05-28)
+
+**Add**
+- 合约IDE支持导出合约的Java工程脚手架
+- 合约仓库新增SmartDev存证合约
+
+**Fix**
+- 优化合约仓库中LibString工具合约，增加bytes32与string互转方法
+- 修复无群组1启动报错问题
+- 修复导出SDK证书目录问题
+- 修复合约IDE中合约调用参数为字符串时不能输入空格
+- 优化合约IDE，通过worker加载编译js文件，修复部分chrome浏览器加载js失败问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Node-Manager v1.4.1+
+- WeBASE-Sign v1.5.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 ### v1.5.0(2021-04-06)
 
 **Add**

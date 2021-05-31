@@ -479,11 +479,11 @@ public class PrecompiledWithSignService {
         return this.handleTransactionReceipt(receipt);
     }
 
-    public String registerCns(int groupId, String signUserId, String contractName, String version,
+    public String registerCns(int groupId, String signUserId, String cnsContractName, String version,
             String contractAddress, String abiInfo) {
         // trans
         List<Object> funcParams = new ArrayList<>();
-        funcParams.add(contractName);
+        funcParams.add(cnsContractName);
         funcParams.add(version);
         funcParams.add(contractAddress);
         funcParams.add(abiInfo);

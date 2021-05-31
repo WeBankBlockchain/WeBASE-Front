@@ -150,6 +150,8 @@ public class ConstantCode {
     // add in v1.5.0
     public static final RetCode WRITE_SDK_CRT_KEY_FILE_FAIL = RetCode.mark(201156,"Write front's sdk cert and key fail!");
     public static final RetCode WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL = RetCode.mark(201157,"Write private key file fail!");
+    // add in v1.5.1
+    public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(201161, "generate project failed in scaffold");
 
 
     /* precompiled runtime check or error */
@@ -196,7 +198,7 @@ public class ConstantCode {
     public static final RetCode DATA_REPEAT_IN_DB_ERROR = RetCode.mark(201242, "Database error: data already exists in db");
     public static final RetCode BLOCK_RANGE_PARAM_INVALID = RetCode.mark(201243, "Block range error, from/toBlock must greater than 0, toBlock must be greater than fromBlock");
     public static final RetCode DATA_NOT_EXIST_ERROR = RetCode.mark(201244, "Database error: data not exists in db, please check your params");
-    public static final RetCode PARAM_INVALID = RetCode.mark(201245, "Only support letter and digit, please check your params");
+    public static final RetCode PARAM_INVALID_LETTER_DIGIT = RetCode.mark(201245, "Only support letter and digit, please check your params");
     public static final RetCode REGISTER_FAILED_ERROR = RetCode.mark(201246, "Register contractEvent failed, please check your param");
     public static final RetCode UNREGISTER_FAILED_ERROR = RetCode.mark(201247, "Unregister event failed, please check mq server exchange");
     public static final RetCode PARAM_FAIL_ABI_INVALID = RetCode.mark(201248, "Contract abi invalid, please check abi");

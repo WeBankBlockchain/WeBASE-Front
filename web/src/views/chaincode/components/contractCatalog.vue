@@ -27,6 +27,7 @@
                     <input multiple type="file" id="file" ref='file' name="chaincodes" class="uploads" @change="upload($event)" />
                 </i>
             </el-tooltip>
+            <!-- <el-button type="text" @click="fromGitHub">GitHub</el-button> -->
             <div>
                 <slot name="footer"></slot>
             </div>
@@ -84,16 +85,24 @@
                     </div>
                 </li>
             </ul>
+            
         </div>
         <add-folder v-if="foldershow" :foldershow="foldershow" @close='folderClose' @success='folderSuccess'></add-folder>
         <add-file v-if="fileshow" :data='selectFolderData' :fileshow="fileshow" @close='fileClose' @success='fileSucccess($event)' :id='folderId'></add-file>
         <select-catalog v-if='cataLogShow' :show='cataLogShow' @success='catalogSuccess($event)' @close='catalogClose'></select-catalog>
+        <export-project v-if='$store.state.exportProjectShow' :show='$store.state.exportProjectShow' :folderList='pathList' @close='exportProjectShowClose'></export-project>
+        <el-dialog v-if="importFromDialog" :title="$t('contracts.importContractTitle')" :visible.sync="importFromDialog" width="470px" center class="send-dialog">
+            <import-from @modelClose="modelClose" @exportSuccessed="exportSuccessed"></import-from>
+        </el-dialog>
+        
     </div>
 </template>
 <script>
 import addFolder from "../dialog/addFolder";
 import addFile from "../dialog/addFile";
 import selectCatalog from "../dialog/selectCatalog";
+import exportProject from "../dialog/exportProject"
+import importFrom from "../dialog/importFrom"
 import { searchContract, getContractPathList, saveChaincode, deleteCode, solcList, solcUpload, solcDownload, deleteSolcId, readSolcVersion, deletePath } from "@/util/api";
 import Bus from "@/bus";
 import Clickoutside from 'element-ui/src/utils/clickoutside';
@@ -113,7 +122,9 @@ export default {
     components: {
         "add-folder": addFolder,
         "add-file": addFile,
-        "select-catalog": selectCatalog
+        "select-catalog": selectCatalog,
+        exportProject,
+        importFrom
     },
     data() {
         return {
@@ -143,7 +154,8 @@ export default {
             pathList: [],
             folderData: null,
             selectFolderData: null,
-            loading: false
+            loading: false,
+            importFromDialog: false
         };
     },
     watch: {
@@ -225,7 +237,6 @@ export default {
             this.handleModel = false;
         },
         handle(e, list) {
-            console.log(e, list);
             this.checkNull()
             list.handleModel = true
             if (e.clientX > 201) {
@@ -451,6 +462,9 @@ export default {
             }
             await saveChaincode(reqData).then(res => {
                 if (res.status === 200) {
+                    setTimeout(() => {
+                            this.getContractPaths()
+                    }, 200);
                     try {
                         if (type) {
                             this.$refs.file.value = "";
@@ -674,7 +688,6 @@ export default {
                 // pageNumber: 1,
                 // pageSize: 500
             };
-            console.log(path)
             if (path && this.$store.state.contractDataList.length > 0) {
                 data.contractPathList = [path]
             } else if (path && this.$store.state.contractDataList.length == 0) {
@@ -804,7 +817,6 @@ export default {
             this.fileClose();
         },
         createFolder(val) {
-            console.log(val)
             let result = [];
             this.folderList.forEach((value, index) => {
                 let num = 0;
@@ -838,7 +850,6 @@ export default {
             return result;
         },
         open(val) {
-            console.log(val)
             sessionStorage.setItem("selectData", "")
             if (val.contractName != "/" && val.contractPath != "/") {
                 this.getContracts(val.contractName, val);
@@ -899,6 +910,7 @@ export default {
 
         },
         select(val, type) {
+            if(!type)this.$store.dispatch('set_selected_contracts_action',val);
             if (this.modifyState) {
                 this.$confirm(`${this.$t('text.unsavedContract')}？`, {
                     center: true,
@@ -1134,7 +1146,6 @@ export default {
             return false;
         },
         deleteSloc(val) {
-            console.log(val)
         },
         exportFile(val) {
             this.$confirm(`${this.$t('dialog.sureExport')}？`)
@@ -1203,8 +1214,21 @@ export default {
                     });
                 }
             })
+        },
+        // 导出项目
+        exportProjectShowClose() {
+            this.$store.dispatch('set_exportProject_show_action',false)
+        },
+        fromGitHub() {
+            this.importFromDialog = true;
+        },
+        modelClose(){
+            this.importFromDialog = false;
+        },
+        exportSuccessed() {
+            this.importFromDialog = false;
+            this.getContractPaths()
         }
-
     }
 };
 </script>

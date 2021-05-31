@@ -72,7 +72,7 @@ export default {
             menuHide: true,
             changeWidth: false,
             contractHide: false,
-            menuWidth: 240,
+            menuWidth: 290,
             urlQuery: this.$root.$route.query,
             loading: false,
             allVersion: [],
@@ -109,29 +109,57 @@ export default {
             this.changeGroup()
         })
         this.allVersion = [
+            // {
+            //     solcName: "v0.4.25",
+            //     versionId: 0,
+            //     encryptType: 0,
+            //     net: 0
+            // },
+            // {
+            //     solcName: "v0.4.25-gm",
+            //     versionId: 1,
+            //     encryptType: 1,
+            //     net: 0
+            // },
+            // {
+            //     solcName: "v0.5.2",
+            //     versionId: 2,
+            //     encryptType: 0,
+            //     net: 0
+            // },
+            // {
+            //     solcName: "v0.5.2-gm",
+            //     versionId: 3,
+            //     encryptType: 1,
+            //     net: 0
+            // },
             {
                 solcName: "v0.4.25",
                 versionId: 0,
+                url: `http://${this.host}/WeBASE-Front/static/js/v0.4.25.js`,
                 encryptType: 0,
-                net: 0
+                net: 1
             },
             {
-                solcName: "v0.4.24-gm",
+                solcName: "v0.4.25-gm",
                 versionId: 1,
+                url: `http://${this.host}/WeBASE-Front/static/js/v0.4.25-gm.js`,
                 encryptType: 1,
-                net: 0
+                net: 1
             },
             {
-                solcName: "v0.5.1",
+                solcName: "v0.5.2",
+                url: `http://${this.host}/WeBASE-Front/static/js/v0.5.2.js`,
                 versionId: 2,
                 encryptType: 0,
-                net: 0
+                net: 1
             },
             {
-                solcName: "v0.5.1-gm",
+                solcName: "v0.5.2-gm",
                 versionId: 3,
+                url: `http://${this.host}/WeBASE-Front/static/js/v0.5.2-gm.js`,
                 encryptType: 1,
-                net: 0
+                net: 1
             },
             {
                 solcName: "v0.6.10",
@@ -149,6 +177,10 @@ export default {
             }
         ]
         if (process.env.NODE_ENV === 'development') {
+            this.allVersion[0].url = `http://${this.host}/static/js/v0.4.25.js`;
+            this.allVersion[1].url = `http://${this.host}/static/js/v0.4.25-gm.js`;
+            this.allVersion[2].url = `http://${this.host}/static/js/v0.5.2.js`;
+            this.allVersion[3].url = `http://${this.host}/static/js/v0.5.2-gm.js`;
             this.allVersion[4].url = `http://${this.host}/static/js/v0.6.10.js`;
             this.allVersion[5].url = `http://${this.host}/static/js/v0.6.10-gm.js`;
         }
@@ -201,7 +233,7 @@ export default {
                 w.addEventListener("error", function (ev) {
                     that.$message({
                         type: "error",
-                        message: this.$t('text.versionError')
+                        message: that.$t('text.versionError')
                     });
                     that.loading = false
                     console.log(ev)

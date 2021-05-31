@@ -319,6 +319,7 @@ public class ContractService {
             log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
             throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
         }
+        // locally
         if (req.isSaveEnabled()) {
             if (StringUtils.isBlank(req.getContractPath())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING);
@@ -341,6 +342,7 @@ public class ContractService {
             cns.setModifyTime(LocalDateTime.now());
             cnsRepository.save(cns);
         } else {
+            // from node mgr
             if (StringUtils.isBlank(req.getSignUserId())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
             }
@@ -447,7 +449,6 @@ public class ContractService {
             List<ABIDefinition> abiInfo, String contractBin, String packageName)
             throws IOException {
 
-
         File abiFile = new File(CleanPathUtil
                 .cleanString(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi"));
         FrontUtils.createFileIfNotExist(abiFile, true);
@@ -464,7 +465,6 @@ public class ContractService {
         if (contractName.length() > 1) {
             contractName = contractName.substring(0, 1).toUpperCase() + contractName.substring(1);
         }
-        // File outputDir = new File(Constants.JAVA_DIR + File.separator + outputDirectory);
         File outputDir = new File(CleanPathUtil.cleanString(Constants.JAVA_DIR));
 
         generateJavaFile(packageName, abiFile, binFile, outputDir);

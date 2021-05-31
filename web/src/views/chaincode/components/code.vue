@@ -53,6 +53,10 @@
                     <i class="el-icon-download contract-icon-style font-16"></i>
                     <span>{{$t('title.exportSdk')}}</span>
                 </span>
+                <span class="contract-code-done" @click="exportJava">
+                    <i class="el-icon-download contract-icon-style font-16"></i>
+                    <span>{{$t('title.exportJavaProject')}}</span>
+                </span>
             </span>
             <div class="search-model" v-if="searchVisibility">
                 <el-input v-model="keyword" placeholder="搜索" style="width:266px;margin-left:10px;" ref="searchInput" @keyup.esc.native="closeBtn" @keyup.enter.native="searchBtn" @keyup.down.native="nextBtn" @keyup.up.native="previousBtn"></el-input>
@@ -654,7 +658,8 @@ export default {
         },
         //v0.4.25 v0.5.1
         compileLowVersion: function (callback) {
-
+            console.log('656:wrapper:', wrapper);
+            console.log('656:Module:', window, window.Module);
             let wrapper = require("solc/wrapper");
             let solc = wrapper(window.Module);
 
@@ -750,11 +755,19 @@ export default {
             this.bin = "";
         },
         deploying: function () {
-            if (this.abiFile) {
-                this.compile(this.deploy)
+            if (JSON.parse(this.abiFile).length == 0 || !this.abiFile) {
+                this.$message({
+                    type: 'error',
+                    message: this.$t('text.haveAbi')
+                })
             } else {
-                this.$message.error(`${this.$t('text.compilationFailed')}`);
+                if (this.abiFile) {
+                    this.compile(this.deploy)
+                } else {
+                    this.$message.error(`${this.$t('text.compilationFailed')}`);
+                }
             }
+
 
         },
         deploy: function () {
@@ -917,19 +930,27 @@ export default {
             this.successHide = val;
         },
         send: function () {
-            ifChangedDepaloy(localStorage.getItem("groupId"), this.data.id).then(res => {
+            if (JSON.parse(this.abiFile).length == 0 || !this.abiFile) {
+                this.$message({
+                    type: 'error',
+                    message: this.$t('text.haveAbi')
+                })
+            } else {
+                ifChangedDepaloy(localStorage.getItem("groupId"), this.data.id).then(res => {
 
-                const { data, status } = res
-                if (status === 200) {
-                    if (data) {
-                        this.sendErrorMessage = this.$t('text.redeploy')
-                        this.dialogVisible = true;
-                    } else {
-                        this.dialogVisible = true;
-                        this.sendErrorMessage = ''
+                    const { data, status } = res
+                    if (status === 200) {
+                        if (data) {
+                            this.sendErrorMessage = this.$t('text.redeploy')
+                            this.dialogVisible = true;
+                        } else {
+                            this.dialogVisible = true;
+                            this.sendErrorMessage = ''
+                        }
                     }
-                }
-            })
+                })
+            }
+
 
         },
         handleClose: function () {
@@ -1139,26 +1160,39 @@ export default {
         handleChange(val) {
             console.log(val);
         },
-        exportSdk(){
+        exportSdk() {
             this.sureExportSdk()
         },
-        sureExportSdk(){
+        sureExportSdk() {
             exportCertSdk().then(res => {
-                const blob = new Blob([res.data])
-                const fileName = `sdk.zip`
-                if ('download' in document.createElement('a')) {
-                    const elink = document.createElement('a')
-                    elink.download = fileName
-                    elink.style.display = 'none'
-                    elink.href = URL.createObjectURL(blob)
-                    document.body.appendChild(elink)
-                    elink.click()
-                    URL.revokeObjectURL(elink.href)
-                    document.body.removeChild(elink)
-                } else { 
-                    navigator.msSaveBlob(blob, fileName)
+                const { status } = res;
+                if (status === 200) {
+                    const blob = new Blob([res.data])
+                    const fileName = `sdk.zip`
+                    if ('download' in document.createElement('a')) {
+                        const elink = document.createElement('a')
+                        elink.download = fileName
+                        elink.style.display = 'none'
+                        elink.href = URL.createObjectURL(blob)
+                        document.body.appendChild(elink)
+                        elink.click()
+                        URL.revokeObjectURL(elink.href)
+                        document.body.removeChild(elink)
+                    } else {
+                        navigator.msSaveBlob(blob, fileName)
+                    }
+                }else {
+                    this.$message({
+                        type: 'error',
+                        message: this.$t('text.haveCertSdk')
+                    })
                 }
+
             })
+        },
+        // 导出java项目
+        exportJava() {
+            this.$store.dispatch('set_exportProject_show_action', true)
         },
     }
 };

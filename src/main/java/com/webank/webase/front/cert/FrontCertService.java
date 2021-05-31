@@ -21,6 +21,8 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.util.CleanPathUtil;
+import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.ZipUtils;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -34,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -276,36 +279,40 @@ public class FrontCertService {
      */
     public Map<String, String> getSDKCertKeyMap() {
         Map<String, String> sdkCertMap = new HashMap<>();
-        log.debug("start getSDKCertKeyMap.");
+        log.info("start getSDKCertKeyMap sslType:{}.", bcosSDK.getSSLCryptoType());
         // add sdk cert: node.crt
+        // v1.5.1 return all sdk cert in conf
         loadBareSdkContent(frontSdkNodeCrt, sdkCertMap);
         loadBareSdkContent(frontSdkNodeKey, sdkCertMap);
         loadBareSdkContent(frontSdkCaCrt, sdkCertMap);
         // if use gm ssl
-        if (bcosSDK.getSSLCryptoType() == CryptoType.SM_TYPE) {
-            loadBareSdkContent(frontGmSdkCaCrt, sdkCertMap);
-            loadBareSdkContent(frontGmSdkNodeCrt, sdkCertMap);
-            loadBareSdkContent(frontGmSdkNodeKey, sdkCertMap);
-            loadBareSdkContent(frontGmEnSdkNodeCrt, sdkCertMap);
-            loadBareSdkContent(frontGmEnSdkNodeKey, sdkCertMap);
-        }
+        loadBareSdkContent(frontGmSdkCaCrt, sdkCertMap);
+        loadBareSdkContent(frontGmSdkNodeCrt, sdkCertMap);
+        loadBareSdkContent(frontGmSdkNodeKey, sdkCertMap);
+        loadBareSdkContent(frontGmEnSdkNodeCrt, sdkCertMap);
+        loadBareSdkContent(frontGmEnSdkNodeKey, sdkCertMap);
         log.debug("end getSDKCertKeyMap sdkCertStr:{}", sdkCertMap);
         return sdkCertMap;
     }
 
     /**
      * get crt file content in dir(String)
-     * @param sdkFileStr
+     * @param sdkFilePath
      * @param targetMap as return result
      */
-    private void loadBareSdkContent(String sdkFileStr, Map<String, String> targetMap) {
-        log.debug("start loadBareSdkContent sdkFileStr:{}", sdkFileStr);
-        try(InputStream nodeCrtInput = new ClassPathResource(sdkFileStr).getInputStream()){
+    private void loadBareSdkContent(String sdkFilePath, Map<String, String> targetMap) {
+        log.debug("start loadBareSdkContent sdkFileStr:{}", sdkFilePath);
+        File checkFile = new File("conf/" + sdkFilePath);
+        if (!checkFile.exists()) {
+            log.warn("loadBareSdkContent sdk of [{}] not exist, jump over", checkFile);
+            return;
+        }
+        try(InputStream nodeCrtInput = new ClassPathResource(sdkFilePath).getInputStream()){
             String nodeCrtStr = inputStream2String(nodeCrtInput);
-            String fileName = sdkFileStr;
+            String fileName = sdkFilePath;
             // if gm/gmca.crt, then fileName=gmca.crt
-            if (sdkFileStr.contains("/")) {
-                String[] gmCertStrArr = sdkFileStr.split("/");
+            if (sdkFilePath.contains("/")) {
+                String[] gmCertStrArr = sdkFilePath.split("/");
                 if (gmCertStrArr.length >= 2) {
                     fileName = gmCertStrArr[gmCertStrArr.length - 1];
                 }
@@ -328,17 +335,23 @@ public class FrontCertService {
      * get sdk cert key files' zip
      * @return
      */
-    public synchronized FileContentHandle getFrontSdkFiles() {
+    public synchronized FileContentHandle getFrontSdkZipFile() {
+        File tempZipFile = new File(TEMP_ZIP_FILE_PATH);
+        if (tempZipFile.exists()) {
+            boolean result = CommonUtils.deleteDir(tempZipFile);
+            log.info("getFrontSdkZipFile delete old zip file[{}] before create new, result:{}", tempZipFile, result);
+        }
+        // get sdk cert content
         Map<String, String> sdkContentMap = this.getSDKCertKeyMap();
         if (sdkContentMap.isEmpty()) {
+            log.error("getFrontSdkZipFile sdk key file not found!");
             throw new FrontException(ConstantCode.SDK_KEY_FILE_NOT_FOUND);
         }
-        // get if guomi sdk
-        String key = sdkContentMap.keySet().iterator().next();
-        boolean useGm = key.contains("gm");
+
         // create dir and zip
-        writeSdkAsFile(sdkContentMap, useGm);
+        writeSdkFilesAndZip(sdkContentMap);
         try {
+            // FileInputStream would be closed by web
             return new FileContentHandle(TEMP_ZIP_FILE_NAME, new FileInputStream(TEMP_ZIP_FILE_PATH));
         } catch (IOException e) {
             log.error("getFrontSdkFiles fail:[]", e);
@@ -346,32 +359,68 @@ public class FrontCertService {
         }
     }
 
-    private void writeSdkAsFile(Map<String, String> sdkContentMap, boolean useGm) {
-        // if guomi, create conf/gm, else create conf/
-        File sdkDir;
-        if (useGm) {
-            sdkDir = new File(TEMP_SDK_DIR + File.separator + "gm");
-        } else {
-            sdkDir = new File(TEMP_SDK_DIR);
+    private void writeSdkFilesAndZip(Map<String, String> sdkContentMap) {
+        this.writeSdkAsFile(sdkContentMap);
+        // zip the directory of sdk
+        //sdk
+        //├── ca.crt
+        //├── gm
+        //│   ├── gmca.crt
+        //│   ├── gmensdk.crt
+        //│   ├── gmensdk.key
+        //│   ├── gmsdk.crt
+        //│   └── gmsdk.key
+        //├── sdk.crt
+        //└── sdk.key
+        try {
+            ZipUtils.generateZipFile(TEMP_SDK_DIR, TEMP_ZIP_DIR, "", TEMP_ZIP_FILE_NAME);
+        } catch (Exception e) {
+            log.error("writeSdkAsFile generateZipFile fail:[]", e);
+            throw new FrontException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
         }
-        log.info("writeSdkAsFile sdkDir:{}", sdkDir);
 
-        // create sdk dir
-        if (sdkDir.exists()) {
-            boolean result = sdkDir.delete();
-            log.info("delete existed gm dir, result:{}", result);
-        }
-        boolean result = sdkDir.mkdirs();
-        log.info("mkdir for temp sdk file, result:{}", result);
+        // after zip, delete sdk dir
+        File sdkDir = new File(TEMP_SDK_DIR);
+        boolean resultDel = CommonUtils.deleteDir(sdkDir);
+        log.info("delete for temp sdk dir[{}], result:{}", sdkDir, resultDel);
+    }
+
+    /**
+     * write sdk file of ca.crt, sdk.crt, sdk.key
+     * @param sdkContentMap
+     * @return
+     */
+    public void writeSdkAsFile(Map<String, String> sdkContentMap) {
 
         // write each content to each file in conf/ or conf/gm/
         // gm: gmca.crt, gmsdk.crt, gmsdk.key
         // else: ca.crt, sdk.crt, sdk.key
+        File sdkDir = new File(TEMP_SDK_DIR);
+        File gmSdkDir = new File(TEMP_SDK_DIR + File.separator + "gm");
+        if (sdkDir.exists()) {
+            boolean result = CommonUtils.deleteDir(sdkDir);
+            log.info("writeSdkAsFile delete sdk dir[{}], result:{}", sdkDir, result);
+        }
+        boolean sdkDirRes =  sdkDir.mkdirs();
+        log.info("writeSdkAsFile re-create sdk dir result:{}", sdkDirRes);
+
         for (String fileName : sdkContentMap.keySet()) {
-            Path sdkFilePath = Paths.get(CleanPathUtil.cleanString(sdkDir.getPath() + File.separator + fileName));
+            // if sdk.key, save in sdk/sdk.key
+            Path sdkFilePath = Paths
+                .get(CleanPathUtil.cleanString(TEMP_SDK_DIR + File.separator + fileName));
+            // if gmsdk.key, save in sdk/gm/gmsdk.key
+            if (fileName.contains("gm")) {
+                sdkFilePath = Paths.get(CleanPathUtil.cleanString(TEMP_SDK_DIR + File.separator
+                    + "gm" + File.separator + fileName));
+                if (!gmSdkDir.exists()) {
+                    boolean gmSdkDirRes = gmSdkDir.mkdirs();
+                    log.info("writeSdkAsFile create gmSdkDir[{}] result:{}", sdkFilePath, gmSdkDirRes);
+                }
+            }
             String fileContent = sdkContentMap.get(fileName);
             log.info("writeSdkAsFile sdkPath:{}, content:{}", sdkFilePath, fileContent);
-            try (BufferedWriter writer = Files.newBufferedWriter(sdkFilePath, StandardCharsets.UTF_8)) {
+            try (BufferedWriter writer = Files
+                .newBufferedWriter(sdkFilePath, StandardCharsets.UTF_8)) {
                 // write to relative path
                 writer.write(fileContent);
             } catch (IOException e) {
@@ -379,100 +428,7 @@ public class FrontCertService {
                 throw new FrontException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
             }
         }
-        // zip the directory of conf(guomi: conf/gm)
-        try {
-            generateZipFile(sdkDir.getPath(), TEMP_ZIP_DIR, useGm);
-        } catch (Exception e) {
-            log.error("writeSdkAsFile generateZipFile fail:[]", e);
-            throw new FrontException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
-        }
-
-        // rm conf dir
-        boolean resultDel = sdkDir.delete();
-        log.info("delete for temp sdk file, result:{}", resultDel);
-    }
-
-    /**
-     * @param path   要压缩的文件路径
-     * @param outputDir zip包的生成目录，默认为tempZip
-     * @param useGm if use gm, there is gm dir in zip
-     */
-    public static void generateZipFile(String path, String outputDir, boolean useGm) throws Exception {
-
-        File file2Zip = new File(CleanPathUtil.cleanString(path));
-        // 压缩文件的路径不存在
-        if (!file2Zip.exists()) {
-            log.error("file not exist:{}", path);
-            throw new Exception("file not exist: " + path);
-        }
-        // 用于存放压缩文件的文件夹
-        File compress = new File(outputDir);
-        // 如果文件夹不存在，进行创建
-        if (!compress.exists() ){
-            compress.mkdirs();
-        }
-        // 目的压缩文件，已存在则先删除
-        // tempZip/conf.zip
-        String generateFileName = CleanPathUtil.cleanString(compress.getAbsolutePath() + File.separator + TEMP_ZIP_FILE_NAME);
-        File confZip = new File(generateFileName);
-        if (confZip.exists() ) {
-            log.info("confZip exist, now delete:{}", confZip);
-            boolean result = confZip.delete();
-            log.info("confZip exist, delete result:{}", result);
-        }
-        // 输出流
-        FileOutputStream outputStream = new FileOutputStream(generateFileName);
-        // 压缩输出流
-        ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(outputStream));
-        // 传入输出流，传入需要压缩的file路径
-        String gmDir = useGm ? "gm" : "";
-        generateFile(zipOutputStream, file2Zip, gmDir);
-
-        log.info("file2Zip:{} and outputFile:{}" ,file2Zip.getAbsolutePath(), generateFileName);
-        // 关闭 输出流
-        zipOutputStream.close();
-        outputStream.close();
     }
 
 
-    /**
-     * @param out  输出流
-     * @param file 目标文件
-     * @param dir  在压缩包中的文件夹
-     * @throws Exception
-     */
-    private static void generateFile(ZipOutputStream out, File file, String dir) throws Exception {
-
-        // 当前的是文件夹，则进行一步处理
-        if (file.isDirectory()) {
-            //得到文件列表信息
-            File[] files = file.listFiles();
-
-            //将文件夹添加到下一级打包目录
-            out.putNextEntry(new ZipEntry(dir + "/"));
-
-            dir = dir.length() == 0 ? "" : dir + "/";
-
-            //循环将文件夹中的文件打包
-            for (int i = 0; i < files.length; i++) {
-                generateFile(out, files[i], dir + files[i].getName());
-            }
-
-        } else { // 当前是文件
-
-            // 输入流
-            FileInputStream inputStream = new FileInputStream(file);
-            // 标记要打包的条目
-            out.putNextEntry(new ZipEntry(dir));
-            // 进行写操作
-            int len = 0;
-            byte[] bytes = new byte[1024];
-            while ((len = inputStream.read(bytes)) > 0) {
-                out.write(bytes, 0, len);
-            }
-            // 关闭输入流
-            inputStream.close();
-        }
-
-    }
 }

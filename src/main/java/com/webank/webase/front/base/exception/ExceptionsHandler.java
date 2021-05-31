@@ -16,7 +16,6 @@
 package com.webank.webase.front.base.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.code.RetCode;
 import com.webank.webase.front.util.ErrorCodeHandleUtils;
 import com.webank.webase.front.util.JsonUtils;
@@ -53,7 +52,7 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = FrontException.class)
     public ResponseEntity myExceptionHandler(FrontException frontException) {
-        log.error("catch frontException: {}",  frontException.getMessage());
+        log.error("catch frontException: []",  frontException);
         Map<String, Object> map = new HashMap<>();
         if (frontException.getRetCode() != null) {
             map.put("code", frontException.getRetCode().getCode());
@@ -70,10 +69,9 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = TypeMismatchException.class)
     public ResponseEntity typeMismatchExceptionHandler(TypeMismatchException ex) {
-        log.warn("catch typeMismatchException", ex);
+        log.error("catch typeMismatchException:[]", ex);
 
         Map<String, Object> map = new HashMap<>();
-        //  map.put("exception", frontException);
         map.put("errorMessage", ex.getMessage());
         map.put("code", 400);
         log.warn("typeMismatchException return:{}", JsonUtils.toJSONString(map));
@@ -83,10 +81,9 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = ServletRequestBindingException.class)
     public ResponseEntity bindExceptionHandler(ServletRequestBindingException ex) {
-        log.warn("catch bindExceptionHandler", ex);
+        log.error("catch bindExceptionHandler []", ex);
 
         Map<String, Object> map = new HashMap<>();
-        //  map.put("exception", frontException);
         map.put("errorMessage", ex.getMessage());
         map.put("code", 400);
         log.warn("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
@@ -101,7 +98,7 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = HttpStatusCodeException.class)
     public ResponseEntity bindExceptionHandler(HttpStatusCodeException ex) {
-        log.warn("catch bindExceptionHandler", ex);
+        log.error("catch bindExceptionHandler:[]", ex);
 
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", ex.getMessage());
@@ -117,10 +114,11 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = ContractException.class)
     public ResponseEntity contractExceptionHandler(ContractException exc) {
-        log.info("catch contract exception: ", exc);
+        log.error("catch contractExceptionHandler: []", exc);
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", exc.getMessage());
         map.put("code", exc.getErrorCode());
+        log.warn("contractExceptionHandler return:{}", JsonUtils.toJSONString(map));
         return ResponseEntity.status(500).body(map);
     }
 
@@ -132,11 +130,12 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = IOException.class)
     public ResponseEntity exceptionHandler(IOException exc) {
-        log.info("catch  exception: ", exc);
+        log.error("catch IOException: []", exc);
         RetCode errorDetail = chainErrorHandle(exc.getMessage());
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", errorDetail.getMessage());
         map.put("code", errorDetail.getCode());
+        log.warn("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
         return ResponseEntity.status(500).body(map);
     }
 
@@ -149,11 +148,12 @@ public class ExceptionsHandler {
     @ResponseBody
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity exceptionHandler(Exception exc) {
-        log.info("catch  exception: ", exc);
+        log.error("catch  exception: []", exc);
         RetCode errorDetail = chainErrorHandle(exc.getMessage());
         Map<String, Object> map = new HashMap<>();
         map.put("errorMessage", errorDetail.getMessage());
         map.put("code", errorDetail.getCode());
+        log.warn("bindExceptionHandler return:{}", JsonUtils.toJSONString(map));
         return ResponseEntity.status(500).body(map);
     }
 
