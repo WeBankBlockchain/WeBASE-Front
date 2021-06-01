@@ -238,7 +238,7 @@ export default {
         modelClose() {
             this.$emit('close')
         },
-        handleExpand (row){
+        handleExpand(row) {
             this.getContractList(row, 'ExpandEvent')
         },
         clickTable: function (row, column, $event) {
@@ -333,22 +333,24 @@ export default {
             this.multipleSelectedId = Array.from(new Set(this.multipleSelectedId))
         },
         submit(formName) {
-            if (this.multipleSelection.length === 0) {
+            if (this.multipleSelectedId.length === 0) {
                 this.$message({
                     type: "error",
                     message: this.$t('rule.checkContract'),
-                    customClass:'zZindex'
+                    customClass: 'zZindex'
                 });
+            } else {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.export()
+                    } else {
+                        return false;
+                    }
+                })
             }
-            this.$refs[formName].validate((valid) => {
-                if (valid) {
-                    this.export()
-                } else {
-                    return false;
-                }
-            })
+
         },
-        handleSelectAll(selection){
+        handleSelectAll(selection) {
             // console.log(selection);
             // if(!selection.length){
             //     this.$message({
@@ -391,13 +393,13 @@ export default {
                     this.$message({
                         type: 'success',
                         message: this.$t('text.exportSuccessed'),
-                        customClass:'zZindex'
+                        customClass: 'zZindex'
                     })
                 } else {
                     this.$message({
                         type: "error",
                         message: this.$chooseLang(res.data.code),
-                        customClass:'zZindex'
+                        customClass: 'zZindex'
                     });
                 }
             })
@@ -407,13 +409,13 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        if(data.channelPort == "null"){
+                        if (data.channelPort == "null") {
                             this.projectFrom.channelPort = ""
-                        }else {
-                             this.queryPort = true
+                        } else {
+                            this.queryPort = true
                             this.projectFrom.channelPort = data.channelPort
                         }
-                        
+
                     } else {
                         this.$message({
                             type: "error",
@@ -436,11 +438,11 @@ export default {
     cursor: pointer;
 }
 .zZindex {
-    z-index:3000 !important;
+    z-index: 3000 !important;
 }
 </style>
 <style>
-    .zZindex {
-        z-index:3000 !important;
-    }
+.zZindex {
+    z-index: 3000 !important;
+}
 </style>
