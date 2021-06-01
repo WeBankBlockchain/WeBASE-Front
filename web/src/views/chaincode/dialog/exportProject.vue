@@ -390,8 +390,15 @@ export default {
                     }
                     this.$message({
                         type: 'success',
-                        message: this.$t('text.exportSuccessed')
+                        message: this.$t('text.exportSuccessed'),
+                        customClass:'zZindex'
                     })
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: this.$chooseLang(res.data.code),
+                        customClass:'zZindex'
+                    });
                 }
             })
         },
