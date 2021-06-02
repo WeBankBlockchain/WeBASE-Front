@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 })
 public class ContractFolderItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long contractFolderId;
     private Long storeId;
     private String contractFolderName;

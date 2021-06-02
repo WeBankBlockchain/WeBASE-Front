@@ -53,8 +53,9 @@ public class PresetDataService {
                                 String StoreIcon, String StoreDesc, String StoreDetail,String StoreDesc_en,
                                 String StoreDetail_en)
     {
+        log.info("insert storeItem id:{},storeName:{}", storeId, storeName);
         if (contractStoreRepository.exists(storeId)) {
-            log.info("insertStoreItem skip storeId:{} storeName:{} already exist", storeId, storeName);
+            log.info("insertStoreItem skip storeId:{} already exist", storeId);
             return;
         }
         StoreItem storeItem = new StoreItem();
@@ -73,7 +74,7 @@ public class PresetDataService {
     }
 
     public void initContractFolderItem() {
-        Integer contractFolderIndex = 1;
+        int contractFolderIndex = 1;
         insertContractFolderItem(contractFolderIndex++,toolboxId,"Tools",
                 "工具箱中有常用的工具合约",
                 "工具箱中有常用的工具合约",
@@ -108,9 +109,9 @@ public class PresetDataService {
     public void insertContractFolderItem(long contractFolderId, long storeId, String contractFolderName, String contractFolderDesc, String contractFolderDetail,
                                          String contractFolderDesc_en, String contractFolderDetail_en)
     {
+        log.info("insert contractFolderItem id:{},contractFolderName:{} ", contractFolderId, contractFolderName);
         if (contractFolderRepository.exists(contractFolderId)) {
-            log.info("insertContractFolderItem skip contractFolderId:{} contractFolderName:{} storeId:{} already exist",
-                contractFolderId, contractFolderName, storeId);
+            log.info("insertContractFolderItem skip contractFolderId:{}  already exist", contractFolderId);
             return;
         }
         ContractFolderItem contractFolderItem = new ContractFolderItem();
@@ -127,7 +128,7 @@ public class PresetDataService {
     }
 
     public void initContractItem() {
-        Integer contractIndex = 1;
+        int contractIndex = 1;
         //tools
         insertContractItem(contractIndex++,toolboxId,"Address",ToolsConstantContext.ADDRESS_SOURCE,
                 ToolsConstantContext.ADDRESS_MD,ToolsConstantContext.ADDRESS_MD);
@@ -193,9 +194,9 @@ public class PresetDataService {
     public void insertContractItem(long contractId, long contractFolderId, String contractName, String contractSrc,
                                 String contractDesc, String contractDesc_en)
     {
+        log.info("insert contractItem id:{},contractName:{}", contractId, contractName);
         if (contractItemRepository.exists(contractId)) {
-            log.debug("insertContractItem skip contractId:{} contractName:{} contractFolderId:{} already exist",
-                contractId, contractName, contractFolderId);
+            log.info("insertContractItem skip contractId:{} already exist", contractId);
             return;
         }
         ContractItem contractItem = new ContractItem();
@@ -215,23 +216,6 @@ public class PresetDataService {
         initContractItem();
         initContractFolderItem();
         initStoreItem();
-//        List<ContractItem> contracts = contractItemRepository.findAll();
-//        if(contracts.size() <= 0)
-//        {
-//            initContractItem();
-//        }
-//
-//        List<ContractFolderItem> contractFolderItemList = contractFolderRepository.findAll();
-//        if(contractFolderItemList.size() <= 0)
-//        {
-//            initContractFolderItem();
-//        }
-//
-//        List<StoreItem> storeItemList = contractStoreRepository.findAll();
-//        if(storeItemList.size() <= 0)
-//        {
-//            initStoreItem();
-//        }
     }
 
 }
