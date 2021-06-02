@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 })
 public class StoreItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long storeId;
     private String storeName;
     private String storeName_en;
