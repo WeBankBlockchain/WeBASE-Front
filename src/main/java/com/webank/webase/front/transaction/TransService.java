@@ -526,7 +526,7 @@ public class TransService {
 
 
     public Object sendQueryTransaction(String encodeStr, String contractAddress, String funcName,
-            String contractAbi, int groupId, String userAddress) {
+            List<Object> contractAbi, int groupId, String userAddress) {
 
         Client web3j = web3ApiService.getWeb3j(groupId);
         String callOutput = web3j
@@ -534,7 +534,7 @@ public class TransService {
                         encodeStr))
             .getCallResult().getOutput();
 
-        ABIDefinition abiDefinition = getFunctionAbiDefinition(funcName, contractAbi);
+        ABIDefinition abiDefinition = getFunctionAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
         if (Objects.isNull(abiDefinition)) {
             throw new FrontException(IN_FUNCTION_ERROR);
         }
@@ -588,8 +588,7 @@ public class TransService {
         return credentials;
     }
 
-    public SignatureResult signMessageHashByType(String messageHash, CryptoKeyPair cryptoKeyPair,
-            int encryptType) {
+    public SignatureResult signMessageHashByType(String messageHash, CryptoKeyPair cryptoKeyPair, int encryptType) {
         try {
             if (encryptType == CryptoType.SM_TYPE) {
                 return smCryptoSuite.sign(messageHash, cryptoKeyPair);
@@ -597,6 +596,7 @@ public class TransService {
                 return ecdsaCryptoSuite.sign(messageHash, cryptoKeyPair);
             }
         } catch (Exception e) {
+            log.error("signMessageHashByType failed:[]", e);
             throw new FrontException(ConstantCode.GET_MESSAGE_HASH, e.getMessage());
         }
     }
@@ -611,7 +611,7 @@ public class TransService {
         CryptoKeyPair cryptoKeyPair = this.getCredentials(false, req.getUser());
 
         SignatureResult signResult = signMessageHashByType(
-                org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()), cryptoKeyPair,
+                Numeric.cleanHexPrefix(req.getHash()), cryptoKeyPair,
                 cryptoSuite.cryptoTypeConfig);
         if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
             SM2SignatureResult sm2SignatureResult = (SM2SignatureResult) signResult;
@@ -659,6 +659,26 @@ public class TransService {
         return this.convertRawTx2Str(groupId, web3j, contractAddress, function, user, isLocal);
     }
 
+    /**
+     * get encoded function for /trans/query-transaction
+     * @param contractAbi
+     * @param funcName
+     * @param funcParam
+     * @return
+     */
+    public String convertEncodedFunction2Str(List<Object> contractAbi,
+        String funcName, List<Object> funcParam) {
+        // check param get function of abi
+        ContractFunction contractFunction = buildContractFunctionWithAbi(contractAbi, funcName, funcParam);
+        // encode function
+        Function function = new Function(funcName, contractFunction.getFinalInputs(),
+            contractFunction.getFinalOutputs());
+
+        FunctionEncoder functionEncoder = new FunctionEncoder(cryptoSuite);
+        String encodedFunction = functionEncoder.encode(function);
+        log.info("convertEncodedFunction2Str encodedFunction:{}", encodedFunction);
+        return encodedFunction;
+    }
 
     /**
      * get encoded raw transaction
@@ -692,6 +712,7 @@ public class TransService {
             return unsignedResultStr;
         } else {
             log.info("createRawTxEncoded use key of address [{}] to sign", user);
+            // hash encoded, to sign locally
             byte[] hashMessage = cryptoSuite.hash(encodedTransaction);
             String hashMessageStr = Numeric.toHexString(hashMessage);
             log.info("createRawTxEncoded encoded tx of hex str:{}", hashMessageStr);
@@ -707,6 +728,8 @@ public class TransService {
                 signResultStr = Numeric.toHexString(signedMessage);
             } else {
                 // sign by webase-sign
+                // convert encoded to hex string (no need to hash then toHex)
+                hashMessageStr = Numeric.toHexString(encodedTransaction);
                 EncodeInfo encodeInfo = new EncodeInfo(user, hashMessageStr);
                 String signDataStr = keyStoreService.getSignData(encodeInfo);
                 SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, cryptoSuite.cryptoTypeConfig);
@@ -716,7 +739,7 @@ public class TransService {
             log.info("createRawTxEncoded signResultStr:{}", signResultStr);
             return signResultStr;
         }
-
+        // trans hash is cryptoSuite.hash(signedStr)
     }
 
 

@@ -25,6 +25,7 @@ import static com.webank.webase.front.base.code.ConstantCode.VERSION_AND_ADDRESS
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.controller.BaseController;
 import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.transaction.entity.ReqEncodeFunction;
 import com.webank.webase.front.transaction.entity.ReqQueryTransHandle;
 import com.webank.webase.front.transaction.entity.ReqSignMessageHash;
 import com.webank.webase.front.transaction.entity.ReqSignedTransHandle;
@@ -166,7 +167,9 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(encodeStr)) {
             throw new FrontException(ENCODE_STR_CANNOT_BE_NULL);
         }
-        Object obj =  transServiceImpl.sendQueryTransaction(encodeStr, reqQueryTransHandle.getContractAddress(),reqQueryTransHandle.getFuncName(),reqQueryTransHandle.getContractAbi(),reqQueryTransHandle.getGroupId(),reqQueryTransHandle.getUserAddress());
+        Object obj =  transServiceImpl.sendQueryTransaction(encodeStr, reqQueryTransHandle.getContractAddress(),
+            reqQueryTransHandle.getFuncName(), reqQueryTransHandle.getContractAbi(), reqQueryTransHandle.getGroupId(),
+            reqQueryTransHandle.getUserAddress());
         log.info("transHandleLocal end  useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return obj;
     }
@@ -270,6 +273,30 @@ public class TransController extends BaseController {
             reqTransHandle.isUseCns(), reqTransHandle.getVersion(), reqTransHandle.getVersion(),
             reqTransHandle.getFuncName(), reqTransHandle.getFuncParam());
         log.info("transToRawTxStrWithSign end useTime:{},encodedOrSignedResult:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
+        return encodedOrSignedResult;
+    }
+
+
+    /**
+     * get encoded function string
+     * @return
+     */
+    @ApiOperation(value = "transaction to encoded function string", notes = "transaction encode")
+    @ApiImplicitParam(name = "reqEncodeFunction", value = "transaction abi and function name and function param", required = true, dataType = "ReqEncodeFunction")
+    @PostMapping("/encode")
+    public String transEncoded2Str(@Valid @RequestBody ReqEncodeFunction reqEncodeFunction, BindingResult result)
+        throws Exception {
+        log.info("transEncoded2Str start. reqEncodeFunction:[{}]", JsonUtils.toJSONString(reqEncodeFunction));
+
+        Instant startTime = Instant.now();
+        log.info("transEncoded2Str start startTime:{}", startTime.toEpochMilli());
+
+        checkParamResult(result);
+
+        String encodedOrSignedResult =  transServiceImpl.convertEncodedFunction2Str(reqEncodeFunction.getContractAbi(),
+            reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam());
+        log.info("transEncoded2Str end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;
     }
