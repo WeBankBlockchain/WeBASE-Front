@@ -92,7 +92,7 @@ List tomcat = [
 List scaffold = [
     'com.webank.webase:solscaffold:1.0.1',
     'com.webank:SmartDev-Scaffold:1.0.0-SNAPSHOT',
-    'com.webank:solc-gradle-plugin:1.0.0'
+    'com.webank:solc-gradle-plugin:1.0.1'
 ]
 
 dependencies {
