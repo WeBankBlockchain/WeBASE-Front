@@ -16,14 +16,11 @@
 package com.webank.webase.front.transaction.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotBlank;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * signMessageHash interface parameter.
@@ -37,5 +34,7 @@ public class ReqSignMessageHash {
      */
     @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
     private String user;
+    @NotBlank
     private String hash;
+
 }

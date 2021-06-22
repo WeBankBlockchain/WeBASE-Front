@@ -15,6 +15,7 @@
  */
 package com.webank.webase.front.transaction;
 
+import static com.webank.webase.front.base.code.ConstantCode.CONTRACT_ADDRESS_INVALID;
 import static com.webank.webase.front.base.code.ConstantCode.ENCODE_STR_CANNOT_BE_NULL;
 import static com.webank.webase.front.base.code.ConstantCode.INVALID_VERSION;
 import static com.webank.webase.front.base.code.ConstantCode.PARAM_ADDRESS_IS_INVALID;
@@ -81,7 +82,8 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (!StringUtils.isBlank(address) && (address.length() != Address.ValidLen
+        if (StringUtils.isNotBlank(address)
+            && (address.length() != Address.ValidLen
                 || org.fisco.bcos.sdk.abi.datatypes.Address.DEFAULT.toString().equals(address))) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
@@ -179,39 +181,80 @@ public class TransController extends BaseController {
         Instant startTime = Instant.now();
         log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
 
-        if(!CommonUtils.isHexNumber(Numeric.cleanHexPrefix(reqSignMessageHash.getHash())))
-        {
+        if (!CommonUtils.isHexNumber(Numeric.cleanHexPrefix(reqSignMessageHash.getHash()))) {
             throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "not a hexadecimal hash string");
         }
-        if( Numeric.cleanHexPrefix(reqSignMessageHash.getHash()).length() != CommonUtils.HASH_LENGTH_64)
-        {
+        if (Numeric.cleanHexPrefix(reqSignMessageHash.getHash()).length() != CommonUtils.HASH_LENGTH_64) {
             throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "wrong length");
         }
-        Object obj =  transServiceImpl.signMessageLocal(reqSignMessageHash);
+        Object obj = transServiceImpl.signMessageLocal(reqSignMessageHash);
         log.info("signMessageLocal end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return obj;
     }
 
+
     /**
-     * transHandle through webase-sign
+     * raw tx to encoded string, and signed locally
      * @return
      */
-    @ApiOperation(value = "transaction to raw tx str", notes = "transaction handling")
+    @ApiOperation(value = "transaction to raw tx str locally", notes = "transaction handling")
     @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandle")
-    @PostMapping("/convertSignedTrans")
-    public String transToRawTxStrLocal(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result) throws Exception {
+    @PostMapping("/convertRawTxStr/local")
+    public String transToRawTxStrLocal(@Valid @RequestBody ReqTransHandle reqTransHandle, BindingResult result)
+        throws Exception {
         log.info("transToRawTxStrLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqTransHandle));
 
         Instant startTime = Instant.now();
         log.info("transToRawTxStrLocal start startTime:{}", startTime.toEpochMilli());
 
         checkParamResult(result);
-        String address = reqTransHandle.getContractAddress();
-        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
+        // check contractAddress
+        String contractAddress = reqTransHandle.getContractAddress();
+        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(contractAddress)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (!StringUtils.isBlank(address) && address.length() != Address.ValidLen) {
+        if (!StringUtils.isBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
+            throw new FrontException(CONTRACT_ADDRESS_INVALID);
+        }
+        if (reqTransHandle.isUseCns()) {
+            if (!PrecompiledUtils.checkVersion(reqTransHandle.getVersion())) {
+                throw new FrontException(INVALID_VERSION);
+            }
+            if (StringUtils.isBlank(reqTransHandle.getCnsName())) {
+                throw new FrontException(PARAM_FAIL_CNS_NAME_IS_EMPTY);
+            }
+        }
+        String encodedOrSignedResult =  transServiceImpl.createRawTxEncoded(true, reqTransHandle.getUser(),
+            reqTransHandle.getGroupId(), reqTransHandle.getContractAddress(), reqTransHandle.getContractAbi(),
+            reqTransHandle.isUseCns(), reqTransHandle.getVersion(), reqTransHandle.getVersion(),
+            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam());
+        log.info("transToRawTxStrLocal end useTime:{},encodedOrSignedResult:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
+        return encodedOrSignedResult;
+    }
+
+    /**
+     * raw tx to encoded string signed by webase-sign
+     * @return
+     */
+    @ApiOperation(value = "transaction to raw tx str", notes = "transaction handling")
+    @ApiImplicitParam(name = "reqTransHandle", value = "transaction info", required = true, dataType = "ReqTransHandleWithSign")
+    @PostMapping("/convertRawTxStr/withSign")
+    public String transToRawTxStrWithSign(@Valid @RequestBody ReqTransHandleWithSign reqTransHandle,
+        BindingResult result) throws Exception {
+        log.info("transToRawTxStrWithSign start. ReqTransHandleWithSign:[{}]", JsonUtils.toJSONString(reqTransHandle));
+
+        Instant startTime = Instant.now();
+        log.info("transToRawTxStrWithSign start startTime:{}", startTime.toEpochMilli());
+
+        checkParamResult(result);
+        // check contractAddress
+        String contractAddress = reqTransHandle.getContractAddress();
+        if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(contractAddress)) {
+            throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
+        }
+        if (StringUtils.isNotBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
@@ -222,8 +265,11 @@ public class TransController extends BaseController {
                 throw new FrontException(PARAM_FAIL_CNS_NAME_IS_EMPTY);
             }
         }
-        String encodedOrSignedResult =  transServiceImpl.transToRawTxStr(reqTransHandle);
-        log.info("transToRawTxStrLocal end useTime:{},encodedOrSignedResult:{}",
+        String encodedOrSignedResult =  transServiceImpl.createRawTxEncoded(false, reqTransHandle.getSignUserId(),
+            reqTransHandle.getGroupId(), reqTransHandle.getContractAddress(), reqTransHandle.getContractAbi(),
+            reqTransHandle.isUseCns(), reqTransHandle.getVersion(), reqTransHandle.getVersion(),
+            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam());
+        log.info("transToRawTxStrWithSign end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;
     }
