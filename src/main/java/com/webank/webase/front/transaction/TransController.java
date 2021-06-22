@@ -284,7 +284,7 @@ public class TransController extends BaseController {
      */
     @ApiOperation(value = "transaction to encoded function string", notes = "transaction encode")
     @ApiImplicitParam(name = "reqEncodeFunction", value = "transaction abi and function name and function param", required = true, dataType = "ReqEncodeFunction")
-    @PostMapping("/encode")
+    @PostMapping("/encodeFunction")
     public String transEncoded2Str(@Valid @RequestBody ReqEncodeFunction reqEncodeFunction, BindingResult result)
         throws Exception {
         log.info("transEncoded2Str start. reqEncodeFunction:[{}]", JsonUtils.toJSONString(reqEncodeFunction));
