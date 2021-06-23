@@ -147,7 +147,7 @@ public class ScaffoldService {
         log.info("generateProject projectGroup:{},artifactName:{},OUTPUT_DIR:{},frontChannelIpPort:{},groupId:{}",
             projectGroup, artifactName, OUTPUT_DIR, frontChannelIpPort, groupId);
         try {
-            projectFactory.buildProjectDir(contractInfoList,
+            projectFactory.buildProjectDirWebase(contractInfoList,
                 projectGroup, artifactName, OUTPUT_DIR, GRADLE_WRAPPER_DIR,
                 frontChannelIpPort, groupId, hexPrivateKeyListStr, sdkMap);
         } catch (Exception e) {

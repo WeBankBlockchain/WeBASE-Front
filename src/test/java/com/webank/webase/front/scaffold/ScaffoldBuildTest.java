@@ -115,7 +115,7 @@ public class ScaffoldBuildTest {
         System.out.println(sdkMap);
 
         WebaseProjectFactory projectFactory = new WebaseProjectFactory();
-        ProjectArtifact result = projectFactory.buildProjectDir(
+        ProjectArtifact result = projectFactory.buildProjectDirWebase(
             Collections.singletonList(contractInfo),
             group, artifactName, outputDir, "gradle",
             //null, null, null, null);
@@ -149,7 +149,7 @@ public class ScaffoldBuildTest {
 
         WebaseProjectFactory projectFactory = new WebaseProjectFactory();
         // ProjectArtifact result = projectFactory.buildProjectDir(Collections.singletonList(contractInfo),
-        ProjectArtifact result = projectFactory.buildProjectDir(Arrays.asList(contractInfo, creditContract),
+        ProjectArtifact result = projectFactory.buildProjectDirWebase(Arrays.asList(contractInfo, creditContract),
             group, artifactName, outputDir, "gradle",
             //null, null, null, null);
             "127.0.0.1:25200", 2, "0x123", sdkMap);
