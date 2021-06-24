@@ -28,6 +28,7 @@ public class PresetDataService {
 
     public static final Integer smartDevToolFolderId = 4;
     public static final Integer smartDevEvidenceFolderId = 5;
+    public static final Integer assetFolderId = 6;
 
 
     public void initStoreItem() {
@@ -47,6 +48,11 @@ public class PresetDataService {
             "Smart-Dev-Contract\'s Evidence Contract suite of business_template",
             "Smart-Dev-Contracts仓库中的存证应用模板",
                     "Smart-Dev-Contract\'s Evidence Contract suite of business_template");
+        insertStoreItem(assetFolderId, "资产应用", "Asset", "4", "pointsId",
+            "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
+            "Asset Contract suite",
+            "套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
+                    "Asset Contract suite");
     }
 
     public void insertStoreItem(long storeId, String storeName, String StoreName_en, String StoreType,
@@ -75,35 +81,41 @@ public class PresetDataService {
 
     public void initContractFolderItem() {
         int contractFolderIndex = 1;
-        insertContractFolderItem(contractFolderIndex++,toolboxId,"Tools",
+        insertContractFolderItem(toolboxId,toolboxId,"Tools",
                 "工具箱中有常用的工具合约",
                 "工具箱中有常用的工具合约",
                 "Toolbox Contract suite",
                 "Toolbox Contract suite");
 
-        insertContractFolderItem(contractFolderIndex++,evidenceId,"Evidence",
+        insertContractFolderItem(evidenceId,evidenceId,"Evidence",
                 "一套区块链存证合约，实现区块链存证、取证",
                 "一套区块链存证合约，实现区块链存证、取证",
                 "Evidence Contract suite",
                 "Evidence Contract suite");
 
-        insertContractFolderItem(contractFolderIndex++,pointsId,"Points",
+        insertContractFolderItem(pointsId,pointsId,"Points",
                 "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
                 "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
                 "Points Contract suite",
                 "Points Contract suite");
-
-        insertContractFolderItem(contractFolderIndex++,toolboxId,"Smart_Dev_Basic",
+        // belong to points store, and new folder
+        insertContractFolderItem(smartDevToolFolderId,toolboxId,"Smart_Dev_Basic",
             "SmartDev基础合约，包含Table/KVTable/Sha/Crypto/HelloWorld等",
             "SmartDev基础合约，包含Table/KVTable/Sha/Crypto/HelloWorld等",
             "Smart-Dev-Contract basic contract suite, including Table/KVTable/Sha/Crypto/HelloWorld etc.",
             "Smart-Dev-Contract basic contract suite, including Table/KVTable/Sha/Crypto/HelloWorld etc.");
 
-        insertContractFolderItem(contractFolderIndex++,smartDevId,"Smart_Dev_Evidence",
+        insertContractFolderItem(smartDevEvidenceFolderId,smartDevId,"Smart_Dev_Evidence",
             "SmartDev存证合约案例",
             "SmartDev存证合约案例",
             "Smart-Dev-Contract Evidence contract suite",
             "Smart-Dev-Contract Evidence contract suite");
+        // belong to points store, and new folder
+        insertContractFolderItem(assetFolderId,assetFolderId,"Asset",
+            "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等，具有增发、销毁，暂停合约，黑白名单等权限控制等功能",
+            "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等，具有增发、销毁，暂停合约，黑白名单等权限控制等功能",
+            "Asset Contract suite",
+            "Asset Contract suite");
     }
 
     public void insertContractFolderItem(long contractFolderId, long storeId, String contractFolderName, String contractFolderDesc, String contractFolderDetail,
@@ -140,7 +152,6 @@ public class PresetDataService {
                 ToolsConstantContext.TABLE_MD,ToolsConstantContext.TABLE_MD);
         insertContractItem(contractIndex++,toolboxId,"Roles",ToolsConstantContext.ROLES_SOURCE,
                 ToolsConstantContext.ROLES_MD,ToolsConstantContext.ROLES_MD);
-
 
         //evidence
         insertContractItem(contractIndex++,evidenceId,"Evidence",
@@ -188,6 +199,28 @@ public class PresetDataService {
             SmartDevConstantContext.EVIDENCE_API_MD,SmartDevConstantContext.EVIDENCE_API_MD);
         insertContractItem(contractIndex++,smartDevEvidenceFolderId,"Authentication",SmartDevConstantContext.AUTH_SOURCE,
             SmartDevConstantContext.EVIDENCE_API_MD,SmartDevConstantContext.EVIDENCE_API_MD);
+
+        // asset
+        insertContractItem(contractIndex++,assetFolderId,"BAC002",
+            PointsConstantContext.BAC002_SOURCE, PointsConstantContext.BAC002_MD,"");
+        insertContractItem(contractIndex++,assetFolderId,"IBAC002",
+            PointsConstantContext.I_BAC002_SOURCE, PointsConstantContext.BAC002_MD,"");
+        // asset tool
+        insertContractItem(contractIndex++,assetFolderId,"Counters",ToolsConstantContext.COUNTER_SOURCE,
+            ToolsConstantContext.ROLES_MD,ToolsConstantContext.COUNTER_MD);
+        insertContractItem(contractIndex++,assetFolderId,"Register",ToolsConstantContext.REGISTER_SOURCE,
+            ToolsConstantContext.ROLES_MD,ToolsConstantContext.REGISTER_MD);
+        insertContractItem(contractIndex++,assetFolderId,"Roles",ToolsConstantContext.ROLES_SOURCE,
+            ToolsConstantContext.ROLES_MD,ToolsConstantContext.ROLES_MD);
+        insertContractItem(contractIndex++,assetFolderId,"SafeMath",ToolsConstantContext.SAFE_MATH_SOURCE,
+            ToolsConstantContext.SAFE_MATH_MD,ToolsConstantContext.ROLES_MD);
+
+        // v1.5.2 tools
+        insertContractItem(contractIndex++,toolboxId,"Counters",ToolsConstantContext.COUNTER_SOURCE,
+            ToolsConstantContext.ROLES_MD,ToolsConstantContext.COUNTER_MD);
+        insertContractItem(contractIndex++,toolboxId,"Register",ToolsConstantContext.REGISTER_SOURCE,
+            ToolsConstantContext.ROLES_MD,ToolsConstantContext.REGISTER_MD);
+
     }
 
 
