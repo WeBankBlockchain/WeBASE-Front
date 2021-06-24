@@ -86,7 +86,9 @@ public class ScaffoldService {
         List<Contract> tbContractList = new ArrayList<>();
         for (Integer id : contractIdList) {
             Contract contract = contractService.findById(id.longValue());
-            if (contract == null || StringUtils.isBlank(contract.getBytecodeBin())) {
+            // if contract abi is null, not compile
+            // if abi is [](empty list), compile already
+            if (contract == null || contract.getContractAbi() == null) {
                 log.error("exportProject contract not exist or not compiled, id:{}", id);
                 throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
             }
@@ -112,6 +114,7 @@ public class ScaffoldService {
             tbContractList, reqProject.getGroupId(), hexPrivateKeyListStr, sdkMap);
         String zipFileName = artifactName + ZIP_SUFFIX;
         try {
+//            ZipUtils.generateZipFile(projectPath, OUTPUT_ZIP_DIR, artifactName, zipFileName);
             ZipUtils.generateZipFile(projectPath, OUTPUT_ZIP_DIR, "", zipFileName);
         } catch (Exception e) {
             log.error("exportProject generateZipFile failed:[]", e);
@@ -160,9 +163,8 @@ public class ScaffoldService {
     }
 
     private List<ContractInfo> handleContractList(List<Contract> contractList) {
-        log.info("handleContractList contractList:{}", contractList);
+        log.info("handleContractList contractList size:{}", contractList.size());
         List<ContractInfo> contractInfoList = new ArrayList<>();
-        log.info("handleContractList param contractList size:{}", contractList.size());
         for (Contract contract : contractList) {
             String sourceCodeBase64 = contract.getContractSource();
             String solSourceCode = new String(Base64.getDecoder().decode(sourceCodeBase64));
@@ -186,7 +188,6 @@ public class ScaffoldService {
             contractInfoList.add(contractInfo);
         }
         log.info("handleContractList result contractInfoList size:{}", contractInfoList.size());
-        log.info("handleContractList contractList:{}", contractInfoList);
         return contractInfoList;
     }
 
