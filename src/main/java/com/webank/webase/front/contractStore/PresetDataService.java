@@ -206,8 +206,8 @@ public class PresetDataService {
         insertContractItem(contractIndex++,assetFolderId,"IBAC002",
             PointsConstantContext.I_BAC002_SOURCE, PointsConstantContext.BAC002_MD,"");
         // asset tool
-        insertContractItem(contractIndex++,assetFolderId,"Counters",ToolsConstantContext.COUNTER_SOURCE,
-            ToolsConstantContext.ROLES_MD,ToolsConstantContext.COUNTER_MD);
+        insertContractItem(contractIndex++,assetFolderId,"Counters",ToolsConstantContext.COUNTERS_SOURCE,
+            ToolsConstantContext.ROLES_MD,ToolsConstantContext.COUNTERS_MD);
         insertContractItem(contractIndex++,assetFolderId,"Register",ToolsConstantContext.REGISTER_SOURCE,
             ToolsConstantContext.ROLES_MD,ToolsConstantContext.REGISTER_MD);
         insertContractItem(contractIndex++,assetFolderId,"Roles",ToolsConstantContext.ROLES_SOURCE,
@@ -216,8 +216,8 @@ public class PresetDataService {
             ToolsConstantContext.SAFE_MATH_MD,ToolsConstantContext.ROLES_MD);
 
         // v1.5.2 tools
-        insertContractItem(contractIndex++,toolboxId,"Counters",ToolsConstantContext.COUNTER_SOURCE,
-            ToolsConstantContext.ROLES_MD,ToolsConstantContext.COUNTER_MD);
+        insertContractItem(contractIndex++,toolboxId,"Counters",ToolsConstantContext.COUNTERS_SOURCE,
+            ToolsConstantContext.ROLES_MD,ToolsConstantContext.COUNTERS_MD);
         insertContractItem(contractIndex++,toolboxId,"Register",ToolsConstantContext.REGISTER_SOURCE,
             ToolsConstantContext.ROLES_MD,ToolsConstantContext.REGISTER_MD);
 
