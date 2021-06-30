@@ -85,7 +85,7 @@ public class ScaffoldController extends BaseController {
         // start export
         RspFile rspFile = scaffoldService.exportProject(param);
         log.info("end exportProjectApi useTime:{} result:{}",
-            Duration.between(startTime, Instant.now()).toMillis(), rspFile);
+            Duration.between(startTime, Instant.now()).toMillis(), rspFile.getFileName());
         return new BaseResponse(ConstantCode.RET_SUCCESS, rspFile);
     }
 
