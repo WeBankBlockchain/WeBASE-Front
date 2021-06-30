@@ -21,6 +21,7 @@ import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.scaffold.entity.ReqProject;
 import com.webank.webase.front.scaffold.entity.RspFile;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.ValidateUtil;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.regex.Pattern;
@@ -28,9 +29,11 @@ import javax.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -42,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ScaffoldController extends BaseController {
     @Autowired
     private ScaffoldService scaffoldService;
+
 
     @PostMapping("/export")
     public BaseResponse exportProjectApi(@Valid @RequestBody ReqProject param) {
@@ -83,5 +87,22 @@ public class ScaffoldController extends BaseController {
         log.info("end exportProjectApi useTime:{} result:{}",
             Duration.between(startTime, Instant.now()).toMillis(), rspFile);
         return new BaseResponse(ConstantCode.RET_SUCCESS, rspFile);
+    }
+
+    @GetMapping("/check")
+    public BaseResponse checkChannelPort(@RequestParam("nodeId") String nodeIp,
+        @RequestParam("channelPort") int channelPort) {
+        Instant startTime = Instant.now();
+        log.info("start checkChannelPort startTime:{}, nodeIp:{} channelPort:{}",
+            startTime.toEpochMilli(), nodeIp, channelPort);
+        if(!ValidateUtil.ipv4Valid(nodeIp)) {
+            log.error("not valid nodeIp:{}", nodeIp);
+            throw new FrontException(ConstantCode.IP_FORMAT_ERROR);
+        }
+        Boolean result = scaffoldService.telnetChannelPort(nodeIp, channelPort);
+
+        log.info("end exportProjectApi useTime:{} result:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), result);
+        return new BaseResponse(ConstantCode.RET_SUCCESS, result);
     }
 }

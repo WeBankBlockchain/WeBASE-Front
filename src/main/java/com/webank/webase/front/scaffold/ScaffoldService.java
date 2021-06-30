@@ -26,6 +26,7 @@ import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.scaffold.entity.ReqProject;
 import com.webank.webase.front.scaffold.entity.RspFile;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.NetUtils;
 import com.webank.webase.front.util.ZipUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.File;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.BeanUtils;
@@ -206,5 +208,18 @@ public class ScaffoldService {
             keyList.add(hexPrivateKey);
         }
         return StringUtils.join(keyList, ",");
+    }
+
+    /**
+     * telnet channel port to check reachable
+     * @param nodeIp
+     * @param channelPort
+     * @return
+     */
+    public Boolean telnetChannelPort(String nodeIp, int channelPort) {
+        Pair<Boolean, Integer> telnetResult = NetUtils.checkPorts(nodeIp, channelPort);
+        // if true, telnet success, port is in use, which means node's channelPort is correct
+        log.info("telnet {}:{} result:{}", nodeIp, channelPort, telnetResult);
+        return telnetResult.getLeft();
     }
 }

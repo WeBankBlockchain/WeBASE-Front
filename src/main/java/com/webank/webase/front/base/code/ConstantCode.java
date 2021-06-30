@@ -152,6 +152,8 @@ public class ConstantCode {
     public static final RetCode WRITE_PRIVATE_KEY_CRT_KEY_FILE_FAIL = RetCode.mark(201157,"Write private key file fail!");
     // add in v1.5.1
     public static final RetCode GENERATE_CONTRACT_PROJECT_FAIL = RetCode.mark(201161, "generate project failed in scaffold");
+    // v1.5.2
+    public static final RetCode IP_FORMAT_ERROR = RetCode.mark(201162, "IP format error.");
 
 
     /* precompiled runtime check or error */
