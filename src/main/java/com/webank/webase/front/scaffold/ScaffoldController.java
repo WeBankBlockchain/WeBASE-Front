@@ -90,7 +90,7 @@ public class ScaffoldController extends BaseController {
     }
 
     @GetMapping("/check")
-    public BaseResponse checkChannelPort(@RequestParam("nodeId") String nodeIp,
+    public BaseResponse checkChannelPort(@RequestParam("nodeIp") String nodeIp,
         @RequestParam("channelPort") int channelPort) {
         Instant startTime = Instant.now();
         log.info("start checkChannelPort startTime:{}, nodeIp:{} channelPort:{}",
