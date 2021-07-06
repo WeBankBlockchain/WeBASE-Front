@@ -961,6 +961,14 @@ export default {
         },
 
         downloadJavaClass: function (formName) {
+             if (!this.abiFile || this.abiFile == '[]') {
+                this.$message({
+                    type: 'warning',
+                    message: this.$t('text.haveAbiAndBin'),
+                    duration: 2000
+                })
+                return
+            }
             this.javaClassDialogVisible = true;
         },
         closeJavaClass: function () {
