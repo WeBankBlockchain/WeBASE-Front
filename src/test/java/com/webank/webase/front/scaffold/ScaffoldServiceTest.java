@@ -50,4 +50,9 @@ public class ScaffoldServiceTest extends SpringTestBase {
         scaffoldService.generateProject(nodeConfig, groupName, artifact,
             tbContractList, 1, "", sdkMap);
     }
+
+    @Test
+    public void testTelnetPort() {
+        scaffoldService.telnetChannelPort("127.0.0.1", 5002);
+    }
 }
