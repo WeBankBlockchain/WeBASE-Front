@@ -23,7 +23,7 @@ repositories {
 
 }
 
-def spring_version="4.3.27.RELEASE"
+def spring_version="4.3.29.RELEASE"
 List spring =[
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-beans:$spring_version",
@@ -90,9 +90,9 @@ List tomcat = [
 ]
 
 List scaffold = [
-    'com.webank.webase:solscaffold:1.0.1',
+    'com.webank.webase:solscaffold:1.0.2-SNAPSHOT',
     'com.webank:SmartDev-Scaffold:1.0.0-SNAPSHOT',
-    'com.webank:solc-gradle-plugin:1.0.0'
+    'com.webank:solc-gradle-plugin:1.0.1'
 ]
 
 dependencies {

@@ -22,8 +22,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * signMessageHash interface parameter.
@@ -37,7 +35,8 @@ public class ReqSignMessageHash {
      */
     @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
     private String user;
+    @NotBlank
     private String hash;
-
     private String signUserId;
+
 }

@@ -74,7 +74,7 @@ public class TransControllerTest extends SpringTestBase {
         testNew.setEncodeStr("0x6d4ce63c");
         testNew.setFuncName("get");
         testNew.setContractAddress("0x5256755ee37aa003a4ed57b06e7a1008935b09a2");
-        testNew.setContractAbi(abi);
+        testNew.setContractAbi(JsonUtils.toJavaObjectList(abi, Object.class));
         ResultActions resultActions = mockMvc
             .perform(MockMvcRequestBuilders.post("/trans/query-transaction").
                 content(JsonUtils.toJSONString(testNew)).
