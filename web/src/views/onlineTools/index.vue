@@ -47,7 +47,7 @@
                         </div>
                     </div>
                 </el-tab-pane>
-                <el-tab-pane :label="$t('onlineTools.sign')" name="second" v-if="encryptionId==0">
+                <el-tab-pane :label="$t('onlineTools.sign')" name="second">
                     <div class="hash-wrapper">
                         <p class="font-color-fff text-title">Hash</p>
                         <el-input type="textarea" v-model="inputSignHash" style="margin-bottom: 20px;"></el-input>
@@ -119,6 +119,10 @@ export default {
                 {
                     label: "sha256",
                     value: "sha256"
+                },
+                {
+                    label: "sm3",
+                    value: "sm3"
                 }
             ],
             privateKeyList: [],
@@ -191,7 +195,8 @@ export default {
                 } else {
                     content = this.inputFile;
                 }
-                this.inputHash = gm.sm3Digest(content)
+                let result = gm.sm3Digest(content);
+                this.inputHash = `0x${result}`;
             }
         },
         getLocalKeyStores() {
@@ -214,6 +219,9 @@ export default {
                 })
         },
         querySignHash() {
+             if(this.encryptionId == '1'){
+               this.signKey[0] = 'p'
+            }
             if (!this.privateKey || !this.inputSignHash) return;
             this.loading = true;
             let param = {

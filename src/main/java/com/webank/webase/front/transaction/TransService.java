@@ -33,6 +33,7 @@ import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
+import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.precompiledapi.PrecompiledCommonInfo;
 import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.transaction.entity.ContractFunction;
@@ -48,11 +49,16 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+
+import java.util.*;
+import javax.persistence.Tuple;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.BcosSDK;
@@ -632,10 +638,48 @@ public class TransService {
         }
     }
 
+
+
+    /**
+     * signMessageLocalExternal
+     */
+    public Object signMessageLocalExternal(ReqSignMessageHash req) {
+        log.info("transHandle start. ReqSignMessageHash:[{}]", JsonUtils.toJSONString(req));
+        RspUserInfo rspUserInfo = keyStoreService.getUserInfoWithSign(req.getSignUserId(),true);
+        String privateKeyRaw = new String(Base64.getDecoder().decode(rspUserInfo.getPrivateKey()));
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKeyRaw);
+        SignatureResult signResult = signMessageHashByType(
+                org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()),cryptoKeyPair,
+                cryptoSuite.cryptoTypeConfig
+        );
+
+        if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+            SM2SignatureResult sm2SignatureResult = (SM2SignatureResult) signResult;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+            rspMessageHashSignature.setP(Numeric.toHexString(sm2SignatureResult.getPub()));
+            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) 0);
+            return rspMessageHashSignature;
+        } else {
+            ECDSASignatureResult sm2SignatureResult = (ECDSASignatureResult) signResult;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+            rspMessageHashSignature.setP("0x");
+            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) (sm2SignatureResult.getV()+27));
+            return rspMessageHashSignature;
+        }
+    }
+
+    /**
+     * get encoded raw transaction
+     * @param contractAddress  if not null, return signed raw tx
+     */
     public String createRawTxEncoded(boolean isLocal, String user,
         int groupId, String contractAddress, List<Object> contractAbi,
         boolean isUseCns, String cnsName, String cnsVersion,
-        String funcName, List<Object> funcParam) throws Exception {
+                String funcName, List<Object> funcParam) throws Exception {
         // check param get function of abi
         ContractFunction contractFunction = buildContractFunctionWithAbi(contractAbi, funcName, funcParam);
 
@@ -658,6 +702,7 @@ public class TransService {
         // false: user is signUserId in webase-sign
         return this.convertRawTx2Str(groupId, web3j, contractAddress, function, user, isLocal);
     }
+
 
     /**
      * get encoded function for /trans/query-transaction
