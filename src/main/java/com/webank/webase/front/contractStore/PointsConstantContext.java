@@ -60,7 +60,7 @@ public class PointsConstantContext {
             "\n" +
             "- 销毁\n" +
             "\n" +
-            "  调用 destory 以及 destoryFrom 销毁自己地址下积分和特定地址下的积分\n" +
+            "  调用 destroy 以及 destroyFrom 销毁自己地址下积分和特定地址下的积分\n" +
             "\n" +
             "- 暂停\n" +
             "\n" +
@@ -144,7 +144,7 @@ public class PointsConstantContext {
             "\n" +
             "  积分描述\n" +
             "\n" +
-            "- <b>destory(uint256 value， string  data)</b>\n" +
+            "- <b>destroy(uint256 value， string  data)</b>\n" +
             "\n" +
             "  减少自己的积分，data 是转账备注\n" +
             "\n" +
@@ -237,7 +237,7 @@ public class PointsConstantContext {
         + "\n"
         + "- 销毁\n"
         + "\n"
-        + "  调用 destory 以及 destoryFrom 销毁自己地址下资产和特定地址下的资产\n"
+        + "  调用 destroy 以及 destroyFrom 销毁自己地址下资产和特定地址下的资产\n"
         + "\n"
         + "- 暂停\n"
         + "\n"
