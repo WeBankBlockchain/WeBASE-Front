@@ -34,6 +34,7 @@ import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
+import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.precompiledapi.PrecompiledCommonInfo;
 import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.transaction.entity.ContractFunction;
@@ -49,12 +50,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import javax.persistence.Tuple;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -617,6 +613,39 @@ public class TransService {
         SignatureResult signResult = signMessageHashByType(
                 org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()), cryptoKeyPair,
                 cryptoSuite.cryptoTypeConfig);
+        if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+            SM2SignatureResult sm2SignatureResult = (SM2SignatureResult) signResult;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+            rspMessageHashSignature.setP(Numeric.toHexString(sm2SignatureResult.getPub()));
+            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) 0);
+            return rspMessageHashSignature;
+        } else {
+            ECDSASignatureResult sm2SignatureResult = (ECDSASignatureResult) signResult;
+            RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
+            rspMessageHashSignature.setP("0x");
+            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) (sm2SignatureResult.getV()+27));
+            return rspMessageHashSignature;
+        }
+    }
+
+
+    /**
+     * signMessageLocalExternal
+     */
+    public Object signMessageLocalExternal(ReqSignMessageHash req) {
+        log.info("transHandle start. ReqSignMessageHash:[{}]", JsonUtils.toJSONString(req));
+        RspUserInfo rspUserInfo = keyStoreService.getUserInfoWithSign(req.getSignUserId(),true);
+        String privateKeyRaw = new String(Base64.getDecoder().decode(rspUserInfo.getPrivateKey()));
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKeyRaw);
+        SignatureResult signResult = signMessageHashByType(
+                org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()),cryptoKeyPair,
+                cryptoSuite.cryptoTypeConfig
+        );
+
         if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
             SM2SignatureResult sm2SignatureResult = (SM2SignatureResult) signResult;
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();

@@ -45,10 +45,7 @@ import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * TransController.
@@ -188,6 +185,29 @@ public class TransController extends BaseController {
             throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "wrong length");
         }
         Object obj =  transServiceImpl.signMessageLocal(reqSignMessageHash);
+        log.info("signMessageLocal end  useTime:{}",
+                Duration.between(startTime, Instant.now()).toMillis());
+        return obj;
+    }
+
+    @ApiOperation(value = "sign Message locally", notes = "sign Message locally")
+    @ApiImplicitParam(name = "reqSignMessageHash", value = "ReqSignMessageHash info", required = true, dataType = "ReqSignMessageHash")
+    @PostMapping("/signMessageHashExternal")
+    public Object signMessageHashExternal(@Valid @RequestBody ReqSignMessageHash reqSignMessageHash, BindingResult result) {
+        log.info("transHandleLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqSignMessageHash));
+//        checkParamResult(result);
+        Instant startTime = Instant.now();
+        log.info("signMessageHashExternal start startTime:{}", startTime.toEpochMilli());
+
+        if(!CommonUtils.isHexNumber(Numeric.cleanHexPrefix(reqSignMessageHash.getHash())))
+        {
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "not a hexadecimal hash string");
+        }
+        if( Numeric.cleanHexPrefix(reqSignMessageHash.getHash()).length() != CommonUtils.HASH_LENGTH_64)
+        {
+            throw new FrontException(ConstantCode.GET_MESSAGE_HASH, "wrong length");
+        }
+        Object obj =  transServiceImpl.signMessageLocalExternal(reqSignMessageHash);
         log.info("signMessageLocal end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return obj;

@@ -38,4 +38,6 @@ public class ReqSignMessageHash {
     @NotNull(message = ConstantCode.PARAM_FAIL_USER_IS_EMPTY_STRING)
     private String user;
     private String hash;
+
+    private String signUserId;
 }
