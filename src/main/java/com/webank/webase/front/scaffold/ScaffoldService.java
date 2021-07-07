@@ -108,8 +108,8 @@ public class ScaffoldService {
         List<String> userAddressList = reqProject.getUserAddressList();
         String hexPrivateKeyListStr = "";
         if (userAddressList != null && !userAddressList.isEmpty()) {
-            // hexPrivateKeyListStr = this.handleUserList(reqProject.getGroupId(), userAddressList);
-            hexPrivateKeyListStr = keyStoreService.getPrivateKey(userAddressList.get(0));
+            hexPrivateKeyListStr = this.handleUserList(userAddressList);
+            //hexPrivateKeyListStr = keyStoreService.getPrivateKey(userAddressList.get(0));
         }
         // generate
         String projectPath = this.generateProject(thisConfig, reqProject.getGroup(), reqProject.getArtifactName(),
