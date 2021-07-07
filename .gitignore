@@ -37,12 +37,14 @@ gradle.properties
 /bin
 *.crt
 *.key
+*.publickey
 h2
 
 /lib/
 solcjs
-v0.*.js
-v0.*.js.gz
+v0.*.*.js
+v0.*.*.js.gz
 /output/
+/conf/
 
 
