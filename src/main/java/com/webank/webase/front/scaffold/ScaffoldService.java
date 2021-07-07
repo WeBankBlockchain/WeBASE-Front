@@ -216,7 +216,7 @@ public class ScaffoldService {
      * @return
      */
     public Boolean telnetChannelPort(String nodeIp, int channelPort) {
-        Pair<Boolean, Integer> telnetResult = NetUtils.checkPorts(nodeIp, channelPort);
+        Pair<Boolean, Integer> telnetResult = NetUtils.checkPorts(nodeIp, 2000, channelPort);
         // if true, telnet success, port is in use, which means node's channelPort is correct
         log.info("telnet {}:{} result:{}", nodeIp, channelPort, telnetResult);
         return telnetResult.getLeft();

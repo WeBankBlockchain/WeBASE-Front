@@ -42,15 +42,9 @@ h2
 
 /lib/
 solcjs
-#v0.*.*.js
-#v0.*.*.js.gz
+v0.*.js
+v0.*.js.gz
 /output/
 /conf/
-#v0.4.25.js
-#v0.4.25-gm.js
-#v0.5.2.js
-#v0.5.2-gm.js
-#v0.6.10.js
-#v0.6.10-gm.js
 
 
