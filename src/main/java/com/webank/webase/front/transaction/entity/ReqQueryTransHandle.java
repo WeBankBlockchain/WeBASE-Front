@@ -1,10 +1,9 @@
 package com.webank.webase.front.transaction.entity;
 
 
-import java.util.List;
-import lombok.Data;
-
 import javax.validation.constraints.NotNull;
+import lombok.Data;
+import org.hibernate.validator.constraints.NotBlank;
 
 @Data
 public class ReqQueryTransHandle {
@@ -13,8 +12,8 @@ public class ReqQueryTransHandle {
   @NotNull
   private String contractAddress;
   private String funcName;
-  @NotNull
-  private List<Object> contractAbi;
+  @NotBlank
+  private String contractAbi;
   private String userAddress = "0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB";
   private int groupId =1 ;
 }
