@@ -1050,3 +1050,12 @@ export function exportOutContract(url) {
 }
 
 
+export function queryChannelIP(data) {
+    return get({
+        url: `${HANDLE}/scaffold/check?nodeIp=`+data.nodeIp+'&channelPort='+data.channelPort,
+        method: 'get',
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || "",
+        }
+    })
+}

@@ -34,7 +34,7 @@
 import { addContractPath } from "@/util/api"
 export default {
     name: "addFolder",
-    props: ['foldershow'],
+    props: ['foldershow','isAddFile'],
     computed: {
         rules() {
             var obj = {
@@ -85,7 +85,7 @@ export default {
             })
         },
         modelClose: function () {
-            this.$emit("close")
+            this.$emit("close");
         },
         add: function () {
             let reqData = {
@@ -94,7 +94,8 @@ export default {
             }
             addContractPath(reqData).then(res => {
                 if (res.status === 200) {
-                    this.$emit("success")
+                    // this.$emit("success")
+                    this.modelClose();
                 } else {
                     this.$message({
                         type: "error",

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-dialog :modal="true" :modal-append-to-body="false" :title="$t('text.exportJavaProject')" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="750px">
+        <el-dialog :modal="true" :modal-append-to-body="false" :title="$t('text.exportJavaProject')" :close-on-click-modal="false" :visible.sync="dialogVisible" :before-close="modelClose" class="dialog-wrapper" width="750px">
             <h3 style="padding-left: 18px">{{$t('text.projectTitle')}}</h3>
             <el-form :model="projectFrom" :rules="rules" ref="projectFrom" label-width="116px" class="demo-ruleForm">
                 <el-form-item :label="$t('text.projectName')" prop="artifactName">
@@ -21,13 +21,21 @@
                     <el-tooltip effect="dark" :content="$t('text.haveChannelPort')" placement="top-start">
                         <i class="el-icon-info"></i>
                     </el-tooltip>
+                 <el-button type="primary" size="small" @click="checkChannelIP('projectFrom')">验证节点存活</el-button>
                 </el-form-item>
                 <el-form-item :label="$t('text.projectUser')">
-                    <el-select v-model="projectFrom.userAddress" :placeholder="$t('text.select')" style="width: 300px">
+                    <!-- <el-select v-model="projectFrom.userAddress" :placeholder="$t('text.select')" style="width: 300px">
                         <el-option v-for="item in userList" :key="item.address" :label="item.userName" :value="item.address">
                         </el-option>
+                    </el-select> -->
+                      <el-select  v-model="projectFrom.userAddress"  class="filter-item"  :placeholder="$t('text.select')"  multiple style="width: 300px">
+                        <el-option v-for="item in userList" :key="item.address" :label="item.userName"  :value="item.address">
+                        </el-option>
                     </el-select>
-                </el-form-item>
+                    <span v-if="isShowAddUserBtn" class="contract-code-done"   @click="createUser()" style="float:right;margin-right:220px">
+                        <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t("privateKey.addUser")}}</a>
+                    </span>
+                </el-form-item> 
                 <!-- <el-form-item :label="'p12密码'" prop="p12Password">
                   <el-input v-model="projectFrom.p12Password" style="width: 300px"></el-input>
               </el-form-item> -->
@@ -42,7 +50,8 @@
                         <!-- <span>{{contractList}}</span> -->
                         <div class="table-content">
                             <el-table ref="multipleTable" :data="scope.row.contractList" :show-header='true' @select-all="handleSelectAll" @selection-change="handleSelectionChange($event, scope.row)" :default-sort="{prop: 'contractPath', order: 'descending'}">
-                                <el-table-column type="selection" :selectable='selectDisabled' width="55">
+                                <el-table-column type="selection" width="55">
+                                     <!-- <el-table-column type="selection" :selectable='selectDisabled' width="55"> -->
                                 </el-table-column>
                                 <el-table-column prop="contractName" show-overflow-tooltip :label="$t('contracts.contractName')"></el-table-column>
                                 <el-table-column prop="contractPath" :label="$t('text.compileStatus')">
@@ -55,22 +64,33 @@
                         </div>
                         <!-- <div v-else>暂无数据</div> -->
                     </template>
-                </el-table-column>
+                </el-table-column> 
                 <el-table-column prop="contractPath" :label="$t('text.uncomplie')" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="modifyTime" :label="$t('nodes.modifyTime')"></el-table-column>
-            </el-table>
+            </el-table> 
             <div slot="footer" class="dialog-footer">
                 <el-button @click="modelClose">{{$t('dialog.cancel')}}</el-button>
                 <el-button type="primary" @click="submit('projectFrom')">{{$t('dialog.confirm')}}</el-button>
             </div>
         </el-dialog>
+         <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible"  class="dialog-wrapper" width="400px" :center="true">
+            <v-createUser  @close='createUserClose'></v-createUser>
+         </el-dialog>
     </div>
 </template>
 
 <script>
-import { searchContract, queryLocalKeyStores, exportJavaProject, fetchChannelPort } from "@/util/api";
+import { searchContract, queryLocalKeyStores, exportJavaProject, fetchChannelPort,queryChannelIP } from "@/util/api";
+import createUser from "@/views/toolsContract/components/createUser";
 let Base64 = require("js-base64").Base64;
+import {
+    complie
+} from "@/util/compile";
+
 export default {
+       components: {
+        "v-createUser": createUser
+    },
     name: 'exportProject',
     props: {
         folderList: {
@@ -188,7 +208,9 @@ export default {
                 channelPort: [
                     { validator: isPort, trigger: 'change' }
                 ]
-            }
+            },
+            creatUserNameVisible: false,
+            isShowAddUserBtn: false
         }
     },
     destroyed() {
@@ -220,7 +242,10 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.userList = data
+                        this.userList = data;
+                        if(this.userList.length==0){
+                            this.isShowAddUserBtn = true;
+                        }
                     } else {
                         this.$message({
                             type: "error",
@@ -317,6 +342,7 @@ export default {
                 });
         },
         handleSelectionChange($event, val) {
+            let num = 0
             this.selectedParentPath = val.contractPath
             this.multipleSelection = $event;
             if (this.selectedParentPath) {
@@ -324,12 +350,21 @@ export default {
             }
             const dynamicObject = Object.values(this.dynamicObject)
             this.multipleSelectedId = []
-            dynamicObject.forEach(item => {
-
+            dynamicObject.forEach(item => { 
                 item.forEach(it => {
                     this.multipleSelectedId.push(it.id)
+                    if(!it.contractAbi){
+                        num++
+                        complie(it,this);
+                    }
                 })
             })
+           if(num>0){  
+                setTimeout(() => {
+                    num =0;
+                    this.getContractList(val,true);
+               }, 1000)
+            }  
             this.multipleSelectedId = Array.from(new Set(this.multipleSelectedId))
         },
         submit(formName) {
@@ -371,7 +406,7 @@ export default {
                 channelIp: this.projectFrom.channelIp
             }
             if (this.projectFrom.userAddress) {
-                reqData.userAddressList = [this.projectFrom.userAddress]
+                reqData.userAddressList = this.projectFrom.userAddress
             }
             exportJavaProject(reqData).then(res => {
                 if (res.data.code === 0) {
@@ -424,7 +459,57 @@ export default {
                     }
 
                 })
-        }
+        },
+
+         checkChannelIP(){
+           if(!this.projectFrom.channelIp || !this.projectFrom.channelPort){
+                this.$message({
+                    message: "channelIp 和 channelPort 必填",
+                    type: "error",
+                    duration: 2000
+                });
+                return false;
+           } 
+
+           let param = {
+                nodeIp: this.projectFrom.channelIp,
+                channelPort: this.projectFrom.channelPort
+            }
+            queryChannelIP(param)
+                .then(res => {
+                    if (res.data.code === 0) {
+                        if (res.data.data) {
+                            this.$message({
+                                type: 'success',
+                                message: this.$t('text.pass')
+                            })
+                        }else{
+                             this.$message({
+                                message: this.$t('text.no'),
+                                type: "error",
+                            });
+                        }
+                    } else {
+                        this.$message({
+                            message: this.$chooseLang(res.data.code),
+                            type: "error",
+                            duration: 2000
+                        });
+
+                    }
+                })
+
+        },
+        createUser(){
+            this.creatUserNameVisible = true;
+        },
+        createUserClose(data){
+             this.creatUserNameVisible = false;
+             this.userList = data;
+             if(this.userList.length > 0 ){
+                 this.isShowAddUserBtn = false; 
+             }
+        },
     }
 }
 </script>

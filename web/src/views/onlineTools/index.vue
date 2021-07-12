@@ -56,8 +56,14 @@
                             <el-select v-model="privateKey" :placeholder="placeholderText">
                                 <el-option v-for="item in privateKeyList" :key="item.address" :label="item.userName" :value="item.address">
                                 </el-option>
-                            </el-select>
-                            <el-button type="primary" style="margin-left:5px;" @click="querySignHash" v-loading="loading">{{$t('onlineTools.sign')}}</el-button>
+                            </el-select> 
+                             <el-button type="primary"   @click="querySignHash" v-loading="loading">{{$t('onlineTools.sign')}}</el-button>
+                              <el-button v-if="isShowAddUserBtn" type="primary"   @click="createUser" v-loading="loading">新增用户</el-button>
+                            <!-- <div style="float:right;padding-left:5px;" >
+                                <span  @click="createUser()">
+                                        <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t("privateKey.addUser")}}</a>
+                                    </span>
+                            </div> -->
                         </div>
                         <p class="font-color-fff text-title">{{$t('onlineTools.result')}}</p>
                         <div class="result" v-if="inputSign">
@@ -74,6 +80,9 @@
                             </ul>
                         </div>
                     </div>
+                      <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" class="dialog-wrapper" width="400px" :center="true" :append-to-body="true">
+                        <v-createUser  @close='createUserClose'></v-createUser>
+                    </el-dialog>
                 </el-tab-pane>
                 <el-tab-pane :label="$t('route.parseAbi')" name="third">
                     <parse-abi></parse-abi>
@@ -94,13 +103,15 @@ import { queryLocalKeyStores, signHash } from "@/util/api";
 const gm = require('@/util/SM2Sign');
 import CryptoJS from 'crypto-js';
 import Bus from "@/bus";
+import createUser from "@/views/toolsContract/components/createUser";
 export default {
     name: 'onlineTools',
 
     components: {
         contentHead,
         parseAbi,
-        eventCheck
+        eventCheck,
+        "v-createUser": createUser
     },
 
     props: {
@@ -119,11 +130,12 @@ export default {
                 {
                     label: "sha256",
                     value: "sha256"
-                },
-                {
-                    label: "sm3",
-                    value: "sm3"
                 }
+                // ,
+                // {
+                //     label: "sm3",
+                //     value: "sm3"
+                // }
             ],
             privateKeyList: [],
             privateKey: "",
@@ -134,6 +146,8 @@ export default {
             placeholderText: this.$t('placeholder.selectedAccountAddress'),
             encryptionId: localStorage.getItem('encryptionId'),
             groupId: localStorage.getItem("groupId"),
+            creatUserNameVisible: false,
+            isShowAddUserBtn: false
         }
     },
 
@@ -188,16 +202,17 @@ export default {
                     this.inputHash = `0x${result}`
                 }
 
-            } else if (this.algorithm === 'sm3') {
-                let content;
-                if (this.inputText) {
-                    content = this.inputText;
-                } else {
-                    content = this.inputFile;
-                }
-                let result = gm.sm3Digest(content);
-                this.inputHash = `0x${result}`;
-            }
+            } 
+            // else if (this.algorithm === 'sm3') {
+            //     let content;
+            //     if (this.inputText) {
+            //         content = this.inputText;
+            //     } else {
+            //         content = this.inputFile;
+            //     }
+            //     let result = gm.sm3Digest(content);
+            //     this.inputHash = `0x${result}`;
+            // }
         },
         getLocalKeyStores() {
             queryLocalKeyStores()
@@ -208,6 +223,7 @@ export default {
                         if (this.privateKeyList.length) {
                             this.privateKey = this.privateKeyList[0]['address']
                         } else {
+                             this.isShowAddUserBtn = true;
                             this.placeholderText = this.$t('placeholder.selectedNoUser')
                         }
                     } else {
@@ -219,9 +235,9 @@ export default {
                 })
         },
         querySignHash() {
-             if(this.encryptionId == '1'){
-               this.signKey[0] = 'p'
-            }
+            //  if(this.encryptionId == '1'){
+            //    this.signKey[0] = 'p'
+            // }
             if (!this.privateKey || !this.inputSignHash) return;
             this.loading = true;
             let param = {
@@ -364,6 +380,16 @@ export default {
                 this.$message.error(this.$t('text.fileSize_5000'));
             }
             return isLt1M;
+        },
+          createUser(){
+            this.creatUserNameVisible = true;
+        },
+         createUserClose(data){
+             this.privateKeyList = data; 
+             if(this.privateKeyList.length > 0 ){
+                 this.isShowAddUserBtn = false;
+             }
+             this.creatUserNameVisible = false;
         },
     }
 }
