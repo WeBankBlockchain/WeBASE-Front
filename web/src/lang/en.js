@@ -170,7 +170,9 @@ export default {
         cnsVersionPattern: "It can only be numbers, letters and '.'",
         cnsName: 'Please enter CNS name',
         length1_10: 'The length is between 1 and 10 character',
-        outUrl: "Url"
+        outUrl: "Url",
+        addContractAddress: "Add contract address",
+        pleaseEnterContractAddress: "Please type in contract address"
     },
     placeholder: {
         globalSearch: 'Search by Block Number / Tx Hash',
@@ -375,6 +377,7 @@ export default {
         haveSelectionAll: 'The contract is not compiled at all',
         haveCertSdk: 'Failed to get SDK certificate. Please check certificate file',
         haveChannelPort: 'Fill it in according to the node front corresponding ChannelPort',
+        addContractAddress: 'Add conctract address'
     },
     contracts: {
         createFile: "Create File",

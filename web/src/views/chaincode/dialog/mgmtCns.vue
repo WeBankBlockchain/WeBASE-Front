@@ -8,6 +8,9 @@
                         <span>{{item.address}}</span>
                     </el-option>
                 </el-select>
+                <span v-if="isShowAddUserBtn" class="contract-code-done"   @click="createUser()" style="float:right;margin-right: -16px;">
+                    <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t("privateKey.addUser")}}</a>
+                </span>
             </el-form-item>
             <el-form-item :label="$t('text.cnsName')" prop="cnsName">
                 <el-input v-model="cnsVersionFrom.cnsName" style="width: 240px;">
@@ -25,17 +28,20 @@
             <el-button @click="modelClose">{{$t('dialog.cancel')}}</el-button>
             <el-button type="primary" @click="submit('cnsVersionFrom')">{{$t('text.register')}}</el-button>
         </div>
+        <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" :before-close="closeUserName" class="dialog-wrapper" width="400px" :center="true" :append-to-body="true">
+              <v-createUser  @close='createUserClose'></v-createUser>
+         </el-dialog>
     </div>
 </template>
 
 <script>
-import { queryLocalKeyStores, registerCns, findCnsInfo } from "@/util/api"
+import { queryLocalKeyStores, registerCns, findCnsInfo } from "@/util/api";
+import createUser from "@/views/toolsContract/components/createUser";
 export default {
     name: 'mgmtCns',
-
     components: {
+        "v-createUser": createUser
     },
-
     props: ['mgmtCnsItem'],
 
     data() {
@@ -51,7 +57,9 @@ export default {
                 cnsVersion: this.mgmtCnsItem.version,
                 cnsName: this.mgmtCnsItem.contractName
             },
-            reqVersion: ""
+            reqVersion: "",
+            creatUserNameVisible: false,
+            isShowAddUserBtn: false
         }
     },
 
@@ -135,6 +143,7 @@ export default {
                         if (this.userList.length) {
                             this.cnsVersionFrom.userId = this.userList[0].address;
                         } else {
+                             this.isShowAddUserBtn = true;
                             this.placeholderText = this.$t('placeholder.selectedNoUser')
                         }
                     } else {
@@ -230,7 +239,18 @@ export default {
                         });
                     }
                 })
-        }
+        },
+
+        createUser(){
+            this.creatUserNameVisible = true;
+        },
+         createUserClose(data){
+             this.userList = data; 
+             if(this.userList.length > 0 ){
+                 this.isShowAddUserBtn = false;
+             }
+             this.creatUserNameVisible = false;
+        },
     }
 }
 </script>

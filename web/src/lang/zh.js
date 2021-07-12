@@ -172,6 +172,8 @@ export default {
         cnsName: '请输入CNS名称',
         length1_10: '长度在 1 到 10 个字符',
         outUrl: "地址",
+        addContractAddress: '添加合约地址',
+        pleaseEnterContractAddress: '请输入合约地址'
 
     },
     placeholder: {
@@ -376,6 +378,9 @@ export default {
         haveSelectionAll: '合约全未编译',
         haveCertSdk: '获取SDK证书失败，请检查证书文件',
         haveChannelPort: '根据节点前置对应channelPort填入',
+        addContractAddress: '添加合约地址',
+        pass: '节点存活',
+        no: '节点不存活'
     },
     contracts: {
         createFile: "新建文件",
