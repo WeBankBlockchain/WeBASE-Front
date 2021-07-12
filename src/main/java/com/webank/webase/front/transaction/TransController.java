@@ -40,6 +40,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -164,8 +165,9 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(encodeStr)) {
             throw new FrontException(ENCODE_STR_CANNOT_BE_NULL);
         }
+        List<Object> contractAbi = JsonUtils.toJavaObjectList(reqQueryTransHandle.getContractAbi(), Object.class);
         Object obj =  transServiceImpl.sendQueryTransaction(encodeStr, reqQueryTransHandle.getContractAddress(),
-            reqQueryTransHandle.getFuncName(), reqQueryTransHandle.getContractAbi(), reqQueryTransHandle.getGroupId(),
+            reqQueryTransHandle.getFuncName(), contractAbi, reqQueryTransHandle.getGroupId(),
             reqQueryTransHandle.getUserAddress());
         log.info("transHandleLocal end  useTime:{}", Duration.between(startTime, Instant.now()).toMillis());
         return obj;
