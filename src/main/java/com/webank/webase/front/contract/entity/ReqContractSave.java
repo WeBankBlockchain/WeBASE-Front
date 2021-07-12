@@ -39,4 +39,6 @@ public class ReqContractSave {
      * 合约编译的runtime-bytecode(runtime-bin)，用于交易解析
      */
     private String contractBin;
+
+    private String contractAddress;
 }
