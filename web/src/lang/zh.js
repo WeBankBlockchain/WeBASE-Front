@@ -172,7 +172,7 @@ export default {
         cnsName: '请输入CNS名称',
         length1_10: '长度在 1 到 10 个字符',
         outUrl: "地址",
-        addContractAddress: '添加合约地址',
+        addContractAddress: '绑定',
         pleaseEnterContractAddress: '请输入合约地址'
 
     },
@@ -328,7 +328,8 @@ export default {
         toBlockEvent: "最小值为1；表示监听最新区块",
         eventParam: '请严格按照event参数类型提示输入;例如 byte类型输入"0x"',
         searchMessage: "查询成功",
-        haveAbiAndBin: "缺少abi和bin",
+        notHaveAbi: "缺少abi",
+        notHaveBin: "缺少bin",
         emptyFolder: "空文件夹",
         folderIsExists: "目录已存在",
         previewAndDescription: "预览和说明",
@@ -378,7 +379,7 @@ export default {
         haveSelectionAll: '合约全未编译',
         haveCertSdk: '获取SDK证书失败，请检查证书文件',
         haveChannelPort: '根据节点前置对应channelPort填入',
-        addContractAddress: '添加合约地址',
+        addContractAddress: '绑定',
         pass: '节点存活',
         no: '节点不存活'
     },
@@ -541,6 +542,7 @@ export default {
     },
     privateKey: {
         addUser: "新增用户",
+        checkNodeActive: "检测",
         importRivateKey: "导入私钥",
         addUserTips: "群组内发送交易的账号都需要在私钥管理里添加，否则会判断为异常用户。",
         searchUser: "请输入用户名或公钥地址",

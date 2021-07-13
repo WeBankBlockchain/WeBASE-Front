@@ -84,6 +84,7 @@
                     <span class="user-explain font-color-fff" v-show="userId">
                         (<span class="ellipsis-info">{{userId}}</span>)
                     </span>
+                    <el-button v-if="isShowAddUserBtn" type="text" size="mini" @click="createUser()">{{$t('privateKey.addUser')}}</el-button>
                 </td>
             </tr>
             <tr v-show="pramasData.length">
@@ -120,12 +121,19 @@
             <el-button @click="close">{{$t('dialog.cancel')}}</el-button>
             <el-button type="primary" @click="submit('transation')" :disabled='buttonClick'>{{$t('dialog.confirm')}}</el-button>
         </div>
+        <el-dialog :modal-append-to-body="false" :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible"  class="dialog-wrapper" width="640px" :center="true">
+            <v-createUser  @close='createUserClose'></v-createUser>
+        </el-dialog>
     </div>
 </template>
 <script>
 import { sendTransation, queryLocalKeyStores, findCnsInfo } from "@/util/api";
+import createUser from "@/views/toolsContract/components/createUser";
 import { isJson } from "@/util/util"
 export default {
+       components: {
+        "v-createUser": createUser
+    },
     name: "sendTransation",
     props: ["data", "dialogClose", "abi", 'version', 'sendErrorMessage'],
     data: function () {
@@ -153,6 +161,8 @@ export default {
             cnsList: [],
             cnsVersion: "",
             cnsName: "",
+            isShowAddUserBtn: false,
+            creatUserNameVisible: false,
         };
     },
     computed: {
@@ -201,6 +211,7 @@ export default {
                             this.userId = this.userList[0]['userName']
                         } else {
                             this.placeholderText = this.$t('placeholder.selectedNoUser')
+                            this.isShowAddUserBtn = true;
                         }
                     } else {
                         this.$message({
@@ -393,7 +404,19 @@ export default {
                         });
                     }
                 })
-        }
+        },
+        createUser(){
+            this.creatUserNameVisible = true;
+        },
+        createUserClose(data){
+             this.userList = data;
+             if(this.userList.length > 0 ){
+                this.isShowAddUserBtn = false;
+                this.transation.userName = this.userList[0]['address']
+                this.userId = this.userList[0]['userName']
+             } 
+             this.creatUserNameVisible = false;
+        },
     }
 };
 </script>

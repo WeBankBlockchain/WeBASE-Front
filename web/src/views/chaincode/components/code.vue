@@ -778,6 +778,14 @@ export default {
             this.bin = "";
         },
         deploying: function () {
+            if (!this.bytecodeBin) {
+                this.$message({
+                    type: 'warning',
+                    message: this.$t('text.notHaveBin'),
+                    duration: 2000
+                })
+                return;
+            }
             if (JSON.parse(this.abiFile).length == 0 || !this.abiFile) {
                 this.$message({
                     type: 'error',
@@ -794,7 +802,8 @@ export default {
 
         },
         deploy: function () {
-            if (this.abiFile) {
+            
+            if (this.abiFile) {                
                 this.dialogUser = true;
             } else {
                 this.$message.error(`${this.$t('text.compilationFailed')}`);
@@ -987,7 +996,7 @@ export default {
              if (!this.abiFile || this.abiFile == '[]') {
                 this.$message({
                     type: 'warning',
-                    message: this.$t('text.haveAbiAndBin'),
+                    message: this.$t('text.notHaveAbi'),
                     duration: 2000
                 })
                 return
@@ -1014,10 +1023,10 @@ export default {
                 });
         },
         getJavaClass: function () {
-            if (!this.abiFile || !this.bytecodeBin) {
+            if (!this.abiFile) {
                 this.$message({
                     type: 'warning',
-                    message: this.$t('text.haveAbiAndBin'),
+                    message: this.$t('text.notHaveAbi'),
                     duration: 2000
                 })
                 return
@@ -1260,7 +1269,7 @@ export default {
                 contractAbi: this.data.contractAbi,
                 contractBin: this.data.contractBin,
                 bytecodeBin: this.data.bytecodeBin,
-                contractAddress : this.contractForm.contractAddress
+                contractAddress : this.contractForm.contractAddress,
             };
             if (this.data.id) {
                 reqData.id = this.data.id;

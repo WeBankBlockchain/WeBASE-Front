@@ -326,7 +326,8 @@ export default {
         addAbi: "Import ABI",
         eventParam: 'Please follow the prompt of event parameter type strictly',
         searchMessage: "Request Success",
-        haveAbiAndBin: "No have abi and bin",
+        notHaveAbi: "Not have abi",
+        notHaveBin: "Not have bin",
         emptyFolder: "Empty Folder",
         folderIsExists: "Contract path is exists",
         folder: "Folder",
@@ -538,6 +539,7 @@ export default {
     },
     privateKey: {
         addUser: "Add Users",
+        checkNodeActive: "check",
         importRivateKey: "Import Rivate Key",
         addUserTips: "The account number of the transaction sent in the group needs to be added to the private key management, otherwise it will be judged as an abnormal user.",
         searchUser: "Please enter user name or public key address",
