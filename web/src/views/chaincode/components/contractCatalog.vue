@@ -588,9 +588,10 @@ export default {
             if (param.id) {
                 reqData.contractId = param.id;
             }
-            if(param.contractAddress){
+            if(param.contractAddress){ 
                 reqData.contractAddress = param.contractAddress;
             }
+            
             saveChaincode(reqData)
                 .then(res => {
                     const { data, status } = res;

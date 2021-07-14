@@ -2,22 +2,20 @@
     <div>
         <el-form ref="cnsVersionFrom" :model="cnsVersionFrom" :rules="rules" class="" size="medium" label-width="135px">
             <el-form-item :label="$t('text.acountAddress')" prop="userId">
-                <el-select v-model="cnsVersionFrom.userId" :placeholder="placeholderText" @change="changeId" style="width: 240px;">
+                <el-select v-model="cnsVersionFrom.userId" :placeholder="placeholderText" @change="changeId" style="width: 200px;">
                     <el-option :label="item.address" :value="item.address" :key="item.address" v-for='item in userList'>
                         <span class="font-12">{{item.userName}}</span>
                         <span>{{item.address}}</span>
                     </el-option>
                 </el-select>
-                <span v-if="isShowAddUserBtn" class="contract-code-done"   @click="createUser()" style="float:right;margin-right: -16px;">
-                    <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t("privateKey.addUser")}}</a>
-                </span>
+                <el-button v-if="isShowAddUserBtn" type="text" size="mini" @click="createUser()">{{$t('privateKey.addUser')}}</el-button>
             </el-form-item>
             <el-form-item :label="$t('text.cnsName')" prop="cnsName">
-                <el-input v-model="cnsVersionFrom.cnsName" style="width: 240px;">
+                <el-input v-model="cnsVersionFrom.cnsName" style="width: 200px;">
                 </el-input>
             </el-form-item>
             <el-form-item :label="$t('text.version')" prop="cnsVersion">
-                <el-input v-model="cnsVersionFrom.cnsVersion" style="width: 240px;">
+                <el-input v-model="cnsVersionFrom.cnsVersion" style="width: 200px;">
                 </el-input>
                 <el-tooltip class="font-color-fff" effect="dark" :content="$t('text.registerCnsTips')" placement="top-start">
                     <i class="el-icon-info"></i>
@@ -28,7 +26,7 @@
             <el-button @click="modelClose">{{$t('dialog.cancel')}}</el-button>
             <el-button type="primary" @click="submit('cnsVersionFrom')">{{$t('text.register')}}</el-button>
         </div>
-        <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" :before-close="closeUserName" class="dialog-wrapper" width="400px" :center="true" :append-to-body="true">
+        <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" :before-close="closeUserName" class="dialog-wrapper" width="640px" :center="true" :append-to-body="true">
               <v-createUser  @close='createUserClose'></v-createUser>
          </el-dialog>
     </div>
@@ -247,7 +245,8 @@ export default {
          createUserClose(data){
              this.userList = data; 
              if(this.userList.length > 0 ){
-                 this.isShowAddUserBtn = false;
+                this.isShowAddUserBtn = false;
+                this.cnsVersionFrom.userId = this.userList[0].address;
              }
              this.creatUserNameVisible = false;
         },

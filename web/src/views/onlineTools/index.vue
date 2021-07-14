@@ -57,13 +57,8 @@
                                 <el-option v-for="item in privateKeyList" :key="item.address" :label="item.userName" :value="item.address">
                                 </el-option>
                             </el-select> 
-                             <el-button type="primary"   @click="querySignHash" v-loading="loading">{{$t('onlineTools.sign')}}</el-button>
-                              <el-button v-if="isShowAddUserBtn" type="primary"   @click="createUser" v-loading="loading">新增用户</el-button>
-                            <!-- <div style="float:right;padding-left:5px;" >
-                                <span  @click="createUser()">
-                                        <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t("privateKey.addUser")}}</a>
-                                    </span>
-                            </div> -->
+                            <el-button v-if="isShowAddUserBtn" type="text" size="mini"  @click="createUser" v-loading="loading">{{$t('privateKey.addUser')}}</el-button>
+                            <el-button  v-if="!isShowAddUserBtn" type="primary"   @click="querySignHash" v-loading="loading">{{$t('onlineTools.sign')}}</el-button>
                         </div>
                         <p class="font-color-fff text-title">{{$t('onlineTools.result')}}</p>
                         <div class="result" v-if="inputSign">
@@ -80,7 +75,7 @@
                             </ul>
                         </div>
                     </div>
-                      <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" class="dialog-wrapper" width="400px" :center="true" :append-to-body="true">
+                      <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" class="dialog-wrapper" width="640px" :center="true" :append-to-body="true">
                         <v-createUser  @close='createUserClose'></v-createUser>
                     </el-dialog>
                 </el-tab-pane>
@@ -387,7 +382,8 @@ export default {
          createUserClose(data){
              this.privateKeyList = data; 
              if(this.privateKeyList.length > 0 ){
-                 this.isShowAddUserBtn = false;
+                this.isShowAddUserBtn = false;
+                this.privateKey = this.privateKeyList[0]['address']
              }
              this.creatUserNameVisible = false;
         },

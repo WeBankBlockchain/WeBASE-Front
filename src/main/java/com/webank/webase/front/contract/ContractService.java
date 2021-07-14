@@ -580,6 +580,11 @@ public class ContractService {
                 contractReq.getContractName(), contractReq.getContractId());
         BeanUtils.copyProperties(contractReq, contract);
         contract.setModifyTime(LocalDateTime.now());
+        if(contract.getContractAddress()!=null && contract.getContractAddress().length()>("0x").length())
+        {
+
+            contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+        }
         contractRepository.save(contract);
         // update time
         ContractPath contractPathVo = new ContractPath();
