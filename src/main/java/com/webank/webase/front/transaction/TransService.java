@@ -226,6 +226,7 @@ public class TransService {
             TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
             String receiptMsg = txDecoder.decodeReceiptStatus(responseReceipt).getReceiptMessages();
             responseReceipt.setMessage(receiptMsg);
+            CommonUtils.processReceiptHexNumber(responseReceipt);
             response = responseReceipt;
             log.info("***node cost time***: {}",
                     Duration.between(nodeStartTime, Instant.now()).toMillis());
@@ -301,7 +302,6 @@ public class TransService {
         log.info("execTransaction start startTime:{}", startTime.toEpochMilli());
         TransactionReceipt transactionReceipt = commonContract.execTransaction(function);
         // cover null message through statusCode
-        // String receiptMsg = FrontUtils.handleReceiptMsg(transactionReceipt);
         String receiptMsg = txDecoder.decodeReceiptStatus(transactionReceipt).getReceiptMessages();
         transactionReceipt.setMessage(receiptMsg);
         CommonUtils.processReceiptHexNumber(transactionReceipt);
