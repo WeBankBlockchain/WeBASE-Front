@@ -402,7 +402,7 @@ export function ImportP12PrivateKey(data) {
         headers: {
             'Content-Type': "multipart/form-data"
         }
-        
+
     })
 }
 
@@ -413,8 +413,7 @@ export function exportPemPrivateKey(data) {
         method: 'post',
         data: data,
         responseType: 'blob/application/json',
-        headers: {
-        }
+        headers: {}
     })
 }
 
@@ -425,8 +424,7 @@ export function exportP12PrivateKey(data) {
         method: 'post',
         data: data,
         responseType: 'blob',
-        headers: {
-        }
+        headers: {}
     })
 }
 
@@ -542,7 +540,7 @@ export function getContractList(data) {
 }
 
 // search contract list for contract path
-export function searchContract (data) {
+export function searchContract(data) {
     return get({
         url: `${HANDLE}contract/contractList/multiPath`,
         method: 'post',
@@ -572,7 +570,7 @@ export function addContractPath(data) {
 }
 
 //delete contract path
-export function deletePath(groupId,contractPath) {
+export function deletePath(groupId, contractPath) {
     return deleted({
         url: `${HANDLE}contract/batch/${groupId}/${contractPath}`,
         method: 'delete'
@@ -878,7 +876,7 @@ export function deleteSolcId(solcId) {
 }
 
 //获取solc文件列表
-export function getSolcList () {
+export function getSolcList() {
     return get({
         url: `${HANDLE}solc/list`,
         method: 'GET',
@@ -1052,7 +1050,7 @@ export function exportOutContract(url) {
 
 export function queryChannelIP(data) {
     return get({
-        url: `${HANDLE}/scaffold/check?nodeIp=`+data.nodeIp+'&channelPort='+data.channelPort,
+        url: `${HANDLE}scaffold/check?nodeIp=` + data.nodeIp + '&channelPort=' + data.channelPort,
         method: 'get',
         headers: {
             AuthorizationToken: "Token " + localStorage.getItem("token") || "",

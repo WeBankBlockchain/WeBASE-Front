@@ -1,0 +1,42 @@
+<!DOCTYPE html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=./static/image/webase_35x35.png type=image/x-icon><title>节点控制台</title><script src=./static/js/base-loading.js></script><script src=./static/js/browserfs.min.js></script><link rel=stylesheet type=text/css href=./static/css/reset.css><link rel=stylesheet type=text/css href=./static/css/base.css><style id=antiClickjack>body {
+            display: none !important;
+        }</style><style type=text/css>.icon {
+            width: 1em;
+            height: 1em;
+            vertical-align: -0.15em;
+            fill: currentColor;
+            overflow: hidden;
+
+        }
+
+        .icon-2 {
+            width: 2.5em;
+            height: 2.5em;
+            vertical-align: -0.15em;
+            fill: currentColor;
+            overflow: hidden;
+        }</style></head><body><body><div id=app style="height: 100% !important;"></div><script type=text/javascript src=./static/js/0.22c9ef28c19dc8fee77c.js></script><script type=text/javascript src=./static/js/3.4bb57876ff675b5ab701.js></script><script type=text/javascript src=./static/js/runtime.0fa7b2dd3fdcae6c5b0e.js></script><script type=text/javascript src=./static/js/5.855d52b1173f29bfb155.js></script></body><script>if (self == top) {
+            var antiClickjack = document.getElementById("antiClickjack");
+            antiClickjack.parentNode.removeChild(antiClickjack);
+        } else {
+            top.location = self.location;
+        }
+        var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
+        var jsSrc = (navigator.language || navigator.browserLanguage).toLowerCase();
+        console.log(userAgent, jsSrc)
+        //判断是否IE浏览器
+        if ((!!window.ActiveXObject || "ActiveXObject" in window) && jsSrc == 'zh-cn') {
+            alert("本系统不支持IE浏览器，请选择Chrome、Safari、火狐或者QQ浏览器、搜狗浏览器的非兼容版");
+        };
+        if ((!!window.ActiveXObject || "ActiveXObject" in window) && jsSrc != 'zh-cn') {
+            alert("This system does not support IE browser, please use Chrome, Firefox, Safari or Opera.");
+        }; 
+        window.onload = () => {
+                BrowserFS.install(window)
+                BrowserFS.configure({
+                    fs: "LocalStorage"
+                }, function (e) {
+                    if (e) console.log(e)
+                    window.remixFileSystem = require('fs')
+                })
+            }</script></body></html>
