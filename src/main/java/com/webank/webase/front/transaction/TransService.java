@@ -304,6 +304,7 @@ public class TransService {
         // String receiptMsg = FrontUtils.handleReceiptMsg(transactionReceipt);
         String receiptMsg = txDecoder.decodeReceiptStatus(transactionReceipt).getReceiptMessages();
         transactionReceipt.setMessage(receiptMsg);
+        CommonUtils.processReceiptHexNumber(transactionReceipt);
         log.info("execTransaction end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return transactionReceipt;
