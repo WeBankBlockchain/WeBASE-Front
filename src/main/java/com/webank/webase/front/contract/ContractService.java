@@ -512,7 +512,7 @@ public class ContractService {
      * save contract data.
      */
     public Contract saveContract(ReqContractSave contractReq) {
-        log.debug("start saveContract contractReq:{}", JsonUtils.toJSONString(contractReq));
+        log.info("start saveContract contractReq:{}", JsonUtils.toJSONString(contractReq));
         if (contractReq.getContractId() == null) {
             // new
             return newContract(contractReq);
