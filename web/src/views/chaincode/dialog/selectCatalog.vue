@@ -24,7 +24,7 @@
                             </el-option>
                         </el-select>
                     <span class="contract-code-done"  @click='addFolder' style="float:right;margin-right:-55px">
-                        <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t('contracts.createFolder')}}</a>
+                        <a target="_blank" style="font-size:12px;cursor:pointer;text-color:#9da2ab">{{this.$t('contracts.createFolder')}}</a>
                     </span>
                     </el-form-item>
                 </el-form>
