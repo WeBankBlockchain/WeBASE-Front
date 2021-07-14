@@ -135,10 +135,10 @@
                             <span v-else style="color:#1f83e7;cursor: pointer;margin-left: 10px;" @click="handleRegisterCns">{{$t('text.register')}}</span>
                         </span>
                     </div>
-                    <div v-else  class="contract-info-list">
-                        <span v-if="bytecodeBin" class="contract-info-list-title" style="color: #0B8AEE">contractAddress
+                    <div v-else v-show="abiFile" class="contract-info-list">
+                        <span v-if="!abiEmpty" class="contract-info-list-title" style="color: #0B8AEE">contractAddress
                         </span>
-                        <span v-if="bytecodeBin" style="color:#1f83e7;cursor: pointer;margin-left: 10px;" @click="addContractAddress">{{$t('text.addContractAddress')}}</span>
+                        <span v-if="!abiEmpty" style="color:#1f83e7;cursor: pointer;margin-left: 10px;" @click="addContractAddress">{{$t('text.addContractAddress')}}</span>
                     </div>
                     <div class="contract-info-list" v-if="abiFile">
                         <span class="contract-info-list-title" style="color: #0B8AEE">contractName
@@ -252,6 +252,7 @@ export default {
             code: "",
             status: 0,
             abiFile: "",
+            abiEmpty: true,
             bin: "",
             contractAddress: "",
             contractName: "",
@@ -361,6 +362,7 @@ export default {
             this.version = "";
             this.status = null;
             this.abiFile = "";
+            this.abiEmpty = true,
             this.contractAddress = "";
             this.errorMessage = "";
             this.contractName = "";
@@ -372,6 +374,8 @@ export default {
             this.aceEditor.setValue(this.content);
             this.status = data.contractStatus;
             this.abiFile = data.contractAbi;
+            if (!(!this.abiFile || this.abiFile == '[]')) 
+            {this.abiEmpty = false}
             this.contractAddress = data.contractAddress;
             this.errorMessage = data.description || "";
             this.contractName = data.contractName;
@@ -398,6 +402,7 @@ export default {
             this.version = "";
             this.status = null;
             this.abiFile = "";
+            this.abiEmpty = true;
             this.contractAddress = "";
             this.errorMessage = "";
             this.contractName = "";
@@ -741,6 +746,8 @@ export default {
                     this.successInfo = `< ${this.$t('text.compilationSucceeded')}`;
                     this.abiFile = compiledMap.abi;
                     this.abiFile = JSON.stringify(this.abiFile);
+                    if (!(!this.abiFile || this.abiFile == '[]')) 
+                    {this.abiEmpty = false}
                     this.bin = compiledMap.evm.deployedBytecode.object;
                     this.bytecodeBin = compiledMap.evm.bytecode.object;
                     this.data.contractAbi = this.abiFile;
@@ -774,6 +781,7 @@ export default {
             this.errorInfo = "";
             this.compileinfo = "";
             this.abiFile = "";
+            this.abiEmpty = true;
             this.contractAddress = "";
             this.bin = "";
         },
@@ -813,7 +821,6 @@ export default {
             this.dialogUser = false;
         },
         setMethod: function () {
-            let Web3EthAbi = web3;
             let arry = [];
             if (this.abiFile) {
                 let list = JSON.parse(this.abiFile);
@@ -1250,9 +1257,21 @@ export default {
                             type: "error",
                             message: this.$t('contracts.contractAddressInput')
                         });
-                    } else {
-                        this.addContractAddressVisible = false;
-                        this.addContract()
+                    }
+                    else {
+                        let web3Utils = require("web3-utils");
+                        if(web3Utils.isAddress(this.contractForm.contractAddress))
+                        {
+                            this.addContractAddressVisible = false;
+                            this.addContract();
+                        }
+                        else
+                        {
+                            this.$message({
+                                type: "error",
+                                message: this.$t('contracts.contractAddressInput')
+                            }); 
+                        }
                     }
                 } else {
                     return false;

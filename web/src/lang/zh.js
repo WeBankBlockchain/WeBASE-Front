@@ -416,7 +416,7 @@ export default {
         paramsInfo: '如果参数类型是数组，请按照以下格式输入，以逗号分隔，非数值和布尔值须使用双引号，例如：["aaa","bbb"]和[100,101]；如果数组参数包含双引号，需转义，例如：["aaa\\"bbb","ccc"]。',
         contractAddress: "合约地址",
         method: "方法",
-        contractAddressInput: "请输入合约地址",
+        contractAddressInput: "请输入正确的合约地址",
         contractAddressInfo: "选填项，导入已部署的合约地址。",
         selectUser: "请选择用户",
         methodType: "方法类型",

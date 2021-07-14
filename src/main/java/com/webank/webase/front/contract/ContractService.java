@@ -582,6 +582,7 @@ public class ContractService {
         contract.setModifyTime(LocalDateTime.now());
         if(contract.getContractAddress()!=null && contract.getContractAddress().length()>("0x").length())
         {
+
             contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
         }
         contractRepository.save(contract);

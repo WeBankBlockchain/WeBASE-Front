@@ -413,7 +413,7 @@ export default {
         paramsInfo: 'If the parameter type is an array, enter the following format, comma separated, with double quotes for non-numeric and Boolean values, such as ["aaa","bbb"] and [100,101]; Escape if array parameters contain double quotes, for example: ["aaa\\"bbb","ccc"].',
         contractAddress: "Address",
         method: "Method",
-        contractAddressInput: "Please enter the contract address",
+        contractAddressInput: "Please enter the correct contract address",
         contractAddressInfo: "Optional item,import deployed contract addresses.",
         selectUser: "Please Select Users",
         methodType: "Method Type",

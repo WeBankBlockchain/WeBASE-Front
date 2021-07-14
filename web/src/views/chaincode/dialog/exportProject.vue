@@ -361,7 +361,7 @@ export default {
                 setTimeout(() => {
                     num =0;
                     this.getContractList(val,true);
-               }, 1000)
+               }, 3000)
             }  
             this.multipleSelectedId = Array.from(new Set(this.multipleSelectedId))
         },
