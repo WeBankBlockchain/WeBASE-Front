@@ -121,7 +121,7 @@
             <el-button @click="close">{{$t('dialog.cancel')}}</el-button>
             <el-button type="primary" @click="submit('transation')" :disabled='buttonClick'>{{$t('dialog.confirm')}}</el-button>
         </div>
-        <el-dialog :modal-append-to-body="false" :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible"  class="dialog-wrapper" width="640px" :center="true">
+        <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" :before-close="closeUserName" class="dialog-wrapper" width="640px" :center="true" :append-to-body="true">
             <v-createUser  @close='createUserClose'></v-createUser>
         </el-dialog>
     </div>
