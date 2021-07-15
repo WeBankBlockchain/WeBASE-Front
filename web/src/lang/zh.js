@@ -381,7 +381,7 @@ export default {
         haveChannelPort: '根据节点前置对应channelPort填入',
         addContractAddress: '绑定',
         pass: '节点存活',
-        no: '节点不存活'
+        no: '节点未存活'
     },
     contracts: {
         createFile: "新建文件",

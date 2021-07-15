@@ -423,7 +423,7 @@ export default {
 
 <style scoped>
 .send-wrapper {
-    padding-left: 30px;
+    padding-left: 25px;
 }
 .send-btn >>> .el-button {
     padding: 9px 16px;
