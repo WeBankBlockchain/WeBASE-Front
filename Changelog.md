@@ -3,6 +3,7 @@
 **Add**
 - 优化合约Java项目导出功能，支持批量编译合约，支持多用户与channel端口检查
 - 合约仓库新增资产合约模板
+- 增加交易组装接口`/tran/convertRawTxStr`和编码交易函数接口`/trans/encodeFunction`
 - 支持合约IDE绑定合约地址
 
 **Fix**
