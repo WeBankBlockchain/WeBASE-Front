@@ -1,3 +1,22 @@
+### v1.5.2(2021-07-16)
+
+**Add**
+- 优化合约Java工程脚手架导出并支持多用户、节点检测
+- 合约仓库新增资产合约模板
+- 支持合约IDE绑定合约地址
+
+**Fix**
+- 优化交易窗口，支持无私钥用户时直接创建私钥
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Node-Manager v1.5.0+
+- WeBASE-Sign v1.5.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 ### v1.5.1(2021-05-28)
 
 **Add**
