@@ -91,7 +91,7 @@ public class ScaffoldService {
             // if contract abi is null, not compile
             // if abi is [](empty list), compile already
             if (contract == null || contract.getContractAbi() == null) {
-                log.error("exportProject contract not exist or not compiled, id:{}", id);
+                log.error("exportProject contract not exist or abi empty, id:{}", id);
                 throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
             }
             tbContractList.add(contract);
