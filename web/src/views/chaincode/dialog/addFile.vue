@@ -25,7 +25,7 @@
                         <el-select v-model="fileFrom.contractType" :disabled='disabled' :placeholder="$t('placeholder.selected')">
                             <el-option v-for="item in options" :key="item.folderName" :label="item.folderName" :value="item.folderName">
                             </el-option>
-                        </el-select>
+                        </el-select>                       
                     </el-form-item>
                 </el-form>
             </div>
@@ -34,14 +34,19 @@
                 <el-button type="primary" @click="submit('fileFrom')">{{$t('dialog.confirm')}}</el-button>
             </div>
         </el-dialog>
+         <add-folder v-if="foldershow" :foldershow="foldershow"  :isAddFile="isAddFile" @close='folderClose'></add-folder>
     </div>
 </template>
 <script>
 import { getContractPathList } from "@/util/api"
 import { filter } from 'jszip'
+import addFolder from "../dialog/addFolder"
 export default {
     name: "addFile",
     props: ['fileshow', 'data', 'id'],
+    components: {
+        "add-folder": addFolder
+    },
     computed: {
         rules() {
             var obj = {
@@ -78,7 +83,9 @@ export default {
             folderId: this.id,
             options: [],
             folderList: [],
-            pathList: []
+            pathList: [],
+            foldershow: false, 
+            isAddFile: ""
         }
     },
     mounted: function () {
@@ -197,7 +204,21 @@ export default {
         },
         modelClose: function () {
             this.$emit("close")
-        }
+        },
+          /**
+         * 关闭文件夹弹窗
+         */
+        folderClose: function () {
+            this.getContractPaths();
+            this.foldershow = false
+        },
+        /**
+         * 新增文件夹 打开文件夹弹窗
+         */
+        addFolder: function () {
+            // this.checkNull();
+            this.foldershow = true
+        },
     }
 }
 </script>

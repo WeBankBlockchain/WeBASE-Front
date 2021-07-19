@@ -512,7 +512,7 @@ public class ContractService {
      * save contract data.
      */
     public Contract saveContract(ReqContractSave contractReq) {
-        log.debug("start saveContract contractReq:{}", JsonUtils.toJSONString(contractReq));
+        log.info("start saveContract contractReq:{}", JsonUtils.toJSONString(contractReq));
         if (contractReq.getContractId() == null) {
             // new
             return newContract(contractReq);
@@ -580,6 +580,11 @@ public class ContractService {
                 contractReq.getContractName(), contractReq.getContractId());
         BeanUtils.copyProperties(contractReq, contract);
         contract.setModifyTime(LocalDateTime.now());
+        if(contract.getContractAddress()!=null && contract.getContractAddress().length()>("0x").length())
+        {
+            contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+            contract.setDeployTime(LocalDateTime.now());
+        }
         contractRepository.save(contract);
         // update time
         ContractPath contractPathVo = new ContractPath();

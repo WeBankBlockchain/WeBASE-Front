@@ -15,7 +15,7 @@
  */
 <template>
     <div>
-        <el-dialog :title="$t('title.selectDirectory')" :visible.sync="dialogVisible" :before-close="close" class="dialog-wrapper" width="433px" :center="true">
+        <el-dialog :title="$t('title.selectDirectory')" :visible.sync="dialogVisible" :before-close="close" class="dialog-wrapper" width="460px" :center="true">
             <div>
                 <el-form :model="folderFrom" :rules="rules" ref="folderFrom" label-width="100px" class="demo-ruleForm">
                     <el-form-item :label="$t('dialog.folderName')" prop="folderName" style="width:330px">
@@ -23,6 +23,9 @@
                             <el-option v-for="item in options" :key="item.folderName" :label="item.folderName" :value="item.folderName">
                             </el-option>
                         </el-select>
+                    <span class="contract-code-done"  @click='addFolder' style="float:right;margin-right:-70px">
+                        <a target="_blank" style="font-size:12px;cursor:pointer;color:#409eff;">{{this.$t('contracts.createFolder')}}</a>
+                    </span>
                     </el-form-item>
                 </el-form>
             </div>
@@ -31,13 +34,18 @@
                 <el-button type="primary" @click="submit('folderFrom')">{{$t('dialog.confirm')}}</el-button>
             </div>
         </el-dialog>
+       <add-folder v-if="foldershow" :foldershow="foldershow" :isAddFile="isAddFile" @close='folderClose'></add-folder>
     </div>
 </template>
 <script>
 import { getContractPathList } from "@/util/api"
+import addFolder from "../dialog/addFolder"
 export default {
     name: "selectCatalog",
     props: ['show'],
+     components: {
+        "add-folder": addFolder
+    },
     computed: {
         rules() {
             var obj = {
@@ -60,7 +68,9 @@ export default {
             },
             dialogVisible: this.show,
             pathList: [],
-            folderList: []
+            folderList: [],
+            foldershow: false,
+            isAddFile:""
         }
     },
     mounted: function () {
@@ -140,7 +150,21 @@ export default {
         },
         close: function () {
             this.$emit("close")
-        }
+        },
+           /**
+         * 关闭文件夹弹窗
+         */
+        folderClose: function () {
+            this.getContractPaths();
+            this.foldershow = false
+        },
+        /**
+         * 新增文件夹 打开文件夹弹窗
+         */
+        addFolder: function () {
+            // this.checkNull();
+            this.foldershow = true
+        },
     }
 }
 </script>

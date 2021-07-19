@@ -1,7 +1,6 @@
 # 节点前置服务
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://webasedoc.readthedocs.io/zh_CN/latest/docs/WeBASE/CONTRIBUTING.html)
 [![CodeFactor](https://www.codefactor.io/repository/github/webankfintech/webase-front/badge)](https://www.codefactor.io/repository/github/webankfintech/webase-front)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f5be085401f54e7080a654693ac260d4)](https://www.codacy.com/gh/WeBankFinTech/WeBASE-Front?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WeBankFinTech/WeBASE-Front&amp;utm_campaign=Badge_Grade)
 [![Code Lines](https://tokei.rs/b1/github/WeBankFinTech/WeBASE-Front?category=code)](https://github.com/WeBankFinTech/WeBASE-Front)
 [![license](http://img.shields.io/badge/license-Apache%20v2-blue.svg)](http://www.apache.org/licenses/)
 [![GitHub (pre-)release](https://img.shields.io/github/release/WeBankFinTech/WeBASE-Front/all.svg)](https://github.com/WeBankFinTech/WeBASE-Front/releases)

@@ -25,6 +25,9 @@
                             <span>{{item.address}}</span>
                         </el-option>
                     </el-select>
+                    
+                    <el-button v-if="isShowAddUserBtn" type="text" size="mini" @click="createUser()">{{$t('privateKey.addUser')}}</el-button>
+ 
                 </td>
                 <td v-show="userName">
                     <div class="user-explain font-color-fff">
@@ -91,17 +94,25 @@
                     </p>
                 </td>
             </tr>
-        </table>
+        </table> 
         <div class="text-right send-btn">
             <el-button @click="close">{{$t('dialog.cancel')}}</el-button>
             <el-button type="primary" @click="submit">{{$t('dialog.confirm')}}</el-button>
         </div>
+          <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" :before-close="closeUserName" class="dialog-wrapper" width="640px" :center="true" :append-to-body="true">
+              <v-createUser  @close='createUserClose'></v-createUser>
+         </el-dialog>
     </div>
 </template>
 <script>
 import { queryLocalKeyStores } from "@/util/api";
-import { isJson } from "@/util/util"
+import { isJson } from "@/util/util";
+import createUser from "@/views/toolsContract/components/createUser";
+
 export default {
+      components: {
+        "v-createUser": createUser
+    },
     name: "changeUser",
     props: ["abi", "contractName"],
     data: function () {
@@ -120,7 +131,10 @@ export default {
             cnsVersionFrom: {
                 cnsVersion: "",
                 cnsName: this.contractName
-            }
+            },
+            isUserNameShow: false,
+            creatUserNameVisible: false,
+            isShowAddUserBtn: false
         };
     },
     computed: {
@@ -182,6 +196,7 @@ export default {
                             this.userId = this.userList[0].address
                             this.userName = this.userList[0].userName
                         } else {
+                            this.isShowAddUserBtn = true;
                             this.placeholderText = this.$t('placeholder.selectedNoUser')
                         }
                     } else {
@@ -265,7 +280,20 @@ export default {
             } else {
                 this.cnsVersionFrom.cnsName = this.contractName;
             }
-        }
+        },
+        createUser(){
+            this.creatUserNameVisible = true;
+        },
+         createUserClose(data){
+             console.log(data);
+             this.userList = data;
+             if(this.userList.length > 0 ){
+                this.userId = this.userList[0].address
+                this.userName = this.userList[0].userName
+                this.isShowAddUserBtn = false;
+             } 
+             this.creatUserNameVisible = false;
+        },
     }
 };
 </script>

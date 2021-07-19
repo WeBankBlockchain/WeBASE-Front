@@ -1,3 +1,23 @@
+### v1.5.2(2021-07-16)
+
+**Add**
+- 优化合约Java项目导出功能，支持批量编译合约，支持多用户与channel端口检查
+- 合约仓库新增资产合约模板
+- 增加交易组装接口`/tran/convertRawTxStr`和编码交易函数接口`/trans/encodeFunction`
+- 支持合约IDE绑定合约地址
+
+**Fix**
+- 优化交易窗口，支持无私钥用户时直接创建私钥
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Node-Manager v1.5.0+
+- WeBASE-Sign v1.5.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 ### v1.5.1(2021-05-28)
 
 **Add**
@@ -13,7 +33,7 @@
 
 **兼容性**
 - 支持FISCO-BCOS v2.4.x 及以上版本
-- WeBASE-Node-Manager v1.4.1+
+- WeBASE-Node-Manager v1.5.0+
 - WeBASE-Sign v1.5.0+
 - WeBASE-Transaction v1.3.0+
 
@@ -32,7 +52,7 @@
 
 **兼容性**
 - 支持FISCO-BCOS v2.4.x 及以上版本
-- WeBASE-Node-Manager v1.4.1+
+- WeBASE-Node-Manager v1.5.0+
 - WeBASE-Sign v1.5.0+
 - WeBASE-Transaction v1.3.0+
 

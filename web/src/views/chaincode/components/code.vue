@@ -125,7 +125,7 @@
                         </el-collapse>
                     </div>
                     <div style="color: #68E600;padding-bottom: 15px;" v-show="abiFileShow">{{successInfo}}</div>
-                    <div class="contract-info-list" v-show="contractAddress">
+                    <div class="contract-info-list" v-if="contractAddress">
                         <span class="contract-info-list-title" style="color: #0B8AEE">contractAddress
                             <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(contractAddress)" :title="$t('title.copyContractAddress')"></i>
                         </span>
@@ -134,6 +134,11 @@
                             <span v-if="reqVersion" style="margin-left: 10px;">(CNS: {{cnsName}} {{reqVersion}})</span>
                             <span v-else style="color:#1f83e7;cursor: pointer;margin-left: 10px;" @click="handleRegisterCns">{{$t('text.register')}}</span>
                         </span>
+                    </div>
+                    <div v-else v-show="abiFile" class="contract-info-list">
+                        <span v-if="!abiEmpty" class="contract-info-list-title" style="color: #0B8AEE">contractAddress
+                        </span>
+                        <span v-if="!abiEmpty" style="color:#1f83e7;cursor: pointer;margin-left: 10px;" @click="addContractAddress">{{$t('text.addContractAddress')}}</span>
                     </div>
                     <div class="contract-info-list" v-if="abiFile">
                         <span class="contract-info-list-title" style="color: #0B8AEE">contractName
@@ -182,6 +187,19 @@
         <el-dialog v-if="mgmtCnsVisible" :title="$t('text.cns')" :visible.sync="mgmtCnsVisible" width="470px" center class="send-dialog">
             <mgmt-cns :mgmtCnsItem="mgmtCnsItem" @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)" @mgmtCnsResultClose="mgmtCnsResultClose"></mgmt-cns>
         </el-dialog>
+
+         <el-dialog :visible.sync="addContractAddressVisible" :title="$t('dialog.addContractAddress')" width="400px" class="dialog-wrapper" center v-if="addContractAddressVisible">
+            <el-form ref="contractForm" :model="contractForm">
+                <el-form-item label="" prop="contractAddress">
+                    <el-input v-model="contractForm.contractAddress" :placeholder="$t('contracts.contractAddressInput')"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="text-right">
+                <el-button @click="closeContractAddress">{{$t('table.cancel')}}</el-button>
+                <el-button type="primary" @click="sureContractAddress('contractForm')">{{$t('table.confirm')}}</el-button>
+            </div>
+        </el-dialog>
+    
     </div>
 </template>
 <script>
@@ -205,7 +223,8 @@ import {
     backgroundCompile,
     registerCns,
     findCnsInfo,
-    exportCertSdk
+    exportCertSdk,
+    saveChaincode
 } from "@/util/api";
 import transaction from "@/components/sendTransaction";
 import changeUser from "../dialog/changeUser";
@@ -233,6 +252,7 @@ export default {
             code: "",
             status: 0,
             abiFile: "",
+            abiEmpty: true,
             bin: "",
             contractAddress: "",
             contractName: "",
@@ -273,7 +293,11 @@ export default {
             cnsName: "",
             mgmtCnsVisible: false,
             mgmtCnsItem: {},
-            activeNames: []
+            activeNames: [],
+            addContractAddressVisible: false,
+            contractForm: {
+                contractAddress: ""
+            },
         };
     },
     watch: {
@@ -338,6 +362,7 @@ export default {
             this.version = "";
             this.status = null;
             this.abiFile = "";
+            this.abiEmpty = true,
             this.contractAddress = "";
             this.errorMessage = "";
             this.contractName = "";
@@ -349,6 +374,8 @@ export default {
             this.aceEditor.setValue(this.content);
             this.status = data.contractStatus;
             this.abiFile = data.contractAbi;
+            if (!(!this.abiFile || this.abiFile == '[]')) 
+            {this.abiEmpty = false}
             this.contractAddress = data.contractAddress;
             this.errorMessage = data.description || "";
             this.contractName = data.contractName;
@@ -375,6 +402,7 @@ export default {
             this.version = "";
             this.status = null;
             this.abiFile = "";
+            this.abiEmpty = true;
             this.contractAddress = "";
             this.errorMessage = "";
             this.contractName = "";
@@ -718,6 +746,8 @@ export default {
                     this.successInfo = `< ${this.$t('text.compilationSucceeded')}`;
                     this.abiFile = compiledMap.abi;
                     this.abiFile = JSON.stringify(this.abiFile);
+                    if (!(!this.abiFile || this.abiFile == '[]')) 
+                    {this.abiEmpty = false}
                     this.bin = compiledMap.evm.deployedBytecode.object;
                     this.bytecodeBin = compiledMap.evm.bytecode.object;
                     this.data.contractAbi = this.abiFile;
@@ -751,10 +781,19 @@ export default {
             this.errorInfo = "";
             this.compileinfo = "";
             this.abiFile = "";
+            this.abiEmpty = true;
             this.contractAddress = "";
             this.bin = "";
         },
         deploying: function () {
+            if (!this.bytecodeBin) {
+                this.$message({
+                    type: 'warning',
+                    message: this.$t('text.notHaveBin'),
+                    duration: 2000
+                })
+                return;
+            }
             if (JSON.parse(this.abiFile).length == 0 || !this.abiFile) {
                 this.$message({
                     type: 'error',
@@ -771,7 +810,8 @@ export default {
 
         },
         deploy: function () {
-            if (this.abiFile) {
+            
+            if (this.abiFile) {                
                 this.dialogUser = true;
             } else {
                 this.$message.error(`${this.$t('text.compilationFailed')}`);
@@ -781,7 +821,6 @@ export default {
             this.dialogUser = false;
         },
         setMethod: function () {
-            let Web3EthAbi = web3;
             let arry = [];
             if (this.abiFile) {
                 let list = JSON.parse(this.abiFile);
@@ -961,6 +1000,14 @@ export default {
         },
 
         downloadJavaClass: function (formName) {
+             if (!this.abiFile || this.abiFile == '[]') {
+                this.$message({
+                    type: 'warning',
+                    message: this.$t('text.notHaveAbi'),
+                    duration: 2000
+                })
+                return
+            }
             this.javaClassDialogVisible = true;
         },
         closeJavaClass: function () {
@@ -983,10 +1030,10 @@ export default {
                 });
         },
         getJavaClass: function () {
-            if (!this.abiFile || !this.bytecodeBin) {
+            if (!this.abiFile) {
                 this.$message({
                     type: 'warning',
-                    message: this.$t('text.haveAbiAndBin'),
+                    message: this.$t('text.notHaveAbi'),
                     duration: 2000
                 })
                 return
@@ -1193,6 +1240,60 @@ export default {
         // 导出java项目
         exportJava() {
             this.$store.dispatch('set_exportProject_show_action', true)
+        },
+        addContractAddress(){
+            this.contractForm.contractAddress = "";
+            this.addContractAddressVisible = true;
+        },
+           closeContractAddress() {
+            this.addContractAddressVisible = false;
+            this.contractForm.contractAddress = "";
+        },
+        sureContractAddress(formName) {
+            this.$refs[formName].validate(valid => {
+                if (valid) {
+                    if (this.contractForm.contractAddress=='' || this.contractForm.contractAddress==null) {
+                        this.$message({
+                            type: "error",
+                            message: this.$t('contracts.contractAddressInput')
+                        });
+                    }
+                    else {
+                        let web3Utils = require("web3-utils");
+                        if(web3Utils.isAddress(this.contractForm.contractAddress))
+                        {
+                            this.addContractAddressVisible = false;
+                            this.addContract();
+                        }
+                        else
+                        {
+                            this.$message({
+                                type: "error",
+                                message: this.$t('contracts.contractAddressInput')
+                            }); 
+                        }
+                    }
+                } else {
+                    return false;
+                }
+            });
+
+        },
+        addContract: function () {
+             let reqData = {
+                groupId: localStorage.getItem("groupId"),
+                contractName: this.data.contractName,
+                contractPath: this.data.contractPath,
+                contractSource: this.data.contractSource,
+                contractAbi: this.data.contractAbi,
+                contractBin: this.data.contractBin,
+                bytecodeBin: this.data.bytecodeBin,
+                contractAddress : this.contractForm.contractAddress,
+            };
+            if (this.data.id) {
+                reqData.id = this.data.id;
+            }
+              Bus.$emit("save", reqData);
         },
     }
 };

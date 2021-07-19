@@ -4,7 +4,8 @@ branches:
   - dev
 
 language: java
-
+services:
+  - mysql
 matrix:
 #  fast_finish: true
   include:
@@ -26,6 +27,29 @@ matrix:
       dist: xenial
       sudo: required
 
+    - language: java
+      jdk: openjdk11
+      os: linux
+      dist: xenial
+      sudo: required
+
+    - language: java
+      jdk: openjdk12
+      os: linux
+      dist: xenial
+      sudo: required
+
+    - language: java
+      jdk: openjdk13
+      os: linux
+      dist: xenial
+      sudo: required
+
+    - language: java
+      jdk: openjdk14
+      os: linux
+      dist: xenial
+      sudo: required
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

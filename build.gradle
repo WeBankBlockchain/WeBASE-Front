@@ -23,7 +23,7 @@ repositories {
 
 }
 
-def spring_version="4.3.27.RELEASE"
+def spring_version="4.3.29.RELEASE"
 List spring =[
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-beans:$spring_version",
@@ -71,7 +71,7 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-def jackson_version = "2.11.0"
+def jackson_version = "2.11.4"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
     "com.fasterxml.jackson.core:jackson-core:$jackson_version",
@@ -90,9 +90,9 @@ List tomcat = [
 ]
 
 List scaffold = [
-    'com.webank.webase:solscaffold:1.0.1',
-    'com.webank:SmartDev-Scaffold:1.0.0-SNAPSHOT',
-    'com.webank:solc-gradle-plugin:1.0.0'
+    'com.webank.webase:solscaffold:1.0.2',
+    'com.webank:SmartDev-Scaffold:1.0.0.1',
+    'com.webank:solc-gradle-plugin:1.0.1'
 ]
 
 dependencies {

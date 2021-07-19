@@ -170,7 +170,9 @@ export default {
         cnsVersionPattern: "It can only be numbers, letters and '.'",
         cnsName: 'Please enter CNS name',
         length1_10: 'The length is between 1 and 10 character',
-        outUrl: "Url"
+        outUrl: "Url",
+        addContractAddress: "Add contract address",
+        pleaseEnterContractAddress: "Please type in contract address"
     },
     placeholder: {
         globalSearch: 'Search by Block Number / Tx Hash',
@@ -324,7 +326,8 @@ export default {
         addAbi: "Import ABI",
         eventParam: 'Please follow the prompt of event parameter type strictly',
         searchMessage: "Request Success",
-        haveAbiAndBin: "No have abi and bin",
+        notHaveAbi: "Not have abi",
+        notHaveBin: "Not have bin",
         emptyFolder: "Empty Folder",
         folderIsExists: "Contract path is exists",
         folder: "Folder",
@@ -375,6 +378,7 @@ export default {
         haveSelectionAll: 'The contract is not compiled at all',
         haveCertSdk: 'Failed to get SDK certificate. Please check certificate file',
         haveChannelPort: 'Fill it in according to the node front corresponding ChannelPort',
+        addContractAddress: 'Add conctract address'
     },
     contracts: {
         createFile: "Create File",
@@ -409,7 +413,7 @@ export default {
         paramsInfo: 'If the parameter type is an array, enter the following format, comma separated, with double quotes for non-numeric and Boolean values, such as ["aaa","bbb"] and [100,101]; Escape if array parameters contain double quotes, for example: ["aaa\\"bbb","ccc"].',
         contractAddress: "Address",
         method: "Method",
-        contractAddressInput: "Please enter the contract address",
+        contractAddressInput: "Please enter the correct contract address",
         contractAddressInfo: "Optional item,import deployed contract addresses.",
         selectUser: "Please Select Users",
         methodType: "Method Type",
@@ -535,6 +539,7 @@ export default {
     },
     privateKey: {
         addUser: "Add Users",
+        checkNodeActive: "check",
         importRivateKey: "Import Rivate Key",
         addUserTips: "The account number of the transaction sent in the group needs to be added to the private key management, otherwise it will be judged as an abnormal user.",
         searchUser: "Please enter user name or public key address",

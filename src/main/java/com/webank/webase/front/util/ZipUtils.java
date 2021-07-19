@@ -82,11 +82,9 @@ public class ZipUtils {
         if (file.isDirectory()) {
             //得到文件列表信息
             File[] files = file.listFiles();
-
-            //将文件夹添加到下一级打包目录
-            out.putNextEntry(new ZipEntry(dir + "/"));
-
             dir = dir.length() == 0 ? "" : dir + "/";
+            //将文件夹添加到下一级打包目录
+            out.putNextEntry(new ZipEntry(dir));
 
             //循环将文件夹中的文件打包
             for (int i = 0; i < files.length; i++) {

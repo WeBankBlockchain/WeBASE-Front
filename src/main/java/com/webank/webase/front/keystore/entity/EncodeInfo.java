@@ -14,15 +14,19 @@
 
 package com.webank.webase.front.keystore.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * EncodeInfo
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class EncodeInfo {
     /**
-     * userId deprecated, use signUserId instead
+     * signUserId in webase-sign
      */
     private String signUserId;
     private String encodedDataStr;

@@ -26,6 +26,7 @@ import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.scaffold.entity.ReqProject;
 import com.webank.webase.front.scaffold.entity.RspFile;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.NetUtils;
 import com.webank.webase.front.util.ZipUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.File;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.BeanUtils;
@@ -86,8 +88,10 @@ public class ScaffoldService {
         List<Contract> tbContractList = new ArrayList<>();
         for (Integer id : contractIdList) {
             Contract contract = contractService.findById(id.longValue());
-            if (contract == null || StringUtils.isBlank(contract.getBytecodeBin())) {
-                log.error("exportProject contract not exist or not compiled, id:{}", id);
+            // if contract abi is null, not compile
+            // if abi is [](empty list), compile already
+            if (contract == null || contract.getContractAbi() == null) {
+                log.error("exportProject contract not exist or abi empty, id:{}", id);
                 throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
             }
             tbContractList.add(contract);
@@ -104,8 +108,8 @@ public class ScaffoldService {
         List<String> userAddressList = reqProject.getUserAddressList();
         String hexPrivateKeyListStr = "";
         if (userAddressList != null && !userAddressList.isEmpty()) {
-            // hexPrivateKeyListStr = this.handleUserList(reqProject.getGroupId(), userAddressList);
-            hexPrivateKeyListStr = keyStoreService.getPrivateKey(userAddressList.get(0));
+            hexPrivateKeyListStr = this.handleUserList(userAddressList);
+            //hexPrivateKeyListStr = keyStoreService.getPrivateKey(userAddressList.get(0));
         }
         // generate
         String projectPath = this.generateProject(thisConfig, reqProject.getGroup(), reqProject.getArtifactName(),
@@ -147,7 +151,7 @@ public class ScaffoldService {
         log.info("generateProject projectGroup:{},artifactName:{},OUTPUT_DIR:{},frontChannelIpPort:{},groupId:{}",
             projectGroup, artifactName, OUTPUT_DIR, frontChannelIpPort, groupId);
         try {
-            projectFactory.buildProjectDir(contractInfoList,
+            projectFactory.buildProjectDirWebase(contractInfoList,
                 projectGroup, artifactName, OUTPUT_DIR, GRADLE_WRAPPER_DIR,
                 frontChannelIpPort, groupId, hexPrivateKeyListStr, sdkMap);
         } catch (Exception e) {
@@ -160,9 +164,8 @@ public class ScaffoldService {
     }
 
     private List<ContractInfo> handleContractList(List<Contract> contractList) {
-        log.info("handleContractList contractList:{}", contractList);
+        log.info("handleContractList contractList size:{}", contractList.size());
         List<ContractInfo> contractInfoList = new ArrayList<>();
-        log.info("handleContractList param contractList size:{}", contractList.size());
         for (Contract contract : contractList) {
             String sourceCodeBase64 = contract.getContractSource();
             String solSourceCode = new String(Base64.getDecoder().decode(sourceCodeBase64));
@@ -186,7 +189,6 @@ public class ScaffoldService {
             contractInfoList.add(contractInfo);
         }
         log.info("handleContractList result contractInfoList size:{}", contractInfoList.size());
-        log.info("handleContractList contractList:{}", contractInfoList);
         return contractInfoList;
     }
 
@@ -205,5 +207,18 @@ public class ScaffoldService {
             keyList.add(hexPrivateKey);
         }
         return StringUtils.join(keyList, ",");
+    }
+
+    /**
+     * telnet channel port to check reachable
+     * @param nodeIp
+     * @param channelPort
+     * @return
+     */
+    public Boolean telnetChannelPort(String nodeIp, int channelPort) {
+        Pair<Boolean, Integer> telnetResult = NetUtils.checkPorts(nodeIp, 2000, channelPort);
+        // if true, telnet success, port is in use, which means node's channelPort is correct
+        log.info("telnet {}:{} result:{}", nodeIp, channelPort, telnetResult);
+        return telnetResult.getLeft();
     }
 }
