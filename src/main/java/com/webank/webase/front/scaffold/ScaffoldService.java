@@ -116,7 +116,7 @@ public class ScaffoldService {
             tbContractList, reqProject.getGroupId(), hexPrivateKeyListStr, sdkMap);
         String zipFileName = artifactName + ZIP_SUFFIX;
         try {
-            ZipUtils.generateZipFile(projectPath, OUTPUT_ZIP_DIR, "", zipFileName);
+            ZipUtils.generateZipFile(projectPath, OUTPUT_ZIP_DIR, artifactName, zipFileName);
         } catch (Exception e) {
             log.error("exportProject generateZipFile failed:[]", e);
             // if failed, delete project dir
