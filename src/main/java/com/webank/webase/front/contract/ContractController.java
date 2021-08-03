@@ -182,7 +182,7 @@ public class ContractController extends BaseController {
      * save contract.
      */
     @ApiOperation(value = "save contract", notes = "save contract ")
-    @ApiImplicitParam(name = "req", value = "contract info", required = true,
+    @ApiImplicitParam(name = "contract", value = "contract info", required = true,
             dataType = "ReqContractSave")
     @PostMapping(value = "/save")
     public Contract saveContract(@RequestBody @Valid ReqContractSave contract, BindingResult result)
