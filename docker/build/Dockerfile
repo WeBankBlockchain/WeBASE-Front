@@ -9,6 +9,7 @@ RUN apt-get update \
 #COPY --from=builder /code/dist/lib                  /dist/lib
 #COPY --from=builder /code/dist/conf_template        /dist/conf
 #COPY --from=builder /code/dist/apps                 /dist/apps
+COPY gradle                /dist/gradle
 COPY static                /dist/static
 COPY lib                  /dist/lib
 COPY conf_template        /dist/conf
