@@ -345,7 +345,7 @@ public class Web3ApiController {
         @ApiImplicitParam(name = "count", value = "count", required = true,
             dataType = "int")
     })
-    @GetMapping("/blockStat/{blockNumber}")
+    @GetMapping("/transReceipt/batchByNumber/{blockNumber}")
     public List<TransactionReceipt> getBatchReceiptByBlockNumber(@PathVariable int groupId,
         @PathVariable BigInteger blockNumber,
         @RequestParam(value = "start", defaultValue = "0") int start,
@@ -363,7 +363,7 @@ public class Web3ApiController {
         @ApiImplicitParam(name = "count", value = "count", required = true,
             dataType = "int")
     })
-    @GetMapping("/blockStat/{blockHash}")
+    @GetMapping("/transReceipt/batchByHash/{blockHash}")
     public List<TransactionReceipt> getBatchReceiptByBlockHash(@PathVariable int groupId,
         @PathVariable String blockHash,
         @RequestParam(value = "start", defaultValue = "0") int start,
