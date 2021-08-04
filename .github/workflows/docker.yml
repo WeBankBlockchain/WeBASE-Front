@@ -80,9 +80,9 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
 
-      - name: send custom message with args
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          args: ${{ steps.set_docker_tag.outputs.docker_tag }} of ${{github.repository }} build success.
+#      - name: send custom message with args
+#        uses: appleboy/telegram-action@master
+#        with:
+#          to: ${{ secrets.TELEGRAM_TO }}
+#          token: ${{ secrets.TELEGRAM_TOKEN }}
+#          args: ${{ steps.set_docker_tag.outputs.docker_tag }} of ${{github.repository }} build success.
