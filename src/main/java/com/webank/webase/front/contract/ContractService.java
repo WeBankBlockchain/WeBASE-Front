@@ -718,7 +718,8 @@ public class ContractService {
     public boolean verifyContractChange(Long contractId, int groupId) {
         Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
         log.debug("verifyContractChange contract:{}", contract);
-        if (!Objects.isNull(contract) && contract.getContractStatus() == 2
+        // contract is deployed and modify time not equal
+        if (Objects.nonNull(contract) && contract.getContractStatus() == ContractStatus.DEPLOYED.getValue()
                 && !contract.getDeployTime().isEqual(contract.getModifyTime())) {
             return true;
         }
