@@ -11,6 +11,9 @@ COPY lib                  /dist/lib
 COPY conf_template        /dist/conf
 COPY apps                 /dist/apps
 
+# run with 'sdk' volume
+RUN mkdir -p /dist/sdk
+
 WORKDIR /dist
 EXPOSE 5002
 
@@ -20,4 +23,4 @@ ENV JAVA_OPTS " -server -Dfile.encoding=UTF-8 -Xmx512m -Xms512m -Xmn256m -Xss512
 ENV APP_MAIN "com.webank.webase.front.Application"
 
 # start commond
-ENTRYPOINT java ${JAVA_OPTS} -Djdk.tls.namedGroups="secp256k1", -Duser.timezone="Asia/Shanghai" -Djava.security.egd=file:/dev/./urandom, -Djava.library.path=/dist/conf -cp ${CLASSPATH}  ${APP_MAIN}
+ENTRYPOINT cp -r /dist/sdk/* /dist/conf/ && java ${JAVA_OPTS} -Djdk.tls.namedGroups="secp256k1", -Duser.timezone="Asia/Shanghai" -Djava.security.egd=file:/dev/./urandom, -Djava.library.path=/dist/conf -cp ${CLASSPATH}  ${APP_MAIN}
