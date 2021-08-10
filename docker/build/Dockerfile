@@ -1,4 +1,3 @@
-#FROM openjdk:8-jdk-alpine as prod
 FROM ubuntu:18.04 as prod
 
 #RUN apk --no-cache add bash curl wget
@@ -6,9 +5,6 @@ RUN apt-get update \
     && apt-get -y install openjdk-8-jre \
     && rm -rf /var/lib/apt/lists/*
 
-#COPY --from=builder /code/dist/lib                  /dist/lib
-#COPY --from=builder /code/dist/conf_template        /dist/conf
-#COPY --from=builder /code/dist/apps                 /dist/apps
 COPY gradle                /dist/gradle
 COPY static                /dist/static
 COPY lib                  /dist/lib
