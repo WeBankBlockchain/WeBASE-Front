@@ -15,7 +15,7 @@
  */
 <template>
     <div>
-        <el-dialog :title="$t('title.selectDirectory')" :visible.sync="dialogVisible" :before-close="close" class="dialog-wrapper" width="433px" :center="true">
+        <el-dialog :title="$t('title.selectDirectory')" :visible.sync="dialogVisible" :before-close="close" class="dialog-wrapper" width="460px" :center="true">
             <div>
                 <el-form :model="folderFrom" :rules="rules" ref="folderFrom" label-width="100px" class="demo-ruleForm">
                     <el-form-item :label="$t('dialog.folderName')" prop="folderName" style="width:330px">
@@ -23,8 +23,8 @@
                             <el-option v-for="item in options" :key="item.folderName" :label="item.folderName" :value="item.folderName">
                             </el-option>
                         </el-select>
-                    <span class="contract-code-done"  @click='addFolder' style="float:right;margin-right:-55px">
-                        <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t('contracts.createFolder')}}</a>
+                    <span class="contract-code-done"  @click='addFolder' style="float:right;margin-right:-70px">
+                        <a target="_blank" style="font-size:12px;cursor:pointer;color:#409eff;">{{this.$t('contracts.createFolder')}}</a>
                     </span>
                     </el-form-item>
                 </el-form>

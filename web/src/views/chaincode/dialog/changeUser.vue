@@ -26,9 +26,8 @@
                         </el-option>
                     </el-select>
                     
-                    <span v-if="isShowAddUserBtn" class="contract-code-done"   @click="createUser()" style="float:right;">
-                        <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t("privateKey.addUser")}}</a>
-                    </span>
+                    <el-button v-if="isShowAddUserBtn" type="text" size="mini" @click="createUser()">{{$t('privateKey.addUser')}}</el-button>
+ 
                 </td>
                 <td v-show="userName">
                     <div class="user-explain font-color-fff">
@@ -100,7 +99,7 @@
             <el-button @click="close">{{$t('dialog.cancel')}}</el-button>
             <el-button type="primary" @click="submit">{{$t('dialog.confirm')}}</el-button>
         </div>
-          <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" :before-close="closeUserName" class="dialog-wrapper" width="400px" :center="true" :append-to-body="true">
+          <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" :before-close="closeUserName" class="dialog-wrapper" width="640px" :center="true" :append-to-body="true">
               <v-createUser  @close='createUserClose'></v-createUser>
          </el-dialog>
     </div>
@@ -286,9 +285,12 @@ export default {
             this.creatUserNameVisible = true;
         },
          createUserClose(data){
+             console.log(data);
              this.userList = data;
              if(this.userList.length > 0 ){
-                 this.isShowAddUserBtn = false;
+                this.userId = this.userList[0].address
+                this.userName = this.userList[0].userName
+                this.isShowAddUserBtn = false;
              } 
              this.creatUserNameVisible = false;
         },

@@ -52,7 +52,7 @@
                 </el-table>
             </div>
         </div>
-        <el-dialog :visible.sync="creatUserNameVisible" :title="$t('dialog.addUsername')" width="400px" class="dialog-wrapper" center v-if="creatUserNameVisible" @close="closeCallback">
+        <el-dialog :visible.sync="creatUserNameVisible" :title="$t('dialog.addUsername')" width="640px" class="dialog-wrapper" center v-if="creatUserNameVisible" @close="closeCallback">
             <el-form ref="userForm" :rules="rules" :model="userForm">
                 <el-form-item label="" prop="userName">
                     <el-input v-model="userForm.userName" :placeholder="$t('dialog.pleaseEnterUserName')"></el-input>

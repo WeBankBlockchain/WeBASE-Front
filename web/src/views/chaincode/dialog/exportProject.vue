@@ -21,7 +21,7 @@
                     <el-tooltip effect="dark" :content="$t('text.haveChannelPort')" placement="top-start">
                         <i class="el-icon-info"></i>
                     </el-tooltip>
-                 <el-button type="primary" size="small" @click="checkChannelIP('projectFrom')">验证节点存活</el-button>
+                 <el-button type="text" size="mini" @click="checkChannelIP('projectFrom')">{{$t('privateKey.checkNodeActive')}}</el-button>
                 </el-form-item>
                 <el-form-item :label="$t('text.projectUser')">
                     <!-- <el-select v-model="projectFrom.userAddress" :placeholder="$t('text.select')" style="width: 300px">
@@ -32,9 +32,7 @@
                         <el-option v-for="item in userList" :key="item.address" :label="item.userName"  :value="item.address">
                         </el-option>
                     </el-select>
-                    <span v-if="isShowAddUserBtn" class="contract-code-done"   @click="createUser()" style="float:right;margin-right:220px">
-                        <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t("privateKey.addUser")}}</a>
-                    </span>
+                    <el-button v-if="isShowAddUserBtn" type="text" size="mini" @click="createUser()">{{$t('privateKey.addUser')}}</el-button>
                 </el-form-item> 
                 <!-- <el-form-item :label="'p12密码'" prop="p12Password">
                   <el-input v-model="projectFrom.p12Password" style="width: 300px"></el-input>
@@ -73,7 +71,7 @@
                 <el-button type="primary" @click="submit('projectFrom')">{{$t('dialog.confirm')}}</el-button>
             </div>
         </el-dialog>
-         <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible"  class="dialog-wrapper" width="400px" :center="true">
+         <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible"  class="dialog-wrapper" width="640px" :center="true">
             <v-createUser  @close='createUserClose'></v-createUser>
          </el-dialog>
     </div>
@@ -363,7 +361,7 @@ export default {
                 setTimeout(() => {
                     num =0;
                     this.getContractList(val,true);
-               }, 1000)
+               }, 3000)
             }  
             this.multipleSelectedId = Array.from(new Set(this.multipleSelectedId))
         },
@@ -507,7 +505,7 @@ export default {
              this.creatUserNameVisible = false;
              this.userList = data;
              if(this.userList.length > 0 ){
-                 this.isShowAddUserBtn = false; 
+                this.isShowAddUserBtn = false;
              }
         },
     }

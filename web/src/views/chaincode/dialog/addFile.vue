@@ -25,10 +25,7 @@
                         <el-select v-model="fileFrom.contractType" :disabled='disabled' :placeholder="$t('placeholder.selected')">
                             <el-option v-for="item in options" :key="item.folderName" :label="item.folderName" :value="item.folderName">
                             </el-option>
-                        </el-select>
-                        <span class="contract-code-done"  @click='addFolder' style="float:right;margin-right:-18px">
-                            <a target="_blank" style="font-size:12px;text-decoration:underline;">{{this.$t('contracts.createFolder')}}</a>
-                        </span>
+                        </el-select>                       
                     </el-form-item>
                 </el-form>
             </div>
