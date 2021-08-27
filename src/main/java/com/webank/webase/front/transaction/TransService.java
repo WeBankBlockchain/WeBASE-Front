@@ -61,7 +61,10 @@ import java.util.Random;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.abi.ABICodec;
+import org.fisco.bcos.sdk.abi.ABICodecException;
 import org.fisco.bcos.sdk.abi.FunctionEncoder;
 import org.fisco.bcos.sdk.abi.FunctionReturnDecoder;
 import org.fisco.bcos.sdk.abi.TypeReference;
@@ -70,6 +73,9 @@ import org.fisco.bcos.sdk.abi.datatypes.Function;
 import org.fisco.bcos.sdk.abi.datatypes.Type;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinitionFactory;
+import org.fisco.bcos.sdk.abi.wrapper.ABIObject;
+import org.fisco.bcos.sdk.abi.wrapper.ContractABIDefinition;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.request.Transaction;
 import org.fisco.bcos.sdk.client.protocol.response.Call.CallOutput;
@@ -81,11 +87,19 @@ import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.builder.TransactionBuilderInterface;
+import org.fisco.bcos.sdk.transaction.builder.TransactionBuilderService;
+import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
 import org.fisco.bcos.sdk.transaction.codec.decode.RevertMessageParser;
 import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
+import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderInterface;
 import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
+import org.fisco.bcos.sdk.transaction.manager.AssembleTransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
+import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
+import org.fisco.bcos.sdk.transaction.model.dto.CallResponse;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.transaction.model.gas.DefaultGasProvider;
 import org.fisco.bcos.sdk.transaction.model.po.RawTransaction;
 import org.fisco.bcos.sdk.transaction.pusher.TransactionPusherService;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -123,68 +137,82 @@ public class TransService {
     private PrecompiledService precompiledService;
     @Autowired
     private BcosSDK bcosSDK;
+    @Autowired
+    private ABICodec abiCodec;
 
     /**
      * transHandleWithSign.
      *
      * @param req request
      */
-    public Object transHandleWithSign(ReqTransHandleWithSign req) throws Exception {
-        // get signUserId
-        String signUserId = req.getSignUserId();
-        // check param get function of abi
-        ContractFunction contractFunction = buildContractFunctionWithAbi(req.getContractAbi(),
-            req.getFuncName(), req.getFuncParam());
-        // check groupId
-        int groupId = req.getGroupId();
-        Client web3j = web3ApiService.getWeb3j(groupId);
-        // check contractAddress
-        String contractAddress = req.getContractAddress();
-        if (req.isUseCns()) {
-            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
-                    req.getCnsName(), req.getVersion());
-            if (CollectionUtils.isEmpty(cnsList)) {
-                throw new FrontException(VERSION_NOT_EXISTS);
-            }
-            contractAddress = cnsList.iterator().next().getAddress();
-            log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
-        }
-        // encode function
-        Function function = new Function(req.getFuncName(), contractFunction.getFinalInputs(),
-                contractFunction.getFinalOutputs());
 
-        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function,
-                contractFunction);
+    public Object transHandleWithSign(ReqTransHandleWithSign req) throws FrontException {
+        int groupId = req.getGroupId();
+        String signUserId = req.getSignUserId();
+        String userAddress = keyStoreService.getAddressBySignUserId(signUserId);
+        if (StringUtils.isBlank(userAddress)) {
+            log.warn("transHandleWithSign this signUser [{}] not record in webase-front", signUserId);
+            userAddress = keyStoreService.getCredentialsForQuery().getAddress();
+        }
+        String abiStr = JsonUtils.objToString(req.getContractAbi());
+        String funcName = req.getFuncName();
+        List<Object> funcParam = req.getFuncParam();
+        String contractAddress = req.getContractAddress();
+        // handle cns
+        if (req.isUseCns()) {
+            try {
+                List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
+                        req.getCnsName(), req.getVersion());
+                if (CollectionUtils.isEmpty(cnsList)) {
+                    throw new FrontException(VERSION_NOT_EXISTS);
+                }
+                contractAddress = cnsList.iterator().next().getAddress();
+                log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
+            } catch (ContractException e) {
+                log.error("queryCnsByNameAndVersion ContractException fail:[]", e);
+                throw new FrontException(ConstantCode.CNS_QUERY_FAIL);
+            }
+        }
+        return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam)
     }
 
+
     /**
-     * send tx with sign for precomnpiled contract
-     * 
-     * @param precompiledType enum of precompiled contract
-     * @param funcName precompiled contract function name
+     * send tx with sign (support precomnpiled contract)
      */
-    public Object transHandleWithSignForPrecompile(int groupId, String signUserId,
-            PrecompiledTypes precompiledType, String funcName, List<Object> funcParams) {
+    public Object transHandleWithSign(int groupId, String signUserId,
+        String contractAddress, String abiStr, String funcName, List<Object> funcParam)
+        throws FrontException {
         // check groupId
-        Client web3j = web3ApiService.getWeb3j(groupId);
-        // get address and abi of precompiled contract
-        String contractAddress = PrecompiledCommonInfo.getAddress(precompiledType);
-        String abiStr = PrecompiledCommonInfo.getAbi(precompiledType);
-        List<Object> contractAbi = JsonUtils.toJavaObjectList(abiStr, Object.class);
-        // check function param and get function param from abi
-        ContractFunction contractFunction =
-                buildContractFunctionWithAbi(contractAbi, funcName, funcParams);
-        // encode function
-        Function function = new Function(funcName, contractFunction.getFinalInputs(),
-                contractFunction.getFinalOutputs());
-        // trans handle
-        return handleTransByFunction(groupId, web3j, signUserId, contractAddress, function,
-                contractFunction);
+        Client client = web3ApiService.getWeb3j(groupId);
+
+        String encodeFunction;
+        try {
+            encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
+        } catch (ABICodecException e) {
+            log.error("transHandleWithSign encode fail:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+        }
+
+        String userAddress = keyStoreService.getAddressBySignUserId(signUserId);
+        if (StringUtils.isBlank(userAddress)) {
+            log.warn("transHandleWithSign this signUser [{}] not record in webase-front", signUserId);
+            userAddress = keyStoreService.getCredentialsForQuery().getAddress();
+        }
+
+        boolean isTxConstant = isConstant(abiStr, funcName);
+        if (isTxConstant) {
+            return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
+        } else {
+            return this.handleTransaction(client, signUserId, contractAddress, encodeFunction);
+        }
+
     }
 
     /**
      * handleTransByFunction by whether is constant
      */
+    @Deprecated
     private Object handleTransByFunction(int groupId, Client web3j, String signUserId,
             String contractAddress, Function function, ContractFunction contractFunction) {
 
@@ -243,6 +271,7 @@ public class TransService {
      *
      * @param req request
      */
+    @Deprecated
     public boolean checkAndSaveAbiFromDb(ReqTransHandle req) {
         Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(
                 req.getGroupId(), req.getContractPath(), req.getContractName());
@@ -337,17 +366,8 @@ public class TransService {
                 new BigInteger(chainId), BigInteger.valueOf(groupId), "");
 
         byte[] encodedTransaction = encoderService.encode(rawTransaction, null);
-        String encodedDataStr = Numeric.toHexString(encodedTransaction);
 
-        EncodeInfo encodeInfo = new EncodeInfo();
-        encodeInfo.setSignUserId(signUserId);
-        encodeInfo.setEncodedDataStr(encodedDataStr);
-
-        Instant startTime = Instant.now();
-        String signDataStr = keyStoreService.getSignData(encodeInfo);
-        log.info("get signdatastr cost time: {}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, cryptoSuite.cryptoTypeConfig);
+        SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId);
         byte[] signedMessage = encoderService.encode(rawTransaction, signData);
         return Numeric.toHexString(signedMessage);
 
@@ -675,7 +695,8 @@ public class TransService {
 
     /**
      * get encoded raw transaction
-     * @param contractAddress  if not null, return signed raw tx
+     * @param user  if user not blank, return signed raw tx, else return encoded tx(not sign)
+     * @param isLocal  if false, user is signUserId, else, user is userAddress local
      */
     public String createRawTxEncoded(boolean isLocal, String user,
         int groupId, String contractAddress, List<Object> contractAbi,
@@ -786,6 +807,98 @@ public class TransService {
             return signResultStr;
         }
         // trans hash is cryptoSuite.hash(signedStr)
+    }
+
+    public Object handleCall(int groupId, String userAddress, String contractAddress,
+        String encodedFunction, String abiStr, String funcName) {
+
+        TransactionProcessor transactionProcessor = new TransactionProcessor(
+            web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(),
+            groupId, Constants.chainId);
+        CallOutput callOutput = transactionProcessor
+            .executeCall(userAddress, contractAddress, encodedFunction)
+            .getCallResult();
+        if (!RECEIPT_STATUS_0X0.equals(callOutput.getStatus())) {
+            Tuple2<Boolean, String> parseResult =
+                RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
+            log.error("call contract error:{}", parseResult);
+            String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
+            return Collections.singletonList("Call contract return error: " + parseResultStr);
+        } else {
+            try {
+                List<String> res = abiCodec
+                    .decodeMethodToString(abiStr, funcName, callOutput.getOutput());
+                log.info("call contract res:{}", res);
+                return res;
+            } catch (ABICodecException e) {
+                log.error("handleCall decode call output fail:[]", e);
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR);
+            }
+        }
+    }
+
+    private boolean isConstant(String abiStr, String functionName) {
+        ABIDefinitionFactory factory = new ABIDefinitionFactory(cryptoSuite);
+
+        ContractABIDefinition contractABIDefinition = factory.loadABI(abiStr);
+        List<ABIDefinition> abiDefinitionList = contractABIDefinition.getFunctions()
+            .get(functionName);
+        if (abiDefinitionList.isEmpty()) {
+            throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
+        }
+        // abi only contain one function, so get first one
+        ABIDefinition function = abiDefinitionList.get(0);
+        return function.isConstant();
+    }
+
+    public TransactionReceipt handleTransaction(Client client, String signUserId, String contractAddress, String encodeFunction) {
+        log.debug("handleTransaction signUserId:{},contractAddress:{},encodeFunction:{}",signUserId,contractAddress, encodeFunction);
+        // raw tx
+        Pair<String, Integer> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
+        TransactionBuilderInterface transactionBuilder = new TransactionBuilderService(client);
+        RawTransaction rawTransaction = transactionBuilder.createTransaction(DefaultGasProvider.GAS_PRICE,
+            DefaultGasProvider.GAS_LIMIT, contractAddress, encodeFunction,
+            BigInteger.ZERO, new BigInteger(chainIdAndGroupId.getLeft()),
+            BigInteger.valueOf(chainIdAndGroupId.getRight()), "");
+        // encode
+        TransactionEncoderInterface transactionEncoder = new TransactionEncoderService(cryptoSuite);
+        byte[] encodedTransaction = transactionEncoder.encode(rawTransaction, null);
+        // sign
+        SignatureResult signResult = this.requestSignForSign(encodedTransaction, signUserId);
+        byte[] signedMessage = transactionEncoder.encode(rawTransaction, signResult);
+        String signedMessageStr = Numeric.toHexString(signedMessage);
+
+        Instant nodeStartTime = Instant.now();
+        // send transaction
+        TransactionReceipt responseReceipt = sendMessage(client, signedMessageStr);
+        TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
+        String receiptMsg = txDecoder.decodeReceiptStatus(responseReceipt).getReceiptMessages();
+        responseReceipt.setMessage(receiptMsg);
+        CommonUtils.processReceiptHexNumber(responseReceipt);
+        log.info("***node cost time***: {}",
+            Duration.between(nodeStartTime, Instant.now()).toMillis());
+        return responseReceipt;
+
+    }
+
+    /**
+     * sign by
+     * @param encodedTransaction
+     * @param signUserId
+     * @return
+     */
+    public SignatureResult requestSignForSign(byte[] encodedTransaction, String signUserId) {
+        String encodedDataStr = Numeric.toHexString(encodedTransaction);
+        EncodeInfo encodeInfo = new EncodeInfo();
+        encodeInfo.setSignUserId(signUserId);
+        encodeInfo.setEncodedDataStr(encodedDataStr);
+
+        Instant startTime = Instant.now();
+        String signDataStr = keyStoreService.getSignData(encodeInfo);
+        log.info("get requestSignForSign cost time: {}",
+            Duration.between(startTime, Instant.now()).toMillis());
+        SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, cryptoSuite.cryptoTypeConfig);
+        return signData;
     }
 
 
