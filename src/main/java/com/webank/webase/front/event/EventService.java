@@ -97,6 +97,8 @@ public class EventService {
     private CryptoSuite cryptoSuite;
     private static final String TYPE_CONTRACT = "contract";
     private static final String TYPE_ABI_INFO = "abi";
+    @Autowired
+    private ABICodec abiCodec;
 
     /**
      * register NewBlockEventCallBack
@@ -389,7 +391,6 @@ public class EventService {
         log.info("getContractEventLog eventParam:{}", eventParam);
         // final CompletableFuture<List<EventLog>> callbackFuture = new CompletableFuture<>();
         final CompletableFuture<List<DecodedEventLog>> callbackFuture = new CompletableFuture<>();
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
         EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);

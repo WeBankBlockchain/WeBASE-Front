@@ -89,7 +89,7 @@ public class ContractController extends BaseController {
     @PostMapping("/deployWithSign")
     public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
             throws Exception {
-        log.info("contract deployWithSign start. ReqDeploy:[{}]",
+        log.info("contract deplocyWithSign start. ReqDeploy:[{}]",
                 JsonUtils.toJSONString(reqDeploy));
         checkParamResult(result);
         if (StringUtils.isBlank(reqDeploy.getSignUserId())) {
@@ -305,6 +305,12 @@ public class ContractController extends BaseController {
         return contractService.findPathList(groupId);
     }
 
+    /**
+     * only delete path, not delete contract
+     * @param groupId
+     * @param contractPath
+     * @return
+     */
     @DeleteMapping("/deletePath/{groupId}/{contractPath}")
     public BaseResponse deletePath(@PathVariable("groupId") Integer groupId,
             @PathVariable String contractPath) {
@@ -313,6 +319,12 @@ public class ContractController extends BaseController {
         return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 
+    /**
+     * delete path and contracts in it
+     * @param groupId
+     * @param contractPath
+     * @return
+     */
     @DeleteMapping("/batch/{groupId}/{contractPath}")
     public BaseResponse batchDeletePath(@PathVariable("groupId") Integer groupId,
             @PathVariable String contractPath) {

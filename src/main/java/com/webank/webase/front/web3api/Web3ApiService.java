@@ -836,7 +836,7 @@ public class Web3ApiService {
      */
     public Client getWeb3j() {
         this.checkConnection();
-        Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList();
+        Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList(); //1
         if (groupIdSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             // get default web3j of integer max value
