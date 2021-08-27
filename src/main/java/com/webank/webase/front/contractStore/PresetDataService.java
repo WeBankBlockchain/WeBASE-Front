@@ -29,6 +29,7 @@ public class PresetDataService {
     public static final Integer smartDevToolFolderId = 4;
     public static final Integer smartDevEvidenceFolderId = 5;
     public static final Integer assetFolderId = 6;
+    public static final Integer traceFolderId = 7;
 
 
     public void initStoreItem() {
@@ -44,15 +45,20 @@ public class PresetDataService {
             "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
             "Points Contract suite", "Points Contract suite");
         insertStoreItem(smartDevId, "SmartDev存证应用", "Smart_Dev_Evidence", "4", "evidenceId",
-            "Smart-Dev-Contracts仓库中的存证应用模板",
+            "Smart-Dev-Contract仓库中的存证应用模板",
             "Smart-Dev-Contract\'s Evidence Contract suite of business_template",
             "Smart-Dev-Contracts仓库中的存证应用模板",
                     "Smart-Dev-Contract\'s Evidence Contract suite of business_template");
         insertStoreItem(assetFolderId, "资产应用", "Asset", "4", "pointsId",
             "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
             "Asset Contract suite",
-            "套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
+            "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
                     "Asset Contract suite");
+        insertStoreItem(traceFolderId, "溯源应用", "Traceability", "4", "evidenceId",
+            "一套溯源应用合约模板（Smart-Dev-Contract）",
+            "Traceability Contract suite",
+            "一套溯源应用合约模板（Smart-Dev-Contract）",
+            "Traceability Contract suite");
     }
 
     public void insertStoreItem(long storeId, String storeName, String StoreName_en, String StoreType,
@@ -110,12 +116,16 @@ public class PresetDataService {
             "SmartDev存证合约案例",
             "Smart-Dev-Contract Evidence contract suite",
             "Smart-Dev-Contract Evidence contract suite");
-        // belong to points store, and new folder
         insertContractFolderItem(assetFolderId,assetFolderId,"Asset",
             "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等，具有增发、销毁，暂停合约，黑白名单等权限控制等功能",
             "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等，具有增发、销毁，暂停合约，黑白名单等权限控制等功能",
             "Asset Contract suite",
             "Asset Contract suite");
+        insertContractFolderItem(traceFolderId,traceFolderId,"Traceability",
+            "一套溯源应用合约模板（Smart-Dev-Contract）",
+            "一套溯源应用合约模板（Smart-Dev-Contract）",
+            "Traceability Contract suite",
+            "Traceability Contract suite");
     }
 
     public void insertContractFolderItem(long contractFolderId, long storeId, String contractFolderName, String contractFolderDesc, String contractFolderDetail,
@@ -220,7 +230,13 @@ public class PresetDataService {
             ToolsConstantContext.ROLES_MD,ToolsConstantContext.COUNTERS_MD);
         insertContractItem(contractIndex++,toolboxId,"Register",ToolsConstantContext.REGISTER_SOURCE,
             ToolsConstantContext.ROLES_MD,ToolsConstantContext.REGISTER_MD);
-
+        // traceability
+        insertContractItem(contractIndex++,traceFolderId,"Goods",SmartDevConstantContext.GOODS,
+            SmartDevConstantContext.TRACE_API_MD,SmartDevConstantContext.TRACE_API_MD);
+        insertContractItem(contractIndex++,traceFolderId,"Traceability",SmartDevConstantContext.TRACEABILITY,
+            SmartDevConstantContext.TRACE_API_MD,SmartDevConstantContext.TRACE_API_MD);
+        insertContractItem(contractIndex++,traceFolderId,"TraceabilityFactory",SmartDevConstantContext.TRACEABILITY_FACTORY,
+            SmartDevConstantContext.TRACE_API_MD,SmartDevConstantContext.TRACE_API_MD);
     }
 
 
