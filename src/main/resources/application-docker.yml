@@ -69,7 +69,7 @@ logging:
 
 constant:
   keyServer: ${KEY_SERVER:"127.0.0.1:5004"} # webase-sign服务的IP:Port（单个）
-  nodePath: /fisco/nodes/127.0.0.1/node0  # node's absolute path to read configuration and monitor node's log
+  nodePath: ${NODE_PATH:/fisco/nodes/127.0.0.1/node0}  # node's absolute path to read configuration and monitor node's log
   aesKey: EfdsW23D23d3df43
   transMaxWait: 30
   monitorDisk: /
