@@ -73,6 +73,8 @@ import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.ABICodec;
+import org.fisco.bcos.sdk.abi.ABICodecException;
 import org.fisco.bcos.sdk.abi.FunctionEncoder;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
 import org.fisco.bcos.sdk.abi.datatypes.Type;
@@ -87,6 +89,10 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
+import org.fisco.bcos.sdk.transaction.manager.AssembleTransactionProcessor;
+import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
+import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
@@ -243,15 +249,14 @@ public class ContractService {
     public String deployWithSign(ReqDeploy req) {
         int groupId = req.getGroupId();
         String signUserId = req.getSignUserId();
-        List<ABIDefinition> abiInfos = req.getAbiInfo();
+        String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam();
-        String contractName = req.getContractName();
+        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
 
         // check groupId
-        Client web3j = web3ApiService.getWeb3j(groupId);
+        Client client = web3ApiService.getWeb3j(groupId);
 
-        if (web3j == null) {
+        if (client == null) {
             throw new FrontException(GROUPID_NOT_EXIST);
         }
 
@@ -261,16 +266,20 @@ public class ContractService {
             checkDeployPermission(req.getGroupId(), userAddress);
         }
 
-        ContractAbiUtil.VersionEvent versionEvent =
-                ContractAbiUtil.getVersionEventFromAbi(contractName, abiInfos);
-        String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
-
+        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        String encodedConstructor;
+        try {
+            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+        } catch (ABICodecException e) {
+            log.error("deployWithSign encode fail:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+        }
 
         // data sign
         String data = bytecodeBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, web3j, signUserId, "", data);
+        String signMsg = transService.signMessage(groupId, client, signUserId, "", data);
         // send transaction
-        TransactionReceipt receipt = transService.sendMessage(web3j, signMsg);
+        TransactionReceipt receipt = transService.sendMessage(client, signMsg);
         String contractAddress = receipt.getContractAddress();
 
         log.info("success deployWithSign. contractAddress:{}", contractAddress);
@@ -285,20 +294,25 @@ public class ContractService {
         String userAddress = req.getUser();
         // check deploy permission
         checkDeployPermission(groupId, userAddress);
-        String contractName = req.getContractName();
-        List<ABIDefinition> abiInfos = req.getAbiInfo();
+
+        String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam();
+        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
 
-        ContractAbiUtil.VersionEvent versionEvent =
-                ContractAbiUtil.getVersionEventFromAbi(contractName, abiInfos);
-        String encodedConstructor = constructorEncoded(contractName, versionEvent, params);
+        ABICodec abiCodec = new ABICodec(cryptoSuite);
 
+        String encodedConstructor;
+        try {
+            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+        } catch (ABICodecException e) {
+            log.error("deployLocally encode fail:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+        }
         // get privateKey
-        CryptoKeyPair credentials = keyStoreService.getCredentials(userAddress);
+        CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress);
         // contract deploy
         String contractAddress =
-                deployContract(groupId, bytecodeBin, encodedConstructor, credentials);
+                deployContract(groupId, encodedConstructor, cryptoKeyPair);
 
         log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
@@ -351,6 +365,7 @@ public class ContractService {
         }
     }
 
+    @Deprecated
     public static String constructorEncodedByContractNameAndVersion(String contractName,
             String version, List<Object> params) throws FrontException {
         // Constructor encoded
@@ -405,27 +420,22 @@ public class ContractService {
         }
     }
 
-    private String deployContract(int groupId, String bytecodeBin, String encodedConstructor,
-            CryptoKeyPair credentials) throws FrontException {
-        CommonContract commonContract = null;
-        Client web3j = web3ApiService.getWeb3j(groupId);
-        if (web3j == null) {
+    private String deployContract(int groupId, String encodedConstructor,
+            CryptoKeyPair cryptoKeyPair) throws FrontException {
+        Client client = web3ApiService.getWeb3j(groupId);
+        if (client == null) {
             throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
         }
+        AssembleTransactionProcessor assembleTxProcessor = null;
         try {
-            commonContract =
-                    CommonContract.deploy(web3j, credentials, bytecodeBin, encodedConstructor);
-        } catch (ContractException e) {
-            log.error("commonContract deploy failed.", e);
-            throw new FrontException(ConstantCode.TRANSACTION_SEND_FAILED, e.getMessage());
+            assembleTxProcessor = TransactionProcessorFactory
+                .createAssembleTransactionProcessor(client, cryptoKeyPair);
         } catch (Exception e) {
-            log.error("commonContract deploy failed.", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR, e.getMessage());
+            log.error("deployContract getAssembleTransactionProcessor error:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
-        log.info("commonContract deploy success. contractAddress:{}",
-                commonContract.getContractAddress());
-        return commonContract.getContractAddress();
-
+        TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
+        return receipt.getContractAddress();
     }
 
     /**

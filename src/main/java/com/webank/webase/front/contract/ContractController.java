@@ -89,7 +89,7 @@ public class ContractController extends BaseController {
     @PostMapping("/deployWithSign")
     public String deploy(@Valid @RequestBody ReqDeploy reqDeploy, BindingResult result)
             throws Exception {
-        log.info("contract deplocyWithSign start. ReqDeploy:[{}]",
+        log.info("contract deployWithSign start. ReqDeploy:[{}]",
                 JsonUtils.toJSONString(reqDeploy));
         checkParamResult(result);
         if (StringUtils.isBlank(reqDeploy.getSignUserId())) {
