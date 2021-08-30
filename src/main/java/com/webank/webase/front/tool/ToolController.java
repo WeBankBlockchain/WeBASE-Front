@@ -68,8 +68,6 @@ public class ToolController {
     @Autowired
     @Qualifier(value = "common")
     private CryptoSuite cryptoSuite;
-    @Autowired
-    private ABICodec abiCodec;
 
     @ApiOperation(value = "decode input/output", notes = "decode tx receipt's input/output")
     @ApiImplicitParam(name = "param", value = "param to be transfer", required = true, dataType = "ReqDecodeParam")
@@ -83,6 +81,7 @@ public class ToolController {
             return txDecoder.decodeReceiptMessage(param.getInput());
         } else if (param.getDecodeType() == 2) {
             String abi = JsonUtils.objToString(param.getAbiList());
+            ABICodec abiCodec = new ABICodec(cryptoSuite);
             // decode output
             try {
                 return abiCodec.decodeMethodAndGetOutputObject(abi, param.getMethodName(),

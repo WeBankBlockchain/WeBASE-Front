@@ -84,8 +84,7 @@ public class PrecompiledWithSignService {
      * 
      * @return String result {"code":0,"msg":"success"}
      */
-    public String setValueByKey(int groupId, String signUserId, String key, String value)
-        throws Exception {
+    public String setValueByKey(int groupId, String signUserId, String key, String value) {
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(key);
         funcParams.add(value);

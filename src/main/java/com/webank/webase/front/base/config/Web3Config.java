@@ -143,16 +143,6 @@ public class Web3Config {
         return new CryptoSuite(encryptType);
     }
 
-    @Bean(name = "abicodec")
-    @DependsOn("common")
-    public ABICodec getABICodec(CryptoSuite commonSuite) {
-        ABICodec abiCodec = new ABICodec(commonSuite);
-        log.info("getABICodec init encrypt type:{}", commonSuite.getCryptoTypeConfig());
-        return abiCodec;
-    }
-
-
-
     @Bean(name = "rpcClient")
     public Client getRpcWeb3j(BcosSDK bcosSDK) {
         // init rpc client(web3j)
