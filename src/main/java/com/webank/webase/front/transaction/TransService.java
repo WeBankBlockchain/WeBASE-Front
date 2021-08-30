@@ -201,7 +201,7 @@ public class TransService {
      * handleTransByFunction by whether is constant
      */
     @Deprecated
-    private Object handleTransByFunction(int groupId, Client web3j, String signUserId,
+    private Object handleTransByFunction(int groupId, Client client, String signUserId,
             String contractAddress, Function function, ContractFunction contractFunction) {
 
         FunctionEncoder functionEncoder = new FunctionEncoder(cryptoSuite);
@@ -235,10 +235,10 @@ public class TransService {
         } else {
             // data sign
             String signMsg =
-                    signMessage(groupId, web3j, signUserId, contractAddress, encodedFunction);
+                    signMessage(groupId, client, signUserId, contractAddress, encodedFunction);
             Instant nodeStartTime = Instant.now();
             // send transaction
-            TransactionReceipt responseReceipt = sendMessage(web3j, signMsg);
+            TransactionReceipt responseReceipt = sendMessage(client, signMsg);
             this.decodeReceipt(responseReceipt);
             response = responseReceipt;
             log.info("***node cost time***: {}",
@@ -332,12 +332,12 @@ public class TransService {
      * @param data info
      * @return
      */
-    public String signMessage(int groupId, Client web3j, String signUserId, String contractAddress,
+    public String signMessage(int groupId, Client client, String signUserId, String contractAddress,
             String data) {
         Random r = new SecureRandom();
         BigInteger randomid = new BigInteger(250, r);
 
-        BigInteger blockLimit = web3j.getBlockLimit();
+        BigInteger blockLimit = client.getBlockLimit();
 
         // v1.5.0 no longer support 2.0.0-rc1 or 2.0.1
         // if (versionContent.contains("2.0.0-rc1") || versionContent.contains("release-2.0.1")) {
@@ -364,8 +364,8 @@ public class TransService {
      *
      * @param signMsg signMsg
      */
-    public TransactionReceipt sendMessage(Client web3j, String signMsg) {
-        TransactionPusherService txPusher = new TransactionPusherService(web3j);
+    public TransactionReceipt sendMessage(Client client, String signMsg) {
+        TransactionPusherService txPusher = new TransactionPusherService(client);
         TransactionReceipt receipt = txPusher.push(signMsg);
         this.decodeReceipt(receipt);
         return receipt;
@@ -510,7 +510,7 @@ public class TransService {
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
         }
 
-        // web3j
+        // client
         boolean isTxConstant = isConstant(abiStr, funcName);
         // get privateKey
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress);
@@ -546,12 +546,12 @@ public class TransService {
 //            log.info("transHandleLocal cns contractAddress:{}", address);
 //        }
 //
-//        // web3j
-//        Client web3j = web3ApiService.getWeb3j(req.getGroupId());
+//        // client
+//        Client client = web3ApiService.getWeb3j(req.getGroupId());
 //        // get privateKey
 //        CryptoKeyPair credentials = getCredentials(contractFunction.getConstant(), req.getUser());
 //        CommonContract commonContract =
-//                CommonContract.load(address, web3j, credentials);
+//                CommonContract.load(address, client, credentials);
 //        // tx decoder
 //        TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
 //        // request
@@ -572,13 +572,13 @@ public class TransService {
 
     public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, int groupId) {
 
-        Client web3j = web3ApiService.getWeb3j(groupId);
+        Client client = web3ApiService.getWeb3j(groupId);
         if (sync) {
-            TransactionReceipt receipt = sendMessage(web3j, signedStr);
+            TransactionReceipt receipt = sendMessage(client, signedStr);
             this.decodeReceipt(receipt);
             return receipt;
         } else {
-            TransactionPusherService txPusher = new TransactionPusherService(web3j);
+            TransactionPusherService txPusher = new TransactionPusherService(client);
             txPusher.pushOnly(signedStr);
             TransactionReceipt transactionReceipt = new TransactionReceipt();
             transactionReceipt.setTransactionHash(cryptoSuite.hash(signedStr));
@@ -590,8 +590,8 @@ public class TransService {
     public Object sendQueryTransaction(String encodeStr, String contractAddress, String funcName,
             List<Object> contractAbi, int groupId, String userAddress) {
 
-        Client web3j = web3ApiService.getWeb3j(groupId);
-        String callOutput = web3j
+        Client client = web3ApiService.getWeb3j(groupId);
+        String callOutput = client
             .call(new Transaction(userAddress, contractAddress,
                         encodeStr))
             .getCallResult().getOutput();
@@ -737,8 +737,6 @@ public class TransService {
         int groupId, String contractAddress, List<Object> contractAbi,
         boolean isUseCns, String cnsName, String cnsVersion,
         String funcName, List<Object> funcParam) throws Exception {
-        // check param get function of abi
-        ContractFunction contractFunction = buildContractFunctionWithAbi(contractAbi, funcName, funcParam);
 
         if (isUseCns) {
             List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
@@ -749,15 +747,13 @@ public class TransService {
             log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
         }
         // encode function
-        Function function = new Function(funcName, contractFunction.getFinalInputs(),
-            contractFunction.getFinalOutputs());
-
+        String encodeFunction = this.convertEncodedFunction2Str(contractAbi, funcName, funcParam);
         // check groupId
-        Client web3j = web3ApiService.getWeb3j(groupId);
+        Client client = web3ApiService.getWeb3j(groupId);
         // isLocal:
         // true: user is userAddress locally
         // false: user is signUserId in webase-sign
-        return this.convertRawTx2Str(groupId, web3j, contractAddress, function, user, isLocal);
+        return this.convertRawTx2Str(client, contractAddress, encodeFunction, user, isLocal);
     }
 
 
@@ -770,16 +766,18 @@ public class TransService {
      */
     public String convertEncodedFunction2Str(List<Object> contractAbi,
         String funcName, List<Object> funcParam) {
-        // check param get function of abi
-        ContractFunction contractFunction = buildContractFunctionWithAbi(contractAbi, funcName, funcParam);
-        // encode function
-        Function function = new Function(funcName, contractFunction.getFinalInputs(),
-            contractFunction.getFinalOutputs());
-
-        FunctionEncoder functionEncoder = new FunctionEncoder(cryptoSuite);
-        String encodedFunction = functionEncoder.encode(function);
-        log.info("convertEncodedFunction2Str encodedFunction:{}", encodedFunction);
-        return encodedFunction;
+        String abiStr = JsonUtils.objToString(contractAbi);
+        funcParam = funcParam == null ? new ArrayList<>() : funcParam;
+        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        String encodeFunction;
+        try {
+            encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
+        } catch (ABICodecException e) {
+            log.error("transHandleWithSign encode fail:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+        }
+        log.info("convertEncodedFunction2Str encodeFunction:{}", encodeFunction);
+        return encodeFunction;
     }
 
     /**
@@ -789,20 +787,16 @@ public class TransService {
      * @case1 if @userAddress is blank, return not signed raw tx encoded str
      * @case2 if @userAddress not blank, return signed str
      */
-    private String convertRawTx2Str(int groupId, Client web3j, String contractAddress,
-        Function function, String user, boolean isLocal) {
+    private String convertRawTx2Str(Client client, String contractAddress,
+        String encodeFunction, String user, boolean isLocal) {
 
         // to encode raw tx
-        BigInteger randomId = new BigInteger(250, new SecureRandom());
-        BigInteger blockLimit = web3j.getBlockLimit();
-        FunctionEncoder functionEncoder = new FunctionEncoder(cryptoSuite);
-        String encodedFunction = functionEncoder.encode(function);
-        log.info("createRawTxEncoded encodedFunction:{}", encodedFunction);
-        String chainId = Constants.chainId;
-        RawTransaction rawTransaction =
-            RawTransaction.createTransaction(randomId, Constants.GAS_PRICE,
-                Constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, encodedFunction,
-                new BigInteger(chainId), BigInteger.valueOf(groupId), "");
+        Pair<String, Integer> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
+        TransactionBuilderInterface transactionBuilder = new TransactionBuilderService(client);
+        RawTransaction rawTransaction = transactionBuilder.createTransaction(DefaultGasProvider.GAS_PRICE,
+            DefaultGasProvider.GAS_LIMIT, contractAddress, encodeFunction,
+            BigInteger.ZERO, new BigInteger(chainIdAndGroupId.getLeft()),
+            BigInteger.valueOf(chainIdAndGroupId.getRight()), "");
 
         TransactionEncoderService encoderService = new TransactionEncoderService(cryptoSuite);
         byte[] encodedTransaction = encoderService.encode(rawTransaction, null);
