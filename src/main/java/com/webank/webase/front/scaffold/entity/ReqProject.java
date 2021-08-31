@@ -38,6 +38,7 @@ public class ReqProject {
      * channel ip for exported project to connect node
      */
     private String channelIp;
+    private Integer channelPort;
     /**
      * select multi user to export in project by p12 format
      */

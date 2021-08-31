@@ -76,12 +76,12 @@ public class ToolController {
         log.info("decode output start. param:{}", JsonUtils.toJSONString(param));
         // todo 自测返回值
         TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
         // decode input
         if (param.getDecodeType() == 1) {
             return txDecoder.decodeReceiptMessage(param.getInput());
         } else if (param.getDecodeType() == 2) {
             String abi = JsonUtils.objToString(param.getAbiList());
+            ABICodec abiCodec = new ABICodec(cryptoSuite);
             // decode output
             try {
                 return abiCodec.decodeMethodAndGetOutputObject(abi, param.getMethodName(),

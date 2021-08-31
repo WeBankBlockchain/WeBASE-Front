@@ -182,7 +182,7 @@ public class ContractController extends BaseController {
      * save contract.
      */
     @ApiOperation(value = "save contract", notes = "save contract ")
-    @ApiImplicitParam(name = "req", value = "contract info", required = true,
+    @ApiImplicitParam(name = "contract", value = "contract info", required = true,
             dataType = "ReqContractSave")
     @PostMapping(value = "/save")
     public Contract saveContract(@RequestBody @Valid ReqContractSave contract, BindingResult result)
@@ -305,6 +305,12 @@ public class ContractController extends BaseController {
         return contractService.findPathList(groupId);
     }
 
+    /**
+     * only delete path, not delete contract
+     * @param groupId
+     * @param contractPath
+     * @return
+     */
     @DeleteMapping("/deletePath/{groupId}/{contractPath}")
     public BaseResponse deletePath(@PathVariable("groupId") Integer groupId,
             @PathVariable String contractPath) {
@@ -313,6 +319,12 @@ public class ContractController extends BaseController {
         return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 
+    /**
+     * delete path and contracts in it
+     * @param groupId
+     * @param contractPath
+     * @return
+     */
     @DeleteMapping("/batch/{groupId}/{contractPath}")
     public BaseResponse batchDeletePath(@PathVariable("groupId") Integer groupId,
             @PathVariable String contractPath) {

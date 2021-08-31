@@ -50,6 +50,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
 import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
@@ -809,13 +810,33 @@ public class Web3ApiService {
     }
 
     /**
+     * get batch receipt in one block
+     * @param groupId
+     * @param blockNumber
+     * @param start start index
+     * @param count cursor, if -1, return all
+     */
+    public List<TransactionReceipt> getBatchReceiptByBlockNumber(int groupId, BigInteger blockNumber, int start, int count) {
+        BcosTransactionReceiptsDecoder batchReceipts = getWeb3j(groupId)
+            .getBatchReceiptsByBlockNumberAndRange(blockNumber, String.valueOf(start), String.valueOf(count));
+        return batchReceipts.decodeTransactionReceiptsInfo().getTransactionReceipts();
+    }
+
+    public List<TransactionReceipt> getBatchReceiptByBlockHash(int groupId, String blockHash, int start, int count) {
+        BcosTransactionReceiptsDecoder batchReceipts = getWeb3j(groupId)
+            .getBatchReceiptsByBlockHashAndRange(blockHash, String.valueOf(start), String.valueOf(count));
+        return batchReceipts.decodeTransactionReceiptsInfo().getTransactionReceipts();
+    }
+
+
+    /**
      * get first web3j in web3jMap
      *
      * @return
      */
     public Client getWeb3j() {
         this.checkConnection();
-        Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList();
+        Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList(); //1
         if (groupIdSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             // get default web3j of integer max value
