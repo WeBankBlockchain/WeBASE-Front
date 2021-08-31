@@ -98,6 +98,7 @@ public class EventService {
     private static final String TYPE_CONTRACT = "contract";
     private static final String TYPE_ABI_INFO = "abi";
 
+
     /**
      * register NewBlockEventCallBack
      */

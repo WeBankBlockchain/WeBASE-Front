@@ -226,6 +226,11 @@ public class ConstantCode {
     public static final RetCode GET_EVENT_CALLBACK_TIMEOUT_ERROR = RetCode.mark(201311, "get event callback fail for time out");
     public static final RetCode GET_EVENT_CALLBACK_ERROR = RetCode.mark(201312, "get event callback error");
 
+    // v1.5.3
+    public static final RetCode CNS_QUERY_FAIL = RetCode.mark(201321,"query cns info fail");
+
+
+
     /* classify common error of web3j*/
     // keystore
     public static final RetCode WEB3J_CREATE_KEY_PAIR_NULL = RetCode.mark(201501, "web3sdk create key pair fail and return null");

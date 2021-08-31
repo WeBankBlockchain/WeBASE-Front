@@ -74,7 +74,7 @@ public class KeyStoreController extends BaseController {
     public KeyStoreInfo getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
                                     @RequestParam(required = false) String appId,
                                     @RequestParam(required = false) String signUserId,
-                                    @RequestParam String userName,
+                                    @RequestParam(required = false) String userName,
                                     @RequestParam(required = false, defaultValue = "false") boolean returnPrivateKey) {
         // external key store (2)
         if (KeyTypes.EXTERNALUSER.getValue() == type) {
@@ -243,7 +243,6 @@ public class KeyStoreController extends BaseController {
         }
         log.info("end exportP12PrivateKey fileContentHandle:{}useTime:{}", fileContentHandle,
             Duration.between(startTime, Instant.now()).toMillis());
-//        return new BaseResponse(ConstantCode.RET_SUCCESS, fileContentHandle);
         return ResponseEntity.ok().headers(FrontUtils.headers(fileContentHandle.getFileName()))
             .body(new InputStreamResource(fileContentHandle.getInputStream()));
     }

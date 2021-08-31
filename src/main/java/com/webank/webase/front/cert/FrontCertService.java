@@ -373,7 +373,7 @@ public class FrontCertService {
         //├── sdk.crt
         //└── sdk.key
         try {
-            ZipUtils.generateZipFile(TEMP_SDK_DIR, TEMP_ZIP_DIR, "", TEMP_ZIP_FILE_NAME);
+            ZipUtils.generateZipFile(TEMP_SDK_DIR, TEMP_ZIP_DIR, TEMP_SDK_DIR, TEMP_ZIP_FILE_NAME);
         } catch (Exception e) {
             log.error("writeSdkAsFile generateZipFile fail:[]", e);
             throw new FrontException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);
