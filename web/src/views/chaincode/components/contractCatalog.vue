@@ -166,7 +166,7 @@ export default {
             this.version = this.solcVersion
         }
     },
-    beforeDestroy() {
+    create() {
         Bus.$off("compile");
         Bus.$off("deploy");
         Bus.$off("open");
@@ -200,8 +200,10 @@ export default {
 
         });
         Bus.$on('modifyState', data => {
+            
             this.contractList.forEach(value => {
                 if (value.id === data.id && data.modifyState) {
+                    console.log(this)
                     this.modifyState = data.modifyState
                     this.modifyParam = data;
                     this.$set(value, "modifyState", true);
@@ -516,6 +518,7 @@ export default {
             this.ID = "";
         },
         getContractArry(val) {
+            
             let result = [];
             let list = [];
             let folderArry = this.createFolder(val);
@@ -576,6 +579,7 @@ export default {
             }
         },
         saveContract(param, title, callback) {
+            
             let reqData = {
                 groupId: localStorage.getItem("groupId"),
                 contractName: param.contractName,
@@ -744,6 +748,7 @@ export default {
                                 this.$set(value, "inputShow", false);
                                 this.$set(value, "modifyState", false);
                             });
+                            console.log(this.modifyState)
                             if (list) {
                                 this.getContractArry(list);
                             } else if (this.$route.query.id) {
@@ -914,8 +919,10 @@ export default {
 
         },
         select(val, type) {
+            console.log(1)
+            
             if(!type)this.$store.dispatch('set_selected_contracts_action',val);
-            if (this.modifyState) {
+            if (val.modifyState) {
                 this.$confirm(`${this.$t('text.unsavedContract')}？`, {
                     center: true,
                     dangerouslyUseHTMLString: true

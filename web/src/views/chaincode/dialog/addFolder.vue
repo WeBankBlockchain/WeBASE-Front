@@ -87,6 +87,9 @@ export default {
         modelClose: function () {
             this.$emit("close");
         },
+        addSuccess:function(){
+             this.$emit("success");
+        },
         add: function () {
             let reqData = {
                 contractPath: this.folderFrom.folderName,
@@ -95,7 +98,7 @@ export default {
             addContractPath(reqData).then(res => {
                 if (res.status === 200) {
                     // this.$emit("success")
-                    this.modelClose();
+                    this.addSuccess();
                 } else {
                     this.$message({
                         type: "error",

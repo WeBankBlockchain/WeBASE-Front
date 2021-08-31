@@ -464,6 +464,13 @@ export default {
                     _this.searchKeyword()
                 }
             });
+            //  this.aceEditor.commands.addCommand({
+            //     name: 'backing',
+            //     bindKey: { win: "Ctrl-z", mac: "Command-z" },
+            //     exec: function (editor) {
+            //         _this.backing()
+            //     }
+            // });
             let editor = this.aceEditor.alignCursors();
             this.aceEditor.getSession().setUseWrapMode(true);
 
@@ -472,16 +479,38 @@ export default {
             this.aceEditor.on("blur", this.blurAce);
             this.aceEditor.resize();
         },
+        // backing:function(){
+        //     console.log('backing');
+        //     console.log(this.content);
+        //     if(this.content==''){
+        //          this.aceEditor.setValue(this.code);
+        //     }
+        // },
         blurAce: function () {
             console.log('blur');
             let data = Base64.encode(this.content);
-            if (this.data.contractSource != data) {
-                this.saveCode()
+            // if (this.data.contractSource != data) {
+            //     this.saveCode()
+            // }
+            //  this.saveShow = true;
+            if(this.data.contractSource!=data){
+                console.log('合约改变弹框提示');
+                 this.$confirm(`${this.$t('text.unsavedContract')}？`, {
+                    center: true,
+                    dangerouslyUseHTMLString: true
+                })
+                    .then(() => {
+                         this.saveCode()
+                    })
+                    
             }
+            
         },
         saveCode: function () {
+            
             this.data.contractSource = Base64.encode(this.content);
             Bus.$emit("save", this.data);
+            var id = this.data.id
         },
         resizeCode: function () {
             this.aceEditor.setOptions({
@@ -520,22 +549,55 @@ export default {
             this.editorShow = false;
         },
         changeAce: function () {
+        //     console.log(this.code);
+        //    console.log(this.content);
+
+          this.$nextTick(() => {
             this.content = this.aceEditor.getSession().getValue();
-            var id = this.data.id;
-            this.$nextTick(() => {
+            //  console.log(this.code);
+            // console.log(this.content);
+            if(this.content.replace(/[\r\n\s]/g,"")==""){
+        //         console.log(this.code);
+        //    console.log(this.content);
+             
+              this.aceEditor.setValue(this.code);
+              this.content = this.aceEditor.getSession().getValue(); 
+             return
+            }
+              var id = this.data.id;
+            // this.$nextTick(() => {
                 if (Base64.decode(this.data.contractSource).length === this.content.length) {
                     Bus.$emit('modifyState', {
                         id: id,
                         modifyState: false
                     })
                 } else {
+                    
                     Bus.$emit('modifyState', Object.assign({}, this.data, {
                         id: id,
                         modifyState: true,
                         contractSource: Base64.encode(this.content)
                     }))
                 }
+            // })
             })
+          
+            // var id = this.data.id;
+            // // this.$nextTick(() => {
+            //     if (Base64.decode(this.data.contractSource).length === this.content.length) {
+            //         Bus.$emit('modifyState', {
+            //             id: id,
+            //             modifyState: false
+            //         })
+            //     } else {
+                    
+            //         Bus.$emit('modifyState', Object.assign({}, this.data, {
+            //             id: id,
+            //             modifyState: true,
+            //             contractSource: Base64.encode(this.content)
+            //         }))
+            //     }
+            // // })
 
         },
 
@@ -657,7 +719,8 @@ export default {
                 path: this.data.contractPath
             });
             let num = 0;
-            w.addEventListener('message', function (ev) {
+            // w.addEventListener('message', function (ev) {
+                  w.onmessage=function(ev){
                 num++
                 if (ev.data.cmd == 'compiled' && num == 1) {
                     that.loadingAce = false
@@ -676,7 +739,7 @@ export default {
                     console.log(ev.data);
                     console.log(JSON.parse(ev.data.data))
                 }
-            }, false);
+            };
             w.addEventListener("error", function (ev) {
                 that.errorInfo = ev;
                 that.errorMessage = ev;
@@ -821,6 +884,7 @@ export default {
             this.dialogUser = false;
         },
         setMethod: function () {
+            let Web3EthAbi = web3;
             let arry = [];
             if (this.abiFile) {
                 let list = JSON.parse(this.abiFile);
@@ -841,7 +905,7 @@ export default {
                                 inputs: value.inputs
                             });
                         }
-                        data.methodId = methodId;
+                        data.methodId = methodId.substr(0,10);
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
                         arry.push(data);
@@ -861,7 +925,7 @@ export default {
                                 inputs: value.inputs
                             });
                         }
-                        data.methodId = methodId;
+                        data.methodId = methodId.substr(0,10);
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
                         arry.push(data);
@@ -979,6 +1043,7 @@ export default {
 
                     const { data, status } = res
                     if (status === 200) {
+                        
                         if (data) {
                             this.sendErrorMessage = this.$t('text.redeploy')
                             this.dialogVisible = true;
@@ -1309,6 +1374,7 @@ export default {
 }
 .contract-code-head {
     width: 100%;
+    min-width:960px;
     height: 48px;
     line-height: 48px;
     color: #fff;

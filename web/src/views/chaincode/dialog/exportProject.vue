@@ -401,7 +401,8 @@ export default {
                 group: this.projectFrom.group,
                 artifactName: this.projectFrom.artifactName,
                 groupId: localStorage.getItem("groupId"),
-                channelIp: this.projectFrom.channelIp
+                channelIp: this.projectFrom.channelIp,
+                channelPort:this.projectFrom.channelPort
             }
             if (this.projectFrom.userAddress) {
                 reqData.userAddressList = this.projectFrom.userAddress
