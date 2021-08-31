@@ -1,8 +1,8 @@
 name: Docker Build And Push To Docker Hub
 
 on:
-#  schedule:
-#    - cron: '0 10 * * *' # everyday at 10am
+  schedule:
+    - cron: '0 10 * * *' # everyday at 10am
   push:
     tags:
       - 'v*.*.*'
@@ -43,7 +43,7 @@ jobs:
         id: set_docker_tag
         run: |
           [[ ${{github.ref}} == */tags/* ]] && DOCKER_TAG="${GIT_TAG_NAME}" || DOCKER_TAG="${BRANCH_NAME}"
-          DOCKER_TAG="${{ secrets.DOCKERHUB_ORG }}/${DOCKER_REPOSITORY}:${DOCKER_TAG}"
+          DOCKER_TAG="${{ secrets.DOCKER_WEBASEPRO_ORG }}/${DOCKER_REPOSITORY}:${DOCKER_TAG}"
 
 
           echo "New docker tag is ${DOCKER_TAG}"
@@ -58,8 +58,8 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_WEBASEPRO_USERNAME }}
+          password: ${{ secrets.DOCKER_WEBASEPRO_TOKEN }}
 
             # - name: Copy nginx config file
             #   id: copy-nginx-file
