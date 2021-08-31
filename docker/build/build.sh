@@ -54,7 +54,7 @@ Usage:
     -t          New tag for image, required.
 
     -p          Push image to docker hub, default no.
-    -i          Default organization, default webase.
+    -i          Default organization, default webasepro.
     -h          Show help info.
 USAGE
     exit 1
