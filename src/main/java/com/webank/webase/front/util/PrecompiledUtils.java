@@ -33,6 +33,7 @@ public class PrecompiledUtils {
     // SystemConfig key
     public static final String TxCountLimit = "tx_count_limit";
     public static final String TxGasLimit = "tx_gas_limit";
+    public static final String ConsensusTimeout = "consensus_timeout";
     // node consensus type
     public static final String NODE_TYPE_SEALER = "sealer";
     public static final String NODE_TYPE_OBSERVER = "observer";
@@ -63,6 +64,8 @@ public class PrecompiledUtils {
             "0x0000000000000000000000000000000000000000";
     public static final String EMPTY_OUTPUT = "0x";
     public static final int TxGasLimitMin = 10000;
+    // unit: second
+    public static final int ConsensusTimeoutMin = 3;
 
     public static int PermissionCode = 0;
     public static int TableExist = 0;
