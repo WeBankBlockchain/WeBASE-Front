@@ -99,7 +99,7 @@ public class PrecompiledSysConfigService {
                 .getSystemConfigByKey(PrecompiledUtils.ConsensusTimeout).getSystemConfig();
         ResSystemConfig systemConfigTimeout = new ResSystemConfig();
         systemConfigTimeout.setConfigKey(PrecompiledUtils.ConsensusTimeout);
-        systemConfigTimeout.setConfigValue(txGasLimit);
+        systemConfigTimeout.setConfigValue(consensusTimeout);
         systemConfigTimeout.setGroupId(groupId);
 
         list.add(systemConfigCount);
