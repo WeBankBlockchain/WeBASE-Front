@@ -172,7 +172,7 @@ export default {
                                 inputs: value.inputs
                             });
                         }
-                        data.methodId = methodId;
+                        data.methodId = methodId.substr(0,10);
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
                         arry.push(data);
@@ -192,7 +192,7 @@ export default {
                                 inputs: value.inputs
                             });
                         }
-                        data.methodId = methodId;
+                        data.methodId = methodId.substr(0,10);
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
                         arry.push(data);

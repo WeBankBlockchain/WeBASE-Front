@@ -33,8 +33,8 @@
                     <el-col :span="17">
                         <span class="font-color-fff text-hidden">value</span>
                         <input class="input-inner" type="text" v-model="item.argumentValue" @input="inputArgumentValue($event,item.type)" />
-                        <span v-if="item.msgObj&&!item.msgObj.is" class="font-color-ed5454">
-                            {{item.msgObj.msg}}
+                        <span v-if="item.tip" class="font-color-ed5454">
+                            {{errors}}
                         </span>
                     </el-col>
                 </el-row>
@@ -116,7 +116,8 @@ export default {
             ],
             textarea: '',
             errorMsg: '',
-            abiJsonContent: []
+            abiJsonContent: [],
+            errors:"参数输入有误，请重新输入"
         }
     },
 
@@ -324,7 +325,7 @@ export default {
             this.argumentList.forEach(item => {
                 inputs.push({
                     type: item.type,
-                    name: item.name
+                    name: item.argumentValue
                 })
                 inputsVal.push(dataType(item.type, item.argumentValue))
 
@@ -334,7 +335,10 @@ export default {
                 return
             }
             for (let i = 0; i < inputsVal.length; i++) {
-                if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
+                // if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
+                if (!inputsVal[i]) {
+                    this.argumentList[i].tip=true;
+                    this.textarea = '';
                     return false
                 }
             }
@@ -361,7 +365,8 @@ export default {
             var inputs = [], inputsVal = [];
             this.argumentList.forEach(item => {
                 inputs.push(item.type)
-                inputsVal.push(dataType(item.type, item.argumentValue))
+                // inputsVal.push(dataType(item.type, item.argumentValue))
+                inputsVal.push(item.argumentValue)
 
             })
 
@@ -370,7 +375,12 @@ export default {
                 return
             }
             for (let i = 0; i < inputsVal.length; i++) {
-                if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
+                // if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
+                //     return false
+                // }
+                 if (!inputsVal[i]) {
+                    this.argumentList[i].tip=true;
+                    this.textarea = '';
                     return false
                 }
             }
