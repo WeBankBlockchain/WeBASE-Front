@@ -498,15 +498,7 @@ public class TransService {
         }
 
         String encodeFunction = this.encodeFunction2Str(abiStr, funcName, funcParam);
-//        try {
-//            // todo bytes转byte[]?
-//            encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
-//        } catch (ABICodecException e) {
-//            log.error("transHandleWithSign encode fail:[]", e);
-//            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
-//        }
 
-        // client
         boolean isTxConstant = this.getABIDefinition(abiStr, funcName).isConstant();
         // get privateKey
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress);
@@ -785,17 +777,50 @@ public class TransService {
         }
         for (int i = 0; i < namedTypeList.size(); i++) {
             NamedType name = namedTypeList.get(i);
-            if (name.getType().startsWith("bytes")) {
-                // update funcParam
-                String bytesHexStr = (String) funcParam.get(i);
-                byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
-                int bytesNLength = Integer.parseInt(name.getType().substring("bytes".length() - 1));
-                if (inputArray.length != bytesNLength) {
-                    log.error("validFuncParam param of bytesN size not match");
-                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
+            String type = name.getType();
+            if (type.startsWith("bytes")) {
+                if (type.contains("[][]")) {
+                    log.warn("validFuncParam param, not support bytes 2d array or more");
+                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
                 }
-                // replace hexString with array
-                funcParam.set(i, inputArray);
+                // if not bytes[], bytes or bytesN
+                if (!type.endsWith("[]")) {
+                    // update funcParam
+                    String bytesHexStr = (String) (funcParam.get(i));
+                    byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                    // bytesN: bytes1, bytes32 etc.
+                    if (type.length() > "bytes".length()) {
+                        int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
+                        if (inputArray.length != bytesNLength) {
+                            log.error("validFuncParam param of bytesN size not match");
+                            throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
+                        }
+                    }
+                    // replace hexString with array
+                    funcParam.set(i, inputArray);
+                } else { // todo bytes[][]
+                    // if bytes[] or bytes32[]
+                    List<String> hexStrArray = (List<String>) (funcParam.get(i));
+                    List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
+                    for (int j = 0; j < hexStrArray.size(); j++) {
+                        String bytesHexStr = hexStrArray.get(j);
+                        byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                        // bytesN: bytes1, bytes32 etc.
+                        if (type.length() > "bytes[]".length()) {
+                            // bytes32[] => 32[]
+                            String temp = type.substring("bytes".length());
+                            // 32[] => 32
+                            int bytesNLength = Integer.parseInt(temp.substring(0, temp.length() - 2));
+                            if (inputArray.length != bytesNLength) {
+                                log.error("validFuncParam param of bytesN size not match");
+                                throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
+                            }
+                        }
+                        bytesArray.add(inputArray);
+                    }
+                    // replace hexString with array
+                    funcParam.set(i, bytesArray);
+                }
             }
         }
     }
