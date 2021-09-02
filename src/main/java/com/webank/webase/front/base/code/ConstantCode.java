@@ -229,6 +229,8 @@ public class ConstantCode {
 
     // v1.5.3
     public static final RetCode CNS_QUERY_FAIL = RetCode.mark(201321,"query cns info fail");
+    public static final RetCode FUNC_PARAM_SIZE_NOT_MATCH = RetCode.mark(201322, "contract funcParam size not match with ABI");
+    public static final RetCode FUNC_PARAM_BYTES_SIZE_NOT_MATCH = RetCode.mark(201323, "contract funcParam bytes array size not match");
 
 
 

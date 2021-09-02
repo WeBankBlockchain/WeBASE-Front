@@ -51,14 +51,14 @@ public class PresetDataService {
                     "Smart-Dev-Contract\'s Evidence Contract suite of business_template");
         insertStoreItem(assetFolderId, "资产应用", "Asset", "4", "pointsId",
             "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
-            "Asset Contract suite",
+            "Asset Contract Suite",
             "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
-                    "Asset Contract suite");
+                    "Asset Contract Suite");
         insertStoreItem(traceFolderId, "溯源应用", "Traceability", "4", "evidenceId",
             "一套溯源应用合约模板（Smart-Dev-Contract）",
-            "Traceability Contract suite",
+            "Traceability Contract Suite",
             "一套溯源应用合约模板（Smart-Dev-Contract）",
-            "Traceability Contract suite");
+            "Traceability Contract Suite");
     }
 
     public void insertStoreItem(long storeId, String storeName, String StoreName_en, String StoreType,
@@ -90,20 +90,20 @@ public class PresetDataService {
         insertContractFolderItem(toolboxId,toolboxId,"Tools",
                 "工具箱中有常用的工具合约",
                 "工具箱中有常用的工具合约",
-                "Toolbox Contract suite",
-                "Toolbox Contract suite");
+                "Toolbox Contract Suite",
+                "Toolbox Contract Suite");
 
         insertContractFolderItem(evidenceId,evidenceId,"Evidence",
                 "一套区块链存证合约，实现区块链存证、取证",
                 "一套区块链存证合约，实现区块链存证、取证",
-                "Evidence Contract suite",
-                "Evidence Contract suite");
+                "Evidence Contract Suite",
+                "Evidence Contract Suite");
 
         insertContractFolderItem(pointsId,pointsId,"Points",
                 "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
                 "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
-                "Points Contract suite",
-                "Points Contract suite");
+                "Points Contract Suite",
+                "Points Contract Suite");
         // belong to points store, and new folder
         insertContractFolderItem(smartDevToolFolderId,toolboxId,"Smart_Dev_Basic",
             "SmartDev基础合约，包含Table/KVTable/Sha/Crypto/HelloWorld等",
@@ -119,13 +119,13 @@ public class PresetDataService {
         insertContractFolderItem(assetFolderId,assetFolderId,"Asset",
             "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等，具有增发、销毁，暂停合约，黑白名单等权限控制等功能",
             "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等，具有增发、销毁，暂停合约，黑白名单等权限控制等功能",
-            "Asset Contract suite",
-            "Asset Contract suite");
+            "Asset Contract Suite",
+            "Asset Contract Suite");
         insertContractFolderItem(traceFolderId,traceFolderId,"Traceability",
             "一套溯源应用合约模板（Smart-Dev-Contract）",
             "一套溯源应用合约模板（Smart-Dev-Contract）",
-            "Traceability Contract suite",
-            "Traceability Contract suite");
+            "Traceability Contract Suite",
+            "Traceability Contract Suite");
     }
 
     public void insertContractFolderItem(long contractFolderId, long storeId, String contractFolderName, String contractFolderDesc, String contractFolderDetail,
