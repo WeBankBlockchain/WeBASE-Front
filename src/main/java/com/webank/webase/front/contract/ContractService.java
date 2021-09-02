@@ -176,15 +176,15 @@ public class ContractService {
             log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
-
-        String subChainAddress = FrontUtils.removeBinFirstAndLast(binOnChain, 68);
-        String subInputBin = FrontUtils.removeFirstStr(contractBin, "0x");
-        log.info("address:{} subBinOnChain:{} subInputBin:{}", contractAddress, subChainAddress,
-                subInputBin);
-        if (!subInputBin.contains(subChainAddress)) {
-            log.error("fail addressIsValid contractAddress:{}", contractAddress);
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
-        }
+        // v1.5.3 allow proxy contract
+//        String subChainAddress = FrontUtils.removeBinFirstAndLast(binOnChain, 68);
+//        String subInputBin = FrontUtils.removeFirstStr(contractBin, "0x");
+//        log.info("address:{} subBinOnChain:{} subInputBin:{}", contractAddress, subChainAddress,
+//                subInputBin);
+//        if (!subInputBin.contains(subChainAddress)) {
+//            log.error("fail addressIsValid contractAddress:{}", contractAddress);
+//            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+//        }
     }
 
     /**

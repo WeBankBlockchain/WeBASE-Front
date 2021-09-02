@@ -47,9 +47,16 @@ public class PrecompiledSysConfigService {
         String value = systemConfigHandle.getConfigValue();
 
         // check system value
+        // check gas limit
         if (PrecompiledUtils.TxGasLimit.equals(key)) {
             if (Integer.parseInt(value) < PrecompiledUtils.TxGasLimitMin) {
                 return ConstantCode.FAIL_SET_SYSTEM_CONFIG_TOO_SMALL;
+            }
+        }
+        // check consensus timeout
+        if (PrecompiledUtils.ConsensusTimeout.equals(key)) {
+            if (Integer.parseInt(value) < PrecompiledUtils.ConsensusTimeoutMin) {
+                return ConstantCode.FAIL_SET_CONSENSUS_TIMEOUT_TOO_SMALL;
             }
         }
         // @param result {"code":0,"msg":"success"}
@@ -88,8 +95,16 @@ public class PrecompiledSysConfigService {
         systemConfigGas.setConfigValue(txGasLimit);
         systemConfigGas.setGroupId(groupId);
 
+        String consensusTimeout = web3ApiService.getWeb3j(groupId)
+                .getSystemConfigByKey(PrecompiledUtils.ConsensusTimeout).getSystemConfig();
+        ResSystemConfig systemConfigTimeout = new ResSystemConfig();
+        systemConfigTimeout.setConfigKey(PrecompiledUtils.ConsensusTimeout);
+        systemConfigTimeout.setConfigValue(consensusTimeout);
+        systemConfigTimeout.setGroupId(groupId);
+
         list.add(systemConfigCount);
         list.add(systemConfigGas);
+        list.add(systemConfigTimeout);
         return list;
     }
 

@@ -22,6 +22,7 @@ import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_VIEW
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.squareup.javapoet.ClassName;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
@@ -65,8 +66,10 @@ import org.fisco.bcos.sdk.abi.TypeReference;
 import org.fisco.bcos.sdk.abi.Utils;
 import org.fisco.bcos.sdk.abi.datatypes.Function;
 import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.abi.datatypes.generated.AbiTypes;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition.NamedType;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinitionFactory;
 import org.fisco.bcos.sdk.abi.wrapper.ContractABIDefinition;
 import org.fisco.bcos.sdk.client.Client;
@@ -173,22 +176,14 @@ public class TransService {
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
 
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
-        String encodeFunction;
-        try {
-            encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
-        } catch (ABICodecException e) {
-            log.error("transHandleWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
-        }
-
+        String encodeFunction = this.encodeFunction2Str(abiStr, funcName, funcParam);
         String userAddress = keyStoreService.getAddressBySignUserId(signUserId);
         if (StringUtils.isBlank(userAddress)) {
             log.warn("transHandleWithSign this signUser [{}] not record in webase-front", signUserId);
             userAddress = keyStoreService.getCredentialsForQuery().getAddress();
         }
 
-        boolean isTxConstant = isConstant(abiStr, funcName);
+        boolean isTxConstant = this.getABIDefinition(abiStr, funcName).isConstant();
         if (isTxConstant) {
             return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
         } else {
@@ -405,6 +400,7 @@ public class TransService {
     /**
      * build Function with abi.
      */
+    @Deprecated
     private ContractFunction buildContractFunctionWithAbi(List<Object> contractAbi, String funcName,
             List<Object> params) {
         log.debug("start buildContractFunctionWithAbi");
@@ -501,17 +497,9 @@ public class TransService {
             }
         }
 
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
-        String encodeFunction;
-        try {
-            encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
-        } catch (ABICodecException e) {
-            log.error("transHandleWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
-        }
+        String encodeFunction = this.encodeFunction2Str(abiStr, funcName, funcParam);
 
-        // client
-        boolean isTxConstant = isConstant(abiStr, funcName);
+        boolean isTxConstant = this.getABIDefinition(abiStr, funcName).isConstant();
         // get privateKey
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress);
 
@@ -747,7 +735,7 @@ public class TransService {
             log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
         }
         // encode function
-        String encodeFunction = this.convertEncodedFunction2Str(contractAbi, funcName, funcParam);
+        String encodeFunction = this.encodeFunction2Str(JsonUtils.objToString(contractAbi), funcName, funcParam);
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
         // isLocal:
@@ -759,15 +747,15 @@ public class TransService {
 
     /**
      * get encoded function for /trans/query-transaction
-     * @param contractAbi
+     * @param abiStr
      * @param funcName
      * @param funcParam
      * @return
      */
-    public String convertEncodedFunction2Str(List<Object> contractAbi,
-        String funcName, List<Object> funcParam) {
-        String abiStr = JsonUtils.objToString(contractAbi);
+    public String encodeFunction2Str(String abiStr, String funcName, List<Object> funcParam) {
+
         funcParam = funcParam == null ? new ArrayList<>() : funcParam;
+        this.validFuncParam(abiStr, funcName, funcParam);
         ABICodec abiCodec = new ABICodec(cryptoSuite);
         String encodeFunction;
         try {
@@ -776,8 +764,65 @@ public class TransService {
             log.error("transHandleWithSign encode fail:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
         }
-        log.info("convertEncodedFunction2Str encodeFunction:{}", encodeFunction);
+        log.info("encodeFunction2Str encodeFunction:{}", encodeFunction);
         return encodeFunction;
+    }
+
+    private void validFuncParam(String contractAbiStr, String funcName, List<Object> funcParam) {
+        ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName);
+        List<NamedType> namedTypeList = abiDefinition.getInputs();
+        if (namedTypeList.size() != funcParam.size()) {
+            log.error("validFuncParam param not match");
+            throw new FrontException(ConstantCode.FUNC_PARAM_SIZE_NOT_MATCH);
+        }
+        for (int i = 0; i < namedTypeList.size(); i++) {
+            NamedType name = namedTypeList.get(i);
+            String type = name.getType();
+            if (type.startsWith("bytes")) {
+                if (type.contains("[][]")) {
+                    log.warn("validFuncParam param, not support bytes 2d array or more");
+                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
+                }
+                // if not bytes[], bytes or bytesN
+                if (!type.endsWith("[]")) {
+                    // update funcParam
+                    String bytesHexStr = (String) (funcParam.get(i));
+                    byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                    // bytesN: bytes1, bytes32 etc.
+                    if (type.length() > "bytes".length()) {
+                        int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
+                        if (inputArray.length != bytesNLength) {
+                            log.error("validFuncParam param of bytesN size not match");
+                            throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
+                        }
+                    }
+                    // replace hexString with array
+                    funcParam.set(i, inputArray);
+                } else { // todo bytes[][]
+                    // if bytes[] or bytes32[]
+                    List<String> hexStrArray = (List<String>) (funcParam.get(i));
+                    List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
+                    for (int j = 0; j < hexStrArray.size(); j++) {
+                        String bytesHexStr = hexStrArray.get(j);
+                        byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                        // bytesN: bytes1, bytes32 etc.
+                        if (type.length() > "bytes[]".length()) {
+                            // bytes32[] => 32[]
+                            String temp = type.substring("bytes".length());
+                            // 32[] => 32
+                            int bytesNLength = Integer.parseInt(temp.substring(0, temp.length() - 2));
+                            if (inputArray.length != bytesNLength) {
+                                log.error("validFuncParam param of bytesN size not match");
+                                throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
+                            }
+                        }
+                        bytesArray.add(inputArray);
+                    }
+                    // replace hexString with array
+                    funcParam.set(i, bytesArray);
+                }
+            }
+        }
     }
 
     /**
@@ -838,7 +883,7 @@ public class TransService {
         // trans hash is cryptoSuite.hash(signedStr)
     }
 
-    private boolean isConstant(String abiStr, String functionName) {
+    private ABIDefinition getABIDefinition(String abiStr, String functionName) {
         ABIDefinitionFactory factory = new ABIDefinitionFactory(cryptoSuite);
 
         ContractABIDefinition contractABIDefinition = factory.loadABI(abiStr);
@@ -849,7 +894,7 @@ public class TransService {
         }
         // abi only contain one function, so get first one
         ABIDefinition function = abiDefinitionList.get(0);
-        return function.isConstant();
+        return function;
     }
 
     public List<String> handleCall(int groupId, String userAddress, String contractAddress,

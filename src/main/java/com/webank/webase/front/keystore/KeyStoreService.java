@@ -443,7 +443,7 @@ public class KeyStoreService {
         // check name
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // to store locally
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair(privateKey);
+        CryptoKeyPair keyPair = cryptoSuite.createKeyPair(Numeric.cleanHexPrefix(privateKey));
         if (keyPair == null) {
             log.error("importFromPrivateKey get null keyPair");
             throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
