@@ -175,7 +175,7 @@ public class ContractController extends BaseController {
             throw new FrontException(ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY);
         }
         contractService.sendAbi(reqSendAbi);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(new BaseResponse(ConstantCode.RET_SUCCESS));
     }
 
     /**
