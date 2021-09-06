@@ -101,6 +101,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import springfox.documentation.spring.web.json.Json;
 
 /**
  * TransService. handle transactions of deploy/call contract
@@ -768,63 +769,6 @@ public class TransService {
         return encodeFunction;
     }
 
-    private void validFuncParam(String contractAbiStr, String funcName, List<Object> funcParam) {
-        ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName);
-        List<NamedType> namedTypeList = abiDefinition.getInputs();
-        if (namedTypeList.size() != funcParam.size()) {
-            log.error("validFuncParam param not match");
-            throw new FrontException(ConstantCode.FUNC_PARAM_SIZE_NOT_MATCH);
-        }
-        for (int i = 0; i < namedTypeList.size(); i++) {
-            NamedType name = namedTypeList.get(i);
-            String type = name.getType();
-            if (type.startsWith("bytes")) {
-                if (type.contains("[][]")) {
-                    log.warn("validFuncParam param, not support bytes 2d array or more");
-                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
-                }
-                // if not bytes[], bytes or bytesN
-                if (!type.endsWith("[]")) {
-                    // update funcParam
-                    String bytesHexStr = (String) (funcParam.get(i));
-                    byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
-                    // bytesN: bytes1, bytes32 etc.
-                    if (type.length() > "bytes".length()) {
-                        int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
-                        if (inputArray.length != bytesNLength) {
-                            log.error("validFuncParam param of bytesN size not match");
-                            throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-                        }
-                    }
-                    // replace hexString with array
-                    funcParam.set(i, inputArray);
-                } else { // todo bytes[][]
-                    // if bytes[] or bytes32[]
-                    List<String> hexStrArray = (List<String>) (funcParam.get(i));
-                    List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
-                    for (int j = 0; j < hexStrArray.size(); j++) {
-                        String bytesHexStr = hexStrArray.get(j);
-                        byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
-                        // bytesN: bytes1, bytes32 etc.
-                        if (type.length() > "bytes[]".length()) {
-                            // bytes32[] => 32[]
-                            String temp = type.substring("bytes".length());
-                            // 32[] => 32
-                            int bytesNLength = Integer.parseInt(temp.substring(0, temp.length() - 2));
-                            if (inputArray.length != bytesNLength) {
-                                log.error("validFuncParam param of bytesN size not match");
-                                throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-                            }
-                        }
-                        bytesArray.add(inputArray);
-                    }
-                    // replace hexString with array
-                    funcParam.set(i, bytesArray);
-                }
-            }
-        }
-    }
-
     /**
      * get encoded raw transaction
      * handleTransByFunction by whether is constant
@@ -906,6 +850,7 @@ public class TransService {
         CallOutput callOutput = transactionProcessor
             .executeCall(userAddress, contractAddress, encodedFunction)
             .getCallResult();
+        // if error
         if (!RECEIPT_STATUS_0X0.equals(callOutput.getStatus())) {
             Tuple2<Boolean, String> parseResult =
                 RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
@@ -913,10 +858,12 @@ public class TransService {
             String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
             return Collections.singletonList("Call contract return error: " + parseResultStr);
         } else {
+            ABICodec abiCodec = new ABICodec(cryptoSuite);
             try {
-                ABICodec abiCodec = new ABICodec(cryptoSuite);
                 List<String> res = abiCodec
                     .decodeMethodToString(abiStr, funcName, callOutput.getOutput());
+                // todo bytes类型转十六进制
+                this.handleFuncOutput(abiStr, funcName, res);
                 log.info("call contract res:{}", res);
                 return res;
             } catch (ABICodecException e) {
@@ -1010,6 +957,105 @@ public class TransService {
         String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
         receipt.setMessage(receiptMsg);
         CommonUtils.processReceiptHexNumber(receipt);
+    }
+
+
+    private void validFuncParam(String contractAbiStr, String funcName, List<Object> funcParam) {
+        ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName);
+        List<NamedType> inputTypeList = abiDefinition.getInputs();
+        if (inputTypeList.size() != funcParam.size()) {
+            log.error("validFuncParam param not match");
+            throw new FrontException(ConstantCode.FUNC_PARAM_SIZE_NOT_MATCH);
+        }
+        for (int i = 0; i < inputTypeList.size(); i++) {
+            String type = inputTypeList.get(i).getType();
+            if (type.startsWith("bytes")) {
+                if (type.contains("[][]")) {
+                    // todo bytes[][]
+                    log.warn("validFuncParam param, not support bytes 2d array or more");
+                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
+                }
+                // if not bytes[], bytes or bytesN
+                if (!type.endsWith("[]")) {
+                    // update funcParam
+                    String bytesHexStr = (String) (funcParam.get(i));
+                    byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                    // bytesN: bytes1, bytes32 etc.
+                    if (type.length() > "bytes".length()) {
+                        int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
+                        if (inputArray.length != bytesNLength) {
+                            log.error("validFuncParam param of bytesN size not match");
+                            throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
+                        }
+                    }
+                    // replace hexString with array
+                    funcParam.set(i, inputArray);
+                } else {
+                    // if bytes[] or bytes32[]
+                    List<String> hexStrArray = (List<String>) (funcParam.get(i));
+                    List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
+                    for (int j = 0; j < hexStrArray.size(); j++) {
+                        String bytesHexStr = hexStrArray.get(j);
+                        byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                        // check: bytesN: bytes1, bytes32 etc.
+                        if (type.length() > "bytes[]".length()) {
+                            // bytes32[] => 32[]
+                            String temp = type.substring("bytes".length());
+                            // 32[] => 32
+                            int bytesNLength = Integer
+                                .parseInt(temp.substring(0, temp.length() - 2));
+                            if (inputArray.length != bytesNLength) {
+                                log.error("validFuncParam param of bytesN size not match");
+                                throw new FrontException(
+                                    ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
+                            }
+                        }
+                        bytesArray.add(inputArray);
+                    }
+                    // replace hexString with array
+                    funcParam.set(i, bytesArray);
+                }
+            }
+        }
+    }
+
+    /**
+     * parse bytes, bytesN, bytesN[], bytes[] from base64 string to hex string
+     * @param abiStr
+     * @param funcName
+     * @param outputValues
+     */
+    private void handleFuncOutput(String abiStr, String funcName, List<String> outputValues) {
+        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
+        List<NamedType> outputTypeList = abiDefinition.getOutputs();
+        for (int i = 0; i < outputTypeList.size(); i++) {
+            String type = outputTypeList.get(i).getType();
+            if (type.startsWith("bytes")) {
+                if (type.contains("[][]")) { // todo bytes[][]
+                    log.warn("validFuncParam param, not support bytes 2d array or more");
+                    continue;
+                }
+                // if not bytes[], bytes or bytesN
+                if (!type.endsWith("[]")) {
+                    // update funcParam
+                    String bytesBase64 = outputValues.get(i);
+                    byte[] inputArray = Base64.getDecoder().decode(bytesBase64);
+                    // replace hexString with array
+                    outputValues.set(i, Numeric.toHexString(inputArray));
+                } else {
+                    // if bytes[] or bytes32[]
+                    List<String> base64StrArray = JsonUtils.toJavaObject(outputValues.get(i), List.class);
+                    List<String> bytesArray = new ArrayList<>(base64StrArray.size());
+                    for (int j = 0; j < base64StrArray.size(); j++) {
+                        String bytesBase64Str = base64StrArray.get(j);
+                        byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
+                        bytesArray.add(Numeric.toHexString(inputArray));
+                    }
+                    // replace hexString with array
+                    outputValues.set(i, JsonUtils.objToString(bytesArray));
+                }
+            }
+        }
     }
 
 }
