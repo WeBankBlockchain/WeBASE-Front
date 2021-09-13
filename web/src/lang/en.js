@@ -254,6 +254,7 @@ export default {
         systemError: 'System Error',
         contractSameDirectory: 'Contract name must be unique under the same directory',
         unsavedContract: 'Contract modifed and unsaved. Save',
+        noSave:'The contract has not been saved, please proceed to the next step',
         contractName: 'Contract Name',
         filePath: 'File Path',
         pleaseEnter: 'Please type in',
