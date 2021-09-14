@@ -40,7 +40,7 @@ public class ReqDeploy {
     private String contractName;
 
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
-    private List<ABIDefinition> abiInfo;
+    private List<Object> abiInfo;
     /**
      * 合约编译的bytecode(bin)，用于部署合约
      */
