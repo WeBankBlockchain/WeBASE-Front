@@ -60,7 +60,7 @@ public class PresetDataService {
             "Traceability Contract Suite",
             "一套溯源应用合约模板（Smart-Dev-Contract）",
             "Traceability Contract Suite");
-        insertStoreItem(proxyFolderId, "代理合约模板", "Proxy", "1", "toolboxId",
+        insertStoreItem(proxyFolderId, "代理合约模板", "Proxy", "4", "toolboxId",
             "一套业务、数据分离对代理合约模板",
             "Proxy Contract Suite",
             "一套业务、数据分离对代理合约模板",
