@@ -142,7 +142,8 @@ export default {
                 userName: "",
                 funcName: "",
                 funcValue: [],
-                funcType: "function"
+                funcType: "function",
+                reqVal:[]
             },
             userId: "",
             userList: [],
@@ -294,15 +295,16 @@ export default {
             }
             if (this.transation.funcValue.length) {
                 for (let i = 0; i < this.transation.funcValue.length; i++) {
+                    debugger
                     let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
                     if (data && isJson(data)) {
                         try {
-                            this.transation.funcValue[i] = JSON.parse(data)
+                            this.transation.reqVal[i] = JSON.parse(data)
                         } catch (error) {
                             console.log(error)
                         }
                     } else {
-                        this.transation.funcValue[i] = data;
+                        this.transation.reqVal[i] = data;
                     }
                 }
             }
@@ -319,7 +321,7 @@ export default {
                 contractPath: this.data.contractPath,
                 version: this.isCNS && this.cnsVersion ? this.cnsVersion : '',
                 funcName: functionName || "",
-                funcParam: this.transation.funcValue,
+                funcParam: this.transation.reqVal,
                 contractAddress: this.isCNS ? "" : this.contractAddress,
                 contractAbi: [this.pramasObj],
                 useAes: false,

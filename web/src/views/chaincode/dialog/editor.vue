@@ -136,7 +136,7 @@
                 </div>
                 <div>
                   <span class="transation-title">logIndex:</span>
-                  <span
+                  <!-- <span
                     v-if="typeof item.logIndex == 'string'"
                     class="transation-content string-color"
                     >{{ item.logIndex }}</span
@@ -145,19 +145,19 @@
                     v-else-if="item.logIndex === null"
                     class="transation-content null-color"
                     >{{ item.logIndex }}null</span
-                  >
-                  <span v-else class="transation-content">{{
+                  > -->
+                  <span  class="transation-content">{{
                     item.logIndex
                   }}</span>
                 </div>
                 <div>
                   <span class="transation-title">transactionIndex:</span>
-                  <span
-                    v-if="item.transactionIndex === null"
+                  <!-- <span
+                    v-if="item.transactionIndex == null||item.transactionIndex == undefined"
                     class="transation-content null-color"
                     >{{ item.transactionIndex }}null</span
-                  >
-                  <span v-else class="transation-content">{{
+                  > -->
+                  <span  class="transation-content">{{
                     item.transactionIndex
                   }}</span>
                 </div>
@@ -332,12 +332,12 @@ import { getFunctionAbi } from "@/util/api";
 // import func from 'vue-editor-bridge';
 export default {
   name: "editor",
-  props: ["data", "show", "input", "editorOutput", "sendConstant"],
+  props: ["datas", "show", "input", "editorOutput", "sendConstant"],
   data() {
     return {
       editorShow: true,
       aceEditor: null,
-      transationData: this.data || null,
+      transationData: this.datas || null,
       modePath: "ace/mode/solidity",
       editorDialog: this.show || false,
       eventSHow: false,
@@ -373,15 +373,16 @@ export default {
   },
   methods: {
     abc(arr) {
-      return arr.replace(/\'/g, "");
-      //     if(arr !=Array){return arr}
-      //     var str = "[";
-      //     arr.forEach(function(item,index,arr){
-      //       str += item+',';
-      //   })
-      //      var a= str.substring(0,(str.length-1));
-      //    return a+"]";
-      // },
+      // return arr.replace(/\'/g, "");
+          if(!Array.isArray(arr)){return arr}
+          return '['+arr.toString()+']'
+        //   var str = "[";
+        //   arr.forEach(function(item,index,arr){
+        //     str += item+',';
+        // })
+        //    var a= str.substring(0,(str.length-1));
+        //  return a+"]";
+      
       //  abc(arr){
       //     arr.forEach(function(item,index,arrs){
       //       if(Number(item)){

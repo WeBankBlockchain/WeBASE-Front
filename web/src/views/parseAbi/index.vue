@@ -403,7 +403,6 @@ export default {
           type: item.type,
           name: item.argumentValue,
         });
-        debugger;
         console.log(dataType);
         inputsVal.push(dataType(item.type, item.argumentValue));
       });
@@ -414,7 +413,6 @@ export default {
       for (let i = 0; i < inputsVal.length; i++) {
         // if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
         if (!inputsVal[i]) {
-          debugger;
           this.textarea = inputsVal[i];
           return false;
         }
