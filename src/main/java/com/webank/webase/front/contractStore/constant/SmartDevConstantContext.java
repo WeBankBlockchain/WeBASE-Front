@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.webank.webase.front.contractStore;
+package com.webank.webase.front.contractStore.constant;
 
 /**
  * Smart-Dev-Contracts evidence template

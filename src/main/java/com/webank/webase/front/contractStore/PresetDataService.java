@@ -1,5 +1,6 @@
 package com.webank.webase.front.contractStore;
 
+import com.webank.webase.front.contractStore.constant.*;
 import com.webank.webase.front.contractStore.entity.ContractFolderItem;
 import com.webank.webase.front.contractStore.entity.ContractItem;
 import com.webank.webase.front.contractStore.entity.StoreItem;
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -30,6 +30,7 @@ public class PresetDataService {
     public static final Integer smartDevEvidenceFolderId = 5;
     public static final Integer assetFolderId = 6;
     public static final Integer traceFolderId = 7;
+    public static final Integer proxyFolderId = 8;
 
 
     public void initStoreItem() {
@@ -54,11 +55,17 @@ public class PresetDataService {
             "Asset Contract Suite",
             "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
                     "Asset Contract Suite");
-        insertStoreItem(traceFolderId, "溯源应用", "Traceability", "4", "evidenceId",
+        insertStoreItem(traceFolderId, "溯源应用", "Traceability", "4", "traceId",
             "一套溯源应用合约模板（Smart-Dev-Contract）",
             "Traceability Contract Suite",
             "一套溯源应用合约模板（Smart-Dev-Contract）",
             "Traceability Contract Suite");
+        insertStoreItem(proxyFolderId, "代理合约模板", "Proxy", "4", "toolboxId",
+            "一套业务、数据分离对代理合约模板",
+            "Proxy Contract Suite",
+            "一套业务、数据分离对代理合约模板",
+            "Proxy Contract Suite");
+
     }
 
     public void insertStoreItem(long storeId, String storeName, String StoreName_en, String StoreType,
@@ -126,6 +133,11 @@ public class PresetDataService {
             "一套溯源应用合约模板（Smart-Dev-Contract）",
             "Traceability Contract Suite",
             "Traceability Contract Suite");
+        insertContractFolderItem(proxyFolderId,proxyFolderId,"Proxy",
+                "一套业务、数据分离对代理合约模板",
+                "一套业务、数据分离对代理合约模板",
+                "Proxy Contract Suite",
+                "Proxy Contract Suite");
     }
 
     public void insertContractFolderItem(long contractFolderId, long storeId, String contractFolderName, String contractFolderDesc, String contractFolderDetail,
@@ -152,7 +164,7 @@ public class PresetDataService {
     public void initContractItem() {
         int contractIndex = 1;
         //tools
-        insertContractItem(contractIndex++,toolboxId,"Address",ToolsConstantContext.ADDRESS_SOURCE,
+        insertContractItem(contractIndex++,toolboxId,"Address", ToolsConstantContext.ADDRESS_SOURCE,
                 ToolsConstantContext.ADDRESS_MD,ToolsConstantContext.ADDRESS_MD);
         insertContractItem(contractIndex++,toolboxId,"LibString",ToolsConstantContext.LIB_STRING_SOURCE,
                 ToolsConstantContext.LIB_STRING_MD,ToolsConstantContext.LIB_STRING_MD);
@@ -201,7 +213,7 @@ public class PresetDataService {
         insertContractItem(contractIndex++,smartDevToolFolderId,"TableTest",ToolsConstantContext.TABLE_TEST_SOURCE,
             ToolsConstantContext.TABLE_CRUD_TEST_MD,ToolsConstantContext.TABLE_CRUD_TEST_MD);
         // evidence
-        insertContractItem(contractIndex++,smartDevEvidenceFolderId,"EvidenceController",SmartDevConstantContext.EVI_CONTROLLER_SOURCE,
+        insertContractItem(contractIndex++,smartDevEvidenceFolderId,"EvidenceController", SmartDevConstantContext.EVI_CONTROLLER_SOURCE,
             SmartDevConstantContext.EVIDENCE_API_MD,SmartDevConstantContext.EVIDENCE_API_MD);
         insertContractItem(contractIndex++,smartDevEvidenceFolderId,"EvidenceRepository",SmartDevConstantContext.EVI_REPO_SOURCE,
             SmartDevConstantContext.EVIDENCE_API_MD,SmartDevConstantContext.EVIDENCE_API_MD);
@@ -230,6 +242,7 @@ public class PresetDataService {
             ToolsConstantContext.ROLES_MD,ToolsConstantContext.COUNTERS_MD);
         insertContractItem(contractIndex++,toolboxId,"Register",ToolsConstantContext.REGISTER_SOURCE,
             ToolsConstantContext.ROLES_MD,ToolsConstantContext.REGISTER_MD);
+        // 1.5.3
         // traceability
         insertContractItem(contractIndex++,traceFolderId,"Goods",SmartDevConstantContext.GOODS,
             SmartDevConstantContext.TRACE_API_MD,SmartDevConstantContext.TRACE_API_MD);
@@ -237,6 +250,27 @@ public class PresetDataService {
             SmartDevConstantContext.TRACE_API_MD,SmartDevConstantContext.TRACE_API_MD);
         insertContractItem(contractIndex++,traceFolderId,"TraceabilityFactory",SmartDevConstantContext.TRACEABILITY_FACTORY,
             SmartDevConstantContext.TRACE_API_MD,SmartDevConstantContext.TRACE_API_MD);
+        // proxy
+        insertContractItem(contractIndex++,proxyFolderId,"EnrollProxy", ProxyConstantContext.ENROLL_PROXY_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+        insertContractItem(contractIndex++,proxyFolderId,"EnrollController", ProxyConstantContext.ENROLL_CONTROLLER_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+        insertContractItem(contractIndex++,proxyFolderId,"EnrollStorage", ProxyConstantContext.ENROLL_STORAGE_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+        insertContractItem(contractIndex++,proxyFolderId,"EnrollStorageStateful", ProxyConstantContext.ENROLL_STORAGE_STATEFUL_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+        insertContractItem(contractIndex++,proxyFolderId,"Proxy", ProxyConstantContext.PROXY_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+        insertContractItem(contractIndex++,proxyFolderId,"BaseStorage", ProxyConstantContext.BASE_STORAGE_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+        insertContractItem(contractIndex++,proxyFolderId,"Ownable", ProxyConstantContext.OWNABLE_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+        insertContractItem(contractIndex++,proxyFolderId,"Strings", ProxyConstantContext.STRINGS_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+        insertContractItem(contractIndex++,proxyFolderId,"Table", ProxyConstantContext.TABLE_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+        insertContractItem(contractIndex++,proxyFolderId,"Address", ToolsConstantContext.ADDRESS_SOURCE,
+                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
     }
 
 
