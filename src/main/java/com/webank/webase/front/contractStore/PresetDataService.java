@@ -61,9 +61,9 @@ public class PresetDataService {
             "一套溯源应用合约模板（Smart-Dev-Contract）",
             "Traceability Contract Suite");
         insertStoreItem(proxyFolderId, "代理合约模板", "Proxy", "4", "toolboxId",
-            "一套业务、数据分离对代理合约模板",
+            "一套可升级的业务、数据分离的代理合约模板",
             "Proxy Contract Suite",
-            "一套业务、数据分离对代理合约模板",
+            "一套可升级的业务、数据分离的代理合约模板",
             "Proxy Contract Suite");
 
     }
@@ -134,8 +134,8 @@ public class PresetDataService {
             "Traceability Contract Suite",
             "Traceability Contract Suite");
         insertContractFolderItem(proxyFolderId,proxyFolderId,"Proxy",
-                "一套业务、数据分离对代理合约模板",
-                "一套业务、数据分离对代理合约模板",
+                "一套可升级的业务、数据分离的代理合约模板",
+                "一套可升级的业务、数据分离的代理合约模板",
                 "Proxy Contract Suite",
                 "Proxy Contract Suite");
     }
