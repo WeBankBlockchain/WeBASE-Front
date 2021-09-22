@@ -411,8 +411,8 @@ export default {
         return;
       }
       for (let i = 0; i < inputsVal.length; i++) {
-        // if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
-        if (!inputsVal[i]) {
+        if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
+        //if (!inputsVal[i]) {
           this.textarea = inputsVal[i];
           return false;
         }
