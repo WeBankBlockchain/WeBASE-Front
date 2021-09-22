@@ -295,7 +295,6 @@ export default {
             }
             if (this.transation.funcValue.length) {
                 for (let i = 0; i < this.transation.funcValue.length; i++) {
-                    debugger
                     let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
                     if (data && isJson(data)) {
                         try {
