@@ -60,9 +60,9 @@ export default {
     },
     mounted() {
         this.getGroup();
-        window.addEventListener('click',function(e){
-            console.log(e)
-        })
+        // window.addEventListener('click',function(e){
+        //     console.log(e)
+        // })
     },
     methods: {
         getGroup() {

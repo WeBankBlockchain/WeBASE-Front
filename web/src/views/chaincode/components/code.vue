@@ -1012,6 +1012,11 @@ export default {
             }
           } else {
             that.errorMessage = output.errors;
+            if (output.error) {
+              that.errorMessage = [
+                { component: "general", formattedMessage: output.error },
+              ];
+            }
             that.errorInfo = that.$t("contracts.contractCompileFail");
             that.loadingAce = false;
           }
@@ -1020,6 +1025,7 @@ export default {
           console.log(JSON.parse(ev.data.data));
         }
       };
+      debugger;
       w.addEventListener("error", function (ev) {
         that.errorInfo = ev;
         that.errorMessage = ev;
