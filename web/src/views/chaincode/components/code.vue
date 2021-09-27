@@ -1025,7 +1025,7 @@ export default {
           console.log(JSON.parse(ev.data.data));
         }
       };
-      debugger;
+      
       w.addEventListener("error", function (ev) {
         that.errorInfo = ev;
         that.errorMessage = ev;
