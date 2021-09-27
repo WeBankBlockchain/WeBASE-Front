@@ -490,42 +490,6 @@ public class Web3ApiService {
 //                bcosSDK.getClient(group2Remove).stop());
     }
 
-    /**
-     * init a new web3j of group id, add in groupChannelConnectionsConfig's connections
-     * todo register block callback
-     * @param groupId
-     * @return
-     */
-//    private synchronized Web3j initWeb3j(int groupId) {
-//        log.info("initWeb3j of groupId:{}", groupId);
-//        List<ChannelConnections> channelConnectionsList =
-//                groupChannelConnectionsConfig.getAllChannelConnections();
-//        ChannelConnections channelConnections = new ChannelConnections();
-//        channelConnections.setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
-//        channelConnections.setGroupId(groupId);
-//        channelConnectionsList.add(channelConnections);
-//        org.fisco.bcos.channel.client.Service service = new org.fisco.bcos.channel.client.Service();
-//        service.setOrgID(Web3Config.orgName);
-//        service.setGroupId(groupId);
-//        service.setThreadPool(threadPoolTaskExecutor);
-//        service.setAllChannelConnections(groupChannelConnectionsConfig);
-//        // newBlockEventCallBack message enqueues in MQ
-//        service.setBlockNotifyCallBack(newBlockEventCallback);
-//        try {
-//            service.run();
-//            serviceMap.put(groupId, service);
-//        } catch (Exception e) {
-//            log.error("initWeb3j fail. groupId:{} error:[]", groupId, e);
-//            throw new FrontException("refresh web3j failed");
-//        }
-//        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-//        channelEthereumService.setTimeout(web3Config.getTimeout());
-//        channelEthereumService.setChannelService(service);
-//        Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
-//        web3jMap.put(groupId, web3j);
-//        return web3j;
-//    }
-
     // get all peers of chain
     public List<Peers.PeerInfo> getPeers(int groupId) {
         return getWeb3j(groupId)
