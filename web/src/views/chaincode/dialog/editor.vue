@@ -357,7 +357,6 @@ export default {
   },
   mounted() {
     this.editorHeight = document.body.offsetHeight * 0.75;
-    debugger
     if (this.transationData.output == "0x") {
       this.inputButtonShow = false;
     } else {
