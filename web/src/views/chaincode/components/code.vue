@@ -385,7 +385,7 @@
     <v-editor
       v-if="editorShow"
       :show="editorShow"
-      :datas="editorData"
+      :data="editorData"
       :sendConstant="sendConstant"
       @close="editorClose"
       ref="editor"
