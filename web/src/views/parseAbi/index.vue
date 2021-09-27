@@ -403,6 +403,7 @@ export default {
           type: item.type,
           name: item.argumentValue,
         });
+        debugger;
         console.log(dataType);
         inputsVal.push(dataType(item.type, item.argumentValue));
       });
@@ -410,17 +411,16 @@ export default {
         this.textarea = "";
         return;
       }
-      debugger
       for (let i = 0; i < inputsVal.length; i++) {
-        if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
-        //if (!inputsVal[i]) {
+        // if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
+        if (!inputsVal[i]) {
+          debugger;
           this.textarea = inputsVal[i];
           return false;
         }
       }
       try {
         if (localStorage.getItem("encryptionId") == 1) {
-          debugger
           this.textarea = web3Abi.smEncodeFunctionCall(
             {
               name: this.functionValue,
