@@ -332,12 +332,12 @@ import { getFunctionAbi } from "@/util/api";
 // import func from 'vue-editor-bridge';
 export default {
   name: "editor",
-  props: ["datas", "show", "input", "editorOutput", "sendConstant"],
+  props: ["data", "show", "input", "editorOutput", "sendConstant"],
   data() {
     return {
       editorShow: true,
       aceEditor: null,
-      transationData: this.datas || null,
+      transationData: this.data || null,
       modePath: "ace/mode/solidity",
       editorDialog: this.show || false,
       eventSHow: false,
