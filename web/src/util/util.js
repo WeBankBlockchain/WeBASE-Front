@@ -323,7 +323,7 @@ export function dataType(type, value) {
     default:
       try {
         var value = value.replace(/\^\[.*\]\$/, '')
-        return JSON.parse(value)
+        return value
       } catch (error) {
         console.log('error：' + value + '!!!' + error);
         return 'error：' + value + '!!!' + error

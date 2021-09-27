@@ -410,6 +410,7 @@ export default {
         this.textarea = "";
         return;
       }
+      
       for (let i = 0; i < inputsVal.length; i++) {
         if (!inputsVal[i] && typeof (inputsVal[i]) != 'boolean') {
         //if (!inputsVal[i]) {
@@ -419,6 +420,7 @@ export default {
       }
       try {
         if (localStorage.getItem("encryptionId") == 1) {
+          
           this.textarea = web3Abi.smEncodeFunctionCall(
             {
               name: this.functionValue,
