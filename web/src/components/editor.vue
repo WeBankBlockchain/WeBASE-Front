@@ -16,9 +16,9 @@
 <template>
     <el-dialog :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
         <div v-if='!transationData'>{{$t('text.noData')}}</div>
-        <!-- <div v-if='transationData && !transationData.logs' slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
+        <div v-if='transationData && !transationData.logs' slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
             <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>
-        </div> -->
+        </div>
         <div v-if='transationData && transationData.logs' slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
             <div>{</div>
             <div v-for="(val,key) in transationData" style="padding-left: 10px;">

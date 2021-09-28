@@ -59,10 +59,7 @@ export default {
         };
     },
     mounted() {
-        this.getGroup();
-        // window.addEventListener('click',function(e){
-        //     console.log(e)
-        // })
+        this.getGroup()
     },
     methods: {
         getGroup() {

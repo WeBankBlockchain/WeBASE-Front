@@ -762,23 +762,19 @@ export default {
       //  this.saveShow = true;
       if (this.data.contractSource != data) {
         console.log("合约改变弹框提示");
-        this.$confirm(
-          `${this.$t("text.unsavedContract")}？`,
-          `${this.$t("text.title")}`,
-          {
-            confirmButtonText: this.$t("title.save"),
-            center: true,
-            type: "warning",
-            dangerouslyUseHTMLString: true,
-          }
-        )
+        this.$confirm(`${this.$t("text.unsavedContract")}？`,`${this.$t("text.title")}`, {
+          confirmButtonText: this.$t("title.save"),
+          center: true,
+          type: 'warning',
+          dangerouslyUseHTMLString: true,
+        })
           .then(() => {
             this.saveCode();
           })
           .catch(() => {
             this.$message({
               type: "info",
-              message: this.$t("text.noSave"),
+              message: this.$t("text.noSave")
             });
           });
       }
@@ -1012,11 +1008,6 @@ export default {
             }
           } else {
             that.errorMessage = output.errors;
-            if (output.error) {
-              that.errorMessage = [
-                { component: "general", formattedMessage: output.error },
-              ];
-            }
             that.errorInfo = that.$t("contracts.contractCompileFail");
             that.loadingAce = false;
           }
@@ -1025,7 +1016,6 @@ export default {
           console.log(JSON.parse(ev.data.data));
         }
       };
-      
       w.addEventListener("error", function (ev) {
         that.errorInfo = ev;
         that.errorMessage = ev;

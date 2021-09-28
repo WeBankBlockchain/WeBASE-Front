@@ -142,8 +142,7 @@ export default {
                 userName: "",
                 funcName: "",
                 funcValue: [],
-                funcType: "function",
-                reqVal:[]
+                funcType: "function"
             },
             userId: "",
             userList: [],
@@ -298,12 +297,12 @@ export default {
                     let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
                     if (data && isJson(data)) {
                         try {
-                            this.transation.reqVal[i] = JSON.parse(data)
+                            this.transation.funcValue[i] = JSON.parse(data)
                         } catch (error) {
                             console.log(error)
                         }
                     } else {
-                        this.transation.reqVal[i] = data;
+                        this.transation.funcValue[i] = data;
                     }
                 }
             }
@@ -320,7 +319,7 @@ export default {
                 contractPath: this.data.contractPath,
                 version: this.isCNS && this.cnsVersion ? this.cnsVersion : '',
                 funcName: functionName || "",
-                funcParam: this.transation.reqVal,
+                funcParam: this.transation.funcValue,
                 contractAddress: this.isCNS ? "" : this.contractAddress,
                 contractAbi: [this.pramasObj],
                 useAes: false,

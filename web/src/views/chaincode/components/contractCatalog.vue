@@ -1208,7 +1208,6 @@ export default {
               }
             }
             this.$store.dispatch("set_contractDataList", []);
-            
             this.getContracts(val.contractPath);
           } else {
             this.$message({

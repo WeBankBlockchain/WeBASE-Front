@@ -114,7 +114,6 @@ module.exports = function worker(self) {
             break
         case 'compile':
             console.log(data.input,data.list,data.path)
-            
             missingInputs.length = 0
             if(data.input && compileJSON) {
            

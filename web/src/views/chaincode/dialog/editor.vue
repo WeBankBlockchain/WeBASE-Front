@@ -136,7 +136,7 @@
                 </div>
                 <div>
                   <span class="transation-title">logIndex:</span>
-                  <!-- <span
+                  <span
                     v-if="typeof item.logIndex == 'string'"
                     class="transation-content string-color"
                     >{{ item.logIndex }}</span
@@ -145,19 +145,19 @@
                     v-else-if="item.logIndex === null"
                     class="transation-content null-color"
                     >{{ item.logIndex }}null</span
-                  > -->
-                  <span  class="transation-content">{{
+                  >
+                  <span v-else class="transation-content">{{
                     item.logIndex
                   }}</span>
                 </div>
                 <div>
                   <span class="transation-title">transactionIndex:</span>
-                  <!-- <span
-                    v-if="item.transactionIndex == null||item.transactionIndex == undefined"
+                  <span
+                    v-if="item.transactionIndex === null"
                     class="transation-content null-color"
                     >{{ item.transactionIndex }}null</span
-                  > -->
-                  <span  class="transation-content">{{
+                  >
+                  <span v-else class="transation-content">{{
                     item.transactionIndex
                   }}</span>
                 </div>
@@ -373,16 +373,15 @@ export default {
   },
   methods: {
     abc(arr) {
-      // return arr.replace(/\'/g, "");
-          if(!Array.isArray(arr)){return arr}
-          return '['+arr.toString()+']'
-        //   var str = "[";
-        //   arr.forEach(function(item,index,arr){
-        //     str += item+',';
-        // })
-        //    var a= str.substring(0,(str.length-1));
-        //  return a+"]";
-      
+      return arr.replace(/\'/g, "");
+      //     if(arr !=Array){return arr}
+      //     var str = "[";
+      //     arr.forEach(function(item,index,arr){
+      //       str += item+',';
+      //   })
+      //      var a= str.substring(0,(str.length-1));
+      //    return a+"]";
+      // },
       //  abc(arr){
       //     arr.forEach(function(item,index,arrs){
       //       if(Number(item)){
