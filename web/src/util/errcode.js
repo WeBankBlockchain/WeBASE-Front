@@ -543,6 +543,22 @@ let errCode = {
         en: "get event callback error",
         zh: '获取事件回调错误'
     },
+    "201321": {
+        en: "query cns info fail",
+        zh: '查询cns信息失败'
+    },
+    "201322": {
+        en: "contract funcParam size not match with ABI",
+        zh: '合同函数参数大小与ABI不匹配'
+    },
+    "201323": {
+        en: "contract funcParam bytes array size not match",
+        zh: '协定funcParam字节数组大小不匹配'
+    },
+    "201324": {
+        en: "contract funcParam bytes array not support high dimensional array",
+        zh: '协定funcParam字节数组不支持高维数组'
+    },
     "201031": {
         en: "privateKey decode fail",
         zh: '私钥解码失败'
