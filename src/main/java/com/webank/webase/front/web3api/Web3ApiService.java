@@ -50,6 +50,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
 import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
@@ -489,42 +490,6 @@ public class Web3ApiService {
 //                bcosSDK.getClient(group2Remove).stop());
     }
 
-    /**
-     * init a new web3j of group id, add in groupChannelConnectionsConfig's connections
-     * todo register block callback
-     * @param groupId
-     * @return
-     */
-//    private synchronized Web3j initWeb3j(int groupId) {
-//        log.info("initWeb3j of groupId:{}", groupId);
-//        List<ChannelConnections> channelConnectionsList =
-//                groupChannelConnectionsConfig.getAllChannelConnections();
-//        ChannelConnections channelConnections = new ChannelConnections();
-//        channelConnections.setConnectionsStr(channelConnectionsList.get(0).getConnectionsStr());
-//        channelConnections.setGroupId(groupId);
-//        channelConnectionsList.add(channelConnections);
-//        org.fisco.bcos.channel.client.Service service = new org.fisco.bcos.channel.client.Service();
-//        service.setOrgID(Web3Config.orgName);
-//        service.setGroupId(groupId);
-//        service.setThreadPool(threadPoolTaskExecutor);
-//        service.setAllChannelConnections(groupChannelConnectionsConfig);
-//        // newBlockEventCallBack message enqueues in MQ
-//        service.setBlockNotifyCallBack(newBlockEventCallback);
-//        try {
-//            service.run();
-//            serviceMap.put(groupId, service);
-//        } catch (Exception e) {
-//            log.error("initWeb3j fail. groupId:{} error:[]", groupId, e);
-//            throw new FrontException("refresh web3j failed");
-//        }
-//        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-//        channelEthereumService.setTimeout(web3Config.getTimeout());
-//        channelEthereumService.setChannelService(service);
-//        Web3j web3j = Web3j.build(channelEthereumService, service.getGroupId());
-//        web3jMap.put(groupId, web3j);
-//        return web3j;
-//    }
-
     // get all peers of chain
     public List<Peers.PeerInfo> getPeers(int groupId) {
         return getWeb3j(groupId)
@@ -809,13 +774,33 @@ public class Web3ApiService {
     }
 
     /**
+     * get batch receipt in one block
+     * @param groupId
+     * @param blockNumber
+     * @param start start index
+     * @param count cursor, if -1, return all
+     */
+    public List<TransactionReceipt> getBatchReceiptByBlockNumber(int groupId, BigInteger blockNumber, int start, int count) {
+        BcosTransactionReceiptsDecoder batchReceipts = getWeb3j(groupId)
+            .getBatchReceiptsByBlockNumberAndRange(blockNumber, String.valueOf(start), String.valueOf(count));
+        return batchReceipts.decodeTransactionReceiptsInfo().getTransactionReceipts();
+    }
+
+    public List<TransactionReceipt> getBatchReceiptByBlockHash(int groupId, String blockHash, int start, int count) {
+        BcosTransactionReceiptsDecoder batchReceipts = getWeb3j(groupId)
+            .getBatchReceiptsByBlockHashAndRange(blockHash, String.valueOf(start), String.valueOf(count));
+        return batchReceipts.decodeTransactionReceiptsInfo().getTransactionReceipts();
+    }
+
+
+    /**
      * get first web3j in web3jMap
      *
      * @return
      */
     public Client getWeb3j() {
         this.checkConnection();
-        Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList();
+        Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList(); //1
         if (groupIdSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             // get default web3j of integer max value

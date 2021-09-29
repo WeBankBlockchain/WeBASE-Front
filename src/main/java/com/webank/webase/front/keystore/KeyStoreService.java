@@ -443,7 +443,7 @@ public class KeyStoreService {
         // check name
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // to store locally
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair(privateKey);
+        CryptoKeyPair keyPair = cryptoSuite.createKeyPair(Numeric.cleanHexPrefix(privateKey));
         if (keyPair == null) {
             log.error("importFromPrivateKey get null keyPair");
             throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
@@ -466,8 +466,21 @@ public class KeyStoreService {
         // post private and save in sign
         RspUserInfo rspUserInfo = postForSignUserEntity(privateKeyEncoded, signUserId, appId);
         // save in local as external
-        KeyStoreInfo keyStoreInfo = saveSignKeyStore(rspUserInfo);
-        return keyStoreInfo;
+        String address = rspUserInfo.getAddress();
+        if (StringUtils.isEmpty(address)) {
+            log.error("importPrivateKeyToSign address empty!");
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+        // v1.5.3: check address exist, if address exist, not update user type as external but remain local type
+        KeyStoreInfo checkExist = keystoreRepository.findByAddress(address);
+        if (checkExist != null) {
+            log.info("saveSignKeyStore of importWithSign, address already exists, only save signUserId:{}",
+                rspUserInfo.getSignUserId());
+            checkExist.setAppId(rspUserInfo.getAppId());
+            checkExist.setSignUserId(rspUserInfo.getSignUserId());
+            return keystoreRepository.save(checkExist);
+        }
+        return saveSignKeyStore(rspUserInfo);
     }
 
 

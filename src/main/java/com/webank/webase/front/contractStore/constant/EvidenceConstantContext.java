@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.front.contractStore;
+package com.webank.webase.front.contractStore.constant;
 
 
 public class EvidenceConstantContext {

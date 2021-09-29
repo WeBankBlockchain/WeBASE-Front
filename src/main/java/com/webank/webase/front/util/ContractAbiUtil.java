@@ -53,7 +53,7 @@ public class ContractAbiUtil {
     private static final String REGEX = "(\\w+)(?:\\[(.*?)\\])(?:\\[(.*?)\\])?";
     private static final Pattern PATTERN = Pattern.compile(REGEX);
     public static final String STATE_MUTABILITY_VIEW = "view";
-        public static final String STATE_MUTABILITY_PURE = "pure";
+    public static final String STATE_MUTABILITY_PURE = "pure";
 
     @Data
     public static class VersionEvent {

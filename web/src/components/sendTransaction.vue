@@ -121,7 +121,7 @@
             <el-button @click="close">{{$t('dialog.cancel')}}</el-button>
             <el-button type="primary" @click="submit('transation')" :disabled='buttonClick'>{{$t('dialog.confirm')}}</el-button>
         </div>
-        <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" :before-close="closeUserName" class="dialog-wrapper" width="640px" :center="true" :append-to-body="true">
+        <el-dialog :title="$t('dialog.addUsername')" :visible.sync="creatUserNameVisible" :before-close="createUserClose" class="dialog-wrapper" width="640px" :center="true" :append-to-body="true">
             <v-createUser  @close='createUserClose'></v-createUser>
         </el-dialog>
     </div>
@@ -142,7 +142,8 @@ export default {
                 userName: "",
                 funcName: "",
                 funcValue: [],
-                funcType: "function"
+                funcType: "function",
+                reqVal:[]
             },
             userId: "",
             userList: [],
@@ -182,6 +183,7 @@ export default {
     },
     methods: {
         submit: function (formName) {
+            
             if (this.isCNS) {
                 if (!this.cnsName || !this.cnsVersion) {
                     this.$message({
@@ -296,12 +298,12 @@ export default {
                     let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
                     if (data && isJson(data)) {
                         try {
-                            this.transation.funcValue[i] = JSON.parse(data)
+                            this.transation.reqVal[i] = JSON.parse(data)
                         } catch (error) {
                             console.log(error)
                         }
                     } else {
-                        this.transation.funcValue[i] = data;
+                        this.transation.reqVal[i] = data;
                     }
                 }
             }
@@ -318,7 +320,7 @@ export default {
                 contractPath: this.data.contractPath,
                 version: this.isCNS && this.cnsVersion ? this.cnsVersion : '',
                 funcName: functionName || "",
-                funcParam: this.transation.funcValue,
+                funcParam: this.transation.reqVal,
                 contractAddress: this.isCNS ? "" : this.contractAddress,
                 contractAbi: [this.pramasObj],
                 useAes: false,
