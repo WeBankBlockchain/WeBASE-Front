@@ -243,7 +243,10 @@ export default {
         sendSuccess(val) {
             this.dialogVisible = false;
             this.editorShow = true;
-            this.editorData = val;
+            this.editorData = null;
+            this.editorData = val.resData;
+            this.editorInput = val.input;
+            this.editorOutput = val.data.outputs;
         },
         editorClose() {
             this.editorShow = false;
