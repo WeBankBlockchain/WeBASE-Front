@@ -68,6 +68,7 @@ import org.fisco.bcos.sdk.abi.datatypes.Function;
 import org.fisco.bcos.sdk.abi.datatypes.Type;
 import org.fisco.bcos.sdk.abi.datatypes.generated.AbiTypes;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.abi.wrapper.ABICodecJsonWrapper;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition.NamedType;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinitionFactory;
@@ -862,7 +863,8 @@ public class TransService {
             try {
                 List<String> res = abiCodec
                     .decodeMethodToString(abiStr, funcName, callOutput.getOutput());
-                // todo bytes类型转十六进制
+                log.info("call contract res before decode:{}", res);
+                // bytes类型转十六进制
                 this.handleFuncOutput(abiStr, funcName, res);
                 log.info("call contract res:{}", res);
                 return res;
@@ -1027,6 +1029,7 @@ public class TransService {
      */
     private void handleFuncOutput(String abiStr, String funcName, List<String> outputValues) {
         ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
+        ABICodecJsonWrapper jsonWrapper = new ABICodecJsonWrapper();
         List<NamedType> outputTypeList = abiDefinition.getOutputs();
         for (int i = 0; i < outputTypeList.size(); i++) {
             String type = outputTypeList.get(i).getType();
@@ -1038,8 +1041,11 @@ public class TransService {
                 // if not bytes[], bytes or bytesN
                 if (!type.endsWith("[]")) {
                     // update funcParam
-                    String bytesBase64 = outputValues.get(i);
-                    byte[] inputArray = Base64.getDecoder().decode(bytesBase64);
+                    String bytesBase64Str = outputValues.get(i);
+                    if (bytesBase64Str.startsWith("base64://")) {
+                        bytesBase64Str = bytesBase64Str.substring("base64://".length());
+                    }
+                    byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
                     // replace hexString with array
                     outputValues.set(i, Numeric.toHexString(inputArray));
                 } else {
@@ -1048,6 +1054,9 @@ public class TransService {
                     List<String> bytesArray = new ArrayList<>(base64StrArray.size());
                     for (int j = 0; j < base64StrArray.size(); j++) {
                         String bytesBase64Str = base64StrArray.get(j);
+                        if (bytesBase64Str.startsWith("base64://")) {
+                            bytesBase64Str = bytesBase64Str.substring("base64://".length());
+                        }
                         byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
                         bytesArray.add(Numeric.toHexString(inputArray));
                     }
