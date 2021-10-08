@@ -276,7 +276,8 @@ public class ContractService {
         }
 
         // data sign
-        String data = bytecodeBin + encodedConstructor;
+//        String data = bytecodeBin + encodedConstructor;
+        String data = encodedConstructor;
         String signMsg = transService.signMessage(groupId, client, signUserId, "", data);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
