@@ -378,12 +378,6 @@ public class EventService {
         Integer fromBlock, Integer toBlock, EventTopicParam eventTopicParam) {
         log.info("start getContractEventLog groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventTopicParam:{}",
             groupId, contractAddress, fromBlock, toBlock, eventTopicParam);
-        // check block height
-        Integer blockHeight = web3ApiService.getBlockNumber(groupId).intValue();
-        if (blockHeight < toBlock) {
-            log.error("getContractEventLog error for request blockHeight greater than blockHeight.");
-            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
-        }
 
         EventLogParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
             contractAddress, eventTopicParam, cryptoSuite);
