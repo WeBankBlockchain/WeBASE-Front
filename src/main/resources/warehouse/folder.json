@@ -1,0 +1,74 @@
+[
+  {
+    "contractFolderId" : 1,
+    "storeId" : 1,
+    "contractFolderName" : "Tools",
+    "contractFolderDesc" : "工具箱中有常用的工具合约",
+    "contractFolderDetail" : "工具箱中有常用的工具合约",
+    "contractFolderDesc_en" : "Toolbox Contract Suite",
+    "contractFolderDetail_en" : "Toolbox Contract Suite"
+  },
+  {
+    "contractFolderId" : 2,
+    "storeId" : 2,
+    "contractFolderName" : "Evidence",
+    "contractFolderDesc" : "一套区块链存证合约，实现区块链存证、取证",
+    "contractFolderDetail" : "一套区块链存证合约，实现区块链存证、取证",
+    "contractFolderDesc_en" : "Evidence Contract Suite",
+    "contractFolderDetail_en" : "Evidence Contract Suite"
+  },
+  {
+    "contractFolderId" : 3,
+    "storeId" : 3,
+    "contractFolderName" : "Points",
+    "contractFolderDesc" : "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+    "contractFolderDetail" : "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+    "contractFolderDesc_en" : "Points Contract Suite",
+    "contractFolderDetail_en" : "Points Contract Suite"
+  },
+  {
+    "contractFolderId" : 4,
+    "storeId" : 1,
+    "contractFolderName" : "Smart_Dev_Basic",
+    "contractFolderDesc" : "SmartDev基础合约，包含Table/KVTable/Sha/Crypto/HelloWorld等",
+    "contractFolderDetail" : "SmartDev基础合约，包含Table/KVTable/Sha/Crypto/HelloWorld等",
+    "contractFolderDesc_en" : "Smart-Dev-Contract basic contract suite, including Table/KVTable/Sha/Crypto/HelloWorld etc.",
+    "contractFolderDetail_en" : "Smart-Dev-Contract basic contract suite, including Table/KVTable/Sha/Crypto/HelloWorld etc."
+  },
+  {
+    "contractFolderId" : 5,
+    "storeId" : 4,
+    "contractFolderName" : "Smart_Dev_Evidence",
+    "contractFolderDesc" : "SmartDev存证合约案例",
+    "contractFolderDetail" : "SmartDev存证合约案例",
+    "contractFolderDesc_en" : "Smart-Dev-Contract Evidence contract suite",
+    "contractFolderDetail_en" : "Smart-Dev-Contract Evidence contract suite"
+  },
+  {
+    "contractFolderId" : 6,
+    "storeId" : 6,
+    "contractFolderName" : "Asset",
+    "contractFolderDesc" : "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等，具有增发、销毁，暂停合约，黑白名单等权限控制等功能",
+    "contractFolderDetail" : "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等，具有增发、销毁，暂停合约，黑白名单等权限控制等功能",
+    "contractFolderDesc_en" : "Asset Contract Suite",
+    "contractFolderDetail_en" : "Asset Contract Suite"
+  },
+  {
+    "contractFolderId" : 7,
+    "storeId" : 7,
+    "contractFolderName" : "Traceability",
+    "contractFolderDesc" : "一套溯源应用合约模板（Smart-Dev-Contract）",
+    "contractFolderDetail" : "一套溯源应用合约模板（Smart-Dev-Contract）",
+    "contractFolderDesc_en" : "Traceability Contract Suite",
+    "contractFolderDetail_en" : "Traceability Contract Suite"
+  },
+  {
+    "contractFolderId" : 8,
+    "storeId" : 8,
+    "contractFolderName" : "Proxy",
+    "contractFolderDesc" : "一套可升级的业务、数据分离的代理合约模板",
+    "contractFolderDetail" : "一套可升级的业务、数据分离的代理合约模板",
+    "contractFolderDesc_en" : "Proxy Contract Suite",
+    "contractFolderDetail_en" : "Proxy Contract Suite"
+  }
+]
