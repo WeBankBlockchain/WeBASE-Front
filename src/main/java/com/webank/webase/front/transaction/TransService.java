@@ -305,6 +305,7 @@ public class TransService {
      * @param function function
      * @param commonContract contract
      */
+    @Deprecated
     public static TransactionReceipt execTransaction(Function function,
             CommonContract commonContract, TransactionDecoderService txDecoder) throws FrontException {
         Instant startTime = Instant.now();

@@ -169,6 +169,7 @@ public class Web3ApiService {
         if (opt.isPresent()) {
             transactionReceipt = opt.get();
         }
+        CommonUtils.decodeReceipt(transactionReceipt, getWeb3j(groupId).getCryptoSuite());
         CommonUtils.processReceiptHexNumber(transactionReceipt);
         return transactionReceipt;
     }
