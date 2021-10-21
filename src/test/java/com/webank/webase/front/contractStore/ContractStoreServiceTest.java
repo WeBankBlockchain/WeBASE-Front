@@ -15,13 +15,20 @@
 package com.webank.webase.front.contractStore;
 
 import com.webank.webase.front.base.SpringTestBase;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contractStore.entity.ContractFolderItem;
 import com.webank.webase.front.contractStore.entity.ContractItem;
 import com.webank.webase.front.contractStore.entity.StoreItem;
 import com.webank.webase.front.util.JsonUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 
 public class ContractStoreServiceTest extends SpringTestBase {
 
@@ -63,7 +70,7 @@ public class ContractStoreServiceTest extends SpringTestBase {
     }
 
     @Test
-    public void test() {
+    public void testPrintAll() {
 
         List<ContractItem> contractItemList = contractItemRepository.findAll();
         for (ContractItem contractItem : contractItemList) {
@@ -72,5 +79,6 @@ public class ContractStoreServiceTest extends SpringTestBase {
             System.out.println(JsonUtils.objToString(contractItem));
         }
     }
+
 
 }
