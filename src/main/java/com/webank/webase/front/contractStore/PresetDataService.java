@@ -1,11 +1,20 @@
 package com.webank.webase.front.contractStore;
 
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contractStore.constant.*;
 import com.webank.webase.front.contractStore.entity.ContractFolderItem;
 import com.webank.webase.front.contractStore.entity.ContractItem;
 import com.webank.webase.front.contractStore.entity.StoreItem;
+import com.webank.webase.front.util.JsonUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -296,9 +305,74 @@ public class PresetDataService {
 
     public void initPresetData()
     {
-        initContractItem();
-        initContractFolderItem();
-        initStoreItem();
+//        initContractItem();
+//        initContractFolderItem();
+//        initStoreItem();
+        this.readAndInitContractItem();
+        this.readAndInitFolderItem();
+        this.readAndInitStoreItem();
     }
 
+    /**
+     * read from ./resources/warehouse/*.json
+     */
+    public void readAndInitStoreItem() {
+        String jsonStr = this.loadWarehouseJson("warehouse.json");
+        List<StoreItem> storeItems = JsonUtils.toJavaObjectList(jsonStr, StoreItem.class);
+        if (storeItems == null) {
+            log.error("readAndInitStoreItem get null");
+            return;
+        }
+        for (StoreItem item : storeItems) {
+            item.setCreateTime(LocalDateTime.now());
+            item.setModifyTime(item.getCreateTime());
+        }
+        contractStoreRepository.save(storeItems);
+        log.info("readAndInitStoreItem save {} items", storeItems.size());
+    }
+
+    public void readAndInitFolderItem() {
+        String jsonStr = this.loadWarehouseJson("folder.json");
+        List<ContractFolderItem> folderItems = JsonUtils.toJavaObjectList(jsonStr, ContractFolderItem.class);
+        if (folderItems == null) {
+            log.error("readAndInitFolderItem get null");
+            return;
+        }
+        for (ContractFolderItem item : folderItems) {
+            item.setCreateTime(LocalDateTime.now());
+            item.setModifyTime(item.getCreateTime());
+        }
+        contractFolderRepository.save(folderItems);
+        log.info("readAndInitFolderItem save {} items", folderItems.size());
+    }
+
+    public void readAndInitContractItem() {
+        String jsonStr = this.loadWarehouseJson("contract.json");
+        List<ContractItem> contractItems = JsonUtils.toJavaObjectList(jsonStr, ContractItem.class);
+        if (contractItems == null) {
+            log.error("readAndInitContractItem get null");
+            return;
+        }
+        for (ContractItem item : contractItems) {
+            item.setCreateTime(LocalDateTime.now());
+            item.setModifyTime(item.getCreateTime());
+        }
+        contractItemRepository.save(contractItems);
+        log.info("readAndInitContractItem save {} items", contractItems.size());
+    }
+
+    private String loadWarehouseJson(String jsonFilePath) {
+        log.info("loadWarehouseJson :{}", jsonFilePath);
+        try (InputStream nodeCrtInput = new ClassPathResource(jsonFilePath).getInputStream()) {
+            String jsonStr = IOUtils.toString(nodeCrtInput, StandardCharsets.UTF_8);
+            log.debug("loadCrtContentByPath itemList:{}", jsonStr);
+            return jsonStr;
+        } catch (IOException e) {
+            log.error("loadWarehouseJson, Exception:[]", e);
+            throw new FrontException("loadWarehouseJson error:" + e.getMessage());
+        } catch (Exception e) {
+            log.error("loadWarehouseJson error:[]", e);
+            throw new FrontException("loadWarehouseJson error:" + e.getMessage());
+        }
+    }
 }
