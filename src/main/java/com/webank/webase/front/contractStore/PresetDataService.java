@@ -324,8 +324,12 @@ public class PresetDataService {
             return;
         }
         for (StoreItem item : storeItems) {
-            item.setCreateTime(LocalDateTime.now());
-            item.setModifyTime(item.getCreateTime());
+            if (contractStoreRepository.exists(item.getStoreId())) {
+                storeItems.remove(item);
+            } else {
+                item.setCreateTime(LocalDateTime.now());
+                item.setModifyTime(item.getCreateTime());
+            }
         }
         contractStoreRepository.save(storeItems);
         log.info("readAndInitStoreItem save {} items", storeItems.size());
@@ -339,8 +343,12 @@ public class PresetDataService {
             return;
         }
         for (ContractFolderItem item : folderItems) {
-            item.setCreateTime(LocalDateTime.now());
-            item.setModifyTime(item.getCreateTime());
+            if (contractFolderRepository.exists(item.getContractFolderId())) {
+                folderItems.remove(item);
+            } else {
+                item.setCreateTime(LocalDateTime.now());
+                item.setModifyTime(item.getCreateTime());
+            }
         }
         contractFolderRepository.save(folderItems);
         log.info("readAndInitFolderItem save {} items", folderItems.size());
@@ -354,8 +362,12 @@ public class PresetDataService {
             return;
         }
         for (ContractItem item : contractItems) {
-            item.setCreateTime(LocalDateTime.now());
-            item.setModifyTime(item.getCreateTime());
+            if (contractItemRepository.exists(item.getContractId())) {
+                contractItems.remove(item);
+            } else {
+                item.setCreateTime(LocalDateTime.now());
+                item.setModifyTime(item.getCreateTime());
+            }
         }
         contractItemRepository.save(contractItems);
         log.info("readAndInitContractItem save {} items", contractItems.size());
