@@ -383,6 +383,7 @@ public class PresetDataService {
             return jsonStr;
         } catch (Exception e) {
             log.error("loadWarehouseJson error:[]", e);
+            return null;
         }
     }
 }
