@@ -381,12 +381,8 @@ public class PresetDataService {
             String jsonStr = IOUtils.toString(nodeCrtInput, StandardCharsets.UTF_8);
             log.debug("loadCrtContentByPath itemList:{}", jsonStr);
             return jsonStr;
-        } catch (IOException e) {
-            log.error("loadWarehouseJson, Exception:[]", e);
-            throw new FrontException("loadWarehouseJson error:" + e.getMessage());
         } catch (Exception e) {
             log.error("loadWarehouseJson error:[]", e);
-            throw new FrontException("loadWarehouseJson error:" + e.getMessage());
         }
     }
 }
