@@ -53,7 +53,7 @@ usage() {
 Usage:
     ${__cmd}    [-h] [-t new_tag] [-p] [-i fiscoorg]
     -t          New tag for image, required. ex: fisco is v2.8.0, then tag is v2.8.0
-    -c          BCOS docker image tag, default v2.4.0, equal to fiscoorg/fiscobcos:v2.4.0.
+    -c          BCOS docker image tag, default v2.8.0, equal to fiscoorg/fiscobcos:v2.8.0.
     -p          Push image to docker hub, default no.
     -i          Default organization, default fiscoorg.
     -h          Show help info.
