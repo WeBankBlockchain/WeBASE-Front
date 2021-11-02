@@ -1,8 +1,8 @@
 name: Docker Build And Push To Docker Hub
 
 on:
-#  schedule:
-#    - cron: '0 10 * * *' # everyday at 10am
+  schedule:
+    - cron: '0 10 * * *' # everyday at 10am
   push:
     tags:
       - 'v*.*.*'
@@ -108,7 +108,7 @@ jobs:
           tagRegex: (.*)  # Optional. Returns specified group text as tag name. Full tag string is returned if regex is not defined.
           tagRegexGroup: 1 # Optional. Default is 1.
 
-      # todo get fisco tag
+      # todo get fisco's tag. temporarily use variable of DOCKER_FISCO_TAG
       - name: Set docker tag from tag
         id: set_docker_tag
         run: |
