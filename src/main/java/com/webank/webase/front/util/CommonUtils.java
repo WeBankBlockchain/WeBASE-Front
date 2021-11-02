@@ -57,6 +57,7 @@ import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -686,6 +687,14 @@ public class CommonUtils {
             }
         }
         return flag;
+    }
+
+
+    public static void decodeReceipt(TransactionReceipt receipt, CryptoSuite cryptoSuite) {
+        // decode receipt
+        TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
+        String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
+        receipt.setMessage(receiptMsg);
     }
 
     /**

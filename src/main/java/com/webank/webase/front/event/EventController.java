@@ -33,6 +33,7 @@ import com.webank.webase.front.event.entity.RspContractInfo;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -69,11 +70,13 @@ public class EventController extends BaseController {
 
     @Autowired
     private EventService eventService;
+    @Autowired
+    private Web3ApiService web3ApiService;
 
 
     @ApiOperation(value = "registerNewBlockEvent",
             notes = "register registerNewBlockEvent and push message to mq")
-    @ApiImplicitParam(name = "ReqNewBlockEventRegister", value = "注册出块通知所需配置",
+    @ApiImplicitParam(name = "reqNewBlockEventRegister", value = "注册出块通知所需配置",
             required = true, dataType = "ReqNewBlockEventRegister")
     @PostMapping("newBlockEvent")
     public BaseResponse registerNewBlockEvent(
@@ -96,7 +99,7 @@ public class EventController extends BaseController {
 
     @ApiOperation(value = "registerContractEvent",
             notes = "register contract event callback and push message to mq")
-    @ApiImplicitParam(name = "ReqContractEventRegister", value = "EventLogUserParams与消息队列所需配置",
+    @ApiImplicitParam(name = "reqContractEventRegister", value = "EventLogUserParams与消息队列所需配置",
             required = true, dataType = "ReqContractEventRegister")
     @PostMapping("contractEvent")
     public BaseResponse registerContractEvent(
@@ -176,7 +179,7 @@ public class EventController extends BaseController {
 
     @ApiOperation(value = "unregisterNewBlockEvent",
             notes = "unregister NewBlockEvent")
-    @ApiImplicitParam(name = "ReqNewBlockEventRegister", value = "注册出块通知所需配置与数据表的id值",
+    @ApiImplicitParam(name = "reqUnregister", value = "注册出块通知所需配置与数据表的id值",
             required = true, dataType = "ReqNewBlockEventRegister")
     @DeleteMapping("newBlockEvent")
     public BaseResponse unregisterNewBlockEvent(
@@ -234,7 +237,7 @@ public class EventController extends BaseController {
 
     @ApiOperation(value = "unregisterContractEvent",
             notes = "unregister contract event")
-    @ApiImplicitParam(name = "ReqContractEventRegister", value = "注册出块通知所需配置与数据表的id值",
+    @ApiImplicitParam(name = "reqUnregister", value = "注册出块通知所需配置与数据表的id值",
             required = true, dataType = "ReqContractEventRegister")
     @DeleteMapping("contractEvent")
     public BaseResponse unregisterContractEvent(
@@ -254,7 +257,7 @@ public class EventController extends BaseController {
 
     @ApiOperation(value = "listContractEventLogs",
         notes = "get event logs from block's tx receipts")
-    @ApiImplicitParam(name = "ReqEventLogList", value = "获取区块EventLog所需参数",
+    @ApiImplicitParam(name = "reqEventLogList", value = "获取区块EventLog所需参数",
         required = true, dataType = "ReqEventLogList")
     @PostMapping("eventLogs/list")
     public BasePageResponse listContractEventLogs(
@@ -262,15 +265,30 @@ public class EventController extends BaseController {
         log.debug("start listContractEventLogs. reqEventLogList:{}", reqEventLogList);
         checkParamResult(result);
         int groupId = reqEventLogList.getGroupId();
+        // v1.5.4 support block auto set as latest block number by set value as -1
         Integer fromBlock = reqEventLogList.getFromBlock();
         Integer toBlock = reqEventLogList.getToBlock();
-        // 0 < fromBlock <= toBlock, latest means latest block
+        // 0 < fromBlock <= toBlock, latest means block number now
         if (fromBlock == 0 || toBlock == 0) {
             return new BasePageResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }
+        // check block height
+        Integer blockHeight = web3ApiService.getBlockNumber(groupId).intValue();
+        if (blockHeight < toBlock) {
+            log.error("getContractEventLog error for request blockHeight greater than blockHeight.");
+            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
+        }
+        if (fromBlock == -1) {
+            fromBlock = blockHeight;
+        }
+        if (toBlock == -1) {
+            toBlock = blockHeight;
+        }
+        // is to is -1, all from can be greater than to;
         if (fromBlock > toBlock) {
             return new BasePageResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
         }
+
         String contractAddress = reqEventLogList.getContractAddress();
         EventTopicParam eventTopicParam = reqEventLogList.getTopics();
         List<Object> contractAbi = reqEventLogList.getContractAbi();

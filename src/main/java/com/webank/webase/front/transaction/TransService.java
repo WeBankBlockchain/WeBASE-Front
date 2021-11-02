@@ -231,12 +231,10 @@ public class TransService {
             }
         } else {
             // data sign
-            String signMsg =
-                    signMessage(groupId, client, signUserId, contractAddress, encodedFunction);
+            String signMsg = signMessage(groupId, client, signUserId, contractAddress, encodedFunction);
             Instant nodeStartTime = Instant.now();
             // send transaction
             TransactionReceipt responseReceipt = sendMessage(client, signMsg);
-            this.decodeReceipt(responseReceipt);
             response = responseReceipt;
             log.info("***node cost time***: {}",
                     Duration.between(nodeStartTime, Instant.now()).toMillis());
@@ -307,6 +305,7 @@ public class TransService {
      * @param function function
      * @param commonContract contract
      */
+    @Deprecated
     public static TransactionReceipt execTransaction(Function function,
             CommonContract commonContract, TransactionDecoderService txDecoder) throws FrontException {
         Instant startTime = Instant.now();
@@ -565,7 +564,6 @@ public class TransService {
         Client client = web3ApiService.getWeb3j(groupId);
         if (sync) {
             TransactionReceipt receipt = sendMessage(client, signedStr);
-            this.decodeReceipt(receipt);
             return receipt;
         } else {
             TransactionPusherService txPusher = new TransactionPusherService(client);
@@ -926,7 +924,6 @@ public class TransService {
         Instant nodeStartTime = Instant.now();
         // send transaction
         TransactionReceipt receipt = sendMessage(client, signedMessageStr);
-        this.decodeReceipt(receipt);
         log.info("***node cost time***: {}",
             Duration.between(nodeStartTime, Instant.now()).toMillis());
         return receipt;
