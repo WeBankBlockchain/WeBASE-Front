@@ -122,7 +122,7 @@
                                             <el-table-column prop="data" label="data" align="left" :show-overflow-tooltip="true">
                                                 <template slot-scope="scope">
                                                     <i class="wbs-icon-baocun font-12 copy-public-key" @click="copyPubilcKey(scope.row.data)" :title="$t('title.copy')"></i>
-                                                    <span>{{scope.row.data}}</span>
+                                                      <span>{{ abc(scope.row.data) }}</span>
                                                 </template>
                                             </el-table-column>
                                         </el-table>
@@ -206,6 +206,11 @@ export default {
 
     },
     methods: {
+         abc(arr) {
+      // return arr.replace(/\'/g, "");
+          if(!Array.isArray(arr)){return arr}
+          return '['+arr.toString()+']'
+         },
         modelClose() {
             this.$emit('close')
         },
