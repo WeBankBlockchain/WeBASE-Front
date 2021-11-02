@@ -104,6 +104,11 @@ export default {
     methods: {
         queryContractStore() {
             this.loading = true;
+
+
+
+
+            
             getContractStore()
                 .then(res => {
                     this.loading = false;

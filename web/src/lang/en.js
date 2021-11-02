@@ -6,6 +6,9 @@ export default {
         transactions: 'Transactions',
         pendingTransactions: 'Pending Transactions',
     },
+    transaction: {
+        blockTips:"-1 represents the current block height",
+    },
     route: {
         statistics: 'Overview',
         nodeManagement: 'Node Mgmt',
@@ -216,7 +219,7 @@ export default {
         writeJavaName: 'Java Package Name',
         selectDirectory: 'Select Directory',
         directory: 'Directory',
-        txnContractAddExp: 'Optional，Import deployed contract address',
+        txnContractAddExp: 'The deployed contract address can be filled in',
         restore: 'Restore',
         zoom: 'Zoom',
         back: 'Back',
@@ -379,7 +382,13 @@ export default {
         haveSelectionAll: 'The contract is not compiled at all',
         haveCertSdk: 'Failed to get SDK certificate. Please check certificate file',
         haveChannelPort: 'Fill it in according to the node front corresponding ChannelPort',
-        addContractAddress: 'Add conctract address'
+        addContractAddress: 'Add conctract address',
+        input: "Please Input",
+        sendInput: "Please Param Input",
+        intEight:'Value range -128 to 127',
+        intSixTeen:'Value range -32768 to 32767',
+        uintEight:'Value range 0 to 255',
+        uintSixTeen:'Value range 0 to 65535',
     },
     contracts: {
         createFile: "Create File",
@@ -489,7 +498,7 @@ export default {
         number: "Please enter number",
         groupId: "Please enter group ID",
         correctJson: "Enter correct JSON",
-        blockNumber: "Greater than 0",
+        blockNumber: "Greater than 0,-1 represents the current block height",
         inputIsNumber: 'Input is not a number',
         inputIsAddress: 'Input is not address',
         inputIsJson: 'Input is not JSON',
