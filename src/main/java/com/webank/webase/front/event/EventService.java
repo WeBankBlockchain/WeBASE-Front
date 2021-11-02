@@ -418,6 +418,7 @@ public class EventService {
 
     /**
      * get abi info from both
+     * different from webase-node-mgr, abi and contract data is separated
      * @param groupId
      * @return
      * @throws IOException
