@@ -451,7 +451,7 @@ public class Web3ApiService {
      * @return
      */
     public List<String> getGroupList() {
-        log.debug("getGroupList. ");
+        log.info("getGroupList. ");
         List<String> groupIdList = getWeb3j().getGroupList(getNodeIpPort()).getGroupList();
         // check web3jMap, if not match groupIdList, refresh web3jMap in front
         refreshWeb3jMap(groupIdList);
@@ -460,7 +460,7 @@ public class Web3ApiService {
 
     public List<String> getNodeIdList() {
         return getWeb3j()
-                .getNodeIDList()
+                .getNodeIDList(getNodeIpPort())
                 .getNodeIDList();
     }
 
