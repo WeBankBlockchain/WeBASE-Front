@@ -64,6 +64,7 @@ import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
@@ -81,6 +82,7 @@ public class Web3ApiService {
     @Autowired
     private BcosSDK bcosSDK;
     @Autowired
+    @Qualifier("rpcClient")
     private Client rpcWeb3j;
     @Autowired
     private Web3Config web3ConfigConstants;
@@ -195,8 +197,7 @@ public class Web3ApiService {
      * getClientVersion.
      */
     public ClientVersion getClientVersion() {
-        ClientVersion version;
-        version = getWeb3j().getNodeVersion().getNodeVersion();
+        ClientVersion version = getWeb3j().getNodeVersion(getNodeIpPort()).getNodeVersion();
         return version;
     }
 
@@ -451,7 +452,7 @@ public class Web3ApiService {
      */
     public List<String> getGroupList() {
         log.debug("getGroupList. ");
-        List<String> groupIdList = getWeb3j().getGroupList().getGroupList();
+        List<String> groupIdList = getWeb3j().getGroupList(getNodeIpPort()).getGroupList();
         // check web3jMap, if not match groupIdList, refresh web3jMap in front
         refreshWeb3jMap(groupIdList);
         return groupIdList;
@@ -527,8 +528,7 @@ public class Web3ApiService {
      * getNodeInfo.
      */
     public NodeInformation getNodeInfo() {
-        String nodeIpPort = web3ConfigConstants.getIp() + ":" + web3ConfigConstants.getChannelPort();
-        return getWeb3j().getNodeInfo(nodeIpPort).getNodeInfo();
+        return getWeb3j().getNodeInfo(getNodeIpPort()).getNodeInfo();
     }
 
     /**
@@ -852,5 +852,9 @@ public class Web3ApiService {
         if (!Web3Config.PEER_CONNECTED) {
             throw new FrontException(ConstantCode.SYSTEM_ERROR_NODE_INACTIVE);
         }
+    }
+
+    private String getNodeIpPort() {
+        return web3ConfigConstants.getIp() + ":" + web3ConfigConstants.getChannelPort();
     }
 }
