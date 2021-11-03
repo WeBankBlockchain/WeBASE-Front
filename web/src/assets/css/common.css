@@ -364,10 +364,9 @@
 }
 
 .el-dialog__header {
-    padding-bottom: 0;
+    padding: 24px 24px 0 24px;
+    text-align: left;
     background-color: #2f3b52;
-    color: #fff !important;
-    border-color: #2f3b52;
 }
 
 .el-dialog__title {
@@ -380,8 +379,8 @@
 .el-dialog__body {
     background-color: #2f3b52;
     color: #fff !important;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 24px 24px 0 24px !important;
+   max-height: 500px;
 }
 
 .el-dialog__footer {

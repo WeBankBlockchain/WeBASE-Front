@@ -51,6 +51,9 @@
                 style="width: 195px"
               ></el-input>
             </el-form-item>
+            <el-tooltip effect="dark" :content="$t('transaction.blockTips')" placement="top-start" style="margin-top:12px">
+                        <i class="el-icon-info contract-icon font-15"></i>
+                    </el-tooltip>
           </div>
           <el-form-item
             :label="$t('table.eventName')"
@@ -181,15 +184,15 @@ export default {
       if (value === "" || value == undefined || value == null) {
         callback();
       } else {
-        if (!Number.isInteger(value)) {
-          callback(new Error(this.$t("rule.inputIsNumber")));
-        } else {
-          if (value <= 0) {
-            callback(new Error(this.$t("rule.blockNumber")));
-          } else {
-            callback();
-          }
-        }
+      if (!Number.isInteger(value)) {
+                        callback(new Error(this.$t('rule.inputIsNumber')));
+                    } else {
+                        if (value > 0||value==-1) {
+                            callback();
+                        } else {
+                            callback(new Error(this.$t('rule.blockNumber')));
+                        }
+                    }
       }
     };
     var validateAbi = (rule, value, callback) => {

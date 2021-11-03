@@ -19,7 +19,7 @@
     style="position: relative; height: 100%"
     v-loading="loading"
   >
-    <div class="contract-menu-header">
+    <div class="contract-menu-header noBlurs">
       <el-tooltip
         class="item"
         effect="dark"
@@ -404,6 +404,12 @@ export default {
         }
       });
     });
+     document.querySelector(".noBlurs").onmousedown = function (e) {
+      console.log(1);
+      Bus.$emit("limit", false);
+      e.preventDefault();
+    };
+  
   },
   directives: {
     Clickoutside,
