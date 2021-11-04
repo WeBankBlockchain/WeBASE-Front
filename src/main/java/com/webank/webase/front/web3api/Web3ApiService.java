@@ -194,8 +194,7 @@ public class Web3ApiService {
      * getClientVersion.
      */
     public ClientVersion getClientVersion() {
-        ClientVersion version;
-        version = getWeb3j().getNodeVersion().getNodeVersion();
+        ClientVersion version = getWeb3j().getNodeVersion(getNodeIpPort()).getNodeVersion();
         return version;
     }
 
@@ -450,7 +449,7 @@ public class Web3ApiService {
      */
     public List<String> getGroupList() {
         log.debug("getGroupList. ");
-        List<String> groupIdList = getWeb3j().getGroupList().getGroupList();
+        List<String> groupIdList = getWeb3j().getGroupList(getNodeIpPort()).getGroupList();
         // check web3jMap, if not match groupIdList, refresh web3jMap in front
         refreshWeb3jMap(groupIdList);
         return groupIdList;
@@ -458,8 +457,8 @@ public class Web3ApiService {
 
     public List<String> getNodeIdList() {
         return getWeb3j()
-                .getNodeIDList()
-                .getNodeIDList();
+            .getNodeIDList(getNodeIpPort())
+            .getNodeIDList();
     }
 
     /**
@@ -526,8 +525,7 @@ public class Web3ApiService {
      * getNodeInfo.
      */
     public NodeInformation getNodeInfo() {
-        String nodeIpPort = web3ConfigConstants.getIp() + ":" + web3ConfigConstants.getChannelPort();
-        return getWeb3j().getNodeInfo(nodeIpPort).getNodeInfo();
+        return getWeb3j().getNodeInfo(getNodeIpPort()).getNodeInfo();
     }
 
     /**
@@ -851,5 +849,9 @@ public class Web3ApiService {
         if (!Web3Config.PEER_CONNECTED) {
             throw new FrontException(ConstantCode.SYSTEM_ERROR_NODE_INACTIVE);
         }
+    }
+
+    private String getNodeIpPort() {
+        return web3ConfigConstants.getIp() + ":" + web3ConfigConstants.getChannelPort();
     }
 }
