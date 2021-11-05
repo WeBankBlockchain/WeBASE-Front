@@ -85,7 +85,7 @@ public class SignDataTestBase extends SpringTestBase {
     }
 
     public String getLocalSignedData(String pri) {
-        CryptoKeyPair credentials = cryptoSuite.createKeyPair(pri);
+        CryptoKeyPair credentials = cryptoSuite.getKeyPairFactory().createKeyPair(pri);
         if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
             return CommonUtils.signatureDataToString((SM2SignatureResult)cryptoSuite.sign(rawData.getBytes(), credentials));
         } else {
@@ -107,7 +107,7 @@ public class SignDataTestBase extends SpringTestBase {
         System.out.println(keyStoreInfo.getPublicKey());
         System.out.println(keyStoreInfo.getPrivateKey());
         // local guomi
-        CryptoKeyPair credentials = cryptoSuite.createKeyPair(keyStoreInfo.getPrivateKey());
+        CryptoKeyPair credentials = cryptoSuite.getKeyPairFactory().createKeyPair(keyStoreInfo.getPrivateKey());
         String pub = credentials.getHexPublicKey();
         String addr = credentials.getAddress();
         System.out.println("local transfer: ");
