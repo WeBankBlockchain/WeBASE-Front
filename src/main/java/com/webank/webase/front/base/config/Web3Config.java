@@ -18,25 +18,20 @@ import com.webank.webase.front.base.properties.Constants;
 import io.netty.channel.ChannelHandlerContext;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.abi.ABICodec;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.model.Message;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
-import org.fisco.bcos.sdk.network.MsgHandler;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 /**
  * init web3sdk getService.
@@ -60,26 +55,26 @@ public class Web3Config {
     private String channelPort = "20200";
 
     // add channel disconnect
-    public static boolean PEER_CONNECTED = true;
-    static class Web3ChannelMsg implements MsgHandler {
-        @Override
-        public void onConnect(ChannelHandlerContext ctx) {
-            PEER_CONNECTED = true;
-            log.info("Web3ChannelMsg onConnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-        }
-
-        @Override
-        public void onMessage(ChannelHandlerContext ctx, Message msg) {
-            // not added in message handler, ignore this override
-            log.info("Web3ChannelMsg onMessage:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-        }
-
-        @Override
-        public void onDisconnect(ChannelHandlerContext ctx) {
-            PEER_CONNECTED = false;
-            log.error("Web3ChannelMsg onDisconnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-        }
-    }
+//    public static boolean PEER_CONNECTED = true;
+//    static class Web3ChannelMsg implements MsgHandler {
+//        @Override
+//        public void onConnect(ChannelHandlerContext ctx) {
+//            PEER_CONNECTED = true;
+//            log.info("Web3ChannelMsg onConnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
+//        }
+//
+//        @Override
+//        public void onMessage(ChannelHandlerContext ctx, Message msg) {
+//            // not added in message handler, ignore this override
+//            log.info("Web3ChannelMsg onMessage:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
+//        }
+//
+//        @Override
+//        public void onDisconnect(ChannelHandlerContext ctx) {
+//            PEER_CONNECTED = false;
+//            log.error("Web3ChannelMsg onDisconnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
+//        }
+//    }
 
     @Bean
     public BcosSDK getBcosSDK() throws ConfigException {
@@ -119,14 +114,10 @@ public class Web3Config {
         BcosSDK bcosSDK = new BcosSDK(configOption);
 
         log.info("init client version");
-        ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
-            .getNodeVersion();
-        Constants.version = version.getVersion();
-        Constants.chainId = version.getChainId();
-
-        Web3ChannelMsg disconnectMsg = new Web3ChannelMsg();
-        bcosSDK.getChannel().addConnectHandler(disconnectMsg);
-        bcosSDK.getChannel().addDisconnectHandler(disconnectMsg);
+//        ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
+//            .getNodeVersion();
+//        Constants.version = version.getVersion();
+//        Constants.chainId = version.getChainId();
 
         return bcosSDK;
     }
@@ -136,19 +127,19 @@ public class Web3Config {
      * 覆盖EncryptType构造函数
      * @return
      */
-    @Bean(name = "common")
-    public CryptoSuite getCommonSuite(BcosSDK bcosSDK) {
-        int encryptType = bcosSDK.getGroupManagerService().getCryptoType(ip + ":" + channelPort);
-        log.info("getCommonSuite init encrypt type:{}", encryptType);
-        return new CryptoSuite(encryptType);
-    }
+//    @Bean(name = "common")
+//    public CryptoSuite getCommonSuite(BcosSDK bcosSDK) {
+//        int encryptType = bcosSDK..getCryptoType(ip + ":" + channelPort);
+//        log.info("getCommonSuite init encrypt type:{}", encryptType);
+//        return new CryptoSuite(encryptType);
+//    }
 
-    @Bean(name = "rpcClient")
-    public Client getRpcWeb3j(BcosSDK bcosSDK) {
-        // init rpc client(web3j)
-        Client rpcWeb3j = Client.build(bcosSDK.getChannel());
-        log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
-        return rpcWeb3j;
-    }
+//    @Bean(name = "rpcClient")
+//    public Client getRpcWeb3j(BcosSDK bcosSDK) {
+//        // init rpc client(web3j)
+//        Client rpcWeb3j = Client.build(bcosSDK.getChannel());
+//        log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
+//        return rpcWeb3j;
+//    }
 
 }

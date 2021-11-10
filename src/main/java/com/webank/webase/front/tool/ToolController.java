@@ -34,9 +34,9 @@ import java.io.IOException;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.ABICodec;
-import org.fisco.bcos.sdk.abi.ABICodecException;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.codec.ABICodec;
+import org.fisco.bcos.sdk.codec.ABICodecException;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
@@ -75,13 +75,13 @@ public class ToolController {
     public Object decode(@Valid @RequestBody ReqDecodeParam param) {
         log.info("decode output start. param:{}", JsonUtils.toJSONString(param));
         // todo 自测返回值
-        TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
+        TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite, false);
         // decode input
         if (param.getDecodeType() == 1) {
             return txDecoder.decodeReceiptMessage(param.getInput());
         } else if (param.getDecodeType() == 2) {
             String abi = JsonUtils.objToString(param.getAbiList());
-            ABICodec abiCodec = new ABICodec(cryptoSuite);
+            ABICodec abiCodec = new ABICodec(cryptoSuite, false);
             // decode output
             try {
                 return abiCodec.decodeMethodAndGetOutputObject(abi, param.getMethodName(),

@@ -53,12 +53,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.abi.ABICodec;
+import org.fisco.bcos.sdk.codec.ABICodec;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.eventsub.EventLogParams;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
 import org.fisco.bcos.sdk.model.EventLog;
-import org.fisco.bcos.sdk.service.GroupManagerService;
+import org.fisco.bcos.sdk.service.GroupServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
@@ -119,7 +119,7 @@ public class EventService {
         String routingKey) {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // to register or unregister
-        GroupManagerService groupManagerService = bcosSDK.getGroupManagerService();
+        GroupServiceImpl groupManagerService = bcosSDK.getGroupManagerService();
         String registerId = null;
         try {
             log.info("registerNewBlockEvent saved to db successfully");
@@ -177,7 +177,7 @@ public class EventService {
             EventLogParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
                 toBlock, contractAddress, topicList, cryptoSuite);
             callback = new ContractEventCallback(mqPublisher, exchangeName, routingKey, groupId, appId,
-                new ABICodec(cryptoSuite), abi, topicList);
+                new ABICodec(cryptoSuite, false), abi, topicList);
             registerId = eventSubscribe.subscribeEvent(params, callback);
             // save to db first
             String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
@@ -298,7 +298,7 @@ public class EventService {
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-        GroupManagerService groupManagerService = bcosSDK.getGroupManagerService();
+        GroupServiceImpl groupManagerService = bcosSDK.getGroupManagerService();
         try {
             String registerId = eventInfo.getRegisterId();
             groupManagerService.eraseBlockNotifyCallback(registerId);
@@ -390,7 +390,7 @@ public class EventService {
         log.info("getContractEventLog eventParam:{}", eventParam);
         // final CompletableFuture<List<EventLog>> callbackFuture = new CompletableFuture<>();
         final CompletableFuture<List<DecodedEventLog>> callbackFuture = new CompletableFuture<>();
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        ABICodec abiCodec = new ABICodec(cryptoSuite, false);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
         EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
