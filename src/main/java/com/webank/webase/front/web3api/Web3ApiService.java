@@ -19,43 +19,33 @@ import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.DataStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
-import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
-import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
-import com.webank.webase.front.web3api.entity.RspSearchTransaction;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.RspTransCountInfo;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.BcosSDKException;
 import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.model.GroupStatus;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
-import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -499,10 +489,10 @@ public class Web3ApiService {
     }
 
     /**
-     * getNodeInfo. todo
+     * getNodeInfo. todo 获取节点名
      */
 //    public NodeInformation getNodeInfo() {
-//        return getWeb3j().getGroupNodeInfo().getNodeInfo(getNodeIpPort()).getNodeInfo();
+//        return getWeb3j().getGroupNodeInfo(getWeb3j().getGroupInfo().getResult().).getNodeInfo(getNodeIpPort()).getNodeInfo();
 //    }
 
     /**
@@ -535,21 +525,21 @@ public class Web3ApiService {
     /**
      * search By Criteria todo add search
      */
-//    public Object searchByCriteria(int groupId, String input) {
-//        if (StringUtils.isBlank(input)) {
-//            log.warn("fail searchByCriteria. input is null");
-//            throw new FrontException(ConstantCode.PARAM_ERROR);
-//        }
-//        if (StringUtils.isNumeric(input)) {
-//            return getBlockByNumber(groupId, new BigInteger(input),true);
-//        } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
-//            JsonTransactionResponse txResponse = getTransactionByHash(groupId, input, true);
-//            BlockHeader blockHeader = getBlockHeaderByNumber(groupId, txResponse.getBlockNumber(), false);
-//            RspSearchTransaction rspSearchTransaction = new RspSearchTransaction(blockHeader.getTimestamp(), txResponse);
-//            return rspSearchTransaction;
-//        }
-//        return null;
-//    }
+    public Object searchByCriteria(int groupId, String input) {
+        if (StringUtils.isBlank(input)) {
+            log.warn("fail searchByCriteria. input is null");
+            throw new FrontException(ConstantCode.PARAM_ERROR);
+        }
+        if (StringUtils.isNumeric(input)) {
+            return getBlockByNumber(groupId, new BigInteger(input),true);
+        } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
+            JsonTransactionResponse txResponse = getTransactionByHash(groupId, input, true);
+//            BlockHeader blockHeader = getBlockHeaderByNumber(groupId, txResponse.getBlockNumber(), false); todo 增加block header
+//            RspSearchTransaction rspSearchTransaction = new RspSearchTransaction(blockHeader.getTimestamp(), txResponse); todo 为了增加timestamp
+            return txResponse;
+        }
+        return null;
+    }
 
     /* above v2.6.1*/
 //    public BlockHeader getBlockHeaderByHash(Integer groupId, String blockHash,
