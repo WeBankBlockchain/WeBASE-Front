@@ -18,6 +18,7 @@ import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
+
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
 import com.webank.webase.front.base.enums.ContractStatus;
@@ -45,7 +46,6 @@ import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
-import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CleanPathUtil;
@@ -73,27 +73,23 @@ import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.ABICodec;
-import org.fisco.bcos.sdk.abi.ABICodecException;
-import org.fisco.bcos.sdk.abi.FunctionEncoder;
-import org.fisco.bcos.sdk.abi.datatypes.Address;
-import org.fisco.bcos.sdk.abi.datatypes.Type;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.codegen.SolidityContractGenerator;
+import org.fisco.bcos.sdk.codec.ABICodec;
+import org.fisco.bcos.sdk.codec.ABICodecException;
+import org.fisco.bcos.sdk.codec.abi.FunctionEncoder;
+import org.fisco.bcos.sdk.codec.datatypes.Address;
+import org.fisco.bcos.sdk.codec.datatypes.Type;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.codegen.ContractGenerator;
 import org.fisco.bcos.sdk.codegen.exceptions.CodeGenException;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
-import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.transaction.manager.AssembleTransactionProcessor;
-import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
@@ -129,8 +125,6 @@ public class ContractService {
     private KeyStoreService keyStoreService;
     @Autowired
     private Web3ApiService web3ApiService;
-    @Autowired
-    private PermissionManageService permissionManageService;
     @Autowired
     private PrecompiledWithSignService precompiledWithSignService;
     @Autowired
@@ -266,8 +260,8 @@ public class ContractService {
             checkDeployPermission(req.getGroupId(), userAddress);
         }
 
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
-        String encodedConstructor;
+        ABICodec abiCodec = new ABICodec(cryptoSuite, false);
+        byte[] encodedConstructor;
         try {
             encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
         } catch (ABICodecException e) {
@@ -277,8 +271,7 @@ public class ContractService {
 
         // data sign
 //        String data = bytecodeBin + encodedConstructor;
-        String data = encodedConstructor;
-        String signMsg = transService.signMessage(groupId, client, signUserId, "", data);
+        String signMsg = transService.signMessage(groupId, client, signUserId, "", encodedConstructor);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
         String contractAddress = receipt.getContractAddress();
@@ -300,9 +293,9 @@ public class ContractService {
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
 
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        ABICodec abiCodec = new ABICodec(cryptoSuite, false);
 
-        String encodedConstructor;
+        byte[] encodedConstructor;
         try {
             encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
         } catch (ABICodecException e) {
@@ -366,35 +359,13 @@ public class ContractService {
         }
     }
 
-    @Deprecated
-    public static String constructorEncodedByContractNameAndVersion(String contractName,
-            String version, List<Object> params) throws FrontException {
-        // Constructor encoded
-        String encodedConstructor = "";
-        String functionName = contractName;
-        // input handle
-        List<String> funcInputTypes =
-                ContractAbiUtil.getFuncInputType(contractName, functionName, version);
-        if (funcInputTypes != null && funcInputTypes.size() > 0) {
-            if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deploy encodedConstructor:{}", encodedConstructor);
-            } else {
-                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-            }
-        }
-        return encodedConstructor;
-    }
-
     /**
      * encode constructor function
      */
-    private static String constructorEncoded(String contractName,
+    private static byte[] constructorEncoded(String contractName,
             ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
         // Constructor encoded
-        String encodedConstructor = "";
+        byte[] encodedConstructor = null;
         String functionName = contractName;
         // input handle
         List<String> funcInputTypes = versionEvent.getFuncInputs().get(functionName);
@@ -421,7 +392,7 @@ public class ContractService {
         }
     }
 
-    private String deployContract(int groupId, String encodedConstructor,
+    private String deployContract(int groupId, byte[] encodedConstructor,
             CryptoKeyPair cryptoKeyPair) throws FrontException {
         Client client = web3ApiService.getWeb3j(groupId);
         if (client == null) {
@@ -494,7 +465,7 @@ public class ContractService {
         try {
             MySecurityManagerConfig.forbidSystemExitCall();
             // sm bin use same bin
-            SolidityContractGenerator generator = new SolidityContractGenerator(binFile, binFile,
+            ContractGenerator generator = new ContractGenerator(binFile, binFile,
                     abiFile, outputDir, packageName);
             generator.generateJavaFiles();
         } catch (IOException | ClassNotFoundException e) {
@@ -911,22 +882,22 @@ public class ContractService {
      */
     private void checkDeployPermission(int groupId, String userAddress) {
         // get deploy permission list
-        List<PermissionInfo> deployUserList =
-                permissionManageService.listDeployAndCreateManager(groupId);
-
-        // check user in the list,
-        if (deployUserList.isEmpty()) {
-            return;
-        } else {
-            long count = 0;
-            count = deployUserList.stream().filter(admin -> admin.getAddress().equals(userAddress))
-                    .count();
-            // if not in the list, permission denied
-            if (count == 0) {
-                log.error("checkDeployPermission permission denied for user:{}", userAddress);
-                throw new FrontException(ConstantCode.PERMISSION_DENIED);
-            }
-        }
+//        List<PermissionInfo> deployUserList =
+//                permissionManageService.listDeployAndCreateManager(groupId);
+//
+//        // check user in the list,
+//        if (deployUserList.isEmpty()) {
+//            return;
+//        } else {
+//            long count = 0;
+//            count = deployUserList.stream().filter(admin -> admin.getAddress().equals(userAddress))
+//                    .count();
+//            // if not in the list, permission denied
+//            if (count == 0) {
+//                log.error("checkDeployPermission permission denied for user:{}", userAddress);
+//                throw new FrontException(ConstantCode.PERMISSION_DENIED);
+//            }
+//        }
 
     }
 

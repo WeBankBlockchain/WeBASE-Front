@@ -16,8 +16,8 @@
 package com.webank.webase.front.contract;
 
 import java.util.List;
-import org.fisco.bcos.sdk.abi.datatypes.Function;
-import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.codec.datatypes.Function;
+import org.fisco.bcos.sdk.codec.datatypes.Type;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.contract.Contract;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
