@@ -23,15 +23,16 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.EventEncoder;
-import org.fisco.bcos.sdk.abi.EventValues;
-import org.fisco.bcos.sdk.abi.TypeReference;
-import org.fisco.bcos.sdk.abi.datatypes.DynamicArray;
-import org.fisco.bcos.sdk.abi.datatypes.Event;
-import org.fisco.bcos.sdk.abi.datatypes.StaticArray;
-import org.fisco.bcos.sdk.abi.datatypes.Type;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition.NamedType;
+import org.fisco.bcos.sdk.codec.EventEncoder;
+import org.fisco.bcos.sdk.codec.abi.EventValues;
+import org.fisco.bcos.sdk.codec.abi.FunctionReturnDecoder;
+import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
+import org.fisco.bcos.sdk.codec.datatypes.DynamicArray;
+import org.fisco.bcos.sdk.codec.datatypes.Event;
+import org.fisco.bcos.sdk.codec.datatypes.StaticArray;
+import org.fisco.bcos.sdk.codec.datatypes.Type;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition.NamedType;
 import org.fisco.bcos.sdk.contract.Contract;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
@@ -277,7 +278,7 @@ public class AbiUtil {
     public static Object receiptParse(TransactionReceipt receipt, List<ABIDefinition> abiList,
             CryptoSuite cryptoSuite) throws FrontException {
         Map<String, Object> resultMap = new HashMap<>();
-        List<Logs> logList = receipt.getLogs();
+        List<Logs> logList = receipt.getLogEntries();
         EventEncoder encoder = new EventEncoder(cryptoSuite);
         for (ABIDefinition abiDefinition : abiList) {
             String eventName = abiDefinition.getName();
@@ -287,7 +288,7 @@ public class AbiUtil {
             Object result = null;
             for (Logs logInfo : logList) {
                 EventValues eventValues =
-                        Contract.staticExtractEventParameters(encoder, event, logInfo);
+                        Contract.staticExtractEventParameters(encoder, new FunctionReturnDecoder(), event, logInfo);
                 if (eventValues != null) {
                     result = callResultParse(funcInputTypes, eventValues.getNonIndexedValues());
                     break;
@@ -309,7 +310,7 @@ public class AbiUtil {
     public static Map<String, Object> getEventFromReceipt(TransactionReceipt receipt,
             List<ABIDefinition> abiList, CryptoSuite cryptoSuite) throws FrontException {
         Map<String, Object> resultMap = new HashMap<>();
-        List<Logs> logList = receipt.getLogs();
+        List<Logs> logList = receipt.getLogEntries();
         EventEncoder encoder = new EventEncoder(cryptoSuite);
         for (ABIDefinition abiDefinition : abiList) {
             String eventName = abiDefinition.getName();
@@ -318,7 +319,7 @@ public class AbiUtil {
             Event event = new Event(eventName, finalOutputs);
             for (Logs logInfo : logList) {
                 EventValues eventValues =
-                        Contract.staticExtractEventParameters(encoder, event, logInfo);
+                        Contract.staticExtractEventParameters(encoder, new FunctionReturnDecoder(), event, logInfo);
                 if (eventValues != null) {
                     resultMap.put(eventName, eventValues);
                 }

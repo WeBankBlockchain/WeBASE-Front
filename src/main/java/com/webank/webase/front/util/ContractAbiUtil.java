@@ -31,11 +31,11 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.fisco.bcos.sdk.abi.datatypes.DynamicArray;
-import org.fisco.bcos.sdk.abi.datatypes.StaticArray;
-import org.fisco.bcos.sdk.abi.datatypes.Type;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition.NamedType;
+import org.fisco.bcos.sdk.codec.datatypes.DynamicArray;
+import org.fisco.bcos.sdk.codec.datatypes.StaticArray;
+import org.fisco.bcos.sdk.codec.datatypes.Type;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition.NamedType;
 import org.fisco.bcos.sdk.model.PrecompiledConstant;
 import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 
@@ -377,7 +377,7 @@ public class ContractAbiUtil {
         String type = trimStorageDeclaration(typeDeclaration);
         Matcher matcher = PATTERN.matcher(type);
         if (matcher.find()) {
-            Class<?> baseType = org.fisco.bcos.sdk.abi.datatypes.generated.AbiTypes
+            Class<?> baseType = org.fisco.bcos.sdk.codec.datatypes.AbiTypes
                     .getType(matcher.group(1));
             String firstArrayDimension = matcher.group(2);
             String secondArrayDimension = matcher.group(3);

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import org.fisco.bcos.sdk.abi.tools.TopicTools;
+import org.fisco.bcos.sdk.codec.abi.tools.TopicTools;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.eventsub.EventLogParams;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -112,7 +112,7 @@ public class RabbitMQUtils {
         // put multiple event in topics[0]
         List<String> topicSigList = new ArrayList<>();
         TopicTools tool = new TopicTools(cryptoSuite);
-        topicList.forEach(t -> topicSigList.add(tool.stringToTopic(t)));
+        topicList.forEach(t -> topicSigList.add(Numeric.toHexString(tool.stringToTopic(t))));
         topics.add(topicSigList);
         params.setTopics(topics);
 
@@ -142,7 +142,7 @@ public class RabbitMQUtils {
         List<String> topicSigList = new ArrayList<>();
         topicList.forEach(t -> {
             if (t instanceof String) {
-                topicSigList.add(tool.stringToTopic((String)t));
+                topicSigList.add(Numeric.toHexString(tool.stringToTopic((String)t)));
             }// instanceof others, convert by TopicTools before add
         });
         topics.add(topicSigList);
@@ -199,17 +199,17 @@ public class RabbitMQUtils {
         if (type.contains("int")) {
             return tool.integerToTopic(new BigInteger(value));
         } else if ("string".equals(type)) {
-            return tool.stringToTopic(value);
+            return Numeric.toHexString(tool.stringToTopic(value));
         } else if ("bool".equals(type)) {
             return tool.boolToTopic(Boolean.parseBoolean(value));
         } else if ("address".equals(type)){
             return tool.addressToTopic(value);
         } else if (type.contains("bytes")) {
             if ("bytes".equals(type)) {
-                return tool.bytesToTopic(Numeric.hexStringToByteArray(value));
+                return Numeric.toHexString(tool.bytesToTopic(Numeric.hexStringToByteArray(value)));
             } else {
                 // bytesN
-                return tool.byteNToTopic(Numeric.hexStringToByteArray(value));
+                return Numeric.toHexString(tool.byteNToTopic(Numeric.hexStringToByteArray(value)));
             }
         } else {
             return null;
