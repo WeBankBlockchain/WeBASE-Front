@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.fisco.bcos.sdk.abi.FunctionReturnDecoder;
-import org.fisco.bcos.sdk.abi.TypeReference;
-import org.fisco.bcos.sdk.abi.datatypes.Address;
-import org.fisco.bcos.sdk.abi.datatypes.Event;
-import org.fisco.bcos.sdk.abi.datatypes.Function;
-import org.fisco.bcos.sdk.abi.datatypes.Type;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
-import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.codec.abi.FunctionReturnDecoder;
+import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
+import org.fisco.bcos.sdk.codec.datatypes.Address;
+import org.fisco.bcos.sdk.codec.datatypes.Event;
+import org.fisco.bcos.sdk.codec.datatypes.Function;
+import org.fisco.bcos.sdk.codec.datatypes.Type;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Uint256;
+import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.contract.Contract;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
@@ -60,8 +60,8 @@ public class Asset extends Contract {
     public TransactionReceipt send(String receiver, BigInteger amount) {
         final Function function = new Function(
                 FUNC_SEND, 
-                Arrays.<Type>asList(new org.fisco.bcos.sdk.abi.datatypes.Address(receiver), 
-                new org.fisco.bcos.sdk.abi.datatypes.generated.Uint256(amount)), 
+                Arrays.<Type>asList(new org.fisco.bcos.sdk.codec.datatypes.Address(receiver),
+                new org.fisco.bcos.sdk.codec.datatypes.generated.Uint256(amount)),
                 Collections.<TypeReference<?>>emptyList());
         return executeTransaction(function);
     }
@@ -69,8 +69,8 @@ public class Asset extends Contract {
     public void send(String receiver, BigInteger amount, TransactionCallback callback) {
         final Function function = new Function(
                 FUNC_SEND, 
-                Arrays.<Type>asList(new org.fisco.bcos.sdk.abi.datatypes.Address(receiver), 
-                new org.fisco.bcos.sdk.abi.datatypes.generated.Uint256(amount)), 
+                Arrays.<Type>asList(new org.fisco.bcos.sdk.codec.datatypes.Address(receiver),
+                new org.fisco.bcos.sdk.codec.datatypes.generated.Uint256(amount)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
@@ -78,8 +78,8 @@ public class Asset extends Contract {
     public String getSignedTransactionForSend(String receiver, BigInteger amount) {
         final Function function = new Function(
                 FUNC_SEND, 
-                Arrays.<Type>asList(new org.fisco.bcos.sdk.abi.datatypes.Address(receiver), 
-                new org.fisco.bcos.sdk.abi.datatypes.generated.Uint256(amount)), 
+                Arrays.<Type>asList(new org.fisco.bcos.sdk.codec.datatypes.Address(receiver),
+                new org.fisco.bcos.sdk.codec.datatypes.generated.Uint256(amount)),
                 Collections.<TypeReference<?>>emptyList());
         return createSignedTransaction(function);
     }
@@ -106,7 +106,7 @@ public class Asset extends Contract {
 
     public BigInteger balances(String param0) throws ContractException {
         final Function function = new Function(FUNC_BALANCES, 
-                Arrays.<Type>asList(new org.fisco.bcos.sdk.abi.datatypes.Address(param0)), 
+                Arrays.<Type>asList(new org.fisco.bcos.sdk.codec.datatypes.Address(param0)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeCallWithSingleValueReturn(function, BigInteger.class);
     }
@@ -114,8 +114,8 @@ public class Asset extends Contract {
     public TransactionReceipt issue(String receiver, BigInteger amount) {
         final Function function = new Function(
                 FUNC_ISSUE, 
-                Arrays.<Type>asList(new org.fisco.bcos.sdk.abi.datatypes.Address(receiver), 
-                new org.fisco.bcos.sdk.abi.datatypes.generated.Uint256(amount)), 
+                Arrays.<Type>asList(new org.fisco.bcos.sdk.codec.datatypes.Address(receiver),
+                new org.fisco.bcos.sdk.codec.datatypes.generated.Uint256(amount)),
                 Collections.<TypeReference<?>>emptyList());
         return executeTransaction(function);
     }
@@ -123,8 +123,8 @@ public class Asset extends Contract {
     public void issue(String receiver, BigInteger amount, TransactionCallback callback) {
         final Function function = new Function(
                 FUNC_ISSUE, 
-                Arrays.<Type>asList(new org.fisco.bcos.sdk.abi.datatypes.Address(receiver), 
-                new org.fisco.bcos.sdk.abi.datatypes.generated.Uint256(amount)), 
+                Arrays.<Type>asList(new org.fisco.bcos.sdk.codec.datatypes.Address(receiver),
+                new org.fisco.bcos.sdk.codec.datatypes.generated.Uint256(amount)),
                 Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
@@ -132,8 +132,8 @@ public class Asset extends Contract {
     public String getSignedTransactionForIssue(String receiver, BigInteger amount) {
         final Function function = new Function(
                 FUNC_ISSUE, 
-                Arrays.<Type>asList(new org.fisco.bcos.sdk.abi.datatypes.Address(receiver), 
-                new org.fisco.bcos.sdk.abi.datatypes.generated.Uint256(amount)), 
+                Arrays.<Type>asList(new org.fisco.bcos.sdk.codec.datatypes.Address(receiver),
+                new org.fisco.bcos.sdk.codec.datatypes.generated.Uint256(amount)),
                 Collections.<TypeReference<?>>emptyList());
         return createSignedTransaction(function);
     }

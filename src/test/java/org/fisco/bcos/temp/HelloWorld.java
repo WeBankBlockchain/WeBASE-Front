@@ -4,13 +4,13 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.fisco.bcos.sdk.abi.FunctionReturnDecoder;
-import org.fisco.bcos.sdk.abi.TypeReference;
-import org.fisco.bcos.sdk.abi.datatypes.DynamicArray;
-import org.fisco.bcos.sdk.abi.datatypes.Function;
-import org.fisco.bcos.sdk.abi.datatypes.Type;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
-import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple1;
+import org.fisco.bcos.sdk.codec.abi.FunctionReturnDecoder;
+import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
+import org.fisco.bcos.sdk.codec.datatypes.DynamicArray;
+import org.fisco.bcos.sdk.codec.datatypes.Function;
+import org.fisco.bcos.sdk.codec.datatypes.Type;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Uint256;
+import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple1;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.contract.Contract;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
@@ -49,8 +49,8 @@ public class HelloWorld extends Contract {
     public TransactionReceipt set(List<BigInteger> _ua) {
         final Function function = new Function(
             FUNC_SET,
-            Arrays.<Type>asList(_ua.isEmpty()?org.fisco.bcos.sdk.abi.datatypes.DynamicArray.empty("uint256[]"):new org.fisco.bcos.sdk.abi.datatypes.DynamicArray<org.fisco.bcos.sdk.abi.datatypes.generated.Uint256>(
-                org.fisco.bcos.sdk.abi.Utils.typeMap(_ua, org.fisco.bcos.sdk.abi.datatypes.generated.Uint256.class))),
+            Arrays.<Type>asList(_ua.isEmpty()?org.fisco.bcos.sdk.codec.datatypes.DynamicArray.empty("uint256[]"):new org.fisco.bcos.sdk.codec.datatypes.DynamicArray<org.fisco.bcos.sdk.codec.datatypes.generated.Uint256>(
+                org.fisco.bcos.sdk.codec.abi.Utils.typeMap(_ua, org.fisco.bcos.sdk.codec.datatypes.generated.Uint256.class))),
             Collections.<TypeReference<?>>emptyList());
         return executeTransaction(function);
     }
@@ -58,8 +58,8 @@ public class HelloWorld extends Contract {
     public void set(List<BigInteger> _ua, TransactionCallback callback) {
         final Function function = new Function(
             FUNC_SET,
-            Arrays.<Type>asList(_ua.isEmpty()?org.fisco.bcos.sdk.abi.datatypes.DynamicArray.empty("uint256[]"):new org.fisco.bcos.sdk.abi.datatypes.DynamicArray<org.fisco.bcos.sdk.abi.datatypes.generated.Uint256>(
-                org.fisco.bcos.sdk.abi.Utils.typeMap(_ua, org.fisco.bcos.sdk.abi.datatypes.generated.Uint256.class))),
+            Arrays.<Type>asList(_ua.isEmpty()?org.fisco.bcos.sdk.codec.datatypes.DynamicArray.empty("uint256[]"):new org.fisco.bcos.sdk.codec.datatypes.DynamicArray<org.fisco.bcos.sdk.codec.datatypes.generated.Uint256>(
+                org.fisco.bcos.sdk.codec.abi.Utils.typeMap(_ua, org.fisco.bcos.sdk.codec.datatypes.generated.Uint256.class))),
             Collections.<TypeReference<?>>emptyList());
         asyncExecuteTransaction(function, callback);
     }
@@ -67,8 +67,8 @@ public class HelloWorld extends Contract {
     public String getSignedTransactionForSet(List<BigInteger> _ua) {
         final Function function = new Function(
             FUNC_SET,
-            Arrays.<Type>asList(_ua.isEmpty()?org.fisco.bcos.sdk.abi.datatypes.DynamicArray.empty("uint256[]"):new org.fisco.bcos.sdk.abi.datatypes.DynamicArray<org.fisco.bcos.sdk.abi.datatypes.generated.Uint256>(
-                org.fisco.bcos.sdk.abi.Utils.typeMap(_ua, org.fisco.bcos.sdk.abi.datatypes.generated.Uint256.class))),
+            Arrays.<Type>asList(_ua.isEmpty()?org.fisco.bcos.sdk.codec.datatypes.DynamicArray.empty("uint256[]"):new org.fisco.bcos.sdk.codec.datatypes.DynamicArray<org.fisco.bcos.sdk.codec.datatypes.generated.Uint256>(
+                org.fisco.bcos.sdk.codec.abi.Utils.typeMap(_ua, org.fisco.bcos.sdk.codec.datatypes.generated.Uint256.class))),
             Collections.<TypeReference<?>>emptyList());
         return createSignedTransaction(function);
     }
