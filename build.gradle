@@ -97,7 +97,7 @@ List scaffold = [
 
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat,scaffold
-    compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2'
+    compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.1.0-110701-SNAPSHOT'
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
     compile 'com.h2database:h2:1.4.200'
