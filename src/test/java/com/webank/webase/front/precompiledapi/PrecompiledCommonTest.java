@@ -21,7 +21,7 @@ import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.JsonUtils;
 import java.util.List;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionPrecompiled;
 import org.junit.Assert;
 import org.junit.Test;

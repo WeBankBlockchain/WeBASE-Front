@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 import com.webank.webase.front.base.TestBase;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
 import org.fisco.bcos.sdk.transaction.model.po.RawTransaction;

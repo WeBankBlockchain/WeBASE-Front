@@ -19,12 +19,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.GroupList;
-import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupList;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -38,16 +35,16 @@ public class BasicTest extends TestBase {
     assertNotNull(i > 0);
   }
 
-  @Test
-  public void consensusStatusTest() {
-    System.out.println(web3j.getConsensusStatus().getConsensusStatus());
-    assertNotNull(web3j.getConsensusStatus().getConsensusStatus());
-  }
+//  @Test
+//  public void consensusStatusTest() { todo
+//    System.out.println(web3j.getConsensusStatus().getConsensusStatus());
+//    assertNotNull(web3j.getConsensusStatus().getConsensusStatus());
+//  }
 
   @Test
   public void getBlockByNumber() {
     BigInteger blockNumber = web3j.getBlockNumber().getBlockNumber();
-    BcosBlock bcosBlock = web3j.getBlockByNumber(blockNumber,true);
+    BcosBlock bcosBlock = web3j.getBlockByNumber(blockNumber,true, false);
     System.out.println(bcosBlock.getBlock());
   }
 
@@ -57,44 +54,36 @@ public class BasicTest extends TestBase {
     assertNotNull(web3j.getSyncStatus().getSyncStatus());
   }
 
-  @Test
-  public void versionTest() {
-    ClientVersion web3ClientVersion = web3j.getNodeVersion().getNodeVersion();
-    System.out.println(web3ClientVersion);
-    assertNotNull(web3ClientVersion);
-  }
+//  @Test
+//  public void versionTest() { todo
+//    ClientVersion web3ClientVersion = web3j.getNodeVersion().getNodeVersion();
+//    System.out.println(web3ClientVersion);
+//    assertNotNull(web3ClientVersion);
+//  }
 
   // getPeers
   @Ignore
   @Test
   public void peersTest() {
     Peers ethPeers = web3j.getPeers();
-    System.out.println(ethPeers.getPeers().get(0).getNodeID());
+    System.out.println(ethPeers.getPeers());
     assertNotNull(ethPeers);
   }
 
-  @Test
-  public void groupPeersTest() {
-    GroupPeers groupPeers = web3j.getGroupPeers();
-    groupPeers.getGroupPeers().forEach(System.out::println);
-    assertNotNull(groupPeers.getResult());
-  }
+//  @Test
+//  public void groupPeersTest() { todo
+//    GroupPeers groupPeers = web3j.getGroupPeers();
+//    groupPeers.getGroupPeers().forEach(System.out::println);
+//    assertNotNull(groupPeers.getResult());
+//  }
 
   @Test
   public void groupListTest() {
-    GroupList groupList = web3j.getGroupList();
-    groupList.getGroupList().stream().forEach(System.out::println);
-    assertTrue((groupList.getGroupList().size() > 0));
+    BcosGroupList groupList = web3j.getGroupList();
+    groupList.getResult().getGroupList().forEach(System.out::println);
+    assertTrue((groupList.getResult().getGroupList().size() > 0));
   }
 
-  @Ignore
-  @Test
-  public void getTransactionByBlockNumberAndIndexTest() {
-    BigInteger blockNumber = web3j.getBlockNumber().getBlockNumber();
-    JsonTransactionResponse transaction =
-        web3j.getTransactionByBlockNumberAndIndex(blockNumber, new BigInteger("0")).getTransaction().get();
-    System.out.println(transaction.calculateHash(web3j.getCryptoSuite()));
-  }
 
 //  @Test
 //  public void basicTest() {
