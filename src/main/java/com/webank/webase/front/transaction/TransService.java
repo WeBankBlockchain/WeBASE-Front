@@ -151,12 +151,12 @@ public class TransService {
         // handle cns
         if (req.isUseCns()) {
             try {
-                List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
+                Tuple2<String, String> cnsInfo = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
                         req.getCnsName(), req.getVersion());
-                if (CollectionUtils.isEmpty(cnsList)) {
-                    throw new FrontException(VERSION_NOT_EXISTS);
-                }
-                contractAddress = cnsList.iterator().next().getAddress();
+//                if (CollectionUtils.isEmpty(cnsList)) { todo check
+//                    throw new FrontException(VERSION_NOT_EXISTS);
+//                }
+                contractAddress = cnsInfo.getValue1();
                 log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
             } catch (ContractException e) {
                 log.error("queryCnsByNameAndVersion ContractException fail:[]", e);
@@ -492,12 +492,9 @@ public class TransService {
         String contractAddress = req.getContractAddress();
         if (req.isUseCns()) {
             try {
-                List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(groupId,
+                Tuple2<String, String> cnsInfo  = precompiledService.queryCnsByNameAndVersion(groupId,
                     req.getCnsName(), req.getVersion());
-                if (CollectionUtils.isEmpty(cnsList)) {
-                    throw new FrontException(VERSION_NOT_EXISTS);
-                }
-                contractAddress = cnsList.iterator().next().getAddress();
+                contractAddress = cnsInfo.getValue1();
                 log.info("transHandleLocal cns contractAddress:{}", contractAddress);
             } catch (ContractException e) {
                 log.error("queryCnsByNameAndVersion ContractException fail:[]", e);
@@ -736,11 +733,8 @@ public class TransService {
         String funcName, List<Object> funcParam) throws Exception {
 
         if (isUseCns) {
-            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
-            if (CollectionUtils.isEmpty(cnsList)) {
-                throw new FrontException(VERSION_NOT_EXISTS);
-            }
-            contractAddress = cnsList.iterator().next().getAddress();
+            Tuple2<String, String> cnsInfo = precompiledService.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
+            contractAddress = cnsInfo.getValue1();
             log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
         }
         // encode function

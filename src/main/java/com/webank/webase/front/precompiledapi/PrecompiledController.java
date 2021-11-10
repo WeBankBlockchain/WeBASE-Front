@@ -39,6 +39,7 @@ import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
@@ -98,19 +99,10 @@ public class PrecompiledController {
                 return ConstantCode.INVALID_VERSION;
             }
             // check return list size
-            resList = precompiledService.queryCnsByNameAndVersion(groupId, name, version);
-            log.info("end queryCns useTime:{} resList:{}",
-                    Duration.between(startTime, Instant.now()).toMillis(), resList);
-            if (resList.size() != 0) {
-                List2Page<CnsInfo> list2Page =
-                        new List2Page<CnsInfo>(resList, pageSize, pageNumber);
-                List<CnsInfo> finalList = list2Page.getPagedList();
-                long totalCount = (long) resList.size();
-                log.debug("in queryCns case: Contract Name And Version. finalList:{}", finalList);
-                return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
-            } else {
-                return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
-            }
+            Tuple2<String, String> res = precompiledService.queryCnsByNameAndVersion(groupId, name, version);
+            log.info("end queryCns useTime:{} res:{}",
+                    Duration.between(startTime, Instant.now()).toMillis(), res);
+            return new BaseResponse(ConstantCode.RET_SUCCESS, res);
         } else {
             return ConstantCode.PARAM_ERROR;
         }

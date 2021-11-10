@@ -46,11 +46,11 @@ public class EncryptTypeController {
         log.info("getEncryptType:{}", encrypt);
         return encrypt;
     }
-    
-    @GetMapping("sslCryptoType")
-    public Integer getSSLCryptoType() {
-        int sslCryptoType = bcosSDK.getSSLCryptoType();
-        log.info("getSSLCryptoType:{}", sslCryptoType);
-        return sslCryptoType;
-    }
+//    todo
+//    @GetMapping("sslCryptoType")
+//    public Integer getSSLCryptoType() {
+//        int sslCryptoType = bcosSDK.getSSLCryptoType();
+//        log.info("getSSLCryptoType:{}", sslCryptoType);
+//        return sslCryptoType;
+//    }
 }

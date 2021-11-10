@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.BcosSDK;
@@ -96,9 +97,8 @@ public class Web3ApiService {
         }
         BcosBlock.Block block;
         block = getWeb3j(groupId)
-                .getBlockByNumber(blockNumber, true, fullTrans)
+                .getBlockByNumber(blockNumber, false, fullTrans)
                 .getBlock();
-        CommonUtils.processBlockHexNumber(block);
         return block;
     }
 
@@ -108,9 +108,9 @@ public class Web3ApiService {
      * @param blockHash blockHash
      */
     public BcosBlock.Block getBlockByHash(int groupId, String blockHash, boolean fullTrans) {
-        BcosBlock.Block block = getWeb3j(groupId).getBlockByHash(blockHash, true, fullTrans)
+        BcosBlock.Block block = getWeb3j(groupId).getBlockByHash(blockHash,
+            false, fullTrans)
                 .getBlock();
-        CommonUtils.processBlockHexNumber(block);
         return block;
     }
 
@@ -171,7 +171,6 @@ public class Web3ApiService {
         if (opt.isPresent()) {
             transaction = opt.get();
         }
-        CommonUtils.processTransHexNumber(transaction);
         return transaction;
     }
 
@@ -439,19 +438,7 @@ public class Web3ApiService {
         // if localGroupIdList not contain group in groupList from chain, add it
         groupIdList.forEach(group2Init ->
                 bcosSDK.getClient(group2Init));
-                //initWeb3j(Integer.parseInt(group2Init)));
 
-        // Set<Integer> localGroupIdList = web3jMap.keySet();
-        // todo whether need to stop client manually, 需要catch get的异常
-        //log.debug("refreshWeb3jMap localGroupList:{}", localGroupIdList);
-        // if local web3j map contains group that not in groupList from chain
-        // remove it from local web3j map
-//        localGroupIdList.stream()
-//            // not contains in groupList from chain
-//            .filter(groupId ->
-//                !groupIdList.contains(String.valueOf(groupId)))
-//            .forEach(group2Remove ->
-//                bcosSDK.getClient(group2Remove).stop());
     }
 
     // get all peers of chain todo
@@ -491,8 +478,10 @@ public class Web3ApiService {
     /**
      * getNodeInfo. todo 获取节点名
      */
-//    public NodeInformation getNodeInfo() {
-//        return getWeb3j().getGroupNodeInfo(getWeb3j().getGroupInfo().getResult().).getNodeInfo(getNodeIpPort()).getNodeInfo();
+//    public  getNodeInfo() {
+////        String nodeName = getWeb3j().getGroupInfo().getResult().getNodeList().;
+////        return getWeb3j().getGroupNodeInfo("").getResult().
+////            .getNodeInfo().getNodeInfo();
 //    }
 
     /**
@@ -514,8 +503,13 @@ public class Web3ApiService {
 
     // todo sealer: nodeId and weight
     public List<Sealer> getSealerList(int groupId) {
-//    public List<String> getSealerList(int groupId) {
         return getWeb3j(groupId).getSealerList().getSealerList();
+    }
+
+    public List<String> getSealerStrList(int groupId) {
+        List<Sealer> sealers = this.getSealerList(groupId);
+        return sealers.stream().map(Sealer::getNodeID).collect(Collectors.toList());
+
     }
 
     public List<String> getObserverList(int groupId) {
@@ -569,7 +563,6 @@ public class Web3ApiService {
         Block block = getWeb3j(groupId)
             .getBlockByNumber(blockNumber, false, false)
             .getBlock();
-        CommonUtils.processBlockHexNumber(block);
         int transCnt = block.getTransactions().size();
         Long timestamp = block.getTimestamp();
         return new RspStatBlock(blockNumber, timestamp, transCnt);

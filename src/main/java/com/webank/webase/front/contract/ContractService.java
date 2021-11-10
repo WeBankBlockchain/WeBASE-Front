@@ -79,6 +79,7 @@ import org.fisco.bcos.sdk.codec.ABICodecException;
 import org.fisco.bcos.sdk.codec.abi.FunctionEncoder;
 import org.fisco.bcos.sdk.codec.datatypes.Address;
 import org.fisco.bcos.sdk.codec.datatypes.Type;
+import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.codegen.ContractGenerator;
 import org.fisco.bcos.sdk.codegen.exceptions.CodeGenException;
@@ -321,12 +322,12 @@ public class ContractService {
         String version = req.getVersion();
         String contractAddress = req.getContractAddress();
         String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
-        List<CnsInfo> cnsList =
+        Tuple2<String, String> cnsList =
                 precompiledService.queryCnsByNameAndVersion(groupId, cnsName, version);
-        if (!CollectionUtils.isEmpty(cnsList)) {
-            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
-            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
-        }
+//        if (!CollectionUtils.isEmpty(cnsList)) { todo 返回为空时怎么判断
+//            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
+//            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
+//        }
         // locally
         if (req.isSaveEnabled()) {
             if (StringUtils.isBlank(req.getContractPath())) {

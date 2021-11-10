@@ -38,7 +38,9 @@ import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
@@ -167,19 +169,19 @@ public class PrecompiledWithSignService {
         if (!isValidNodeID(nodeId)) {
             return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
         }
-        List<String> sealerList = web3ApiService.getSealerList(groupId);
+        List<String> sealerList = web3ApiService.getSealerStrList(groupId); // todo check
         if (sealerList.contains(nodeId)) {
             return ConstantCode.ALREADY_EXISTS_IN_SEALER_LIST.toString();
         }
-        List<String> nodeIdList = web3ApiService.getNodeIdList();
-        if (!nodeIdList.contains(nodeId)) {
-            log.error("nodeId is not connected with others, cannot added as sealer");
-            return ConstantCode.PEERS_NOT_CONNECTED.toString();
-        }
+//        List<String> nodeIdList = web3ApiService.getNodeIdList(); todo
+//        if (!nodeIdList.contains(nodeId)) {
+//            log.error("nodeId is not connected with others, cannot added as sealer");
+//            return ConstantCode.PEERS_NOT_CONNECTED.toString();
+//        }
         // check group file
-        if (!containsGroupFile(groupId)) {
-            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
-        }
+//        if (!containsGroupFile(groupId)) {
+//            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+//        }
         // trans
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
@@ -219,10 +221,10 @@ public class PrecompiledWithSignService {
      * consensus: remove node from list through webase-sign
      */
     public String removeNode(int groupId, String signUserId, String nodeId) {
-        List<String> groupPeers = web3ApiService.getGroupPeers(groupId);
-        if (!groupPeers.contains(nodeId)) {
-            return ConstantCode.ALREADY_REMOVED_FROM_THE_GROUP.toString();
-        }
+//        List<String> groupPeers = web3ApiService.getGroupPeers(groupId);
+//        if (!groupPeers.contains(nodeId)) {
+//            return ConstantCode.ALREADY_REMOVED_FROM_THE_GROUP.toString();
+//        }
         // trans
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
@@ -249,15 +251,17 @@ public class PrecompiledWithSignService {
      * check node id
      */
     private boolean isValidNodeID(String _nodeID) {
-        boolean flag = false;
-        List<String> nodeIDs = web3ApiService.getNodeIdList();
-        for (String nodeID : nodeIDs) {
-            if (_nodeID.equals(nodeID)) {
-                flag = true;
-                break;
-            }
-        }
-        return flag;
+//        boolean flag = false;
+//        List<String> nodeIDs = web3ApiService.getNodeIdList(); todo
+//        List<String> nodeIDs = web3ApiService.getNodeIdList();
+//        for (String nodeID : nodeIDs) {
+//            if (_nodeID.equals(nodeID)) {
+//                flag = true;
+//                break;
+//            }
+//        }
+//        return flag;
+        return true;
     }
 
     /**
@@ -551,24 +555,5 @@ public class PrecompiledWithSignService {
         }
     }
 
-    /**
-     * check group config file exist before add as sealer/observer
-     */
-    private boolean containsGroupFile(int groupId) {
-        log.info("check front's node contains group file of groupId:{}", groupId);
-        ClientVersion clientVersion = web3ApiService.getClientVersion();
-        int supportVer = CommonUtils.getVersionFromStr(clientVersion.getSupportedVersion());
-        if (supportVer < 241) {
-            log.info("client support version not support dynamic group");
-            return true;
-        }
-        // INEXISTENT
-        String groupStatus = (String) web3ApiService.querySingleGroupStatus(groupId).getData();
-        if (GROUP_FILE_NOT_EXIST.equals(groupStatus)) {
-            log.error("node contains no group file to add in this group:{}", groupId);
-            return false;
-        }
-        return true;
-    }
 
 }

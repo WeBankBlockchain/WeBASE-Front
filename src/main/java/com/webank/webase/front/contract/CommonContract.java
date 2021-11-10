@@ -27,11 +27,12 @@ import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 
 /**
  * Contract's common functions
- *
+ * only solidity, not support liquid yet
  */
 public final class CommonContract extends Contract {
 
-    protected CommonContract(String contractAddress, Client web3j, CryptoKeyPair credentials) {
+    protected CommonContract(String contractAddress, Client web3j,
+        CryptoKeyPair credentials) {
         //todo check no binary whether matters
         super("", contractAddress, web3j, credentials);
     }
@@ -46,8 +47,9 @@ public final class CommonContract extends Contract {
     }
 
     public static CommonContract deploy(Client web3j, CryptoKeyPair credentials,
-            String contractBin, String encodedConstructor) throws ContractException {
-        return deploy(CommonContract.class, web3j, credentials, contractBin, encodedConstructor);
+            String contractBin, byte[] encodedConstructor) throws ContractException {
+        return deploy(CommonContract.class, web3j, credentials,
+            contractBin, "", encodedConstructor,"");
     }
 
     public static CommonContract load(String contractAddress, Client web3j, CryptoKeyPair credentials) {

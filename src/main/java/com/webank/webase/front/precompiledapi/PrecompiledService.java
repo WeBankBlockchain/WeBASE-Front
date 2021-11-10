@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
 import org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCycleService;
@@ -66,7 +67,10 @@ public class PrecompiledService {
         return cnsService.selectByName(contractName);
     }
 
-    public List<CnsInfo> queryCnsByNameAndVersion(int groupId, String contractName,
+    /**
+     * @return address,abi
+     */
+    public Tuple2<String, String> queryCnsByNameAndVersion(int groupId, String contractName,
         String version) throws ContractException {
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
@@ -100,11 +104,10 @@ public class PrecompiledService {
 
     public List<NodeInfo> getNodeList(int groupId) throws IOException {
         // nodeListWithType 组合多个带有类型的nodeid list
-        List<String> sealerList =
-                web3ApiService.getWeb3j(groupId).getSealerList().getSealerList();
+        List<String> sealerList = web3ApiService.getSealerStrList(groupId);
         List<String> observerList =
                 web3ApiService.getWeb3j(groupId).getObserverList().getObserverList();
-        List<String> peerList = web3ApiService.getWeb3j(groupId).getNodeIDList().getNodeIDList();
+//        List<String> peerList = web3ApiService.getWeb3j(groupId).getNodeIDList().getNodeIDList(); todo
         // process nodeList
         List<NodeInfo> nodeListWithType = new ArrayList<>();
 
@@ -112,10 +115,11 @@ public class PrecompiledService {
         sealerList.forEach(sealer -> nodeListWithType.add(new NodeInfo(sealer, NODE_TYPE_SEALER)));
         observerList.forEach(
                 observer -> nodeListWithType.add(new NodeInfo(observer, NODE_TYPE_OBSERVER)));
-        // peer not in sealer/observer but connected is remove node(游离节点)
-        peerList.stream().filter(peer -> !sealerList.contains(peer) && !observerList.contains(peer))
-                .forEach(peerToAdd -> nodeListWithType
-                        .add(new NodeInfo(peerToAdd, NODE_TYPE_REMOVE)));
+        // peer not in sealer/observer but connected is remove node(游离节点) todo
+//        List<String> peerList = web3ApiService.getWeb3j(groupId).getNodeIDList().getNodeIDList();
+//        peerList.stream().filter(peer -> !sealerList.contains(peer) && !observerList.contains(peer))
+//                .forEach(peerToAdd -> nodeListWithType
+//                        .add(new NodeInfo(peerToAdd, NODE_TYPE_REMOVE)));
 
         return nodeListWithType;
     }
@@ -185,7 +189,8 @@ public class PrecompiledService {
                                             Condition conditions) throws Exception {
         TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
                 keyStoreService.getCredentialsForQuery());
-        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), table.getKey(), conditions);
+//        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), table.getKey(), conditions); todo check
+        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), conditions);
         return selectRes;
     }
 

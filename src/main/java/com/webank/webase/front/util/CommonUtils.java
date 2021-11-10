@@ -703,55 +703,6 @@ public class CommonUtils {
         receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
     }
 
-
-    /**
-     * convert hex number string to decimal number string
-     * @param block
-     */
-    public static void processBlockHexNumber(BcosBlock.Block block) {
-        if (block == null) {
-            return;
-        }
-        String gasLimit = Optional.ofNullable(block.getGasLimit()).orElse("0");
-        String gasUsed =  Optional.ofNullable(block.getGasUsed()).orElse("0");
-        String timestamp =  Optional.ofNullable(block.getTimestamp()).orElse("0");
-        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
-        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
-        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
-    }
-
-    /**
-     * convert hex number string to decimal number string
-     * @param blockHeader
-     */
-    public static void processBlockHeaderHexNumber(BcosBlockHeader.BlockHeader blockHeader) {
-        if (blockHeader == null) {
-            return;
-        }
-        String gasLimit = Optional.ofNullable(blockHeader.getGasLimit()).orElse("0");
-        String gasUsed =  Optional.ofNullable(blockHeader.getGasUsed()).orElse("0");
-        String timestamp =  Optional.ofNullable(blockHeader.getTimestamp()).orElse("0");
-        blockHeader.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
-        blockHeader.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
-        blockHeader.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
-    }
-
-    /**
-     * convert hex number string to decimal number string
-     * @param trans
-     */
-    public static void processTransHexNumber(JsonTransactionResponse trans) {
-        if (trans == null) {
-            return;
-        }
-        String gas = Optional.ofNullable(trans.getGas()).orElse("0");
-        String gasPrice = Optional.ofNullable(trans.getGasPrice()).orElse("0");
-        String groupId = Optional.ofNullable(trans.getGroupId()).orElse("0");
-        trans.setGas(Numeric.toBigInt(gas).toString(10));
-        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
-        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
-    }
-
     /**
      * get version number without character
      * @param verStr ex: v2.4.1, ex 1.5.0

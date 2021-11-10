@@ -27,6 +27,7 @@ import com.webank.webase.front.event.NewBlockEventInfoRepository;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
@@ -54,7 +55,7 @@ public class EventRegisterInitTask {
     @Autowired
     MQPublisher mqPublisher;
     @Autowired
-    private BcosSDK bcosSDK;
+    private Web3ApiService web3ApiService;
     @Autowired
     private EventService eventService;
 
@@ -72,7 +73,9 @@ public class EventRegisterInitTask {
     public synchronized void syncEventRegisterTask() {
         try{
             log.debug("Register task starts.");
-            for (Integer groupId: bcosSDK.getGroupManagerService().getGroupList()) {
+//            for (Integer groupId: bcosSDK.getGroupManagerService().getGroupList()) {
+            for (String gId: web3ApiService.getGroupList()) {
+                int groupId = Integer.parseInt(gId);
                 List<NewBlockEventInfo> newBlockEventInfoList =
                         newBlockEventInfoRepository.findByGroupId(groupId);
                 List<ContractEventInfo> contractEventInfoList =

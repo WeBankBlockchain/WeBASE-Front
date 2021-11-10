@@ -82,21 +82,21 @@ public class PrecompiledSysConfigService {
         List<ResSystemConfig> list = new ArrayList<>();
 
         String txCountLimit = web3ApiService.getWeb3j(groupId)
-                .getSystemConfigByKey(PrecompiledUtils.TxCountLimit).getSystemConfig();
+                .getSystemConfigByKey(PrecompiledUtils.TxCountLimit).getSystemConfig().getValue();
         ResSystemConfig systemConfigCount = new ResSystemConfig();
         systemConfigCount.setConfigKey(PrecompiledUtils.TxCountLimit);
         systemConfigCount.setConfigValue(txCountLimit);
         systemConfigCount.setGroupId(groupId);
 
         String txGasLimit = web3ApiService.getWeb3j(groupId)
-                .getSystemConfigByKey(PrecompiledUtils.TxGasLimit).getSystemConfig();
+                .getSystemConfigByKey(PrecompiledUtils.TxGasLimit).getSystemConfig().getValue();
         ResSystemConfig systemConfigGas = new ResSystemConfig();
         systemConfigGas.setConfigKey(PrecompiledUtils.TxGasLimit);
         systemConfigGas.setConfigValue(txGasLimit);
         systemConfigGas.setGroupId(groupId);
 
         String consensusTimeout = web3ApiService.getWeb3j(groupId)
-                .getSystemConfigByKey(PrecompiledUtils.ConsensusTimeout).getSystemConfig();
+                .getSystemConfigByKey(PrecompiledUtils.ConsensusTimeout).getSystemConfig().getValue();
         ResSystemConfig systemConfigTimeout = new ResSystemConfig();
         systemConfigTimeout.setConfigKey(PrecompiledUtils.ConsensusTimeout);
         systemConfigTimeout.setConfigValue(consensusTimeout);
@@ -110,7 +110,7 @@ public class PrecompiledSysConfigService {
 
     public String getSysConfigByKey(int groupId, String key) {
         // 校验
-        String result = web3ApiService.getWeb3j(groupId).getSystemConfigByKey(key).getSystemConfig();
+        String result = web3ApiService.getWeb3j(groupId).getSystemConfigByKey(key).getSystemConfig().getValue();
         return result;
 
     }
