@@ -123,7 +123,7 @@ public class KeyStoreService {
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // create keyPair(support guomi)
         KeyStoreInfo keyStoreInfo;
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair();
+        CryptoKeyPair keyPair = cryptoSuite.getKeyPairFactory().generateKeyPair();
         if (keyPair == null) {
             log.error("fail createKeyStore for null key pair");
             throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
@@ -206,7 +206,7 @@ public class KeyStoreService {
     public CryptoKeyPair getCredentialsForQuery() {
         log.debug("start getCredentialsForQuery. ");
         // create keyPair(support guomi)
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair();
+        CryptoKeyPair keyPair = cryptoSuite.getKeyPairFactory().generateKeyPair();
         if (keyPair == null) {
             log.error("create random Credentials for query failed for null key pair");
             throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
@@ -349,7 +349,7 @@ public class KeyStoreService {
      */
     public CryptoKeyPair getCredentials(String user) throws FrontException {
         String privateKey = getPrivateKey(user);
-        return cryptoSuite.createKeyPair(privateKey);
+        return cryptoSuite.getKeyPairFactory().createKeyPair(privateKey);
     }
 
     /**
@@ -443,7 +443,7 @@ public class KeyStoreService {
         // check name
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // to store locally
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair(Numeric.cleanHexPrefix(privateKey));
+        CryptoKeyPair keyPair = cryptoSuite.getKeyPairFactory().createKeyPair(Numeric.cleanHexPrefix(privateKey));
         if (keyPair == null) {
             log.error("importFromPrivateKey get null keyPair");
             throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);

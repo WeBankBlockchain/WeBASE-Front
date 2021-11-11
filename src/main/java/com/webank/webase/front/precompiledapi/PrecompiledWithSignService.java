@@ -16,14 +16,10 @@ package com.webank.webase.front.precompiledapi;
 
 import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDOBSERVER;
 import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDSEALER;
-//import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_REMOVE;
-import static org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCyclePrecompiled.FUNC_FREEZE;
-import static org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCyclePrecompiled.FUNC_GRANTMANAGER;
-import static org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCyclePrecompiled.FUNC_UNFREEZE;
-import static org.fisco.bcos.sdk.contract.precompiled.crud.CRUDPrecompiled.FUNC_INSERT;
-import static org.fisco.bcos.sdk.contract.precompiled.crud.CRUDPrecompiled.FUNC_REMOVE;
-import static org.fisco.bcos.sdk.contract.precompiled.crud.CRUDPrecompiled.FUNC_UPDATE;
-import static org.fisco.bcos.sdk.contract.precompiled.crud.table.TableFactory.FUNC_CREATETABLE;
+import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_REMOVE;
+import static org.fisco.bcos.sdk.contract.precompiled.crud.TablePrecompiled.FUNC_CREATETABLE;
+import static org.fisco.bcos.sdk.contract.precompiled.crud.TablePrecompiled.FUNC_INSERT;
+import static org.fisco.bcos.sdk.contract.precompiled.crud.TablePrecompiled.FUNC_UPDATE;
 import static org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,19 +29,14 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.transaction.TransService;
-import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.PrecompiledConstant;
 import org.fisco.bcos.sdk.model.PrecompiledRetCode;
 import org.fisco.bcos.sdk.model.RetCode;
@@ -55,6 +46,8 @@ import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+//import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_REMOVE;
 
 /**
  * send raw transaction through webase-sign to call precompiled
@@ -374,43 +367,6 @@ public class PrecompiledWithSignService {
         }
     }
 
-    public String contractFreeze(int groupId, String signUserId, String contractAddress) {
-        // trans
-        List<Object> funcParams = new ArrayList<>();
-        funcParams.add(contractAddress);
-        String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CSM);
-        String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CSM);
-        TransactionReceipt receipt =
-                (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, precompiledAddress, abiStr, FUNC_FREEZE, funcParams);
-        return this.handleTransactionReceipt(receipt);
-    }
-
-    public String contractUnfreeze(int groupId, String signUserId, String contractAddress) {
-        // trans
-        List<Object> funcParams = new ArrayList<>();
-        funcParams.add(contractAddress);
-        String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CSM);
-        String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CSM);
-        TransactionReceipt receipt =
-                (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, precompiledAddress, abiStr, FUNC_UNFREEZE, funcParams);
-        return this.handleTransactionReceipt(receipt);
-    }
-
-    public String contractGrantManager(int groupId, String signUserId, String contractAddress,
-            String grantAddress) {
-        // trans
-        List<Object> funcParams = new ArrayList<>();
-        funcParams.add(contractAddress);
-        funcParams.add(grantAddress);
-        String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CSM);
-        String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CSM);
-        TransactionReceipt receipt =
-                (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, precompiledAddress, abiStr, FUNC_GRANTMANAGER, funcParams);
-        return this.handleTransactionReceipt(receipt);
-    }
 //
 //    /**
 //     * chain governance, above FISCO-BCOS v2.5.0

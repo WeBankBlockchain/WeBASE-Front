@@ -14,31 +14,20 @@
 package com.webank.webase.front.precompiledapi;
 
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
-import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
 
-import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.precompiledapi.crud.CRUDParseUtils;
 import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
-import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
-import org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCycleService;
-import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
-import org.fisco.bcos.sdk.model.PrecompiledConstant;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -156,79 +145,43 @@ public class PrecompiledService {
         String res = precompiledWithSignService.remove(groupId, signUserId, table, condition);
         return res;
     }
+//
+//    /**
+//     * desc
+//     */
+//    public List<Map<String, String>> desc(int groupId, String tableName) throws Exception {
+//        TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
+//                keyStoreService.getCredentialsForQuery());
+//        List<Map<String, String>> descRes = crudService.desc(tableName);
+//        if (!CRUDParseUtils.checkTableExistence(descRes)) {
+//            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+//        }
+//        return descRes;
+////        String tableKey = descRes.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
+////        String valueFields = descRes.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME);
+////        return new Table(tableName, tableKey, valueFields);
+//    }
+//
+//    public String descTable(int groupId, String tableName) throws Exception {
+//        List<Map<String, String>> descRes = this.desc(groupId, tableName);
+//        if (!CRUDParseUtils.checkTableExistence(descRes)) {
+//            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+//        }
+//        String tableInfo = JsonUtils.objToString(descRes);
+//        return CRUDParseUtils.formatJson(tableInfo);
+//    }
+//
+//    /**
+//     * select
+//     */
+//    public List<Map<String, String>> select(int groupId, Table table,
+//                                            Condition conditions) throws Exception {
+//        TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
+//                keyStoreService.getCredentialsForQuery());
+////        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), table.getKey(), conditions); todo check
+//        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), conditions);
+//        return selectRes;
+//    }
 
-    /**
-     * desc
-     */
-    public List<Map<String, String>> desc(int groupId, String tableName) throws Exception {
-        TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                keyStoreService.getCredentialsForQuery());
-        List<Map<String, String>> descRes = crudService.desc(tableName);
-        if (!CRUDParseUtils.checkTableExistence(descRes)) {
-            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
-        }
-        return descRes;
-//        String tableKey = descRes.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
-//        String valueFields = descRes.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME);
-//        return new Table(tableName, tableKey, valueFields);
-    }
 
-    public String descTable(int groupId, String tableName) throws Exception {
-        List<Map<String, String>> descRes = this.desc(groupId, tableName);
-        if (!CRUDParseUtils.checkTableExistence(descRes)) {
-            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
-        }
-        String tableInfo = JsonUtils.objToString(descRes);
-        return CRUDParseUtils.formatJson(tableInfo);
-    }
-
-    /**
-     * select
-     */
-    public List<Map<String, String>> select(int groupId, Table table,
-                                            Condition conditions) throws Exception {
-        TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                keyStoreService.getCredentialsForQuery());
-//        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), table.getKey(), conditions); todo check
-        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), conditions);
-        return selectRes;
-    }
-
-    public String contractFreeze(int groupId, String signUserId, String contractAddress)
-            {
-        return precompiledWithSignService.contractFreeze(groupId, signUserId, contractAddress);
-    }
-
-    public String contractUnfreeze(int groupId, String signUserId, String contractAddress)
-            {
-        return precompiledWithSignService.contractUnfreeze(groupId, signUserId, contractAddress);
-    }
-
-    public String contractGrantManager(int groupId, String signUserId, String contractAddress,
-            String grantAddress) {
-        return precompiledWithSignService.contractGrantManager(groupId, signUserId, contractAddress,
-                grantAddress);
-    }
-
-    public String contractStatus(int groupId, String contractAddress) throws Exception {
-        ContractLifeCycleService contractStatusService = new ContractLifeCycleService(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
-        String res = contractStatusService.getContractStatus(contractAddress);
-        if (res.contains("frozen")) {
-            // res: The account has been frozen. You can use this account after unfreezing it.
-            return "1";
-        } else {
-            // res: The address is nonexistent.
-            // res: The account is available.
-            // res: invalid
-            // res: not a account address
-            return "0";
-        }
-    }
-
-    public List<String> contractManagerList(int groupId, String contractAddress) throws Exception {
-        ContractLifeCycleService contractStatusService = new ContractLifeCycleService(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery());
-        return contractStatusService.listManager(contractAddress);
-    }
 }

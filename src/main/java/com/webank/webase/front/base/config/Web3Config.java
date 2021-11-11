@@ -24,10 +24,12 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.ClientImpl;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -134,12 +136,12 @@ public class Web3Config {
 //        return new CryptoSuite(encryptType);
 //    }
 
-//    @Bean(name = "rpcClient")
-//    public Client getRpcWeb3j(BcosSDK bcosSDK) {
-//        // init rpc client(web3j)
-//        Client rpcWeb3j = Client.build(bcosSDK.getChannel());
-//        log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
-//        return rpcWeb3j;
-//    }
+    @Bean(name = "rpcClient")
+    public Client getRpcWeb3j(BcosSDK bcosSDK) throws JniException {
+        // init rpc client(web3j)
+        Client rpcWeb3j = Client.build(bcosSDK.getConfig());
+        log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
+        return rpcWeb3j;
+    }
 
 }

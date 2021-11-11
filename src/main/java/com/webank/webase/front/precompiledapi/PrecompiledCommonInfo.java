@@ -20,9 +20,7 @@ package com.webank.webase.front.precompiledapi;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.contractmgr.ContractLifeCyclePrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.crud.CRUDPrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.crud.table.TableFactory;
+import org.fisco.bcos.sdk.contract.precompiled.crud.TablePrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.model.PrecompiledAddress;
 import org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled;
 
@@ -37,16 +35,13 @@ public class PrecompiledCommonInfo {
         switch (types) {
             case SYSTEM_CONFIG:
                 return PrecompiledAddress.SYSCONFIG_PRECOMPILED_ADDRESS;
-            case TABLE_FACTORY:
-                return PrecompiledAddress.TABLEFACTORY_PRECOMPILED_ADDRESS;
+            case TABLE_FACTORY: // todo check
             case CRUD:
-                return PrecompiledAddress.CRUD_PRECOMPILED_ADDRESS;
+                return PrecompiledAddress.TABLEFACTORY_PRECOMPILED_ADDRESS;
             case CONSENSUS:
                 return PrecompiledAddress.CONSENSUS_PRECOMPILED_ADDRESS;
             case CNS:
                 return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
-            case CSM:
-                return PrecompiledAddress.CONTRACT_LIFECYCLE_PRECOMPILED_ADDRESS;
             default:
                 return "";
         }
@@ -57,15 +52,13 @@ public class PrecompiledCommonInfo {
             case SYSTEM_CONFIG:
                 return SystemConfigPrecompiled.ABI;
             case TABLE_FACTORY:
-                return TableFactory.ABI;
+                return TablePrecompiled.ABI;
             case CRUD:
-                return CRUDPrecompiled.ABI;
+                return TablePrecompiled.ABI;
             case CONSENSUS:
                 return ConsensusPrecompiled.ABI;
             case CNS:
                 return CNSPrecompiled.ABI;
-            case CSM:
-                return ContractLifeCyclePrecompiled.ABI;
             default:
                 return "";
         }

@@ -165,7 +165,7 @@ public class EventService {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // to register or unregister
 //        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId); todo init event suscribe
-        EventSubscribe eventSubscribe = new EventSubscribeImp(String.valueOf(groupId), bcosSDK.getConfig());
+        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(String.valueOf(groupId));
         String registerId = null;
         ContractEventCallback callback = null;
         try {
@@ -347,8 +347,7 @@ public class EventService {
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-//        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId); todo
-        EventSubscribe eventSubscribe = new EventSubscribeImp(String.valueOf(groupId), bcosSDK.getConfig());
+        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(String.valueOf(groupId));
 
         try {
             String registerId = eventInfo.getRegisterId();
@@ -392,7 +391,7 @@ public class EventService {
         ABICodec abiCodec = new ABICodec(cryptoSuite, false);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
-        EventSubscribe eventSubscribe = new EventSubscribeImp(String.valueOf(groupId), bcosSDK.getConfig());
+        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(String.valueOf(groupId));
         String registerId = eventSubscribe.subscribeEvent(eventParam, callback);
 
         List<DecodedEventLog> resultList;

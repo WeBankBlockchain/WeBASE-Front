@@ -697,7 +697,7 @@ public class TransService {
         log.info("transHandle start. ReqSignMessageHash:[{}]", JsonUtils.toJSONString(req));
         RspUserInfo rspUserInfo = keyStoreService.getUserInfoWithSign(req.getSignUserId(),true);
         String privateKeyRaw = new String(Base64.getDecoder().decode(rspUserInfo.getPrivateKey()));
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKeyRaw);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(privateKeyRaw);
         SignatureResult signResult = signMessageHashByType(
                 org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()),cryptoKeyPair,
                 cryptoSuite.cryptoTypeConfig

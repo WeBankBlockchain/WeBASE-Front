@@ -47,9 +47,6 @@ import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes32;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
@@ -750,7 +747,7 @@ public class CommonUtils {
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + PEM_FILE_FORMAT;
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(rawPrivateKey);
         cryptoKeyPair.storeKeyPairWithPem(exportedKeyPath);
         return exportedKeyPath;
     }
@@ -779,7 +776,7 @@ public class CommonUtils {
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + P12_FILE_FORMAT;
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(rawPrivateKey);
         cryptoKeyPair.storeKeyPairWithP12(exportedKeyPath, p12Password);
 
         return exportedKeyPath;
