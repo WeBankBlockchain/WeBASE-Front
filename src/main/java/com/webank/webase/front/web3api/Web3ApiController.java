@@ -60,7 +60,7 @@ public class Web3ApiController {
 
     @ApiOperation(value = "getBlockNumber", notes = "Get the latest block height of the node")
     @GetMapping("/blockNumber")
-    public BigInteger getBlockNumber(@PathVariable int groupId) {
+    public BigInteger getBlockNumber(@PathVariable String groupId) {
         return web3ApiService.getBlockNumber(groupId);
     }
 
@@ -68,7 +68,7 @@ public class Web3ApiController {
     @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
             dataType = "BigInteger", paramType = "path")
     @GetMapping("/blockByNumber/{blockNumber}")
-    public BcosBlock.Block getBlockByNumber(@PathVariable int groupId,
+    public BcosBlock.Block getBlockByNumber(@PathVariable String groupId,
         @PathVariable BigInteger blockNumber,
         @RequestParam(value = "fullTrans", required = false, defaultValue = "false") boolean fullTrans) {
         return web3ApiService.getBlockByNumber(groupId, blockNumber, fullTrans);
@@ -79,7 +79,7 @@ public class Web3ApiController {
             paramType = "path")
     @GetMapping("/blockByHash/{blockHash}")
     public BcosBlock.Block getBlockByHash(
-        @PathVariable int groupId,
+        @PathVariable String groupId,
         @PathVariable String blockHash,
         @RequestParam(value = "fullTrans", required = false, defaultValue = "false") boolean fullTrans) {
         return web3ApiService.getBlockByHash(groupId, blockHash, fullTrans);
@@ -90,7 +90,7 @@ public class Web3ApiController {
     @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
             dataType = "BigInteger", paramType = "path")
     @GetMapping("/blockTransCnt/{blockNumber}")
-    public int getBlockTransCntByNumber(@PathVariable int groupId,
+    public int getBlockTransCntByNumber(@PathVariable String groupId,
             @PathVariable BigInteger blockNumber) {
         return web3ApiService.getBlockTransCntByNumber(groupId, blockNumber);
     }
@@ -99,7 +99,7 @@ public class Web3ApiController {
 
     @ApiOperation(value = "getPbftView", notes = "Get PbftView")
     @GetMapping("/pbftView")
-    public BigInteger getPbftView(@PathVariable int groupId) {
+    public BigInteger getPbftView(@PathVariable String groupId) {
         return web3ApiService.getPbftView(groupId);
     }
 
@@ -108,7 +108,7 @@ public class Web3ApiController {
     @ApiImplicitParam(name = "transHash", value = "transHash", required = true, dataType = "String",
             paramType = "path")
     @GetMapping("/transactionReceipt/{transHash}")
-    public TransactionReceipt getTransactionReceipt(@PathVariable int groupId,
+    public TransactionReceipt getTransactionReceipt(@PathVariable String groupId,
             @PathVariable String transHash) {
         return web3ApiService.getTransactionReceipt(groupId, transHash);
     }
@@ -119,7 +119,7 @@ public class Web3ApiController {
             paramType = "path")
     @GetMapping("/transaction/{transHash}")
     public JsonTransactionResponse getTransactionByHash(
-        @PathVariable int groupId,
+        @PathVariable String groupId,
         @PathVariable String transHash,
         @RequestParam(value = "withProof", required = false, defaultValue = "false") boolean withProof) {
         return web3ApiService.getTransactionByHash(groupId, transHash, withProof);
@@ -139,7 +139,7 @@ public class Web3ApiController {
             @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
                     dataType = "BigInteger", paramType = "path")})
     @GetMapping("/code/{address}/{blockNumber}")
-    public String getCode(@PathVariable int groupId, @PathVariable String address,
+    public String getCode(@PathVariable String groupId, @PathVariable String address,
             @PathVariable BigInteger blockNumber) {
         if (address.length() != Address.ValidLen) {
             throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
@@ -158,7 +158,7 @@ public class Web3ApiController {
             @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
                     dataType = "int", paramType = "path"))
     @GetMapping("/transaction-total")
-    public RspTransCountInfo getTransTotalCnt(@PathVariable int groupId) {
+    public RspTransCountInfo getTransTotalCnt(@PathVariable String groupId) {
         return web3ApiService.getTransCnt(groupId);
     }
 
@@ -171,7 +171,7 @@ public class Web3ApiController {
 //            @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex",
 //                    required = true, dataType = "BigInteger", paramType = "path")})
 //    @GetMapping("/transByBlockHashAndIndex/{blockHash}/{transactionIndex}")
-//    public JsonTransactionResponse getTransByBlockHashAndIndex(@PathVariable int groupId,
+//    public JsonTransactionResponse getTransByBlockHashAndIndex(@PathVariable String groupId,
 //            @PathVariable String blockHash, @PathVariable BigInteger transactionIndex) {
 //        return web3ApiService.getTransByBlockHashAndIndex(groupId, blockHash, transactionIndex);
 //    }
@@ -185,22 +185,22 @@ public class Web3ApiController {
 //            @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex",
 //                    required = true, dataType = "BigInteger", paramType = "path")})
 //    @GetMapping("/transByBlockNumberAndIndex/{blockNumber}/{transactionIndex}")
-//    public JsonTransactionResponse getTransByBlockNumberAndIndex(@PathVariable int groupId,
+//    public JsonTransactionResponse getTransByBlockNumberAndIndex(@PathVariable String groupId,
 //            @PathVariable BigInteger blockNumber, @PathVariable BigInteger transactionIndex) {
 //        return web3ApiService.getTransByBlockNumberAndIndex(groupId, blockNumber, transactionIndex);
 //    }
 
 //    @ApiOperation(value = "getNodeStatusList", notes = "get list of node status info")
 //    @GetMapping("/getNodeStatusList")
-//    public List<NodeStatusInfo> getNodeStatusList(@PathVariable int groupId) {
+//    public List<NodeStatusInfo> getNodeStatusList(@PathVariable String groupId) {
 //        return web3ApiService.getNodeStatusList(groupId); todo 待sdk添加
 //    }
 
-//    @ApiOperation(value = "getGroupPeers", notes = "get list of group peers")
-//    @GetMapping("/groupPeers")
-//    public List<String> getGroupPeers(@PathVariable int groupId) {
-//        return web3ApiService.getGroupPeers(groupId);  todo 待sdk添加
-//    }
+    @ApiOperation(value = "getGroupPeers", notes = "get list of group peers, include removed nodes")
+    @GetMapping("/groupPeers")
+    public List<String> getGroupPeers(@PathVariable String groupId) {
+        return web3ApiService.getGroupPeers(groupId);
+    }
 
     @ApiOperation(value = "getGroupList", notes = "get list of group id")
     @GetMapping("/groupList")
@@ -214,53 +214,53 @@ public class Web3ApiController {
 //        return web3ApiService.getNodeIdList();  todo 待sdk添加
 //    }
 
-    @ApiOperation(value = "getPeers", notes = "get list of peers")
-    @GetMapping("/peers")
-    public String getPeers(@PathVariable int groupId) {
-        return web3ApiService.getPeers(groupId);
-    }
+//    @ApiOperation(value = "getPeers", notes = "get list of peers")
+//    @GetMapping("/peers")
+//    public String getPeers(@PathVariable String groupId) {
+//        return web3ApiService.getPeers(groupId);
+//    }
 
     @ApiOperation(value = "getPendingTransactionCount", notes = "get count of pending transactions count")
     @GetMapping("/pending-transactions-count")
-    public int getPendingTransactionCount(@PathVariable int groupId) {
+    public int getPendingTransactionCount(@PathVariable String groupId) {
         return web3ApiService.getPendingTransactions(groupId);
     }
 
     // todo 待添加
 //    @ApiOperation(value = "getConsensusStatus", notes = "get consensus status of group")
 //    @GetMapping("/consensusStatus")
-//    public ConsensusInfo getConsensusStatus(@PathVariable int groupId) {
+//    public ConsensusInfo getConsensusStatus(@PathVariable String groupId) {
 //        return web3ApiService.getConsensusStatus(groupId);
 //    }
 
     @ApiOperation(value = "getSyncStatus", notes = "get sync status of group")
     @GetMapping("/syncStatus")
-    public SyncStatusInfo getSyncStatus(@PathVariable int groupId) {
+    public SyncStatusInfo getSyncStatus(@PathVariable String groupId) {
         return web3ApiService.getSyncStatus(groupId);
     }
 
     @ApiOperation(value = "getSystemConfigByKey", notes = "get system config value by key")
     @ApiImplicitParam(name = "key", value = "key of system config", required = true, dataType = "String")
     @GetMapping("/systemConfigByKey/{key}")
-    public String getSystemConfigByKey(@PathVariable int groupId, @PathVariable String key) {
+    public String getSystemConfigByKey(@PathVariable String groupId, @PathVariable String key) {
         return web3ApiService.getSystemConfigByKey(groupId, key);
     }
-
-    @ApiOperation(value = "getNodeConfig", notes = "Get node config info")
-    @GetMapping("/nodeConfig")
-    public Object getNodeConfig() {
-        return web3ApiService.getNodeConfig();
-    }
+//
+//    @ApiOperation(value = "getNodeConfig", notes = "Get node config info")
+//    @GetMapping("/nodeConfig")
+//    public Object getNodeConfig() {
+//        return web3ApiService.getNodeConfig();
+//    }
 
     @ApiOperation(value = "getSealerList", notes = "get list of group's sealers")
     @GetMapping("/sealerList")
-    public List<Sealer> getSealerList(@PathVariable int groupId) {
+    public List<Sealer> getSealerList(@PathVariable String groupId) {
         return web3ApiService.getSealerList(groupId);
     }
 
     @ApiOperation(value = "getObserverList", notes = "get list of group's observers")
     @GetMapping("/observerList")
-    public List<String> getObserverList(@PathVariable int groupId) {
+    public List<String> getObserverList(@PathVariable String groupId) {
         return web3ApiService.getObserverList(groupId);
     }
 
@@ -274,7 +274,7 @@ public class Web3ApiController {
     @ApiOperation(value = "searchByCriteria", notes = "get list of group id")
     @ApiImplicitParam(name = "input", value = "input of criteria", required = true, dataType = "String")
     @GetMapping("/search")
-    public Object searchByCriteria(@PathVariable int groupId, @RequestParam String input) {
+    public Object searchByCriteria(@PathVariable String groupId, @RequestParam String input) {
         return web3ApiService.searchByCriteria(groupId, input);
     }
 
@@ -283,7 +283,7 @@ public class Web3ApiController {
 //    @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true,
 //        dataType = "String", paramType = "path")
 //    @GetMapping("/blockHeaderByHash/{blockHash}")
-//    public BlockHeader getBlockHeaderByHash(@PathVariable int groupId,
+//    public BlockHeader getBlockHeaderByHash(@PathVariable String groupId,
 //        @PathVariable String blockHash) {
 //        return web3ApiService.getBlockHeaderByHash(groupId, blockHash, true);
 //    }
@@ -292,7 +292,7 @@ public class Web3ApiController {
 //    @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
 //        dataType = "BigInteger", paramType = "path")
 //    @GetMapping("/blockHeaderByNumber/{blockNumber}")
-//    public BlockHeader getBlockHeaderByNumber(@PathVariable int groupId,
+//    public BlockHeader getBlockHeaderByNumber(@PathVariable String groupId,
 //        @PathVariable BigInteger blockNumber) {
 //        return web3ApiService.getBlockHeaderByNumber(groupId, blockNumber, true);
 //    }
@@ -303,7 +303,7 @@ public class Web3ApiController {
     @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
         dataType = "BigInteger", paramType = "path")
     @GetMapping("/blockStat/{blockNumber}")
-    public RspStatBlock getBlockStatByNumber(@PathVariable int groupId,
+    public RspStatBlock getBlockStatByNumber(@PathVariable String groupId,
         @PathVariable BigInteger blockNumber) {
         return web3ApiService.getBlockStatisticByNumber(groupId, blockNumber);
     }
@@ -320,7 +320,7 @@ public class Web3ApiController {
 //            dataType = "int")
 //    })
 //    @GetMapping("/transReceipt/batchByNumber/{blockNumber}")
-//    public List<TransactionReceipt> getBatchReceiptByBlockNumber(@PathVariable int groupId,
+//    public List<TransactionReceipt> getBatchReceiptByBlockNumber(@PathVariable String groupId,
 //        @PathVariable BigInteger blockNumber,
 //        @RequestParam(value = "start", defaultValue = "0") int start,
 //        @RequestParam(value = "count", defaultValue = "-1") int count) {
@@ -338,7 +338,7 @@ public class Web3ApiController {
 //            dataType = "int")
 //    })
 //    @GetMapping("/transReceipt/batchByHash/{blockHash}")
-//    public List<TransactionReceipt> getBatchReceiptByBlockHash(@PathVariable int groupId,
+//    public List<TransactionReceipt> getBatchReceiptByBlockHash(@PathVariable String groupId,
 //        @PathVariable String blockHash,
 //        @RequestParam(value = "start", defaultValue = "0") int start,
 //        @RequestParam(value = "count", defaultValue = "-1") int count) {
