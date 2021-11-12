@@ -40,7 +40,7 @@ public class TestBase {
     // 绝对路径
     String configFile = ".\\src\\test\\resources\\config-example.toml";
     bcosSDK =  BcosSDK.build(configFile);
-    web3j = bcosSDK.getClient(groupId.toString());
+    web3j = bcosSDK.getClient(groupId);
     cryptoSuite = web3j.getCryptoSuite();
     cryptoKeyPair = web3j.getCryptoSuite().getKeyPairFactory().createKeyPair("71f1479d9051e8d6b141a3b3ef9c01a7756da823a0af280c6bf62d18ee0cc978");
 

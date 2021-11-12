@@ -24,6 +24,7 @@ import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.security.SignatureException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -33,7 +34,6 @@ import org.fisco.bcos.sdk.model.CryptoType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.client.RestTemplate;
 
 public class SignDataTestBase extends SpringTestBase {
@@ -44,8 +44,8 @@ public class SignDataTestBase extends SpringTestBase {
     @Autowired
     RestTemplate restTemplate;
     @Autowired
-    @Qualifier("common")
-    CryptoSuite cryptoSuite;
+    private Web3ApiService web3ApiService;
+
 
 
     private static final String rawData = "123";
@@ -59,7 +59,7 @@ public class SignDataTestBase extends SpringTestBase {
         EncodeInfo encodeInfo = new EncodeInfo();
         // uuid to set uuid of webase-sign's keystoreInfo
         encodeInfo.setSignUserId("uuid");
-        encodeInfo.setEncodedDataStr(cryptoSuite.hash(rawData));
+        encodeInfo.setEncodedDataStr(new CryptoSuite(1).hash(rawData));
         String signedData = keyStoreService.getSignData(encodeInfo);// from webase-sign
         System.out.println(signedData); // 00fd8bbc86faa0cf9216886e15118862ef5469c5283ab43b727ebaee93d866ced346c6eea89aac11be598de5ad8b3711791594651a3a3e44df2f7d9a522da351e0
 //        Assert.assertTrue(StringUtils.isNotBlank(signedData));
@@ -85,11 +85,11 @@ public class SignDataTestBase extends SpringTestBase {
     }
 
     public String getLocalSignedData(String pri) {
-        CryptoKeyPair credentials = cryptoSuite.getKeyPairFactory().createKeyPair(pri);
-        if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
-            return CommonUtils.signatureDataToString((SM2SignatureResult)cryptoSuite.sign(rawData.getBytes(), credentials));
+        CryptoKeyPair credentials = new CryptoSuite(1).getKeyPairFactory().createKeyPair(pri);
+        if (new CryptoSuite(1).cryptoTypeConfig == CryptoType.SM_TYPE) {
+            return CommonUtils.signatureDataToString((SM2SignatureResult)new CryptoSuite(1).sign(rawData.getBytes(), credentials));
         } else {
-            return CommonUtils.signatureDataToString((ECDSASignatureResult) cryptoSuite.sign(rawData.getBytes(), credentials));
+            return CommonUtils.signatureDataToString((ECDSASignatureResult) new CryptoSuite(1).sign(rawData.getBytes(), credentials));
         }
     }
 
@@ -107,7 +107,7 @@ public class SignDataTestBase extends SpringTestBase {
         System.out.println(keyStoreInfo.getPublicKey());
         System.out.println(keyStoreInfo.getPrivateKey());
         // local guomi
-        CryptoKeyPair credentials = cryptoSuite.getKeyPairFactory().createKeyPair(keyStoreInfo.getPrivateKey());
+        CryptoKeyPair credentials = new CryptoSuite(1).getKeyPairFactory().createKeyPair(keyStoreInfo.getPrivateKey());
         String pub = credentials.getHexPublicKey();
         String addr = credentials.getAddress();
         System.out.println("local transfer: ");
