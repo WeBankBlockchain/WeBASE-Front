@@ -46,7 +46,7 @@ public class ReqNewBlockEventRegister {
      * group id
      */
     @NotNull(message = "groupId cannot be empty")
-    private Integer groupId;
+    private String groupId;
 
     /**
      * MQ info: exchange name

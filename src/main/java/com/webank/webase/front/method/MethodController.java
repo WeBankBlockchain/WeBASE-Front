@@ -68,7 +68,7 @@ public class MethodController extends BaseController {
      * query by methodId.
      */
     @GetMapping(value = "findById/{groupId}/{methodId}")
-    public BaseResponse getBymethodId(@PathVariable("groupId") Integer groupId,
+    public BaseResponse getBymethodId(@PathVariable("groupId") String groupId,
         @PathVariable("methodId") String methodId) {
         BaseResponse baseResponse = new BaseResponse(ConstantCode.RET_SUCCEED);
         Instant startTime = Instant.now();

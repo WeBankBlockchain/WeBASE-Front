@@ -155,7 +155,7 @@ public class ContractService {
     /**
      * check address is valid.
      */
-    private void addressIsValid(int groupId, String contractAddress, String contractBin) {
+    private void addressIsValid(String groupId, String contractAddress, String contractBin) {
         if (StringUtils.isBlank(contractAddress)) {
             log.error("fail addressIsValid. contractAddress is empty");
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
@@ -242,7 +242,7 @@ public class ContractService {
      * deploy through webase-sign
      */
     public String deployWithSign(ReqDeploy req) {
-        int groupId = req.getGroupId();
+        String groupId = req.getGroupId();
         String signUserId = req.getSignUserId();
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
@@ -285,7 +285,7 @@ public class ContractService {
      * deploy locally, not through webase-sign
      */
     public String deployLocally(ReqDeploy req) {
-        int groupId = req.getGroupId();
+        String groupId = req.getGroupId();
         String userAddress = req.getUser();
         // check deploy permission
         checkDeployPermission(groupId, userAddress);
@@ -317,7 +317,7 @@ public class ContractService {
      * registerCns.
      */
     public void registerCns(ReqRegisterCns req) throws Exception {
-        int groupId = req.getGroupId();
+        String groupId = req.getGroupId();
         String cnsName = req.getCnsName();
         String version = req.getVersion();
         String contractAddress = req.getContractAddress();
@@ -393,7 +393,7 @@ public class ContractService {
         }
     }
 
-    private String deployContract(int groupId, byte[] encodedConstructor,
+    private String deployContract(String groupId, byte[] encodedConstructor,
             CryptoKeyPair cryptoKeyPair) throws FrontException {
         Client client = web3ApiService.getWeb3j(groupId);
         if (client == null) {
@@ -482,7 +482,7 @@ public class ContractService {
     /**
      * delete contract by contractId.
      */
-    public void deleteContract(Long contractId, int groupId) {
+    public void deleteContract(Long contractId, String groupId) {
         log.debug("start deleteContract contractId:{} groupId:{}", contractId, groupId);
         // check contract id
         verifyContractIdExist(contractId, groupId);
@@ -604,7 +604,7 @@ public class ContractService {
     /**
      * find all contract without contract content
      */
-    public List<RspContractNoAbi> findAllContractNoAbi(int groupId, int contractStatus)
+    public List<RspContractNoAbi> findAllContractNoAbi(String groupId, int contractStatus)
             throws IOException {
         // init templates
         initDefaultContract(groupId);
@@ -627,7 +627,7 @@ public class ContractService {
      * @param groupId
      * @throws IOException
      */
-    private void initDefaultContract(Integer groupId) throws IOException {
+    private void initDefaultContract(String groupId) throws IOException {
         String contractPath = "template";
         List<Contract> contracts =
                 contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
@@ -667,7 +667,7 @@ public class ContractService {
     /**
      * verify contract not exist.
      */
-    private void verifyContractNotExist(int groupId, String path, String name) {
+    private void verifyContractNotExist(String groupId, String path, String name) {
         Contract contract =
                 contractRepository.findByGroupIdAndContractPathAndContractName(groupId, path, name);
         if (Objects.nonNull(contract)) {
@@ -679,7 +679,7 @@ public class ContractService {
     /**
      * verify that the contract had not deployed.
      */
-    private Contract verifyContractNotDeploy(Long contractId, int groupId) {
+    private Contract verifyContractNotDeploy(Long contractId, String groupId) {
         Contract contract = verifyContractIdExist(contractId, groupId);
         if (ContractStatus.DEPLOYED.getValue() == contract.getContractStatus()) {
             log.info("contract had bean deployed contract", contractId);
@@ -691,7 +691,7 @@ public class ContractService {
     /**
      * verify that the contractId is exist.
      */
-    private Contract verifyContractIdExist(Long contractId, int groupId) {
+    private Contract verifyContractIdExist(Long contractId, String groupId) {
         Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
         if (Objects.isNull(contract)) {
             log.info("contractId is invalid. contractId:{}", contractId);
@@ -703,7 +703,7 @@ public class ContractService {
     /**
      * verify that if the contract changed.
      */
-    public boolean verifyContractChange(Long contractId, int groupId) {
+    public boolean verifyContractChange(Long contractId, String groupId) {
         Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
         log.debug("verifyContractChange contract:{}", contract);
         // contract is deployed and modify time not equal
@@ -717,7 +717,7 @@ public class ContractService {
     /**
      * contract name can not be repeated.
      */
-    private void verifyContractNameNotExist(int groupId, String path, String name,
+    private void verifyContractNameNotExist(String groupId, String path, String name,
             Long contractId) {
         Contract localContract =
                 contractRepository.findByGroupIdAndContractPathAndContractName(groupId, path, name);
@@ -855,7 +855,7 @@ public class ContractService {
     /**
      * addContractPath.
      */
-    public List<ContractPath> findPathList(Integer groupId) throws IOException {
+    public List<ContractPath> findPathList(String groupId) throws IOException {
         // init default contracts and dir
         initDefaultContract(groupId);
         // get from database
@@ -871,7 +871,7 @@ public class ContractService {
     /**
      * deletePath.
      */
-    public void deletePath(Integer groupId, String contractPath) {
+    public void deletePath(String groupId, String contractPath) {
         ContractPathKey contractPathKey = new ContractPathKey();
         contractPathKey.setGroupId(groupId);
         contractPathKey.setContractPath(contractPath);
@@ -881,7 +881,7 @@ public class ContractService {
     /**
      * check user deploy permission
      */
-    private void checkDeployPermission(int groupId, String userAddress) {
+    private void checkDeployPermission(String groupId, String userAddress) {
         // get deploy permission list
 //        List<PermissionInfo> deployUserList =
 //                permissionManageService.listDeployAndCreateManager(groupId);
@@ -909,7 +909,7 @@ public class ContractService {
      * @param contractPath
      * @return
      */
-    public void batchDeleteByPath(int groupId, String contractPath) {
+    public void batchDeleteByPath(String groupId, String contractPath) {
         log.debug("start batchDeleteByPath groupId:{},contractPath:{}", groupId, contractPath);
         List<Contract> contractList =
                 contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
@@ -928,7 +928,7 @@ public class ContractService {
         return contract;
     }
 
-    public Contract findByGroupIdAndAddress(int groupId, String contractAddress) {
+    public Contract findByGroupIdAndAddress(String groupId, String contractAddress) {
         Contract contract =
                 contractRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
         if (Objects.isNull(contract)) {
@@ -946,7 +946,7 @@ public class ContractService {
     public List<Contract> listContractByMultiPath(ReqListContract param) {
         log.debug("start listContractByMultiPath ReqListContract:{},", param);
         List<Contract> resultList = new ArrayList<>();
-        int groupId = param.getGroupId();
+        String groupId = param.getGroupId();
         List<String> contractPathList = param.getContractPathList();
         for (String contractPath : contractPathList) {
             List<Contract> contractList =

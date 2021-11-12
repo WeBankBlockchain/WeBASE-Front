@@ -42,7 +42,7 @@ public class ContractEventCallback implements EventCallback {
     private MQPublisher MQPublisher;
     private String exchangeName;
     private String routingKey;
-    private int groupId;
+    private String groupId;
     private String appId;
 //    @Setter
 //    private boolean running = false;
@@ -51,7 +51,7 @@ public class ContractEventCallback implements EventCallback {
     private List<String> eventNameList;
 
     public ContractEventCallback(MQPublisher mqPublisher,
-        String exchangeName, String routingKey, int groupId, String appId,
+        String exchangeName, String routingKey, String groupId, String appId,
         ABICodec abiCodec, String contractAbi, List<String> eventNameList) {
         this.MQPublisher = mqPublisher;
         this.exchangeName = exchangeName;
@@ -97,7 +97,7 @@ public class ContractEventCallback implements EventCallback {
         pushMessage2MQ(groupId, status, logs);
     }
 
-    private void pushMessage2MQ(int groupId,
+    private void pushMessage2MQ(String groupId,
                                 int status, List<EventLog> logs) {
         EventLogPushMessage eventLogPushMessage = new EventLogPushMessage();
         eventLogPushMessage.setEventType(EventTypes.EVENT_LOG_PUSH.getValue());

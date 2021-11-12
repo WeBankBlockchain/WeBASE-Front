@@ -73,9 +73,7 @@ public class EventRegisterInitTask {
     public synchronized void syncEventRegisterTask() {
         try{
             log.debug("Register task starts.");
-//            for (Integer groupId: bcosSDK.getGroupManagerService().getGroupList()) {
-            for (String gId: web3ApiService.getGroupList()) {
-                int groupId = Integer.parseInt(gId);
+            for (String groupId: web3ApiService.getGroupList()) {
                 List<NewBlockEventInfo> newBlockEventInfoList =
                         newBlockEventInfoRepository.findByGroupId(groupId);
                 List<ContractEventInfo> contractEventInfoList =
@@ -102,7 +100,7 @@ public class EventRegisterInitTask {
         String appId = registerInfo.getAppId();
         String exchangeName = registerInfo.getExchangeName();
         String queueName = registerInfo.getQueueName();
-        int groupId = registerInfo.getGroupId();
+        String groupId = registerInfo.getGroupId();
         String blockRoutingKey = registerInfo.getRoutingKey();
         eventService.handleRegNewBlock(appId, groupId, exchangeName, queueName, blockRoutingKey);
         log.debug("end registerNewBlockEvent successful appId:{}", appId);
@@ -114,7 +112,7 @@ public class EventRegisterInitTask {
         String exchangeName = rInfo.getExchangeName();
         String queueName = rInfo.getQueueName();
         String appId = rInfo.getAppId();
-        int groupId = rInfo.getGroupId();
+        String groupId = rInfo.getGroupId();
         String eventRoutingKey = rInfo.getRoutingKey();
         String contractAddress = rInfo.getContractAddress();
         String abi = rInfo.getContractAbi();

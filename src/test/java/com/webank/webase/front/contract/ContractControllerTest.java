@@ -37,7 +37,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class ContractControllerTest extends SpringTestBase {
 
     private MockMvc mockMvc;
-    private Integer groupId = 1;
+    private String groupId = "1";
 
     @Autowired
     private WebApplicationContext webApplicationContext;

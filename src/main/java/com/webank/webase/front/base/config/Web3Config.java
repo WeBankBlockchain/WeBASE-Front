@@ -15,6 +15,7 @@ package com.webank.webase.front.base.config;
 
 
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.util.JsonUtils;
 import io.netty.channel.ChannelHandlerContext;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 /**
  * init web3sdk getService.
@@ -46,62 +48,42 @@ public class Web3Config {
 
     // deprecated org name, use agency from /web3/nodeInfo api instead
     public static String orgName = "fisco";
-    public String certPath = "conf";
     private List<Integer> groupIdList;
-    /* use String in java sdk*/
-    private String corePoolSize;
-    private String maxPoolSize;
-    private String queueCapacity;
-    /* use String in java sdk*/
-    private String ip = "127.0.0.1";
-    private String channelPort = "20200";
+    private String threadPoolSize;
+//    private String ip = "127.0.0.1";
+//    private String channelPort = "20200";
+    private List<String> peers; // ["127.0.0.1:20200","127.0.0.1:20201"]
+    private boolean useSmSsl = false;
+    public String certPath = "conf";
 
-    // add channel disconnect
-//    public static boolean PEER_CONNECTED = true;
-//    static class Web3ChannelMsg implements MsgHandler {
-//        @Override
-//        public void onConnect(ChannelHandlerContext ctx) {
-//            PEER_CONNECTED = true;
-//            log.info("Web3ChannelMsg onConnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-//        }
-//
-//        @Override
-//        public void onMessage(ChannelHandlerContext ctx, Message msg) {
-//            // not added in message handler, ignore this override
-//            log.info("Web3ChannelMsg onMessage:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-//        }
-//
-//        @Override
-//        public void onDisconnect(ChannelHandlerContext ctx) {
-//            PEER_CONNECTED = false;
-//            log.error("Web3ChannelMsg onDisconnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-//        }
-//    }
-
+    /**
+     * todo init one-bean and set ConfigOption by api 或,支持启动就连接
+     * todo 保存证书文件/保存ip配置(toml文件)
+     * @return
+     * @throws ConfigException
+     */
     @Bean
     public BcosSDK getBcosSDK() throws ConfigException {
         log.info("start init ConfigProperty");
+        log.info("=========getBcosSDK :{}", peers);
         // cert config, encrypt type
         Map<String, Object> cryptoMaterial = new HashMap<>();
         // cert use conf
         cryptoMaterial.put("certPath", certPath);
+        cryptoMaterial.put("useSMCrypto", useSmSsl);
         // user no need set this:cryptoMaterial.put("sslCryptoType", encryptType);
-        log.info("init cert cryptoMaterial:{}, (using conf as cert path)", cryptoMaterial);
+        log.info("init cert cryptoMaterial:{}, (using conf as cert path)", JsonUtils.objToString(cryptoMaterial));
 
         // peers, default one node in front
         Map<String, Object> network = new HashMap<>();
-        List<String> peers = new ArrayList<>();
-        peers.add(ip + ":" + channelPort);
         network.put("peers", peers);
-        log.info("init node network property :{}", peers);
+        log.info("init node network property :{}", JsonUtils.objToString(peers));
 
         // thread pool config
         log.info("init thread pool property");
         Map<String, Object> threadPool = new HashMap<>();
-        threadPool.put("channelProcessorThreadSize", corePoolSize);
-        threadPool.put("receiptProcessorThreadSize", corePoolSize);
-        threadPool.put("maxBlockingQueueSize", queueCapacity);
-        log.info("init thread pool property:{}", threadPool);
+        threadPool.put("threadPoolSize", threadPoolSize);
+        log.info("init thread pool property:{}", JsonUtils.objToString(threadPool));
 
         // init property
         ConfigProperty configProperty = new ConfigProperty();
@@ -112,7 +94,7 @@ public class Web3Config {
         log.info("init configOption from configProperty");
         ConfigOption configOption = new ConfigOption(configProperty);
         // init bcosSDK
-        log.info("init bcos sdk instance, please check sdk.log");
+        log.info("init bcos sdk instance, check sdk.log for detail");
         BcosSDK bcosSDK = new BcosSDK(configOption);
 
         log.info("init client version");
@@ -125,17 +107,6 @@ public class Web3Config {
     }
 
 
-    /**
-     * 覆盖EncryptType构造函数
-     * @return
-     */
-//    @Bean(name = "common")
-//    public CryptoSuite getCommonSuite(BcosSDK bcosSDK) {
-//        int encryptType = bcosSDK..getCryptoType(ip + ":" + channelPort);
-//        log.info("getCommonSuite init encrypt type:{}", encryptType);
-//        return new CryptoSuite(encryptType);
-//    }
-
     @Bean(name = "rpcClient")
     public Client getRpcWeb3j(BcosSDK bcosSDK) throws JniException {
         // init rpc client(web3j)
@@ -144,4 +115,11 @@ public class Web3Config {
         return rpcWeb3j;
     }
 
+    @Bean(name = "common")
+    @DependsOn("rpcClient")
+    public CryptoSuite getCommonSuite(Client rpcClient) {
+        int encryptType = rpcClient.getCryptoType();
+        log.info("getCommonSuite init encrypt type:{}", encryptType);
+        return new CryptoSuite(encryptType);
+    }
 }

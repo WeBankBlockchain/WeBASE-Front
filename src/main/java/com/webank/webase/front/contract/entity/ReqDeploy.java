@@ -52,7 +52,7 @@ public class ReqDeploy {
     private String contractBin;
     private String contractSource;
     private String contractPath;
-    private int groupId;
+    private String groupId;
     private Long contractId;
     private List<Object> funcParam = new ArrayList<>();
     @Deprecated

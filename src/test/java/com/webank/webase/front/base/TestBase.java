@@ -29,7 +29,7 @@ public class TestBase {
   protected static CryptoSuite cryptoSuite;
   protected static CryptoKeyPair cryptoKeyPair;
   protected static BigInteger chainId = new BigInteger("1");
-  protected static Integer groupId = 1;
+  protected static String groupId = "1";
 
   protected static String address;
   protected static BigInteger blockNumber;

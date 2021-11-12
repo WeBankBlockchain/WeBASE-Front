@@ -44,7 +44,7 @@ import java.util.List;
 public class EventControllerTestBase extends SpringTestBase {
 
     private MockMvc mockMvc;
-    private Integer groupId = 1;
+    private String groupId = "1";
     private int pageNumber = 1;
     private int pageSize = 5;
 
@@ -96,7 +96,7 @@ public class EventControllerTestBase extends SpringTestBase {
         param.setExchangeName("group001");
         param.setQueueName("user1");
         param.setAppId("app1");
-        param.setGroupId(1);
+        param.setGroupId("1");
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.post("/event/newBlockEvent").
                         content(JsonUtils.toJSONString(param)).
@@ -170,7 +170,7 @@ public class EventControllerTestBase extends SpringTestBase {
         param.setExchangeName("group001");
         param.setQueueName("user1");
         param.setAppId("app1");
-        param.setGroupId(1);
+        param.setGroupId("1");
         param.setInfoId(blockInfoId);
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.delete("/event/newBlockEvent").
@@ -189,7 +189,7 @@ public class EventControllerTestBase extends SpringTestBase {
         param.setExchangeName("group001");
         param.setQueueName("user1");
         param.setAppId("app1");
-        param.setGroupId(1);
+        param.setGroupId("1");
         param.setInfoId(eventInfoId);
         ResultActions resultActions = mockMvc
                 .perform(MockMvcRequestBuilders.delete("/event/contractEvent").

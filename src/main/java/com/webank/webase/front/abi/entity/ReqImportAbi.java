@@ -30,7 +30,7 @@ import java.util.List;
 public class ReqImportAbi {
     private Long abiId;
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotBlank
     private String contractName;
     @NotBlank

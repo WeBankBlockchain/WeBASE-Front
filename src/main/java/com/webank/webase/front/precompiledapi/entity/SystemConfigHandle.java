@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 public class SystemConfigHandle {
 
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
-    private int groupId;
+    private String groupId;
     @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String signUserId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONFIG_KEY_IS_EMPTY)

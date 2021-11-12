@@ -41,7 +41,7 @@ public class Cns implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column(name = "group_id")
-    private Integer groupId;
+    private String groupId;
     @Column(name = "contract_path")
     private String contractPath;
     @Column(name = "contract_name")

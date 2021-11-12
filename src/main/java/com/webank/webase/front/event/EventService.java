@@ -99,7 +99,7 @@ public class EventService {
      * register NewBlockEventCallBack
      */
     @Transactional
-    public List<NewBlockEventInfo> registerNewBlockEvent(String appId, int groupId,
+    public List<NewBlockEventInfo> registerNewBlockEvent(String appId, String groupId,
                                                          String exchangeName, String queueName) {
         log.info("start registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
@@ -111,7 +111,7 @@ public class EventService {
     }
 
     @Transactional
-    public void handleRegNewBlock(String appId, int groupId, String exchangeName, String queueName,
+    public void handleRegNewBlock(String appId, String groupId, String exchangeName, String queueName,
         String routingKey) {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // to register or unregister todo register block notify
@@ -146,7 +146,7 @@ public class EventService {
      * @param topicList single one
      */
     @Transactional
-    public List<ContractEventInfo> registerContractEvent(String appId, int groupId, String exchangeName, String queueName,
+    public List<ContractEventInfo> registerContractEvent(String appId, String groupId, String exchangeName, String queueName,
                                                          String abi, String fromBlock, String toBlock,
                                                          String contractAddress, List<String> topicList) {
         log.info("start registerContractEvent appId:{},groupId:{},contractAddress:{},params:{},exchangeName:{},queueName:{}",
@@ -160,7 +160,7 @@ public class EventService {
     }
 
     @Transactional
-    public void handleRegContract(String appId, int groupId, String exchangeName, String queueName, String routingKey,
+    public void handleRegContract(String appId, String groupId, String exchangeName, String queueName, String routingKey,
         String abi, String fromBlock, String toBlock, String contractAddress, List<String> topicList) {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // to register or unregister
@@ -192,7 +192,7 @@ public class EventService {
     }
 
     @Transactional
-    public String addNewBlockEventInfo(int eventType, String appId, int groupId,
+    public String addNewBlockEventInfo(int eventType, String appId, String groupId,
         String exchangeName, String queueName, String routingKey, String registerId) {
         checkNewBlockEventExist(appId, exchangeName, queueName);
         NewBlockEventInfo registerInfo = new NewBlockEventInfo();
@@ -219,7 +219,7 @@ public class EventService {
     }
 
     @Transactional
-    public String addContractEventInfo(int eventType, String appId, int groupId,
+    public String addContractEventInfo(int eventType, String appId, String groupId,
         String exchangeName, String queueName, String routingKey, String abi,
         String fromBlock, String toBlock, String contractAddress, List<String> topicList,
         String registerId) throws FrontException {
@@ -262,14 +262,14 @@ public class EventService {
      * @param groupId
      * @param page 分页与按时间降序
      */
-    public List<NewBlockEventInfo> getNewBlockInfoList(int groupId, Pageable page) {
+    public List<NewBlockEventInfo> getNewBlockInfoList(String groupId, Pageable page) {
         return newBlockEventInfoRepository.findByGroupId(groupId, page);
     }
 
     /**
      * full list
      */
-    public List<NewBlockEventInfo> getNewBlockInfoList(int groupId) {
+    public List<NewBlockEventInfo> getNewBlockInfoList(String groupId) {
         return newBlockEventInfoRepository.findByGroupId(groupId);
     }
 
@@ -278,7 +278,7 @@ public class EventService {
      * @param groupId
      * @param appId
      */
-    public List<NewBlockEventInfo> getNewBlockInfo(int groupId, String appId) {
+    public List<NewBlockEventInfo> getNewBlockInfo(String groupId, String appId) {
         return newBlockEventInfoRepository.findByGroupIdAndAppId(groupId, appId);
     }
 
@@ -287,7 +287,7 @@ public class EventService {
      * @param infoId
      * @return left info
      */
-    public List<NewBlockEventInfo> unregisterNewBlock(String infoId, String appId, int groupId, String exchangeName,
+    public List<NewBlockEventInfo> unregisterNewBlock(String infoId, String appId, String groupId, String exchangeName,
                                                       String queueName) {
         log.debug("unregisterNewBlock appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
@@ -315,18 +315,18 @@ public class EventService {
      * @param page 分页与按时间降序
      * @return
      */
-    public List<ContractEventInfo> getContractEventInfoList(int groupId, Pageable page) {
+    public List<ContractEventInfo> getContractEventInfoList(String groupId, Pageable page) {
         return contractEventInfoRepository.findByGroupId(groupId, page);
     }
 
     /**
      * full list
      */
-    public List<ContractEventInfo> getContractEventInfoList(int groupId) {
+    public List<ContractEventInfo> getContractEventInfoList(String groupId) {
         return contractEventInfoRepository.findByGroupId(groupId);
     }
 
-    public List<ContractEventInfo> getContractEventInfo(int groupId, String appId) {
+    public List<ContractEventInfo> getContractEventInfo(String groupId, String appId) {
         return contractEventInfoRepository.findByGroupIdAndAppId(groupId, appId);
     }
 
@@ -339,7 +339,7 @@ public class EventService {
      * @param queueName
      * @return left info
      */
-    public List<ContractEventInfo> unregisterContractEvent(String infoId, String appId, int groupId, String exchangeName,
+    public List<ContractEventInfo> unregisterContractEvent(String infoId, String appId, String groupId, String exchangeName,
                                                       String queueName) {
         log.debug("unregisterContractEvent infoId:{},appId:{},groupId:{},exchangeName:{},queueName:{}",
                 infoId, appId, groupId, exchangeName, queueName);
@@ -372,7 +372,7 @@ public class EventService {
      * sync get history event
      * cannot filter by indexed param, only filter by event name and contractAddress
      */
-    public List<DecodedEventLog> getContractEventLog(int groupId, String contractAddress, String abi,
+    public List<DecodedEventLog> getContractEventLog(String groupId, String contractAddress, String abi,
         Integer fromBlock, Integer toBlock, EventTopicParam eventTopicParam) {
         log.info("start getContractEventLog groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventTopicParam:{}",
             groupId, contractAddress, fromBlock, toBlock, eventTopicParam);
@@ -410,7 +410,7 @@ public class EventService {
         return resultList;
     }
 
-    public Object getAbiByAddressFromBoth(int groupId, String type, String contractAddress) {
+    public Object getAbiByAddressFromBoth(String groupId, String type, String contractAddress) {
         if (TYPE_CONTRACT.equals(type)) {
             return contractService.findByGroupIdAndAddress(groupId, contractAddress);
         } else if (TYPE_ABI_INFO.equals(type)) {
@@ -426,7 +426,7 @@ public class EventService {
      * @return
      * @throws IOException
      */
-    public List<RspContractInfo> getContractInfoListFromBoth(int groupId) throws IOException {
+    public List<RspContractInfo> getContractInfoListFromBoth(String groupId) throws IOException {
         // get contract list
         List<RspContractNoAbi> contractList = contractService.findAllContractNoAbi(groupId, ContractStatus.DEPLOYED.getValue());
         // get abi list

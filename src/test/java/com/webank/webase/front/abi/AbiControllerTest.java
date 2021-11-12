@@ -40,7 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 public class AbiControllerTest {
     private MockMvc mockMvc;
-    private Integer groupId = 1;
+    private String groupId = "1";
     private Integer pageNumber = 1;
     private Integer pageSize = 5;
 
@@ -56,7 +56,7 @@ public class AbiControllerTest {
     public void testInserAbi() throws Exception {
         // test insert
         ReqImportAbi abiInsert = new ReqImportAbi();
-        abiInsert.setGroupId(1);
+        abiInsert.setGroupId("1");
         abiInsert.setContractAddress("0xd8e1e0834b38081982f4a080aeae350a6d422915");
         abiInsert.setContractName("Hello");
         String abiStr = "[{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_ua\",\"type\":\"uint256[]\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";

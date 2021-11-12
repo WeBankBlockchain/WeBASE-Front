@@ -15,5 +15,5 @@ public class ReqQueryTransHandle {
   @NotBlank
   private String contractAbi;
   private String userAddress = "0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB";
-  private int groupId =1 ;
+  private String groupId = "1";
 }

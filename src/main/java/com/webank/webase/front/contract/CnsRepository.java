@@ -24,8 +24,8 @@ import org.springframework.data.repository.CrudRepository;
 public interface CnsRepository extends CrudRepository<Cns, Long>,
     JpaSpecificationExecutor<Cns> {
     
-    List<Cns> findByGroupIdAndContractName(int groupId, String contractName);
+    List<Cns> findByGroupIdAndContractName(String groupId, String contractName);
     
     @Query(nativeQuery=true, value = "select * from Cns n where n.group_id = ?1 and n.contract_address = ?2 order by n.modify_time desc limit 1")
-    Cns findByAddressLimitOne(int groupId, String contractAddress);
+    Cns findByAddressLimitOne(String groupId, String contractAddress);
 }

@@ -14,7 +14,6 @@
 package com.webank.webase.front.monitor;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BasePageResponse;
@@ -62,10 +61,8 @@ public class MonitorService {
     MonitorRepository monitorRepository;
     @Autowired
     Constants constants;
-    @Autowired
-    NodeConfig nodeConfig;
 
-    public Page<Monitor> pagingQuery(int groupId, Integer pageNumber, Integer pageSize,
+    public Page<Monitor> pagingQuery(String groupId, Integer pageNumber, Integer pageSize,
             LocalDateTime beginDate, LocalDateTime endDate) {
         Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
         Specification<Monitor> queryParam = (root, criteriaQuery, criteriaBuilder) -> {
@@ -134,8 +131,7 @@ public class MonitorService {
         }
         Long currentTime = System.currentTimeMillis();
         // to do add more group
-        for (String gId : web3ApiService.getGroupList()) {
-            int groupId = Integer.parseInt(gId); //todo
+        for (String groupId : web3ApiService.getGroupList()) {
             Client web3j = web3ApiService.getWeb3j(groupId);
             Monitor monitor = new Monitor();
             BlockNumber blockHeight = web3j.getBlockNumber();
@@ -163,30 +159,6 @@ public class MonitorService {
         log.debug("delete record count = " + i);
     }
 
-    public List<GroupSizeInfo> getGroupSizeInfos() {
-        List<GroupSizeInfo> data = new ArrayList<>();
-        String groupDataPath = constants.getNodePath() + File.separator + nodeConfig.getGroupDataPath();
-        File f = new File(CleanPathUtil.cleanString(groupDataPath));
-        File[] fs = f.listFiles();
-        if (fs == null) {
-            return data;
-        }
-        // get info
-        for (File file : fs) {
-            if (file.isDirectory()) {
-                String name = file.getName();
-                int groupId = CommonUtils.extractFigureFromStr(name);
-                data.add(new GroupSizeInfo(groupId, name, file.getAbsolutePath(),
-                        CommonUtils.getFolderSize(file)));
-            }
-        }
-        // set unit: KB
-        for (GroupSizeInfo groupSizeInfo : data) {
-            groupSizeInfo.setSize(groupSizeInfo.getSize() / 1024L);
-        }
-        return data;
-    }
-
     /**
      * less than beginDate or larger than endDate
      * order by id
@@ -198,7 +170,7 @@ public class MonitorService {
      * @return BasePageResponse
      */
     @Transactional
-    public BasePageResponse pagingQueryStat(int groupId, Integer pageNumber, Integer pageSize,
+    public BasePageResponse pagingQueryStat(String groupId, Integer pageNumber, Integer pageSize,
         LocalDateTime beginDate, LocalDateTime endDate) {
         // get larger than endDate
         Pageable pageableEnd = new PageRequest(pageNumber - 1, pageSize / 2,

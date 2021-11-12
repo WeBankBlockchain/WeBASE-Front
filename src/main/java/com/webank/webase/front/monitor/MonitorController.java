@@ -52,7 +52,7 @@ public class MonitorController {
 
     @ApiOperation(value = "分页查询", notes = "分页查询")
     @GetMapping("/pagingQuery")
-    public BasePageResponse pagingQuery(@RequestParam(defaultValue = "1") int groupId,
+    public BasePageResponse pagingQuery(@RequestParam(defaultValue = "1") String groupId,
             @RequestParam(defaultValue = "1") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) @DateTimeFormat(
@@ -74,31 +74,21 @@ public class MonitorController {
         return response;
     }
 
-    @ApiOperation(value = "检查节点进程连接")
-    @GetMapping("/checkNodeProcess")
-    public boolean checkNodeProcess() {
-        log.info("checkNodeProcess.");
-        return CommonUtils.checkConnect(web3Config.getIp(),
-                Integer.valueOf(web3Config.getChannelPort()));
-    }
+//    @ApiOperation(value = "检查节点进程连接") todo
+//    @GetMapping("/checkNodeProcess")
+//    public boolean checkNodeProcess() {
+//        log.info("checkNodeProcess.");
+//        return CommonUtils.checkConnect(web3Config.getIp(),
+//                Integer.valueOf(web3Config.getChannelPort()));
+//    }
 
-    @ApiOperation(value = "获取群组大小信息")
-    @GetMapping("/getGroupSizeInfos")
-    public List<GroupSizeInfo> getGroupSizeInfos() {
-        Instant startTime = Instant.now();
-        log.info("getGroupSizeInfos start:{}", startTime.toEpochMilli());
-        List<GroupSizeInfo> groupSizeInfos = monitorService.getGroupSizeInfos();
-        log.info("getGroupSizeInfos end  useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        return groupSizeInfos;
-    }
 
     /**
      * get by less than begin or larger than end order by id desc
      */
     @ApiOperation(value = "开区间分页查询", notes = "分页查询，获取时间范围以外的")
     @GetMapping("/pagingQuery/stat")
-    public BasePageResponse getNodeMonitorForStat(@RequestParam(defaultValue = "1") int groupId,
+    public BasePageResponse getNodeMonitorForStat(@RequestParam(defaultValue = "1") String groupId,
         @RequestParam(defaultValue = "1") Integer pageNumber,
         @RequestParam(defaultValue = "10") Integer pageSize,
         @RequestParam(required = false) @DateTimeFormat(

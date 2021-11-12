@@ -52,7 +52,7 @@ public class PrecompiledSysConfigController{
      */
     @GetMapping("config/list")
     public Object querySystemConfigByGroupId(
-            @RequestParam(defaultValue = "1") int groupId,
+            @RequestParam(defaultValue = "1") String groupId,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
         Instant startTime = Instant.now();

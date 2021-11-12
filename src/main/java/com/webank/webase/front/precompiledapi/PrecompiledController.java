@@ -54,7 +54,7 @@ public class PrecompiledController {
      * Cns manage
      */
     @GetMapping("cns/list")
-    public Object queryCns(@RequestParam(defaultValue = "1") int groupId,
+    public Object queryCns(@RequestParam(defaultValue = "1") String groupId,
             @RequestParam String contractNameAndVersion,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
@@ -102,7 +102,7 @@ public class PrecompiledController {
      */
 
     @GetMapping("consensus/list")
-    public Object getNodeList(@RequestParam(defaultValue = "1") int groupId,
+    public Object getNodeList(@RequestParam(defaultValue = "1") String groupId,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
         Instant startTime = Instant.now();
@@ -129,7 +129,7 @@ public class PrecompiledController {
             throws Exception {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();
-        int groupId = consensusHandle.getGroupId();
+        String groupId = consensusHandle.getGroupId();
         String from = consensusHandle.getSignUserId();
         String nodeId = consensusHandle.getNodeId();
         if (!PrecompiledUtils.checkNodeId(nodeId)) {
@@ -148,7 +148,7 @@ public class PrecompiledController {
         }
     }
 
-    public Object addSealer(int groupId, String fromAddress, String nodeId) throws Exception {
+    public Object addSealer(String groupId, String fromAddress, String nodeId) throws Exception {
         Instant startTime = Instant.now();
         log.info("start addSealer startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
@@ -163,7 +163,7 @@ public class PrecompiledController {
         }
     }
 
-    public Object addObserver(int groupId, String fromAddress, String nodeId) throws Exception {
+    public Object addObserver(String groupId, String fromAddress, String nodeId) throws Exception {
         Instant startTime = Instant.now();
         log.info("start addObserver startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
@@ -178,7 +178,7 @@ public class PrecompiledController {
         }
     }
 
-    public Object removeNode(int groupId, String fromAddress, String nodeId) throws Exception {
+    public Object removeNode(String groupId, String fromAddress, String nodeId) throws Exception {
         Instant startTime = Instant.now();
         log.info("start addSealer startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
@@ -203,7 +203,7 @@ public class PrecompiledController {
 //    @PostMapping("crud")
 //    public Object crudManageControl(@Valid @RequestBody CrudHandle crudHandle) throws Exception {
 //        log.info("start crudManageControl. crudHandle:{}", crudHandle);
-//        int groupId = crudHandle.getGroupId();
+//        String groupId = crudHandle.getGroupId();
 //        String from = crudHandle.getSignUserId();
 //        String sql = crudHandle.getSql();
 //        // to lower case
@@ -229,7 +229,7 @@ public class PrecompiledController {
 //    }
 //
 //
-//    public Object createTable(int groupId, String fromAddress, String sql) {
+//    public Object createTable(String groupId, String fromAddress, String sql) {
 //        Instant startTime = Instant.now();
 //        log.info("start createTable startTime:{}, groupId:{},fromAddress:{},sql:{}",
 //                startTime.toEpochMilli(), groupId, fromAddress, sql);
@@ -254,7 +254,7 @@ public class PrecompiledController {
 //    }
 //
 //    // check table name exist by desc(tableName)
-//    public Object desc(int groupId, String sql) {
+//    public Object desc(String groupId, String sql) {
 //        Instant startTime = Instant.now();
 //        log.info("start descTable startTime:{}, groupId:{},sql:{}", startTime.toEpochMilli(),
 //                groupId, sql);
@@ -284,7 +284,7 @@ public class PrecompiledController {
 //        }
 //    }
 //
-//    public Object select(int groupId, String sql) throws Exception {
+//    public Object select(String groupId, String sql) throws Exception {
 //        Instant startTime = Instant.now();
 //        log.info("start select startTime:{}, groupId:{},sql:{}", startTime.toEpochMilli(), groupId,
 //                sql);
@@ -348,7 +348,7 @@ public class PrecompiledController {
 //
 //    }
 //
-//    public Object insert(int groupId, String fromAddress, String sql) throws Exception {
+//    public Object insert(String groupId, String fromAddress, String sql) throws Exception {
 //        Instant startTime = Instant.now();
 //        log.info("start insert startTime:{}, groupId:{},fromAddress:{},sql:{}",
 //            startTime.toEpochMilli(), groupId, fromAddress, sql);
@@ -376,7 +376,7 @@ public class PrecompiledController {
 //        return insertResult;
 //    }
 //
-//    public Object update(int groupId, String fromAddress, String sql) throws Exception {
+//    public Object update(String groupId, String fromAddress, String sql) throws Exception {
 //        Instant startTime = Instant.now();
 //        log.info("start update startTime:{}, groupId:{},fromAddress:{},sql:{}",
 //                startTime.toEpochMilli(), groupId, fromAddress, sql);
@@ -418,7 +418,7 @@ public class PrecompiledController {
 //        return updateResult;
 //    }
 //
-//    public Object remove(int groupId, String fromAddress, String sql) {
+//    public Object remove(String groupId, String fromAddress, String sql) {
 //        Instant startTime = Instant.now();
 //        log.info("start remove startTime:{}, groupId:{},fromAddress:{},sql:{}",
 //                startTime.toEpochMilli(), groupId, fromAddress, sql);

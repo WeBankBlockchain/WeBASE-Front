@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
 public class PermissionHandle {
     // defaultValue = "1"
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
-    private int groupId;
+    private String groupId;
     private String permissionType;
     @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String signUserId;

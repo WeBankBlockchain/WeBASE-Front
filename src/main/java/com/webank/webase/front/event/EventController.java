@@ -84,7 +84,7 @@ public class EventController extends BaseController {
         if (!CommonUtils.isLetterDigit(appId)) {
             throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
         }
-        int groupId = reqNewBlockEventRegister.getGroupId();
+        String groupId = reqNewBlockEventRegister.getGroupId();
         String exchangeName = reqNewBlockEventRegister.getExchangeName();
         // username as queue name
         String queueName = reqNewBlockEventRegister.getQueueName();
@@ -103,7 +103,7 @@ public class EventController extends BaseController {
             @Valid @RequestBody ReqContractEventRegister reqContractEventRegister, BindingResult result){
         log.debug("start registerContractEvent. {}", reqContractEventRegister);
         checkParamResult(result);
-        int groupId = reqContractEventRegister.getGroupId();
+        String groupId = reqContractEventRegister.getGroupId();
         String appId = reqContractEventRegister.getAppId();
         if (!CommonUtils.isLetterDigit(appId)) {
             throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
@@ -142,7 +142,7 @@ public class EventController extends BaseController {
     @ApiImplicitParam(name = "appId", value = "应用编号",
             required = true, dataType = "String")
     @GetMapping("newBlockEvent/{groupId}/{appId}")
-    public BaseResponse getNewBlockEventByAppId(@PathVariable("groupId") int groupId,
+    public BaseResponse getNewBlockEventByAppId(@PathVariable("groupId") String groupId,
                                                 @PathVariable("appId") String appId) {
         log.debug("start getNewBlockEventInfo groupId:{},appId:{}", groupId, appId);
         List<NewBlockEventInfo> resList = eventService.getNewBlockInfo(groupId, appId);
@@ -154,7 +154,7 @@ public class EventController extends BaseController {
             notes = "get registered NewBlockEvent info by page")
     @GetMapping(value = {"newBlockEvent/list/{groupId}/{pageNumber}/{pageSize}",
             "newBlockEvent/list/{groupId}"})
-    public BasePageResponse getNewBlockEventInfo(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse getNewBlockEventInfo(@PathVariable("groupId") String groupId,
                                                  @PathVariable(value = "pageNumber", required = false) Integer pageNumber,
                                                  @PathVariable(value = "pageSize", required = false) Integer pageSize) {
         log.debug("start getNewBlockEventInfo. groupId:{}", groupId);
@@ -184,7 +184,7 @@ public class EventController extends BaseController {
         log.debug("start unregisterNewBlockEvent reqUnregister. {}", reqUnregister);
         String infoId = reqUnregister.getId();
         String appId = reqUnregister.getAppId();
-        int groupId = reqUnregister.getGroupId();
+        String groupId = reqUnregister.getGroupId();
         String exchangeName = reqUnregister.getExchangeName();
         // username as queue name
         String queueName = reqUnregister.getQueueName();
@@ -201,7 +201,7 @@ public class EventController extends BaseController {
     @ApiImplicitParam(name = "appId", value = "应用编号",
             required = true, dataType = "String")
     @GetMapping("contractEvent/{groupId}/{appId}")
-    public BaseResponse getContractEventByAppId(@PathVariable("groupId") int groupId,
+    public BaseResponse getContractEventByAppId(@PathVariable("groupId") String groupId,
                                                 @PathVariable("appId") String appId) {
         log.debug("start getContractEventInfo appId:{}", appId);
         List<ContractEventInfo> resList = eventService.getContractEventInfo(groupId, appId);
@@ -213,7 +213,7 @@ public class EventController extends BaseController {
             notes = "get registered contract event info by page")
     @GetMapping(value = {"contractEvent/list/{groupId}/{pageNumber}/{pageSize}",
             "contractEvent/list/{groupId}"})
-    public BasePageResponse getContractEventInfo(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse getContractEventInfo(@PathVariable("groupId") String groupId,
                                                  @PathVariable(value = "pageNumber", required = false) Integer pageNumber,
                                                  @PathVariable(value = "pageSize", required = false) Integer pageSize) {
         log.debug("start getContractEventInfo.");
@@ -242,7 +242,7 @@ public class EventController extends BaseController {
         log.debug("start unregisterContractEvent reqUnregister. {}", reqUnregister);
         String infoId = reqUnregister.getId();
         String appId = reqUnregister.getAppId();
-        int groupId = reqUnregister.getGroupId();
+        String groupId = reqUnregister.getGroupId();
         String exchangeName = reqUnregister.getExchangeName();
         // username as queue name
         String queueName = reqUnregister.getQueueName();
@@ -261,7 +261,7 @@ public class EventController extends BaseController {
         @Valid @RequestBody ReqEventLogList reqEventLogList, BindingResult result){
         log.debug("start listContractEventLogs. reqEventLogList:{}", reqEventLogList);
         checkParamResult(result);
-        int groupId = reqEventLogList.getGroupId();
+        String groupId = reqEventLogList.getGroupId();
         Integer fromBlock = reqEventLogList.getFromBlock();
         Integer toBlock = reqEventLogList.getToBlock();
         // 0 < fromBlock <= toBlock, latest means latest block
@@ -296,7 +296,7 @@ public class EventController extends BaseController {
             dataType = "String")
     })
     @GetMapping("/contractInfo/{groupId}/{type}/{contractAddress}")
-    public BaseResponse findByAddress( @PathVariable Integer groupId,
+    public BaseResponse findByAddress( @PathVariable String groupId,
         @PathVariable String type, @PathVariable String contractAddress) {
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
         log.info("findByAddress start. groupId:{},contractAddress:{},type:{}", groupId, contractAddress, type);
@@ -314,7 +314,7 @@ public class EventController extends BaseController {
             dataType = "Integer"),
     })
     @GetMapping("/listAddress/{groupId}")
-    public BaseResponse listAbi(@PathVariable Integer groupId) throws IOException {
+    public BaseResponse listAbi(@PathVariable String groupId) throws IOException {
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
         log.info("listAbi start. groupId:{}", groupId);
 

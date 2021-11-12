@@ -33,7 +33,7 @@ public class PrecompiledWithSignServiceTest {
     PrecompiledWithSignService precompiledWithSignService;
     @Autowired
     PrecompiledSysConfigService sysConfigService;
-    private int groupId = 1;
+    private String groupId = "1";
     private String signAddress = "0xf16c0bf5a8bf4049ede4c3a070efcc1052095f63";
 
     /**

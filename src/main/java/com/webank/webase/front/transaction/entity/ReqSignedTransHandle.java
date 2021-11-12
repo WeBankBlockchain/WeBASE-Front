@@ -27,6 +27,6 @@ public class ReqSignedTransHandle {
     private String signedStr;
     private Boolean sync;
     @NotNull
-    private int groupId =1 ;
+    private String groupId = "1";
 
 }

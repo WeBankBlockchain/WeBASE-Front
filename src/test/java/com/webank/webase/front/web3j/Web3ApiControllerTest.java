@@ -36,7 +36,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class Web3ApiControllerTest extends SpringTestBase {
 
     private MockMvc mockMvc;
-    private Integer groupId = 1;
+    private String groupId = "1";
 
     @Autowired
     private WebApplicationContext webApplicationContext;

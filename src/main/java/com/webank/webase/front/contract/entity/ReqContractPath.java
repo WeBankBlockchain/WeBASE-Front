@@ -21,7 +21,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @Data
 public class ReqContractPath {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotBlank
     private String contractPath;
 }

@@ -137,7 +137,7 @@ public class TransService {
      */
 
     public Object transHandleWithSign(ReqTransHandleWithSign req) throws FrontException {
-        int groupId = req.getGroupId();
+        String groupId = req.getGroupId();
         String signUserId = req.getSignUserId();
         String userAddress = keyStoreService.getAddressBySignUserId(signUserId);
         if (StringUtils.isBlank(userAddress)) {
@@ -170,7 +170,7 @@ public class TransService {
     /**
      * send tx with sign (support precomnpiled contract)
      */
-    public Object transHandleWithSign(int groupId, String signUserId,
+    public Object transHandleWithSign(String groupId, String signUserId,
         String contractAddress, String abiStr, String funcName, List<Object> funcParam)
         throws FrontException {
         // check groupId
@@ -196,7 +196,7 @@ public class TransService {
      * handleTransByFunction by whether is constant
      */
     @Deprecated
-    private Object handleTransByFunction(int groupId, Client client, String signUserId,
+    private Object handleTransByFunction(String groupId, Client client, String signUserId,
             String contractAddress, Function function, ContractFunction contractFunction) {
 
         FunctionEncoder functionEncoder = new FunctionEncoder(cryptoSuite);
@@ -329,7 +329,7 @@ public class TransService {
      * @param data info
      * @return
      */
-    public String signMessage(int groupId, Client client, String signUserId, String contractAddress,
+    public String signMessage(String groupId, Client client, String signUserId, String contractAddress,
             byte[] data) {
         Random r = new SecureRandom();
         BigInteger randomid = new BigInteger(250, r);
@@ -483,7 +483,7 @@ public class TransService {
      * send transaction locally
      */
     public Object transHandleLocal(ReqTransHandle req) {
-        int groupId = req.getGroupId();
+        String groupId = req.getGroupId();
         String abiStr = JsonUtils.objToString(req.getContractAbi());
         String funcName = req.getFuncName();
         List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
@@ -563,7 +563,7 @@ public class TransService {
 //    }
 
 
-    public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, int groupId) {
+    public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, String groupId) {
 
         Client client = web3ApiService.getWeb3j(groupId);
         if (sync) {
@@ -581,7 +581,7 @@ public class TransService {
 
 
     public Object sendQueryTransaction(byte[] encodeStr, String contractAddress, String funcName,
-            List<Object> contractAbi, int groupId, String userAddress) {
+            List<Object> contractAbi, String groupId, String userAddress) {
 
         Client client = web3ApiService.getWeb3j(groupId);
         String callOutput = client
@@ -728,7 +728,7 @@ public class TransService {
      * @param isLocal  if false, user is signUserId, else, user is userAddress local
      */
     public String createRawTxEncoded(boolean isLocal, String user,
-        int groupId, String contractAddress, List<Object> contractAbi,
+        String groupId, String contractAddress, List<Object> contractAbi,
         boolean isUseCns, String cnsName, String cnsVersion,
         String funcName, List<Object> funcParam) throws Exception {
 
@@ -847,7 +847,7 @@ public class TransService {
         return function;
     }
 
-    public List<String> handleCall(int groupId, String userAddress, String contractAddress,
+    public List<String> handleCall(String groupId, String userAddress, String contractAddress,
         byte[] encodedFunction, String abiStr, String funcName) {
 
         TransactionProcessor transactionProcessor = new TransactionProcessor(

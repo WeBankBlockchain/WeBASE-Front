@@ -70,7 +70,7 @@ public class PrecompiledWithSignService {
      * 
      * @return String result {"code":0,"msg":"success"}
      */
-    public String setValueByKey(int groupId, String signUserId, String key, String value) {
+    public String setValueByKey(String groupId, String signUserId, String key, String value) {
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(key);
         funcParams.add(value);
@@ -89,7 +89,7 @@ public class PrecompiledWithSignService {
 //     *
 //     * @return String result {"code":0,"msg":"success"}
 //     */
-//    public String grant(int groupId, String signUserId, String tableName, String toAddress) {
+//    public String grant(String groupId, String signUserId, String tableName, String toAddress) {
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(tableName);
 //        funcParams.add(toAddress);
@@ -106,7 +106,7 @@ public class PrecompiledWithSignService {
 //     *
 //     * @return String result {"code":0,"msg":"success"}
 //     */
-//    public String revoke(int groupId, String signUserId, String tableName, String toAddress) {
+//    public String revoke(String groupId, String signUserId, String tableName, String toAddress) {
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(tableName);
 //        funcParams.add(toAddress);
@@ -123,7 +123,7 @@ public class PrecompiledWithSignService {
 //     *
 //     * @return String result {"code":0,"msg":"success"}
 //     */
-//    public String grantWrite(int groupId, String signUserId, String tableName, String toAddress) {
+//    public String grantWrite(String groupId, String signUserId, String tableName, String toAddress) {
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(tableName);
 //        funcParams.add(toAddress);
@@ -140,7 +140,7 @@ public class PrecompiledWithSignService {
 //     *
 //     * @return String result {"code":0,"msg":"success"}
 //     */
-//    public String revokeWrite(int groupId, String signUserId, String tableName, String toAddress) {
+//    public String revokeWrite(String groupId, String signUserId, String tableName, String toAddress) {
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(tableName);
 //        funcParams.add(toAddress);
@@ -157,7 +157,7 @@ public class PrecompiledWithSignService {
      * consensus: add sealer through webase-sign
      * v1.5.0 增加校验群组文件是否存在，P2P连接存在
      */
-    public String addSealer(int groupId, String signUserId, String nodeId) {
+    public String addSealer(String groupId, String signUserId, String nodeId) {
         // check node id
         if (!isValidNodeID(nodeId)) {
             return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
@@ -189,7 +189,7 @@ public class PrecompiledWithSignService {
     /**
      * consensus: add observer through webase-sign
      */
-    public String addObserver(int groupId, String signUserId, String nodeId) {
+    public String addObserver(String groupId, String signUserId, String nodeId) {
         // check node id
         if (!isValidNodeID(nodeId)) {
             return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
@@ -213,7 +213,7 @@ public class PrecompiledWithSignService {
     /**
      * consensus: remove node from list through webase-sign
      */
-    public String removeNode(int groupId, String signUserId, String nodeId) {
+    public String removeNode(String groupId, String signUserId, String nodeId) {
 //        List<String> groupPeers = web3ApiService.getGroupPeers(groupId);
 //        if (!groupPeers.contains(nodeId)) {
 //            return ConstantCode.ALREADY_REMOVED_FROM_THE_GROUP.toString();
@@ -260,7 +260,7 @@ public class PrecompiledWithSignService {
     /**
      * CRUD: create table through webase-sign
      */
-    public String createTable(int groupId, String signUserId, Table table) {
+    public String createTable(String groupId, String signUserId, Table table) {
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
         funcParams.add(table.getKey());
@@ -277,7 +277,7 @@ public class PrecompiledWithSignService {
     /**
      * CRUD: insert table through webase-sign
      */
-    public String insert(int groupId, String signUserId, Table table, Entry entry) {
+    public String insert(String groupId, String signUserId, Table table, Entry entry) {
         checkTableKeyLength(table);
         // trans
         String entryJsonStr;
@@ -304,7 +304,7 @@ public class PrecompiledWithSignService {
     /**
      * CRUD: update table through webase-sign
      */
-    public String update(int groupId, String signUserId, Table table, Entry entry,
+    public String update(String groupId, String signUserId, Table table, Entry entry,
             Condition condition) {
         checkTableKeyLength(table);
         // trans
@@ -335,7 +335,7 @@ public class PrecompiledWithSignService {
     /**
      * CRUD: remove table through webase-sign
      */
-    public String remove(int groupId, String signUserId, Table table, Condition condition) {
+    public String remove(String groupId, String signUserId, Table table, Condition condition) {
         checkTableKeyLength(table);
         // trans
         String conditionStr;
@@ -371,7 +371,7 @@ public class PrecompiledWithSignService {
 //    /**
 //     * chain governance, above FISCO-BCOS v2.5.0
 //     */
-//    public String grantChainCommittee(int groupId, String signUserId, String toAddress) {
+//    public String grantChainCommittee(String groupId, String signUserId, String toAddress) {
 //        // trans
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(toAddress);
@@ -384,7 +384,7 @@ public class PrecompiledWithSignService {
 //        return this.handleTransactionReceipt(receipt);
 //    }
 //
-//    public String revokeChainCommittee(int groupId, String signUserId, String toAddress) {
+//    public String revokeChainCommittee(String groupId, String signUserId, String toAddress) {
 //        // trans
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(toAddress);
@@ -397,7 +397,7 @@ public class PrecompiledWithSignService {
 //        return this.handleTransactionReceipt(receipt);
 //    }
 //
-//    public String updateChainCommitteeWeight(int groupId, String signUserId, String toAddress,
+//    public String updateChainCommitteeWeight(String groupId, String signUserId, String toAddress,
 //            int weight) {
 //        // trans
 //        List<Object> funcParams = new ArrayList<>();
@@ -412,7 +412,7 @@ public class PrecompiledWithSignService {
 //        return this.handleTransactionReceipt(receipt);
 //    }
 //
-//    public String updateThreshold(int groupId, String signUserId, int threshold) {
+//    public String updateThreshold(String groupId, String signUserId, int threshold) {
 //        // trans
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(threshold);
@@ -425,7 +425,7 @@ public class PrecompiledWithSignService {
 //        return this.handleTransactionReceipt(receipt);
 //    }
 //
-//    public String grantOperator(int groupId, String signUserId, String toAddress) {
+//    public String grantOperator(String groupId, String signUserId, String toAddress) {
 //        // trans
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(toAddress);
@@ -437,7 +437,7 @@ public class PrecompiledWithSignService {
 //        return this.handleTransactionReceipt(receipt);
 //    }
 //
-//    public String revokeOperator(int groupId, String signUserId, String toAddress) {
+//    public String revokeOperator(String groupId, String signUserId, String toAddress) {
 //        // trans
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(toAddress);
@@ -449,7 +449,7 @@ public class PrecompiledWithSignService {
 //        return this.handleTransactionReceipt(receipt);
 //    }
 //
-//    public String freezeAccount(int groupId, String signUserId, String toAddress) {
+//    public String freezeAccount(String groupId, String signUserId, String toAddress) {
 //        // trans
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(toAddress);
@@ -461,7 +461,7 @@ public class PrecompiledWithSignService {
 //        return this.handleTransactionReceipt(receipt);
 //    }
 //
-//    public String unfreezeAccount(int groupId, String signUserId, String toAddress) {
+//    public String unfreezeAccount(String groupId, String signUserId, String toAddress) {
 //        // trans
 //        List<Object> funcParams = new ArrayList<>();
 //        funcParams.add(toAddress);
@@ -474,7 +474,7 @@ public class PrecompiledWithSignService {
 //        return this.handleTransactionReceipt(receipt);
 //    }
 
-    public String registerCns(int groupId, String signUserId, String cnsContractName, String version,
+    public String registerCns(String groupId, String signUserId, String cnsContractName, String version,
             String contractAddress, String abiInfo) {
         // trans
         List<Object> funcParams = new ArrayList<>();

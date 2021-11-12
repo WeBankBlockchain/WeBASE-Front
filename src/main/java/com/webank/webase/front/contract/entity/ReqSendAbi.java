@@ -25,7 +25,7 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 @Data
 public class ReqSendAbi {
-    private Integer groupId;
+    private String groupId;
     private String contractName;
     //   @NotBlank(message = ConstantCode.PARAM_FAIL_VERSION_IS_EMPTY)
    // private String version;
