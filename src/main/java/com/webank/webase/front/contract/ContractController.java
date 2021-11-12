@@ -268,7 +268,7 @@ public class ContractController extends BaseController {
             BindingResult result) throws FrontException {
         log.info("contractCompile start. param:{}", JsonUtils.toJSONString(req));
         checkParamResult(result);
-        return contractService.contractCompile(req.getContractName(), req.getSolidityBase64());
+        return contractService.contractCompile(req.getContractName(), req.getSolidityBase64(), req.getGroupId());
     }
 
     /**

@@ -26,4 +26,6 @@ public class ReqContractCompile {
     // Base64 of the contract source
     @NotBlank
     private String solidityBase64;
+    @NotBlank
+    private String groupId;
 }

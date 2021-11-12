@@ -15,11 +15,8 @@ package com.webank.webase.front.web3api;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.Address;
-import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
-import com.webank.webase.front.web3api.entity.ReqGroupStatus;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.RspTransCountInfo;
 import io.swagger.annotations.Api;
@@ -27,20 +24,18 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -162,40 +157,18 @@ public class Web3ApiController {
         return web3ApiService.getTransCnt(groupId);
     }
 
-//    @ApiOperation(value = "getTransByBlockHashAndIndex",
-//            notes = "Gets the transaction information for the specified "
-//                    + "location of the specified block")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true,
-//                    dataType = "String", paramType = "path"),
-//            @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex",
-//                    required = true, dataType = "BigInteger", paramType = "path")})
-//    @GetMapping("/transByBlockHashAndIndex/{blockHash}/{transactionIndex}")
-//    public JsonTransactionResponse getTransByBlockHashAndIndex(@PathVariable String groupId,
-//            @PathVariable String blockHash, @PathVariable BigInteger transactionIndex) {
-//        return web3ApiService.getTransByBlockHashAndIndex(groupId, blockHash, transactionIndex);
-//    }
+    @ApiOperation(value = "getNodeStatusList", notes = "get list of node status info")
+    @GetMapping("/getNodeStatusList")
+    public List<NodeStatusInfo> getNodeStatusList(@PathVariable String groupId) {
+        // todo
+        return new ArrayList<>();
+    }
 
-//    @ApiOperation(value = "getTransByBlockNumberAndIndex",
-//            notes = "Gets the transaction information for the specified "
-//                    + "location of the specified block")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-//                    dataType = "BigInteger", paramType = "path"),
-//            @ApiImplicitParam(name = "transactionIndex", value = "transactionIndex",
-//                    required = true, dataType = "BigInteger", paramType = "path")})
-//    @GetMapping("/transByBlockNumberAndIndex/{blockNumber}/{transactionIndex}")
-//    public JsonTransactionResponse getTransByBlockNumberAndIndex(@PathVariable String groupId,
-//            @PathVariable BigInteger blockNumber, @PathVariable BigInteger transactionIndex) {
-//        return web3ApiService.getTransByBlockNumberAndIndex(groupId, blockNumber, transactionIndex);
-//    }
-
-//    @ApiOperation(value = "getNodeStatusList", notes = "get list of node status info")
-//    @GetMapping("/getNodeStatusList")
-//    public List<NodeStatusInfo> getNodeStatusList(@PathVariable String groupId) {
-//        return web3ApiService.getNodeStatusList(groupId); todo 待sdk添加
-//    }
-
+    /**
+     * same as nodeIdList in fisco 2.0
+     * @param groupId
+     * @return
+     */
     @ApiOperation(value = "getGroupPeers", notes = "get list of group peers, include removed nodes")
     @GetMapping("/groupPeers")
     public List<String> getGroupPeers(@PathVariable String groupId) {
@@ -207,31 +180,25 @@ public class Web3ApiController {
     public List<String> getGroupList() {
         return web3ApiService.getGroupList();
     }
-//
-//    @ApiOperation(value = "getNodeIDList", notes = "get list of node id")
-//    @GetMapping("/nodeIdList")
-//    public List<String> getNodeIDList() {
-//        return web3ApiService.getNodeIdList();  todo 待sdk添加
-//    }
 
-//    @ApiOperation(value = "getPeers", notes = "get list of peers")
-//    @GetMapping("/peers")
-//    public String getPeers(@PathVariable String groupId) {
-//        return web3ApiService.getPeers(groupId);
-//    }
+
+    @ApiOperation(value = "getPeers", notes = "get list of peers")
+    @GetMapping("/peers")
+    public Peers.PeersInfo getPeers(@PathVariable String groupId) {
+        return web3ApiService.getPeers(groupId);
+    }
 
     @ApiOperation(value = "getPendingTransactionCount", notes = "get count of pending transactions count")
     @GetMapping("/pending-transactions-count")
     public int getPendingTransactionCount(@PathVariable String groupId) {
-        return web3ApiService.getPendingTransactions(groupId);
+        return web3ApiService.getPendingTransactionsSize(groupId);
     }
 
-    // todo 待添加
-//    @ApiOperation(value = "getConsensusStatus", notes = "get consensus status of group")
-//    @GetMapping("/consensusStatus")
-//    public ConsensusInfo getConsensusStatus(@PathVariable String groupId) {
-//        return web3ApiService.getConsensusStatus(groupId);
-//    }
+    @ApiOperation(value = "getConsensusStatus", notes = "get consensus status of group")
+    @GetMapping("/consensusStatus")
+    public ConsensusStatusInfo getConsensusStatus(@PathVariable String groupId) {
+        return web3ApiService.getConsensusStatus(groupId);
+    }
 
     @ApiOperation(value = "getSyncStatus", notes = "get sync status of group")
     @GetMapping("/syncStatus")

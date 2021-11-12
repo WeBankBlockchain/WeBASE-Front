@@ -51,7 +51,6 @@ import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CleanPathUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
-import com.webank.webase.front.util.ErrorCodeHandleUtils;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
@@ -83,9 +82,7 @@ import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.codegen.ContractGenerator;
 import org.fisco.bcos.sdk.codegen.exceptions.CodeGenException;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
@@ -95,7 +92,6 @@ import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -103,7 +99,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 /**
  * contract management.
@@ -130,9 +125,6 @@ public class ContractService {
     private PrecompiledWithSignService precompiledWithSignService;
     @Autowired
     private PrecompiledService precompiledService;
-    @Autowired
-    @Qualifier(value = "common")
-    private CryptoSuite cryptoSuite;
 
     /**
      * sendAbi.
@@ -261,7 +253,7 @@ public class ContractService {
             checkDeployPermission(req.getGroupId(), userAddress);
         }
 
-        ABICodec abiCodec = new ABICodec(cryptoSuite, false);
+        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
         byte[] encodedConstructor;
         try {
             encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
@@ -294,7 +286,7 @@ public class ContractService {
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
 
-        ABICodec abiCodec = new ABICodec(cryptoSuite, false);
+        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
 
         byte[] encodedConstructor;
         try {
@@ -304,7 +296,7 @@ public class ContractService {
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
         }
         // get privateKey
-        CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress);
+        CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);
         // contract deploy
         String contractAddress =
                 deployContract(groupId, encodedConstructor, cryptoKeyPair);
@@ -336,7 +328,7 @@ public class ContractService {
             if (StringUtils.isBlank(req.getUserAddress())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
             }
-            CryptoKeyPair credentials = keyStoreService.getCredentials(req.getUserAddress());
+            CryptoKeyPair credentials = keyStoreService.getCredentials(req.getUserAddress(), groupId);
             CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId), credentials);
             try {
                 cnsService.registerCNS(cnsName, version, contractAddress, abiInfo);
@@ -739,12 +731,12 @@ public class ContractService {
     /**
      * compile contract.
      */
-    public RspContractCompile contractCompile(String contractName, String sourceBase64) {
+    public RspContractCompile contractCompile(String contractName, String sourceBase64, String groupId) {
         File contractFile = null;
 
         try {
             // whether use guomi to compile
-            boolean useSM2 = cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE;
+            boolean useSM2 = web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE;
             // decode
             byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
             String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
@@ -798,8 +790,9 @@ public class ContractService {
             log.error("There is no sol files in source.");
             throw new FrontException(ConstantCode.NO_SOL_FILES);
         }
+        String groupId = inputParam.getGroupId();
         // whether use guomi to compile
-        boolean useSM2 = cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE;
+        boolean useSM2 = web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE;
 
         List<RspMultiContractCompile> compileInfos = new ArrayList<>();
         for (File solFile : solFiles) {

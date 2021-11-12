@@ -315,9 +315,10 @@ public class TransController extends BaseController {
         log.info("transEncoded2Str start startTime:{}", startTime.toEpochMilli());
 
         checkParamResult(result);
-
-        String encodedOrSignedResult =  transServiceImpl.encodeFunction2Str(JsonUtils.objToString(reqEncodeFunction.getContractAbi()),
-            reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam());
+        String groupId = reqEncodeFunction.getGroupId();
+        String encodedOrSignedResult =  transServiceImpl.encodeFunction2Str(
+            JsonUtils.objToString(reqEncodeFunction.getContractAbi()),
+            reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam(), groupId);
         log.info("transEncoded2Str end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;

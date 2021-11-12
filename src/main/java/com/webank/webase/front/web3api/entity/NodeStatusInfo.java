@@ -13,7 +13,7 @@
  */
 package com.webank.webase.front.web3api.entity;
 
-import java.math.BigInteger;
+import com.webank.webase.front.base.enums.DataStatus;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,8 +25,20 @@ import lombok.NoArgsConstructor;
 public class NodeStatusInfo {
 
     private String nodeId;
-    private BigInteger blockNumber;
-    private BigInteger pbftView;
+    private long blockNumber;
+    private long pbftView;
     private Integer status;
     private LocalDateTime latestStatusUpdateTime;
+    private boolean timeout;
+    private boolean isSyncing;
+
+    public NodeStatusInfo (String nodeId, long blockNumber, long pbftView) {
+        this.nodeId = nodeId;
+        this.blockNumber = blockNumber;
+        this.pbftView = pbftView;
+        this.status = DataStatus.NORMAL.getValue();
+        this.latestStatusUpdateTime = LocalDateTime.now();
+        this.timeout = false;
+        this.isSyncing = false;
+    }
 }

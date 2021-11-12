@@ -52,7 +52,7 @@ public class PrecompiledService {
      */
     public List<CnsInfo> queryCnsByName(String groupId, String contractName) throws ContractException {
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
-                keyStoreService.getCredentialsForQuery());
+                keyStoreService.getCredentialsForQuery(groupId));
         return cnsService.selectByName(contractName);
     }
 
@@ -62,14 +62,14 @@ public class PrecompiledService {
     public Tuple2<String, String> queryCnsByNameAndVersion(String groupId, String contractName,
         String version) throws ContractException {
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
-                keyStoreService.getCredentialsForQuery());
+                keyStoreService.getCredentialsForQuery(groupId));
         return cnsService.selectByNameAndVersion(contractName, version);
     }
 
     public String getAddressByContractNameAndVersion(String groupId, String contractName,
         String version) throws ContractException {
         CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
-                keyStoreService.getCredentialsForQuery());
+                keyStoreService.getCredentialsForQuery(groupId));
         return cnsService.getContractAddress(contractName, version);
     }
 

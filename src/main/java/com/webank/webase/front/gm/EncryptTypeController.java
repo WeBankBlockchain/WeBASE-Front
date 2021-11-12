@@ -16,12 +16,10 @@
 
 package com.webank.webase.front.gm;
 
+import com.webank.webase.front.base.config.Web3Config;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,22 +33,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "")
 public class EncryptTypeController {
     @Autowired
-    @Qualifier("common")
-    private CryptoSuite cryptoSuite;
-    @Autowired
-    private BcosSDK bcosSDK;
+    private Web3Config web3Config;
 
-    @GetMapping("encrypt")
-    public Integer getEncryptType() {
-        int encrypt = cryptoSuite.cryptoTypeConfig;
-        log.info("getEncryptType:{}", encrypt);
-        return encrypt;
-    }
-//    todo
-//    @GetMapping("sslCryptoType")
-//    public Integer getSSLCryptoType() {
-//        int sslCryptoType = bcosSDK.getSSLCryptoType();
-//        log.info("getSSLCryptoType:{}", sslCryptoType);
-//        return sslCryptoType;
+//    @GetMapping("encrypt")
+//    public Integer getEncryptType() {
+//        int encrypt = web3ApiService.getCryptoType();
+//        log.info("getEncryptType:{}", encrypt);
+//        return encrypt;
 //    }
+//    todo 根据群组获取加密类型
+
+    @GetMapping("sslCryptoType")
+    public boolean getSSLCryptoType() {
+        boolean sslCryptoType = web3Config.isUseSmSsl();
+        log.info("getSSLCryptoType:{}", sslCryptoType);
+        return sslCryptoType;
+    }
 }

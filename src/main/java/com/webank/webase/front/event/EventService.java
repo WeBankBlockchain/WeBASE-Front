@@ -51,12 +51,9 @@ import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.codec.ABICodec;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.eventsub.EventLogParams;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
-import org.fisco.bcos.sdk.eventsub.EventSubscribeImp;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,9 +85,6 @@ public class EventService {
     private AbiService abiService;
     @Autowired
     private BcosSDK bcosSDK;
-    @Autowired
-    @Qualifier("common")
-    private CryptoSuite cryptoSuite;
     private static final String TYPE_CONTRACT = "contract";
     private static final String TYPE_ABI_INFO = "abi";
 
@@ -172,9 +166,9 @@ public class EventService {
             log.info("registerContractEvent saved to db successfully");
             // init EventLogUserParams for register
             EventLogParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
-                toBlock, contractAddress, topicList, cryptoSuite);
+                toBlock, contractAddress, topicList, web3ApiService.getWeb3j(groupId).getCryptoSuite());
             callback = new ContractEventCallback(mqPublisher, exchangeName, routingKey, groupId, appId,
-                new ABICodec(cryptoSuite, false), abi, topicList);
+                new ABICodec(web3ApiService.getCryptoSuite(groupId), false), abi, topicList);
             registerId = eventSubscribe.subscribeEvent(params, callback);
             // save to db first
             String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
@@ -384,11 +378,11 @@ public class EventService {
         }
 
         EventLogParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
-            contractAddress, eventTopicParam, cryptoSuite);
+            contractAddress, eventTopicParam, web3ApiService.getCryptoSuite(groupId));
         log.info("getContractEventLog eventParam:{}", eventParam);
         // final CompletableFuture<List<EventLog>> callbackFuture = new CompletableFuture<>();
         final CompletableFuture<List<DecodedEventLog>> callbackFuture = new CompletableFuture<>();
-        ABICodec abiCodec = new ABICodec(cryptoSuite, false);
+        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
         EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(String.valueOf(groupId));

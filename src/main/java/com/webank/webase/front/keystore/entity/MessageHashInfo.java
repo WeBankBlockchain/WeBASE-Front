@@ -15,6 +15,7 @@
 package com.webank.webase.front.keystore.entity;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * EncodeInfo
@@ -26,4 +27,6 @@ public class MessageHashInfo {
      */
     private String signUserId;
     private String messageHash;
+    @NotBlank
+    private String groupId;
 }

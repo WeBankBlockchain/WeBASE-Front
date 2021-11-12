@@ -12,25 +12,24 @@
  * the License.
  */
 
-package com.webank.webase.front.transaction.entity;
+package com.webank.webase.front.base.enums;
 
-import java.util.List;
-import javax.validation.constraints.NotNull;
-import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+public enum NodeTypes {
 
-/**
- * get encoded function string
- * @author marsli
- */
-@Data
-public class ReqEncodeFunction {
-    @NotBlank
-    private String funcName;
-    @NotNull
-    private List<Object> contractAbi;
-    @NotNull
-    private List<Object> funcParam;
-    @NotBlank
-    private String groupId;
+    SEALER(0),
+
+    OBSERVER(1),
+
+    REMOVED(2);
+
+    private int value;
+
+    NodeTypes(Integer type) {
+        this.value = type;
+    }
+
+    public int getValue() {
+            return this.value;
+    }
+
 }
