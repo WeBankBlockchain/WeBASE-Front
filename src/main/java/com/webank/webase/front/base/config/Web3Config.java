@@ -26,11 +26,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.ClientImpl;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupList;
+import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.jni.common.JniException;
+import org.fisco.bcos.sdk.jni.rpc.Rpc;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -95,6 +98,7 @@ public class Web3Config {
         ConfigOption configOption = new ConfigOption(configProperty);
         // init bcosSDK
         log.info("init bcos sdk instance, check sdk.log for detail");
+
         BcosSDK bcosSDK = new BcosSDK(configOption);
 
         log.info("init client version");
@@ -114,12 +118,12 @@ public class Web3Config {
         log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
         return rpcWeb3j;
     }
-
-    @Bean(name = "common")
-    @DependsOn("rpcClient")
-    public CryptoSuite getCommonSuite(Client rpcClient) {
-        int encryptType = rpcClient.getCryptoType();
-        log.info("getCommonSuite init encrypt type:{}", encryptType);
-        return new CryptoSuite(encryptType);
-    }
+//
+//    @Bean(name = "common") todo 通过group判断
+//    @DependsOn("rpcClient")
+//    public CryptoSuite getCommonSuite(Client rpcClient) {
+//        int encryptType = rpcClient.getCryptoType();
+//        log.info("getCommonSuite init encrypt type:{}", encryptType);
+//        return new CryptoSuite(encryptType);
+//    }
 }

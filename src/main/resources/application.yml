@@ -55,12 +55,10 @@ server:
     max-connections: 10000
 
 sdk:
-  corePoolSize: 50
-  maxPoolSize: 100
-  queueCapacity: 100
-  ip: 127.0.0.1
-  channelPort: 20200
-  certPath: conf  # cert path of relative or absolute
+  peers: ["127.0.0.1:20200", "127.0.0.1:20201"] # sdk's ip port
+  useSmSsl: false # sdk whether use sm ssl
+  certPath: conf  # sdk cert path of relative or absolute
+  threadPoolSize: 50 # thread pool of sdk
 
 logging:
   config: classpath:log4j2.xml
@@ -72,8 +70,6 @@ constant:
   nodePath: /fisco/nodes/127.0.0.1/node0  # node's absolute path to read configuration and monitor node's log
   aesKey: EfdsW23D23d3df43
   transMaxWait: 30
-  monitorDisk: /
-  monitorEnabled: true
   http_read_timeOut: 100000
   http_connect_timeOut: 100000
   # event sync map task (unit: ms)
