@@ -43,6 +43,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -84,7 +85,7 @@ public class EventService {
     @Autowired
     private AbiService abiService;
     @Autowired
-    private BcosSDK bcosSDK;
+    private Stack<BcosSDK> bcosSDKs;
     private static final String TYPE_CONTRACT = "contract";
     private static final String TYPE_ABI_INFO = "abi";
 
@@ -159,7 +160,7 @@ public class EventService {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // to register or unregister
 //        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId); todo init event suscribe
-        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(String.valueOf(groupId));
+        EventSubscribe eventSubscribe = bcosSDKs.peek().getEventSubscribe(String.valueOf(groupId));
         String registerId = null;
         ContractEventCallback callback = null;
         try {
@@ -341,7 +342,7 @@ public class EventService {
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(String.valueOf(groupId));
+        EventSubscribe eventSubscribe = bcosSDKs.peek().getEventSubscribe(String.valueOf(groupId));
 
         try {
             String registerId = eventInfo.getRegisterId();
@@ -385,7 +386,7 @@ public class EventService {
         ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
-        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(String.valueOf(groupId));
+        EventSubscribe eventSubscribe = bcosSDKs.peek().getEventSubscribe(String.valueOf(groupId));
         String registerId = eventSubscribe.subscribeEvent(eventParam, callback);
 
         List<DecodedEventLog> resultList;

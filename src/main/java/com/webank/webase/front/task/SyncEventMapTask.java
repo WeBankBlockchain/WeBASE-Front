@@ -27,6 +27,7 @@ import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import java.util.List;
+import java.util.Stack;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
@@ -48,7 +49,7 @@ public class SyncEventMapTask {
     @Autowired
     ContractEventInfoRepository contractEventInfoRepository;
     @Autowired
-    private BcosSDK bcosSDK;
+    private Stack<BcosSDK> bcosSDKs;
     @Autowired
     private EventService eventService;
 
@@ -100,7 +101,7 @@ public class SyncEventMapTask {
                 log.debug("remove event callback of registerId:{}", registerId);
                 ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(registerId);
 //                EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(callback.getGroupId()); todo
-                EventSubscribe eventSubscribe = new EventSubscribeImp(String.valueOf(callback.getGroupId()), bcosSDK.getConfig());
+                EventSubscribe eventSubscribe = new EventSubscribeImp(String.valueOf(callback.getGroupId()), bcosSDKs.peek().getConfig());
                 eventSubscribe.unsubscribeEvent(registerId, callback);
                 CONTRACT_EVENT_CALLBACK_MAP.remove(registerId);
                 removeCount++;

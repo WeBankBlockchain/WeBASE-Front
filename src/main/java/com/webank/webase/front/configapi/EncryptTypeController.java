@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.webank.webase.front.gm;
+package com.webank.webase.front.configapi;
 
 import com.webank.webase.front.base.config.Web3Config;
+import com.webank.webase.front.web3api.Web3ApiService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,18 +32,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "/encrypt", tags = "encrypt type interface(standard/guomi)")
 @Slf4j
 @RestController
-@RequestMapping(value = "")
+@RequestMapping(value = "config")
 public class EncryptTypeController {
     @Autowired
     private Web3Config web3Config;
+    @Autowired
+    private Web3ApiService web3ApiService;
 
-//    @GetMapping("encrypt")
-//    public Integer getEncryptType() {
-//        int encrypt = web3ApiService.getCryptoType();
-//        log.info("getEncryptType:{}", encrypt);
-//        return encrypt;
-//    }
-//    todo 根据群组获取加密类型
+    @GetMapping("encrypt/{groupId}")
+    public Integer getEncryptType(@PathVariable("groupId") String groupId) {
+        int encrypt = web3ApiService.getCryptoType(groupId);
+        log.info("getEncryptType groupId:{},type:{}", groupId, encrypt);
+        return encrypt;
+    }
 
     @GetMapping("sslCryptoType")
     public boolean getSSLCryptoType() {

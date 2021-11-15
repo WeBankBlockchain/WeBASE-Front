@@ -41,11 +41,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -94,8 +90,6 @@ public class FrontCertService {
     Constants constants;
     @Autowired
     private Web3ApiService web3ApiService;
-    @Autowired
-    private BcosSDK bcosSDK;
     @Autowired
     private Web3Config web3Config;
 
@@ -278,7 +272,7 @@ public class FrontCertService {
      */
     public Map<String, String> getSDKCertKeyMap() {
         Map<String, String> sdkCertMap = new HashMap<>();
-//        log.info("start getSDKCertKeyMap sslType:{}.", bcosSDK.getSSLType()); todo
+        log.info("start getSDKCertKeyMap sslType:{}.", web3Config.isUseSmSsl());
         // add sdk cert: node.crt
         // v1.5.1 return all sdk cert in conf
         loadBareSdkContent(frontSdkNodeCrt, sdkCertMap);

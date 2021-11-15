@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Stack;
+import java.util.Vector;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -64,7 +66,7 @@ public class Web3ApiService {
     @Autowired
     private Constants constants;
     @Autowired
-    private BcosSDK bcosSDK;
+    private Stack<BcosSDK> bcosSDKs;
     @Autowired
     private Client rpcWeb3j;
     @Autowired
@@ -174,9 +176,9 @@ public class Web3ApiService {
 
     /**
      * getClientVersion. todo
-     */
-//    public ClientVersion getClientVersion() {
-//        ClientVersion version = getWeb3j().getNodeVersion(getNodeIpPort()).getNodeVersion();
+//     */
+//    public ClientVersion getClientVersion(String groupId) {
+//        ClientVersion version = getWeb3j(groupId).get()).getNodeVersion();
 //        return version;
 //    }
 
@@ -405,33 +407,15 @@ public class Web3ApiService {
         List<String> groupIdList = getWeb3j()
             .getGroupList().getResult()
             .getGroupList();
-        // check web3jMap, if not match groupIdList, refresh web3jMap in front
-        refreshWeb3jMap(groupIdList);
         return groupIdList;
     }
 
     /**
-     * node id list todo
+     * node id list
      */
     public List<String> getGroupPeers(String groupId) {
         return getWeb3j(groupId)
-            .getGroupPeers(groupId).getGroupPeers();
-    }
-
-    /**
-     * add web3j from chain and remove web3j not in chain
-     * todo use getClient init new web3j, remove old one
-     * @param groupIdList
-     * @throws FrontException
-     */
-    @DependsOn("encryptType")
-    public void refreshWeb3jMap(List<String> groupIdList) throws FrontException {
-        // todo whether need to init new client
-        log.debug("refreshWeb3jMap groupIdList:{}", groupIdList);
-        // if localGroupIdList not contain group in groupList from chain, add it
-        groupIdList.forEach(group2Init ->
-                bcosSDK.getClient(group2Init));
-
+            .getGroupPeers().getGroupPeers();
     }
 
     // get all peers of chain
@@ -464,15 +448,6 @@ public class Web3ApiService {
         return getWeb3j(groupId)
                 .getSystemConfigByKey(key)
                 .getSystemConfig().getValue(); // todo
-    }
-
-    /**
-     * getGroupInfo.
-     * @return 包含了群组信息和节点的机构信息
-     */
-    public GroupInfo getGroupInfo() {
-        GroupInfo groupInfo = getWeb3j().getGroupInfo().getResult();
-        return groupInfo;
     }
 
     /**
@@ -544,16 +519,15 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j() {
-//        this.checkConnection();
         List<String> groupIdList = rpcWeb3j.getGroupList().getResult().getGroupList(); //1
         if (groupIdList.isEmpty()) {
-            log.error("web3jMap is empty, groupList empty! please check your node status");
+            log.error("Node's groupList empty! please check your node status");
             // get default web3j of integer max value
-            return rpcWeb3j;
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
         }
         // get random index to get web3j
         String index = groupIdList.iterator().next();
-        return bcosSDK.getClient(index);
+        return bcosSDKs.peek().getClient(index);
     }
 
     /**
@@ -562,10 +536,9 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j(String groupId) {
-//        this.checkConnection();
         Client web3j;
         try {
-            web3j= bcosSDK.getClient(groupId);
+            web3j= bcosSDKs.peek().getClient(groupId);
         } catch (BcosSDKException e) {
             String errorMsg = e.getMessage();
             log.error("bcosSDK getClient failed: {}", errorMsg);
@@ -604,7 +577,4 @@ public class Web3ApiService {
 //        }
 //    }
 
-//    private String getNodeIpPort(int index) {
-//        return web3ConfigConstants.getPeers().isEmpty();
-//    }
 }

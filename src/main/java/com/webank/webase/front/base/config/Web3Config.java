@@ -14,13 +14,18 @@
 package com.webank.webase.front.base.config;
 
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.util.JsonUtils;
 import io.netty.channel.ChannelHandlerContext;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
+import java.util.Vector;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
@@ -53,20 +58,28 @@ public class Web3Config {
     public static String orgName = "fisco";
     private List<Integer> groupIdList;
     private String threadPoolSize;
-//    private String ip = "127.0.0.1";
-//    private String channelPort = "20200";
     private List<String> peers; // ["127.0.0.1:20200","127.0.0.1:20201"]
     private boolean useSmSsl = false;
     public String certPath = "conf";
 
+
+    @Bean
+    public Stack<BcosSDK> getBcosSDK() throws ConfigException, JniException {
+        Stack<BcosSDK> bcosSDKs = new Stack<>();
+        // pass peers to init sdk
+        BcosSDK bcosSDK = this.buildBcosSDK(this.peers);
+        bcosSDKs.push(bcosSDK);
+        return bcosSDKs;
+    }
+
     /**
-     * todo init one-bean and set ConfigOption by api 或,支持启动就连接
-     * todo 保存证书文件/保存ip配置(toml文件)
+     * todo init one-bean and set ConfigOption by api
+     * 启动至少配置证书、一个节点的IP PORT
+     * todo DB保存ip配置，定时刷新
      * @return
      * @throws ConfigException
      */
-    @Bean
-    public BcosSDK getBcosSDK() throws ConfigException {
+    public BcosSDK buildBcosSDK(List<String> newPeers) throws ConfigException, JniException {
         log.info("start init ConfigProperty");
         log.info("=========getBcosSDK :{}", peers);
         // cert config, encrypt type
@@ -79,7 +92,7 @@ public class Web3Config {
 
         // peers, default one node in front
         Map<String, Object> network = new HashMap<>();
-        network.put("peers", peers);
+        network.put("peers", newPeers);
         log.info("init node network property :{}", JsonUtils.objToString(peers));
 
         // thread pool config
@@ -97,33 +110,35 @@ public class Web3Config {
         log.info("init configOption from configProperty");
         ConfigOption configOption = new ConfigOption(configProperty);
         // init bcosSDK
-        log.info("init bcos sdk instance, check sdk.log for detail");
-
         BcosSDK bcosSDK = new BcosSDK(configOption);
+        log.info("finish init bcos sdk instance, check sdk.log for detail");
 
-        log.info("init client version");
+        Client groupListClient = this.getRpcWeb3j(bcosSDK);
+        List<String> groupList = groupListClient.getGroupList().getResult().getGroupList();
+        Client client = bcosSDK.getClient(groupList.iterator().next());
+        BigInteger blockHeight = client.getBlockNumber().getBlockNumber();
+        log.info("getBlockNumber blockHeight:{}", blockHeight);
+        Constants.chainId = client.getChainId();
+
 //        ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
 //            .getNodeVersion();
 //        Constants.version = version.getVersion();
-//        Constants.chainId = version.getChainId();
+//        Constants.chainId = bcosSDK.getChainId();
 
         return bcosSDK;
     }
 
 
+    /**
+     * only used to get groupList
+     * @throws JniException
+     */
     @Bean(name = "rpcClient")
     public Client getRpcWeb3j(BcosSDK bcosSDK) throws JniException {
-        // init rpc client(web3j)
+
         Client rpcWeb3j = Client.build(bcosSDK.getConfig());
-        log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
+        log.info("get rpcWeb3j(only support groupList) client:{}", rpcWeb3j);
         return rpcWeb3j;
     }
-//
-//    @Bean(name = "common") todo 通过group判断
-//    @DependsOn("rpcClient")
-//    public CryptoSuite getCommonSuite(Client rpcClient) {
-//        int encryptType = rpcClient.getCryptoType();
-//        log.info("getCommonSuite init encrypt type:{}", encryptType);
-//        return new CryptoSuite(encryptType);
-//    }
+
 }

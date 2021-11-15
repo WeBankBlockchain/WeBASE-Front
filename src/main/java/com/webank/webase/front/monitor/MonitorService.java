@@ -17,12 +17,8 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BasePageResponse;
-import com.webank.webase.front.monitor.entity.GroupSizeInfo;
 import com.webank.webase.front.monitor.entity.Monitor;
-import com.webank.webase.front.util.CleanPathUtil;
-import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -30,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
 import org.fisco.bcos.sdk.client.protocol.response.PbftView;
@@ -53,8 +48,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 public class MonitorService {
-    @Autowired
-    BcosSDK bcosSDK;
     @Autowired
     private Web3ApiService web3ApiService;
     @Autowired

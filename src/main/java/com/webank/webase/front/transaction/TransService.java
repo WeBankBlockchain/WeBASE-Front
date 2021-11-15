@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Stack;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -121,7 +122,7 @@ public class TransService {
     @Autowired
     private PrecompiledService precompiledService;
     @Autowired
-    private BcosSDK bcosSDK;
+    private Stack<BcosSDK> bcosSDKs;
     /**
      * transHandleWithSign.
      *
