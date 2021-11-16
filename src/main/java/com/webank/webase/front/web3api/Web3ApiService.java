@@ -241,28 +241,17 @@ public class Web3ApiService {
         log.info("start getNodeStatusList. groupId:{}", groupId);
         List<NodeStatusInfo> statusList = new ArrayList<>();
 
-        List<String> observerList = this.getObserverList(groupId);
-        List<String> sealerList = this.getSealerStrList(groupId);
-        List<String> nodeInGroupList = new ArrayList<>();
-        nodeInGroupList.addAll(sealerList);
-        nodeInGroupList.addAll(observerList);
-        if (nodeInGroupList.isEmpty()) {
-            log.warn("end getNodeStatusList. nodeListInGroup is empty");
-            return Collections.emptyList();
-        }
-
         // include observer, sealer, exclude removed nodes
         this.refreshNodeNameMap(groupId);
+        log.info("getNodeStatusList NODE_ID_2_NODE_NAME:{}", JsonUtils.objToString(NODE_ID_2_NODE_NAME));
         // get local node
-        for (String nodeId : nodeInGroupList) {
+        for (String nodeId : NODE_ID_2_NODE_NAME.keySet()) {
             String nodeName = NODE_ID_2_NODE_NAME.get(nodeId);
+            log.info("getNodeStatusList nodeId:{},nodeName:{}", nodeId, nodeName);
             // check nodeType if observer or sealer todo 观察节点也适用timeout
-//            NodeTypes nodeType = sealerList.stream()
-//                .filter(nodeId::equals)
-//                .map(c -> NodeTypes.SEALER).findFirst()
-//                .orElse(NodeTypes.OBSERVER);
 
             ConsensusStatusInfo consensusStatusInfo = this.getConsensusStatus(groupId, nodeName);
+            log.info("getNodeStatusList consensusStatusInfo{}", consensusStatusInfo);
             int blockNumber = consensusStatusInfo.getBlockNumber();
             // if timeout true, view increase
             int view = consensusStatusInfo.getView();
@@ -509,12 +498,12 @@ public class Web3ApiService {
         return this.getWeb3j(groupId).getCryptoType();
     }
 
-    private Map<String, String> refreshNodeNameMap(String groupId) {
+    private void refreshNodeNameMap(String groupId) {
+        log.info("refreshNodeNameMap groupId:{}", groupId);
         List<GroupNodeInfo> nodeInfoList = this.getGroupInfo(groupId).getNodeList();
         for (GroupNodeInfo node : nodeInfoList) {
             NODE_ID_2_NODE_NAME.put(node.getIniConfig().getNodeID(), node.getName());
         }
-
-        return NODE_ID_2_NODE_NAME;
+        log.info("end refreshNodeNameMap groupId:{}", groupId);
     }
 }
