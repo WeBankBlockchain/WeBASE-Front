@@ -15,17 +15,17 @@ package com.webank.webase.front.web3api;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
-import com.webank.webase.front.base.enums.DataStatus;
-import com.webank.webase.front.base.enums.NodeTypes;
+import com.webank.webase.front.base.enums.NodeStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.RspTransCountInfo;
 import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +41,7 @@ import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
@@ -76,8 +77,7 @@ public class Web3ApiService {
 //    @Autowired
 //    private Map<String, Client> clientMap;
 
-    private static Map<String, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
-    private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
+    private static Map<String, String> NODE_ID_2_NODE_NAME = new HashMap<>();
     private static final int HASH_OF_TRANSACTION_LENGTH = 66;
 
 
@@ -140,8 +140,18 @@ public class Web3ApiService {
      */
     public BigInteger getPbftView(String groupId) {
 
-        BigInteger result;
-        result = getWeb3j(groupId).getPbftView().getPbftView();
+        BigInteger result = getWeb3j(groupId).getPbftView().getPbftView();
+        return result;
+    }
+
+    /**
+     * todo consensusStatus
+     * @param groupId
+     * @return
+     */
+    public BigInteger getPbftView(String groupId, String nodeName) {
+
+        BigInteger result = getWeb3j(groupId).getPbftView().getPbftView();
         return result;
     }
 
@@ -225,116 +235,60 @@ public class Web3ApiService {
 
     }
 
-
     /**
-     * nodeHeartBeat. todo
+     * node status list of sealer and observer todo
      */
-//    public List<NodeStatusInfo> getNodeStatusList(String groupId) {
-//        log.info("start getNodeStatusList. groupId:{}", groupId);
-//        try {
-//            List<NodeStatusInfo> statusList = new ArrayList<>();
-//            // include observer and sealer, exclude removed nodes
-//            List<String> sealerList = this.getSealerStrList(groupId);
-//            List<String> observerList = this.getObserverList(groupId);
-//            List<String> nodeListInGroup = new ArrayList<>();
-//            nodeListInGroup.addAll(sealerList);
-//            nodeListInGroup.addAll(observerList);
-//            if (nodeListInGroup.isEmpty()) {
-//                log.warn("end getNodeStatusList. nodeListInGroup is empty");
-//                return Collections.emptyList();
-//            }
-//
-//            // get local node
-//            SyncStatusInfo syncStatusInfo = this.getSyncStatus(groupId);
-//            for (String peer : nodeListInGroup) {
-//                int nodeType = NodeTypes.SEALER.getValue();
-//                // check nodeType if observer or sealer
-//                if (observerList != null) {
-//                    nodeType = observerList.stream()
-//                        .filter(peer::equals)
-//                        .map(c -> NodeTypes.OBSERVER.getValue()).findFirst()
-//                        .orElse(NodeTypes.SEALER.getValue());
-//                }
-//                // front's node block height
-//                long blockNumberOnChain = getBlockNumberOfNodeOnChain(syncStatusInfo, peer);
-//                // check timeout
-//                // check syncing
-//                String latestView =
-//                    viewInfoList.stream().filter(cl -> peer.equals(cl.getNodeId()))
-//                                .map(ViewInfo::getView).findFirst().orElse("0");// pbftView
-//                // check node status
-//                statusList.add(
-//                        checkNodeStatus(groupId, peer, blockNumberOnChain, latestView, nodeType));
-//            }
-//
-//            nodeStatusMap.put(groupId, statusList);
-//            log.info("end getNodeStatusList. groupId:{} statusList:{}", groupId,
-//                    JsonUtils.toJSONString(statusList));
-//            return statusList;
-//        } catch (Exception e) {
-//            log.error("nodeHeartBeat Exception.", e);
-//            throw new FrontException(ConstantCode.NODE_REQUEST_FAILED);
-//        }
-//    }
+    public List<NodeStatusInfo> getNodeStatusList(String groupId) {
+        log.info("start getNodeStatusList. groupId:{}", groupId);
+        List<NodeStatusInfo> statusList = new ArrayList<>();
 
-
-    /**
-     * check node status.
-     */
-    private NodeStatusInfo checkNodeStatus(String groupId, String nodeId, long chainBlockNumber,
-        long chainView, int nodeType) {
-        log.info("start checkNodeStatus. groupId:{} nodeId:{} blockNumber:{} chainView:{}", groupId,
-                nodeId, chainBlockNumber, chainView);
-
-        if (Objects.isNull(nodeStatusMap.get(groupId))) {
-            log.info("end checkNodeStatus. no cache group:{}", groupId);
-            return new NodeStatusInfo(nodeId, chainBlockNumber, chainView);
-        } else {
-            List<NodeStatusInfo> statusList = nodeStatusMap.get(groupId);
-            NodeStatusInfo localNodeStatus = statusList.stream()
-                    .filter(s -> nodeId.equals(s.getNodeId())).findFirst().orElse(null);
-            if (Objects.isNull(localNodeStatus)) {
-                log.info("end checkNodeStatus. no cache node:{}", nodeId);
-                return new NodeStatusInfo(nodeId, chainBlockNumber, chainView);
-            }
-
-            LocalDateTime latestUpdate = localNodeStatus.getLatestStatusUpdateTime();
-            Long subTime = Duration.between(latestUpdate, LocalDateTime.now()).toMillis();
-            if (subTime < CHECK_NODE_WAIT_MIN_MILLIS) {
-                log.info("checkNodeStatus jump over. nodeId:{} subTime:{}", nodeId, subTime);
-                return localNodeStatus;
-            }
-
-            long localBlockNumber = localNodeStatus.getBlockNumber();
-            long localPbftView = localNodeStatus.getPbftView();
-            // 0-consensus;1-observer
-            if (nodeType == NodeTypes.SEALER.getValue()) {
-                if (localBlockNumber == chainBlockNumber && localPbftView == chainView) {
-                    log.warn("node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
-                            nodeId, localBlockNumber, chainBlockNumber, localPbftView, chainView);
-                    localNodeStatus.setStatus(DataStatus.INVALID.getValue());
-                } else {
-                    localNodeStatus.setBlockNumber(chainBlockNumber);
-                    localNodeStatus.setPbftView(chainView);
-                    localNodeStatus.setStatus(DataStatus.NORMAL.getValue());
-                }
-            } else {
-                if (!(chainBlockNumber == getBlockNumber(groupId).longValue())) {
-                    log.warn(
-                            "node[{}] is invalid. localNumber:{} chainNumber:{} localView:{} chainView:{}",
-                            nodeId, localBlockNumber, chainBlockNumber, localPbftView, chainView);
-                    localNodeStatus.setStatus(DataStatus.INVALID.getValue());
-                } else {
-                    localNodeStatus.setBlockNumber(chainBlockNumber);
-                    localNodeStatus.setPbftView(chainView);
-                    localNodeStatus.setStatus(DataStatus.NORMAL.getValue());
-                }
-            }
-            localNodeStatus.setLatestStatusUpdateTime(LocalDateTime.now());
-            return localNodeStatus;
+        List<String> observerList = this.getObserverList(groupId);
+        List<String> sealerList = this.getSealerStrList(groupId);
+        List<String> nodeInGroupList = new ArrayList<>();
+        nodeInGroupList.addAll(sealerList);
+        nodeInGroupList.addAll(observerList);
+        if (nodeInGroupList.isEmpty()) {
+            log.warn("end getNodeStatusList. nodeListInGroup is empty");
+            return Collections.emptyList();
         }
-    }
 
+        // include observer, sealer, exclude removed nodes
+        this.refreshNodeNameMap(groupId);
+        // get local node
+        for (String nodeId : nodeInGroupList) {
+            String nodeName = NODE_ID_2_NODE_NAME.get(nodeId);
+            // check nodeType if observer or sealer
+//            NodeTypes nodeType = sealerList.stream()
+//                .filter(nodeId::equals)
+//                .map(c -> NodeTypes.SEALER).findFirst()
+//                .orElse(NodeTypes.OBSERVER);
+
+            ConsensusStatusInfo consensusStatusInfo = this.getConsensusStatus(groupId, nodeName);
+            int blockNumber = consensusStatusInfo.getBlockNumber();
+            // if timeout true, view increase
+            int view = consensusStatusInfo.getView();
+
+            // normal => timeout false, else true
+            boolean ifTimeout = consensusStatusInfo.getTimeout();
+            // if timeout, check if node is syncing;
+            // if syncing, always timeout until syncing finish
+            NodeStatus status = NodeStatus.NORMAL;
+            if (ifTimeout) {
+                status = NodeStatus.INVALID;
+                SyncStatusInfo syncStatusInfo = this.getSyncStatus(groupId, nodeName);
+                if (syncStatusInfo.getIsSyncing()) {
+                    status = NodeStatus.SYNCING;
+                }
+            }
+            // check node status
+            statusList.add(new NodeStatusInfo(nodeId, status, blockNumber, view));
+        }
+
+        log.info("end getNodeStatusList. groupId:{} statusList:{}", groupId,
+                JsonUtils.toJSONString(statusList));
+        return statusList;
+
+    }
 
     /**
      * get latest number of peer on chain.
@@ -400,8 +354,23 @@ public class Web3ApiService {
         return getWeb3j(groupId).getConsensusStatus().getConsensusStatus();
     }
 
+    /**
+     * todo 展示
+     * todo 记录nodeName列表，根据多个nodeName获取
+     * @param groupId
+     * @param nodeName
+     * @return
+     */
+    public ConsensusStatusInfo getConsensusStatus(String groupId, String nodeName) {
+        return getWeb3j(groupId).getConsensusStatus(nodeName).getConsensusStatus();
+    }
+
     public SyncStatusInfo getSyncStatus(String groupId) {
         return getWeb3j(groupId).getSyncStatus().getSyncStatus();
+    }
+
+    public SyncStatusInfo getSyncStatus(String groupId, String nodeName) {
+        return getWeb3j(groupId).getSyncStatus(nodeName).getSyncStatus();
     }
 
     /**
@@ -542,5 +511,12 @@ public class Web3ApiService {
         return this.getWeb3j(groupId).getCryptoType();
     }
 
+    private Map<String, String> refreshNodeNameMap(String groupId) {
+        List<GroupNodeInfo> nodeInfoList = this.getGroupInfo(groupId).getNodeList();
+        for (GroupNodeInfo node : nodeInfoList) {
+            NODE_ID_2_NODE_NAME.put(node.getIniConfig().getNodeID(), node.getName());
+        }
 
+        return NODE_ID_2_NODE_NAME;
+    }
 }
