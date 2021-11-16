@@ -57,6 +57,8 @@ public class ConfigService {
             log.error("updateBcosSDKPeers error:[]", e);
             throw new FrontException(ConstantCode.BUILD_SDK_WITH_NEW_PEERS_FAILED);
         }
+        // todo 保存peers配置到db
+
         if (newBcosSDK != null) {
             bcosSDKs.pop();
             bcosSDKs.push(newBcosSDK);

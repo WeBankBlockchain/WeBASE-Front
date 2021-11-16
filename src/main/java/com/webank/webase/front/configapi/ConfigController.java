@@ -37,9 +37,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * return encrypt type to web 0 is standard, 1 is guomi
+ * get or update config local
  */
-@Api(value = "/encrypt", tags = "encrypt type interface(standard/guomi)")
+@Api(value = "/config", tags = "config interface")
 @Slf4j
 @RestController
 @RequestMapping(value = "config")
@@ -72,12 +72,14 @@ public class ConfigController {
 
     /**
      * update sdk's peers configuration, use same sdk certificates to connect with peers
+     * todo test update sdk
      * @return
      */
     @PostMapping("bcosSDK/peers")
     public BaseResponse updateSDKPeers(@RequestBody @Valid ReqPeers param) {
         Instant startTime = Instant.now();
         log.info("start updateSDKPeers param:{}", param);
+        // todo 校验ip:port格式，telnet能否连上
         configService.updateBcosSDKPeers(param);
         log.info("end updateSDKPeers useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());

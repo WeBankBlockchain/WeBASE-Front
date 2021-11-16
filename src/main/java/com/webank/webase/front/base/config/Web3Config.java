@@ -170,7 +170,7 @@ public class Web3Config {
     }
 
     @Bean(name = "singleClient")
-    public Client getClient(BcosSDK bcosSDK) throws JniException {
+    public Client getClient(BcosSDK bcosSDK) {
 
         Client client = bcosSDK.getClient("group");
         // Client rpcWeb3j = bcosSDK.getClient();

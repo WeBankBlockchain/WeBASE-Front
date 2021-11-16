@@ -34,6 +34,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.List;
@@ -819,5 +820,19 @@ public class CommonUtils {
         }
         String regex = "^[a-zA-Z]+$";
         return (input.charAt(0)+"").matches(regex);
+    }
+
+    /**
+     * compareStrList
+     * @param list1
+     * @param list2
+     * @return true if same list
+     */
+    public static boolean compareStrList(List<String> list1, List<String> list2) {
+        String[] arr1 = list1.toArray(new String[]{});
+        String[] arr2 = list2.toArray(new String[]{});
+        Arrays.sort(arr1);
+        Arrays.sort(arr1);
+        return Arrays.equals(arr1,arr2);
     }
 }

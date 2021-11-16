@@ -43,8 +43,6 @@ import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -52,12 +50,9 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
-import java.util.Stack;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.tars.TransactionData;
 import org.fisco.bcos.sdk.client.protocol.request.Transaction;
@@ -121,8 +116,7 @@ public class TransService {
     private CryptoSuite ecdsaCryptoSuite;
     @Autowired
     private PrecompiledService precompiledService;
-    @Autowired
-    private Stack<BcosSDK> bcosSDKs;
+
     /**
      * transHandleWithSign.
      *
