@@ -32,4 +32,7 @@ public enum NodeTypes {
             return this.value;
     }
 
+    public boolean isSealerOrObserver() {
+        return (this.value == SEALER.value || this.value == OBSERVER.value);
+    }
 }

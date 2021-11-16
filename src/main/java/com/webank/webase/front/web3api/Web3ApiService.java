@@ -145,7 +145,6 @@ public class Web3ApiService {
     }
 
     /**
-     * todo consensusStatus
      * @param groupId
      * @return
      */
@@ -236,7 +235,7 @@ public class Web3ApiService {
     }
 
     /**
-     * node status list of sealer and observer todo
+     * node status list of sealer and observer
      */
     public List<NodeStatusInfo> getNodeStatusList(String groupId) {
         log.info("start getNodeStatusList. groupId:{}", groupId);
@@ -257,7 +256,7 @@ public class Web3ApiService {
         // get local node
         for (String nodeId : nodeInGroupList) {
             String nodeName = NODE_ID_2_NODE_NAME.get(nodeId);
-            // check nodeType if observer or sealer
+            // check nodeType if observer or sealer todo 观察节点也适用timeout
 //            NodeTypes nodeType = sealerList.stream()
 //                .filter(nodeId::equals)
 //                .map(c -> NodeTypes.SEALER).findFirst()
@@ -346,7 +345,7 @@ public class Web3ApiService {
     }
 
     /**
-     * get BasicConsensusInfo and List of ViewInfo todo
+     * get BasicConsensusInfo, include block height, timeout, view
      * @param groupId
      * @return
      */
@@ -355,8 +354,7 @@ public class Web3ApiService {
     }
 
     /**
-     * todo 展示
-     * todo 记录nodeName列表，根据多个nodeName获取
+     * getConsensusStatus by node name
      * @param groupId
      * @param nodeName
      * @return

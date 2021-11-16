@@ -20,14 +20,13 @@ import static org.junit.Assert.assertNotNull;
 
 import com.webank.webase.front.base.TestBase;
 import java.math.BigInteger;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupList;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransaction;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
-import org.fisco.bcos.sdk.client.protocol.response.BlockHash;
 import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
 import org.fisco.bcos.sdk.client.protocol.response.Code;
+import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus;
 import org.fisco.bcos.sdk.client.protocol.response.ObserverList;
 import org.fisco.bcos.sdk.client.protocol.response.PbftView;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
@@ -36,7 +35,6 @@ import org.fisco.bcos.sdk.client.protocol.response.SealerList;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus;
 import org.fisco.bcos.sdk.client.protocol.response.SystemConfig;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -67,11 +65,11 @@ public class Web3jApITest extends TestBase {
     assertNotNull(pbftView.getPbftView());
   }
 
-//  @Test
-//  public void getConsensusStatus() {  todo
-//      ConsensusStatus consensusStatus = web3j.getConsensusStatus();
-//      assertNotNull(consensusStatus);
-//  }
+  @Test
+  public void getConsensusStatus() {
+      ConsensusStatus consensusStatus = web3j.getConsensusStatus();
+      assertNotNull(consensusStatus);
+  }
 
   @Test
   public void getSyncStatus() {
@@ -109,11 +107,6 @@ public class Web3jApITest extends TestBase {
       assertNotNull(observerList.getObserverList());
   }
 
-//  @Test
-//  public void getNodeIDList() { todo
-//      NodeIDList nodeIDList = web3j.getNodeIDList();
-//      assertNotNull(nodeIDList.getNodeIDList());
-//  }
 
   @Test
   public void getSystemConfigByKey() {
@@ -149,12 +142,6 @@ public class Web3jApITest extends TestBase {
       assertNotNull(bcosBlock.getBlock());
   }
 
-//  @Ignore
-//  @Test  todo
-//  public void getBlockHashByNumber() {
-//      BlockHash blockHash = web3j.getBlockHashByNumber(blockNumber);
-//      assertNotNull(blockHash.getBlockHashByNumber());
-//  }
 
   @Ignore
   @Test
