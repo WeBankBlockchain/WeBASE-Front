@@ -29,7 +29,7 @@ import lombok.Data;
 @Data
 @Deprecated
 public class ReqDeployWithSign {
-    private int groupId = 1;
+    private String groupId = "1";
     private int signUserId = 100001;
     /**
      * 合约编译的bytecode(bin)，用于部署合约

@@ -25,7 +25,7 @@ public interface MonitorRepository
         extends CrudRepository<Monitor, Long>, JpaSpecificationExecutor<Monitor> {
 
     @Query(value = "select m from Monitor m where m.groupId = ?1 and m.timestamp between ?2 and ?3 order by m.id")
-    public List<Monitor> findByTimeBetween(int groupId, Long startTime, Long endTime);
+    public List<Monitor> findByTimeBetween(String groupId, Long startTime, Long endTime);
 
     @Modifying
     @Transactional

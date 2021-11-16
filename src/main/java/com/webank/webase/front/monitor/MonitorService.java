@@ -14,20 +14,11 @@
 package com.webank.webase.front.monitor;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.config.NodeConfig;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BasePageResponse;
-import com.webank.webase.front.monitor.entity.GroupSizeInfo;
 import com.webank.webase.front.monitor.entity.Monitor;
-import com.webank.webase.front.performance.result.Data;
-import com.webank.webase.front.performance.result.LineDataList;
-import com.webank.webase.front.performance.result.PerformanceData;
-import com.webank.webase.front.util.CleanPathUtil;
-import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
-import java.io.File;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -35,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
 import org.fisco.bcos.sdk.client.protocol.response.PbftView;
@@ -59,39 +49,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MonitorService {
     @Autowired
-    BcosSDK bcosSDK;
-    @Autowired
     private Web3ApiService web3ApiService;
     @Autowired
     MonitorRepository monitorRepository;
     @Autowired
     Constants constants;
-    @Autowired
-    NodeConfig nodeConfig;
 
-    public List<PerformanceData> findContrastDataByTime(int groupId, LocalDateTime startTime,
-            LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
-            int gap) {
-
-        List<Monitor> monitorList;
-        if (startTime == null || endTime == null) {
-            monitorList = new ArrayList<>();
-        } else {
-            monitorList = monitorRepository.findByTimeBetween(groupId,
-                    startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-                    endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-        }
-        List<Monitor> contrastMonitorList = new ArrayList<>();
-        if (contrastStartTime != null && contrastEndTime != null) {
-            contrastMonitorList = monitorRepository.findByTimeBetween(groupId,
-                    contrastStartTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-                    contrastEndTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-        }
-        return transferToPerformanceData(transferListByGap(monitorList, gap),
-                transferListByGap(contrastMonitorList, gap));
-    }
-
-    public Page<Monitor> pagingQuery(int groupId, Integer pageNumber, Integer pageSize,
+    public Page<Monitor> pagingQuery(String groupId, Integer pageNumber, Integer pageSize,
             LocalDateTime beginDate, LocalDateTime endDate) {
         Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
         Specification<Monitor> queryParam = (root, criteriaQuery, criteriaBuilder) -> {
@@ -110,49 +74,6 @@ public class MonitorService {
         return monitorRepository.findAll(queryParam, pageable);
     }
 
-    private List<PerformanceData> transferToPerformanceData(List<Monitor> monitorList,
-            List<Monitor> contrastMonitorList) {
-        List<Long> timestampList = new ArrayList<>();
-        List<BigDecimal> blockHeightValueList = new ArrayList<>();
-        List<BigDecimal> pbftViewValueList = new ArrayList<>();
-        List<BigDecimal> pendingCountValueList = new ArrayList<>();
-        for (Monitor monitor : monitorList) {
-            blockHeightValueList.add(monitor.getBlockHeight() == null ? null
-                    : new BigDecimal(monitor.getBlockHeight()));
-            pbftViewValueList.add(
-                    monitor.getPbftView() == null ? null : new BigDecimal(monitor.getPbftView()));
-            pendingCountValueList.add(monitor.getPendingTransactionCount() == null ? null
-                    : new BigDecimal(monitor.getPendingTransactionCount()));
-            timestampList.add(monitor.getTimestamp());
-        }
-        monitorList.clear();
-
-        List<Long> contrastTimestampList = new ArrayList<>();
-        List<BigDecimal> contrastBlockHeightValueList = new ArrayList<>();
-        List<BigDecimal> contrastPbftViewValueList = new ArrayList<>();
-        List<BigDecimal> contrastPendingCountValueList = new ArrayList<>();
-        for (Monitor monitor : contrastMonitorList) {
-            contrastBlockHeightValueList.add(monitor.getBlockHeight() == null ? null
-                    : new BigDecimal(monitor.getBlockHeight()));
-            contrastPbftViewValueList.add(
-                    monitor.getPbftView() == null ? null : new BigDecimal(monitor.getPbftView()));
-            contrastPendingCountValueList.add(monitor.getPendingTransactionCount() == null ? null
-                    : new BigDecimal(monitor.getPendingTransactionCount()));
-            contrastTimestampList.add(monitor.getTimestamp());
-        }
-        contrastMonitorList.clear();
-        List<PerformanceData> performanceDataList = new ArrayList<>();
-        performanceDataList.add(new PerformanceData("blockHeight",
-                new Data(new LineDataList(timestampList, blockHeightValueList),
-                        new LineDataList(contrastTimestampList, contrastBlockHeightValueList))));
-        performanceDataList.add(
-                new PerformanceData("pbftView", new Data(new LineDataList(null, pbftViewValueList),
-                        new LineDataList(null, contrastPbftViewValueList))));
-        performanceDataList.add(new PerformanceData("pendingCount",
-                new Data(new LineDataList(null, pendingCountValueList),
-                        new LineDataList(null, contrastPendingCountValueList))));
-        return performanceDataList;
-    }
 
     public List transferListByGap(List arrayList, int gap) {
         if (gap == 0) {
@@ -203,7 +124,7 @@ public class MonitorService {
         }
         Long currentTime = System.currentTimeMillis();
         // to do add more group
-        for (Integer groupId : bcosSDK.getGroupManagerService().getGroupList()) {
+        for (String groupId : web3ApiService.getGroupList()) {
             Client web3j = web3ApiService.getWeb3j(groupId);
             Monitor monitor = new Monitor();
             BlockNumber blockHeight = web3j.getBlockNumber();
@@ -231,30 +152,6 @@ public class MonitorService {
         log.debug("delete record count = " + i);
     }
 
-    public List<GroupSizeInfo> getGroupSizeInfos() {
-        List<GroupSizeInfo> data = new ArrayList<>();
-        String groupDataPath = constants.getNodePath() + File.separator + nodeConfig.getGroupDataPath();
-        File f = new File(CleanPathUtil.cleanString(groupDataPath));
-        File[] fs = f.listFiles();
-        if (fs == null) {
-            return data;
-        }
-        // get info
-        for (File file : fs) {
-            if (file.isDirectory()) {
-                String name = file.getName();
-                int groupId = CommonUtils.extractFigureFromStr(name);
-                data.add(new GroupSizeInfo(groupId, name, file.getAbsolutePath(),
-                        CommonUtils.getFolderSize(file)));
-            }
-        }
-        // set unit: KB
-        for (GroupSizeInfo groupSizeInfo : data) {
-            groupSizeInfo.setSize(groupSizeInfo.getSize() / 1024L);
-        }
-        return data;
-    }
-
     /**
      * less than beginDate or larger than endDate
      * order by id
@@ -266,7 +163,7 @@ public class MonitorService {
      * @return BasePageResponse
      */
     @Transactional
-    public BasePageResponse pagingQueryStat(int groupId, Integer pageNumber, Integer pageSize,
+    public BasePageResponse pagingQueryStat(String groupId, Integer pageNumber, Integer pageSize,
         LocalDateTime beginDate, LocalDateTime endDate) {
         // get larger than endDate
         Pageable pageableEnd = new PageRequest(pageNumber - 1, pageSize / 2,

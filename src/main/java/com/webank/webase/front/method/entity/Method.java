@@ -31,7 +31,7 @@ public class Method implements Serializable {
     @Id
     private String methodId;
     @Id
-    private Integer groupId;
+    private String groupId;
     @Column(columnDefinition = "text")
     private String abiInfo;
     private String methodType;

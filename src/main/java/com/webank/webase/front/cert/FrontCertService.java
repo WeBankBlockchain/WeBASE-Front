@@ -16,6 +16,7 @@
 package com.webank.webase.front.cert;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
@@ -23,6 +24,7 @@ import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.util.CleanPathUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ZipUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,11 +41,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -91,10 +89,10 @@ public class FrontCertService {
     @Autowired
     Constants constants;
     @Autowired
-    @Qualifier("common")
-    private CryptoSuite cryptoSuite;
+    private Web3ApiService web3ApiService;
     @Autowired
-    private BcosSDK bcosSDK;
+    private Web3Config web3Config;
+
 
     /**
      * 设置了front对应的节点的目录，如/data/fisco/nodes/127.0.0.1/node0
@@ -110,7 +108,7 @@ public class FrontCertService {
         log.debug("start getNodeCerts in {}" + nodePath);
         getCertListByPathAndType(nodePath, CertTypes.NODE.getValue(), resList);
         // gm cert added to resList
-        if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+        if (web3Config.isUseSmSsl()) {
             getCertListByPathAndType(nodePath, CertTypes.OTHERS.getValue(), resList);
         }
         log.debug("end getNodeCerts in {}" + nodePath);
@@ -233,17 +231,17 @@ public class FrontCertService {
      */
     public Path getCertPath(String nodePath, int certType) {
         if (certType == CertTypes.CHAIN.getValue()) {
-            if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+            if (web3Config.isUseSmSsl()) {
                 return Paths.get(CleanPathUtil.cleanString(nodePath.concat(gmCaCrtPath)));
             }
             return Paths.get(CleanPathUtil.cleanString(nodePath.concat(caCrtPath)));
         } else if (certType == CertTypes.NODE.getValue()) {
-            if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+            if (web3Config.isUseSmSsl()) {
                 return Paths.get(CleanPathUtil.cleanString(nodePath.concat(gmNodeCrtPath)));
             }
             return Paths.get(CleanPathUtil.cleanString(nodePath.concat(nodeCrtPath)));
         } else if(certType == CertTypes.OTHERS.getValue()) {
-            if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+            if (web3Config.isUseSmSsl()) {
                 return Paths.get(CleanPathUtil.cleanString(nodePath.concat(gmEncryptCrtPath)));
             } else {
                 return null;
@@ -274,7 +272,7 @@ public class FrontCertService {
      */
     public Map<String, String> getSDKCertKeyMap() {
         Map<String, String> sdkCertMap = new HashMap<>();
-        log.info("start getSDKCertKeyMap sslType:{}.", bcosSDK.getSSLCryptoType());
+        log.info("start getSDKCertKeyMap sslType:{}.", web3Config.isUseSmSsl());
         // add sdk cert: node.crt
         // v1.5.1 return all sdk cert in conf
         loadBareSdkContent(frontSdkNodeCrt, sdkCertMap);

@@ -23,4 +23,6 @@ public class ReqMultiContractCompile {
     // Base64 of the contract zip source
     @NotBlank
     private String contractZipBase64;
+    @NotBlank
+    private String groupId;
 }

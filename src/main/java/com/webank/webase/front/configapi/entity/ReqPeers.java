@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -12,35 +12,18 @@
  * the License.
  */
 
-package com.webank.webase.front.scaffold.entity;
+package com.webank.webase.front.configapi.entity;
 
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.NotBlank;
 
-/**
- * @author marsli
- */
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
-public class ReqProject {
+public class ReqPeers {
     @NotNull
-    private List<Integer> contractIdList;
-    @NotBlank
-    private String group;
-    @NotBlank
-    private String artifactName;
-    @NotNull
-    private Integer groupId;
-    /**
-     * channel ip for exported project to connect node
-     */
-    private String channelIp;
-    private Integer channelPort;
-    /**
-     * select multi user to export in project by p12 format
-     */
-    private List<String> userAddressList;
+    private List<String> peers;
 }

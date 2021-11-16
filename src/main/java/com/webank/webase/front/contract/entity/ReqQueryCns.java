@@ -26,7 +26,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @Data
 public class ReqQueryCns {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY_STRING)
-    private Integer groupId;
+    private String groupId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_ADDRESS_EMPTY)
     private String contractAddress;
 }

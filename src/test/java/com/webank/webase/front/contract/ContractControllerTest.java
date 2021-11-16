@@ -22,7 +22,6 @@ import com.webank.webase.front.util.JsonUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class ContractControllerTest extends SpringTestBase {
 
     private MockMvc mockMvc;
-    private Integer groupId = 1;
+    private String groupId = "1";
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -95,7 +94,7 @@ public class ContractControllerTest extends SpringTestBase {
     @Test
     public void testDeploy() throws Exception {
         String abiInfo = "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"type\":\"constructor\"}]";
-        List<ABIDefinition> list = JsonUtils.toJavaObjectList(abiInfo, ABIDefinition.class);
+        List<Object> list = JsonUtils.toJavaObjectList(abiInfo, Object.class);
         //param
         ReqDeploy deployInputParam = new ReqDeploy();
         deployInputParam.setGroupId(groupId);

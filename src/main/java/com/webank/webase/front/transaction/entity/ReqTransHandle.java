@@ -39,7 +39,7 @@ public class ReqTransHandle {
     private String contractPath;
     @NotBlank(message = ConstantCode.PARAM_FAIL_FUNCNAME_IS_EMPTY)
     private String funcName;
-    private int groupId = 1;
+    private String groupId = "1";
     private List<Object> contractAbi = new ArrayList<>();
     private List<Object> funcParam = new ArrayList<>();
     @Deprecated

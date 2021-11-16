@@ -29,17 +29,17 @@ public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEven
 
     NewBlockEventInfo findById(String id);
 
-    List<NewBlockEventInfo> findByGroupIdAndAppId(int groupId, String appId);
+    List<NewBlockEventInfo> findByGroupIdAndAppId(String groupId, String appId);
 
     List<NewBlockEventInfo> findByAppId(String appId);
 
-    List<NewBlockEventInfo> findByGroupId(int groupId);
+    List<NewBlockEventInfo> findByGroupId(String groupId);
 
     List<NewBlockEventInfo> findByQueueName(String queueName);
 
     List<NewBlockEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
 
-    List<NewBlockEventInfo> findByGroupId(int groupId, Pageable pageable);
+    List<NewBlockEventInfo> findByGroupId(String groupId, Pageable pageable);
 
     /**
      * check unique by appId exchangeName queueName

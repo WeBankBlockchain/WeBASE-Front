@@ -1,48 +1,38 @@
-/*
- * Copyright 2014-2019 the original author or authors.
- *
+/**
+ * Copyright 2014-2020 the original author or authors.
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 
-package com.webank.webase.front.logparse.util;
+package com.webank.webase.front.base.enums;
 
-/**
- * log type enums
- */
-public enum LogTypes {
+public enum NodeTypes {
 
-    UNKNOWN(0),
+    SEALER(0),
 
-    NETWORK(1),
+    OBSERVER(1),
 
-    TxGAS(2);
+    REMOVED(2);
 
     private int value;
 
-    LogTypes(Integer logTypes) {
-        this.value = logTypes;
+    NodeTypes(Integer type) {
+        this.value = type;
     }
 
     public int getValue() {
-        return this.value;
+            return this.value;
     }
 
-    public static boolean isInclude(int key) {
-        boolean include = false;
-        for (LogTypes e : LogTypes.values()) {
-            if (e.getValue() == key) {
-                include = true;
-                break;
-            }
-        }
-        return include;
+    public boolean isSealerOrObserver() {
+        return (this.value == SEALER.value || this.value == OBSERVER.value);
     }
 }

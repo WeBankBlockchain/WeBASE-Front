@@ -27,6 +27,8 @@ import org.hibernate.validator.constraints.NotBlank;
 @NoArgsConstructor
 public class ReqImportPem {
     @NotBlank
+    private String groupId;
+    @NotBlank
     private String pemContent;
     private String userName;
 }

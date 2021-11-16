@@ -15,28 +15,24 @@ package com.webank.webase.front.base.config;
 
 
 import com.webank.webase.front.base.properties.Constants;
-import io.netty.channel.ChannelHandlerContext;
-import java.util.ArrayList;
+import com.webank.webase.front.util.JsonUtils;
+import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.abi.ABICodec;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.model.Message;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
-import org.fisco.bcos.sdk.network.MsgHandler;
+import org.fisco.bcos.sdk.jni.common.JniException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 /**
  * init web3sdk getService.
@@ -49,62 +45,89 @@ public class Web3Config {
 
     // deprecated org name, use agency from /web3/nodeInfo api instead
     public static String orgName = "fisco";
-    public String certPath = "conf";
     private List<Integer> groupIdList;
-    /* use String in java sdk*/
-    private String corePoolSize;
-    private String maxPoolSize;
-    private String queueCapacity;
-    /* use String in java sdk*/
-    private String ip = "127.0.0.1";
-    private String channelPort = "20200";
+    private String threadPoolSize;
+    private List<String> peers; // ["127.0.0.1:20200","127.0.0.1:20201"]
+    private boolean useSmSsl = false;
+    public String certPath = "conf";
 
-    // add channel disconnect
-    public static boolean PEER_CONNECTED = true;
-    static class Web3ChannelMsg implements MsgHandler {
-        @Override
-        public void onConnect(ChannelHandlerContext ctx) {
-            PEER_CONNECTED = true;
-            log.info("Web3ChannelMsg onConnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-        }
-
-        @Override
-        public void onMessage(ChannelHandlerContext ctx, Message msg) {
-            // not added in message handler, ignore this override
-            log.info("Web3ChannelMsg onMessage:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-        }
-
-        @Override
-        public void onDisconnect(ChannelHandlerContext ctx) {
-            PEER_CONNECTED = false;
-            log.error("Web3ChannelMsg onDisconnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-        }
-    }
 
     @Bean
-    public BcosSDK getBcosSDK() throws ConfigException {
+    public Stack<BcosSDK> getBcosSDK() throws ConfigException, JniException {
+        Stack<BcosSDK> bcosSDKs = new Stack<>();
+        // pass peers to init sdk
+        BcosSDK bcosSDK = this.buildBcosSDK(this.peers);
+        // check block height
+//        Client groupListClient = this.getRpcWeb3j(bcosSDK);
+//        log.info("====== getBcosSDK groupListClient:{}", JsonUtils.objToString(groupListClient));
+//        List<String> groupList = groupListClient.getGroupList().getResult().getGroupList();
+//        this.getClientMap(bcosSDK, groupList);
+//        Client client = bcosSDK.getClient(groupList.iterator().next());
+//        log.info("====== getBcosSDK groupList:{}", groupList);
+//        log.info("====== blockHeight client:{}", JsonUtils.objToString(client));
+//        BigInteger blockHeight = client.getBlockNumber().getBlockNumber();
+//        log.info("====== getBcosSDK blockHeight:{}", blockHeight);
+//        Constants.chainId = client.getChainId();
+
+        bcosSDKs.push(bcosSDK);
+        log.info("====== getBcosSDK stack bcosSDKs:{}", bcosSDKs);
+
+        return bcosSDKs;
+    }
+
+//
+//    /**
+//     * todo rm this
+//     * @return
+//     * @throws JniException
+//     */
+//    @Bean
+//    public Map<String, Client> getClientMap(BcosSDK bcosSDK, List<String> groupList) {
+//        Map<String, Client> clientMap = new ConcurrentHashMap<>();
+//        log.info("init getClientMap bcosSDK:{},groupList:{}", JsonUtils.objToString(bcosSDK), groupList);
+//        for (String groupId : groupList) {
+//            Client client = null;
+//            try {
+//                client = Client.build(groupId, bcosSDK.getConfig());
+//                log.info("getClientMap client:{}", JsonUtils.objToString(client));
+//            } catch (JniException e) {
+//                log.error("getClientMap build client error:[]", e);
+//            };
+//            log.info("getClientMap client:{}", JsonUtils.objToString(client));
+//            clientMap.put(groupId, client);
+//        }
+//        log.info("finish getClientMap:{}", clientMap.size());
+//        return clientMap;
+//    }
+
+    /**
+     * todo init one-bean and set ConfigOption by api
+     * 启动至少配置证书、一个节点的IP PORT
+     * todo DB保存ip配置，定时刷新
+     * @return
+     * @throws ConfigException
+     */
+    public BcosSDK buildBcosSDK(List<String> newPeers) throws ConfigException, JniException {
         log.info("start init ConfigProperty");
+        log.info("=========getBcosSDK :{}", peers);
         // cert config, encrypt type
         Map<String, Object> cryptoMaterial = new HashMap<>();
         // cert use conf
         cryptoMaterial.put("certPath", certPath);
+        cryptoMaterial.put("useSMCrypto", useSmSsl);
         // user no need set this:cryptoMaterial.put("sslCryptoType", encryptType);
-        log.info("init cert cryptoMaterial:{}, (using conf as cert path)", cryptoMaterial);
+        log.info("init cert cryptoMaterial:{}, (using conf as cert path)", JsonUtils.objToString(cryptoMaterial));
 
         // peers, default one node in front
         Map<String, Object> network = new HashMap<>();
-        List<String> peers = new ArrayList<>();
-        peers.add(ip + ":" + channelPort);
-        network.put("peers", peers);
-        log.info("init node network property :{}", peers);
+        network.put("peers", newPeers);
+        log.info("init node network property :{}", JsonUtils.objToString(newPeers));
 
         // thread pool config
         log.info("init thread pool property");
         Map<String, Object> threadPool = new HashMap<>();
-        threadPool.put("channelProcessorThreadSize", corePoolSize);
-        threadPool.put("receiptProcessorThreadSize", corePoolSize);
-        threadPool.put("maxBlockingQueueSize", queueCapacity);
-        log.info("init thread pool property:{}", threadPool);
+        threadPool.put("threadPoolSize", threadPoolSize);
+        log.info("init thread pool property:{}", JsonUtils.objToString(threadPool));
 
         // init property
         ConfigProperty configProperty = new ConfigProperty();
@@ -115,40 +138,43 @@ public class Web3Config {
         log.info("init configOption from configProperty");
         ConfigOption configOption = new ConfigOption(configProperty);
         // init bcosSDK
-        log.info("init bcos sdk instance, please check sdk.log");
         BcosSDK bcosSDK = new BcosSDK(configOption);
-
-        log.info("init client version");
-        ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
-            .getNodeVersion();
-        Constants.version = version.getVersion();
-        Constants.chainId = version.getChainId();
-
-        Web3ChannelMsg disconnectMsg = new Web3ChannelMsg();
-        bcosSDK.getChannel().addConnectHandler(disconnectMsg);
-        bcosSDK.getChannel().addDisconnectHandler(disconnectMsg);
+        log.info("finish init bcos sdk instance, check sdk.log for detail");
+        try {
+            this.getRpcWeb3j(bcosSDK);
+            this.getClient(bcosSDK);
+        } catch (JniException e) {
+            log.error("getBcosSDK error:[]", e);
+            throw e;
+        }
+//        ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
+//            .getNodeVersion();
+//        Constants.version = version.getVersion();
+//        Constants.chainId = bcosSDK.getChainId();
 
         return bcosSDK;
     }
 
 
     /**
-     * 覆盖EncryptType构造函数
-     * @return
+     * only used to get groupList
+     * @throws JniException
      */
-    @Bean(name = "common")
-    public CryptoSuite getCommonSuite(BcosSDK bcosSDK) {
-        int encryptType = bcosSDK.getGroupManagerService().getCryptoType(ip + ":" + channelPort);
-        log.info("getCommonSuite init encrypt type:{}", encryptType);
-        return new CryptoSuite(encryptType);
-    }
-
     @Bean(name = "rpcClient")
-    public Client getRpcWeb3j(BcosSDK bcosSDK) {
-        // init rpc client(web3j)
-        Client rpcWeb3j = Client.build(bcosSDK.getChannel());
-        log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
+    public Client getRpcWeb3j(BcosSDK bcosSDK) throws JniException {
+
+        Client rpcWeb3j = Client.build(bcosSDK.getConfig());
+        // Client rpcWeb3j = bcosSDK.getClient();
+        log.info("get rpcWeb3j(only support groupList) client:{}", rpcWeb3j);
         return rpcWeb3j;
     }
 
+    @Bean(name = "singleClient")
+    public Client getClient(BcosSDK bcosSDK) {
+
+        Client client = bcosSDK.getClient("group");
+        // Client rpcWeb3j = bcosSDK.getClient();
+        log.info("get client:{}", client);
+        return client;
+    }
 }

@@ -2,78 +2,77 @@ package com.webank.webase.front.util;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
-import org.fisco.bcos.sdk.abi.TypeReference;
-import org.fisco.bcos.sdk.abi.datatypes.Address;
-import org.fisco.bcos.sdk.abi.datatypes.Bool;
-import org.fisco.bcos.sdk.abi.datatypes.DynamicBytes;
-import org.fisco.bcos.sdk.abi.datatypes.Utf8String;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes1;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes10;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes11;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes12;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes13;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes14;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes15;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes16;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes17;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes18;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes19;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes2;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes20;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes21;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes22;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes23;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes24;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes25;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes26;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes27;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes28;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes29;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes3;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes30;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes31;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes4;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes5;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes6;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes7;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes8;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes9;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Int256;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray1;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray10;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray11;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray12;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray128;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray13;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray14;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray15;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray16;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray17;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray18;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray19;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray2;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray20;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray21;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray22;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray23;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray24;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray25;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray26;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray27;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray28;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray29;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray3;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray30;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray31;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray32;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray4;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray5;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray6;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray7;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray8;
-import org.fisco.bcos.sdk.abi.datatypes.generated.StaticArray9;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.sdk.codec.datatypes.Address;
+import org.fisco.bcos.sdk.codec.datatypes.Bool;
+import org.fisco.bcos.sdk.codec.datatypes.DynamicBytes;
+import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
+import org.fisco.bcos.sdk.codec.datatypes.Utf8String;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes1;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes10;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes11;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes12;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes13;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes14;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes15;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes16;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes17;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes18;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes19;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes2;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes20;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes21;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes22;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes23;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes24;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes25;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes26;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes27;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes28;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes29;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes3;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes30;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes31;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes4;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes5;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes6;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes7;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes8;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes9;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Int256;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray1;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray10;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray11;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray12;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray13;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray14;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray15;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray16;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray17;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray18;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray19;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray2;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray20;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray21;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray22;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray23;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray24;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray25;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray26;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray27;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray28;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray29;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray3;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray30;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray31;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray32;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray4;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray5;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray6;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray7;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray8;
+import org.fisco.bcos.sdk.codec.datatypes.generated.StaticArray9;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Uint256;
 
 public class StaticArrayReference {
 
@@ -149,8 +148,8 @@ public class StaticArrayReference {
                 return create31(type, indexed);
             case 32:
                 return create32(type, indexed);
-            case 128:
-                return create128(type, indexed);
+//            case 128: // removed in 3.0.0
+//                return create128(type, indexed);
 
             default:
                 throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
@@ -2941,91 +2940,91 @@ public class StaticArrayReference {
                         String.format("type:%s[32] static array unsupported encoding", type));
         }
     }
-
-    private static TypeReference<?> create128(String type, boolean indexed) throws FrontException {
-
-        if (AbiTypes.invalidInt(type)) {
-            return new TypeReference<StaticArray128<Int256>>(indexed) {};
-        } else if (AbiTypes.invalidUint(type)) {
-            return new TypeReference<StaticArray128<Uint256>>(indexed) {};
-        }
-
-        switch (type) {
-            case "address":
-                return new TypeReference<StaticArray128<Address>>(indexed) {};
-            case "bool":
-                return new TypeReference<StaticArray128<Bool>>(indexed) {};
-            case "string":
-                return new TypeReference<StaticArray128<Utf8String>>(indexed) {};
-            case "bytes":
-                return new TypeReference<StaticArray128<DynamicBytes>>(indexed) {};
-            case "bytes1":
-                return new TypeReference<StaticArray128<Bytes1>>(indexed) {};
-            case "bytes2":
-                return new TypeReference<StaticArray128<Bytes2>>(indexed) {};
-            case "bytes3":
-                return new TypeReference<StaticArray128<Bytes3>>(indexed) {};
-            case "bytes4":
-                return new TypeReference<StaticArray128<Bytes4>>(indexed) {};
-            case "bytes5":
-                return new TypeReference<StaticArray128<Bytes5>>(indexed) {};
-            case "bytes6":
-                return new TypeReference<StaticArray128<Bytes6>>(indexed) {};
-            case "bytes7":
-                return new TypeReference<StaticArray128<Bytes7>>(indexed) {};
-            case "bytes8":
-                return new TypeReference<StaticArray128<Bytes8>>(indexed) {};
-            case "bytes9":
-                return new TypeReference<StaticArray128<Bytes9>>(indexed) {};
-            case "bytes10":
-                return new TypeReference<StaticArray128<Bytes10>>(indexed) {};
-            case "bytes11":
-                return new TypeReference<StaticArray128<Bytes11>>(indexed) {};
-            case "bytes12":
-                return new TypeReference<StaticArray128<Bytes12>>(indexed) {};
-            case "bytes13":
-                return new TypeReference<StaticArray128<Bytes13>>(indexed) {};
-            case "bytes14":
-                return new TypeReference<StaticArray128<Bytes14>>(indexed) {};
-            case "bytes15":
-                return new TypeReference<StaticArray128<Bytes15>>(indexed) {};
-            case "bytes16":
-                return new TypeReference<StaticArray128<Bytes16>>(indexed) {};
-            case "bytes17":
-                return new TypeReference<StaticArray128<Bytes17>>(indexed) {};
-            case "bytes18":
-                return new TypeReference<StaticArray128<Bytes18>>(indexed) {};
-            case "bytes19":
-                return new TypeReference<StaticArray128<Bytes19>>(indexed) {};
-            case "bytes20":
-                return new TypeReference<StaticArray128<Bytes20>>(indexed) {};
-            case "bytes21":
-                return new TypeReference<StaticArray128<Bytes21>>(indexed) {};
-            case "bytes22":
-                return new TypeReference<StaticArray128<Bytes22>>(indexed) {};
-            case "bytes23":
-                return new TypeReference<StaticArray128<Bytes23>>(indexed) {};
-            case "bytes24":
-                return new TypeReference<StaticArray128<Bytes24>>(indexed) {};
-            case "bytes25":
-                return new TypeReference<StaticArray128<Bytes25>>(indexed) {};
-            case "bytes26":
-                return new TypeReference<StaticArray128<Bytes26>>(indexed) {};
-            case "bytes27":
-                return new TypeReference<StaticArray128<Bytes27>>(indexed) {};
-            case "bytes28":
-                return new TypeReference<StaticArray128<Bytes28>>(indexed) {};
-            case "bytes29":
-                return new TypeReference<StaticArray128<Bytes29>>(indexed) {};
-            case "bytes30":
-                return new TypeReference<StaticArray128<Bytes30>>(indexed) {};
-            case "bytes31":
-                return new TypeReference<StaticArray128<Bytes31>>(indexed) {};
-            case "bytes32":
-                return new TypeReference<StaticArray128<Bytes32>>(indexed) {};
-            default:
-                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
-                        String.format("type:%s[128] static array unsupported encoding", type));
-        }
-    }
+//
+//    private static TypeReference<?> create128(String type, boolean indexed) throws FrontException {
+//
+//        if (AbiTypes.invalidInt(type)) {
+//            return new TypeReference<StaticArray128<Int256>>(indexed) {};
+//        } else if (AbiTypes.invalidUint(type)) {
+//            return new TypeReference<StaticArray128<Uint256>>(indexed) {};
+//        }
+//
+//        switch (type) {
+//            case "address":
+//                return new TypeReference<StaticArray128<Address>>(indexed) {};
+//            case "bool":
+//                return new TypeReference<StaticArray128<Bool>>(indexed) {};
+//            case "string":
+//                return new TypeReference<StaticArray128<Utf8String>>(indexed) {};
+//            case "bytes":
+//                return new TypeReference<StaticArray128<DynamicBytes>>(indexed) {};
+//            case "bytes1":
+//                return new TypeReference<StaticArray128<Bytes1>>(indexed) {};
+//            case "bytes2":
+//                return new TypeReference<StaticArray128<Bytes2>>(indexed) {};
+//            case "bytes3":
+//                return new TypeReference<StaticArray128<Bytes3>>(indexed) {};
+//            case "bytes4":
+//                return new TypeReference<StaticArray128<Bytes4>>(indexed) {};
+//            case "bytes5":
+//                return new TypeReference<StaticArray128<Bytes5>>(indexed) {};
+//            case "bytes6":
+//                return new TypeReference<StaticArray128<Bytes6>>(indexed) {};
+//            case "bytes7":
+//                return new TypeReference<StaticArray128<Bytes7>>(indexed) {};
+//            case "bytes8":
+//                return new TypeReference<StaticArray128<Bytes8>>(indexed) {};
+//            case "bytes9":
+//                return new TypeReference<StaticArray128<Bytes9>>(indexed) {};
+//            case "bytes10":
+//                return new TypeReference<StaticArray128<Bytes10>>(indexed) {};
+//            case "bytes11":
+//                return new TypeReference<StaticArray128<Bytes11>>(indexed) {};
+//            case "bytes12":
+//                return new TypeReference<StaticArray128<Bytes12>>(indexed) {};
+//            case "bytes13":
+//                return new TypeReference<StaticArray128<Bytes13>>(indexed) {};
+//            case "bytes14":
+//                return new TypeReference<StaticArray128<Bytes14>>(indexed) {};
+//            case "bytes15":
+//                return new TypeReference<StaticArray128<Bytes15>>(indexed) {};
+//            case "bytes16":
+//                return new TypeReference<StaticArray128<Bytes16>>(indexed) {};
+//            case "bytes17":
+//                return new TypeReference<StaticArray128<Bytes17>>(indexed) {};
+//            case "bytes18":
+//                return new TypeReference<StaticArray128<Bytes18>>(indexed) {};
+//            case "bytes19":
+//                return new TypeReference<StaticArray128<Bytes19>>(indexed) {};
+//            case "bytes20":
+//                return new TypeReference<StaticArray128<Bytes20>>(indexed) {};
+//            case "bytes21":
+//                return new TypeReference<StaticArray128<Bytes21>>(indexed) {};
+//            case "bytes22":
+//                return new TypeReference<StaticArray128<Bytes22>>(indexed) {};
+//            case "bytes23":
+//                return new TypeReference<StaticArray128<Bytes23>>(indexed) {};
+//            case "bytes24":
+//                return new TypeReference<StaticArray128<Bytes24>>(indexed) {};
+//            case "bytes25":
+//                return new TypeReference<StaticArray128<Bytes25>>(indexed) {};
+//            case "bytes26":
+//                return new TypeReference<StaticArray128<Bytes26>>(indexed) {};
+//            case "bytes27":
+//                return new TypeReference<StaticArray128<Bytes27>>(indexed) {};
+//            case "bytes28":
+//                return new TypeReference<StaticArray128<Bytes28>>(indexed) {};
+//            case "bytes29":
+//                return new TypeReference<StaticArray128<Bytes29>>(indexed) {};
+//            case "bytes30":
+//                return new TypeReference<StaticArray128<Bytes30>>(indexed) {};
+//            case "bytes31":
+//                return new TypeReference<StaticArray128<Bytes31>>(indexed) {};
+//            case "bytes32":
+//                return new TypeReference<StaticArray128<Bytes32>>(indexed) {};
+//            default:
+//                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
+//                        String.format("type:%s[128] static array unsupported encoding", type));
+//        }
+//    }
 }

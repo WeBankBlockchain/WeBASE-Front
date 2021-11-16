@@ -26,7 +26,7 @@ public class CnsHandle {
 
     // defaultValue = "1"
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
-    private int groupId;
+    private String groupId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String signUserId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_NAME_IS_EMPTY)

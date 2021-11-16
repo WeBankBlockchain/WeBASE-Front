@@ -21,7 +21,7 @@ import lombok.Data;
 @Data
 public class ReqAccountStatus {
     @NotNull
-    private Integer groupId;
+    private String groupId;
     @NotNull
     private List<String> addressList;
 }

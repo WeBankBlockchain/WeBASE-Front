@@ -39,7 +39,7 @@ public class EventLogPushMessage implements MQObject {
      */
     private Integer eventType;
 
-    private Integer groupId;
+    private String groupId;
 
     /**
      * related with

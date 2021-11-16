@@ -18,6 +18,7 @@ package com.webank.webase.front.keystore.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.NotBlank;
 
 @Data
 @NoArgsConstructor
@@ -28,4 +29,6 @@ public class ReqImportWithSign {
      * encoded in base64 format
      */
     private String privateKey;
+    @NotBlank
+    private String groupId;
 }

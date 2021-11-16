@@ -20,7 +20,7 @@ import lombok.Data;
 @Data
 public class RspContractNoAbi {
     private Long id;
-    private Integer groupId;
+    private String groupId;
     private String contractAddress;
     private String description;
     private LocalDateTime createTime;

@@ -36,7 +36,7 @@ public class AbiInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long abiId;
-    private Integer groupId;
+    private String groupId;
     private String contractName;
     private String contractAddress;
     @Column(columnDefinition = "mediumtext")

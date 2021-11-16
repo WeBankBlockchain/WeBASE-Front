@@ -36,7 +36,7 @@
 //
 //import java.math.BigInteger;
 //import org.bouncycastle.util.encoders.Hex;
-//import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
+//import org.fisco.bcos.sdk.codec.datatypes.generated.Uint256;
 //import org.fisco.bcos.web3j.solidity.SolidityType;
 //import org.junit.Test;
 //

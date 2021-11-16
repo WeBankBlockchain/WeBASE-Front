@@ -29,7 +29,7 @@ public class TestBase {
   protected static CryptoSuite cryptoSuite;
   protected static CryptoKeyPair cryptoKeyPair;
   protected static BigInteger chainId = new BigInteger("1");
-  protected static Integer groupId = 1;
+  protected static String groupId = "1";
 
   protected static String address;
   protected static BigInteger blockNumber;
@@ -42,7 +42,7 @@ public class TestBase {
     bcosSDK =  BcosSDK.build(configFile);
     web3j = bcosSDK.getClient(groupId);
     cryptoSuite = web3j.getCryptoSuite();
-    cryptoKeyPair = web3j.getCryptoSuite().createKeyPair("71f1479d9051e8d6b141a3b3ef9c01a7756da823a0af280c6bf62d18ee0cc978");
+    cryptoKeyPair = web3j.getCryptoSuite().getKeyPairFactory().createKeyPair("71f1479d9051e8d6b141a3b3ef9c01a7756da823a0af280c6bf62d18ee0cc978");
 
     //todo deploy ok.sol
     // blockHash = web3j.getBlockHashByNumber(blockNumber).getBlockHashByNumber();

@@ -42,7 +42,7 @@ public class BlockPushMessage implements MQObject {
     /**
      * group id
      */
-    private Integer groupId;
+    private String groupId;
 
     /**
      * block height

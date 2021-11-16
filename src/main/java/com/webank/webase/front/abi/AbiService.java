@@ -51,7 +51,7 @@ public class AbiService {
     Web3ApiService web3ApiService;
 
 
-    public List<AbiInfo> getListByGroupId(Integer groupId, Pageable pageable) {
+    public List<AbiInfo> getListByGroupId(String groupId, Pageable pageable) {
         List<AbiInfo> abiList = abiRepository.findByGroupId(groupId, pageable);
         return abiList;
     }
@@ -59,7 +59,7 @@ public class AbiService {
     /**
      * get all
      */
-    public List<RspContractNoAbi> getListByGroupIdNoAbi(Integer groupId) {
+    public List<RspContractNoAbi> getListByGroupIdNoAbi(String groupId) {
         List<AbiInfo> abiList = abiRepository.findByGroupId(groupId);
         List<RspContractNoAbi> resultList = new ArrayList<>();
         abiList.forEach(c -> {
@@ -81,7 +81,7 @@ public class AbiService {
 
     @Transactional
     public void insertAbiInfo(ReqImportAbi param) {
-        int groupId = param.getGroupId();
+        String groupId = param.getGroupId();
         String contractName = param.getContractName();
         String contractAddress = param.getContractAddress();
         String contractAbiStr;
@@ -141,7 +141,7 @@ public class AbiService {
         return abiInfo;
     }
 
-    public AbiInfo getAbiByGroupIdAndAddress(int groupId, String contractAddress) {
+    public AbiInfo getAbiByGroupIdAndAddress(String groupId, String contractAddress) {
         AbiInfo abiInfo = abiRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
         if (Objects.isNull(abiInfo)) {
             throw new FrontException(ConstantCode.ABI_INFO_NOT_EXISTS);
@@ -162,7 +162,7 @@ public class AbiService {
      * @param contractName
      * @param address
      */
-    private void checkAbiNotExist(int groupId, String contractName, String address) {
+    private void checkAbiNotExist(String groupId, String contractName, String address) {
         AbiInfo checkAbiName = abiRepository.findByGroupIdAndContractName(groupId, contractName);
         if (Objects.nonNull(checkAbiName)) {
             throw new FrontException(ConstantCode.CONTRACT_NAME_REPEAT);
@@ -177,7 +177,7 @@ public class AbiService {
      * check address is valid.
      * @return address's runtime bin
      */
-    private String getAddressRuntimeBin(int groupId, String contractAddress) {
+    private String getAddressRuntimeBin(String groupId, String contractAddress) {
         if (StringUtils.isBlank(contractAddress)) {
             log.error("fail getAddressRuntimeBin. contractAddress is empty");
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);

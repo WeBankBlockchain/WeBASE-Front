@@ -19,7 +19,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -52,7 +52,7 @@ public class ReqDeploy {
     private String contractBin;
     private String contractSource;
     private String contractPath;
-    private int groupId;
+    private String groupId;
     private Long contractId;
     private List<Object> funcParam = new ArrayList<>();
     @Deprecated

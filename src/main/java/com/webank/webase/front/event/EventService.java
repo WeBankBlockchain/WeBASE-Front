@@ -16,7 +16,6 @@
 
 package com.webank.webase.front.event;
 
-import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
 import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_BLOCK;
 import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_EVENT;
@@ -30,13 +29,11 @@ import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.ContractService;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.event.callback.ContractEventCallback;
-import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.event.callback.SyncEventLogCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.DecodedEventLog;
 import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
-import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.event.entity.RspContractInfo;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
@@ -46,6 +43,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -53,14 +51,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.abi.ABICodec;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.codec.ABICodec;
 import org.fisco.bcos.sdk.eventsub.EventLogParams;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
-import org.fisco.bcos.sdk.model.EventLog;
-import org.fisco.bcos.sdk.service.GroupManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,10 +85,7 @@ public class EventService {
     @Autowired
     private AbiService abiService;
     @Autowired
-    private BcosSDK bcosSDK;
-    @Autowired
-    @Qualifier("common")
-    private CryptoSuite cryptoSuite;
+    private Stack<BcosSDK> bcosSDKs;
     private static final String TYPE_CONTRACT = "contract";
     private static final String TYPE_ABI_INFO = "abi";
 
@@ -103,7 +94,7 @@ public class EventService {
      * register NewBlockEventCallBack
      */
     @Transactional
-    public List<NewBlockEventInfo> registerNewBlockEvent(String appId, int groupId,
+    public List<NewBlockEventInfo> registerNewBlockEvent(String appId, String groupId,
                                                          String exchangeName, String queueName) {
         log.info("start registerNewBlockEvent appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
@@ -115,29 +106,29 @@ public class EventService {
     }
 
     @Transactional
-    public void handleRegNewBlock(String appId, int groupId, String exchangeName, String queueName,
+    public void handleRegNewBlock(String appId, String groupId, String exchangeName, String queueName,
         String routingKey) {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        // to register or unregister
-        GroupManagerService groupManagerService = bcosSDK.getGroupManagerService();
-        String registerId = null;
-        try {
-            log.info("registerNewBlockEvent saved to db successfully");
-            NewBlockEventCallback callback = new NewBlockEventCallback(mqPublisher, groupId,
-                new PublisherHelper(groupId, exchangeName, routingKey));
-            registerId = groupManagerService.registerBlockNotifyCallback(callback);
-            // save to db 通过db来保证不重复注册
-            String infoId = addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
-                appId, groupId, exchangeName, queueName, routingKey, registerId);
-            // record groupId, exchange, routingKey for all block notify
-            BLOCK_ROUTING_KEY_MAP.put(registerId, callback);
-            log.info("end registerNewBlockEvent, infoId:{}, registerId:{}", infoId, registerId);
-        } catch (Exception e) {
-            log.error("register newBlockEvent error:[]", e);
-            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
-            groupManagerService.eraseBlockNotifyCallback(registerId);
-            throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
-        }
+        // to register or unregister todo register block notify
+//        GroupServiceImpl groupManagerService = bcosSDK.getGroupManagerService();
+//        String registerId = null;
+//        try {
+//            log.info("registerNewBlockEvent saved to db successfully");
+//            NewBlockEventCallback callback = new NewBlockEventCallback(mqPublisher, groupId,
+//                new PublisherHelper(groupId, exchangeName, routingKey));
+//            registerId = groupManagerService.registerBlockNotifyCallback(callback);
+//            // save to db 通过db来保证不重复注册
+//            String infoId = addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
+//                appId, groupId, exchangeName, queueName, routingKey, registerId);
+//            // record groupId, exchange, routingKey for all block notify
+//            BLOCK_ROUTING_KEY_MAP.put(registerId, callback);
+//            log.info("end registerNewBlockEvent, infoId:{}, registerId:{}", infoId, registerId);
+//        } catch (Exception e) {
+//            log.error("register newBlockEvent error:[]", e);
+//            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+//            groupManagerService.eraseBlockNotifyCallback(registerId);
+//            throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
+//        }
     }
 
 
@@ -150,7 +141,7 @@ public class EventService {
      * @param topicList single one
      */
     @Transactional
-    public List<ContractEventInfo> registerContractEvent(String appId, int groupId, String exchangeName, String queueName,
+    public List<ContractEventInfo> registerContractEvent(String appId, String groupId, String exchangeName, String queueName,
                                                          String abi, String fromBlock, String toBlock,
                                                          String contractAddress, List<String> topicList) {
         log.info("start registerContractEvent appId:{},groupId:{},contractAddress:{},params:{},exchangeName:{},queueName:{}",
@@ -164,20 +155,21 @@ public class EventService {
     }
 
     @Transactional
-    public void handleRegContract(String appId, int groupId, String exchangeName, String queueName, String routingKey,
+    public void handleRegContract(String appId, String groupId, String exchangeName, String queueName, String routingKey,
         String abi, String fromBlock, String toBlock, String contractAddress, List<String> topicList) {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // to register or unregister
-        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
+//        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId); todo init event suscribe
+        EventSubscribe eventSubscribe = bcosSDKs.peek().getEventSubscribe(String.valueOf(groupId));
         String registerId = null;
         ContractEventCallback callback = null;
         try {
             log.info("registerContractEvent saved to db successfully");
             // init EventLogUserParams for register
             EventLogParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
-                toBlock, contractAddress, topicList, cryptoSuite);
+                toBlock, contractAddress, topicList, web3ApiService.getWeb3j(groupId).getCryptoSuite());
             callback = new ContractEventCallback(mqPublisher, exchangeName, routingKey, groupId, appId,
-                new ABICodec(cryptoSuite), abi, topicList);
+                new ABICodec(web3ApiService.getCryptoSuite(groupId), false), abi, topicList);
             registerId = eventSubscribe.subscribeEvent(params, callback);
             // save to db first
             String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
@@ -195,7 +187,7 @@ public class EventService {
     }
 
     @Transactional
-    public String addNewBlockEventInfo(int eventType, String appId, int groupId,
+    public String addNewBlockEventInfo(int eventType, String appId, String groupId,
         String exchangeName, String queueName, String routingKey, String registerId) {
         checkNewBlockEventExist(appId, exchangeName, queueName);
         NewBlockEventInfo registerInfo = new NewBlockEventInfo();
@@ -222,7 +214,7 @@ public class EventService {
     }
 
     @Transactional
-    public String addContractEventInfo(int eventType, String appId, int groupId,
+    public String addContractEventInfo(int eventType, String appId, String groupId,
         String exchangeName, String queueName, String routingKey, String abi,
         String fromBlock, String toBlock, String contractAddress, List<String> topicList,
         String registerId) throws FrontException {
@@ -265,14 +257,14 @@ public class EventService {
      * @param groupId
      * @param page 分页与按时间降序
      */
-    public List<NewBlockEventInfo> getNewBlockInfoList(int groupId, Pageable page) {
+    public List<NewBlockEventInfo> getNewBlockInfoList(String groupId, Pageable page) {
         return newBlockEventInfoRepository.findByGroupId(groupId, page);
     }
 
     /**
      * full list
      */
-    public List<NewBlockEventInfo> getNewBlockInfoList(int groupId) {
+    public List<NewBlockEventInfo> getNewBlockInfoList(String groupId) {
         return newBlockEventInfoRepository.findByGroupId(groupId);
     }
 
@@ -281,7 +273,7 @@ public class EventService {
      * @param groupId
      * @param appId
      */
-    public List<NewBlockEventInfo> getNewBlockInfo(int groupId, String appId) {
+    public List<NewBlockEventInfo> getNewBlockInfo(String groupId, String appId) {
         return newBlockEventInfoRepository.findByGroupIdAndAppId(groupId, appId);
     }
 
@@ -290,7 +282,7 @@ public class EventService {
      * @param infoId
      * @return left info
      */
-    public List<NewBlockEventInfo> unregisterNewBlock(String infoId, String appId, int groupId, String exchangeName,
+    public List<NewBlockEventInfo> unregisterNewBlock(String infoId, String appId, String groupId, String exchangeName,
                                                       String queueName) {
         log.debug("unregisterNewBlock appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
@@ -298,16 +290,16 @@ public class EventService {
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-        GroupManagerService groupManagerService = bcosSDK.getGroupManagerService();
-        try {
-            String registerId = eventInfo.getRegisterId();
-            groupManagerService.eraseBlockNotifyCallback(registerId);
-            BLOCK_ROUTING_KEY_MAP.remove(registerId);
-            mqService.unbindQueueFromExchange(exchangeName, queueName, eventInfo.getRoutingKey());
-        } catch (Exception e) {
-            log.error("unregisterNewBlock error: ", e);
-            throw new FrontException(ConstantCode.UNREGISTER_FAILED_ERROR);
-        }
+//        GroupServiceImpl groupManagerService = bcosSDK.getGroupManagerService(); todo 取消注册出块
+//        try {
+//            String registerId = eventInfo.getRegisterId();
+//            groupManagerService.eraseBlockNotifyCallback(registerId);
+//            BLOCK_ROUTING_KEY_MAP.remove(registerId);
+//            mqService.unbindQueueFromExchange(exchangeName, queueName, eventInfo.getRoutingKey());
+//        } catch (Exception e) {
+//            log.error("unregisterNewBlock error: ", e);
+//            throw new FrontException(ConstantCode.UNREGISTER_FAILED_ERROR);
+//        }
         // remove from db
         newBlockEventInfoRepository.delete(infoId);
         return newBlockEventInfoRepository.findByAppId(appId);
@@ -318,18 +310,18 @@ public class EventService {
      * @param page 分页与按时间降序
      * @return
      */
-    public List<ContractEventInfo> getContractEventInfoList(int groupId, Pageable page) {
+    public List<ContractEventInfo> getContractEventInfoList(String groupId, Pageable page) {
         return contractEventInfoRepository.findByGroupId(groupId, page);
     }
 
     /**
      * full list
      */
-    public List<ContractEventInfo> getContractEventInfoList(int groupId) {
+    public List<ContractEventInfo> getContractEventInfoList(String groupId) {
         return contractEventInfoRepository.findByGroupId(groupId);
     }
 
-    public List<ContractEventInfo> getContractEventInfo(int groupId, String appId) {
+    public List<ContractEventInfo> getContractEventInfo(String groupId, String appId) {
         return contractEventInfoRepository.findByGroupIdAndAppId(groupId, appId);
     }
 
@@ -342,7 +334,7 @@ public class EventService {
      * @param queueName
      * @return left info
      */
-    public List<ContractEventInfo> unregisterContractEvent(String infoId, String appId, int groupId, String exchangeName,
+    public List<ContractEventInfo> unregisterContractEvent(String infoId, String appId, String groupId, String exchangeName,
                                                       String queueName) {
         log.debug("unregisterContractEvent infoId:{},appId:{},groupId:{},exchangeName:{},queueName:{}",
                 infoId, appId, groupId, exchangeName, queueName);
@@ -350,7 +342,8 @@ public class EventService {
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
+        EventSubscribe eventSubscribe = bcosSDKs.peek().getEventSubscribe(String.valueOf(groupId));
+
         try {
             String registerId = eventInfo.getRegisterId();
             // set callback's id empty to stop callback pushing message
@@ -374,7 +367,7 @@ public class EventService {
      * sync get history event
      * cannot filter by indexed param, only filter by event name and contractAddress
      */
-    public List<DecodedEventLog> getContractEventLog(int groupId, String contractAddress, String abi,
+    public List<DecodedEventLog> getContractEventLog(String groupId, String contractAddress, String abi,
         Integer fromBlock, Integer toBlock, EventTopicParam eventTopicParam) {
         log.info("start getContractEventLog groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventTopicParam:{}",
             groupId, contractAddress, fromBlock, toBlock, eventTopicParam);
@@ -386,14 +379,14 @@ public class EventService {
         }
 
         EventLogParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
-            contractAddress, eventTopicParam, cryptoSuite);
+            contractAddress, eventTopicParam, web3ApiService.getCryptoSuite(groupId));
         log.info("getContractEventLog eventParam:{}", eventParam);
         // final CompletableFuture<List<EventLog>> callbackFuture = new CompletableFuture<>();
         final CompletableFuture<List<DecodedEventLog>> callbackFuture = new CompletableFuture<>();
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
-        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
+        EventSubscribe eventSubscribe = bcosSDKs.peek().getEventSubscribe(String.valueOf(groupId));
         String registerId = eventSubscribe.subscribeEvent(eventParam, callback);
 
         List<DecodedEventLog> resultList;
@@ -412,7 +405,7 @@ public class EventService {
         return resultList;
     }
 
-    public Object getAbiByAddressFromBoth(int groupId, String type, String contractAddress) {
+    public Object getAbiByAddressFromBoth(String groupId, String type, String contractAddress) {
         if (TYPE_CONTRACT.equals(type)) {
             return contractService.findByGroupIdAndAddress(groupId, contractAddress);
         } else if (TYPE_ABI_INFO.equals(type)) {
@@ -428,7 +421,7 @@ public class EventService {
      * @return
      * @throws IOException
      */
-    public List<RspContractInfo> getContractInfoListFromBoth(int groupId) throws IOException {
+    public List<RspContractInfo> getContractInfoListFromBoth(String groupId) throws IOException {
         // get contract list
         List<RspContractNoAbi> contractList = contractService.findAllContractNoAbi(groupId, ContractStatus.DEPLOYED.getValue());
         // get abi list

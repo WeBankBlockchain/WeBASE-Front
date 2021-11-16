@@ -47,7 +47,7 @@ public class ReqContractEventRegister {
      * group id
      */
     @NotNull(message = "groupId cannot be null")
-    private Integer groupId;
+    private String groupId;
 
     /**
      * MQ info: exchange name

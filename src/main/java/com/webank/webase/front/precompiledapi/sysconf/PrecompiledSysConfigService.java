@@ -41,7 +41,7 @@ public class PrecompiledSysConfigService {
      * System config related 启动项目时，检查是否已有table 否则Create table sysconfig(groupId, from key, value)
      */
     public Object setSysConfigValueByKey(SystemConfigHandle systemConfigHandle) {
-        int groupId = systemConfigHandle.getGroupId();
+        String groupId = systemConfigHandle.getGroupId();
         String signUserId = systemConfigHandle.getSignUserId();
         String key = systemConfigHandle.getConfigKey();
         String value = systemConfigHandle.getConfigValue();
@@ -64,7 +64,7 @@ public class PrecompiledSysConfigService {
         return result;
     }
 
-    public List<ResSystemConfig> querySysConfigByGroupId(int groupId) {
+    public List<ResSystemConfig> querySysConfigByGroupId(String groupId) {
 
         List<ResSystemConfig> list = getConfigList(groupId);
 
@@ -78,25 +78,25 @@ public class PrecompiledSysConfigService {
      * @return
      * @throws IOException
      */
-    private List<ResSystemConfig> getConfigList(int groupId) {
+    private List<ResSystemConfig> getConfigList(String groupId) {
         List<ResSystemConfig> list = new ArrayList<>();
 
         String txCountLimit = web3ApiService.getWeb3j(groupId)
-                .getSystemConfigByKey(PrecompiledUtils.TxCountLimit).getSystemConfig();
+                .getSystemConfigByKey(PrecompiledUtils.TxCountLimit).getSystemConfig().getValue();
         ResSystemConfig systemConfigCount = new ResSystemConfig();
         systemConfigCount.setConfigKey(PrecompiledUtils.TxCountLimit);
         systemConfigCount.setConfigValue(txCountLimit);
         systemConfigCount.setGroupId(groupId);
 
         String txGasLimit = web3ApiService.getWeb3j(groupId)
-                .getSystemConfigByKey(PrecompiledUtils.TxGasLimit).getSystemConfig();
+                .getSystemConfigByKey(PrecompiledUtils.TxGasLimit).getSystemConfig().getValue();
         ResSystemConfig systemConfigGas = new ResSystemConfig();
         systemConfigGas.setConfigKey(PrecompiledUtils.TxGasLimit);
         systemConfigGas.setConfigValue(txGasLimit);
         systemConfigGas.setGroupId(groupId);
 
         String consensusTimeout = web3ApiService.getWeb3j(groupId)
-                .getSystemConfigByKey(PrecompiledUtils.ConsensusTimeout).getSystemConfig();
+                .getSystemConfigByKey(PrecompiledUtils.ConsensusTimeout).getSystemConfig().getValue();
         ResSystemConfig systemConfigTimeout = new ResSystemConfig();
         systemConfigTimeout.setConfigKey(PrecompiledUtils.ConsensusTimeout);
         systemConfigTimeout.setConfigValue(consensusTimeout);
@@ -108,9 +108,9 @@ public class PrecompiledSysConfigService {
         return list;
     }
 
-    public String getSysConfigByKey(int groupId, String key) {
+    public String getSysConfigByKey(String groupId, String key) {
         // 校验
-        String result = web3ApiService.getWeb3j(groupId).getSystemConfigByKey(key).getSystemConfig();
+        String result = web3ApiService.getWeb3j(groupId).getSystemConfigByKey(key).getSystemConfig().getValue();
         return result;
 
     }
