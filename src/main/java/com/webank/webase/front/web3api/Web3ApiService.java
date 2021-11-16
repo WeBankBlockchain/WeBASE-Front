@@ -32,12 +32,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Stack;
-import java.util.Vector;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.BcosSDKException;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
@@ -53,7 +51,7 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -68,9 +66,15 @@ public class Web3ApiService {
     @Autowired
     private Stack<BcosSDK> bcosSDKs;
     @Autowired
+    @Qualifier("rpcClient")
     private Client rpcWeb3j;
     @Autowired
+    @Qualifier("singleClient")
+    private Client singleClient;
+    @Autowired
     private Web3Config web3ConfigConstants;
+//    @Autowired
+//    private Map<String, Client> clientMap;
 
     private static Map<String, List<NodeStatusInfo>> nodeStatusMap = new HashMap<>();
     private static final Long CHECK_NODE_WAIT_MIN_MILLIS = 5000L;
@@ -214,48 +218,6 @@ public class Web3ApiService {
         return txCountResult;
     }
 
-    /**
-     * getTransByBlockHashAndIndex.
-     *
-     * @param blockHash blockHash
-     * @param transactionIndex index
-     */
-//    public JsonTransactionResponse getTransByBlockHashAndIndex(String groupId, String blockHash,
-//                                                   BigInteger transactionIndex) {
-//
-//        JsonTransactionResponse transaction = null;
-//        Optional<JsonTransactionResponse> opt = getWeb3j(groupId)
-//                .getTransactionByBlockHashAndIndex(blockHash, transactionIndex)
-//                .getTransaction();
-//        if (opt.isPresent()) {
-//            transaction = opt.get();
-//        }
-//        CommonUtils.processTransHexNumber(transaction);
-//        return transaction;
-//    }
-
-    /**
-     * getTransByBlockNumberAndIndex.
-     *
-     * @param blockNumber blockNumber
-     */
-//    public JsonTransactionResponse getTransByBlockNumberAndIndex(String groupId, BigInteger blockNumber,
-//                                                     BigInteger transactionIndex) {
-//        JsonTransactionResponse transaction = null;
-//        if (blockNumberCheck(groupId, blockNumber)) {
-//            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
-//        }
-//        Optional<JsonTransactionResponse> opt =
-//                getWeb3j(groupId)
-//                        .getTransactionByBlockNumberAndIndex(blockNumber, transactionIndex)
-//                        .getTransaction();
-//        if (opt.isPresent()) {
-//            transaction = opt.get();
-//        }
-//        CommonUtils.processTransHexNumber(transaction);
-//        return transaction;
-//    }
-
     private boolean blockNumberCheck(String groupId, BigInteger blockNumber) {
         BigInteger currentNumber = getWeb3j(groupId).getBlockNumber().getBlockNumber();
         log.debug("**** currentNumber:{}", currentNumber);
@@ -265,22 +227,25 @@ public class Web3ApiService {
 
 
     /**
-     * nodeHeartBeat.
+     * nodeHeartBeat. todo
      */
 //    public List<NodeStatusInfo> getNodeStatusList(String groupId) {
 //        log.info("start getNodeStatusList. groupId:{}", groupId);
 //        try {
 //            List<NodeStatusInfo> statusList = new ArrayList<>();
-//            SyncStatusInfo syncStatusInfo = this.getSyncStatus(groupId);
 //            // include observer and sealer, exclude removed nodes
-//            List<String> nodeListInGroup = syncStatusInfo.getPeers().stream()
-//                .map(PeersInfo::getNodeId)
-//                .collect(Collectors.toList());
-//            List<String> observerList = getObserverList(groupId);
+//            List<String> sealerList = this.getSealerStrList(groupId);
+//            List<String> observerList = this.getObserverList(groupId);
+//            List<String> nodeListInGroup = new ArrayList<>();
+//            nodeListInGroup.addAll(sealerList);
+//            nodeListInGroup.addAll(observerList);
 //            if (nodeListInGroup.isEmpty()) {
-//                log.info("end getNodeStatusList. nodeListInGroup is empty");
+//                log.warn("end getNodeStatusList. nodeListInGroup is empty");
 //                return Collections.emptyList();
 //            }
+//
+//            // get local node
+//            SyncStatusInfo syncStatusInfo = this.getSyncStatus(groupId);
 //            for (String peer : nodeListInGroup) {
 //                int nodeType = NodeTypes.SEALER.getValue();
 //                // check nodeType if observer or sealer
@@ -290,6 +255,7 @@ public class Web3ApiService {
 //                        .map(c -> NodeTypes.OBSERVER.getValue()).findFirst()
 //                        .orElse(NodeTypes.SEALER.getValue());
 //                }
+//                // front's node block height
 //                long blockNumberOnChain = getBlockNumberOfNodeOnChain(syncStatusInfo, peer);
 //                // check timeout
 //                // check syncing
@@ -404,7 +370,7 @@ public class Web3ApiService {
      */
     public List<String> getGroupList() {
         log.debug("getGroupList. ");
-        List<String> groupIdList = getWeb3j()
+        List<String> groupIdList = rpcWeb3j
             .getGroupList().getResult()
             .getGroupList();
         return groupIdList;
@@ -447,12 +413,12 @@ public class Web3ApiService {
     public String getSystemConfigByKey(String groupId, String key) {
         return getWeb3j(groupId)
                 .getSystemConfigByKey(key)
-                .getSystemConfig().getValue(); // todo
+                .getSystemConfig().getValue();
     }
 
     /**
-     * get node config info
-     * @return todo
+     * get node config info todo
+     * @return
      */
 //    public Object getNodeConfig() {
 //        return JsonUtils.toJavaObject(nodeConfig.toString(), Object.class);
@@ -478,7 +444,7 @@ public class Web3ApiService {
     }
 
     /**
-     * search By Criteria todo add search
+     * search By Criteria
      */
     public Object searchByCriteria(String groupId, String input) {
         if (StringUtils.isBlank(input)) {
@@ -518,17 +484,17 @@ public class Web3ApiService {
      * get first web3j in web3jMap
      * @return
      */
-    public Client getWeb3j() {
-        List<String> groupIdList = rpcWeb3j.getGroupList().getResult().getGroupList(); //1
-        if (groupIdList.isEmpty()) {
-            log.error("Node's groupList empty! please check your node status");
-            // get default web3j of integer max value
-            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-        }
-        // get random index to get web3j
-        String index = groupIdList.iterator().next();
-        return bcosSDKs.peek().getClient(index);
-    }
+//    public Client getWeb3j() {
+//        List<String> groupIdList = rpcWeb3j.getGroupList().getResult().getGroupList(); //1
+//        if (groupIdList.isEmpty()) {
+//            log.error("Node's groupList empty! please check your node status");
+//            // get default web3j of integer max value
+//            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
+//        }
+//        // get random index to get web3j
+//        String index = groupIdList.iterator().next();
+//        return clientMap.get(index);
+//    }
 
     /**
      * get target group's web3j
@@ -536,31 +502,36 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j(String groupId) {
-        Client web3j;
-        try {
-            web3j= bcosSDKs.peek().getClient(groupId);
-        } catch (BcosSDKException e) {
-            String errorMsg = e.getMessage();
-            log.error("bcosSDK getClient failed: {}", errorMsg);
-            // check client error type
-            if (errorMsg.contains("available peers")) {
-                log.error("no available node to connect to");
-                throw new FrontException(ConstantCode.SYSTEM_ERROR_NODE_INACTIVE.getCode(),
-                    "no available node to connect to");
-            }
-            if (errorMsg.contains("existence of group")) {
-                log.error("group: {} of the connected node not exist!", groupId);
-                throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL.getCode(),
-                    "group: " + groupId + " of the connected node not exist!");
-            }
-            if (errorMsg.contains("no peers set up the group")) {
-                log.error("no peers belong to this group: {}!", groupId);
-                throw new FrontException(ConstantCode.SYSTEM_ERROR_NO_NODE_IN_GROUP.getCode(),
-                    "no peers belong to this group: " + groupId);
-            }
-            throw new FrontException(ConstantCode.WEB3J_CLIENT_IS_NULL);
-        }
-        return web3j;
+//        Client web3j;
+//        try {
+//            web3j= clientMap.get(groupId);
+//        } catch (BcosSDKException e) {
+//            String errorMsg = e.getMessage();
+//            log.error("bcosSDK getClient failed: {}", errorMsg);
+//            // check client error type
+//            if (errorMsg.contains("available peers")) {
+//                log.error("no available node to connect to");
+//                throw new FrontException(ConstantCode.SYSTEM_ERROR_NODE_INACTIVE.getCode(),
+//                    "no available node to connect to");
+//            }
+//            if (errorMsg.contains("existence of group")) {
+//                log.error("group: {} of the connected node not exist!", groupId);
+//                throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL.getCode(),
+//                    "group: " + groupId + " of the connected node not exist!");
+//            }
+//            if (errorMsg.contains("no peers set up the group")) {
+//                log.error("no peers belong to this group: {}!", groupId);
+//                throw new FrontException(ConstantCode.SYSTEM_ERROR_NO_NODE_IN_GROUP.getCode(),
+//                    "no peers belong to this group: " + groupId);
+//            }
+//            throw new FrontException(ConstantCode.WEB3J_CLIENT_IS_NULL);
+//        }
+        log.info("getWeb3j groupId:{}", groupId);
+//        Client client = clientMap.get(groupId);
+//        if (client == null) {
+//            throw new FrontException(ConstantCode.WEB3J_CLIENT_IS_NULL);
+//        }
+        return singleClient;
     }
 
     public CryptoSuite getCryptoSuite(String groupId) {
@@ -571,10 +542,5 @@ public class Web3ApiService {
         return this.getWeb3j(groupId).getCryptoType();
     }
 
-//    private void checkConnection() { todo
-//        if (!Web3Config.PEER_CONNECTED) {
-//            throw new FrontException(ConstantCode.SYSTEM_ERROR_NODE_INACTIVE);
-//        }
-//    }
 
 }

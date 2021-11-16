@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
@@ -165,7 +166,7 @@ public class Web3ApiController {
     }
 
     /**
-     * same as nodeIdList in fisco 2.0
+     * same as /web3/nodeIdList in fisco 2.0
      * @param groupId
      * @return
      */
@@ -173,6 +174,13 @@ public class Web3ApiController {
     @GetMapping("/groupPeers")
     public List<String> getGroupPeers(@PathVariable String groupId) {
         return web3ApiService.getGroupPeers(groupId);
+    }
+
+
+    @ApiOperation(value = "getGroupInfo", notes = "get group info")
+    @GetMapping("/groupInfo")
+    public GroupInfo getGroupInfo(@PathVariable String groupId) {
+        return web3ApiService.getGroupInfo(groupId);
     }
 
     @ApiOperation(value = "getGroupList", notes = "get list of group id")
