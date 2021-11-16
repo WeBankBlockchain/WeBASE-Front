@@ -14,6 +14,7 @@
 package com.webank.webase.front.precompiledapi;
 
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
+import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
 
 import com.webank.webase.front.keystore.KeyStoreService;
@@ -91,12 +92,11 @@ public class PrecompiledService {
         return res;
     }
 
-    public List<NodeInfo> getNodeList(String groupId) throws IOException {
+    public List<NodeInfo> getNodeList(String groupId) {
         // nodeListWithType 组合多个带有类型的nodeid list
         List<String> sealerList = web3ApiService.getSealerStrList(groupId);
-        List<String> observerList =
-                web3ApiService.getWeb3j(groupId).getObserverList().getObserverList();
-//        List<String> peerList = web3ApiService.getWeb3j(groupId).getNodeIDList().getNodeIDList(); todo
+        List<String> observerList = web3ApiService.getObserverList(groupId);
+        List<String> peerList = web3ApiService.getGroupPeers(groupId);
         // process nodeList
         List<NodeInfo> nodeListWithType = new ArrayList<>();
 
@@ -104,11 +104,10 @@ public class PrecompiledService {
         sealerList.forEach(sealer -> nodeListWithType.add(new NodeInfo(sealer, NODE_TYPE_SEALER)));
         observerList.forEach(
                 observer -> nodeListWithType.add(new NodeInfo(observer, NODE_TYPE_OBSERVER)));
-        // peer not in sealer/observer but connected is remove node(游离节点) todo
-//        List<String> peerList = web3ApiService.getWeb3j(groupId).getNodeIDList().getNodeIDList();
-//        peerList.stream().filter(peer -> !sealerList.contains(peer) && !observerList.contains(peer))
-//                .forEach(peerToAdd -> nodeListWithType
-//                        .add(new NodeInfo(peerToAdd, NODE_TYPE_REMOVE)));
+        // peer not in sealer/observer but connected is remove node(游离节点)
+        peerList.stream().filter(peer -> !sealerList.contains(peer) && !observerList.contains(peer))
+                .forEach(peerToAdd -> nodeListWithType
+                        .add(new NodeInfo(peerToAdd, NODE_TYPE_REMOVE)));
 
         return nodeListWithType;
     }

@@ -159,18 +159,18 @@ public class PrecompiledWithSignService {
      */
     public String addSealer(String groupId, String signUserId, String nodeId) {
         // check node id
-        if (!isValidNodeID(nodeId)) {
+        if (!isValidNodeID(groupId, nodeId)) {
             return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
         }
-        List<String> sealerList = web3ApiService.getSealerStrList(groupId); // todo check
+        List<String> sealerList = web3ApiService.getSealerStrList(groupId);
         if (sealerList.contains(nodeId)) {
             return ConstantCode.ALREADY_EXISTS_IN_SEALER_LIST.toString();
         }
-//        List<String> nodeIdList = web3ApiService.getNodeIdList(); todo
-//        if (!nodeIdList.contains(nodeId)) {
-//            log.error("nodeId is not connected with others, cannot added as sealer");
-//            return ConstantCode.PEERS_NOT_CONNECTED.toString();
-//        }
+        List<String> nodeIdList = web3ApiService.getGroupPeers(groupId);
+        if (!nodeIdList.contains(nodeId)) {
+            log.error("nodeId is not connected with others, cannot added as sealer");
+            return ConstantCode.PEERS_NOT_CONNECTED.toString();
+        }
         // check group file
 //        if (!containsGroupFile(groupId)) {
 //            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
@@ -191,7 +191,7 @@ public class PrecompiledWithSignService {
      */
     public String addObserver(String groupId, String signUserId, String nodeId) {
         // check node id
-        if (!isValidNodeID(nodeId)) {
+        if (!isValidNodeID(groupId, nodeId)) {
             return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
         }
         List<String> observerList = web3ApiService.getObserverList(groupId);
@@ -243,18 +243,16 @@ public class PrecompiledWithSignService {
     /**
      * check node id
      */
-    private boolean isValidNodeID(String _nodeID) {
-//        boolean flag = false;
-//        List<String> nodeIDs = web3ApiService.getNodeIdList(); todo
-//        List<String> nodeIDs = web3ApiService.getNodeIdList();
-//        for (String nodeID : nodeIDs) {
-//            if (_nodeID.equals(nodeID)) {
-//                flag = true;
-//                break;
-//            }
-//        }
-//        return flag;
-        return true;
+    private boolean isValidNodeID(String groupId, String _nodeID) {
+        boolean flag = false;
+        List<String> nodeIDs = web3ApiService.getGroupPeers(groupId);
+        for (String nodeID : nodeIDs) {
+            if (_nodeID.equals(nodeID)) {
+                flag = true;
+                break;
+            }
+        }
+        return flag;
     }
 
     /**
