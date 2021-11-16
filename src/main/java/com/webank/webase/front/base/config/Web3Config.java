@@ -107,7 +107,7 @@ public class Web3Config {
      * @return
      * @throws ConfigException
      */
-    public BcosSDK buildBcosSDK(List<String> newPeers) throws ConfigException {
+    public BcosSDK buildBcosSDK(List<String> newPeers) throws ConfigException, JniException {
         log.info("start init ConfigProperty");
         log.info("=========getBcosSDK :{}", peers);
         // cert config, encrypt type
@@ -145,7 +145,7 @@ public class Web3Config {
             this.getClient(bcosSDK);
         } catch (JniException e) {
             log.error("getBcosSDK error:[]", e);
-            e.printStackTrace();
+            throw e;
         }
 //        ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
 //            .getNodeVersion();
