@@ -18,8 +18,10 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.configapi.entity.ConfigInfo;
 import com.webank.webase.front.configapi.entity.ReqPeers;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.JsonUtils;
 import java.util.List;
 import java.util.Stack;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -36,6 +39,8 @@ public class ConfigService {
     private Web3Config web3Config;
     @Autowired
     private Stack<BcosSDK> bcosSDKs;
+    @Autowired
+    private ConfigInfoRepository configInfoRepository;
 
     public synchronized void updateBcosSDKPeers(ReqPeers param) {
         log.info("updateBcosSDKPeers param:{}", param);
@@ -52,17 +57,36 @@ public class ConfigService {
         log.info("updateBcosSDKPeers newPeers:{},oldPeers:{}", newPeers, oldPeers);
         BcosSDK newBcosSDK = null;
         try {
-            newBcosSDK = web3Config.buildBcosSDK(param.getPeers());
+            newBcosSDK = web3Config.buildBcosSDK(newPeers);
         } catch (ConfigException | JniException e) {
             log.error("updateBcosSDKPeers error:[]", e);
             throw new FrontException(ConstantCode.BUILD_SDK_WITH_NEW_PEERS_FAILED);
         }
-        // todo 保存peers配置到db
-
+        // save peers to db
+        this.savePeersConfig(newPeers);
+        // todo auto load peers to sdk
         if (newBcosSDK != null) {
             bcosSDKs.pop();
             bcosSDKs.push(newBcosSDK);
         }
+    }
+
+//    @Transactional(isolation = )
+
+    /**
+     * todo update方式，幂等方式保存，先查id
+     * @param peers
+     * @return
+     */
+    public ConfigInfo savePeersConfig(List<String> peers) {
+        log.info("savePeersConfig peers:{}", peers);
+        //todo select
+        ConfigInfo configInfo = new ConfigInfo();
+        configInfo.setType("sdk");
+        configInfo.setType("peers");
+        configInfo.setType(JsonUtils.objToString(peers));
+        log.info("savePeersConfig configInfo:{}", configInfo);
+        return configInfoRepository.save(configInfo);
     }
 
 }
