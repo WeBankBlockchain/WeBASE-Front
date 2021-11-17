@@ -159,7 +159,7 @@ public class Web3ApiController {
     }
 
     @ApiOperation(value = "getNodeStatusList", notes = "get list of node status info")
-    @GetMapping("/getNodeStatusList")
+    @GetMapping("/nodeStatusList")
     public List<NodeStatusInfo> getNodeStatusList(@PathVariable String groupId) {
         return web3ApiService.getNodeStatusList(groupId);
     }
