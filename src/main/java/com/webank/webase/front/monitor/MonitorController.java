@@ -20,6 +20,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.monitor.entity.GroupSizeInfo;
 import com.webank.webase.front.monitor.entity.Monitor;
+import com.webank.webase.front.monitor.entity.PerformanceData;
 import com.webank.webase.front.util.CommonUtils;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -49,6 +50,36 @@ public class MonitorController {
     private MonitorService monitorService;
     @Autowired
     private Web3Config web3Config;
+
+    @ApiOperation(value = "查询链上数据", notes = "查询链上数据")
+    @ApiImplicitParams({@ApiImplicitParam(name = "beginDate", value = "开始时间"),
+        @ApiImplicitParam(name = "endDate", value = "结束时间"),
+        @ApiImplicitParam(name = "contrastBeginDate", value = "对比开始时间"),
+        @ApiImplicitParam(name = "contrastEndDate", value = "对比结束时间"),
+        @ApiImplicitParam(name = "gap", value = "时间间隔", dataType = "int")})
+    @GetMapping
+    public List<PerformanceData> getChainMonitor(
+        @RequestParam(required = false) @DateTimeFormat(
+            iso = DATE_TIME) LocalDateTime beginDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DATE_TIME) LocalDateTime endDate,
+        @RequestParam(required = false) @DateTimeFormat(
+            iso = DATE_TIME) LocalDateTime contrastBeginDate,
+        @RequestParam(required = false) @DateTimeFormat(
+            iso = DATE_TIME) LocalDateTime contrastEndDate,
+        @RequestParam(required = false, defaultValue = "1") int gap,
+        @RequestParam(defaultValue = "1") String groupId) {
+        Instant startTime = Instant.now();
+        log.info("getChainMonitor startTime:{} groupId:[{}]", groupId,
+            startTime.toEpochMilli());
+
+        List<PerformanceData> performanceList = monitorService.findContrastDataByTime(groupId,
+            beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
+
+        log.info("getChainMonitor end. useTime:{}",
+            Duration.between(startTime, Instant.now()).toMillis());
+        return performanceList;
+    }
+
 
     @ApiOperation(value = "分页查询", notes = "分页查询")
     @GetMapping("/pagingQuery")

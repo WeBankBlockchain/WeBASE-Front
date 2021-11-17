@@ -17,8 +17,12 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BasePageResponse;
+import com.webank.webase.front.monitor.entity.Data;
+import com.webank.webase.front.monitor.entity.LineDataList;
 import com.webank.webase.front.monitor.entity.Monitor;
+import com.webank.webase.front.monitor.entity.PerformanceData;
 import com.webank.webase.front.web3api.Web3ApiService;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -55,25 +59,71 @@ public class MonitorService {
     @Autowired
     Constants constants;
 
-    public Page<Monitor> pagingQuery(String groupId, Integer pageNumber, Integer pageSize,
-            LocalDateTime beginDate, LocalDateTime endDate) {
-        Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
-        Specification<Monitor> queryParam = (root, criteriaQuery, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
-            if (beginDate != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
-                        beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-            }
-            if (endDate != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
-                        endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
-            }
-            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
-        };
-        return monitorRepository.findAll(queryParam, pageable);
+    public List<PerformanceData> findContrastDataByTime(String groupId, LocalDateTime startTime,
+        LocalDateTime endTime, LocalDateTime contrastStartTime, LocalDateTime contrastEndTime,
+        int gap) {
+
+        List<Monitor> monitorList;
+        if (startTime == null || endTime == null) {
+            monitorList = new ArrayList<>();
+        } else {
+            monitorList = monitorRepository.findByTimeBetween(groupId,
+                startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        }
+        List<Monitor> contrastMonitorList = new ArrayList<>();
+        if (contrastStartTime != null && contrastEndTime != null) {
+            contrastMonitorList = monitorRepository.findByTimeBetween(groupId,
+                contrastStartTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                contrastEndTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        }
+        return transferToPerformanceData(transferListByGap(monitorList, gap),
+            transferListByGap(contrastMonitorList, gap));
     }
 
+    private List<PerformanceData> transferToPerformanceData(List<Monitor> monitorList,
+        List<Monitor> contrastMonitorList) {
+        List<Long> timestampList = new ArrayList<>();
+        List<BigDecimal> blockHeightValueList = new ArrayList<>();
+        List<BigDecimal> pbftViewValueList = new ArrayList<>();
+        List<BigDecimal> pendingCountValueList = new ArrayList<>();
+        for (Monitor monitor : monitorList) {
+            blockHeightValueList.add(monitor.getBlockHeight() == null ? null
+                : new BigDecimal(monitor.getBlockHeight()));
+            pbftViewValueList.add(
+                monitor.getPbftView() == null ? null : new BigDecimal(monitor.getPbftView()));
+            pendingCountValueList.add(monitor.getPendingTransactionCount() == null ? null
+                : new BigDecimal(monitor.getPendingTransactionCount()));
+            timestampList.add(monitor.getTimestamp());
+        }
+        monitorList.clear();
+
+        List<Long> contrastTimestampList = new ArrayList<>();
+        List<BigDecimal> contrastBlockHeightValueList = new ArrayList<>();
+        List<BigDecimal> contrastPbftViewValueList = new ArrayList<>();
+        List<BigDecimal> contrastPendingCountValueList = new ArrayList<>();
+        for (Monitor monitor : contrastMonitorList) {
+            contrastBlockHeightValueList.add(monitor.getBlockHeight() == null ? null
+                : new BigDecimal(monitor.getBlockHeight()));
+            contrastPbftViewValueList.add(
+                monitor.getPbftView() == null ? null : new BigDecimal(monitor.getPbftView()));
+            contrastPendingCountValueList.add(monitor.getPendingTransactionCount() == null ? null
+                : new BigDecimal(monitor.getPendingTransactionCount()));
+            contrastTimestampList.add(monitor.getTimestamp());
+        }
+        contrastMonitorList.clear();
+        List<PerformanceData> performanceDataList = new ArrayList<>();
+        performanceDataList.add(new PerformanceData("blockHeight",
+            new Data(new LineDataList(timestampList, blockHeightValueList),
+                new LineDataList(contrastTimestampList, contrastBlockHeightValueList))));
+        performanceDataList.add(
+            new PerformanceData("pbftView", new Data(new LineDataList(null, pbftViewValueList),
+                new LineDataList(null, contrastPbftViewValueList))));
+        performanceDataList.add(new PerformanceData("pendingCount",
+            new Data(new LineDataList(null, pendingCountValueList),
+                new LineDataList(null, contrastPendingCountValueList))));
+        return performanceDataList;
+    }
 
     public List transferListByGap(List arrayList, int gap) {
         if (gap == 0) {
@@ -108,6 +158,25 @@ public class MonitorService {
             }
         }
         return newMonitorList;
+    }
+
+    public Page<Monitor> pagingQuery(String groupId, Integer pageNumber, Integer pageSize,
+        LocalDateTime beginDate, LocalDateTime endDate) {
+        Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
+        Specification<Monitor> queryParam = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
+            if (beginDate != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("timestamp"),
+                    beginDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            if (endDate != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("timestamp"),
+                    endDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        return monitorRepository.findAll(queryParam, pageable);
     }
 
     /**
