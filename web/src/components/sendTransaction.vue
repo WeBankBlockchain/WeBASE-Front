@@ -23,7 +23,7 @@
                     <span class="font-color-fff">{{data.contractName}}</span>
                 </td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td class="text-right text-td" style="padding: 5px 0;"><span class="font-color-fff ">CNS：</span></td>
                 <td>
                     <el-checkbox v-model="isCNS" @change="changeCns"></el-checkbox>
@@ -48,8 +48,8 @@
                         </template>
                     </el-input>
                 </td>
-            </tr>
-            <tr v-else>
+            </tr> -->
+            <tr>
                 <td class="text-right text-td"><span class="font-color-fff">{{$t('text.contractAddress')}}：</span></td>
                 <td>
                     <el-input v-model.trim="contractAddress" style="width: 260px;margin-bottom:4px;" :placeholder="$t('placeholder.selectedContractAddress')"></el-input>

@@ -241,6 +241,7 @@ export default {
             let reqQuery = {
                 privateKey: fileString,
                 userName: this.keyForm.fileName,
+                groupId:localStorage.getItem('groupId')
             };
             queryImportPrivateKey(reqQuery)
                 .then(res => {
@@ -270,6 +271,7 @@ export default {
             let reqQuery = {
                 pemContent: fileContent,
                 userName: this.keyForm.fileName,
+                groupId:localStorage.getItem('groupId')
             };
             ImportPemPrivateKey(reqQuery)
                 .then(res => {
@@ -302,6 +304,7 @@ export default {
             form.append('userName', this.keyForm.fileName)
             form.append('p12File', param)
             form.append('p12Password', Base64.encode(this.keyForm.password))
+            form.append(' groupId', localStorage.getItem('groupId'))
             ImportP12PrivateKey(form)
                 .then(res => {
                     const { data, status } = res;

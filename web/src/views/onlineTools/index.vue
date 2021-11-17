@@ -237,7 +237,8 @@ export default {
             this.loading = true;
             let param = {
                 hash: this.inputSignHash,
-                user: this.privateKey
+                user: this.privateKey,
+                groupId:this.groupId
             }
             signHash(param)
                 .then(res => {

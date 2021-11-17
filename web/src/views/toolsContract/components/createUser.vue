@@ -55,6 +55,7 @@ export default {
             creatUserNameVisible: false,
             // dialogVisible: this.createuserShow,
             privateKeyList: localStorage.getItem("privateKeyList") ? JSON.parse(localStorage.getItem("privateKeyList")) : [],
+            groupId:localStorage.getItem("groupId")
         };
     },
      
@@ -89,7 +90,7 @@ export default {
             });
         },
         addUser: function () {
-            queryCreatePrivateKey({ useAes: false, type: 0, userName: this.userForm.userName })
+            queryCreatePrivateKey({ useAes: false, type: 0, userName: this.userForm.userName, groupId:this.groupId })
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {

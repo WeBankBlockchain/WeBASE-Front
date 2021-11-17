@@ -500,7 +500,7 @@ export function querySyncStatus(group) {
 //nodes status info 
 export function queryNodesStatusInfo(group) {
     return get({
-        url: `${HANDLE}${group}/web3/getNodeStatusList`,
+        url: `${HANDLE}${group}/web3/nodeStatusList`,
         method: 'get'
     })
 }
@@ -692,9 +692,9 @@ export function backgroundCompile(data) {
         data: data
     })
 }
-export function encryption() {
+export function encryption(groupId) {
     return get({
-        url: `${HANDLE}encrypt`,
+        url: `${HANDLE}config/encrypt/${groupId}`,
         method: 'get',
         responseType: 'text'
     })
