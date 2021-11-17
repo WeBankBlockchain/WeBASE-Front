@@ -349,6 +349,7 @@ public class Web3ApiService {
      * @return
      */
     public ConsensusStatusInfo getConsensusStatus(String groupId, String nodeName) {
+        log.info("getConsensusStatus groupId{},nodeName:{}", groupId, nodeName);
         return getWeb3j(groupId).getConsensusStatus(nodeName).getConsensusStatus();
     }
 
