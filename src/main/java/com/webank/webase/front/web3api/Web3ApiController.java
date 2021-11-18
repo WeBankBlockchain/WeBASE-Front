@@ -252,25 +252,6 @@ public class Web3ApiController {
         return web3ApiService.searchByCriteria(groupId, input);
     }
 
-    /* above 2.7.0 */
-//    @ApiOperation(value = "getBlockHeaderByHash", notes = "Get block header with sealers based on block hash")
-//    @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true,
-//        dataType = "String", paramType = "path")
-//    @GetMapping("/blockHeaderByHash/{blockHash}")
-//    public BlockHeader getBlockHeaderByHash(@PathVariable String groupId,
-//        @PathVariable String blockHash) {
-//        return web3ApiService.getBlockHeaderByHash(groupId, blockHash, true);
-//    }
-//
-//    @ApiOperation(value = "getBlockHeaderByNumber", notes = "Get block header with sealers based on block height")
-//    @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-//        dataType = "BigInteger", paramType = "path")
-//    @GetMapping("/blockHeaderByNumber/{blockNumber}")
-//    public BlockHeader getBlockHeaderByNumber(@PathVariable String groupId,
-//        @PathVariable BigInteger blockNumber) {
-//        return web3ApiService.getBlockHeaderByNumber(groupId, blockNumber, true);
-//    }
-    /* above 2.7.0 */
 
     @ApiOperation(value = "getBlockTransCntByNumber",
         notes = "Get the number of transactions in the block based on the block height")
@@ -282,43 +263,11 @@ public class Web3ApiController {
         return web3ApiService.getBlockStatisticByNumber(groupId, blockNumber);
     }
 
-    /* above 2.7.0 */
-//    @ApiOperation(value = "getBatchReceiptByBlockNumber",
-//        notes = "Get the number of transactions in the block based on the block height")
-//    @ApiImplicitParams({
-//        @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
-//            dataType = "BigInteger", paramType = "path"),
-//        @ApiImplicitParam(name = "start", value = "start", required = true,
-//            dataType = "int"),
-//        @ApiImplicitParam(name = "count", value = "count", required = true,
-//            dataType = "int")
-//    })
-//    @GetMapping("/transReceipt/batchByNumber/{blockNumber}")
-//    public List<TransactionReceipt> getBatchReceiptByBlockNumber(@PathVariable String groupId,
-//        @PathVariable BigInteger blockNumber,
-//        @RequestParam(value = "start", defaultValue = "0") int start,
-//        @RequestParam(value = "count", defaultValue = "-1") int count) {
-//        return web3ApiService.getBatchReceiptByBlockNumber(groupId, blockNumber, start, count);
-//    }
-//
-//    @ApiOperation(value = "getBatchReceiptByBlockHash",
-//        notes = "Get the number of transactions in the block based on the block height")
-//    @ApiImplicitParams({
-//        @ApiImplicitParam(name = "blockHash", value = "blockHash", required = true,
-//            dataType = "String", paramType = "path"),
-//        @ApiImplicitParam(name = "start", value = "start", required = true,
-//            dataType = "int"),
-//        @ApiImplicitParam(name = "count", value = "count", required = true,
-//            dataType = "int")
-//    })
-//    @GetMapping("/transReceipt/batchByHash/{blockHash}")
-//    public List<TransactionReceipt> getBatchReceiptByBlockHash(@PathVariable String groupId,
-//        @PathVariable String blockHash,
-//        @RequestParam(value = "start", defaultValue = "0") int start,
-//        @RequestParam(value = "count", defaultValue = "-1") int count) {
-//        return web3ApiService.getBatchReceiptByBlockHash(groupId, blockHash, start, count);
-//    }
-
+    @GetMapping("encrypt")
+    public Integer getEncryptType(@PathVariable("groupId") String groupId) {
+        int encrypt = web3ApiService.getCryptoType(groupId);
+        return encrypt;
+    }
 //    @ApiOperation(value = "getNodeInfo", notes = "Get node information")
 //    @GetMapping("/nodeInfo")
 //    public NodeInformation getNodeInfo() {
