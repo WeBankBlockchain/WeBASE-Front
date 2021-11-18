@@ -23,5 +23,5 @@ import org.springframework.data.repository.CrudRepository;
 public interface ConfigInfoRepository extends CrudRepository<ConfigInfo, Long>,
     JpaSpecificationExecutor<ConfigInfo> {
 
-    ConfigInfo findByKey(String key);
+    ConfigInfo findByTypeAndKey(String type, String key);
 }

@@ -30,17 +30,23 @@ import javax.persistence.Id;
 @Data
 @Entity
 @Table(uniqueConstraints = {
-    @UniqueConstraint(name = "unique_config", columnNames = {"key"})
+    @UniqueConstraint(name = "unique_config", columnNames = {"type","key"})
 })
 public class ConfigInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    /**
+     * example: type is "sdk"
+     */
     private String type;
     /**
-     * example: key is peers, value is ["127.0.0.1:20200"]
+     * example: key is "peers"
      */
     private String key;
+    /**
+     * example: value is ["127.0.0.1:20200"]
+     */
     private String value;
     private Integer version;
 }

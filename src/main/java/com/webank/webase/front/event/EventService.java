@@ -43,14 +43,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.codec.ABICodec;
 import org.fisco.bcos.sdk.eventsub.EventLogParams;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
@@ -84,8 +82,6 @@ public class EventService {
     private ContractService contractService;
     @Autowired
     private AbiService abiService;
-    @Autowired
-    private Stack<BcosSDK> bcosSDKs;
     private static final String TYPE_CONTRACT = "contract";
     private static final String TYPE_ABI_INFO = "abi";
 
@@ -160,7 +156,7 @@ public class EventService {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // to register or unregister
 //        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId); todo init event suscribe
-        EventSubscribe eventSubscribe = bcosSDKs.peek().getEventSubscribe(String.valueOf(groupId));
+        EventSubscribe eventSubscribe = web3ApiService.getBcosSDK().getEventSubscribe(String.valueOf(groupId));
         String registerId = null;
         ContractEventCallback callback = null;
         try {
@@ -342,7 +338,7 @@ public class EventService {
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-        EventSubscribe eventSubscribe = bcosSDKs.peek().getEventSubscribe(String.valueOf(groupId));
+        EventSubscribe eventSubscribe = web3ApiService.getBcosSDK().getEventSubscribe(String.valueOf(groupId));
 
         try {
             String registerId = eventInfo.getRegisterId();
@@ -386,7 +382,7 @@ public class EventService {
         ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
-        EventSubscribe eventSubscribe = bcosSDKs.peek().getEventSubscribe(String.valueOf(groupId));
+        EventSubscribe eventSubscribe = web3ApiService.getBcosSDK().getEventSubscribe(String.valueOf(groupId));
         String registerId = eventSubscribe.subscribeEvent(eventParam, callback);
 
         List<DecodedEventLog> resultList;

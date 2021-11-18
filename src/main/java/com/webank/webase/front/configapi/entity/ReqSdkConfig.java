@@ -23,7 +23,17 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReqPeers {
+public class ReqSdkConfig {
+    private Boolean useGmSsl;
     @NotNull
     private List<String> peers;
+    private String caCertStr;
+    private String sdkCertStr;
+    private String sdkKeyStr;
+    private String smCaCertStr;
+    private String smSdkCertStr;
+    private String smSdkKeyStr;
+    private String smEnSdkCertStr;
+    private String smEnSdkKeyStr;
+
 }

@@ -20,7 +20,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.properties.VersionProperties;
 import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.configapi.entity.ReqPeers;
+import com.webank.webase.front.configapi.entity.ReqSdkConfig;
 import com.webank.webase.front.version.VersionService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import io.swagger.annotations.Api;
@@ -70,13 +70,15 @@ public class ConfigController {
         return sslCryptoType;
     }
 
+
+
     /**
      * update sdk's peers configuration, use same sdk certificates to connect with peers
      * todo test update sdk
      * @return
      */
     @PostMapping("bcosSDK/peers")
-    public BaseResponse updateSDKPeers(@RequestBody @Valid ReqPeers param) {
+    public BaseResponse updateSDKPeers(@RequestBody @Valid ReqSdkConfig param) {
         Instant startTime = Instant.now();
         log.info("start updateSDKPeers param:{}", param);
         // todo 校验ip:port格式，telnet能否连上

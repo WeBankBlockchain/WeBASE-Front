@@ -264,9 +264,13 @@ public class ConstantCode {
     //public static final RetCode ALREADY_EXISTS_IN_OBSERVER_LIST = RetCode.mark(51105, "The");
 
     /* fit in 3.0 */
+    public static final RetCode BCOS_SDK_EMPTY = RetCode.mark(201600, "BcosSDK is empty, call config api to init one bcosSDK");
     public static final RetCode PARAM_ERROR_EMPTY_PEERS = RetCode.mark(201601, "Sdk's peers cannot be empty");
+    public static final RetCode PARAM_ERROR_CERT_EMPTY = RetCode.mark(201601, "Sdk's sdk certificates and key cannot be empty");
+    public static final RetCode PARAM_ERROR_CERT_NOT_MATCH = RetCode.mark(201601, "Sdk's sdk certificates and key not match");
     public static final RetCode SAME_SDK_PEERS_ERROR = RetCode.mark(201602, "Sdk's peers same with new peers");
-    public static final RetCode BUILD_SDK_WITH_NEW_PEERS_FAILED = RetCode.mark(201603, "Build bcosSDk instance with new peers failed");
+    public static final RetCode CONNECT_TO_NEW_PEERS_FAILED = RetCode.mark(201603, "webase-front connect to new peers ip port failed!");
+    public static final RetCode BUILD_SDK_WITH_NEW_PEERS_FAILED = RetCode.mark(201604, "Build bcosSDk instance with new peers failed");
 
 
 }
