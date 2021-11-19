@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,21 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class NetUtils {
+    public static final String IP_PATTERN =
+        "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
+
+    /**
+     * Validate ipv4 address.
+     *
+     * @param ip
+     * @return return false if ip is not a valid IP format.
+     */
+    public static boolean ipv4Valid(final String ip) {
+        if (StringUtils.isBlank(ip)) {
+            return false;
+        }
+        return ip.matches(IP_PATTERN);
+    }
 
     public static Pair<Boolean, Integer> checkPorts(String ip, int timeout, int ... portArray) {
         if (ArrayUtils.isEmpty(portArray)){

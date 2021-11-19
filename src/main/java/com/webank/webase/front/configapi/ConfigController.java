@@ -20,12 +20,14 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.properties.VersionProperties;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.configapi.entity.ConfigInfo;
 import com.webank.webase.front.configapi.entity.ReqSdkConfig;
 import com.webank.webase.front.version.VersionService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import io.swagger.annotations.Api;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +67,7 @@ public class ConfigController {
 
     @GetMapping("sslCryptoType")
     public boolean getSSLCryptoType() {
-        boolean sslCryptoType = web3Config.isUseSmSsl();
+        boolean sslCryptoType = configService.getSdkUseSmSsl();
         log.info("getSSLCryptoType:{}", sslCryptoType);
         return sslCryptoType;
     }
@@ -77,15 +79,24 @@ public class ConfigController {
      * todo test update sdk
      * @return
      */
-    @PostMapping("bcosSDK/peers")
-    public BaseResponse updateSDKPeers(@RequestBody @Valid ReqSdkConfig param) {
+    @PostMapping("bcosSDK")
+    public BaseResponse updateSDK(@RequestBody @Valid ReqSdkConfig param) {
         Instant startTime = Instant.now();
         log.info("start updateSDKPeers param:{}", param);
-        // todo 校验ip:port格式，telnet能否连上
-        configService.updateBcosSDKPeers(param);
+        configService.configBcosSDK(param);
         log.info("end updateSDKPeers useTime:{}",
             Duration.between(startTime, Instant.now()).toMillis());
         return new BaseResponse(ConstantCode.RET_SUCCESS);
+    }
+
+    @GetMapping("bcosSDK")
+    public BaseResponse getSDKConfig() {
+        Instant startTime = Instant.now();
+        log.info("start updateSDKPeers ");
+        Map<String, ConfigInfo> configInfoMap = configService.getConfigInfoSdk();
+        log.info("end updateSDKPeers useTime:{}",
+            Duration.between(startTime, Instant.now()).toMillis());
+        return new BaseResponse(ConstantCode.RET_SUCCESS, configInfoMap);
     }
 
 

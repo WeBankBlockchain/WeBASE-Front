@@ -18,14 +18,12 @@ import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.NodeStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
-import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.RspTransCountInfo;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +50,6 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -91,9 +88,7 @@ public class Web3ApiService {
         if (blockNumberCheck(groupId, blockNumber)) {
             throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
         }
-        BcosBlock.Block block;
-        block = getWeb3j(groupId)
-                .getBlockByNumber(blockNumber, false, fullTrans)
+        BcosBlock.Block block = getWeb3j(groupId).getBlockByNumber(blockNumber, false, fullTrans)
                 .getBlock();
         return block;
     }

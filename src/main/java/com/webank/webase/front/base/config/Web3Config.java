@@ -47,11 +47,8 @@ public class Web3Config {
     @Autowired
     private ConfigService configService;
 
-//    public String certPath = "conf";
     private String threadPoolSize;
 
-    public static List<String> peers; // ["127.0.0.1:20200","127.0.0.1:20201"]
-    public static boolean useSmSsl = false;
 
 
     @Bean
@@ -61,56 +58,4 @@ public class Web3Config {
 
     }
 
-    /**
-     * todo init one-bean and set ConfigOption by api
-     * 启动至少配置证书、一个节点的IP PORT
-     * todo DB保存ip配置，定时刷新
-     * @return
-     * @throws ConfigException
-     */
-//    public BcosSDK buildBcosSDK(List<String> newPeers) throws ConfigException, JniException {
-//
-//        // init config option
-//        log.info("init configOption from configProperty");
-//        ConfigOption configOption = initConfigOption;
-//        // init bcosSDK
-//        BcosSDK bcosSDK = new BcosSDK(configOption);
-//        log.info("finish init bcos sdk instance, check sdk.log for detail");
-//        try {
-//            this.getRpcWeb3j(bcosSDK);
-//            this.getClient(bcosSDK);
-//        } catch (JniException e) {
-//            log.error("getBcosSDK error:[]", e);
-//            throw e;
-//        }
-////        ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
-////            .getNodeVersion();
-////        Constants.version = version.getVersion();
-////        Constants.chainId = bcosSDK.getChainId();
-//
-//        return bcosSDK;
-//    }
-
-
-//    /**
-//     * only used to get groupList
-//     * @throws JniException
-//     */
-//    @Bean(name = "rpcClient")
-//    public Client getRpcWeb3j(BcosSDK bcosSDK) throws JniException {
-//
-//        Client rpcWeb3j = Client.build(bcosSDK.getConfig());
-//        // Client rpcWeb3j = bcosSDK.getClient();
-//        log.info("get rpcWeb3j(only support groupList) client:{}", rpcWeb3j);
-//        return rpcWeb3j;
-//    }
-//
-//    @Bean(name = "singleClient")
-//    public Client getClient(BcosSDK bcosSDK) {
-//
-//        Client client = bcosSDK.getClient("group");
-//        // Client rpcWeb3j = bcosSDK.getClient();
-//        log.info("get client:{}", client);
-//        return client;
-//    }
 }
