@@ -575,20 +575,23 @@ public class TransService {
             return Collections.singletonList("Call contract return error: " + parseResultStr);
         } else {
             ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
-            try {
+//            try {
                 // todo output is byte[] or string  Numeric.hexStringToByteArray
+            // todo ABICodec解析不正确
                 log.error("todo========= callOutput.getOutput():{}", callOutput.getOutput());
 //                List<String> res = abiCodec.decodeMethodToString(abiStr, funcName, callOutput.getOutput());
-                List<String> res = abiCodec.decodeMethodToString(abiStr, funcName, Numeric.hexStringToByteArray(callOutput.getOutput()));
+//                List<String> res = abiCodec.decodeMethodToString(abiStr, funcName, Numeric.hexStringToByteArray(callOutput.getOutput()));
+                List<String> res = new ArrayList<>();
+                res.add(callOutput.getOutput());
                 log.info("call contract res before decode:{}", res);
                 // bytes类型转十六进制
                 this.handleFuncOutput(abiStr, funcName, res, groupId);
                 log.info("call contract res:{}", res);
                 return res;
-            } catch (ABICodecException e) {
-                log.error("handleCall decode call output fail:[]", e);
-                throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR);
-            }
+//            } catch (ABICodecException e) {
+//                log.error("handleCall decode call output fail:[]", e);
+//                throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR);
+//            }
         }
     }
 
@@ -609,8 +612,8 @@ public class TransService {
         TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair);
         // cover null message through statusCode
         this.decodeReceipt(receipt);
-        log.info("execTransaction end  useTime:{}",
-            Duration.between(startTime, Instant.now()).toMillis());
+        log.info("execTransaction end useTime:{},receipt:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), receipt);
         return receipt;
     }
 
@@ -741,13 +744,13 @@ public class TransService {
 
     /**
      * parse bytes, bytesN, bytesN[], bytes[] from base64 string to hex string
+     *  todo 应该在sdk中完成
      * @param abiStr
      * @param funcName
      * @param outputValues
      */
     private void handleFuncOutput(String abiStr, String funcName, List<String> outputValues, String groupId) {
         ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName, groupId);
-        ABICodecJsonWrapper jsonWrapper = new ABICodecJsonWrapper();
         List<NamedType> outputTypeList = abiDefinition.getOutputs();
         for (int i = 0; i < outputTypeList.size(); i++) {
             String type = outputTypeList.get(i).getType();
