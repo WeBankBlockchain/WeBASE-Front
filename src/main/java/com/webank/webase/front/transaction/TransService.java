@@ -15,32 +15,23 @@ package com.webank.webase.front.transaction;
 
 
 import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
-import static com.webank.webase.front.base.properties.Constants.RECEIPT_STATUS_0X0;
-import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_PURE;
-import static com.webank.webase.front.util.ContractAbiUtil.STATE_MUTABILITY_VIEW;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qq.tars.protocol.tars.TarsOutputStream;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.ContractRepository;
-import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
-import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.precompiledapi.PrecompiledService;
-import com.webank.webase.front.transaction.entity.ContractFunction;
 import com.webank.webase.front.transaction.entity.ReqSignMessageHash;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
-import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.time.Duration;
@@ -60,7 +51,6 @@ import org.fisco.bcos.sdk.client.protocol.response.Call.CallOutput;
 import org.fisco.bcos.sdk.codec.ABICodec;
 import org.fisco.bcos.sdk.codec.ABICodecException;
 import org.fisco.bcos.sdk.codec.Utils;
-import org.fisco.bcos.sdk.codec.abi.FunctionEncoder;
 import org.fisco.bcos.sdk.codec.abi.FunctionReturnDecoder;
 import org.fisco.bcos.sdk.codec.datatypes.Function;
 import org.fisco.bcos.sdk.codec.datatypes.Type;
@@ -88,7 +78,6 @@ import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.transaction.pusher.TransactionPusherService;
 import org.fisco.bcos.sdk.utils.Numeric;
-import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -135,21 +124,6 @@ public class TransService {
         String funcName = req.getFuncName();
         List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         String contractAddress = req.getContractAddress();
-        // handle cns
-        if (req.isUseCns()) {
-            try {
-                Tuple2<String, String> cnsInfo = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
-                        req.getCnsName(), req.getVersion());
-//                if (CollectionUtils.isEmpty(cnsList)) { todo check
-//                    throw new FrontException(VERSION_NOT_EXISTS);
-//                }
-                contractAddress = cnsInfo.getValue1();
-                log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
-            } catch (ContractException e) {
-                log.error("queryCnsByNameAndVersion ContractException fail:[]", e);
-                throw new FrontException(ConstantCode.CNS_QUERY_FAIL);
-            }
-        }
         return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam);
     }
 
@@ -179,91 +153,6 @@ public class TransService {
 
     }
 
-    /**
-     * handleTransByFunction by whether is constant
-     */
-    @Deprecated
-    private Object handleTransByFunction(String groupId, Client client, String signUserId,
-            String contractAddress, Function function, ContractFunction contractFunction) {
-
-        FunctionEncoder functionEncoder = new FunctionEncoder(web3ApiService.getCryptoSuite(groupId));
-        byte[] encodedFunction = functionEncoder.encode(function);
-        Object response;
-        Instant startTime = Instant.now();
-        // if constant, signUserId can be ""
-        if (contractFunction.getConstant()) {
-            KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery(groupId);
-            TransactionProcessor transactionProcessor = new TransactionProcessor(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(groupId),
-                String.valueOf(groupId), Constants.chainId);
-            CallOutput callOutput = transactionProcessor
-                .executeCall(keyStoreInfo.getAddress(), contractAddress, encodedFunction)
-                .getCallResult();
-            if (!RECEIPT_STATUS_0X0.equals(callOutput.getStatus())) {
-                Tuple2<Boolean, String> parseResult =
-                    RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
-                log.error("call contract error:{}", parseResult);
-                String parseResultStr = parseResult.getValue1() ? parseResult.getValue2()
-                    : "call contract error of status" + callOutput.getStatus();
-                response = Collections.singletonList("Call contract return error: " + parseResultStr);
-            } else {
-                FunctionReturnDecoder decoder = new FunctionReturnDecoder();
-                List<Type> typeList = decoder
-                    .decode(callOutput.getOutput(), function.getOutputParameters());
-                if (typeList.size() > 0) {
-                    response = AbiUtil.callResultParse(contractFunction.getOutputList(), typeList);
-                } else {
-                    response = typeList;
-                }
-            }
-        } else {
-            // data sign
-            String signMsg =
-                    signMessage(groupId, client, signUserId, contractAddress, encodedFunction);
-            Instant nodeStartTime = Instant.now();
-            // send transaction
-            TransactionReceipt responseReceipt = sendMessage(client, signMsg);
-            this.decodeReceipt(responseReceipt);
-            response = responseReceipt;
-            log.info("***node cost time***: {}",
-                    Duration.between(nodeStartTime, Instant.now()).toMillis());
-        }
-        log.info("***transaction total cost time***: {}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        log.info("transHandleWithSign end. func:{} baseRsp:{}", contractFunction.getFuncName(),
-                JsonUtils.toJSONString(response));
-        return response;
-    }
-
-    /**
-     * checkAndSaveAbiFromDb.
-     *
-     * @param req request
-     */
-    @Deprecated
-    public boolean checkAndSaveAbiFromDb(ReqTransHandle req) {
-        Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(
-                req.getGroupId(), req.getContractPath(), req.getContractName());
-        log.info("checkAndSaveAbiFromDb contract:{}", contract);
-        if (Objects.isNull(contract)) {
-            log.info("checkAndSaveAbiFromDb contract is null");
-            return false;
-        }
-        // save abi
-        ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-        List<ABIDefinition> abiDefinitionList;
-        try {
-            abiDefinitionList = objectMapper.readValue(contract.getContractAbi(), objectMapper
-                    .getTypeFactory().constructCollectionType(List.class, ABIDefinition.class));
-        } catch (JsonProcessingException e) {
-            log.error("parse abi to json error:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_ABI_PARSE_JSON_ERROR);
-        }
-        ContractAbiUtil.setFunctionFromAbi(req.getContractName(), req.getContractPath(),
-                abiDefinitionList, new ArrayList<>());
-        return true;
-    }
-
 
     /**
      * execCall through common contract
@@ -272,6 +161,7 @@ public class TransService {
      * @param function function
      * @param commonContract contract
      */
+    @Deprecated
     public static Object execCall(List<String> funOutputTypes, Function function,
             CommonContract commonContract) throws FrontException {
         try {
@@ -294,6 +184,7 @@ public class TransService {
      * @param function function
      * @param commonContract contract
      */
+    @Deprecated
     public static TransactionReceipt execTransaction(Function function,
             CommonContract commonContract, TransactionDecoderService txDecoder) throws FrontException {
         Instant startTime = Instant.now();
@@ -351,110 +242,6 @@ public class TransService {
     }
 
     /**
-     * build Function with cns.
-     */
-    @Deprecated
-    private ContractFunction buildContractFunctionWithCns(String contractName, String funcName,
-            String version, List<Object> params) {
-        log.debug("start buildContractFunctionWithCns");
-        // if function is constant
-        boolean constant = ContractAbiUtil.getConstant(contractName, funcName, version);
-        // inputs format
-        List<String> funcInputTypes =
-                ContractAbiUtil.getFuncInputType(contractName, funcName, version);
-        // check param match inputs
-        if (funcInputTypes.size() != params.size()) {
-            log.error("load contract function error for function params not fit");
-            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-        }
-        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-        // outputs format
-        List<String> funOutputTypes =
-                ContractAbiUtil.getFuncOutputType(contractName, funcName, version);
-        List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
-
-        // build ContractFunction
-        ContractFunction cf = ContractFunction.builder().funcName(funcName).constant(constant)
-                .inputList(funcInputTypes).outputList(funOutputTypes).finalInputs(finalInputs)
-                .finalOutputs(finalOutputs).build();
-        return cf;
-    }
-
-    /**
-     * build Function with abi.
-     */
-    @Deprecated
-    private ContractFunction buildContractFunctionWithAbi(List<Object> contractAbi, String funcName,
-            List<Object> params) {
-        log.debug("start buildContractFunctionWithAbi");
-        // check function name
-        ABIDefinition abiDefinition =
-                AbiUtil.getAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
-        if (Objects.isNull(abiDefinition)) {
-            log.warn("transaction fail. func:{} is not existed", funcName);
-            throw new FrontException(IN_FUNCTION_ERROR);
-        }
-
-        // input format
-        List<String> funcInputTypes = AbiUtil.getFuncInputType(abiDefinition);
-        // check param match inputs
-        if (funcInputTypes.size() != params.size()) {
-            log.error("load contract function error for function params not fit");
-            throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-        }
-        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-        // output format
-        List<String> funOutputTypes = AbiUtil.getFuncOutputType(abiDefinition);
-        List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
-
-        // fit in solidity 0.6
-        boolean isConstant = (STATE_MUTABILITY_VIEW.equals(abiDefinition.getStateMutability())
-                || STATE_MUTABILITY_PURE.equals(abiDefinition.getStateMutability()));
-        // build ContractFunction
-        ContractFunction cf = ContractFunction.builder().funcName(funcName).constant(isConstant)
-                // .constant(abiDefinition.isConstant())
-                .inputList(funcInputTypes).outputList(funOutputTypes).finalInputs(finalInputs)
-                .finalOutputs(finalOutputs).build();
-        return cf;
-    }
-
-    /**
-     * does abi exist in cns or db.
-     * @Deprecated: request body contains abi list
-     */
-    @Deprecated
-    private void checkContractAbiInCnsOrDb(ReqTransHandle req) {
-        log.debug("start checkContractAbiInCnsOrDb");
-        String version = req.getVersion();
-        String contractName = req.getContractName();
-        String contractAddress = req.getContractAddress();
-        String contractPath = req.getContractPath();
-        boolean ifExisted;
-        // check if contractAbi existed in cache
-        if (version != null) {
-            ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
-        } else {
-            ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, contractAddress.substring(2));
-            req.setVersion(contractAddress.substring(2));
-        }
-        // deprecated cns in front
-        // check if contractAbi existed in cns
-        // if (!ifExisted) {
-        // ifExisted = checkAndSaveAbiFromCns(contract);
-        // }
-        // check if contractAbi existed in db
-        if (!ifExisted) {
-            ifExisted = checkAndSaveAbiFromDb(req);
-            req.setVersion(contractPath);
-        }
-
-        if (!ifExisted) {
-            throw new FrontException(ConstantCode.ABI_GET_ERROR);
-        }
-
-    }
-
-    /**
      * send transaction locally
      */
     public Object transHandleLocal(ReqTransHandle req) {
@@ -465,17 +252,6 @@ public class TransService {
         String userAddress = req.getUser();
 
         String contractAddress = req.getContractAddress();
-        if (req.isUseCns()) {
-            try {
-                Tuple2<String, String> cnsInfo  = precompiledService.queryCnsByNameAndVersion(groupId,
-                    req.getCnsName(), req.getVersion());
-                contractAddress = cnsInfo.getValue1();
-                log.info("transHandleLocal cns contractAddress:{}", contractAddress);
-            } catch (ContractException e) {
-                log.error("queryCnsByNameAndVersion ContractException fail:[]", e);
-                throw new FrontException(ConstantCode.CNS_QUERY_FAIL);
-            }
-        }
 
         byte[] encodeFunction = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId);
 
@@ -494,48 +270,6 @@ public class TransService {
             return this.handleTransaction(client, cryptoKeyPair, contractAddress, encodeFunction);
         }
     }
-
-//
-//    public Object transHandleLocal(ReqTransHandle req) throws Exception {
-//        log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(req));
-//        // check param and build function
-//        ContractFunction contractFunction = buildContractFunctionWithAbi(req.getContractAbi(),
-//            req.getFuncName(), req.getFuncParam());
-//
-//        // address
-//        String address = req.getContractAddress();
-//        if (req.isUseCns()) {
-//            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
-//                    req.getCnsName(), req.getVersion());
-//            if (CollectionUtils.isEmpty(cnsList)) {
-//                throw new FrontException(VERSION_NOT_EXISTS);
-//            }
-//            address = cnsList.iterator().next().getAddress();
-//            log.info("transHandleLocal cns contractAddress:{}", address);
-//        }
-//
-//        // client
-//        Client client = web3ApiService.getWeb3j(req.getGroupId());
-//        // get privateKey
-//        CryptoKeyPair credentials = getCredentials(contractFunction.getConstant(), req.getUser());
-//        CommonContract commonContract =
-//                CommonContract.load(address, client, credentials);
-//        // tx decoder
-//        TransactionDecoderService txDecoder = new TransactionDecoderService(web3ApiService.getCryptoSuite(groupId));
-//        // request
-//        Object result;
-//        Function function = new Function(req.getFuncName(), contractFunction.getFinalInputs(),
-//                contractFunction.getFinalOutputs());
-//        if (contractFunction.getConstant()) {
-//            result = execCall(contractFunction.getOutputList(), function, commonContract);
-//        } else {
-//            result = execTransaction(function, commonContract, txDecoder);
-//        }
-//
-//        log.info("transHandle end. name:{} func:{} result:{}", req.getContractName(),
-//            req.getFuncName(), JsonUtils.toJSONString(result));
-//        return result;
-//    }
 
 
     public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, String groupId) {
@@ -833,7 +567,7 @@ public class TransService {
             .executeCall(userAddress, contractAddress, encodedFunction)
             .getCallResult();
         // if error
-        if (!RECEIPT_STATUS_0X0.equals(callOutput.getStatus())) {
+        if (callOutput.getStatus() != 0) {
             Tuple2<Boolean, String> parseResult =
                 RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
             log.error("call contract error:{}", parseResult);
@@ -841,20 +575,23 @@ public class TransService {
             return Collections.singletonList("Call contract return error: " + parseResultStr);
         } else {
             ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
-            try {
+//            try {
                 // todo output is byte[] or string  Numeric.hexStringToByteArray
+            // todo ABICodec解析不正确
                 log.error("todo========= callOutput.getOutput():{}", callOutput.getOutput());
 //                List<String> res = abiCodec.decodeMethodToString(abiStr, funcName, callOutput.getOutput());
-                List<String> res = abiCodec.decodeMethodToString(abiStr, funcName, callOutput.getOutput().getBytes());
+//                List<String> res = abiCodec.decodeMethodToString(abiStr, funcName, Numeric.hexStringToByteArray(callOutput.getOutput()));
+                List<String> res = new ArrayList<>();
+                res.add(callOutput.getOutput());
                 log.info("call contract res before decode:{}", res);
                 // bytes类型转十六进制
                 this.handleFuncOutput(abiStr, funcName, res, groupId);
                 log.info("call contract res:{}", res);
                 return res;
-            } catch (ABICodecException e) {
-                log.error("handleCall decode call output fail:[]", e);
-                throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR);
-            }
+//            } catch (ABICodecException e) {
+//                log.error("handleCall decode call output fail:[]", e);
+//                throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR);
+//            }
         }
     }
 
@@ -875,8 +612,8 @@ public class TransService {
         TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair);
         // cover null message through statusCode
         this.decodeReceipt(receipt);
-        log.info("execTransaction end  useTime:{}",
-            Duration.between(startTime, Instant.now()).toMillis());
+        log.info("execTransaction end useTime:{},receipt:{}",
+            Duration.between(startTime, Instant.now()).toMillis(), receipt);
         return receipt;
     }
 
@@ -1007,13 +744,13 @@ public class TransService {
 
     /**
      * parse bytes, bytesN, bytesN[], bytes[] from base64 string to hex string
+     *  todo 应该在sdk中完成
      * @param abiStr
      * @param funcName
      * @param outputValues
      */
     private void handleFuncOutput(String abiStr, String funcName, List<String> outputValues, String groupId) {
         ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName, groupId);
-        ABICodecJsonWrapper jsonWrapper = new ABICodecJsonWrapper();
         List<NamedType> outputTypeList = abiDefinition.getOutputs();
         for (int i = 0; i < outputTypeList.size(); i++) {
             String type = outputTypeList.get(i).getType();

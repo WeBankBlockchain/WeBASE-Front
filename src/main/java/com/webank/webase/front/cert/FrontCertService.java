@@ -16,15 +16,13 @@
 package com.webank.webase.front.cert;
 
 import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.configapi.ConfigService;
 import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.util.CleanPathUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ZipUtils;
-import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,74 +57,27 @@ import org.springframework.stereotype.Service;
 public class FrontCertService {
     private static final String crtContentHead = "-----BEGIN CERTIFICATE-----\n";
     private static final String crtContentTail = "-----END CERTIFICATE-----\n";
-    // 前置配置的节点目录下的证书
-    private static final String nodeCrtPath = "/conf/node.crt";
-    private static final String caCrtPath = "/conf/ca.crt";
-    // 国密双证书模式
-    // 国密证书
-    private static final String gmNodeCrtPath = "/conf/gmnode.crt";
-    private static final String gmCaCrtPath = "/conf/gmca.crt";
-    // 国密加密证书
-    private static final String gmEncryptCrtPath = "/conf/gmennode.crt";
 
-    // 前置的sdk证书
-    private static final String frontSdkCaCrt = "ca.crt";
-    private static final String frontSdkNodeCrt = "sdk.crt";
-    // add in v1.5.0
-    private static final String frontSdkNodeKey = "sdk.key";
-    private static final String frontGmSdkCaCrt = "gm/gmca.crt";
-    private static final String frontGmSdkNodeCrt = "gm/gmsdk.crt";
-    private static final String frontGmSdkNodeKey = "gm/gmsdk.key";
-    private static final String frontGmEnSdkNodeCrt = "gm/gmensdk.crt";
-    private static final String frontGmEnSdkNodeKey = "gm/gmensdk.key";
+    // 前置的sdk证书 todo 从路径读，换成db获取
+    // ecdsa
+    public static final String frontSdkCaCrt = "ca.crt";
+    public static final String frontSdkNodeCrt = "sdk.crt";
+    public static final String frontSdkNodeKey = "sdk.key";
+    // gm
+    public static final String frontGmSdkCaCrt = "sm_ca.crt";
+    public static final String frontGmSdkNodeCrt = "sm_sdk.crt";
+    public static final String frontGmSdkNodeKey = "sm_sdk.key";
+    public static final String frontGmEnSdkNodeCrt = "sm_ensdk.crt";
+    public static final String frontGmEnSdkNodeKey = "sm_ensdk.key";
     // v1.5.0 add sdk key
     private final static String TEMP_SDK_DIR = "sdk";
     private final static String TEMP_ZIP_DIR = "tempZip";
     private final static String TEMP_ZIP_FILE_NAME = "conf.zip";
     private final static String TEMP_ZIP_FILE_PATH = TEMP_ZIP_DIR + File.separator + TEMP_ZIP_FILE_NAME;
 
-
     @Autowired
-    Constants constants;
-    @Autowired
-    private Web3ApiService web3ApiService;
-    @Autowired
-    private Web3Config web3Config;
+    private ConfigService configService;
 
-
-    /**
-     * 设置了front对应的节点的目录，如/data/fisco/nodes/127.0.0.1/node0
-     * 则获取 ${path}/conf 中的ca.crt, node.crt
-     * 无需填agency.crt的读取，因为node.crt会包含node和agency的证书
-     * @return List<String> 或者 String
-     * 2019/12: support guomi: add encrypt node cert in resultList
-     */
-    // 0 is node ca, 1 is agency ca
-    public List<String> getNodeCerts() {
-        List<String> resList = new ArrayList<>();
-        String nodePath = constants.getNodePath();
-        log.debug("start getNodeCerts in {}" + nodePath);
-        getCertListByPathAndType(nodePath, CertTypes.NODE.getValue(), resList);
-        // gm cert added to resList
-        if (web3Config.isUseSmSsl()) {
-            getCertListByPathAndType(nodePath, CertTypes.OTHERS.getValue(), resList);
-        }
-        log.debug("end getNodeCerts in {}" + nodePath);
-        return resList;
-    }
-
-
-    public String getChainCert() {
-        List<String> resList = new ArrayList<>();
-        String nodePath = constants.getNodePath();
-        log.debug("start getChainCert in {}" + nodePath);
-        getCertListByPathAndType(nodePath, CertTypes.CHAIN.getValue(), resList);
-        log.debug("end getChainCert in {}" + nodePath);
-        if (resList.isEmpty()) {
-            return "";
-        }
-        return resList.get(0);
-    }
     /**
      * get SDK crts in directory ~/resource/
      * including agency's crt, node.crt
@@ -143,20 +94,6 @@ public class FrontCertService {
         log.debug("end getSDKNodeCerts sdkCertStr []" + sdkCertMap);
         return sdkCertMap;
     }
-
-    /**
-     * get Cert from crt file through nodePath and certType
-     * @param nodePath
-     * @param certType
-     * @param targetList
-     */
-    private void getCertListByPathAndType(String nodePath, int certType, List<String> targetList) {
-        log.debug("start tools: getCertList in nodePath:{},certType:{}", nodePath, certType);
-        Path certPath = getCertPath(nodePath, certType);
-        loadCrtContentByPath(certPath, targetList);
-    }
-
-
 
     /**
      * get crt file content in dir(String)
@@ -222,33 +159,6 @@ public class FrontCertService {
         return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
     }
 
-    /**
-     * get cert file's path through concat nodePath with certType
-     * @param nodePath the fisco node front connecting with, ex: /data/fisco/nodes/127.0.0.1/node0
-     * @param certType
-     * @return
-     * 2019/12 support guomi
-     */
-    public Path getCertPath(String nodePath, int certType) {
-        if (certType == CertTypes.CHAIN.getValue()) {
-            if (web3Config.isUseSmSsl()) {
-                return Paths.get(CleanPathUtil.cleanString(nodePath.concat(gmCaCrtPath)));
-            }
-            return Paths.get(CleanPathUtil.cleanString(nodePath.concat(caCrtPath)));
-        } else if (certType == CertTypes.NODE.getValue()) {
-            if (web3Config.isUseSmSsl()) {
-                return Paths.get(CleanPathUtil.cleanString(nodePath.concat(gmNodeCrtPath)));
-            }
-            return Paths.get(CleanPathUtil.cleanString(nodePath.concat(nodeCrtPath)));
-        } else if(certType == CertTypes.OTHERS.getValue()) {
-            if (web3Config.isUseSmSsl()) {
-                return Paths.get(CleanPathUtil.cleanString(nodePath.concat(gmEncryptCrtPath)));
-            } else {
-                return null;
-            }
-        }
-        return null;
-    }
 
     /**
      * remove the last character: "\n"
@@ -272,7 +182,7 @@ public class FrontCertService {
      */
     public Map<String, String> getSDKCertKeyMap() {
         Map<String, String> sdkCertMap = new HashMap<>();
-        log.info("start getSDKCertKeyMap sslType:{}.", web3Config.isUseSmSsl());
+        log.info("start getSDKCertKeyMap sslType:{}.", configService.getSdkUseSmSsl());
         // add sdk cert: node.crt
         // v1.5.1 return all sdk cert in conf
         loadBareSdkContent(frontSdkNodeCrt, sdkCertMap);

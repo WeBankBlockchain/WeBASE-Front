@@ -17,11 +17,13 @@ package com.webank.webase.front.configapi;
 
 import com.webank.webase.front.configapi.entity.ConfigInfo;
 import com.webank.webase.front.contract.entity.Contract;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 
 public interface ConfigInfoRepository extends CrudRepository<ConfigInfo, Long>,
     JpaSpecificationExecutor<ConfigInfo> {
 
-    ConfigInfo findByKey(String key);
+    List<ConfigInfo> findByType(String type);
+    ConfigInfo findByTypeAndKey(String type, String key);
 }
