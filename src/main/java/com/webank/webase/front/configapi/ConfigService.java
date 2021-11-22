@@ -14,7 +14,14 @@
 
 package com.webank.webase.front.configapi;
 
-import static com.webank.webase.front.cert.FrontCertService.*;
+import static com.webank.webase.front.cert.FrontCertService.frontGmEnSdkNodeCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontGmEnSdkNodeKey;
+import static com.webank.webase.front.cert.FrontCertService.frontGmSdkCaCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontGmSdkNodeCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontGmSdkNodeKey;
+import static com.webank.webase.front.cert.FrontCertService.frontSdkCaCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontSdkNodeCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontSdkNodeKey;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
@@ -33,12 +40,9 @@ import java.util.Stack;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.config.ConfigOption;
-import org.fisco.bcos.sdk.config.exceptions.ConfigException;
-import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.config.model.CryptoMaterialConfig;
 import org.fisco.bcos.sdk.config.model.NetworkConfig;
 import org.fisco.bcos.sdk.config.model.ThreadPoolConfig;
-import org.fisco.bcos.sdk.jni.common.JniException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -53,9 +57,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConfigService {
     @Autowired
     private Web3Config web3Config;
-    @Autowired
-    @Lazy
-    private Stack<BcosSDK> bcosSDKs;
+//    @Autowired
+//    @Lazy
+//    private Stack<BcosSDK> bcosSDKs;
     @Autowired
     private ConfigInfoRepository configInfoRepository;
 
@@ -108,7 +112,8 @@ public class ConfigService {
         // todo check certificate
 
         log.info("updateBcosSDKPeers newPeers:{},oldPeers:{}", newPeers, oldPeers);
-        this.buildBcosSDK();
+        this.refreshSDKStack(param);
+        // build成功再save， todo save后在初始化的时候尝试自动加载
         // todo save config to db
         this.saveConfig(param);
 
@@ -122,7 +127,7 @@ public class ConfigService {
         // save certs
         this.updateCertConfig(param);
         // save gm
-        this.updateSmSslConfig(param.getUseGmSsl());
+        this.updateSmSslConfig(param.getUseSmSsl());
         log.info("end saveConfig");
     }
 
@@ -145,13 +150,13 @@ public class ConfigService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public ConfigInfo updateSmSslConfig(boolean useGmSsl) {
-        log.info("savePeersConfig useGmSsl:{}", useGmSsl);
+    public ConfigInfo updateSmSslConfig(boolean useSmSsl) {
+        log.info("savePeersConfig useSmSsl:{}", useSmSsl);
         ConfigInfo oldConfig = configInfoRepository.findByTypeAndKey(TYPE_SDK, SDK_USE_SM_SSL);
         if (oldConfig == null) {
             oldConfig = new ConfigInfo();
         }
-        oldConfig.setValue(String.valueOf(useGmSsl));
+        oldConfig.setValue(String.valueOf(useSmSsl));
         log.info("savePeersConfig configInfo:{}", oldConfig);
         return configInfoRepository.save(oldConfig);
     }
@@ -160,7 +165,7 @@ public class ConfigService {
     public void updateCertConfig(ReqSdkConfig param) {
         log.info("savePeersConfig param:{}", param);
         List<ConfigInfo> configInfos = new ArrayList<>();
-        if (param.getUseGmSsl()) {
+        if (param.getUseSmSsl()) {
             ConfigInfo smcaConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmSdkCaCrt)).orElse(new ConfigInfo());
             ConfigInfo smsdkCrtConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmSdkNodeCrt)).orElse(new ConfigInfo());
             ConfigInfo smsdkKeyeyConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmSdkNodeKey)).orElse(new ConfigInfo());
@@ -220,22 +225,27 @@ public class ConfigService {
         return caCertBase64;
     }
 
-    public void buildBcosSDK() {
-        ConfigOption configOption = initConfigOption();
-        // init bcosSDK
-        BcosSDK bcosSDK = new BcosSDK(configOption);
-        if (bcosSDKs.isEmpty()) {
-            bcosSDKs.push(bcosSDK);
-        } else {
-            bcosSDKs.pop();
-            bcosSDKs.push(bcosSDK);
-        }
+    public void refreshSDKStack(ReqSdkConfig param) {
+        BcosSDK bcosSDK = this.buildBcosSDK(param);
+//        if (bcosSDKs.isEmpty()) { todo 启动的时候尝试读取db的值，存在则build，否则调过build
+//            bcosSDKs.push(bcosSDK);
+//        } else {
+//            bcosSDKs.pop();
+//            bcosSDKs.push(bcosSDK);
+//        }
     }
 
-    public ConfigOption initConfigOption() {
+    public BcosSDK buildBcosSDK(ReqSdkConfig param) {
+        ConfigOption configOption = initConfigOption(param);
+        // init bcosSDK
+        BcosSDK bcosSDK = new BcosSDK(configOption);
+        return bcosSDK;
+    }
+
+    public ConfigOption initConfigOption(ReqSdkConfig param) {
         // network
         NetworkConfig networkConfig = new NetworkConfig();
-        networkConfig.setPeers(this.getSdkPeers());
+        networkConfig.setPeers(param.getPeers());
         networkConfig.setDefaultGroup("group");
         networkConfig.setTimeout(30000); // 30s
         // thread pool
@@ -244,7 +254,8 @@ public class ConfigService {
         threadPoolConfig.setThreadPoolSize(Integer.parseInt(threadPoolSize));
 
         // ssl type, cert config
-        CryptoMaterialConfig cryptoMaterialConfig = this.getCryptoMaterialFromDb();
+//        CryptoMaterialConfig cryptoMaterialConfig = this.getCryptoMaterialFromDb();
+        CryptoMaterialConfig cryptoMaterialConfig = this.loadCryptoMaterial(param);
         this.checkCryptoCertMatch(cryptoMaterialConfig);
 
         // set crypto
@@ -253,6 +264,24 @@ public class ConfigService {
         configOption.setThreadPoolConfig(threadPoolConfig);
         configOption.setNetworkConfig(networkConfig);
         return configOption;
+    }
+
+    private CryptoMaterialConfig loadCryptoMaterial(ReqSdkConfig param) {
+        CryptoMaterialConfig cryptoMaterialConfig = new CryptoMaterialConfig();
+        boolean useSmSsl = param.getUseSmSsl();
+        cryptoMaterialConfig.setUseSmCrypto(useSmSsl);
+        if (useSmSsl) {
+            cryptoMaterialConfig.setCaCert(param.getCaCertStr());
+            cryptoMaterialConfig.setSdkCert(param.getSdkCertStr());
+            cryptoMaterialConfig.setSdkPrivateKey(param.getSdkKeyStr());
+            cryptoMaterialConfig.setEnSdkCert(param.getSmEnSdkCertStr());
+            cryptoMaterialConfig.setEnSdkPrivateKey(param.getSmEnSdkKeyStr());
+        } else {
+            cryptoMaterialConfig.setCaCert(param.getCaCertStr());
+            cryptoMaterialConfig.setSdkCert(param.getSdkCertStr());
+            cryptoMaterialConfig.setSdkPrivateKey(param.getSdkKeyStr());
+        }
+        return cryptoMaterialConfig;
     }
 
     private CryptoMaterialConfig getCryptoMaterialFromDb() {

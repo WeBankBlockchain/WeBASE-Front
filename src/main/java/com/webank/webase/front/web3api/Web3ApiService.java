@@ -50,6 +50,7 @@ import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -61,8 +62,14 @@ public class Web3ApiService {
 
     @Autowired
     private Constants constants;
+//    @Autowired
+//    private Stack<BcosSDK> bcosSDKs;
     @Autowired
-    private Stack<BcosSDK> bcosSDKs;
+    @Qualifier("rpcClient")
+    private Client rpcWeb3j;
+    @Autowired
+    @Qualifier("singleClient")
+    private Client singleClient;
     @Autowired
     private Web3Config web3ConfigConstants;
 
@@ -294,7 +301,8 @@ public class Web3ApiService {
      */
     public List<String> getGroupList() {
         log.debug("getGroupList. ");
-        List<String> groupIdList = getBcosSDK().getClient()
+//        List<String> groupIdList = getBcosSDK().getClient()
+        List<String> groupIdList = getWeb3j()
             .getGroupList().getResult()
             .getGroupList();
         return groupIdList;
@@ -423,7 +431,7 @@ public class Web3ApiService {
      * get first web3j in web3jMap
      * @return
      */
-//    public Client getWeb3j() {
+    public Client getWeb3j() {
 //        List<String> groupIdList = rpcWeb3j.getGroupList().getResult().getGroupList(); //1
 //        if (groupIdList.isEmpty()) {
 //            log.error("Node's groupList empty! please check your node status");
@@ -433,7 +441,8 @@ public class Web3ApiService {
 //        // get random index to get web3j
 //        String index = groupIdList.iterator().next();
 //        return clientMap.get(index);
-//    }
+        return rpcWeb3j;
+    }
 
     /**
      * get target group's web3j
@@ -441,16 +450,17 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j(String groupId) {
-//        log.info("getWeb3j groupId:{}", groupId);
-        return getBcosSDK().getClient(groupId);
+        return singleClient;
     }
 
+    // todo
     public BcosSDK getBcosSDK() {
-        if (bcosSDKs.empty()) {
-            log.warn("getBcosSDK stack is empty");
-            throw new FrontException(ConstantCode.BCOS_SDK_EMPTY);
-        }
-        return bcosSDKs.peek();
+//        if (bcosSDKs.empty()) {
+//            log.warn("getBcosSDK stack is empty");
+//            throw new FrontException(ConstantCode.BCOS_SDK_EMPTY);
+//        }
+//        return bcosSDKs.peek(); todo
+        return BcosSDK.build("");
     }
 
     public CryptoSuite getCryptoSuite(String groupId) {

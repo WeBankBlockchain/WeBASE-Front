@@ -25,6 +25,7 @@ import com.webank.webase.front.configapi.entity.ReqSdkConfig;
 import com.webank.webase.front.version.VersionService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -89,6 +90,7 @@ public class ConfigController {
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
+    @ApiOperation(value = "getSDKConfig", notes = "Get the latest sdk config")
     @GetMapping("bcosSDK")
     public BaseResponse getSDKConfig() {
         Instant startTime = Instant.now();

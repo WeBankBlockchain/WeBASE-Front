@@ -145,7 +145,7 @@ public class PresetDataService {
     {
         log.info("insert contractFolderItem id:{},contractFolderName:{} ", contractFolderId, contractFolderName);
         if (contractFolderRepository.exists(contractFolderId)) {
-            log.info("insertContractFolderItem skip contractFolderId:{}  already exist", contractFolderId);
+            log.debug("insertContractFolderItem skip contractFolderId:{}  already exist", contractFolderId);
             return;
         }
         ContractFolderItem contractFolderItem = new ContractFolderItem();

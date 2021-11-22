@@ -25,7 +25,7 @@ public class Address {
     private boolean valid;
     private String address;
 
-    public static final int ValidLen = 42;
+    public static final int ValidLen = 40;
 
     public Address() {}
 

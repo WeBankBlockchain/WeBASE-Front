@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReqSdkConfig {
-    private Boolean useGmSsl;
+    private Boolean useSmSsl;
     @NotNull
     private List<String> peers;
     private String caCertStr;
