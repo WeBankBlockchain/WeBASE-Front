@@ -44,6 +44,7 @@ import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
+import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -199,17 +200,16 @@ public class Web3ApiService {
     /**
      * get transaction counts.
      */
-    public RspTransCountInfo getTransCnt(String groupId) {
-        TotalTransactionCount.TransactionCountInfo transactionCount;
-        transactionCount = getWeb3j(groupId)
-                .getTotalTransactionCount()
-                .getTotalTransactionCount();
-        String txSumHex = transactionCount.getTransactionCount();
-        String blockNumberHex = transactionCount.getBlockNumber();
-        String failedTxSumHex = transactionCount.getFailedTransactionCount();
-        RspTransCountInfo txCountResult = new RspTransCountInfo(Numeric.toBigInt(txSumHex),
-            Numeric.toBigInt(blockNumberHex), Numeric.toBigInt(failedTxSumHex));
-        return txCountResult;
+    public TransactionCountInfo getTransCnt(String groupId) {
+        TotalTransactionCount.TransactionCountInfo transactionCount = getWeb3j(groupId)
+            .getTotalTransactionCount()
+            .getTotalTransactionCount();
+//        log.info("getTransCnt transactionCount:{}", transactionCount);
+//        String txSumHex = transactionCount.getTransactionCount();
+//        String blockNumberHex = transactionCount.getBlockNumber();
+//        String failedTxSumHex = transactionCount.getFailedTransactionCount();
+
+        return transactionCount;
     }
 
     private boolean blockNumberCheck(String groupId, BigInteger blockNumber) {

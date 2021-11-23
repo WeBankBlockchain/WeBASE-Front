@@ -83,8 +83,7 @@ public class PrecompiledSysConfigController{
                 startTime.toEpochMilli(), systemConfigHandle);
         String key = systemConfigHandle.getConfigKey();
         // tx_count_limit, tx_gas_limit
-        if (!PrecompiledUtils.TxCountLimit.equals(key) && !PrecompiledUtils.TxGasLimit.equals(key)
-            && !PrecompiledUtils.ConsensusTimeout.equals(key)) {
+        if (!PrecompiledUtils.TxCountLimit.equals(key) && !PrecompiledUtils.TxGasLimit.equals(key)) {
             log.error("end setSysConfigValueByKey. Exception:{}",
                     ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY.getMessage());
             return ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY;
