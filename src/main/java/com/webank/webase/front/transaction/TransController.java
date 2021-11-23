@@ -81,10 +81,10 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-//        if (StringUtils.isNotBlank(address) todo
-//            && (address.length() != Address.ValidLen || org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address))) {
-//            throw new FrontException(PARAM_ADDRESS_IS_INVALID);
-//        }
+        if (StringUtils.isNotBlank(address)
+            && (address.length() != Address.ValidLen || org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address))) {
+            throw new FrontException(PARAM_ADDRESS_IS_INVALID);
+        }
         if (reqTransHandle.isUseCns()) {
             if (!PrecompiledUtils.checkVersion(reqTransHandle.getVersion())) {
                 throw new FrontException(INVALID_VERSION);
@@ -113,9 +113,9 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-//        if (!StringUtils.isBlank(address) && address.length() != Address.ValidLen) { todo
-//            throw new FrontException(PARAM_ADDRESS_IS_INVALID);
-//        }
+        if (!StringUtils.isBlank(address) && address.length() != Address.ValidLen) {
+            throw new FrontException(PARAM_ADDRESS_IS_INVALID);
+        }
         if (reqTransHandle.isUseCns()) {
             if (!PrecompiledUtils.checkVersion(reqTransHandle.getVersion())) {
                 throw new FrontException(INVALID_VERSION);

@@ -137,11 +137,10 @@ public class Web3ApiController {
     @GetMapping("/code/{address}/{blockNumber}")
     public String getCode(@PathVariable String groupId, @PathVariable String address,
             @PathVariable BigInteger blockNumber) {
-//        if (address.length() != Address.ValidLen) {
-//            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
-//        }
-//        return web3ApiService.getCode(groupId, address, blockNumber);
-        return "0x0";
+        if (address.length() != Address.ValidLen) {
+            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
+        }
+        return web3ApiService.getCode(groupId, address, blockNumber);
     }
 
     /**
