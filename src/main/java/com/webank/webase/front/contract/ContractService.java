@@ -249,12 +249,6 @@ public class ContractService {
             throw new FrontException(GROUPID_NOT_EXIST);
         }
 
-        // check deploy permission
-        String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
-        if (StringUtils.isNotBlank(userAddress)) {
-            checkDeployPermission(req.getGroupId(), userAddress);
-        }
-
         ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
         byte[] encodedConstructor;
         try {
@@ -265,8 +259,8 @@ public class ContractService {
         }
 
         // data sign
-//        String data = bytecodeBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, client, signUserId, "", encodedConstructor);
+//        String signMsg = transService.signMessage(groupId, client, signUserId, "", encodedConstructor);
+        String signMsg = transService.signMessage(groupId, client, signUserId, null, encodedConstructor);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
         String contractAddress = receipt.getContractAddress();
