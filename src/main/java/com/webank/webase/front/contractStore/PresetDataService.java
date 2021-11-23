@@ -72,9 +72,9 @@ public class PresetDataService {
                                 String StoreIcon, String StoreDesc, String StoreDetail,String StoreDesc_en,
                                 String StoreDetail_en)
     {
-        log.info("insert storeItem id:{},storeName:{}", storeId, storeName);
+        log.debug("insert storeItem id:{},storeName:{}", storeId, storeName);
         if (contractStoreRepository.exists(storeId)) {
-            log.info("insertStoreItem skip storeId:{} already exist", storeId);
+            log.debug("insertStoreItem skip storeId:{} already exist", storeId);
             return;
         }
         StoreItem storeItem = new StoreItem();
@@ -143,7 +143,7 @@ public class PresetDataService {
     public void insertContractFolderItem(long contractFolderId, long storeId, String contractFolderName, String contractFolderDesc, String contractFolderDetail,
                                          String contractFolderDesc_en, String contractFolderDetail_en)
     {
-        log.info("insert contractFolderItem id:{},contractFolderName:{} ", contractFolderId, contractFolderName);
+        log.debug("insert contractFolderItem id:{},contractFolderName:{} ", contractFolderId, contractFolderName);
         if (contractFolderRepository.exists(contractFolderId)) {
             log.debug("insertContractFolderItem skip contractFolderId:{}  already exist", contractFolderId);
             return;
@@ -277,9 +277,9 @@ public class PresetDataService {
     public void insertContractItem(long contractId, long contractFolderId, String contractName, String contractSrc,
                                 String contractDesc, String contractDesc_en)
     {
-        log.info("insert contractItem id:{},contractName:{}", contractId, contractName);
+        log.debug("insert contractItem id:{},contractName:{}", contractId, contractName);
         if (contractItemRepository.exists(contractId)) {
-            log.info("insertContractItem skip contractId:{} already exist", contractId);
+            log.debug("insertContractItem skip contractId:{} already exist", contractId);
             return;
         }
         ContractItem contractItem = new ContractItem();

@@ -17,7 +17,6 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.NodeStatus;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Stack;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -60,8 +58,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class Web3ApiService {
 
-    @Autowired
-    private Constants constants;
 //    @Autowired
 //    private Stack<BcosSDK> bcosSDKs;
     @Autowired
@@ -185,7 +181,7 @@ public class Web3ApiService {
 //    }
 
     /**
-     * getCode.
+     * getCode. todo 底层未支持
      *
      * @param address address
      * @param blockNumber blockNumber
@@ -399,7 +395,7 @@ public class Web3ApiService {
             throw new FrontException(ConstantCode.PARAM_ERROR);
         }
         if (StringUtils.isNumeric(input)) {
-            return getBlockByNumber(groupId, new BigInteger(input),true);
+            return getBlockByNumber(groupId, new BigInteger(input),false); // todo check
         } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
             JsonTransactionResponse txResponse = getTransactionByHash(groupId, input, true);
             return txResponse;

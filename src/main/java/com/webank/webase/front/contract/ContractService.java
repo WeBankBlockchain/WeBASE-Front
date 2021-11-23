@@ -156,13 +156,15 @@ public class ContractService {
             log.error("fail addressIsValid. bytecodeBin is empty");
             throw new FrontException(ConstantCode.CONTRACT_BIN_NULL);
         }
-        String binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+        // todo getCode
+//        String binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+//
+//        log.debug("addressIsValid address:{} binOnChain:{}", contractAddress, binOnChain);
+//        if (StringUtils.isBlank(binOnChain)) {
+//            log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
+//            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+//        }
 
-        log.debug("addressIsValid address:{} binOnChain:{}", contractAddress, binOnChain);
-        if (StringUtils.isBlank(binOnChain)) {
-            log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
-        }
         // v1.5.3 allow proxy contract
 //        String subChainAddress = FrontUtils.removeBinFirstAndLast(binOnChain, 68);
 //        String subInputBin = FrontUtils.removeFirstStr(contractBin, "0x");

@@ -210,15 +210,13 @@ public class TransService {
     public String signMessage(String groupId, Client client, String signUserId, String contractAddress,
             byte[] data) {
         // to encode raw tx
-        String chainId = Constants.chainId;
+        Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
         TransactionBuilderService txBuilderService = new TransactionBuilderService(web3ApiService.getWeb3j(groupId));
         TransactionData rawTransaction = txBuilderService
-            .createTransaction(contractAddress, data, Constants.chainId, String.valueOf(groupId));
+            .createTransaction(contractAddress, data, chainIdAndGroupId.getLeft(), String.valueOf(groupId));
+        log.debug("signMessage rawTransaction:{}", JsonUtils.objToString(rawTransaction));
         TransactionEncoderService encoderService = new TransactionEncoderService(web3ApiService.getCryptoSuite(groupId));
-//        byte[] encodedTransaction = encoderService.encodeToTransactionBytes(rawTransaction); todo get rawTx byteArray
-        TarsOutputStream tarsOutputStream = new TarsOutputStream();
-        rawTransaction.writeTo(tarsOutputStream);
-        byte[] encodedTransaction = tarsOutputStream.toByteArray();
+        byte[] encodedTransaction = encoderService.encode(rawTransaction);
 
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
         byte[] txHash = encoderService.encodeAndHashBytes(rawTransaction);  // todo encode hash delete
@@ -238,7 +236,6 @@ public class TransService {
         TransactionReceipt receipt = txPusher.push(signMsg);
         this.decodeReceipt(receipt);
         return receipt;
-
     }
 
     /**
@@ -503,8 +500,7 @@ public class TransService {
             chainIdAndGroupId.getRight());
 
         TransactionEncoderService encoderService = new TransactionEncoderService(client.getCryptoSuite());
-//        byte[] encodedTransaction = encoderService.encode(rawTransaction, null); todo
-        byte[] encodedTransaction = encodeRawTx2ByteArr(rawTransaction);
+        byte[] encodedTransaction = encoderService.encode(rawTransaction);
         // if user not null: sign, else, not sign
         if (StringUtils.isBlank(user)) {
             // return unsigned raw tx encoded str
@@ -560,9 +556,11 @@ public class TransService {
     public List<String> handleCall(String groupId, String userAddress, String contractAddress,
         byte[] encodedFunction, String abiStr, String funcName) {
 
+        Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory
+            .getChainIdAndGroupId(web3ApiService.getWeb3j(groupId));
         TransactionProcessor transactionProcessor = new TransactionProcessor(
             web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(groupId),
-            String.valueOf(groupId), Constants.chainId);
+            String.valueOf(groupId), chainIdAndGroupId.getLeft());
         CallOutput callOutput = transactionProcessor
             .executeCall(userAddress, contractAddress, encodedFunction)
             .getCallResult();
@@ -635,10 +633,10 @@ public class TransService {
         TransactionData rawTransaction = transactionBuilder.createTransaction(contractAddress, encodeFunction,
             chainIdAndGroupId.getLeft(), chainIdAndGroupId.getRight());
         // encode
-        byte[] encodedTransaction = encodeRawTx2ByteArr(rawTransaction);
+        TransactionEncoderService encoderService = new TransactionEncoderService(web3ApiService.getCryptoSuite(groupId));
+        byte[] encodedTransaction = encoderService.encode(rawTransaction);
         // sign
         SignatureResult signResult = this.requestSignForSign(encodedTransaction, signUserId, groupId);
-        TransactionEncoderService encoderService = new TransactionEncoderService(web3ApiService.getCryptoSuite(groupId));
         byte[] signedMessage = this.encodeRawTxWithSign(rawTransaction, signResult, encoderService);
         String signedMessageStr = Numeric.toHexString(signedMessage);
 
