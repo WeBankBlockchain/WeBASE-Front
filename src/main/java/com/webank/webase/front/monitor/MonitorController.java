@@ -105,14 +105,6 @@ public class MonitorController {
         return response;
     }
 
-//    @ApiOperation(value = "检查节点进程连接") todo
-//    @GetMapping("/checkNodeProcess")
-//    public boolean checkNodeProcess() {
-//        log.info("checkNodeProcess.");
-//        return CommonUtils.checkConnect(web3Config.getIp(),
-//                Integer.valueOf(web3Config.getChannelPort()));
-//    }
-
 
     /**
      * get by less than begin or larger than end order by id desc

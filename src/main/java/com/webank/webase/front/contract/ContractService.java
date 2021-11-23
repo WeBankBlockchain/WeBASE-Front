@@ -156,13 +156,15 @@ public class ContractService {
             log.error("fail addressIsValid. bytecodeBin is empty");
             throw new FrontException(ConstantCode.CONTRACT_BIN_NULL);
         }
-        String binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+        // todo getCode
+//        String binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+//
+//        log.debug("addressIsValid address:{} binOnChain:{}", contractAddress, binOnChain);
+//        if (StringUtils.isBlank(binOnChain)) {
+//            log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
+//            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+//        }
 
-        log.debug("addressIsValid address:{} binOnChain:{}", contractAddress, binOnChain);
-        if (StringUtils.isBlank(binOnChain)) {
-            log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
-        }
         // v1.5.3 allow proxy contract
 //        String subChainAddress = FrontUtils.removeBinFirstAndLast(binOnChain, 68);
 //        String subInputBin = FrontUtils.removeFirstStr(contractBin, "0x");
@@ -247,12 +249,6 @@ public class ContractService {
             throw new FrontException(GROUPID_NOT_EXIST);
         }
 
-        // check deploy permission
-        String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
-        if (StringUtils.isNotBlank(userAddress)) {
-            checkDeployPermission(req.getGroupId(), userAddress);
-        }
-
         ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
         byte[] encodedConstructor;
         try {
@@ -263,8 +259,8 @@ public class ContractService {
         }
 
         // data sign
-//        String data = bytecodeBin + encodedConstructor;
-        String signMsg = transService.signMessage(groupId, client, signUserId, "", encodedConstructor);
+//        String signMsg = transService.signMessage(groupId, client, signUserId, "", encodedConstructor);
+        String signMsg = transService.signMessage(groupId, client, signUserId, null, encodedConstructor);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
         String contractAddress = receipt.getContractAddress();

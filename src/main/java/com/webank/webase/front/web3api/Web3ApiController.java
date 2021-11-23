@@ -33,6 +33,7 @@ import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStat
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -154,7 +155,7 @@ public class Web3ApiController {
             @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
                     dataType = "int", paramType = "path"))
     @GetMapping("/transaction-total")
-    public RspTransCountInfo getTransTotalCnt(@PathVariable String groupId) {
+    public TransactionCountInfo getTransTotalCnt(@PathVariable String groupId) {
         return web3ApiService.getTransCnt(groupId);
     }
 
@@ -226,10 +227,18 @@ public class Web3ApiController {
 //        return web3ApiService.getNodeConfig();
 //    }
 
+
+    @ApiOperation(value = "getSealerList", notes = "get list of group's sealers")
+    @GetMapping("/sealerList/weight")
+    public List<Sealer> getSealerListWithWeight(@PathVariable String groupId) {
+        return web3ApiService.getSealerList(groupId);
+    }
+
+
     @ApiOperation(value = "getSealerList", notes = "get list of group's sealers")
     @GetMapping("/sealerList")
-    public List<Sealer> getSealerList(@PathVariable String groupId) {
-        return web3ApiService.getSealerList(groupId);
+    public List<String> getSealerList(@PathVariable String groupId) {
+        return web3ApiService.getSealerStrList(groupId);
     }
 
     @ApiOperation(value = "getObserverList", notes = "get list of group's observers")

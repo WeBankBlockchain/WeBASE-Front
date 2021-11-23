@@ -82,8 +82,7 @@ public class TransController extends BaseController {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
         if (StringUtils.isNotBlank(address)
-            && (address.length() != Address.ValidLen
-                || org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address))) {
+            && (address.length() != Address.ValidLen || org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address))) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {

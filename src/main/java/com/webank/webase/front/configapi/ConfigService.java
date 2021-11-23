@@ -112,7 +112,7 @@ public class ConfigService {
         // todo check certificate
 
         log.info("updateBcosSDKPeers newPeers:{},oldPeers:{}", newPeers, oldPeers);
-        this.refreshSDKStack(param);
+//        this.refreshSDKStack(param); todo
         // build成功再save， todo save后在初始化的时候尝试自动加载
         // todo save config to db
         this.saveConfig(param);
@@ -208,7 +208,7 @@ public class ConfigService {
     public List<String> getSdkPeers() {
         ConfigInfo configInfo = configInfoRepository.findByTypeAndKey(TYPE_SDK, SDK_PEERS);
         if (configInfo == null) {
-            throw new FrontException(ConstantCode.PARAM_ERROR_EMPTY_PEERS);
+            return new ArrayList<>();
         }
         List<String> dbPeers = JsonUtils.toJavaObjectList(configInfo.getValue(), String.class);
         log.info("getSdkPeers :{}", dbPeers);

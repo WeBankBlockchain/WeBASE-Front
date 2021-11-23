@@ -17,7 +17,6 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.NodeStatus;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Stack;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +44,7 @@ import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
+import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -60,8 +59,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class Web3ApiService {
 
-    @Autowired
-    private Constants constants;
 //    @Autowired
 //    private Stack<BcosSDK> bcosSDKs;
     @Autowired
@@ -185,7 +182,7 @@ public class Web3ApiService {
 //    }
 
     /**
-     * getCode.
+     * getCode. todo 底层未支持
      *
      * @param address address
      * @param blockNumber blockNumber
@@ -203,17 +200,16 @@ public class Web3ApiService {
     /**
      * get transaction counts.
      */
-    public RspTransCountInfo getTransCnt(String groupId) {
-        TotalTransactionCount.TransactionCountInfo transactionCount;
-        transactionCount = getWeb3j(groupId)
-                .getTotalTransactionCount()
-                .getTotalTransactionCount();
-        String txSumHex = transactionCount.getTransactionCount();
-        String blockNumberHex = transactionCount.getBlockNumber();
-        String failedTxSumHex = transactionCount.getFailedTransactionCount();
-        RspTransCountInfo txCountResult = new RspTransCountInfo(Numeric.toBigInt(txSumHex),
-            Numeric.toBigInt(blockNumberHex), Numeric.toBigInt(failedTxSumHex));
-        return txCountResult;
+    public TransactionCountInfo getTransCnt(String groupId) {
+        TotalTransactionCount.TransactionCountInfo transactionCount = getWeb3j(groupId)
+            .getTotalTransactionCount()
+            .getTotalTransactionCount();
+//        log.info("getTransCnt transactionCount:{}", transactionCount);
+//        String txSumHex = transactionCount.getTransactionCount();
+//        String blockNumberHex = transactionCount.getBlockNumber();
+//        String failedTxSumHex = transactionCount.getFailedTransactionCount();
+
+        return transactionCount;
     }
 
     private boolean blockNumberCheck(String groupId, BigInteger blockNumber) {
@@ -399,7 +395,7 @@ public class Web3ApiService {
             throw new FrontException(ConstantCode.PARAM_ERROR);
         }
         if (StringUtils.isNumeric(input)) {
-            return getBlockByNumber(groupId, new BigInteger(input),true);
+            return getBlockByNumber(groupId, new BigInteger(input),false); // todo check
         } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
             JsonTransactionResponse txResponse = getTransactionByHash(groupId, input, true);
             return txResponse;
