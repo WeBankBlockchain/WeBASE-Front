@@ -227,10 +227,18 @@ public class Web3ApiController {
 //        return web3ApiService.getNodeConfig();
 //    }
 
+
+    @ApiOperation(value = "getSealerList", notes = "get list of group's sealers")
+    @GetMapping("/sealerList/weight")
+    public List<Sealer> getSealerListWithWeight(@PathVariable String groupId) {
+        return web3ApiService.getSealerList(groupId);
+    }
+
+
     @ApiOperation(value = "getSealerList", notes = "get list of group's sealers")
     @GetMapping("/sealerList")
-    public List<Sealer> getSealerList(@PathVariable String groupId) {
-        return web3ApiService.getSealerList(groupId);
+    public List<String> getSealerList(@PathVariable String groupId) {
+        return web3ApiService.getSealerStrList(groupId);
     }
 
     @ApiOperation(value = "getObserverList", notes = "get list of group's observers")
