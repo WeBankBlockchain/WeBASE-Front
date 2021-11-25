@@ -98,7 +98,7 @@ public class Web3Config {
                 log.error("Init bcosSDK from db failed:[]", e);
             }
             if (configOption == null) {
-                log.error("Init bcosSDK configOption from db failed, configOption:{}", configOption);
+                log.error("Init bcosSDK configOption from db failed, configOption is null");
                 return bcosSDKs;
             }
             BcosSDK bcosSDK = new BcosSDK(configOption);

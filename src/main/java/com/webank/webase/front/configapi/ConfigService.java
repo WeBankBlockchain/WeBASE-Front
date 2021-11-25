@@ -142,7 +142,7 @@ public class ConfigService {
 //        if (bcosSDKs.isEmpty()) {
 //            bcosSDKs.push(bcosSDK);
 //        } else {
-//            bcosSDKs.pop();
+//            bcosSDKs.pop(); //todo 调用bcosSDK的stop
 //            bcosSDKs.push(bcosSDK);
 //        }
     }
@@ -158,9 +158,8 @@ public class ConfigService {
         log.info("savePeersConfig peers:{}", peers);
         ConfigInfo oldConfig = configInfoRepository.findByTypeAndKey(TYPE_SDK, SDK_PEERS);
         if (oldConfig == null) {
-            oldConfig = new ConfigInfo();
+            oldConfig = new ConfigInfo(TYPE_SDK, SDK_PEERS, JsonUtils.objToString(peers));
         }
-        oldConfig.setValue(JsonUtils.objToString(peers));
         log.info("savePeersConfig configInfo:{}", oldConfig);
         return configInfoRepository.save(oldConfig);
     }
@@ -170,9 +169,8 @@ public class ConfigService {
         log.info("savePeersConfig useSmSsl:{}", useSmSsl);
         ConfigInfo oldConfig = configInfoRepository.findByTypeAndKey(TYPE_SDK, SDK_USE_SM_SSL);
         if (oldConfig == null) {
-            oldConfig = new ConfigInfo();
+            oldConfig = new ConfigInfo(TYPE_SDK, SDK_USE_SM_SSL, JsonUtils.objToString(useSmSsl));
         }
-        oldConfig.setValue(String.valueOf(useSmSsl));
         log.info("savePeersConfig configInfo:{}", oldConfig);
         return configInfoRepository.save(oldConfig);
     }
@@ -182,20 +180,28 @@ public class ConfigService {
         log.info("savePeersConfig param:{}", param);
         List<ConfigInfo> configInfos = new ArrayList<>();
         if (param.getUseSmSsl()) {
-            ConfigInfo smcaConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmSdkCaCrt)).orElse(new ConfigInfo());
-            ConfigInfo smsdkCrtConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmSdkNodeCrt)).orElse(new ConfigInfo());
-            ConfigInfo smsdkKeyeyConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmSdkNodeKey)).orElse(new ConfigInfo());
-            ConfigInfo smEnCrtConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmEnSdkNodeCrt)).orElse(new ConfigInfo());
-            ConfigInfo smEnKeyConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmEnSdkNodeKey)).orElse(new ConfigInfo());
+            ConfigInfo smcaConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmSdkCaCrt))
+                .orElse(new ConfigInfo(TYPE_SDK, frontGmSdkCaCrt, JsonUtils.objToString(param.getSmCaCertStr())));
+            ConfigInfo smsdkCrtConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmSdkNodeCrt))
+                .orElse(new ConfigInfo(TYPE_SDK, frontGmSdkNodeCrt, JsonUtils.objToString(param.getSmSdkCertStr())));
+            ConfigInfo smsdkKeyeyConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmSdkNodeKey))
+                .orElse(new ConfigInfo(TYPE_SDK, frontGmSdkNodeKey, JsonUtils.objToString(param.getSmSdkKeyStr())));
+            ConfigInfo smEnCrtConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmEnSdkNodeCrt))
+                .orElse(new ConfigInfo(TYPE_SDK, frontGmEnSdkNodeCrt, JsonUtils.objToString(param.getSmEnSdkCertStr())));
+            ConfigInfo smEnKeyConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontGmEnSdkNodeKey))
+                .orElse(new ConfigInfo(TYPE_SDK, frontGmEnSdkNodeKey, JsonUtils.objToString(param.getSmSdkKeyStr())));
             configInfos.add(smcaConfig);
             configInfos.add(smsdkCrtConfig);
             configInfos.add(smsdkKeyeyConfig);
             configInfos.add(smEnCrtConfig);
             configInfos.add(smEnKeyConfig);
         } else {
-            ConfigInfo caConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontSdkCaCrt)).orElse(new ConfigInfo());
-            ConfigInfo sdkCrtConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontSdkNodeCrt)).orElse(new ConfigInfo());
-            ConfigInfo sdkKeyConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontSdkNodeKey)).orElse(new ConfigInfo());
+            ConfigInfo caConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontSdkCaCrt))
+                .orElse(new ConfigInfo(TYPE_SDK, frontSdkCaCrt, JsonUtils.objToString(param.getCaCertStr())));
+            ConfigInfo sdkCrtConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontSdkNodeCrt))
+                .orElse(new ConfigInfo(TYPE_SDK, frontSdkNodeCrt, JsonUtils.objToString(param.getSdkCertStr())));
+            ConfigInfo sdkKeyConfig = Optional.ofNullable(configInfoRepository.findByTypeAndKey(TYPE_SDK, frontSdkNodeKey))
+                .orElse(new ConfigInfo(TYPE_SDK, frontSdkNodeKey, JsonUtils.objToString(param.getSdkKeyStr())));
             configInfos.add(caConfig);
             configInfos.add(sdkCrtConfig);
             configInfos.add(sdkKeyConfig);
@@ -265,6 +271,7 @@ public class ConfigService {
         configOption.setCryptoMaterialConfig(cryptoMaterialConfig);
         configOption.setThreadPoolConfig(threadPoolConfig);
         configOption.setNetworkConfig(networkConfig);
+        configOption.setJniConfig(configOption.generateJniConfig());
         log.info("initConfigOption configOption :{}", JsonUtils.objToString(configOption));
         return configOption;
     }
