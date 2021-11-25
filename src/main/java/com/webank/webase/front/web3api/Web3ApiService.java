@@ -188,12 +188,12 @@ public class Web3ApiService {
      * @param blockNumber blockNumber
      */
     public String getCode(String groupId, String address, BigInteger blockNumber) {
-        String code;
         if (blockNumberCheck(groupId, blockNumber)) {
             throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
         }
-        code = getWeb3j(groupId)
+        String code = getWeb3j(groupId)
                 .getCode(address).getCode();
+        log.debug("getCode code:{}", code);
         return code;
     }
 
