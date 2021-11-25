@@ -60,11 +60,11 @@ public class PresetDataService {
             "Traceability Contract Suite",
             "一套溯源应用合约模板（Smart-Dev-Contract）",
             "Traceability Contract Suite");
-        insertStoreItem(proxyFolderId, "代理合约模板", "Proxy", "4", "toolboxId",
-            "一套可升级的业务、数据分离的代理合约模板",
-            "Proxy Contract Suite",
-            "一套可升级的业务、数据分离的代理合约模板",
-            "Proxy Contract Suite");
+//        insertStoreItem(proxyFolderId, "代理合约模板", "Proxy", "4", "toolboxId",
+//            "一套可升级的业务、数据分离的代理合约模板",
+//            "Proxy Contract Suite",
+//            "一套可升级的业务、数据分离的代理合约模板",
+//            "Proxy Contract Suite");
 
     }
 
@@ -133,11 +133,11 @@ public class PresetDataService {
             "一套溯源应用合约模板（Smart-Dev-Contract）",
             "Traceability Contract Suite",
             "Traceability Contract Suite");
-        insertContractFolderItem(proxyFolderId,proxyFolderId,"Proxy",
-                "一套可升级的业务、数据分离的代理合约模板",
-                "一套可升级的业务、数据分离的代理合约模板",
-                "Proxy Contract Suite",
-                "Proxy Contract Suite");
+//        insertContractFolderItem(proxyFolderId,proxyFolderId,"Proxy",
+//                "一套可升级的业务、数据分离的代理合约模板",
+//                "一套可升级的业务、数据分离的代理合约模板",
+//                "Proxy Contract Suite",
+//                "Proxy Contract Suite");
     }
 
     public void insertContractFolderItem(long contractFolderId, long storeId, String contractFolderName, String contractFolderDesc, String contractFolderDetail,
@@ -251,26 +251,26 @@ public class PresetDataService {
         insertContractItem(contractIndex++,traceFolderId,"TraceabilityFactory",SmartDevConstantContext.TRACEABILITY_FACTORY,
             SmartDevConstantContext.TRACE_API_MD,SmartDevConstantContext.TRACE_API_MD);
         // proxy
-        insertContractItem(contractIndex++,proxyFolderId,"EnrollProxy", ProxyConstantContext.ENROLL_PROXY_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
-        insertContractItem(contractIndex++,proxyFolderId,"EnrollController", ProxyConstantContext.ENROLL_CONTROLLER_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
-        insertContractItem(contractIndex++,proxyFolderId,"EnrollStorage", ProxyConstantContext.ENROLL_STORAGE_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
-        insertContractItem(contractIndex++,proxyFolderId,"EnrollStorageStateful", ProxyConstantContext.ENROLL_STORAGE_STATEFUL_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
-        insertContractItem(contractIndex++,proxyFolderId,"Proxy", ProxyConstantContext.PROXY_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
-        insertContractItem(contractIndex++,proxyFolderId,"BaseStorage", ProxyConstantContext.BASE_STORAGE_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
-        insertContractItem(contractIndex++,proxyFolderId,"Ownable", ProxyConstantContext.OWNABLE_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
-        insertContractItem(contractIndex++,proxyFolderId,"Strings", ProxyConstantContext.STRINGS_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
-        insertContractItem(contractIndex++,proxyFolderId,"Table", ProxyConstantContext.TABLE_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
-        insertContractItem(contractIndex++,proxyFolderId,"Address", ToolsConstantContext.ADDRESS_SOURCE,
-                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"EnrollProxy", ProxyConstantContext.ENROLL_PROXY_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"EnrollController", ProxyConstantContext.ENROLL_CONTROLLER_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"EnrollStorage", ProxyConstantContext.ENROLL_STORAGE_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"EnrollStorageStateful", ProxyConstantContext.ENROLL_STORAGE_STATEFUL_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"Proxy", ProxyConstantContext.PROXY_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"BaseStorage", ProxyConstantContext.BASE_STORAGE_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"Ownable", ProxyConstantContext.OWNABLE_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"Strings", ProxyConstantContext.STRINGS_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"Table", ProxyConstantContext.TABLE_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+//        insertContractItem(contractIndex++,proxyFolderId,"Address", ToolsConstantContext.ADDRESS_SOURCE,
+//                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
     }
 
 
