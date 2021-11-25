@@ -23,6 +23,7 @@ import static com.webank.webase.front.cert.FrontCertService.frontSdkCaCrt;
 import static com.webank.webase.front.cert.FrontCertService.frontSdkNodeCrt;
 import static com.webank.webase.front.cert.FrontCertService.frontSdkNodeKey;
 
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.configapi.ConfigService;
 import com.webank.webase.front.configapi.entity.ReqSdkConfig;
 import com.webank.webase.front.util.JsonUtils;
@@ -35,7 +36,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.codec.datatypes.Bool;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
@@ -85,33 +85,43 @@ public class Web3Config {
     }
 
 //    @Bean
-//    public Stack<BcosSDK> getBcosSDK() throws ConfigException {
-//    public BcosSDK getBcosSDK() throws ConfigException {
-//        Stack<BcosSDK> bcosSDKs = new Stack<>(); todo
-//        if (loadFromDb) {
-//            try {
-//                this.initSDKFromDb(bcosSDKs);
-//            } catch (ConfigException e) {
-//                log.error("push new sdk instance error:[]", e);
-//            }
-//        } else {
-//            BcosSDK bcosSDK = initSDKFromFile();
-//            return bcosSDK;
-//            bcosSDKs.push(bcosSDK);
-//        }
-//        return bcosSDKs;
-//    }
+    public Stack<BcosSDK> getBcosSDK() throws ConfigException {
+        Stack<BcosSDK> bcosSDKs = new Stack<>();
+        log.info("getBcosSDK loadFromDb:{}", loadFromDb);
+        if (loadFromDb) {
+            ConfigOption configOption = null;
+            try {
+                configOption = configService.initConfigOptionFromDb();
+            } catch (FrontException e) {
+                log.error("Config of sdk not config:[]", e);
+            } catch (Exception e) {
+                log.error("Init bcosSDK from db failed:[]", e);
+            }
+            if (configOption == null) {
+                log.error("Init bcosSDK configOption from db failed, configOption:{}", configOption);
+                return bcosSDKs;
+            }
+            BcosSDK bcosSDK = new BcosSDK(configOption);
+            log.info("getBcosSDK bcosSDK:{}", JsonUtils.objToString(bcosSDK));
+            bcosSDKs.push(bcosSDK);
+        } else {
+            ConfigOption configOption = this.initSDKFromFile();
+            BcosSDK bcosSDK = new BcosSDK(configOption);
+            log.info("getBcosSDK bcosSDK:{}", JsonUtils.objToString(bcosSDK));
+            bcosSDKs.push(bcosSDK);
+        }
+        log.info("getBcosSDK bcosSDKs:{}", JsonUtils.objToString(bcosSDKs));
+
+        return bcosSDKs;
+    }
 
     @Bean
     public ConfigOption initSDKFromFile() throws ConfigException {
         log.info("start init ConfigProperty");
         // cert config, encrypt type
         Map<String, Object> cryptoMaterial = new HashMap<>();
-        // cert use conf
         cryptoMaterial.put("certPath", certPath);
-//        cryptoMaterial.put("useSMCrypto", useSmSsl);
         cryptoMaterial.put("useSMCrypto", useSmSsl);
-        // user no need set this:cryptoMaterial.put("sslCryptoType", encryptType);
         log.info("init cert cryptoMaterial:{}, (using conf as cert path)", JsonUtils.objToString(cryptoMaterial));
 
         // peers, default one node in front
@@ -131,17 +141,13 @@ public class Web3Config {
         configProperty.setNetwork(network);
         configProperty.setThreadPool(threadPool);
         // init config option
-        log.info("init configOption from configProperty");
         ConfigOption configOption = new ConfigOption(configProperty);
-        // init bcosSDK
-//        BcosSDK bcosSDK = new BcosSDK(configOption);
-//        log.info("finish init bcos sdk instance, check sdk.log for detail");
-
+        log.info("initSDKFromFile init configOption :{}", configOption);
         return configOption;
     }
 
-
-    public void initSDKFromDb(Stack<BcosSDK> bcosSDKs) throws ConfigException {
+    @Deprecated
+    public ConfigOption initSDKFromDb() throws ConfigException {
         ReqSdkConfig config = new ReqSdkConfig();
         boolean useGmSsl = Boolean.parseBoolean(useSmSsl);
         config.setUseSmSsl(useGmSsl);
@@ -157,11 +163,9 @@ public class Web3Config {
             config.setSdkCertStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontSdkNodeCrt));
             config.setSdkKeyStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontSdkNodeKey));
         }
-        BcosSDK bcosSDK = configService.buildBcosSDK(config);
-        if (bcosSDKs.isEmpty()) {
-            log.info("push new sdk instance into stack:{}", JsonUtils.objToString(bcosSDK));
-            bcosSDKs.push(bcosSDK);
-        }
+        ConfigOption configOption = configService.initConfigOption(config);
+        log.info("initSDKFromDb configOption :{}", configOption);
+        return configOption;
     }
 
 

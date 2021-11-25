@@ -69,6 +69,7 @@ public class ConfigService {
 
     public Map<String, ConfigInfo> getConfigInfoSdk() {
         List<ConfigInfo> oldConfig = configInfoRepository.findByType(TYPE_SDK);
+        log.info("getConfigInfoSdk oldConfig:{}", oldConfig);
         Map<String, ConfigInfo> configInfoMap = new HashMap<>();
         for (ConfigInfo info : oldConfig) {
             configInfoMap.put(info.getKey(), info);
@@ -83,7 +84,10 @@ public class ConfigService {
         if (newPeers == null || newPeers.isEmpty()) {
             throw new FrontException(ConstantCode.PARAM_ERROR_EMPTY_PEERS);
         }
-        List<String> oldPeers = this.getSdkPeers();
+        ConfigInfo peersConfig = configInfoRepository.findByTypeAndKey(TYPE_SDK, SDK_PEERS);
+        List<String> oldPeers = Optional.ofNullable(
+            JsonUtils.toJavaObjectList(peersConfig.getValue(), String.class))
+            .orElse(new ArrayList<>());
         log.info("updateBcosSDKPeers oldPeers in db:{}", oldPeers);
 
         boolean isSame = CommonUtils.compareStrList(oldPeers, newPeers);
@@ -112,7 +116,7 @@ public class ConfigService {
         // todo check certificate
 
         log.info("updateBcosSDKPeers newPeers:{},oldPeers:{}", newPeers, oldPeers);
-//        this.refreshSDKStack(param); todo
+        this.refreshSDKStack(param); //todo
         // build成功再save， todo save后在初始化的时候尝试自动加载
         // todo save config to db
         this.saveConfig(param);
@@ -192,9 +196,10 @@ public class ConfigService {
     }
 
 
-    public boolean getSdkUseSmSsl() {
+    public Boolean getSdkUseSmSsl() {
         ConfigInfo configInfo = configInfoRepository.findByTypeAndKey(TYPE_SDK, SDK_USE_SM_SSL);
         if (configInfo == null) {
+            log.warn("getSdkUseSmSsl get null");
             throw new FrontException(ConstantCode.BCOS_SDK_EMPTY);
         }
         boolean useSmSsl = Boolean.parseBoolean(configInfo.getValue());
@@ -208,7 +213,8 @@ public class ConfigService {
     public List<String> getSdkPeers() {
         ConfigInfo configInfo = configInfoRepository.findByTypeAndKey(TYPE_SDK, SDK_PEERS);
         if (configInfo == null) {
-            return new ArrayList<>();
+            log.warn("getSdkPeers get null");
+            throw new FrontException(ConstantCode.BCOS_SDK_EMPTY);
         }
         List<String> dbPeers = JsonUtils.toJavaObjectList(configInfo.getValue(), String.class);
         log.info("getSdkPeers :{}", dbPeers);
@@ -218,6 +224,7 @@ public class ConfigService {
     public String getSdkCertStr(String certName) {
         ConfigInfo configInfo = configInfoRepository.findByTypeAndKey(TYPE_SDK, certName);
         if (configInfo == null) {
+            log.warn("getSdkCertStr get null");
             throw new FrontException(ConstantCode.PARAM_ERROR_CERT_EMPTY);
         }
         String caCertBase64 = configInfo.getValue();
@@ -227,12 +234,12 @@ public class ConfigService {
 
     public void refreshSDKStack(ReqSdkConfig param) {
         BcosSDK bcosSDK = this.buildBcosSDK(param);
-//        if (bcosSDKs.isEmpty()) { todo 启动的时候尝试读取db的值，存在则build，否则调过build
-//            bcosSDKs.push(bcosSDK);
-//        } else {
-//            bcosSDKs.pop();
-//            bcosSDKs.push(bcosSDK);
-//        }
+        if (bcosSDKs.isEmpty()) {
+            bcosSDKs.push(bcosSDK);
+        } else {
+            bcosSDKs.pop();
+            bcosSDKs.push(bcosSDK);
+        }
     }
 
     public BcosSDK buildBcosSDK(ReqSdkConfig param) {
@@ -284,7 +291,26 @@ public class ConfigService {
         return cryptoMaterialConfig;
     }
 
-    private CryptoMaterialConfig getCryptoMaterialFromDb() {
+
+    /**
+     * todo auto try load from db to init bcosSDK when start
+     * todo if db's data is null, catch FrontException, skip init,
+     * @return
+     */
+    public ConfigOption initConfigOptionFromDb() throws FrontException {
+        // network
+        List<String> peers = this.getSdkPeers();
+
+        NetworkConfig networkConfig = new NetworkConfig();
+        networkConfig.setPeers(peers);
+        networkConfig.setDefaultGroup("group");
+        networkConfig.setTimeout(30000); // 30s
+        // thread pool
+        String threadPoolSize = web3Config.getThreadPoolSize();
+        ThreadPoolConfig threadPoolConfig = new ThreadPoolConfig();
+        threadPoolConfig.setThreadPoolSize(Integer.parseInt(threadPoolSize));
+
+        // ssl type, cert config
         CryptoMaterialConfig cryptoMaterialConfig = new CryptoMaterialConfig();
         boolean useSmSsl = this.getSdkUseSmSsl();
         cryptoMaterialConfig.setUseSmCrypto(useSmSsl);
@@ -299,8 +325,17 @@ public class ConfigService {
             cryptoMaterialConfig.setSdkCert(this.getSdkCertStr(frontSdkNodeCrt));
             cryptoMaterialConfig.setSdkPrivateKey(this.getSdkCertStr(frontSdkNodeKey));
         }
-        return cryptoMaterialConfig;
+        // todo
+        this.checkCryptoCertMatch(cryptoMaterialConfig);
+
+        // set crypto
+        ConfigOption configOption = new ConfigOption();
+        configOption.setCryptoMaterialConfig(cryptoMaterialConfig);
+        configOption.setThreadPoolConfig(threadPoolConfig);
+        configOption.setNetworkConfig(networkConfig);
+        return configOption;
     }
+
 
     // TODO check cryptoMaterialConfig's cert match with each other
     private void checkCryptoCertMatch(CryptoMaterialConfig cryptoMaterialConfig) {
