@@ -699,6 +699,19 @@ export function encryption(groupId) {
         responseType: 'text'
     })
 }
+export function getSDK() {
+    return get({
+        url: `${HANDLE}config/bcosSDK`,
+        method: 'get',
+    })
+}
+export function updateSDK(data) {
+    return post({
+        url: `${HANDLE}config/bcosSDK`,
+        method: 'post',
+        data: data
+    })
+}
 /*订阅事件*/
 
 export function blockEventList(data, list) {
