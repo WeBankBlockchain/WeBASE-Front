@@ -3,6 +3,7 @@ package com.webank.webase.front.contract;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.entity.RspContractCompile;
+import com.webank.webase.front.contractStore.constant.ToolsConstantContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.fisco.solc.compiler.CompilationResult;
@@ -91,4 +92,5 @@ public class ContractTest{
         }
 
     }
+
 }

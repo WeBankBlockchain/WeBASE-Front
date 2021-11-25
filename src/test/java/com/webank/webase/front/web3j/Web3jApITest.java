@@ -155,7 +155,7 @@ public class Web3jApITest extends TestBase {
   @Test
   public void getTransactionReceipt() {
       BcosTransactionReceipt bcosTransactionReceipt = web3j.getTransactionReceipt(blockHash, true);
-      TransactionReceipt transactionReceipt = bcosTransactionReceipt.getTransactionReceipt().get();
+      TransactionReceipt transactionReceipt = bcosTransactionReceipt.getTransactionReceipt();
         assertNotNull(transactionReceipt);
   }
 

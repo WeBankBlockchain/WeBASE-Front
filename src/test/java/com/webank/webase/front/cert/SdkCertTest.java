@@ -36,18 +36,4 @@ public class SdkCertTest extends SpringTestBase {
         sdkList.forEach(c -> System.out.println(c));
     }
 
-    @Test
-    public void testChainCertService() {
-        String sdkList = frontCertService.getChainCert();
-        System.out.println(sdkList);
-        Assert.notNull(sdkList, "load sdk crt error");
-    }
-
-    @Test
-    public void testNodeCertsService() {
-        List<String> sdkList = frontCertService.getNodeCerts();
-        Assert.notNull(sdkList, "load sdk crt error");
-        sdkList.forEach(c -> System.out.println(c));
-    }
-
 }
