@@ -85,9 +85,8 @@ public class ConfigService {
             throw new FrontException(ConstantCode.PARAM_ERROR_EMPTY_PEERS);
         }
         ConfigInfo peersConfig = configInfoRepository.findByTypeAndKey(TYPE_SDK, SDK_PEERS);
-        List<String> oldPeers = Optional.ofNullable(
-            JsonUtils.toJavaObjectList(peersConfig.getValue(), String.class))
-            .orElse(new ArrayList<>());
+        List<String> oldPeers = peersConfig != null
+            ? JsonUtils.toJavaObjectList(peersConfig.getValue(), String.class) : new ArrayList<>();
         log.info("updateBcosSDKPeers oldPeers in db:{}", oldPeers);
 
         boolean isSame = CommonUtils.compareStrList(oldPeers, newPeers);
@@ -133,6 +132,19 @@ public class ConfigService {
         // save gm
         this.updateSmSslConfig(param.getUseSmSsl());
         log.info("end saveConfig");
+    }
+
+    public void refreshSDKStack(ReqSdkConfig param) {
+        ConfigOption configOption = initConfigOption(param);
+        // init bcosSDK
+        BcosSDK bcosSDK = new BcosSDK(configOption);
+        log.info("refreshSDKStack bcosSDK:{}", bcosSDK);
+//        if (bcosSDKs.isEmpty()) {
+//            bcosSDKs.push(bcosSDK);
+//        } else {
+//            bcosSDKs.pop();
+//            bcosSDKs.push(bcosSDK);
+//        }
     }
 
 
@@ -232,23 +244,6 @@ public class ConfigService {
         return caCertBase64;
     }
 
-    public void refreshSDKStack(ReqSdkConfig param) {
-        BcosSDK bcosSDK = this.buildBcosSDK(param);
-        if (bcosSDKs.isEmpty()) {
-            bcosSDKs.push(bcosSDK);
-        } else {
-            bcosSDKs.pop();
-            bcosSDKs.push(bcosSDK);
-        }
-    }
-
-    public BcosSDK buildBcosSDK(ReqSdkConfig param) {
-        ConfigOption configOption = initConfigOption(param);
-        // init bcosSDK
-        BcosSDK bcosSDK = new BcosSDK(configOption);
-        return bcosSDK;
-    }
-
     public ConfigOption initConfigOption(ReqSdkConfig param) {
         // network
         NetworkConfig networkConfig = new NetworkConfig();
@@ -270,6 +265,7 @@ public class ConfigService {
         configOption.setCryptoMaterialConfig(cryptoMaterialConfig);
         configOption.setThreadPoolConfig(threadPoolConfig);
         configOption.setNetworkConfig(networkConfig);
+        log.info("initConfigOption configOption :{}", JsonUtils.objToString(configOption));
         return configOption;
     }
 
