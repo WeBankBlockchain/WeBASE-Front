@@ -190,7 +190,8 @@ export default {
         },
         pemRivateKey() {
             var form = {
-                userAddress: this.exportInfo.address
+                userAddress: this.exportInfo.address,
+                groupId:localStorage.getItem('groupId')
             }
             exportPemPrivateKey(form)
                 .then(res => {
@@ -222,7 +223,8 @@ export default {
         p12RivateKey() {
             var form = {
                 userAddress: this.exportInfo.address,
-                p12Password: Base64.encode(this.keyForm.password)
+                p12Password: Base64.encode(this.keyForm.password),
+                groupId:localStorage.getItem('groupId')
             }
             exportP12PrivateKey(form)
                 .then(res => {

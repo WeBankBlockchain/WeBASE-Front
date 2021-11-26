@@ -35,7 +35,7 @@
                     </div>
                 </td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td style="width: 100px;text-align: right" class="text-td"><span class="font-color-fff">CNS：</span></td>
                 <td>
                     <el-checkbox v-model="isCNS" @change="changeCns"></el-checkbox>
@@ -69,7 +69,7 @@
                         </el-form-item>
                     </el-form>
                 </td>
-            </tr>
+            </tr> -->
             <tr v-if='inputs.length'>
                 <td style="vertical-align: top;width: 100px;text-align: right" class="text-td">
                     <span class="font-color-fff">

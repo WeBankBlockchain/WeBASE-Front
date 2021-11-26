@@ -196,7 +196,7 @@ export default {
             this.groupName = localStorage.getItem("groupName");
         }
         this.$nextTick(function () {
-            this.getGroup(this.getClientVersion);
+            this.getGroup();
             localStorage.setItem("sidebarHide", false);
             this.changeRouter();
             if (this.$refs.sidebarContent.offsetHeight > document.body.clientHeight) {
@@ -223,7 +223,7 @@ export default {
             localStorage.setItem('groupId', this.group);
             localStorage.setItem("groupName", this.groupName);
             Bus.$emit("changeGroup", this.group);
-            this.getClientVersion();
+            //this.getClientVersion();
         },
         getClientVersion() {
             queryClientVersion(this.group)
@@ -261,6 +261,7 @@ export default {
                                 groupName: `group${arr[i]}`
                             });
                         }
+                        
                         this.groupList = list;
                         if (!this.group) {
                             this.group = this.groupList[0].group;
@@ -271,7 +272,7 @@ export default {
                         localStorage.setItem("groupName", this.groupName)
                         localStorage.setItem('groupId', this.group);
                         localStorage.setItem("cluster", JSON.stringify(list));
-                        callback()
+                       // callback()
                     } else {
                         if(res.data.code){
                             this.$message({

@@ -132,6 +132,16 @@ export default {
         export: '导出',
         placeholder: '请输入文件名(默认file)'
     },
+    sdk:{
+        caCertStr:'caCert',
+        sdkCertStr:'sdkCert',
+        sdkKeyStr:'sdkKey',
+        smCaCertStr:'smCaCert',
+        smEnSdkCertStr:'smEnSdkCert',
+        smEnSdkKeyStr:'smEnSdkKey',
+        smSdkCertStr:'smSdkCert',
+        smSdkKeyStr:'smSdkKey',
+    },
     notice: {
         copySuccessfully: '复制成功',
         copyFailure: '值为空，不复制'
@@ -234,8 +244,10 @@ export default {
         transactionReceipt: '交易回执',
         mgmtCns: "管理CNS",
         exportJavaProject: "导出java项目",
+        addSDK:'配置SDK'
     },
     text: {
+        updateSDKsucess:'配置成功',
         isRedeploy: '合约已部署 是否重新部署？',
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',
         noStoreContract: '请在左侧面板点击打开一个合约',

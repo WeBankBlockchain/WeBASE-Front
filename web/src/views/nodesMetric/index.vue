@@ -136,13 +136,17 @@ export default {
                         } else {
                             var timestampList = data[0]["data"]["contrastDataList"]["timestampList"] || [];
                         }
+                        
                         this.nodesHealthData = data;
+                        this.nodesHealthData.splice(1,1)
                         this.nodesHealthData.forEach(item => {
                             if (item.metricType === "blockHeight") {
                                 item.metricName = this.$t('text.blockHeight');
-                            } else if (item.metricType === "pbftView") {
+                            } 
+                            else if (item.metricType === "pbftView") {
                                 item.metricName = "pbftView";
-                            } else if (item.metricType === 'pendingCount') {
+                            } 
+                            else if (item.metricType === 'pendingCount') {
                                 item.metricName = this.$t('text.pendingTransactions');
                             }
                             if (this.chartParam.contrastBeginDate) {

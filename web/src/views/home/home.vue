@@ -165,6 +165,9 @@
                 </el-col>
             </el-row>
         </div>
+        <el-dialog :show-close='false' :close-on-click-modal="false" :title="$t('title.addSDK')" :visible.sync="sdkDialogVisible" width="600px" v-if="sdkDialogVisible" center>
+           <update-sdk @sdkClose="sdkClose" @updateSDKsucess="sdkSuccess" :sdkParam="sdkParam"></update-sdk>
+        </el-dialog>
     </div>
 </template>
 
@@ -172,6 +175,7 @@
 import contentHead from "@/components/contentHead";
 import transactionDetail from "@/components/transactionDetail";
 import charts from "./components/chart";
+import updateSdk from "./components/updateSDK";
 import {
     getChartData,
     getNetworkStatistics,
@@ -183,7 +187,9 @@ import {
     queryTxNumber,
     queryPendingTxNumber,
     queryHomeSearch,
-    queryGroup
+    queryGroup,
+    getSDK,
+    updateSDK
 } from "@/util/api";
 import { changWeek, numberFormat, format } from "@/util/util";
 import router from "@/router";
@@ -198,7 +204,8 @@ export default {
     components: {
         "v-content-head": contentHead,
         "v-chart": charts,
-        "v-transaction-detail": transactionDetail
+        "v-transaction-detail": transactionDetail,
+        "update-sdk":updateSdk
     },
     data: function () {
         return {
@@ -299,7 +306,9 @@ export default {
             overviewTxNumber: "",
             overviewPendingTxNumber: "",
             group: localStorage.getItem("groupId"),
-            searchMap: {}
+            searchMap: {},
+            sdkDialogVisible:false,
+            sdkParam:{}
         };
     },
     beforeDestroy: function () {
@@ -314,6 +323,7 @@ export default {
         // this.getNodeTable();
         // this.getBlockList();
         // this.getTransaction();
+        //this.getSDK()
         if (this.group) {
             this.getAllOverview()
         } else {
@@ -327,6 +337,26 @@ export default {
     },
     destroyed() { },
     methods: {
+        sdkSuccess(){
+            this.sdkDialogVisible=false
+               if (this.group) {
+            this.getAllOverview()
+        } else {
+            this.getGroup()
+        }
+        },
+        sdkClose(){
+            this.sdkDialogVisible=false
+        },
+        getSDK(){
+        getSDK().then(res=>{
+            const { data, status } = res;
+            console.log(data);
+            if(JSON.stringify(data.data)=='{}'){
+             this.sdkDialogVisible=true
+            }
+        })
+        },
         getGroup() {
             queryGroup()
                 .then(res => {
@@ -339,6 +369,8 @@ export default {
                             this.group = arr[0]
                             this.getAllOverview()
                         }
+                    }else{
+                        this.getSDK()
                     }
                 })
                 .catch(err => {
@@ -390,7 +422,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.overviewNodesNumber = data.length;
+                        this.overviewNodesNumber = data.length;                                                                       
                     } else {
                         this.$message({
                             type: "error",
@@ -410,7 +442,7 @@ export default {
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {
-                        this.overviewTxNumber = data.txSum;
+                        this.overviewTxNumber = data.transactionCount;
                     } else {
                         this.$message({
                             type: "error",
