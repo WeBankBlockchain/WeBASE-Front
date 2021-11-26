@@ -303,7 +303,17 @@ export default {
                             console.log(error)
                         }
                     } else {
-                        this.transation.reqVal[i] = data;
+                        switch (data) {
+                           case "true":
+                             this.transation.reqVal[i] = true
+                             break
+                           case "false":
+                             this.transation.reqVal[i] = false
+                             break
+                           default:
+                             this.transation.reqVal[i] = data
+                             break
+                        }
                     }
                 }
             }
