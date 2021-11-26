@@ -38,5 +38,7 @@ public class ReqSignMessageHash {
     @NotBlank
     private String hash;
     private String signUserId;
+    @NotBlank
+    private String groupId;
 
 }

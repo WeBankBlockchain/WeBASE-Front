@@ -26,6 +26,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ContractPathKey implements Serializable {
     private static final long serialVersionUID = 713233686141669428L;
-    private Integer groupId;
+    private String groupId;
     private String contractPath;
 }

@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.List;
-import org.fisco.bcos.sdk.abi.TypeReference;
-import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
+import org.fisco.bcos.sdk.codec.datatypes.Type;
 
 /**
  * abi's function information.

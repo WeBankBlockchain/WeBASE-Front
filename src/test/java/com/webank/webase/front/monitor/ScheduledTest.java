@@ -46,7 +46,7 @@ public class ScheduledTest extends TestBase {
             System.out.println("begin sync chain data");
             Long currentTime = System.currentTimeMillis();
             // add  more group
-            Client web3j = web3ApiService.getWeb3j(1);
+            Client web3j = web3ApiService.getWeb3j("1");
             Monitor monitor = new Monitor();
             BlockNumber blockHeight = web3j.getBlockNumber();
             PbftView pbftView = web3j.getPbftView();
@@ -55,7 +55,7 @@ public class ScheduledTest extends TestBase {
             monitor.setPbftView(pbftView.getPbftView());
             monitor.setPendingTransactionCount(pendingTxSize.getPendingTxSize());
             monitor.setTimestamp(currentTime);
-            monitor.setGroupId(1);
+            monitor.setGroupId("1");
             System.out.println(monitor);
             System.out.println("insert success =  " + monitor.getId());
 

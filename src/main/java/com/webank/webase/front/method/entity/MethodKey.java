@@ -23,5 +23,5 @@ import lombok.Data;
 public class MethodKey implements Serializable {
     private static final long serialVersionUID = 6135785965389059052L;
     private String methodId;
-    private Integer groupId;
+    private String groupId;
 }

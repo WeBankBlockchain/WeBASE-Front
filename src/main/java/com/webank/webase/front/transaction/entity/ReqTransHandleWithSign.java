@@ -29,7 +29,7 @@ import org.hibernate.validator.constraints.NotBlank;
  */
 @Data
 public class ReqTransHandleWithSign {
-    private int groupId = 1;
+    private String groupId = "1";
     @NotNull(message = ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY_STRING)
     private String signUserId;
     /**

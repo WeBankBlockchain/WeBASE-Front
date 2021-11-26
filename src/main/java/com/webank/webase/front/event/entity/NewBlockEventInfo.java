@@ -51,7 +51,7 @@ public class NewBlockEventInfo {
     /**
      * group id
      */
-    private Integer groupId;
+    private String groupId;
 
     /**
      * MQ info

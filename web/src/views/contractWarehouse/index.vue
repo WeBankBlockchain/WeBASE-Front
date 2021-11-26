@@ -107,7 +107,7 @@ export default {
             getContractStore()
                 .then(res => {
                     this.loading = false;
-                    if (res.data.code === 0) {
+                     if (res.data.code === 0) {
                         var list = res.data.data;
                         // var iconList = ["tools", "supply", "points"];
                         // list.forEach((item, index) => {

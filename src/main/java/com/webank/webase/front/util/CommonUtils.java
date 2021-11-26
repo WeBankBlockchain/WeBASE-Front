@@ -34,6 +34,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.List;
@@ -46,10 +47,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
+import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
@@ -703,55 +701,6 @@ public class CommonUtils {
         receipt.setBlockNumber(Numeric.toBigInt(blockNumber).toString(10));
     }
 
-
-    /**
-     * convert hex number string to decimal number string
-     * @param block
-     */
-    public static void processBlockHexNumber(BcosBlock.Block block) {
-        if (block == null) {
-            return;
-        }
-        String gasLimit = Optional.ofNullable(block.getGasLimit()).orElse("0");
-        String gasUsed =  Optional.ofNullable(block.getGasUsed()).orElse("0");
-        String timestamp =  Optional.ofNullable(block.getTimestamp()).orElse("0");
-        block.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
-        block.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
-        block.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
-    }
-
-    /**
-     * convert hex number string to decimal number string
-     * @param blockHeader
-     */
-    public static void processBlockHeaderHexNumber(BcosBlockHeader.BlockHeader blockHeader) {
-        if (blockHeader == null) {
-            return;
-        }
-        String gasLimit = Optional.ofNullable(blockHeader.getGasLimit()).orElse("0");
-        String gasUsed =  Optional.ofNullable(blockHeader.getGasUsed()).orElse("0");
-        String timestamp =  Optional.ofNullable(blockHeader.getTimestamp()).orElse("0");
-        blockHeader.setGasLimit(Numeric.toBigInt(gasLimit).toString(10));
-        blockHeader.setGasUsed(Numeric.toBigInt(gasUsed).toString(10));
-        blockHeader.setTimestamp(Numeric.toBigInt(timestamp).toString(10));
-    }
-
-    /**
-     * convert hex number string to decimal number string
-     * @param trans
-     */
-    public static void processTransHexNumber(JsonTransactionResponse trans) {
-        if (trans == null) {
-            return;
-        }
-        String gas = Optional.ofNullable(trans.getGas()).orElse("0");
-        String gasPrice = Optional.ofNullable(trans.getGasPrice()).orElse("0");
-        String groupId = Optional.ofNullable(trans.getGroupId()).orElse("0");
-        trans.setGas(Numeric.toBigInt(gas).toString(10));
-        trans.setGasPrice(Numeric.toBigInt(gasPrice).toString(10));
-        trans.setGroupId(Numeric.toBigInt(groupId).toString(10));
-    }
-
     /**
      * get version number without character
      * @param verStr ex: v2.4.1, ex 1.5.0
@@ -799,7 +748,7 @@ public class CommonUtils {
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + PEM_FILE_FORMAT;
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(rawPrivateKey);
         cryptoKeyPair.storeKeyPairWithPem(exportedKeyPath);
         return exportedKeyPath;
     }
@@ -828,7 +777,7 @@ public class CommonUtils {
         // get private key
         String exportedKeyPath = TEMP_EXPORT_KEYSTORE_PATH + File.separator +
             userName + "_" + address + P12_FILE_FORMAT;
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(rawPrivateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(rawPrivateKey);
         cryptoKeyPair.storeKeyPairWithP12(exportedKeyPath, p12Password);
 
         return exportedKeyPath;
@@ -871,5 +820,19 @@ public class CommonUtils {
         }
         String regex = "^[a-zA-Z]+$";
         return (input.charAt(0)+"").matches(regex);
+    }
+
+    /**
+     * compareStrList
+     * @param list1
+     * @param list2
+     * @return true if same list
+     */
+    public static boolean compareStrList(List<String> list1, List<String> list2) {
+        String[] arr1 = list1.toArray(new String[]{});
+        String[] arr2 = list2.toArray(new String[]{});
+        Arrays.sort(arr1);
+        Arrays.sort(arr1);
+        return Arrays.equals(arr1,arr2);
     }
 }

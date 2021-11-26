@@ -17,6 +17,7 @@ package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.base.TestBase;
 import java.util.List;
+import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
@@ -45,7 +46,7 @@ public class CnsServiceTest extends TestBase {
         System.out.println(cnsService.registerCNS(contractName, version, address, abi));
 
         // 默认获取最新版本
-        List<CnsInfo> res = cnsService.selectByNameAndVersion(contractName, version);
+        Tuple2<String, String> res = cnsService.selectByNameAndVersion(contractName, version);
         List<CnsInfo> list = cnsService.selectByName(contractName);
         System.out.println(res);
         System.out.println(list);

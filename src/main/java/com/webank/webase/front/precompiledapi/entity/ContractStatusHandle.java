@@ -25,7 +25,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ContractStatusHandle {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
-    private int groupId;
+    private String groupId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_ADDRESS_EMPTY)
     private String contractAddress;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_HANDLE_TYPE_EMPTY)

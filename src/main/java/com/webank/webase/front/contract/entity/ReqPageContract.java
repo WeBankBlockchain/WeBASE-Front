@@ -18,7 +18,7 @@ import lombok.Data;
 @Data
 public class ReqPageContract {
 
-    private Integer groupId;
+    private String groupId;
     private String contractName;
     private String contractAddress;
     private Integer contractStatus;

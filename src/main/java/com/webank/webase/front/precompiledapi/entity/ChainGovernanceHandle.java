@@ -24,7 +24,7 @@ import lombok.Data;
 public class ChainGovernanceHandle {
     // defaultValue = "1"
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
-    private Integer groupId;
+    private String groupId;
     @NotNull(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)
     private String signUserId;
     private String address;

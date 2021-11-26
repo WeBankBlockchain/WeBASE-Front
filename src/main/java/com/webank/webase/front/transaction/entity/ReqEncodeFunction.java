@@ -31,4 +31,6 @@ public class ReqEncodeFunction {
     private List<Object> contractAbi;
     @NotNull
     private List<Object> funcParam;
+    @NotBlank
+    private String groupId;
 }

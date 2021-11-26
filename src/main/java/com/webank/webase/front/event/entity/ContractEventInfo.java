@@ -54,7 +54,7 @@ public class ContractEventInfo {
     /**
      * group id
      */
-    private Integer groupId;
+    private String groupId;
 
     /**
      * MQ info

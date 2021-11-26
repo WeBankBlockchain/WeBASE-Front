@@ -31,7 +31,7 @@ import lombok.Data;
 public class ContractPath implements Serializable {
     private static final long serialVersionUID = 3286516914027062194L;
     @Id
-    private Integer groupId;
+    private String groupId;
     @Id
     private String contractPath;
     private LocalDateTime createTime;

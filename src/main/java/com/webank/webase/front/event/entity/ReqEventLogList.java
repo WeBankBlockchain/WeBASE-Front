@@ -28,7 +28,7 @@ public class ReqEventLogList {
      * group id
      */
     @NotNull(message = "groupId cannot be null")
-    private Integer groupId;
+    private String groupId;
 
     /**
      * contract abi for decoder

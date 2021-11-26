@@ -18,12 +18,12 @@ import lombok.Data;
 @Data
 public class GroupSizeInfo {
     
-    private int groupId;
+    private String groupId;
     private String groupName;
     private String path;
     private long size;
     
-    public GroupSizeInfo(int groupId, String groupName, String path, long size) {
+    public GroupSizeInfo(String groupId, String groupName, String path, long size) {
         super();
         this.groupId = groupId;
         this.groupName = groupName;

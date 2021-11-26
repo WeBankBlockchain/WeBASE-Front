@@ -50,7 +50,7 @@ public class MethodService {
     /**
      * query by methodId.
      */
-    public Method getByMethodId(String methodId, int groupId) {
+    public Method getByMethodId(String methodId, String groupId) {
         MethodKey pram = new MethodKey();
         pram.setMethodId(methodId);
         pram.setGroupId(groupId);

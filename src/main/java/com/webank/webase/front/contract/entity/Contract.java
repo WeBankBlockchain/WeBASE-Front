@@ -43,7 +43,7 @@ public class Contract {
     private String version;
     private String contractName;
     private Integer contractStatus;
-    private Integer groupId;
+    private String groupId;
     @Column(columnDefinition = "mediumtext")
     private String contractSource;
     @Column(columnDefinition = "mediumtext")

@@ -20,7 +20,7 @@ import lombok.Data;
  */
 @Data
 public class ResSystemConfig {
-    private int groupId;
+    private String groupId;
     private String configKey;
     private String configValue;
 }

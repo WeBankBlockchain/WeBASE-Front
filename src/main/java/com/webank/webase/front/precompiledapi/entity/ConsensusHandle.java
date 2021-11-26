@@ -24,7 +24,7 @@ import javax.validation.constraints.NotNull;
 @Data
 public class ConsensusHandle {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
-    private int groupId;
+    private String groupId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_NODE_TYPE_IS_EMPTY)
     private String nodeType;
     @NotBlank(message = ConstantCode.PARAM_FAIL_FROM_IS_EMPTY)

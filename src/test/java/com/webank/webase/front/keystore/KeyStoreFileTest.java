@@ -66,7 +66,7 @@ public class KeyStoreFileTest {
     public void loadPrivateKeyTest() throws Exception {
         String privateKey = "71f1479d9051e8d6b141a3b3ef9c01a7756da823a0af280c6bf62d18ee0cc978";
         CryptoSuite cryptoSuite = new CryptoSuite(CryptoType.ECDSA_TYPE);
-        CryptoKeyPair credentials = cryptoSuite.createKeyPair(privateKey);
+        CryptoKeyPair credentials = cryptoSuite.getKeyPairFactory().createKeyPair(privateKey);
         // private key 实例
         System.out.println(credentials.getHexPrivateKey());
         // public key 实例

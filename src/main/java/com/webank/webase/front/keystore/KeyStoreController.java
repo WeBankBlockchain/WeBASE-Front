@@ -26,7 +26,6 @@ import com.webank.webase.front.keystore.entity.MessageHashInfo;
 import com.webank.webase.front.keystore.entity.ReqExport;
 import com.webank.webase.front.keystore.entity.ReqImportPem;
 import com.webank.webase.front.keystore.entity.ReqImportWithSign;
-import com.webank.webase.front.keystore.entity.RspKeyFile;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.util.CommonUtils;
@@ -37,7 +36,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -71,18 +69,20 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "userName", value = "user name", dataType = "String"),
     })
     @GetMapping
-    public KeyStoreInfo getKeyStore(@RequestParam(required = false, defaultValue = "2") int type,
-                                    @RequestParam(required = false) String appId,
-                                    @RequestParam(required = false) String signUserId,
-                                    @RequestParam(required = false) String userName,
-                                    @RequestParam(required = false, defaultValue = "false") boolean returnPrivateKey) {
+    public KeyStoreInfo getKeyStore(
+        @RequestParam String groupId,
+        @RequestParam(required = false, defaultValue = "2") int type,
+        @RequestParam(required = false) String appId,
+        @RequestParam(required = false) String signUserId,
+        @RequestParam(required = false) String userName,
+        @RequestParam(required = false, defaultValue = "false") boolean returnPrivateKey) {
         // external key store (2)
         if (KeyTypes.EXTERNALUSER.getValue() == type) {
             if (StringUtils.isBlank(signUserId) || StringUtils.isBlank(appId)) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_APPID_SIGN_USER_ID_EMPTY);
             }
             // create from webase-sign , return keystoreInfo without private key
-            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStoreWithSign(signUserId, appId, returnPrivateKey);
+            KeyStoreInfo keyStoreInfo = keyStoreService.createKeyStoreWithSign(signUserId, appId, returnPrivateKey, groupId);
             return keyStoreInfo;
         } else if (KeyTypes.LOCALUSER.getValue() == type) {
             // local key store (0)
@@ -91,7 +91,7 @@ public class KeyStoreController extends BaseController {
                 throw new FrontException(ConstantCode.USER_NAME_NULL);
             }
             // create locally, return keystoreInfo with private key encrypted
-            return keyStoreService.createKeyStoreLocally(userName);
+            return keyStoreService.createKeyStoreLocally(userName, groupId);
         } else {
             log.error("fail createKeyStore. key store type invalid");
             throw new FrontException(ConstantCode.PARAM_VAILD_FAIL);
@@ -128,8 +128,11 @@ public class KeyStoreController extends BaseController {
         @ApiImplicitParam(name = "userName", value = "user name", required = true, dataType = "String")
     })
     @GetMapping("/import")
-    public KeyStoreInfo importPrivateKey(@RequestParam String privateKey, @RequestParam String userName) {
-        return keyStoreService.importFromPrivateKey(privateKey, userName);
+    public KeyStoreInfo importPrivateKey(
+        @RequestParam String groupId,
+        @RequestParam String privateKey,
+        @RequestParam String userName) {
+        return keyStoreService.importFromPrivateKey(privateKey, userName, groupId);
     }
 
     @ApiOperation(value = "import PrivateKey by pem", notes = "import PrivateKey by pem")
@@ -139,10 +142,11 @@ public class KeyStoreController extends BaseController {
     public BaseResponse importPemPrivateKey(@Valid @RequestBody ReqImportPem reqImportPem) {
         String pemContent = reqImportPem.getPemContent();
         String userName = reqImportPem.getUserName();
+        String groupId = reqImportPem.getGroupId();
         if(!pemContent.startsWith(PemUtils.crtContentHeadNoLF)) {
             throw new FrontException(ConstantCode.PEM_FORMAT_ERROR);
         }
-        keyStoreService.importKeyStoreFromPem(pemContent, userName);
+        keyStoreService.importKeyStoreFromPem(pemContent, userName, groupId);
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
@@ -153,16 +157,18 @@ public class KeyStoreController extends BaseController {
             @ApiImplicitParam(name = "p12Password", value = ".p12 file password", dataType = "String")
     })
     @PostMapping("/importP12")
-    public BaseResponse importP12PrivateKey(@RequestParam String userName,
-                                            @RequestParam MultipartFile p12File,
-                                            @RequestParam(required = false, defaultValue = "") String p12Password) {
+    public BaseResponse importP12PrivateKey(
+        @RequestParam String groupId,
+        @RequestParam String userName,
+        @RequestParam MultipartFile p12File,
+        @RequestParam(required = false, defaultValue = "") String p12Password) {
         if (!CommonUtils.notContainsChinese(p12Password)) {
             throw new FrontException(ConstantCode.P12_PASSWORD_NOT_CHINESE);
         }
         if (p12File.getSize() == 0) {
             throw new FrontException(ConstantCode.P12_FILE_ERROR);
         }
-        keyStoreService.importKeyStoreFromP12(p12File, p12Password, userName);
+        keyStoreService.importKeyStoreFromP12(p12File, p12Password, userName, groupId);
         return new BaseResponse(ConstantCode.RET_SUCCESS);
     }
 
@@ -172,7 +178,7 @@ public class KeyStoreController extends BaseController {
     @PostMapping("/importWithSign")
     public KeyStoreInfo importPrivateKeyWithSign(@Valid @RequestBody ReqImportWithSign reqImportWithSign) {
         return keyStoreService.importPrivateKeyToSign(reqImportWithSign.getPrivateKey(),
-                reqImportWithSign.getSignUserId(), reqImportWithSign.getAppId());
+                reqImportWithSign.getSignUserId(), reqImportWithSign.getAppId(), reqImportWithSign.getGroupId());
     }
 
 
@@ -200,6 +206,7 @@ public class KeyStoreController extends BaseController {
     public ResponseEntity<InputStreamResource> exportPemPrivateKey(@RequestBody ReqExport param) {
         Instant startTime = Instant.now();
         log.info("start exportPemPrivateKey startTime:{},param:{}", startTime.toEpochMilli(), param);
+        String groupId = param.getGroupId();
         String userAddress = param.getUserAddress();
         String signUserId = param.getSignUserId();
         if (StringUtils.isAllBlank(userAddress, signUserId)) {
@@ -208,9 +215,9 @@ public class KeyStoreController extends BaseController {
         // get file
         FileContentHandle fileContentHandle;
         if (StringUtils.isNotBlank(signUserId)) {
-            fileContentHandle = keyStoreService.exportPemWithSign(signUserId);
+            fileContentHandle = keyStoreService.exportPemWithSign(signUserId, groupId);
         } else {
-            fileContentHandle = keyStoreService.exportPemLocal(userAddress);
+            fileContentHandle = keyStoreService.exportPemLocal(userAddress, groupId);
         }
         log.info("end exportPemPrivateKey fileContentHandle:{}useTime:{}", fileContentHandle,
             Duration.between(startTime, Instant.now()).toMillis());
@@ -225,6 +232,7 @@ public class KeyStoreController extends BaseController {
     public ResponseEntity<InputStreamResource> exportP12PrivateKey(@RequestBody ReqExport param) {
         Instant startTime = Instant.now();
         log.info("start exportP12PrivateKey startTime:{},param:{}", startTime.toEpochMilli(),param);
+        String groupId = param.getGroupId();
         String userAddress = param.getUserAddress();
         String signUserId = param.getSignUserId();
         String p12Password = param.getP12Password();
@@ -237,9 +245,9 @@ public class KeyStoreController extends BaseController {
         // get file
         FileContentHandle fileContentHandle;
         if (StringUtils.isNotBlank(signUserId)) {
-            fileContentHandle = keyStoreService.exportP12WithSign(signUserId, p12Password);
+            fileContentHandle = keyStoreService.exportP12WithSign(signUserId, p12Password, groupId);
         } else {
-            fileContentHandle = keyStoreService.exportP12Local(userAddress, p12Password);
+            fileContentHandle = keyStoreService.exportP12Local(userAddress, p12Password, groupId);
         }
         log.info("end exportP12PrivateKey fileContentHandle:{}useTime:{}", fileContentHandle,
             Duration.between(startTime, Instant.now()).toMillis());

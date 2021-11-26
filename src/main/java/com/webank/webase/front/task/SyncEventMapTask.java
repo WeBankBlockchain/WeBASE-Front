@@ -26,11 +26,13 @@ import com.webank.webase.front.event.NewBlockEventInfoRepository;
 import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.List;
+import java.util.Stack;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
-import org.fisco.bcos.sdk.service.GroupManagerService;
+import org.fisco.bcos.sdk.eventsub.EventSubscribeImp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -48,7 +50,7 @@ public class SyncEventMapTask {
     @Autowired
     ContractEventInfoRepository contractEventInfoRepository;
     @Autowired
-    private BcosSDK bcosSDK;
+    private Web3ApiService web3ApiService;
     @Autowired
     private EventService eventService;
 
@@ -68,21 +70,21 @@ public class SyncEventMapTask {
     private void cleanNewBlockEventMap() {
         log.debug("start cleanNewBlockEventMap. ");
         int removeCount = 0;
-        GroupManagerService groupManagerService = bcosSDK.getGroupManagerService();
-        List<NewBlockEventInfo> blockInfoList = Lists.newArrayList(newBlockEventInfoRepository.findAll());
-        for (String registerId : BLOCK_ROUTING_KEY_MAP.keySet()) {
-            // check whether map contains callback that not in db
-            long equalCount = blockInfoList.stream()
-                    .filter(info -> registerId.equals(info.getRegisterId()))
-                    .count();
-            // remove from map that not in db's list
-            if (equalCount == 0) {
-                log.debug("remove new block callback of registerId:{}", registerId);
-                groupManagerService.eraseBlockNotifyCallback(registerId);
-                BLOCK_ROUTING_KEY_MAP.remove(registerId);
-                removeCount++;
-            }
-        }
+//        GroupManagerService groupManagerService = bcosSDK.getGroupManagerService(); todo 取消注册
+//        List<NewBlockEventInfo> blockInfoList = Lists.newArrayList(newBlockEventInfoRepository.findAll());
+//        for (String registerId : BLOCK_ROUTING_KEY_MAP.keySet()) {
+//            // check whether map contains callback that not in db
+//            long equalCount = blockInfoList.stream()
+//                    .filter(info -> registerId.equals(info.getRegisterId()))
+//                    .count();
+//            // remove from map that not in db's list
+//            if (equalCount == 0) {
+//                log.debug("remove new block callback of registerId:{}", registerId);
+//                groupManagerService.eraseBlockNotifyCallback(registerId);
+//                BLOCK_ROUTING_KEY_MAP.remove(registerId);
+//                removeCount++;
+//            }
+//        }
         log.debug("end cleanNewBlockEventMap. removeCount:{}", removeCount);
     }
 
@@ -99,7 +101,8 @@ public class SyncEventMapTask {
             if (equalCount == 0) {
                 log.debug("remove event callback of registerId:{}", registerId);
                 ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(registerId);
-                EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(callback.getGroupId());
+//                EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(callback.getGroupId()); todo
+                EventSubscribe eventSubscribe = new EventSubscribeImp(String.valueOf(callback.getGroupId()), web3ApiService.getBcosSDK().getConfig());
                 eventSubscribe.unsubscribeEvent(registerId, callback);
                 CONTRACT_EVENT_CALLBACK_MAP.remove(registerId);
                 removeCount++;

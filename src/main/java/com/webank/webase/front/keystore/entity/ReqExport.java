@@ -16,6 +16,7 @@ package com.webank.webase.front.keystore.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.NotBlank;
 
 @Data
 @NoArgsConstructor
@@ -23,4 +24,6 @@ public class ReqExport {
     private String userAddress;
     private String signUserId;
     private String p12Password;
+    @NotBlank
+    private String groupId;
 }

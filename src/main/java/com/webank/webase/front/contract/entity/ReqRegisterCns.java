@@ -19,7 +19,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -29,7 +29,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Data
 public class ReqRegisterCns {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY_STRING)
-    private Integer groupId;
+    private String groupId;
     @Deprecated
     private String contractName;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CNS_NAME_IS_EMPTY_STRING)

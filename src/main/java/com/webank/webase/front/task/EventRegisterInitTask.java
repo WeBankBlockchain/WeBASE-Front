@@ -27,6 +27,7 @@ import com.webank.webase.front.event.NewBlockEventInfoRepository;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
@@ -54,7 +55,7 @@ public class EventRegisterInitTask {
     @Autowired
     MQPublisher mqPublisher;
     @Autowired
-    private BcosSDK bcosSDK;
+    private Web3ApiService web3ApiService;
     @Autowired
     private EventService eventService;
 
@@ -72,7 +73,7 @@ public class EventRegisterInitTask {
     public synchronized void syncEventRegisterTask() {
         try{
             log.debug("Register task starts.");
-            for (Integer groupId: bcosSDK.getGroupManagerService().getGroupList()) {
+            for (String groupId: web3ApiService.getGroupList()) {
                 List<NewBlockEventInfo> newBlockEventInfoList =
                         newBlockEventInfoRepository.findByGroupId(groupId);
                 List<ContractEventInfo> contractEventInfoList =
@@ -99,7 +100,7 @@ public class EventRegisterInitTask {
         String appId = registerInfo.getAppId();
         String exchangeName = registerInfo.getExchangeName();
         String queueName = registerInfo.getQueueName();
-        int groupId = registerInfo.getGroupId();
+        String groupId = registerInfo.getGroupId();
         String blockRoutingKey = registerInfo.getRoutingKey();
         eventService.handleRegNewBlock(appId, groupId, exchangeName, queueName, blockRoutingKey);
         log.debug("end registerNewBlockEvent successful appId:{}", appId);
@@ -111,7 +112,7 @@ public class EventRegisterInitTask {
         String exchangeName = rInfo.getExchangeName();
         String queueName = rInfo.getQueueName();
         String appId = rInfo.getAppId();
-        int groupId = rInfo.getGroupId();
+        String groupId = rInfo.getGroupId();
         String eventRoutingKey = rInfo.getRoutingKey();
         String contractAddress = rInfo.getContractAddress();
         String abi = rInfo.getContractAbi();

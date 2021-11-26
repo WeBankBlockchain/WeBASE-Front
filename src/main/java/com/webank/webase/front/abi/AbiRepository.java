@@ -31,11 +31,11 @@ public interface AbiRepository extends CrudRepository<AbiInfo, Long>,
 
     AbiInfo findByAbiId(Long abiId);
 
-    AbiInfo findByGroupIdAndContractAddress(Integer groupId, String address);
+    AbiInfo findByGroupIdAndContractAddress(String groupId, String address);
 
-    AbiInfo findByGroupIdAndContractName(Integer groupId, String userName);
+    AbiInfo findByGroupIdAndContractName(String groupId, String userName);
 
-    List<AbiInfo> findByGroupId(Integer groupId, Pageable pageable);
+    List<AbiInfo> findByGroupId(String groupId, Pageable pageable);
 
-    List<AbiInfo> findByGroupId(Integer groupId);
+    List<AbiInfo> findByGroupId(String groupId);
 }

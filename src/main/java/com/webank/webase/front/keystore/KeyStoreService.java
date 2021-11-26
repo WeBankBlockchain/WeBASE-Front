@@ -31,6 +31,7 @@ import com.webank.webase.front.util.AesUtils;
 import com.webank.webase.front.util.CleanPathUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -88,8 +89,7 @@ public class KeyStoreService {
     @Autowired
     private KeystoreRepository keystoreRepository;
     @Autowired
-    @Qualifier(value = "common")
-    private CryptoSuite cryptoSuite;
+    private Web3ApiService web3ApiService;
     private final static String TEMP_EXPORT_KEYSTORE_PATH = "exportedKey";
     private final static String PEM_FILE_FORMAT = ".pem";
     private final static String P12_FILE_FORMAT = ".p12";
@@ -118,12 +118,12 @@ public class KeyStoreService {
      * create key store locally and save
      * with private key
      */
-    public KeyStoreInfo createKeyStoreLocally(String userName) {
+    public KeyStoreInfo createKeyStoreLocally(String userName, String groupId) {
         log.info("start createKeyStore. userName:{}", userName);
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // create keyPair(support guomi)
         KeyStoreInfo keyStoreInfo;
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair();
+        CryptoKeyPair keyPair = web3ApiService.getCryptoSuite(groupId).getKeyPairFactory().generateKeyPair();
         if (keyPair == null) {
             log.error("fail createKeyStore for null key pair");
             throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
@@ -143,9 +143,9 @@ public class KeyStoreService {
      * @param appId
      * @return KeyStoreInfo
      */
-    public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId, boolean returnPrivateKey) {
+    public KeyStoreInfo createKeyStoreWithSign(String signUserId, String appId, boolean returnPrivateKey, String groupId) {
         // get from sign
-        RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId, returnPrivateKey);
+        RspUserInfo rspUserInfo = getSignUserEntity(signUserId, appId, returnPrivateKey, groupId);
         KeyStoreInfo keyStoreInfo = saveSignKeyStore(rspUserInfo);
         if (returnPrivateKey && rspUserInfo.getPrivateKey() != null) {
             // decrypt private key
@@ -203,10 +203,10 @@ public class KeyStoreService {
      * get random credential to call transaction(not execute)
      * 2019/11/26 support guomi
      */
-    public CryptoKeyPair getCredentialsForQuery() {
+    public CryptoKeyPair getCredentialsForQuery(String groupId) {
         log.debug("start getCredentialsForQuery. ");
         // create keyPair(support guomi)
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair();
+        CryptoKeyPair keyPair = web3ApiService.getCryptoSuite(groupId).getKeyPairFactory().generateKeyPair();
         if (keyPair == null) {
             log.error("create random Credentials for query failed for null key pair");
             throw new FrontException(ConstantCode.WEB3J_CREATE_KEY_PAIR_NULL);
@@ -215,10 +215,10 @@ public class KeyStoreService {
         return keyPair;
     }
 
-    public KeyStoreInfo getKeyStoreInfoForQuery() {
+    public KeyStoreInfo getKeyStoreInfoForQuery(String groupId) {
         log.debug("start getKeyStoreInfoForQuery. ");
         // create keyPair(support guomi)
-        CryptoKeyPair keyPair = this.getCredentialsForQuery();
+        CryptoKeyPair keyPair = this.getCredentialsForQuery(groupId);
         return keyPair2KeyStoreInfo(keyPair, "");
     }
 
@@ -273,6 +273,7 @@ public class KeyStoreService {
      */
     public RspMessageHashSignature getMessageHashSignData(MessageHashInfo params) throws FrontException {
         try {
+            String groupId = params.getGroupId();
             String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
             log.info("getSignData url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
@@ -296,9 +297,9 @@ public class KeyStoreService {
             }
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
 
-            if (cryptoSuite.cryptoTypeConfig == CryptoType.SM_TYPE) {
+            if (web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE) {
                 SM2SignatureResult signData = (SM2SignatureResult) CommonUtils.stringToSignatureData(signDataStr,
-                    cryptoSuite.cryptoTypeConfig);
+                    web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
                 // SM2SignatureResult signData = CommonUtils.stringToSM2SignatureData(signDataStr);
                 rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
                 rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
@@ -306,7 +307,7 @@ public class KeyStoreService {
                 rspMessageHashSignature.setP(Numeric.toHexString(signData.getPub()));
             } else {
                 ECDSASignatureResult signData = (ECDSASignatureResult) CommonUtils.stringToSignatureData(signDataStr,
-                    cryptoSuite.cryptoTypeConfig);
+                    web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
                 // ECDSASignatureResult signData = CommonUtils.stringToECDSASignatureData(signDataStr);
                 rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
                 rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
@@ -347,9 +348,9 @@ public class KeyStoreService {
      * get credential to send transaction
      * 2019/11/26 support guomi
      */
-    public CryptoKeyPair getCredentials(String user) throws FrontException {
+    public CryptoKeyPair getCredentials(String user, String groupId) throws FrontException {
         String privateKey = getPrivateKey(user);
-        return cryptoSuite.createKeyPair(privateKey);
+        return web3ApiService.getCryptoSuite(groupId).getKeyPairFactory().createKeyPair(privateKey);
     }
 
     /**
@@ -389,12 +390,12 @@ public class KeyStoreService {
      * @param userName
      * @return
      */
-    public KeyStoreInfo importKeyStoreFromPem(String pemContent, String userName) {
+    public KeyStoreInfo importKeyStoreFromPem(String pemContent, String userName, String groupId) {
         PEMKeyStore pemManager = new PEMKeyStore(new ByteArrayInputStream(pemContent.getBytes()));
         String privateKey = KeyTool.getHexedPrivateKey(pemManager.getKeyPair().getPrivate());
         // throw new FrontException(ConstantCode.PEM_CONTENT_ERROR);
         // to store local
-        return importFromPrivateKey(privateKey, userName);
+        return importFromPrivateKey(privateKey, userName, groupId);
     }
 
     /**
@@ -404,7 +405,8 @@ public class KeyStoreService {
      * @param userName
      * @return KeyStoreInfo
      */
-    public KeyStoreInfo importKeyStoreFromP12(MultipartFile file, String p12PasswordEncoded, String userName) {
+    public KeyStoreInfo importKeyStoreFromP12(MultipartFile file, String p12PasswordEncoded,
+        String userName, String groupId) {
         // decode p12 password
         String password;
         try {
@@ -430,7 +432,7 @@ public class KeyStoreService {
             throw new FrontException(ConstantCode.P12_FILE_ERROR);
         }
         // to store local
-        return importFromPrivateKey(privateKey, userName);
+        return importFromPrivateKey(privateKey, userName, groupId);
     }
 
     /**
@@ -439,11 +441,11 @@ public class KeyStoreService {
      * @param userName
      * @return KeyStoreInfo local user
      */
-    public KeyStoreInfo importFromPrivateKey(String privateKey, String userName) {
+    public KeyStoreInfo importFromPrivateKey(String privateKey, String userName, String groupId) {
         // check name
         checkUserNameAndTypeNotExist(userName, KeyTypes.LOCALUSER.getValue());
         // to store locally
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair(Numeric.cleanHexPrefix(privateKey));
+        CryptoKeyPair keyPair = web3ApiService.getCryptoSuite(groupId).getKeyPairFactory().createKeyPair(Numeric.cleanHexPrefix(privateKey));
         if (keyPair == null) {
             log.error("importFromPrivateKey get null keyPair");
             throw new FrontException(ConstantCode.PRIVATE_KEY_DECODE_FAIL);
@@ -462,9 +464,9 @@ public class KeyStoreService {
      * @param appId
      * @return KeyStoreInfo
      */
-    public KeyStoreInfo importPrivateKeyToSign(String privateKeyEncoded, String signUserId, String appId) {
+    public KeyStoreInfo importPrivateKeyToSign(String privateKeyEncoded, String signUserId, String appId, String groupId) {
         // post private and save in sign
-        RspUserInfo rspUserInfo = postForSignUserEntity(privateKeyEncoded, signUserId, appId);
+        RspUserInfo rspUserInfo = postForSignUserEntity(privateKeyEncoded, signUserId, appId, groupId);
         // save in local as external
         String address = rspUserInfo.getAddress();
         if (StringUtils.isEmpty(address)) {
@@ -489,10 +491,10 @@ public class KeyStoreService {
      * @param signUserId unique user id to call webase-sign
      * @return
      */
-    public RspUserInfo getSignUserEntity(String signUserId, String appId, boolean returnPrivateKey) {
+    public RspUserInfo getSignUserEntity(String signUserId, String appId, boolean returnPrivateKey, String groupId) {
         // webase-sign api(v1.3.0) support
         String url = String.format(Constants.WEBASE_SIGN_USER_URI, constants.getKeyServer(),
-                cryptoSuite.cryptoTypeConfig, signUserId, appId, returnPrivateKey);
+                web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig, signUserId, appId, returnPrivateKey);
         log.info("getSignUserEntity url:{}", url);
         BaseResponse baseResponse = getForEntity(url);
         log.info("getSignUserEntity response:{}", JsonUtils.toJSONString(baseResponse));
@@ -542,7 +544,7 @@ public class KeyStoreService {
      * @param privateKeyEncoded base64 encoded
      * @return RspUserInfo
      */
-    public RspUserInfo postForSignUserEntity(String privateKeyEncoded, String signUserId, String appId) {
+    public RspUserInfo postForSignUserEntity(String privateKeyEncoded, String signUserId, String appId, String groupId) {
         String urlSpilt = Constants.WEBASE_SIGN_USER_URI.split("\\?")[0];
         String url = String.format(urlSpilt, constants.getKeyServer());
         log.info("getSignUserEntity url:{}", url);
@@ -550,7 +552,7 @@ public class KeyStoreService {
         params.put("privateKey", privateKeyEncoded);
         params.put("signUserId", signUserId);
         params.put("appId", appId);
-        params.put("encryptType", cryptoSuite.cryptoTypeConfig);
+        params.put("encryptType", web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
 
         BaseResponse baseResponse = postForEntity(url, params);
 
@@ -615,11 +617,11 @@ public class KeyStoreService {
     }
 
 
-    public FileContentHandle exportPemWithSign(String signUserId) {
+    public FileContentHandle exportPemWithSign(String signUserId, String groupId) {
         RspUserInfo rspUserInfo = getUserInfoWithSign(signUserId, true);
         String address = rspUserInfo.getAddress();
         String rawPrivateKey = rspUserInfo.getPrivateKey();
-        String filePath = CommonUtils.writePrivateKeyPem(rawPrivateKey, address, "", cryptoSuite);
+        String filePath = CommonUtils.writePrivateKeyPem(rawPrivateKey, address, "", web3ApiService.getCryptoSuite(groupId));
         try {
             log.info("exportPemWithSign filePath:{}", filePath);
             return new FileContentHandle(address + PEM_FILE_FORMAT,
@@ -630,11 +632,11 @@ public class KeyStoreService {
         }
     }
 
-    public FileContentHandle exportPemLocal(String address) {
+    public FileContentHandle exportPemLocal(String address, String groupId) {
         KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
         String userName = keyStoreInfo.getUserName();
         String rawPrivateKey = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
-        String filePath = CommonUtils.writePrivateKeyPem(rawPrivateKey, address, userName, cryptoSuite);
+        String filePath = CommonUtils.writePrivateKeyPem(rawPrivateKey, address, userName, web3ApiService.getCryptoSuite(groupId));
         try {
             log.info("exportPemLocal filePath:{}", filePath);
             return new FileContentHandle(userName + "_" + address + PEM_FILE_FORMAT,
@@ -646,7 +648,7 @@ public class KeyStoreService {
     }
 
 
-    public FileContentHandle exportP12WithSign(String signUserId, String p12PasswordEncoded) {
+    public FileContentHandle exportP12WithSign(String signUserId, String p12PasswordEncoded, String groupId) {
         // decode p12 password
         String p12Password;
         try {
@@ -659,7 +661,7 @@ public class KeyStoreService {
         RspUserInfo rspUserInfo = getUserInfoWithSign(signUserId, true);
         String address = rspUserInfo.getAddress();
         String rawPrivateKey = rspUserInfo.getPrivateKey();
-        String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, "sign", cryptoSuite);
+        String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, "sign", web3ApiService.getCryptoSuite(groupId));
         log.info("exportP12WithSign filePath:{}", filePath);
         try {
             return new FileContentHandle(address + P12_FILE_FORMAT,
@@ -670,7 +672,7 @@ public class KeyStoreService {
         }
     }
 
-    public FileContentHandle exportP12Local(String address, String p12PasswordEncoded) {
+    public FileContentHandle exportP12Local(String address, String p12PasswordEncoded, String groupId) {
         // decode p12 password
         String p12Password;
         try {
@@ -683,7 +685,7 @@ public class KeyStoreService {
         KeyStoreInfo keyStoreInfo = keystoreRepository.findByAddress(address);
         String userName = keyStoreInfo.getUserName();
         String rawPrivateKey = aesUtils.aesDecrypt(keyStoreInfo.getPrivateKey());
-        String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, userName, cryptoSuite);
+        String filePath = CommonUtils.writePrivateKeyP12(p12Password, rawPrivateKey, address, userName, web3ApiService.getCryptoSuite(groupId));
         log.info("exportP12Local filePath:{}", filePath);
         try {
             return new FileContentHandle(userName + "_" + address + P12_FILE_FORMAT,

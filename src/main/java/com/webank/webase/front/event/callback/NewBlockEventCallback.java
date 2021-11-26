@@ -40,13 +40,13 @@ public class NewBlockEventCallback implements BlockNumberNotifyCallback {
     private static Logger logger = LoggerFactory.getLogger(NewBlockEventCallback.class);
 
     private MQPublisher MQPublisher;
-    private int groupId;
+    private String groupId;
     private PublisherHelper blockPublishInfo;
 
     @Override
     public void onReceiveBlockNumberInfo(String peerIpAndPort,
         BlockNumberNotification blockNumberNotification) {
-        int groupId = Integer.parseInt(blockNumberNotification.getGroupId());
+        String groupId = blockNumberNotification.getGroupId();
         String blockNumber = blockNumberNotification.getBlockNumber();
         logger.info("NewBlockEventCallBack peerIpAndPort:{}, groupId:{}, blockNumber:{}",
             peerIpAndPort, groupId, blockNumber);

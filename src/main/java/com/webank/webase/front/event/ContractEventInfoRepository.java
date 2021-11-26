@@ -18,17 +18,17 @@ public interface ContractEventInfoRepository extends CrudRepository<ContractEven
 
     List<ContractEventInfo> findByAppId(String appId);
 
-    List<ContractEventInfo> findByGroupId(int groupId);
+    List<ContractEventInfo> findByGroupId(String groupId);
 
     List<ContractEventInfo> findByQueueName(String queueName);
 
-    List<ContractEventInfo> findByGroupIdAndContractAddress(int groupId, String contractAddress);
+    List<ContractEventInfo> findByGroupIdAndContractAddress(String groupId, String contractAddress);
 
     List<ContractEventInfo> findByExchangeNameAndRoutingKey(String exchangeName, String routingKey);
 
-    List<ContractEventInfo> findByGroupId(int groupId, Pageable pageable);
+    List<ContractEventInfo> findByGroupId(String groupId, Pageable pageable);
 
-    List<ContractEventInfo> findByGroupIdAndAppId(int groupId, String appId);
+    List<ContractEventInfo> findByGroupIdAndAppId(String groupId, String appId);
 
     /**
      * check unique by appId exchangeName queueName and contractAddress

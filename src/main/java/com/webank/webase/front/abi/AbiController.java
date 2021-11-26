@@ -53,7 +53,7 @@ public class AbiController extends BaseController {
     @ApiOperation(value = "getAbiListByGroupId",
             notes = "get imported abi info list by page")
     @GetMapping("/list/{groupId}/{pageNumber}/{pageSize}")
-    public BasePageResponse getAbiListByGroupId(@PathVariable("groupId") Integer groupId,
+    public BasePageResponse getAbiListByGroupId(@PathVariable("groupId") String groupId,
                                                 @PathVariable("pageNumber") Integer pageNumber,
                                                 @PathVariable("pageSize") Integer pageSize) {
         log.debug("start getAbiListByGroupId. groupId:{}", groupId);

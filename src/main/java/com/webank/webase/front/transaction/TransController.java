@@ -82,8 +82,7 @@ public class TransController extends BaseController {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
         if (StringUtils.isNotBlank(address)
-            && (address.length() != Address.ValidLen
-                || org.fisco.bcos.sdk.abi.datatypes.Address.DEFAULT.toString().equals(address))) {
+            && (address.length() != Address.ValidLen || org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address))) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
@@ -161,10 +160,10 @@ public class TransController extends BaseController {
         log.info("transHandleLocal start startTime:{}", startTime.toEpochMilli());
 
         checkParamResult(result);
-        String encodeStr = reqQueryTransHandle.getEncodeStr();
-        if (StringUtils.isBlank(encodeStr)) {
+        if (StringUtils.isBlank(reqQueryTransHandle.getEncodeStr())) {
             throw new FrontException(ENCODE_STR_CANNOT_BE_NULL);
         }
+        byte[] encodeStr = Numeric.hexStringToByteArray(reqQueryTransHandle.getEncodeStr());
         List<Object> contractAbi = JsonUtils.toJavaObjectList(reqQueryTransHandle.getContractAbi(), Object.class);
         Object obj =  transServiceImpl.sendQueryTransaction(encodeStr, reqQueryTransHandle.getContractAddress(),
             reqQueryTransHandle.getFuncName(), contractAbi, reqQueryTransHandle.getGroupId(),
@@ -315,9 +314,10 @@ public class TransController extends BaseController {
         log.info("transEncoded2Str start startTime:{}", startTime.toEpochMilli());
 
         checkParamResult(result);
-
-        String encodedOrSignedResult =  transServiceImpl.encodeFunction2Str(JsonUtils.objToString(reqEncodeFunction.getContractAbi()),
-            reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam());
+        String groupId = reqEncodeFunction.getGroupId();
+        String encodedOrSignedResult =  transServiceImpl.encodeFunction2Str(
+            JsonUtils.objToString(reqEncodeFunction.getContractAbi()),
+            reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam(), groupId);
         log.info("transEncoded2Str end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;

@@ -22,7 +22,7 @@ import org.hibernate.validator.constraints.NotBlank;
 public class ReqContractSave {
 
     @NotNull
-    private Integer groupId;
+    private String groupId;
     private Long contractId;
     @NotBlank
     private String contractName;

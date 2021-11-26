@@ -52,7 +52,7 @@ public class PrecompiledSysConfigController{
      */
     @GetMapping("config/list")
     public Object querySystemConfigByGroupId(
-            @RequestParam(defaultValue = "1") int groupId,
+            @RequestParam(defaultValue = "1") String groupId,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
         Instant startTime = Instant.now();
@@ -83,8 +83,7 @@ public class PrecompiledSysConfigController{
                 startTime.toEpochMilli(), systemConfigHandle);
         String key = systemConfigHandle.getConfigKey();
         // tx_count_limit, tx_gas_limit
-        if (!PrecompiledUtils.TxCountLimit.equals(key) && !PrecompiledUtils.TxGasLimit.equals(key)
-            && !PrecompiledUtils.ConsensusTimeout.equals(key)) {
+        if (!PrecompiledUtils.TxCountLimit.equals(key) && !PrecompiledUtils.TxGasLimit.equals(key)) {
             log.error("end setSysConfigValueByKey. Exception:{}",
                     ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY.getMessage());
             return ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY;

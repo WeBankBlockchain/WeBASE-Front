@@ -51,7 +51,7 @@ public class AbiService {
     Web3ApiService web3ApiService;
 
 
-    public List<AbiInfo> getListByGroupId(Integer groupId, Pageable pageable) {
+    public List<AbiInfo> getListByGroupId(String groupId, Pageable pageable) {
         List<AbiInfo> abiList = abiRepository.findByGroupId(groupId, pageable);
         return abiList;
     }
@@ -59,7 +59,7 @@ public class AbiService {
     /**
      * get all
      */
-    public List<RspContractNoAbi> getListByGroupIdNoAbi(Integer groupId) {
+    public List<RspContractNoAbi> getListByGroupIdNoAbi(String groupId) {
         List<AbiInfo> abiList = abiRepository.findByGroupId(groupId);
         List<RspContractNoAbi> resultList = new ArrayList<>();
         abiList.forEach(c -> {
@@ -81,7 +81,7 @@ public class AbiService {
 
     @Transactional
     public void insertAbiInfo(ReqImportAbi param) {
-        int groupId = param.getGroupId();
+        String groupId = param.getGroupId();
         String contractName = param.getContractName();
         String contractAddress = param.getContractAddress();
         String contractAbiStr;
@@ -92,14 +92,14 @@ public class AbiService {
             throw new FrontException(ConstantCode.PARAM_FAIL_ABI_INVALID);
         }
         // check address
-        String contractBin = getAddressRuntimeBin(groupId, contractAddress);
+//        String contractBin = getAddressRuntimeBin(groupId, contractAddress); todo getCode
         // check name and address of abi not exist
         checkAbiNotExist(groupId, contractName, contractAddress);
 
         AbiInfo saveAbi = new AbiInfo();
         BeanUtils.copyProperties(param, saveAbi);
         saveAbi.setContractAbi(contractAbiStr);
-        saveAbi.setContractBin(contractBin);
+//        saveAbi.setContractBin(contractBin);
         saveAbi.setCreateTime(LocalDateTime.now());
         saveAbi.setModifyTime(LocalDateTime.now());
         abiRepository.save(saveAbi);
@@ -121,9 +121,9 @@ public class AbiService {
             throw new FrontException(ConstantCode.PARAM_FAIL_ABI_INVALID);
         }
         // check address
-        String contractBin = getAddressRuntimeBin(param.getGroupId(), param.getContractAddress());
+//        String contractBin = getAddressRuntimeBin(param.getGroupId(), param.getContractAddress()); todo
         updateAbi.setContractAbi(contractAbiStr);
-        updateAbi.setContractBin(contractBin);
+//        updateAbi.setContractBin(contractBin);
         updateAbi.setModifyTime(LocalDateTime.now());
         abiRepository.save(updateAbi);
     }
@@ -141,7 +141,7 @@ public class AbiService {
         return abiInfo;
     }
 
-    public AbiInfo getAbiByGroupIdAndAddress(int groupId, String contractAddress) {
+    public AbiInfo getAbiByGroupIdAndAddress(String groupId, String contractAddress) {
         AbiInfo abiInfo = abiRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
         if (Objects.isNull(abiInfo)) {
             throw new FrontException(ConstantCode.ABI_INFO_NOT_EXISTS);
@@ -162,7 +162,7 @@ public class AbiService {
      * @param contractName
      * @param address
      */
-    private void checkAbiNotExist(int groupId, String contractName, String address) {
+    private void checkAbiNotExist(String groupId, String contractName, String address) {
         AbiInfo checkAbiName = abiRepository.findByGroupIdAndContractName(groupId, contractName);
         if (Objects.nonNull(checkAbiName)) {
             throw new FrontException(ConstantCode.CONTRACT_NAME_REPEAT);
@@ -177,25 +177,25 @@ public class AbiService {
      * check address is valid.
      * @return address's runtime bin
      */
-    private String getAddressRuntimeBin(int groupId, String contractAddress) {
-        if (StringUtils.isBlank(contractAddress)) {
-            log.error("fail getAddressRuntimeBin. contractAddress is empty");
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
-        }
-        String binOnChain;
-        try {
-            binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
-        } catch (Exception e) {
-            log.error("fail getAddressRuntimeBin.", e);
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
-        }
-        log.info("getAddressRuntimeBin address:{} binOnChain:{}", contractAddress, binOnChain);
-        String runtimeBin = FrontUtils.removeFirstStr(binOnChain, "0x");
-        if (StringUtils.isBlank(runtimeBin)) {
-            log.error("fail getAddressRuntimeBin. runtimeBin is null, address:{}", contractAddress);
-            throw new FrontException(ConstantCode.CONTRACT_NOT_DEPLOY_ERROR);
-        }
-        return runtimeBin;
-    }
+//    private String getAddressRuntimeBin(String groupId, String contractAddress) {
+//        if (StringUtils.isBlank(contractAddress)) {
+//            log.error("fail getAddressRuntimeBin. contractAddress is empty");
+//            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
+//        }
+//        String binOnChain;
+//        try {
+//            binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+//        } catch (Exception e) {
+//            log.error("fail getAddressRuntimeBin.", e);
+//            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+//        }
+//        log.info("getAddressRuntimeBin address:{} binOnChain:{}", contractAddress, binOnChain);
+//        String runtimeBin = FrontUtils.removeFirstStr(binOnChain, "0x");
+//        if (StringUtils.isBlank(runtimeBin)) {
+//            log.error("fail getAddressRuntimeBin. runtimeBin is null, address:{}", contractAddress);
+//            throw new FrontException(ConstantCode.CONTRACT_NOT_DEPLOY_ERROR);
+//        }
+//        return runtimeBin;
+//    }
 
 }

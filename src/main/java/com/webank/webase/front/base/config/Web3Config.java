@@ -14,29 +14,36 @@
 package com.webank.webase.front.base.config;
 
 
-import com.webank.webase.front.base.properties.Constants;
-import io.netty.channel.ChannelHandlerContext;
-import java.util.ArrayList;
+import static com.webank.webase.front.cert.FrontCertService.frontGmEnSdkNodeCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontGmEnSdkNodeKey;
+import static com.webank.webase.front.cert.FrontCertService.frontGmSdkCaCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontGmSdkNodeCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontGmSdkNodeKey;
+import static com.webank.webase.front.cert.FrontCertService.frontSdkCaCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontSdkNodeCrt;
+import static com.webank.webase.front.cert.FrontCertService.frontSdkNodeKey;
+
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.configapi.ConfigService;
+import com.webank.webase.front.configapi.entity.ReqSdkConfig;
+import com.webank.webase.front.util.JsonUtils;
+import java.io.File;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.abi.ABICodec;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.model.Message;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
-import org.fisco.bcos.sdk.network.MsgHandler;
+import org.fisco.bcos.sdk.jni.common.JniException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 /**
  * init web3sdk getService.
@@ -46,65 +53,87 @@ import org.springframework.context.annotation.DependsOn;
 @Configuration
 @ConfigurationProperties(prefix = "sdk")
 public class Web3Config {
+    @Autowired
+    private ConfigService configService;
+    private boolean loadFromDb;
 
-    // deprecated org name, use agency from /web3/nodeInfo api instead
-    public static String orgName = "fisco";
-    public String certPath = "conf";
-    private List<Integer> groupIdList;
-    /* use String in java sdk*/
-    private String corePoolSize;
-    private String maxPoolSize;
-    private String queueCapacity;
-    /* use String in java sdk*/
-    private String ip = "127.0.0.1";
-    private String channelPort = "20200";
+    private String threadPoolSize;
+    private String certPath;
+    private String useSmSsl;
+    private List<String> peers;
 
-    // add channel disconnect
-    public static boolean PEER_CONNECTED = true;
-    static class Web3ChannelMsg implements MsgHandler {
-        @Override
-        public void onConnect(ChannelHandlerContext ctx) {
-            PEER_CONNECTED = true;
-            log.info("Web3ChannelMsg onConnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
+    /**
+     * only used to get groupList
+     * @throws JniException
+     */
+    @Bean(name = "rpcClient")
+    public Client getRpcWeb3j(ConfigOption configOption) throws JniException {
+
+        Client rpcWeb3j = Client.build(configOption);
+        // Client rpcWeb3j = bcosSDK.getClient();
+        log.info("get rpcWeb3j(only support groupList) client:{}", rpcWeb3j);
+        return rpcWeb3j;
+    }
+
+    @Bean(name = "singleClient")
+    public Client getClient(ConfigOption configOption) throws JniException {
+
+        Client client = Client.build("group", configOption);
+        // Client rpcWeb3j = bcosSDK.getClient();
+        log.info("get client:{}", client);
+        return client;
+    }
+
+//    @Bean
+    public Stack<BcosSDK> getBcosSDK() throws ConfigException {
+        Stack<BcosSDK> bcosSDKs = new Stack<>();
+        log.info("getBcosSDK loadFromDb:{}", loadFromDb);
+        if (loadFromDb) {
+            ConfigOption configOption = null;
+            try {
+                configOption = configService.initConfigOptionFromDb();
+            } catch (FrontException e) {
+                log.error("Config of sdk not config:[]", e);
+            } catch (Exception e) {
+                log.error("Init bcosSDK from db failed:[]", e);
+            }
+            if (configOption == null) {
+                log.error("Init bcosSDK configOption from db failed, configOption is null");
+                return bcosSDKs;
+            }
+            BcosSDK bcosSDK = new BcosSDK(configOption);
+            log.info("getBcosSDK bcosSDK:{}", JsonUtils.objToString(bcosSDK));
+            bcosSDKs.push(bcosSDK);
+        } else {
+            ConfigOption configOption = this.initSDKFromFile();
+            BcosSDK bcosSDK = new BcosSDK(configOption);
+            log.info("getBcosSDK bcosSDK:{}", JsonUtils.objToString(bcosSDK));
+            bcosSDKs.push(bcosSDK);
         }
+        log.info("getBcosSDK bcosSDKs:{}", JsonUtils.objToString(bcosSDKs));
 
-        @Override
-        public void onMessage(ChannelHandlerContext ctx, Message msg) {
-            // not added in message handler, ignore this override
-            log.info("Web3ChannelMsg onMessage:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-        }
-
-        @Override
-        public void onDisconnect(ChannelHandlerContext ctx) {
-            PEER_CONNECTED = false;
-            log.error("Web3ChannelMsg onDisconnect:{}, status:{}", ctx.channel().remoteAddress(), PEER_CONNECTED);
-        }
+        return bcosSDKs;
     }
 
     @Bean
-    public BcosSDK getBcosSDK() throws ConfigException {
+    public ConfigOption initSDKFromFile() throws ConfigException {
         log.info("start init ConfigProperty");
         // cert config, encrypt type
         Map<String, Object> cryptoMaterial = new HashMap<>();
-        // cert use conf
         cryptoMaterial.put("certPath", certPath);
-        // user no need set this:cryptoMaterial.put("sslCryptoType", encryptType);
-        log.info("init cert cryptoMaterial:{}, (using conf as cert path)", cryptoMaterial);
+        cryptoMaterial.put("useSMCrypto", useSmSsl);
+        log.info("init cert cryptoMaterial:{}, (using conf as cert path)", JsonUtils.objToString(cryptoMaterial));
 
         // peers, default one node in front
         Map<String, Object> network = new HashMap<>();
-        List<String> peers = new ArrayList<>();
-        peers.add(ip + ":" + channelPort);
         network.put("peers", peers);
-        log.info("init node network property :{}", peers);
+        log.info("init node network property :{}", JsonUtils.objToString(peers));
 
         // thread pool config
         log.info("init thread pool property");
         Map<String, Object> threadPool = new HashMap<>();
-        threadPool.put("channelProcessorThreadSize", corePoolSize);
-        threadPool.put("receiptProcessorThreadSize", corePoolSize);
-        threadPool.put("maxBlockingQueueSize", queueCapacity);
-        log.info("init thread pool property:{}", threadPool);
+        threadPool.put("threadPoolSize", threadPoolSize);
+        log.info("init thread pool property:{}", JsonUtils.objToString(threadPool));
 
         // init property
         ConfigProperty configProperty = new ConfigProperty();
@@ -112,43 +141,32 @@ public class Web3Config {
         configProperty.setNetwork(network);
         configProperty.setThreadPool(threadPool);
         // init config option
-        log.info("init configOption from configProperty");
         ConfigOption configOption = new ConfigOption(configProperty);
-        // init bcosSDK
-        log.info("init bcos sdk instance, please check sdk.log");
-        BcosSDK bcosSDK = new BcosSDK(configOption);
-
-        log.info("init client version");
-        ClientVersion version = bcosSDK.getGroupManagerService().getNodeVersion(ip + ":" + channelPort)
-            .getNodeVersion();
-        Constants.version = version.getVersion();
-        Constants.chainId = version.getChainId();
-
-        Web3ChannelMsg disconnectMsg = new Web3ChannelMsg();
-        bcosSDK.getChannel().addConnectHandler(disconnectMsg);
-        bcosSDK.getChannel().addDisconnectHandler(disconnectMsg);
-
-        return bcosSDK;
+        log.info("initSDKFromFile init configOption :{}", configOption);
+        return configOption;
     }
 
-
-    /**
-     * 覆盖EncryptType构造函数
-     * @return
-     */
-    @Bean(name = "common")
-    public CryptoSuite getCommonSuite(BcosSDK bcosSDK) {
-        int encryptType = bcosSDK.getGroupManagerService().getCryptoType(ip + ":" + channelPort);
-        log.info("getCommonSuite init encrypt type:{}", encryptType);
-        return new CryptoSuite(encryptType);
+    @Deprecated
+    public ConfigOption initSDKFromDb() throws ConfigException {
+        ReqSdkConfig config = new ReqSdkConfig();
+        boolean useGmSsl = Boolean.parseBoolean(useSmSsl);
+        config.setUseSmSsl(useGmSsl);
+        config.setPeers(peers);
+        if (useGmSsl) {
+            config.setCaCertStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontGmSdkCaCrt));
+            config.setSdkCertStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontGmSdkNodeCrt));
+            config.setSdkKeyStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontGmSdkNodeKey));
+            config.setSmEnSdkCertStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontGmEnSdkNodeCrt));
+            config.setSmEnSdkKeyStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontGmEnSdkNodeKey));
+        } else {
+            config.setCaCertStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontSdkCaCrt));
+            config.setSdkCertStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontSdkNodeCrt));
+            config.setSdkKeyStr(ConfigProperty.getConfigFileContent(certPath + File.separator + frontSdkNodeKey));
+        }
+        ConfigOption configOption = configService.initConfigOption(config);
+        log.info("initSDKFromDb configOption :{}", configOption);
+        return configOption;
     }
 
-    @Bean(name = "rpcClient")
-    public Client getRpcWeb3j(BcosSDK bcosSDK) {
-        // init rpc client(web3j)
-        Client rpcWeb3j = Client.build(bcosSDK.getChannel());
-        log.info("get rpcWeb3j(only support rpc) client:{}", rpcWeb3j);
-        return rpcWeb3j;
-    }
 
 }

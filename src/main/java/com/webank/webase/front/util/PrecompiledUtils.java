@@ -33,7 +33,6 @@ public class PrecompiledUtils {
     // SystemConfig key
     public static final String TxCountLimit = "tx_count_limit";
     public static final String TxGasLimit = "tx_gas_limit";
-    public static final String ConsensusTimeout = "consensus_timeout";
     // node consensus type
     public static final String NODE_TYPE_SEALER = "sealer";
     public static final String NODE_TYPE_OBSERVER = "observer";

@@ -20,7 +20,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.monitor.entity.GroupSizeInfo;
 import com.webank.webase.front.monitor.entity.Monitor;
-import com.webank.webase.front.performance.result.PerformanceData;
+import com.webank.webase.front.monitor.entity.PerformanceData;
 import com.webank.webase.front.util.CommonUtils;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -53,36 +53,37 @@ public class MonitorController {
 
     @ApiOperation(value = "查询链上数据", notes = "查询链上数据")
     @ApiImplicitParams({@ApiImplicitParam(name = "beginDate", value = "开始时间"),
-            @ApiImplicitParam(name = "endDate", value = "结束时间"),
-            @ApiImplicitParam(name = "contrastBeginDate", value = "对比开始时间"),
-            @ApiImplicitParam(name = "contrastEndDate", value = "对比结束时间"),
-            @ApiImplicitParam(name = "gap", value = "时间间隔", dataType = "int")})
+        @ApiImplicitParam(name = "endDate", value = "结束时间"),
+        @ApiImplicitParam(name = "contrastBeginDate", value = "对比开始时间"),
+        @ApiImplicitParam(name = "contrastEndDate", value = "对比结束时间"),
+        @ApiImplicitParam(name = "gap", value = "时间间隔", dataType = "int")})
     @GetMapping
     public List<PerformanceData> getChainMonitor(
-            @RequestParam(required = false) @DateTimeFormat(
-                    iso = DATE_TIME) LocalDateTime beginDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) @DateTimeFormat(
-                    iso = DATE_TIME) LocalDateTime contrastBeginDate,
-            @RequestParam(required = false) @DateTimeFormat(
-                    iso = DATE_TIME) LocalDateTime contrastEndDate,
-            @RequestParam(required = false, defaultValue = "1") int gap,
-            @RequestParam(defaultValue = "1") int groupId) {
+        @RequestParam(required = false) @DateTimeFormat(
+            iso = DATE_TIME) LocalDateTime beginDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DATE_TIME) LocalDateTime endDate,
+        @RequestParam(required = false) @DateTimeFormat(
+            iso = DATE_TIME) LocalDateTime contrastBeginDate,
+        @RequestParam(required = false) @DateTimeFormat(
+            iso = DATE_TIME) LocalDateTime contrastEndDate,
+        @RequestParam(required = false, defaultValue = "1") int gap,
+        @RequestParam(defaultValue = "1") String groupId) {
         Instant startTime = Instant.now();
         log.info("getChainMonitor startTime:{} groupId:[{}]", groupId,
-                startTime.toEpochMilli());
+            startTime.toEpochMilli());
 
         List<PerformanceData> performanceList = monitorService.findContrastDataByTime(groupId,
-                beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
+            beginDate, endDate, contrastBeginDate, contrastEndDate, gap);
 
         log.info("getChainMonitor end. useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
+            Duration.between(startTime, Instant.now()).toMillis());
         return performanceList;
     }
 
+
     @ApiOperation(value = "分页查询", notes = "分页查询")
     @GetMapping("/pagingQuery")
-    public BasePageResponse pagingQuery(@RequestParam(defaultValue = "1") int groupId,
+    public BasePageResponse pagingQuery(@RequestParam(defaultValue = "1") String groupId,
             @RequestParam(defaultValue = "1") Integer pageNumber,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) @DateTimeFormat(
@@ -104,31 +105,13 @@ public class MonitorController {
         return response;
     }
 
-    @ApiOperation(value = "检查节点进程连接")
-    @GetMapping("/checkNodeProcess")
-    public boolean checkNodeProcess() {
-        log.info("checkNodeProcess.");
-        return CommonUtils.checkConnect(web3Config.getIp(),
-                Integer.valueOf(web3Config.getChannelPort()));
-    }
-
-    @ApiOperation(value = "获取群组大小信息")
-    @GetMapping("/getGroupSizeInfos")
-    public List<GroupSizeInfo> getGroupSizeInfos() {
-        Instant startTime = Instant.now();
-        log.info("getGroupSizeInfos start:{}", startTime.toEpochMilli());
-        List<GroupSizeInfo> groupSizeInfos = monitorService.getGroupSizeInfos();
-        log.info("getGroupSizeInfos end  useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        return groupSizeInfos;
-    }
 
     /**
      * get by less than begin or larger than end order by id desc
      */
     @ApiOperation(value = "开区间分页查询", notes = "分页查询，获取时间范围以外的")
     @GetMapping("/pagingQuery/stat")
-    public BasePageResponse getNodeMonitorForStat(@RequestParam(defaultValue = "1") int groupId,
+    public BasePageResponse getNodeMonitorForStat(@RequestParam(defaultValue = "1") String groupId,
         @RequestParam(defaultValue = "1") Integer pageNumber,
         @RequestParam(defaultValue = "10") Integer pageSize,
         @RequestParam(required = false) @DateTimeFormat(

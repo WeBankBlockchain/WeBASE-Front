@@ -217,7 +217,7 @@ public class ContractController extends BaseController {
             @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
                     dataType = "Long")})
     @DeleteMapping("/{groupId}/{contractId}")
-    public BaseResponse deleteByContractId(@PathVariable Integer groupId,
+    public BaseResponse deleteByContractId(@PathVariable String groupId,
             @PathVariable Long contractId) throws FrontException {
         log.info("deleteByContractId start. groupId:{} contractId:{}", groupId, contractId);
         contractService.deleteContract(contractId, groupId);
@@ -252,7 +252,7 @@ public class ContractController extends BaseController {
             @ApiImplicitParam(name = "contractId", value = "contractId", required = true,
                     dataType = "Long")})
     @GetMapping("/ifChanged/{groupId}/{contractId}")
-    public boolean ifChanged(@PathVariable Integer groupId, @PathVariable Long contractId) {
+    public boolean ifChanged(@PathVariable String groupId, @PathVariable Long contractId) {
         log.info("ifChanged start. groupId:{} contractId:{}", groupId, contractId);
         return contractService.verifyContractChange(contractId, groupId);
     }
@@ -268,7 +268,7 @@ public class ContractController extends BaseController {
             BindingResult result) throws FrontException {
         log.info("contractCompile start. param:{}", JsonUtils.toJSONString(req));
         checkParamResult(result);
-        return contractService.contractCompile(req.getContractName(), req.getSolidityBase64());
+        return contractService.contractCompile(req.getContractName(), req.getSolidityBase64(), req.getGroupId());
     }
 
     /**
@@ -299,7 +299,7 @@ public class ContractController extends BaseController {
      * query by groupId.
      */
     @GetMapping(value = "/findPathList/{groupId}")
-    public List<ContractPath> findPathList(@PathVariable("groupId") Integer groupId)
+    public List<ContractPath> findPathList(@PathVariable("groupId") String groupId)
             throws IOException {
         log.info("start findPathList. groupId:{}", groupId);
         return contractService.findPathList(groupId);
@@ -312,7 +312,7 @@ public class ContractController extends BaseController {
      * @return
      */
     @DeleteMapping("/deletePath/{groupId}/{contractPath}")
-    public BaseResponse deletePath(@PathVariable("groupId") Integer groupId,
+    public BaseResponse deletePath(@PathVariable("groupId") String groupId,
             @PathVariable String contractPath) {
         log.info("start deletePath. contractPath:{}", contractPath);
         contractService.deletePath(groupId, contractPath);
@@ -326,7 +326,7 @@ public class ContractController extends BaseController {
      * @return
      */
     @DeleteMapping("/batch/{groupId}/{contractPath}")
-    public BaseResponse batchDeletePath(@PathVariable("groupId") Integer groupId,
+    public BaseResponse batchDeletePath(@PathVariable("groupId") String groupId,
             @PathVariable String contractPath) {
         log.info("start deletePath. contractPath:{}", contractPath);
         contractService.batchDeleteByPath(groupId, contractPath);
@@ -340,7 +340,7 @@ public class ContractController extends BaseController {
             notes = "query list of contract without abi/bin")
     @ApiImplicitParam(name = "groupId", value = "groupId", required = true, dataType = "Integer")
     @GetMapping(value = "/contractList/all/light")
-    public BasePageResponse findAll(@RequestParam("groupId") Integer groupId,
+    public BasePageResponse findAll(@RequestParam("groupId") String groupId,
             @RequestParam("contractStatus") Integer contractStatus)
             throws FrontException, IOException {
         log.info("findAll start. groupId:{},contractStatus:{}", groupId, contractStatus);

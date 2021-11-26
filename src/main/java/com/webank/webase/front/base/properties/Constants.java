@@ -59,19 +59,14 @@ public class Constants {
     public static final String WEBASE_SIGN_VERSION_URI =
         "http://%s/WeBASE-Sign/version";
     public static final String ACCOUNT1_PATH = "node.key";
-    public static final String OPERATE_GROUP_START = "start";
-    public static final String OPERATE_GROUP_STOP = "stop";
-    public static final String OPERATE_GROUP_REMOVE = "remove";
-    public static final String OPERATE_GROUP_RECOVER = "recover";
-    public static final String OPERATE_GROUP_GET_STATUS = "getStatus";
     public static final String CONSTANT_PREFIX = "constant";
     public static final String SOLC_DIR_PATH_CONFIG = "solcjs";
     public static final String SOLC_DIR_PATH = "./conf/solcjs";
     public static final String SOLC_JS_SUFFIX = ".js";
     public static final String RECEIPT_STATUS_0X0 = "0x0";
 
-    public static String version;
-    public static String chainId;
+//    public static String version;
+//    public static String chainId;
     private String keyServer = "127.0.0.1:8080";
     private int transMaxWait = 30;
     private String monitorDisk = "/";

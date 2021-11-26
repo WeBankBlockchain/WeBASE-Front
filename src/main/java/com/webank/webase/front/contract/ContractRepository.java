@@ -24,14 +24,14 @@ import com.webank.webase.front.contract.entity.Contract;
 public interface ContractRepository extends CrudRepository<Contract, Long>,
     JpaSpecificationExecutor<Contract> {
 
-    Contract findByGroupIdAndContractPathAndContractName(int groupId, String contractPath,
+    Contract findByGroupIdAndContractPathAndContractName(String groupId, String contractPath,
         String contractName);
     
-    List<Contract> findByGroupIdAndContractPath(int groupId, String contractPath);
+    List<Contract> findByGroupIdAndContractPath(String groupId, String contractPath);
 
-    Contract findByGroupIdAndId(int groupId, Long contractId);
+    Contract findByGroupIdAndId(String groupId, Long contractId);
 
-    Contract findByGroupIdAndContractAddress(int groupId, String contractAddress);
+    Contract findByGroupIdAndContractAddress(String groupId, String contractAddress);
 
-    List<Contract> findByGroupIdAndContractStatus(int groupId, int contractStatus);
+    List<Contract> findByGroupIdAndContractStatus(String groupId, int contractStatus);
 }
