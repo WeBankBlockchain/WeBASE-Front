@@ -640,10 +640,10 @@ export function addFunctionAbi(data) {
     })
 }
 export function getFunctionAbi(data, list) {
-    
+
     const params = reviseParam(data, list);
     return get({
-        url: `${HANDLE}method/findById/${params.str.substr(0,12)}`,
+        url: `${HANDLE}method/findById/${params.str.substr(0,16)}`,
         method: 'get',
         headers: {
             Authorization: "Token " + localStorage.getItem("token") || ""

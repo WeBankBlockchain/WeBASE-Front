@@ -295,15 +295,15 @@ export default {
             }
             if (this.transation.funcValue.length) {
                 for (let i = 0; i < this.transation.funcValue.length; i++) {
-                    let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
-                    if (data && isJson(data)) {
+                    let datas = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
+                    if (datas && isJson(datas)) {
                         try {
-                            this.transation.reqVal[i] = JSON.parse(data)
+                            this.transation.reqVal[i] = JSON.parse(datas)
                         } catch (error) {
                             console.log(error)
                         }
-                    } else {
-                        this.transation.reqVal[i] = data;
+                    } else{
+                        this.transation.reqVal[i] = datas;
                     }
                 }
             }
