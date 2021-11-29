@@ -150,7 +150,8 @@ export default {
             privateKeyList: localStorage.getItem("privateKeyList") ? JSON.parse(localStorage.getItem("privateKeyList")) : [],
             fileString: "",
             uploadMap: {},
-            exportInfo: {}
+            exportInfo: {},
+            groupId:localStorage.getItem('groupId')            
         };
     },
     mounted() {
@@ -159,7 +160,7 @@ export default {
     },
     methods: {
         getEncryption: function () {
-            encryption().then(res => {
+            encryption(this.groupId).then(res => {
                 if (res.status == 200) {
                     localStorage.setItem("encryptionId", res.data)
                 } else {
@@ -232,7 +233,7 @@ export default {
 
         },
         addUser: function () {
-            queryCreatePrivateKey({ useAes: false, type: 0, userName: this.userForm.userName })
+            queryCreatePrivateKey({ useAes: false, type: 0, userName: this.userForm.userName, groupId:this.groupId})
                 .then(res => {
                     const { data, status } = res;
                     if (status === 200) {

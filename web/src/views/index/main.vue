@@ -136,8 +136,9 @@ export default {
                         message: "长度在 6 到 12 个字符",
                         trigger: "blur"
                     }
-                ]
-            }
+                ],
+            },
+            groupId:localStorage.getItem('groupId')            
         };
     },
     computed: {
@@ -156,7 +157,7 @@ export default {
     },
     methods: {
         getEncryption: function () {
-            encryption().then(res => {
+            encryption(this.groupId).then(res => {
                 if (res.status == 200) {
                      if (res.data != this.encryptionId) {
                         localStorage.setItem('solcName', '')

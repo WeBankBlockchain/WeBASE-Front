@@ -92,7 +92,7 @@ const routes = [
         menuShow: true,
         iconCls: 'wbs-icon-monitor sidebar-icon',
         children: [
-            { path: '/hostMetric', component: hostMetric, name: '主机指标', enName: 'hostMetrics', menuShow: true, meta: { requireAuth: false } },
+            { path: '/hostMetric', component: hostMetric, name: '主机指标', enName: 'hostMetrics', menuShow: false, meta: { requireAuth: false } },
             { path: '/nodesMetric', component: nodesMetric, name: '节点指标', enName: 'nodeMetrics', menuShow: true, meta: { requireAuth: false } },
         ]
     }, 

@@ -82,7 +82,8 @@ export default {
             versionId: localStorage.getItem('versionId') ? localStorage.getItem('versionId') : '',
             host: location.host,
             solcList: [],
-            allVersionList: []
+            allVersionList: [],
+            groupId:localStorage.getItem('groupId')            
         };
     },
     computed: {
@@ -281,7 +282,7 @@ export default {
         },
         getEncryption: function (callback) {
             this.loading = true
-            encryption().then(res => {
+            encryption(this.groupId).then(res => {
                 if (res.status == 200) {
                     localStorage.setItem("encryptionId", res.data)
                     callback()
