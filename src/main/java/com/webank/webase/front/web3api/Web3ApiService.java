@@ -65,8 +65,8 @@ public class Web3ApiService {
     @Qualifier("rpcClient")
     private Client rpcWeb3j;
     @Autowired
-    @Qualifier("singleClient")
-    private Client singleClient;
+    @Qualifier("clientMap")
+    private Map<String, Client> clientMap;
     @Autowired
     private Web3Config web3ConfigConstants;
 
@@ -204,10 +204,6 @@ public class Web3ApiService {
         TotalTransactionCount.TransactionCountInfo transactionCount = getWeb3j(groupId)
             .getTotalTransactionCount()
             .getTotalTransactionCount();
-//        log.info("getTransCnt transactionCount:{}", transactionCount);
-//        String txSumHex = transactionCount.getTransactionCount();
-//        String blockNumberHex = transactionCount.getBlockNumber();
-//        String failedTxSumHex = transactionCount.getFailedTransactionCount();
 
         return transactionCount;
     }
@@ -297,7 +293,6 @@ public class Web3ApiService {
      */
     public List<String> getGroupList() {
         log.debug("getGroupList. ");
-//        List<String> groupIdList = getBcosSDK().getClient()
         List<String> groupIdList = getWeb3j()
             .getGroupList().getResult()
             .getGroupList();
@@ -428,15 +423,6 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j() {
-//        List<String> groupIdList = rpcWeb3j.getGroupList().getResult().getGroupList(); //1
-//        if (groupIdList.isEmpty()) {
-//            log.error("Node's groupList empty! please check your node status");
-//            // get default web3j of integer max value
-//            throw new FrontException(ConstantCode.SYSTEM_ERROR_GROUP_LIST_EMPTY);
-//        }
-//        // get random index to get web3j
-//        String index = groupIdList.iterator().next();
-//        return clientMap.get(index);
         return rpcWeb3j;
     }
 
@@ -446,7 +432,7 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j(String groupId) {
-        return singleClient;
+        return clientMap.get(groupId);
     }
 
     // todo
@@ -455,7 +441,7 @@ public class Web3ApiService {
 //            log.warn("getBcosSDK stack is empty");
 //            throw new FrontException(ConstantCode.BCOS_SDK_EMPTY);
 //        }
-//        return bcosSDKs.peek(); todo
+//        return bcosSDKs.peek(); todo 未支持bcosSDK
         return BcosSDK.build("");
     }
 
