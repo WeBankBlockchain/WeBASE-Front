@@ -53,7 +53,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class Web3ApiController {
 
     @Autowired
-    Web3ApiService web3ApiService;
+    private Web3ApiService web3ApiService;
 
     @ApiOperation(value = "getBlockNumber", notes = "Get the latest block height of the node")
     @GetMapping("/blockNumber")
@@ -138,9 +138,9 @@ public class Web3ApiController {
     @GetMapping("/code/{address}/{blockNumber}")
     public String getCode(@PathVariable String groupId, @PathVariable String address,
             @PathVariable BigInteger blockNumber) {
-        if (address.length() != Address.ValidLen) {
-            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
-        }
+//        if (address.length() != Address.ValidLen) { todo
+//            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
+//        }
         return web3ApiService.getCode(groupId, address, blockNumber);
     }
 
@@ -261,7 +261,6 @@ public class Web3ApiController {
         return web3ApiService.searchByCriteria(groupId, input);
     }
 
-
     @ApiOperation(value = "getBlockTransCntByNumber",
         notes = "Get the number of transactions in the block based on the block height")
     @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
@@ -277,11 +276,5 @@ public class Web3ApiController {
         int encrypt = web3ApiService.getCryptoType(groupId);
         return encrypt;
     }
-//    @ApiOperation(value = "getNodeInfo", notes = "Get node information")
-//    @GetMapping("/nodeInfo")
-//    public NodeInformation getNodeInfo() {
-//        return web3ApiService.getNodeInfo();
-//    }
 
-    /* above 2.7.0 */
 }

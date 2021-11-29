@@ -56,7 +56,7 @@ server:
 
 sdk:
   loadFromDb: false # dev option
-  useSmSsl: false  # sdk cert path of relative or absolute
+  useSmSsl: false  # sdk whether enable sm ssl(guomi)
   certPath: conf  # sdk cert path of relative or absolute
   peers: ['127.0.0.1:20200','127.0.0.1:20201']
   threadPoolSize: 50 # thread pool of sdk
