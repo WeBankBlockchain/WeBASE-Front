@@ -1,5 +1,19 @@
 # server version
-version: v1.5.3
+version: v2.0.0-rc1
+
+server:
+  port: 5002
+  context-path: /WeBASE-Front
+  connection-timeout: 30000
+  tomcat:
+    max-threads: 200
+    max-connections: 10000
+
+sdk:
+  useSmSsl: false  # sdk whether enable sm ssl(guomi)
+  certPath: conf  # sdk cert path of relative or absolute
+  peers: ['127.0.0.1:20200','127.0.0.1:20201']
+  threadPoolSize: 50 # thread pool of sdk
 
 spring:
   datasource:
@@ -45,21 +59,6 @@ spring:
       max-request-size: 30MB # request max size
       max-file-size: 20MB # single file size
 
-
-server:
-  port: 5002
-  context-path: /WeBASE-Front
-  connection-timeout: 30000
-  tomcat:
-    max-threads: 200
-    max-connections: 10000
-
-sdk:
-  loadFromDb: false # dev option
-  useSmSsl: false  # sdk whether enable sm ssl(guomi)
-  certPath: conf  # sdk cert path of relative or absolute
-  peers: ['127.0.0.1:20200','127.0.0.1:20201']
-  threadPoolSize: 50 # thread pool of sdk
 
 logging:
   config: classpath:log4j2.xml
