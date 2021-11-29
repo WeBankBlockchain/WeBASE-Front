@@ -22,13 +22,13 @@ import static org.fisco.bcos.sdk.contract.precompiled.crud.TablePrecompiled.FUNC
 import static org.fisco.bcos.sdk.contract.precompiled.crud.TablePrecompiled.FUNC_UPDATE;
 import static org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.transaction.TransService;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,6 @@ import org.fisco.bcos.sdk.model.RetCode;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
-import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -278,24 +277,33 @@ public class PrecompiledWithSignService {
     public String insert(String groupId, String signUserId, Table table, Entry entry) {
         checkTableKeyLength(table);
         // trans
-        String entryJsonStr;
-        try {
-            entryJsonStr =
-                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFieldNameToValue());
-        } catch (JsonProcessingException e) {
-            log.error("remove JsonProcessingException:[]", e);
-            throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
-        }
+//        String entryJsonStr;
+//        try {
+//            entryJsonStr =
+//                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFieldNameToValue());
+//        } catch (JsonProcessingException e) {
+//            log.error("remove JsonProcessingException:[]", e);
+//            throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
+//        }
+
+        log.debug(
+            "table getKey : {},  table getTableName :{},table getKeyFieldName :{},table getValueFields: {} ",
+            table.getKey(), table.getTableName(),
+            table.getKeyFieldName(), table.getValueFields());
+        log.info("entry is {}", JsonUtils.objToString(entry.getFieldNameToValue()));
+
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
-        funcParams.add(table.getKey());
-        funcParams.add(entryJsonStr);
-        funcParams.add(table.getOptional());
+        funcParams.add(entry.getTablePrecompiledEntry());
+        log.debug("funcParams is {}",  JsonUtils.objToString(funcParams));
+
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CRUD);
+        log.debug("abiStr is {}", JsonUtils.objToString(abiStr));
+        log.debug("contractAddress is {}", contractAddress);
         TransactionReceipt receipt =
-                (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, contractAddress, abiStr, FUNC_INSERT, funcParams);
+            (TransactionReceipt) transService.transHandleWithSign(groupId,
+                signUserId, contractAddress, abiStr, FUNC_INSERT, funcParams);
         return this.handleTransactionReceipt(receipt);
     }
 
@@ -306,22 +314,23 @@ public class PrecompiledWithSignService {
             Condition condition) {
         checkTableKeyLength(table);
         // trans
-        String entryJsonStr, conditionStr;
-        try {
-            entryJsonStr =
-                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFieldNameToValue());
-            conditionStr = ObjectMapperFactory.getObjectMapper()
-                    .writeValueAsString(condition.getConditions());
-        } catch (JsonProcessingException e) {
-            log.error("update JsonProcessingException:[]", e);
-            throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
-        }
+//        String entryJsonStr, conditionStr;
+//        try {
+//            entryJsonStr =
+//                    ObjectMapperFactory.getObjectMapper().writeValueAsString(entry.getFieldNameToValue());
+//            conditionStr = ObjectMapperFactory.getObjectMapper()
+//                    .writeValueAsString(condition.getConditions());
+//        } catch (JsonProcessingException e) {
+//            log.error("update JsonProcessingException:[]", e);
+//            throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
+//        }
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
         funcParams.add(table.getKey());
-        funcParams.add(entryJsonStr);
-        funcParams.add(conditionStr);
         funcParams.add(table.getOptional());
+        funcParams.add(condition);
+        funcParams.add(entry.getTablePrecompiledEntry());
+
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CRUD);
         TransactionReceipt receipt =
@@ -336,18 +345,18 @@ public class PrecompiledWithSignService {
     public String remove(String groupId, String signUserId, Table table, Condition condition) {
         checkTableKeyLength(table);
         // trans
-        String conditionStr;
-        try {
-            conditionStr = ObjectMapperFactory.getObjectMapper()
-                    .writeValueAsString(condition.getConditions());
-        } catch (JsonProcessingException e) {
-            log.error("remove JsonProcessingException:[]", e);
-            throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
-        }
+//        String conditionStr;
+//        try {
+//            conditionStr = ObjectMapperFactory.getObjectMapper()
+//                    .writeValueAsString(condition.getConditions());
+//        } catch (JsonProcessingException e) {
+//            log.error("remove JsonProcessingException:[]", e);
+//            throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
+//        }
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
         funcParams.add(table.getKey());
-        funcParams.add(conditionStr);
+        funcParams.add(condition);
         funcParams.add(table.getOptional());
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CRUD);
