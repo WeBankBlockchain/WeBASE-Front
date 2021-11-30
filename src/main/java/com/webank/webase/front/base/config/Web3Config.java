@@ -64,7 +64,7 @@ public class Web3Config {
 
 
     @Bean
-    public ConfigOption initConfigOptionFromFile() throws ConfigException {
+    public ConfigOption getConfigOptionFromFile() throws ConfigException {
         log.info("start init ConfigProperty");
         // cert config, encrypt type
         Map<String, Object> cryptoMaterial = new HashMap<>();
