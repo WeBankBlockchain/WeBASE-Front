@@ -50,52 +50,52 @@ import org.springframework.web.bind.annotation.RestController;
 public class PrecompiledController {
     @Autowired
     private PrecompiledService precompiledService;
-
-    /**
-     * Cns manage
-     */
-    @GetMapping("cns/list")
-    public Object queryCns(@RequestParam(defaultValue = "1") String groupId,
-            @RequestParam String contractNameAndVersion,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
-        Instant startTime = Instant.now();
-        log.info("start queryCns. startTime:{}, groupId:{}, contractNameAndVersion:{}",
-                startTime.toEpochMilli(), groupId, contractNameAndVersion);
-        List<CnsInfo> resList = new ArrayList<>();
-        // get "name:version"
-        String[] params = contractNameAndVersion.split(":");
-        if (params.length == 1) {
-            String name = params[0];
-            resList = precompiledService.queryCnsByName(groupId, name);
-            log.info("end queryCns useTime:{} resList:{}",
-                    Duration.between(startTime, Instant.now()).toMillis(), resList);
-            if (resList.size() != 0) {
-                List2Page<CnsInfo> list2Page =
-                        new List2Page<CnsInfo>(resList, pageSize, pageNumber);
-                List<CnsInfo> finalList = list2Page.getPagedList();
-                long totalCount = (long) resList.size();
-                log.debug("end queryCns. Contract Name finalList:{}", finalList);
-                return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
-            } else {
-                return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
-            }
-        } else if (params.length == 2) {
-            String name = params[0];
-            String version = params[1];
-            if (!PrecompiledUtils.checkVersion(version)) {
-                return ConstantCode.INVALID_VERSION;
-            }
-            // check return list size
-            Tuple2<String, String> res = precompiledService.queryCnsByNameAndVersion(groupId, name, version);
-            log.info("end queryCns useTime:{} res:{}",
-                    Duration.between(startTime, Instant.now()).toMillis(), res);
-            return new BaseResponse(ConstantCode.RET_SUCCESS, res);
-        } else {
-            return ConstantCode.PARAM_ERROR;
-        }
-    }
-
+//
+//    /**
+//     * Cns manage
+//     */
+//    @GetMapping("cns/list")
+//    public Object queryCns(@RequestParam(defaultValue = "1") String groupId,
+//            @RequestParam String contractNameAndVersion,
+//            @RequestParam(defaultValue = "10") int pageSize,
+//            @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
+//        Instant startTime = Instant.now();
+//        log.info("start queryCns. startTime:{}, groupId:{}, contractNameAndVersion:{}",
+//                startTime.toEpochMilli(), groupId, contractNameAndVersion);
+//        List<CnsInfo> resList = new ArrayList<>();
+//        // get "name:version"
+//        String[] params = contractNameAndVersion.split(":");
+//        if (params.length == 1) {
+//            String name = params[0];
+//            resList = precompiledService.queryCnsByName(groupId, name);
+//            log.info("end queryCns useTime:{} resList:{}",
+//                    Duration.between(startTime, Instant.now()).toMillis(), resList);
+//            if (resList.size() != 0) {
+//                List2Page<CnsInfo> list2Page =
+//                        new List2Page<CnsInfo>(resList, pageSize, pageNumber);
+//                List<CnsInfo> finalList = list2Page.getPagedList();
+//                long totalCount = (long) resList.size();
+//                log.debug("end queryCns. Contract Name finalList:{}", finalList);
+//                return new BasePageResponse(ConstantCode.RET_SUCCESS, finalList, totalCount);
+//            } else {
+//                return new BasePageResponse(ConstantCode.RET_SUCCESS_EMPTY_LIST, resList, 0);
+//            }
+//        } else if (params.length == 2) {
+//            String name = params[0];
+//            String version = params[1];
+//            if (!PrecompiledUtils.checkVersion(version)) {
+//                return ConstantCode.INVALID_VERSION;
+//            }
+//            // check return list size
+//            Tuple2<String, String> res = precompiledService.queryCnsByNameAndVersion(groupId, name, version);
+//            log.info("end queryCns useTime:{} res:{}",
+//                    Duration.between(startTime, Instant.now()).toMillis(), res);
+//            return new BaseResponse(ConstantCode.RET_SUCCESS, res);
+//        } else {
+//            return ConstantCode.PARAM_ERROR;
+//        }
+//    }
+//
 
 
     /**

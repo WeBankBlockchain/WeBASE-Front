@@ -24,6 +24,7 @@ import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
@@ -96,6 +97,8 @@ public class PrecompiledService {
     public List<NodeInfo> getNodeList(String groupId) {
         // nodeListWithType 组合多个带有类型的nodeid list
         List<Sealer> sealerList = web3ApiService.getSealerList(groupId);
+
+        List<String> sealerStrList = sealerList.stream().map(Sealer::getNodeID).collect(Collectors.toList());;
         List<String> observerList = web3ApiService.getObserverList(groupId);
         List<String> peerList = web3ApiService.getGroupPeers(groupId);
         // process nodeList
@@ -107,7 +110,7 @@ public class PrecompiledService {
         observerList.forEach(
                 observer -> nodeListWithType.add(new NodeInfo(observer, NODE_TYPE_OBSERVER)));
         // peer not in sealer/observer but connected is remove node(游离节点)
-        peerList.stream().filter(peer -> !sealerList.contains(peer) && !observerList.contains(peer))
+        peerList.stream().filter(peer -> !sealerStrList.contains(peer) && !observerList.contains(peer))
                 .forEach(peerToAdd -> nodeListWithType
                         .add(new NodeInfo(peerToAdd, NODE_TYPE_REMOVE)));
 
