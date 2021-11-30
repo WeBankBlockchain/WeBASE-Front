@@ -93,49 +93,49 @@ public class EventController extends BaseController {
 //        return new BaseResponse(ConstantCode.RET_SUCCESS);
 //    }
 //
-
-    @ApiOperation(value = "registerContractEvent",
-            notes = "register contract event callback and push message to mq")
-    @ApiImplicitParam(name = "ReqContractEventRegister", value = "EventLogUserParams与消息队列所需配置",
-            required = true, dataType = "ReqContractEventRegister")
-    @PostMapping("contractEvent")
-    public BaseResponse registerContractEvent(
-            @Valid @RequestBody ReqContractEventRegister reqContractEventRegister, BindingResult result){
-        log.debug("start registerContractEvent. {}", reqContractEventRegister);
-        checkParamResult(result);
-        String groupId = reqContractEventRegister.getGroupId();
-        String appId = reqContractEventRegister.getAppId();
-        if (!CommonUtils.isLetterDigit(appId)) {
-            throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
-        }
-        String fromBlock = reqContractEventRegister.getFromBlock();
-        String toBlock = reqContractEventRegister.getToBlock();
-        // 0 < fromBlock <= toBlock, latest means latest block
-        if ("0".equals(fromBlock) || "0".equals(toBlock)) {
-            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
-        }
-        if ("latest".equals(fromBlock) && !"latest".equals(toBlock)) {
-            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
-        }
-        if (!"latest".equals(fromBlock) && !"latest".equals(toBlock) &&
-                Integer.parseInt(toBlock) < Integer.parseInt(fromBlock)) {
-            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
-        }
-        String contractAddress = reqContractEventRegister.getContractAddress();
-        List<String> topicList = reqContractEventRegister.getTopicList();
-        List<Object> contractAbi = reqContractEventRegister.getContractAbi();
-        String abiStr = JsonUtils.toJSONString(contractAbi);
-        AbiUtil.checkAbi(abiStr);
-        String exchangeName = reqContractEventRegister.getExchangeName();
-        // username as queue name
-        String queueName = reqContractEventRegister.getQueueName();
-        // register contract event log push in service
-        eventService.registerContractEvent(appId, groupId,
-                exchangeName, queueName, abiStr, fromBlock, toBlock,
-                contractAddress, topicList);
-        log.debug("end registerContractEvent. ");
-        return new BaseResponse(ConstantCode.RET_SUCCESS);
-    }
+//
+//    @ApiOperation(value = "registerContractEvent",
+//            notes = "register contract event callback and push message to mq")
+//    @ApiImplicitParam(name = "ReqContractEventRegister", value = "EventLogUserParams与消息队列所需配置",
+//            required = true, dataType = "ReqContractEventRegister")
+//    @PostMapping("contractEvent")
+//    public BaseResponse registerContractEvent(
+//            @Valid @RequestBody ReqContractEventRegister reqContractEventRegister, BindingResult result){
+//        log.debug("start registerContractEvent. {}", reqContractEventRegister);
+//        checkParamResult(result);
+//        String groupId = reqContractEventRegister.getGroupId();
+//        String appId = reqContractEventRegister.getAppId();
+//        if (!CommonUtils.isLetterDigit(appId)) {
+//            throw new FrontException(ConstantCode.PARAM_INVALID_LETTER_DIGIT);
+//        }
+//        String fromBlock = reqContractEventRegister.getFromBlock();
+//        String toBlock = reqContractEventRegister.getToBlock();
+//        // 0 < fromBlock <= toBlock, latest means latest block
+//        if ("0".equals(fromBlock) || "0".equals(toBlock)) {
+//            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+//        }
+//        if ("latest".equals(fromBlock) && !"latest".equals(toBlock)) {
+//            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+//        }
+//        if (!"latest".equals(fromBlock) && !"latest".equals(toBlock) &&
+//                Integer.parseInt(toBlock) < Integer.parseInt(fromBlock)) {
+//            return new BaseResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+//        }
+//        String contractAddress = reqContractEventRegister.getContractAddress();
+//        List<String> topicList = reqContractEventRegister.getTopicList();
+//        List<Object> contractAbi = reqContractEventRegister.getContractAbi();
+//        String abiStr = JsonUtils.toJSONString(contractAbi);
+//        AbiUtil.checkAbi(abiStr);
+//        String exchangeName = reqContractEventRegister.getExchangeName();
+//        // username as queue name
+//        String queueName = reqContractEventRegister.getQueueName();
+//        // register contract event log push in service
+//        eventService.registerContractEvent(appId, groupId,
+//                exchangeName, queueName, abiStr, fromBlock, toBlock,
+//                contractAddress, topicList);
+//        log.debug("end registerContractEvent. ");
+//        return new BaseResponse(ConstantCode.RET_SUCCESS);
+//    }
 
     @ApiOperation(value = "getNewBlockEventInfo",
             notes = "get registered NewBlockEvent info by app id")
@@ -232,56 +232,56 @@ public class EventController extends BaseController {
         return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
     }
 
-    @ApiOperation(value = "unregisterContractEvent",
-            notes = "unregister contract event")
-    @ApiImplicitParam(name = "ReqContractEventRegister", value = "注册出块通知所需配置与数据表的id值",
-            required = true, dataType = "ReqContractEventRegister")
-    @DeleteMapping("contractEvent")
-    public BaseResponse unregisterContractEvent(
-            @Valid @RequestBody ReqUnregister reqUnregister) {
-        log.debug("start unregisterContractEvent reqUnregister. {}", reqUnregister);
-        String infoId = reqUnregister.getId();
-        String appId = reqUnregister.getAppId();
-        String groupId = reqUnregister.getGroupId();
-        String exchangeName = reqUnregister.getExchangeName();
-        // username as queue name
-        String queueName = reqUnregister.getQueueName();
-        eventService.unregisterContractEvent(infoId, appId, groupId,
-                exchangeName, queueName);
-        log.debug("end unregisterContractEvent. ");
-        return new BaseResponse(ConstantCode.RET_SUCCESS);
-    }
+//    @ApiOperation(value = "unregisterContractEvent",
+//            notes = "unregister contract event")
+//    @ApiImplicitParam(name = "ReqContractEventRegister", value = "注册出块通知所需配置与数据表的id值",
+//            required = true, dataType = "ReqContractEventRegister")
+//    @DeleteMapping("contractEvent")
+//    public BaseResponse unregisterContractEvent(
+//            @Valid @RequestBody ReqUnregister reqUnregister) {
+//        log.debug("start unregisterContractEvent reqUnregister. {}", reqUnregister);
+//        String infoId = reqUnregister.getId();
+//        String appId = reqUnregister.getAppId();
+//        String groupId = reqUnregister.getGroupId();
+//        String exchangeName = reqUnregister.getExchangeName();
+//        // username as queue name
+//        String queueName = reqUnregister.getQueueName();
+//        eventService.unregisterContractEvent(infoId, appId, groupId,
+//                exchangeName, queueName);
+//        log.debug("end unregisterContractEvent. ");
+//        return new BaseResponse(ConstantCode.RET_SUCCESS);
+//    }
 
-    @ApiOperation(value = "listContractEventLogs",
-        notes = "get event logs from block's tx receipts")
-    @ApiImplicitParam(name = "ReqEventLogList", value = "获取区块EventLog所需参数",
-        required = true, dataType = "ReqEventLogList")
-    @PostMapping("eventLogs/list")
-    public BasePageResponse listContractEventLogs(
-        @Valid @RequestBody ReqEventLogList reqEventLogList, BindingResult result){
-        log.debug("start listContractEventLogs. reqEventLogList:{}", reqEventLogList);
-        checkParamResult(result);
-        String groupId = reqEventLogList.getGroupId();
-        Integer fromBlock = reqEventLogList.getFromBlock();
-        Integer toBlock = reqEventLogList.getToBlock();
-        // 0 < fromBlock <= toBlock, latest means latest block
-        if (fromBlock == 0 || toBlock == 0) {
-            return new BasePageResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
-        }
-        if (fromBlock > toBlock) {
-            return new BasePageResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
-        }
-        String contractAddress = reqEventLogList.getContractAddress();
-        EventTopicParam eventTopicParam = reqEventLogList.getTopics();
-        List<Object> contractAbi = reqEventLogList.getContractAbi();
-        String abiStr = JsonUtils.toJSONString(contractAbi);
-        AbiUtil.checkAbi(abiStr);
-        // get event log from each block's tx receipts
-        List<DecodedEventLog> resList = eventService.getContractEventLog(groupId, contractAddress, abiStr,
-            fromBlock, toBlock, eventTopicParam);
-        log.debug("end listContractEventLogs resList:{}. ", resList);
-        return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
-    }
+//    @ApiOperation(value = "listContractEventLogs",
+//        notes = "get event logs from block's tx receipts")
+//    @ApiImplicitParam(name = "ReqEventLogList", value = "获取区块EventLog所需参数",
+//        required = true, dataType = "ReqEventLogList")
+//    @PostMapping("eventLogs/list")
+//    public BasePageResponse listContractEventLogs(
+//        @Valid @RequestBody ReqEventLogList reqEventLogList, BindingResult result){
+//        log.debug("start listContractEventLogs. reqEventLogList:{}", reqEventLogList);
+//        checkParamResult(result);
+//        String groupId = reqEventLogList.getGroupId();
+//        Integer fromBlock = reqEventLogList.getFromBlock();
+//        Integer toBlock = reqEventLogList.getToBlock();
+//        // 0 < fromBlock <= toBlock, latest means latest block
+//        if (fromBlock == 0 || toBlock == 0) {
+//            return new BasePageResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+//        }
+//        if (fromBlock > toBlock) {
+//            return new BasePageResponse(ConstantCode.BLOCK_RANGE_PARAM_INVALID);
+//        }
+//        String contractAddress = reqEventLogList.getContractAddress();
+//        EventTopicParam eventTopicParam = reqEventLogList.getTopics();
+//        List<Object> contractAbi = reqEventLogList.getContractAbi();
+//        String abiStr = JsonUtils.toJSONString(contractAbi);
+//        AbiUtil.checkAbi(abiStr);
+//        // get event log from each block's tx receipts
+//        List<DecodedEventLog> resList = eventService.getContractEventLog(groupId, contractAddress, abiStr,
+//            fromBlock, toBlock, eventTopicParam);
+//        log.debug("end listContractEventLogs resList:{}. ", resList);
+//        return new BasePageResponse(ConstantCode.RET_SUCCESS, resList, resList.size());
+//    }
 
     /**
      * query list of contract only contain groupId and contractAddress and contractName
