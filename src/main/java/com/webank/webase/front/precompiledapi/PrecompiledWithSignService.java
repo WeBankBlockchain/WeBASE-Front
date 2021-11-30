@@ -157,27 +157,15 @@ public class PrecompiledWithSignService {
      * consensus: add sealer through webase-sign
      * v1.5.0 增加校验群组文件是否存在，P2P连接存在
      */
-    public String addSealer(String groupId, String signUserId, String nodeId) {
+    public String addSealer(String groupId, String signUserId, String nodeId, int weight) {
         // check node id
         if (!isValidNodeID(groupId, nodeId)) {
             return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
         }
-        List<String> sealerList = web3ApiService.getSealerStrList(groupId);
-        if (sealerList.contains(nodeId)) {
-            return ConstantCode.ALREADY_EXISTS_IN_SEALER_LIST.toString();
-        }
-        List<String> nodeIdList = web3ApiService.getGroupPeers(groupId);
-        if (!nodeIdList.contains(nodeId)) {
-            log.error("nodeId is not connected with others, cannot added as sealer");
-            return ConstantCode.PEERS_NOT_CONNECTED.toString();
-        }
-        // check group file
-//        if (!containsGroupFile(groupId)) {
-//            throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
-//        }
         // trans
         List<Object> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
+        funcParams.add(weight);
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
         TransactionReceipt receipt =

@@ -31,6 +31,10 @@ public class ConsensusHandle {
     private String signUserId;
     @NotBlank(message = ConstantCode.PARAM_FAIL_NODE_ID_IS_EMPTY)
     private String nodeId;
+    /**
+     * sealer's weight
+     */
+    private Integer weight;
     @Deprecated
     private String fromAddress;
 }

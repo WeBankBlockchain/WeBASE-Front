@@ -121,23 +121,6 @@ public class ConstantCode {
     public static final RetCode INVALID_CONTRACT_HANDLE_TYPE = RetCode.mark(201115, "invalid contract handle type");
     public static final RetCode FAIL_CONTRACT_HANDLE = RetCode.mark(201116, "contract status handle fail");
 
-    // group operate error code from sdk
-    public static final RetCode GROUP_OPERATE_FAIL = RetCode.mark(201120, "group operate fail");
-    public static final RetCode NODE_INTERNAL_ERROR = RetCode.mark(201121, "node internal error");
-    public static final RetCode GROUP_ALREADY_EXISTS = RetCode.mark(201122, "group already exists");
-    public static final RetCode GROUP_ALREADY_RUNNING = RetCode.mark(201123, "group already running");
-    public static final RetCode GROUP_ALREADY_STOPPED = RetCode.mark(201124, "group already stopped");
-    public static final RetCode GROUP_ALREADY_DELETED = RetCode.mark(201125, "group already deleted");
-    public static final RetCode GROUP_NOT_FOUND = RetCode.mark(201126, "group not found");
-    public static final RetCode GROUP_OPERATE_INVALID_PARAMS = RetCode.mark(201127, "group operate param error");
-    public static final RetCode PEERS_NOT_CONNECTED = RetCode.mark(201128, "group peers not connected");
-    public static final RetCode GENESIS_CONF_ALREADY_EXISTS = RetCode.mark(201129, "group genesis conf already exists");
-    public static final RetCode GROUP_CONF_ALREADY_EXIST = RetCode.mark(201130, "group config.ini already exists");
-    public static final RetCode GENESIS_CONF_NOT_FOUND = RetCode.mark(201131, "group genesis conf not found");
-    public static final RetCode GROUP_CONF_NOT_FOUND = RetCode.mark(201132, "group config.ini not found");
-    public static final RetCode GROUP_IS_STOPPING = RetCode.mark(201133, "group is stopping");
-    public static final RetCode GROUP_NOT_DELETED = RetCode.mark(201134, "group not deleted");
-
     // contract type param error
     public static final RetCode CONTRACT_TYPE_ENCODED_ERROR = RetCode.mark(201151, "Unsupported contract param type to encoded");
     public static final RetCode CONTRACT_TYPE_DECODED_ERROR = RetCode.mark(201152, "Unsupported contract param type to decoded");
@@ -271,6 +254,8 @@ public class ConstantCode {
     public static final RetCode SAME_SDK_PEERS_ERROR = RetCode.mark(201602, "Sdk's peers same with new peers");
     public static final RetCode CONNECT_TO_NEW_PEERS_FAILED = RetCode.mark(201603, "webase-front connect to new peers ip port failed!");
     public static final RetCode BUILD_SDK_WITH_NEW_PEERS_FAILED = RetCode.mark(201604, "Build bcosSDk instance with new peers failed");
+
+    public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
 
 
 }

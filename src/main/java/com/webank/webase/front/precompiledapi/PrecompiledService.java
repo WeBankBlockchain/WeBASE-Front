@@ -77,8 +77,8 @@ public class PrecompiledService {
     /**
      * Consensus config related
      */
-    public String addSealer(String groupId, String signUserId, String nodeId) {
-        String res = precompiledWithSignService.addSealer(groupId, signUserId, nodeId);
+    public String addSealer(String groupId, String signUserId, String nodeId, int weight) {
+        String res = precompiledWithSignService.addSealer(groupId, signUserId, nodeId, weight);
         return res;
     }
 
