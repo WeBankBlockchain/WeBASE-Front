@@ -16,7 +16,6 @@ package com.webank.webase.front.transaction;
 
 import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
 
-import com.qq.tars.protocol.tars.TarsOutputStream;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
@@ -38,10 +37,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -57,7 +54,6 @@ import org.fisco.bcos.sdk.codec.datatypes.Function;
 import org.fisco.bcos.sdk.codec.datatypes.Type;
 import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
 import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
-import org.fisco.bcos.sdk.codec.wrapper.ABICodecJsonWrapper;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition.NamedType;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinitionFactory;
@@ -74,7 +70,6 @@ import org.fisco.bcos.sdk.transaction.builder.TransactionBuilderService;
 import org.fisco.bcos.sdk.transaction.codec.decode.RevertMessageParser;
 import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
-import org.fisco.bcos.sdk.transaction.manager.AssembleTransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
@@ -107,6 +102,10 @@ public class TransService {
     private CryptoSuite ecdsaCryptoSuite;
     @Autowired
     private PrecompiledService precompiledService;
+    /**
+     * if use wasm(liquid), use 1
+     */
+    private static final int USE_SOLIDITY = 0; 
 
     /**
      * transHandleWithSign.
@@ -221,7 +220,7 @@ public class TransService {
         byte[] encodedTransaction = encoderService.encode(rawTransaction);
 
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
-        byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData);
+        byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
 //        return Numeric.toHexString(signedMessage);
         return Base64.getEncoder().encodeToString(signedMessage);
 
@@ -522,10 +521,10 @@ public class TransService {
             String signResultStr;
             if (isLocal) {
                 CryptoKeyPair cryptoKeyPair = this.getCredentials(false, user, groupId);
-                SignatureResult userSignResult = signMessageHashByType(hashMessageStr,
+                SignatureResult signData = signMessageHashByType(hashMessageStr,
                     cryptoKeyPair, client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, userSignResult);
+                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
                 signResultStr = Numeric.toHexString(signedMessage);
             } else {
                 // sign by webase-sign
@@ -534,7 +533,7 @@ public class TransService {
                 EncodeInfo encodeInfo = new EncodeInfo(user, hashMessageStr);
                 String signDataStr = keyStoreService.getSignData(encodeInfo);
                 SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, client.getCryptoSuite().cryptoTypeConfig);
-                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData);
+                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
                 signResultStr = Numeric.toHexString(signedMessage);
             }
             log.info("createRawTxEncoded signResultStr:{}", signResultStr);
@@ -615,7 +614,7 @@ public class TransService {
         log.info("handleTransaction start startTime:{}", startTime.toEpochMilli());
         // send tx
         TransactionProcessor txProcessor = TransactionProcessorFactory.createTransactionProcessor(client, cryptoKeyPair);
-        TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair);
+        TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair, USE_SOLIDITY);
         // cover null message through statusCode
         this.decodeReceipt(receipt);
         log.info("execTransaction end useTime:{},receipt:{}",
@@ -636,22 +635,6 @@ public class TransService {
         log.debug("handleTransaction signUserId:{},contractAddress:{},encodeFunction:{}",signUserId,contractAddress, encodeFunction);
         String groupId = client.getGroup();
         String signedMessageStr = this.signMessage(groupId, client, signUserId, contractAddress, encodeFunction);
-        // raw tx
-//        Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
-//        TransactionBuilderInterface transactionBuilder = new TransactionBuilderService(client);
-//        TransactionData rawTransaction = transactionBuilder.createTransaction(contractAddress, encodeFunction,
-//            chainIdAndGroupId.getLeft(), chainIdAndGroupId.getRight());
-//        log.debug("handleTransaction rawTransaction:{}", JsonUtils.objToString(rawTransaction));
-//        // encode
-//        TransactionEncoderService encoderService = new TransactionEncoderService(web3ApiService.getCryptoSuite(groupId));
-//        byte[] encodedTransaction = encoderService.encode(rawTransaction);
-//        log.debug("handleTransaction encodedTransaction:{}", JsonUtils.objToString(encodedTransaction));
-//        // sign
-//        SignatureResult signResult = this.requestSignForSign(encodedTransaction, signUserId, groupId);
-//        log.debug("handleTransaction SignatureResult signResult:{}", JsonUtils.objToString(signResult));
-//        byte[] signedMessage = this.encodeRawTxWithSign(rawTransaction, signResult, encoderService);
-//        String signedMessageStr = Numeric.toHexString(signedMessage);
-//        log.debug("handleTransaction signedMessageStr:{}", JsonUtils.objToString(signedMessageStr));
 
         Instant nodeStartTime = Instant.now();
         // send transaction

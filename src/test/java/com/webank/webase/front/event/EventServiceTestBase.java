@@ -26,8 +26,8 @@ public class EventServiceTestBase extends SpringTestBase {
     private ContractEventInfoRepository eventInfoRepository;
     @Autowired
     private NewBlockEventInfoRepository blockEventInfoRepository;
-    @Autowired
-    private EventService eventService;
+//    @Autowired
+//    private EventService eventService;
 
     @Test
     public void testFindContractEvent() {

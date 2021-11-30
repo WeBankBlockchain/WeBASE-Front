@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.fisco.bcos.sdk.codec.ABICodec;
 import org.fisco.bcos.sdk.codec.ABICodecException;
-import org.fisco.bcos.sdk.eventsub.EventCallback;
+import org.fisco.bcos.sdk.eventsub.EventSubCallback;
 import org.fisco.bcos.sdk.model.EventLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * use CompleteFuture to get all callback of event
  */
-public class SyncEventLogCallback implements EventCallback {
+public class SyncEventLogCallback implements EventSubCallback {
 
     private static final Logger logger =
         LoggerFactory.getLogger(SyncEventLogCallback.class);
@@ -59,9 +59,9 @@ public class SyncEventLogCallback implements EventCallback {
      * @param logs   logs from the message.
      */
     @Override
-    public void onReceiveLog(int status, List<EventLog> logs) {
+    public void onReceiveLog(String eventSubId, int status, List<EventLog> logs) {
         logger.info(
-            "SyncEventLogCallback onPushEventLog status: {}, logs: {}", status, logs);
+            "SyncEventLogCallback onPushEventLog eventSubId:{}, status: {}, logs: {}", eventSubId, status, logs);
         // status == 0 push not finish,
         if (status == 0) {
             // add in resultList
