@@ -287,6 +287,12 @@ public class Web3ApiService {
         return groupInfo;
     }
 
+
+    public List<GroupNodeInfo> getGroupNodeInfo(String groupId) {
+        List<GroupNodeInfo> groupNodeInfos = getWeb3j(groupId).getGroupInfo().getResult().getNodeList();
+        return groupNodeInfos;
+    }
+
     /**
      * get group list and refresh web3j map
      * @return
