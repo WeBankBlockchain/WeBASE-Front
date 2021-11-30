@@ -15,7 +15,7 @@
  */
 // import url from './url'
 import { post, get, patch, put, deleted } from './http'
-import { reviseParam } from './util'
+import { reviseParam ,resizeParam} from './util'
 import qs from 'qs'
 
 var HANDLE = null;
@@ -641,9 +641,9 @@ export function addFunctionAbi(data) {
 }
 export function getFunctionAbi(data, list) {
 
-    const params = reviseParam(data, list);
+    const params = resizeParam(data, list);
     return get({
-        url: `${HANDLE}method/findById/${params.str.substr(0,16)}`,
+        url: `${HANDLE}method/findById/${params}`,
         method: 'get',
         headers: {
             Authorization: "Token " + localStorage.getItem("token") || ""

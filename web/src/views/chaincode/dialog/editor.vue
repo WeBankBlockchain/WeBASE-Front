@@ -22,7 +22,7 @@
     <div v-if="transationData && transationData.logEntries" slot :style="{ height: editorHeight + 'px' }" style="overflow-y: auto">
       <div>{</div>
       <div v-for="(val, key) in transationData" style="padding-left: 10px">
-        <div v-if="key != 'logEntries' && key != 'output'">
+        <div v-if="key != 'logEntries' && key != 'output'&& key != 'input'">
           <template v-if="key == 'status'">
             <span class="transation-title">{{ key }}:</span>
             <span :style="{ color: txStatusColor(val) }">{{ val }}</span>
@@ -35,7 +35,41 @@
             <span class="transation-content other-color" v-else>{{ val }}</span>
           </template>
         </div>
-
+        <div v-else-if='key == "input"'>
+          <span class="transation-title">{{key}}:</span>
+          <span class="transation-content string-color" v-if="showDecodeInput">"{{val}}"</span>
+          <div v-if="!showDecodeInput" class="transation-data" style="width: 500px">
+            <div class="input-label">
+              <span class="label">function</span>
+              <span>{{funcData + "(" + abiType + inputType + ")"}}</span>
+              <el-tooltip v-if="funcData == '' " effect="dark" :content="$t('text.importContractTip')" placement="top-start">
+                <i class="el-icon-info"></i>
+              </el-tooltip>
+            </div>
+            <div class="input-label">
+              <span class="label">methodId</span>
+              <span>{{methodId}}</span>
+            </div>
+            <div class="input-label">
+              <span class="label">data:</span>
+              <el-table :data="inputDatas" v-if="inputDatas.length" style="display:inline-block;width:350px">
+                <el-table-column prop="name" label="name" align="left"></el-table-column>
+                <el-table-column prop="type" label="type" align="left"></el-table-column>
+                <el-table-column prop="data" label="data" align="left" :show-overflow-tooltip="true">
+                  <template slot-scope="scope">
+                    <i class="wbs-icon-baocun font-12 copy-public-key" @click="copyPubilcKey(scope.row.data)" :title="$t('text.copy')"></i>
+                    <span>{{scope.row.data}}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <div class="item">
+            <!-- <div class="item" v-show="inputButtonShow"> -->
+            <span class="label"></span>
+            <el-button @click="decodeInputCheck" type="primary">{{inputTitle}}</el-button>
+          </div>
+        </div>
         <div v-else-if="key == 'output'">
           <span class="transation-title">{{ key }}:</span>
           <span class="transation-content string-color" v-if="showDecode">"{{ val }}"</span>
@@ -174,6 +208,7 @@
             ]
           </span>
         </div>
+
       </div>
       <div>}</div>
     </div>
@@ -189,7 +224,7 @@ export default {
     return {
       editorShow: true,
       aceEditor: null,
-      transationData: this.data || {logEntries:['']},
+      transationData: this.data || { logEntries: [""] },
       modePath: "ace/mode/solidity",
       editorDialog: this.show || false,
       eventSHow: false,
@@ -197,10 +232,14 @@ export default {
       funcData: "",
       methodId: "",
       abiType: "",
+      inputType: [],
       inputData: [],
+      inputDatas: [],
       decodeData: "",
       showDecode: true,
+      showDecodeInput: true,
       buttonTitle: this.$t("text.txnDecodeBtn"),
+      inputTitle: this.$t("text.txnEncodeBtn"),
       typesArray: this.input,
       inputButtonShow: true,
       editorHeight: "",
@@ -245,6 +284,15 @@ export default {
       //   })
       // //   return arr
       // },
+    },
+    decodeInputCheck: function () {
+      if (this.showDecodeInput) {
+        this.showDecodeInput = false;
+        this.inputTitle = this.$t("text.txnEncodeBtn");
+      } else {
+        this.showDecodeInput = true;
+        this.inputTitle = this.$t("text.txnDecodeBtn");
+      }
     },
     modelClose() {
       this.$emit("close");
@@ -305,10 +353,61 @@ export default {
         this.buttonTitle = this.$t("text.txnEncodeBtn");
       }
     },
+    decodeInput: function (input, abiData) {
+      let Web3EthAbi = require("web3-eth-abi");
+
+      this.methodId = input.substring(0, 10);
+      // this.methodId = data;
+      let inputDatas = "0x" + input.substring(10);
+      if (abiData) {
+        abiData.abiInfo = JSON.parse(abiData.abiInfo);
+        abiData.abiInfo.inputs.forEach((val, index) => {
+          if (val && val.type && val.name) {
+            this.inputType[index] = val.type + " " + val.name;
+          } else if (val && val.name) {
+            this.inputType[index] = val.name;
+          } else if (val && val.type) {
+            this.inputType[index] = val.type;
+          } else if (val) {
+            this.inputType[index] = val;
+          }
+        });
+
+        this.funcData = abiData.abiInfo.name;
+        if (abiData.abiInfo.inputs.length) {
+          this.decodeData = Web3EthAbi.decodeParameters(
+            abiData.abiInfo.inputs,
+            inputDatas
+          );
+          if (JSON.stringify(this.decodeData) != "{}") {
+            for (const key in this.decodeData) {
+              abiData.abiInfo.inputs.forEach((val, index) => {
+                if (val && val.name && val.type) {
+                  if (key === val.name) {
+                    this.inputDatas[index] = {};
+                    this.inputDatas[index].name = val.name;
+                    this.inputDatas[index].type = val.type;
+                    this.inputDatas[index].data = this.decodeData[key];
+                  }
+                } else if (val) {
+                  if (index == key) {
+                    this.inputDatas[index] = {};
+                    this.inputDatas[index].type = val;
+                    this.inputDatas[index].data = this.decodeData[key];
+                  }
+                }
+              });
+            }
+          }
+        }
+        this.showDecodeInput = false;
+        this.inputTitle = this.$t("text.txnEncodeBtn");
+      }
+    },
     decodeEvent() {
       for (let i = 0; i < this.transationData.logEntries.length; i++) {
-        console.log(this.transationData.logEntries)
-        console.log(this.transationData.logEntries[i].topic[0])
+        console.log(this.transationData.logEntries);
+        console.log(this.transationData.logEntries[i].topic[0]);
         let data = {
           groupId: localStorage.getItem("groupId"),
           data: this.transationData.logEntries[i].topic[0],
@@ -320,10 +419,11 @@ export default {
                 res.data.data,
                 this.transationData.logEntries[i]
               );
-              let that=this;
+              let that = this;
               setTimeout(() => {
                 that.eventSHow = true;
               }, 200);
+              this.decodeInputApi(this.transationData.input);
             } else if (res.data.code !== 0) {
               this.$message({
                 type: "error",
@@ -339,6 +439,30 @@ export default {
           });
       }
     },
+    decodeInputApi(param) {
+      let data = {
+        groupId: localStorage.getItem("groupId"),
+        data: param,
+      };
+      getFunctionAbi(data)
+        .then((res) => {
+          if (res.data.code == 0 && res.data.data) {
+            this.decodeInput(param, res.data.data);
+          } else if (res.data.code !== 0) {
+            this.$message({
+              type: "error",
+              message: errcode.errCode[res.data.code].cn,
+            });
+          }
+        })
+        .catch((err) => {
+          this.$message({
+            type: "error",
+            message: "系统错误！",
+          });
+        });
+    },
+
     decodeLogs(eventData, data) {
       let Web3EthAbi = require("web3-eth-abi");
       let abi = "";
