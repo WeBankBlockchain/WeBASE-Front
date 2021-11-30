@@ -49,8 +49,9 @@ public class PrecompiledSysConfigService {
         // check system value
         // check gas limit
         if (PrecompiledUtils.TxGasLimit.equals(key)) {
-            if (Integer.parseInt(value) < PrecompiledUtils.TxGasLimitMin) {
-                return ConstantCode.FAIL_SET_SYSTEM_CONFIG_TOO_SMALL;
+            if (Long.parseLong(value) < PrecompiledUtils.TxGasLimitMin ||
+            Long.parseLong(value) > PrecompiledUtils.TxGasLimitMax) {
+                return ConstantCode.SET_SYSTEM_CONFIG_GAS_RANGE_ERROR;
             }
         }
 

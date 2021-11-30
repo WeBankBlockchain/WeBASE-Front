@@ -37,41 +37,9 @@ public class PrecompiledUtils {
     public static final String NODE_TYPE_SEALER = "sealer";
     public static final String NODE_TYPE_OBSERVER = "observer";
     public static final String NODE_TYPE_REMOVE = "remove";
-    // permission manage type
-    public static final String PERMISSION_TYPE_PERMISSION = "permission";
-    public static final String PERMISSION_TYPE_DEPLOY_AND_CREATE = "deployAndCreate";
-    public static final String PERMISSION_TYPE_USERTABLE = "userTable";
-    public static final String PERMISSION_TYPE_NODE = "node";
-    public static final String PERMISSION_TYPE_SYS_CONFIG = "sysConfig";
-    public static final String PERMISSION_TYPE_CNS = "cns";
-    // contract manage type
-    public static final String CONTRACT_MANAGE_FREEZE = "freeze";
-    public static final String CONTRACT_MANAGE_UNFREEZE = "unfreeze";
-    public static final String CONTRACT_MANAGE_GETSTATUS = "getStatus";
-    public static final String CONTRACT_MANAGE_GRANTMANAGER = "grantManager";
-    public static final String CONTRACT_MANAGE_LISTMANAGER = "listManager";
 
-    public static final int InvalidReturnNumber = -100;
-    public static final int QueryLogCount = 20;
-    public static final int LogMaxCount = 10000;
-    public static final String PositiveIntegerRange = "from 1 to 2147483647";
-    public static final String NonNegativeIntegerRange = "from 0 to 2147483647";
-    public static final String DeployLogntegerRange = "from 1 to 100";
-    public static final String NodeIdLength = "128";
-    public static final String TxGasLimitRange = "from 100000 to 2147483647";
-    public static final String EMPTY_CONTRACT_ADDRESS =
-            "0x0000000000000000000000000000000000000000";
-    public static final String EMPTY_OUTPUT = "0x";
     public static final int TxGasLimitMin = 10000;
-    // unit: second
-    public static final int ConsensusTimeoutMin = 3;
-
-    public static int PermissionCode = 0;
-    public static int TableExist = 0;
-    public static int PRECOMPILED_SUCCESS = 0; // permission denied
-    public static int TABLE_NAME_AND_ADDRESS_ALREADY_EXIST = -51000; // table name and address already exist
-    public static int TABLE_NAME_AND_ADDRESS_NOT_EXIST = -51001; // table name and address does not exist
-    public static int CRUD_SQL_ERROR = -51503; // process sql error
+    public static final int TxGasLimitMax = 2147483647;
 
     public static int SYS_TABLE_KEY_MAX_LENGTH = 58; // 64- "_user_".length
     public static int SYS_TABLE_KEY_FIELD_NAME_MAX_LENGTH = 64;
@@ -100,15 +68,6 @@ public class PrecompiledUtils {
         }else {
             return true;
         }
-    }
-
-
-    public static Map string2Map(String str)
-            throws JsonParseException, IOException{
-        Map<String, Object> resMap;
-        ObjectMapper mapper = new ObjectMapper();
-        resMap = mapper.readValue(str, Map.class);
-        return resMap;
     }
 
 }

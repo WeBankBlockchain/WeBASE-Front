@@ -39,6 +39,7 @@ import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.config.model.ConfigProperty;
+import org.fisco.bcos.sdk.eventsub.EventSubscribe;
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -64,7 +65,7 @@ public class Web3Config {
 
 
     @Bean
-    public ConfigOption initConfigOptionFromFile() throws ConfigException {
+    public ConfigOption getConfigOptionFromFile() throws ConfigException {
         log.info("start init ConfigProperty");
         // cert config, encrypt type
         Map<String, Object> cryptoMaterial = new HashMap<>();
@@ -93,6 +94,7 @@ public class Web3Config {
         log.info("initConfigOptionFromFile init configOption :{}", configOption);
         return configOption;
     }
+
     /**
      * only used to get groupList
      * @throws JniException
@@ -150,6 +152,25 @@ public class Web3Config {
 //        } else { // load from file
 
 
+    @Bean(name = "eventSubMap")
+    public Map<String, EventSubscribe> getEventSubMap(ConfigOption configOption) throws JniException {
+        Map<String, EventSubscribe> eventSubscribeMap = new HashMap<>();
+        Client rpcClient = getRpcWeb3j(configOption);
+        List<String> groupList = rpcClient.getGroupList().getResult().getGroupList();
+        log.info("getEventSubMap groupList:{}", groupList);
+        if (groupList.isEmpty()) {
+            log.error("**** getEventSubMap group list is empty!");
+            return eventSubscribeMap;
+        }
+        for (String groupId : groupList) {
+            EventSubscribe eventSubscribe = EventSubscribe.build(groupId, configOption);
+            eventSubscribeMap.put(groupId, eventSubscribe);
+        }
+        log.info("getEventSubMap success, size:{}, details:{}", eventSubscribeMap.size(),
+            JsonUtils.objToString(eventSubscribeMap));
+
+        return eventSubscribeMap;
+    }
 
 //    private Map<String, Client> initMap(ConfigOption configOption) throws JniException {
 //        Map<String, Client> clientMap = new HashMap<>();

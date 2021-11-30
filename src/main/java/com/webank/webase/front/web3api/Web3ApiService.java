@@ -45,7 +45,9 @@ import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
+import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -372,7 +374,6 @@ public class Web3ApiService {
         return getWeb3j(groupId).getPendingTxSize().getPendingTxSize().intValue();
     }
 
-    // todo sealer: nodeId and weight
     public List<Sealer> getSealerList(String groupId) {
         return getWeb3j(groupId).getSealerList().getSealerList();
     }
@@ -438,17 +439,25 @@ public class Web3ApiService {
      * @return
      */
     public Client getWeb3j(String groupId) {
-        return clientMap.get(groupId);
-    }
-
-    // todo
-    public BcosSDK getBcosSDK() {
-//        if (bcosSDKs.empty()) {
-//            log.warn("getBcosSDK stack is empty");
-//            throw new FrontException(ConstantCode.BCOS_SDK_EMPTY);
-//        }
-//        return bcosSDKs.peek(); todo 未支持bcosSDK
-        return BcosSDK.build("");
+        Client client = clientMap.get(groupId);
+        if (client == null) {
+            List<String> groupList = this.getGroupList();
+            if (!groupList.contains(groupId)) {
+                log.error("getClient group id not exist! groupId:{}", groupId);
+                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+            }
+            // else, groupList contains this groupId, try to build new client
+            try {
+                Client clientNew = Client.build(groupId, web3ConfigConstants.getConfigOptionFromFile());
+                log.info("getClient clientNew:{}", clientNew);
+                clientMap.put(groupId, clientNew);
+                return clientNew;
+            } catch (ConfigException | JniException e) {
+                log.error("build new client of groupId:{} failed:{}", groupId, e);
+                throw new FrontException(ConstantCode.BUILD_NEW_CLIENT_FAILED);
+            }
+        }
+        return client;
     }
 
     public CryptoSuite getCryptoSuite(String groupId) {
