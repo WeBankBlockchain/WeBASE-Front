@@ -14,6 +14,7 @@
 package com.webank.webase.front.precompiledapi;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BasePageResponse;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precompiledapi.entity.ConsensusHandle;
@@ -104,7 +105,7 @@ public class PrecompiledController {
     @GetMapping("consensus/list")
     public Object getNodeList(@RequestParam(defaultValue = "1") String groupId,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "1") int pageNumber) throws Exception {
+            @RequestParam(defaultValue = "1") int pageNumber) {
         Instant startTime = Instant.now();
         log.info("start getNodeList startTime:{}, groupId:{}", startTime.toEpochMilli(), groupId);
         List<NodeInfo> resList = precompiledService.getNodeList(groupId);
@@ -126,18 +127,19 @@ public class PrecompiledController {
             required = true, dataType = "ConsensusHandle")
     @PostMapping("consensus")
     public Object nodeManageControl(@Valid @RequestBody ConsensusHandle consensusHandle)
-            throws Exception {
+            {
         log.info("start nodeManageControl. consensusHandle:{}", consensusHandle);
         String nodeType = consensusHandle.getNodeType();
         String groupId = consensusHandle.getGroupId();
         String from = consensusHandle.getSignUserId();
         String nodeId = consensusHandle.getNodeId();
+        Integer weight = consensusHandle.getWeight();
         if (!PrecompiledUtils.checkNodeId(nodeId)) {
             return ConstantCode.INVALID_NODE_ID;
         }
         switch (nodeType) {
             case PrecompiledUtils.NODE_TYPE_SEALER:
-                return addSealer(groupId, from, nodeId);
+                return addSealer(groupId, from, nodeId, weight);
             case PrecompiledUtils.NODE_TYPE_OBSERVER:
                 return addObserver(groupId, from, nodeId);
             case PrecompiledUtils.NODE_TYPE_REMOVE:
@@ -148,12 +150,15 @@ public class PrecompiledController {
         }
     }
 
-    public Object addSealer(String groupId, String fromAddress, String nodeId) throws Exception {
+    public Object addSealer(String groupId, String fromAddress, String nodeId, Integer weight) {
         Instant startTime = Instant.now();
-        log.info("start addSealer startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
-                startTime.toEpochMilli(), groupId, fromAddress, nodeId);
+        log.info("start addSealer startTime:{}, groupId:{},fromAddress:{},nodeId:{},weight:{}",
+                startTime.toEpochMilli(), groupId, fromAddress, nodeId, weight);
+        if (weight == null) {
+            throw new FrontException(ConstantCode.ADD_SEALER_WEIGHT_CANNOT_NULL);
+        }
         try {
-            Object res = precompiledService.addSealer(groupId, fromAddress, nodeId);
+            Object res = precompiledService.addSealer(groupId, fromAddress, nodeId, weight);
             log.info("end addSealer useTime:{} res:{}",
                     Duration.between(startTime, Instant.now()).toMillis(), res);
             return res;
@@ -163,7 +168,7 @@ public class PrecompiledController {
         }
     }
 
-    public Object addObserver(String groupId, String fromAddress, String nodeId) throws Exception {
+    public Object addObserver(String groupId, String fromAddress, String nodeId) {
         Instant startTime = Instant.now();
         log.info("start addObserver startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
@@ -178,7 +183,7 @@ public class PrecompiledController {
         }
     }
 
-    public Object removeNode(String groupId, String fromAddress, String nodeId) throws Exception {
+    public Object removeNode(String groupId, String fromAddress, String nodeId) {
         Instant startTime = Instant.now();
         log.info("start addSealer startTime:{}, groupId:{},fromAddress:{},nodeId:{}",
                 startTime.toEpochMilli(), groupId, fromAddress, nodeId);
