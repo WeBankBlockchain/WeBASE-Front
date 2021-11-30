@@ -460,16 +460,6 @@ public class Web3ApiService {
         return client;
     }
 
-    // todo
-    public BcosSDK getBcosSDK() {
-//        if (bcosSDKs.empty()) {
-//            log.warn("getBcosSDK stack is empty");
-//            throw new FrontException(ConstantCode.BCOS_SDK_EMPTY);
-//        }
-//        return bcosSDKs.peek(); todo 未支持bcosSDK
-        return BcosSDK.build("");
-    }
-
     public CryptoSuite getCryptoSuite(String groupId) {
         return this.getWeb3j(groupId).getCryptoSuite();
     }
