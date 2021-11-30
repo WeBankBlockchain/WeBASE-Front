@@ -374,7 +374,6 @@ public class Web3ApiService {
         return getWeb3j(groupId).getPendingTxSize().getPendingTxSize().intValue();
     }
 
-    // todo sealer: nodeId and weight
     public List<Sealer> getSealerList(String groupId) {
         return getWeb3j(groupId).getSealerList().getSealerList();
     }

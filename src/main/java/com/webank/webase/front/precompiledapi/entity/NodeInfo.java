@@ -17,10 +17,18 @@ package com.webank.webase.front.precompiledapi.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class NodeInfo {
     private String nodeId;
     private String nodeType;
+    private int weight;
+
+    public NodeInfo(String nodeId, String nodeType) {
+        this.nodeId = nodeId;
+        this.nodeType = nodeType;
+    }
 }
