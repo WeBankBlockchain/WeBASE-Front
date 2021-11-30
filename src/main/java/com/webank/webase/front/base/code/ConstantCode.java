@@ -147,10 +147,9 @@ public class ConstantCode {
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied, please check chain administrator permission");
     // sys config
     public static final RetCode UNSUPPORTED_SYSTEM_CONFIG_KEY = RetCode.mark(201208, "unsupported for this system config key");
-    public static final RetCode FAIL_SET_SYSTEM_CONFIG_TOO_SMALL =  RetCode.mark(201209,
+    public static final RetCode SET_SYSTEM_CONFIG_GAS_RANGE_ERROR =  RetCode.mark(201209,
             "provide value by positive integer mode, from 100000 to 2147483647");
     public static final RetCode FAIL_SET_SYSTEM_CONFIG = RetCode.mark(201210, "set system config value fail for params error or permission denied ");
-    public static final RetCode FAIL_SET_CONSENSUS_TIMEOUT_TOO_SMALL = RetCode.mark(201211, "set consensus_timeout failed, must greater than 3 seconds");
     // consensus (node manager)
     public static final RetCode INVALID_NODE_ID = RetCode.mark(201216,"node id is invalid");
     public static final RetCode INVALID_NODE_TYPE = RetCode.mark(201217,"invalid node type: sealer, observer, remove ");
@@ -249,11 +248,11 @@ public class ConstantCode {
     /* fit in 3.0 */
     public static final RetCode BCOS_SDK_EMPTY = RetCode.mark(201600, "BcosSDK is empty, call config api to init one bcosSDK");
     public static final RetCode PARAM_ERROR_EMPTY_PEERS = RetCode.mark(201601, "Sdk's peers cannot be empty");
-    public static final RetCode PARAM_ERROR_CERT_EMPTY = RetCode.mark(201601, "Sdk's sdk certificates and key cannot be empty");
-    public static final RetCode PARAM_ERROR_CERT_NOT_MATCH = RetCode.mark(201601, "Sdk's sdk certificates and key not match");
-    public static final RetCode SAME_SDK_PEERS_ERROR = RetCode.mark(201602, "Sdk's peers same with new peers");
-    public static final RetCode CONNECT_TO_NEW_PEERS_FAILED = RetCode.mark(201603, "webase-front connect to new peers ip port failed!");
-    public static final RetCode BUILD_NEW_CLIENT_FAILED = RetCode.mark(201604, "Build client instance of new group failed");
+    public static final RetCode PARAM_ERROR_CERT_EMPTY = RetCode.mark(201602, "Sdk's sdk certificates and key cannot be empty");
+    public static final RetCode SAME_SDK_PEERS_ERROR = RetCode.mark(201603, "Sdk's peers same with new peers");
+    public static final RetCode CONNECT_TO_NEW_PEERS_FAILED = RetCode.mark(201604, "webase-front connect to new peers ip port failed!");
+    public static final RetCode BUILD_NEW_CLIENT_FAILED = RetCode.mark(201605, "Build client instance of new group failed");
+    public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
 
     public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
 
