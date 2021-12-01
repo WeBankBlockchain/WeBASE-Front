@@ -16,6 +16,7 @@
 package com.webank.webase.front.cert;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.configapi.ConfigService;
@@ -76,7 +77,7 @@ public class FrontCertService {
     private final static String TEMP_ZIP_FILE_PATH = TEMP_ZIP_DIR + File.separator + TEMP_ZIP_FILE_NAME;
 
     @Autowired
-    private ConfigService configService;
+    private Web3Config web3Config;
 
     /**
      * get SDK crts in directory ~/resource/
@@ -182,7 +183,7 @@ public class FrontCertService {
      */
     public Map<String, String> getSDKCertKeyMap() {
         Map<String, String> sdkCertMap = new HashMap<>();
-        log.info("start getSDKCertKeyMap sslType:{}.", configService.getSdkUseSmSsl());
+        log.info("start getSDKCertKeyMap sslType:{}.", web3Config.getUseSmSsl());
         // add sdk cert: node.crt
         // v1.5.1 return all sdk cert in conf
         loadBareSdkContent(frontSdkNodeCrt, sdkCertMap);

@@ -29,6 +29,7 @@ import java.util.List;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
+import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
@@ -53,7 +54,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class Web3ApiController {
 
     @Autowired
-    Web3ApiService web3ApiService;
+    private Web3ApiService web3ApiService;
 
     @ApiOperation(value = "getBlockNumber", notes = "Get the latest block height of the node")
     @GetMapping("/blockNumber")
@@ -138,9 +139,9 @@ public class Web3ApiController {
     @GetMapping("/code/{address}/{blockNumber}")
     public String getCode(@PathVariable String groupId, @PathVariable String address,
             @PathVariable BigInteger blockNumber) {
-        if (address.length() != Address.ValidLen) {
-            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
-        }
+//        if (address.length() != Address.ValidLen) { todo
+//            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
+//        }
         return web3ApiService.getCode(groupId, address, blockNumber);
     }
 
@@ -181,6 +182,12 @@ public class Web3ApiController {
     @GetMapping("/groupInfo")
     public GroupInfo getGroupInfo(@PathVariable String groupId) {
         return web3ApiService.getGroupInfo(groupId);
+    }
+
+    @ApiOperation(value = "getGroupInfo", notes = "get group info")
+    @GetMapping("/groupNodeInfo")
+    public List<GroupNodeInfo> getGroupNodeInfo(@PathVariable String groupId) {
+        return web3ApiService.getGroupNodeInfo(groupId);
     }
 
     @ApiOperation(value = "getGroupList", notes = "get list of group id")
@@ -261,7 +268,6 @@ public class Web3ApiController {
         return web3ApiService.searchByCriteria(groupId, input);
     }
 
-
     @ApiOperation(value = "getBlockTransCntByNumber",
         notes = "Get the number of transactions in the block based on the block height")
     @ApiImplicitParam(name = "blockNumber", value = "blockNumber", required = true,
@@ -277,11 +283,5 @@ public class Web3ApiController {
         int encrypt = web3ApiService.getCryptoType(groupId);
         return encrypt;
     }
-//    @ApiOperation(value = "getNodeInfo", notes = "Get node information")
-//    @GetMapping("/nodeInfo")
-//    public NodeInformation getNodeInfo() {
-//        return web3ApiService.getNodeInfo();
-//    }
 
-    /* above 2.7.0 */
 }

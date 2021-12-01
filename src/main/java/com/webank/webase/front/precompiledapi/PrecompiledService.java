@@ -17,21 +17,18 @@ import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
 
-import com.webank.webase.front.base.code.ConstantCode;
-import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.precompiledapi.crud.CRUDParseUtils;
 import com.webank.webase.front.precompiledapi.crud.Table;
 import com.webank.webase.front.precompiledapi.entity.NodeInfo;
-import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
-import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
 import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
@@ -82,8 +79,8 @@ public class PrecompiledService {
     /**
      * Consensus config related
      */
-    public String addSealer(String groupId, String signUserId, String nodeId) {
-        String res = precompiledWithSignService.addSealer(groupId, signUserId, nodeId);
+    public String addSealer(String groupId, String signUserId, String nodeId, int weight) {
+        String res = precompiledWithSignService.addSealer(groupId, signUserId, nodeId, weight);
         return res;
     }
 
@@ -99,18 +96,21 @@ public class PrecompiledService {
 
     public List<NodeInfo> getNodeList(String groupId) {
         // nodeListWithType 组合多个带有类型的nodeid list
-        List<String> sealerList = web3ApiService.getSealerStrList(groupId);
+        List<Sealer> sealerList = web3ApiService.getSealerList(groupId);
+
+        List<String> sealerStrList = sealerList.stream().map(Sealer::getNodeID).collect(Collectors.toList());;
         List<String> observerList = web3ApiService.getObserverList(groupId);
         List<String> peerList = web3ApiService.getGroupPeers(groupId);
         // process nodeList
         List<NodeInfo> nodeListWithType = new ArrayList<>();
 
         // add all sealer and observer in List
-        sealerList.forEach(sealer -> nodeListWithType.add(new NodeInfo(sealer, NODE_TYPE_SEALER)));
+        sealerList.forEach(sealer -> nodeListWithType.add(
+            new NodeInfo(sealer.getNodeID(), NODE_TYPE_SEALER, sealer.getWeight())));
         observerList.forEach(
                 observer -> nodeListWithType.add(new NodeInfo(observer, NODE_TYPE_OBSERVER)));
         // peer not in sealer/observer but connected is remove node(游离节点)
-        peerList.stream().filter(peer -> !sealerList.contains(peer) && !observerList.contains(peer))
+        peerList.stream().filter(peer -> !sealerStrList.contains(peer) && !observerList.contains(peer))
                 .forEach(peerToAdd -> nodeListWithType
                         .add(new NodeInfo(peerToAdd, NODE_TYPE_REMOVE)));
 
@@ -149,43 +149,43 @@ public class PrecompiledService {
         String res = precompiledWithSignService.remove(groupId, signUserId, table, condition);
         return res;
     }
-
-    /**
-     * desc
-     */
-    public List<Map<String, String>> desc(String groupId, String tableName) throws Exception {
-        TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                keyStoreService.getCredentialsForQuery(groupId));
-        List<Map<String, String>> descRes = crudService.desc(tableName);
-        if (!CRUDParseUtils.checkTableExistence(descRes)) {
-            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
-        }
-        return descRes;
-//        String tableKey = descRes.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
-//        String valueFields = descRes.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME);
-//        return new Table(tableName, tableKey, valueFields);
-    }
-
-    public String descTable(String groupId, String tableName) throws Exception {
-        List<Map<String, String>> descRes = this.desc(groupId, tableName);
-        if (!CRUDParseUtils.checkTableExistence(descRes)) {
-            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
-        }
-        String tableInfo = JsonUtils.objToString(descRes);
-        return CRUDParseUtils.formatJson(tableInfo);
-    }
-
-    /**
-     * select
-     */
-    public List<Map<String, String>> select(String groupId, Table table,
-                                            Condition conditions) throws Exception {
-        TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                keyStoreService.getCredentialsForQuery(groupId));
-//        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), table.getKey(), conditions); todo check
-        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), conditions);
-        return selectRes;
-    }
+//
+//    /**
+//     * desc
+//     */
+//    public List<Map<String, String>> desc(String groupId, String tableName) throws Exception {
+//        TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
+//                keyStoreService.getCredentialsForQuery());
+//        List<Map<String, String>> descRes = crudService.desc(tableName);
+//        if (!CRUDParseUtils.checkTableExistence(descRes)) {
+//            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+//        }
+//        return descRes;
+////        String tableKey = descRes.get(0).get(PrecompiledConstant.KEY_FIELD_NAME);
+////        String valueFields = descRes.get(0).get(PrecompiledConstant.VALUE_FIELD_NAME);
+////        return new Table(tableName, tableKey, valueFields);
+//    }
+//
+//    public String descTable(String groupId, String tableName) throws Exception {
+//        List<Map<String, String>> descRes = this.desc(groupId, tableName);
+//        if (!CRUDParseUtils.checkTableExistence(descRes)) {
+//            throw new FrontException(ConstantCode.FAIL_TABLE_NOT_EXISTS);
+//        }
+//        String tableInfo = JsonUtils.objToString(descRes);
+//        return CRUDParseUtils.formatJson(tableInfo);
+//    }
+//
+//    /**
+//     * select
+//     */
+//    public List<Map<String, String>> select(String groupId, Table table,
+//                                            Condition conditions) throws Exception {
+//        TableCRUDService crudService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
+//                keyStoreService.getCredentialsForQuery());
+////        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), table.getKey(), conditions); todo check
+//        List<Map<String, String>> selectRes = crudService.select(table.getTableName(), conditions);
+//        return selectRes;
+//    }
 
 
 }

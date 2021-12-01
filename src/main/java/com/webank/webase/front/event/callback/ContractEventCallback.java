@@ -22,7 +22,7 @@ import com.webank.webase.front.event.entity.message.EventLogPushMessage;
 import java.util.List;
 import lombok.Data;
 import org.fisco.bcos.sdk.codec.ABICodec;
-import org.fisco.bcos.sdk.eventsub.EventCallback;
+import org.fisco.bcos.sdk.eventsub.EventSubCallback;
 import org.fisco.bcos.sdk.model.EventLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author marsli
  */
 @Data
-public class ContractEventCallback implements EventCallback {
+public class ContractEventCallback implements EventSubCallback {
 
     private static final Logger logger =
             LoggerFactory.getLogger(ContractEventCallback.class);
@@ -70,10 +70,10 @@ public class ContractEventCallback implements EventCallback {
      * @param logs
      */
     @Override
-    public void onReceiveLog(int status, List<EventLog> logs) {
+    public void onReceiveLog(String eventSubId, int status, List<EventLog> logs) {
         logger.info(
                 "ContractEventCallback onPushEventLog" +
-                        " status: {}, logs: {}", status, logs);
+                        "eventSubId:{} status: {}, logs: {}", eventSubId, status, logs);
         // decode event
         // todo event decode result entity
 //        List<Object> decodeResList = new ArrayList<>();

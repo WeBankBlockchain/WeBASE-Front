@@ -22,13 +22,15 @@ import com.webank.webase.front.event.entity.EventTopicParam;
 import com.webank.webase.front.event.entity.EventTopicParam.IndexedParamType;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.fisco.bcos.sdk.codec.abi.tools.TopicTools;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.eventsub.EventLogParams;
+import org.fisco.bcos.sdk.eventsub.EventSubParams;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -98,91 +100,53 @@ public class RabbitMQUtils {
      * @param topicList
      * @return
      */
-    public static EventLogParams initSingleEventLogUserParams(String fromBlock, String toBlock,
+    public static EventSubParams initSingleEventLogUserParams(String fromBlock, String toBlock,
         String contractAddress, List<String> topicList, CryptoSuite cryptoSuite) {
-        EventLogParams params = new EventLogParams();
-        params.setFromBlock(fromBlock);
-        params.setToBlock(toBlock);
+        EventSubParams params = new EventSubParams();
+        params.setFromBlock(new BigInteger(fromBlock));
+        params.setToBlock(new BigInteger(toBlock));
 
         // addresses，设置为Java合约对象的地址
-        List<String> addresses = new ArrayList<>();
-        addresses.add(contractAddress);
-        params.setAddresses(addresses);
-        List<Object> topics = new ArrayList<>();
+        params.addAddress(contractAddress);
         // put multiple event in topics[0]
-        List<String> topicSigList = new ArrayList<>();
         TopicTools tool = new TopicTools(cryptoSuite);
-        topicList.forEach(t -> topicSigList.add(Numeric.toHexString(tool.stringToTopic(t))));
-        topics.add(topicSigList);
-        params.setTopics(topics);
+        topicList.forEach(t ->
+            params.addTopic(0, tool.stringToTopic(t)));
 
         return params;
     }
 
-    /**
-     * init EventLogUserParams with multiple addresses and topics
-     * @param fromBlock
-     * @param toBlock
-     * @param contractAddressList
-     * @param topicList
-     * @return
-     */
-    public static EventLogParams initMultipleEventLogUserParams(String fromBlock, String toBlock,
-        List<String> contractAddressList, List<Object> topicList, CryptoSuite cryptoSuite) {
-        EventLogParams params = new EventLogParams();
-        params.setFromBlock(fromBlock);
-        params.setToBlock(toBlock);
-
-        // addresses，设置为Java合约对象的地址
-        List<String> addresses = new ArrayList<>(contractAddressList);
-        params.setAddresses(addresses);
-        List<Object> topics = new ArrayList<>();
-        // put multiple event in topics[0]
-        TopicTools tool = new TopicTools(cryptoSuite);
-        List<String> topicSigList = new ArrayList<>();
-        topicList.forEach(t -> {
-            if (t instanceof String) {
-                topicSigList.add(Numeric.toHexString(tool.stringToTopic((String)t)));
-            }// instanceof others, convert by TopicTools before add
-        });
-        topics.add(topicSigList);
-        params.setTopics(topics);
-        return params;
-    }
 
     /**
      * eventTopicParam to topics
      * for sync get event log
       */
-    public static EventLogParams initEventTopicParam(Integer fromBlock, Integer toBlock,
+    public static EventSubParams initEventTopicParam(Integer fromBlock, Integer toBlock,
         String contractAddress, EventTopicParam eventTopicParam, CryptoSuite cryptoSuite) {
         TopicTools tool = new TopicTools(cryptoSuite);
 
-        EventLogParams params = new EventLogParams();
-        params.setFromBlock(String.valueOf(fromBlock));
-        params.setToBlock(String.valueOf(toBlock));
+        EventSubParams params = new EventSubParams();
+        params.setFromBlock(BigInteger.valueOf(fromBlock));
+        params.setToBlock(BigInteger.valueOf(toBlock));
 
         // addresses，设置为Java合约对象的地址
-        List<String> addresses = new ArrayList<>();
-        addresses.add(contractAddress);
-        params.setAddresses(addresses);
-        List<Object> topics = new ArrayList<>();
+        params.addAddress(contractAddress);
+
         // put event name in topics[0],
-        topics.add(tool.stringToTopic(eventTopicParam.getEventName()));
+        params.addTopic(0, tool.stringToTopic(eventTopicParam.getEventName()));
         // if indexed param is null, add null, else add its sig value
-        topics.add(Optional
+        params.addTopic(1, Optional
                 .ofNullable(eventTopicParam.getIndexed1())
                 .map(i -> getIndexedParamTypeSig(i, tool))
                 .orElse(null));
-        topics.add(Optional
+        params.addTopic(2, Optional
             .ofNullable(eventTopicParam.getIndexed2())
             .map(i -> getIndexedParamTypeSig(i, tool))
             .orElse(null));
-        topics.add(Optional
+        params.addTopic(3, Optional
             .ofNullable(eventTopicParam.getIndexed3())
             .map(i -> getIndexedParamTypeSig(i, tool))
             .orElse(null));
-        params.setTopics(topics);
 
         return params;
     }
@@ -199,17 +163,17 @@ public class RabbitMQUtils {
         if (type.contains("int")) {
             return tool.integerToTopic(new BigInteger(value));
         } else if ("string".equals(type)) {
-            return Numeric.toHexString(tool.stringToTopic(value));
+            return tool.stringToTopic(value);
         } else if ("bool".equals(type)) {
             return tool.boolToTopic(Boolean.parseBoolean(value));
         } else if ("address".equals(type)){
             return tool.addressToTopic(value);
         } else if (type.contains("bytes")) {
             if ("bytes".equals(type)) {
-                return Numeric.toHexString(tool.bytesToTopic(Numeric.hexStringToByteArray(value)));
+                return tool.bytesToTopic(Numeric.hexStringToByteArray(value));
             } else {
                 // bytesN
-                return Numeric.toHexString(tool.byteNToTopic(Numeric.hexStringToByteArray(value)));
+                return tool.byteNToTopic(Numeric.hexStringToByteArray(value));
             }
         } else {
             return null;

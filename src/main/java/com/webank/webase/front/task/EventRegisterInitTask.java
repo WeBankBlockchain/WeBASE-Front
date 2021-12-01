@@ -30,7 +30,6 @@ import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.BcosSDK;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -62,7 +61,7 @@ public class EventRegisterInitTask {
     /**
      * Callback used to run the bean.
      */
-    @Scheduled(fixedDelayString = "${constant.eventRegisterTaskFixedDelay}")
+//    @Scheduled(fixedDelayString = "${constant.eventRegisterTaskFixedDelay}") todo
     public void taskStart() {
         syncEventRegisterTask();
     }

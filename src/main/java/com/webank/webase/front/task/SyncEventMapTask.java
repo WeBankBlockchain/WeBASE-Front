@@ -16,23 +16,20 @@
 
 package com.webank.webase.front.task;
 
-import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
 
 import com.google.common.collect.Lists;
+import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.event.ContractEventInfoRepository;
 import com.webank.webase.front.event.EventService;
 import com.webank.webase.front.event.NewBlockEventInfoRepository;
 import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
-import com.webank.webase.front.event.entity.NewBlockEventInfo;
-import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.List;
-import java.util.Stack;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
-import org.fisco.bcos.sdk.eventsub.EventSubscribeImp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -50,11 +47,11 @@ public class SyncEventMapTask {
     @Autowired
     ContractEventInfoRepository contractEventInfoRepository;
     @Autowired
-    private Web3ApiService web3ApiService;
+    private Map<String, EventSubscribe> subscribeMap;
     @Autowired
     private EventService eventService;
 
-    @Scheduled(fixedDelayString = "${constant.syncEventMapTaskFixedDelay}")
+//    @Scheduled(fixedDelayString = "${constant.syncEventMapTaskFixedDelay}") todo
     public void taskStart() {
         syncEventMapTask();
     }
@@ -101,9 +98,8 @@ public class SyncEventMapTask {
             if (equalCount == 0) {
                 log.debug("remove event callback of registerId:{}", registerId);
                 ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(registerId);
-//                EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(callback.getGroupId()); todo
-                EventSubscribe eventSubscribe = new EventSubscribeImp(String.valueOf(callback.getGroupId()), web3ApiService.getBcosSDK().getConfig());
-                eventSubscribe.unsubscribeEvent(registerId, callback);
+                EventSubscribe eventSubscribe = subscribeMap.get(callback.getGroupId());
+                eventSubscribe.unsubscribeEvent(registerId);
                 CONTRACT_EVENT_CALLBACK_MAP.remove(registerId);
                 removeCount++;
             }

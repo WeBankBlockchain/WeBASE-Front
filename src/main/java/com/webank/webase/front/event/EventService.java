@@ -22,6 +22,7 @@ import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_EVENT;
 
 import com.webank.webase.front.abi.AbiService;
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.base.exception.FrontException;
@@ -42,6 +43,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -50,8 +52,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.codec.ABICodec;
-import org.fisco.bcos.sdk.eventsub.EventLogParams;
+import org.fisco.bcos.sdk.config.exceptions.ConfigException;
+import org.fisco.bcos.sdk.eventsub.EventSubParams;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
+import org.fisco.bcos.sdk.jni.common.JniException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -76,6 +80,10 @@ public class EventService {
     private MQPublisher mqPublisher;
     @Autowired
     private Web3ApiService web3ApiService;
+    @Autowired
+    private Map<String, EventSubscribe> eventSubscribeMap;
+    @Autowired
+    private Web3Config web3Config;
     @Autowired
     private Constants constants;
     @Autowired
@@ -155,18 +163,18 @@ public class EventService {
         String abi, String fromBlock, String toBlock, String contractAddress, List<String> topicList) {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // to register or unregister
-//        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId); todo init event suscribe
-        EventSubscribe eventSubscribe = web3ApiService.getBcosSDK().getEventSubscribe(String.valueOf(groupId));
-        String registerId = null;
+        EventSubscribe eventSubscribe = this.getEventSubscribe(String.valueOf(groupId));
         ContractEventCallback callback = null;
+        String registerId = "";
         try {
             log.info("registerContractEvent saved to db successfully");
             // init EventLogUserParams for register
-            EventLogParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
+            EventSubParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
                 toBlock, contractAddress, topicList, web3ApiService.getWeb3j(groupId).getCryptoSuite());
             callback = new ContractEventCallback(mqPublisher, exchangeName, routingKey, groupId, appId,
                 new ABICodec(web3ApiService.getCryptoSuite(groupId), false), abi, topicList);
-            registerId = eventSubscribe.subscribeEvent(params, callback);
+            registerId = "";// todo add registerId
+            eventSubscribe.subscribeEvent(params, callback);
             // save to db first
             String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
                 exchangeName, queueName, routingKey, abi, fromBlock, toBlock, contractAddress, topicList,
@@ -177,7 +185,7 @@ public class EventService {
             log.error("Register contractEvent failed: ", e);
             // make transactional
             mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
-            eventSubscribe.unsubscribeEvent(registerId, callback);
+            eventSubscribe.unsubscribeEvent(registerId);
             throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
         }
     }
@@ -338,7 +346,7 @@ public class EventService {
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-        EventSubscribe eventSubscribe = web3ApiService.getBcosSDK().getEventSubscribe(String.valueOf(groupId));
+        EventSubscribe eventSubscribe = this.getEventSubscribe(String.valueOf(groupId));
 
         try {
             String registerId = eventInfo.getRegisterId();
@@ -347,7 +355,7 @@ public class EventService {
             if (Objects.isNull(callback)) {
                 log.warn("unregister failed for it's unregistered in map");
             }
-            eventSubscribe.unsubscribeEvent(registerId, callback);
+            eventSubscribe.unsubscribeEvent(registerId);
             CONTRACT_EVENT_CALLBACK_MAP.remove(registerId);
             mqService.unbindQueueFromExchange(exchangeName, queueName, eventInfo.getRoutingKey());
         } catch (Exception e) {
@@ -374,7 +382,7 @@ public class EventService {
             throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
         }
 
-        EventLogParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
+        EventSubParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
             contractAddress, eventTopicParam, web3ApiService.getCryptoSuite(groupId));
         log.info("getContractEventLog eventParam:{}", eventParam);
         // final CompletableFuture<List<EventLog>> callbackFuture = new CompletableFuture<>();
@@ -382,8 +390,9 @@ public class EventService {
         ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
-        EventSubscribe eventSubscribe = web3ApiService.getBcosSDK().getEventSubscribe(String.valueOf(groupId));
-        String registerId = eventSubscribe.subscribeEvent(eventParam, callback);
+        EventSubscribe eventSubscribe = this.getEventSubscribe(String.valueOf(groupId));
+        String registerId = "";
+        eventSubscribe.subscribeEvent(eventParam, callback);
 
         List<DecodedEventLog> resultList;
         try {
@@ -396,7 +405,7 @@ public class EventService {
             throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_TIMEOUT_ERROR);
         } finally {
             log.info("end get event log callback and unsubscribe registerId:{}", registerId);
-            eventSubscribe.unsubscribeEvent(registerId, callback);
+            eventSubscribe.unsubscribeEvent(registerId);
         }
         return resultList;
     }
@@ -429,4 +438,25 @@ public class EventService {
         return resultList;
     }
 
+    public EventSubscribe getEventSubscribe(String groupId) {
+        EventSubscribe eventSubscribe = eventSubscribeMap.get(groupId);
+        if (eventSubscribe == null) {
+            List<String> groupList = web3ApiService.getGroupList();
+            if (!groupList.contains(groupId)) {
+                log.error("getEventSubscribe group id not exist! groupId:{}", groupId);
+                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+            }
+            // else, groupList contains this groupId, try to build new eventSubscribe
+            try {
+                EventSubscribe eventSubscribeNew = EventSubscribe.build(groupId, web3Config.getConfigOptionFromFile());
+                log.info("getEventSubscribe eventSubscribeNew:{}", eventSubscribeNew);
+                eventSubscribeMap.put(groupId, eventSubscribeNew);
+                return eventSubscribeNew;
+            } catch (ConfigException | JniException e) {
+                log.error("build new eventSubscribe of groupId:{} failed:{}", groupId, e);
+                throw new FrontException(ConstantCode.BUILD_NEW_EVENT_SUBSCRIBE_FAILED);
+            }
+        }
+        return eventSubscribe;
+    }
 }

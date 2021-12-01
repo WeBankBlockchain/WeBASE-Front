@@ -2,7 +2,7 @@
 version: v2.0.0-rc1
 
 server:
-  port: 5002
+  port: ${SERVER_PORT:5002}
   context-path: /WeBASE-Front
   connection-timeout: 30000
   tomcat:
@@ -10,9 +10,9 @@ server:
     max-connections: 10000
 
 sdk:
-  useSmSsl: false  # sdk whether enable sm ssl(guomi)
+  useSmSsl: ${USE_SM_SSL:false}  # sdk whether enable sm ssl(guomi)
   certPath: conf  # sdk cert path of relative or absolute
-  peers: ['127.0.0.1:20200','127.0.0.1:20201']
+  peers: ${PEERS:"['127.0.0.1:20200','127.0.0.1:20201']"}
   threadPoolSize: 50 # thread pool of sdk
 
 spring:
@@ -67,7 +67,6 @@ logging:
 
 constant:
   keyServer: 127.0.0.1:5004 # webase-sign服务的IP:Port（单个）
-  nodePath: /fisco/nodes/127.0.0.1/node0  # node's absolute path to read configuration and monitor node's log
   aesKey: EfdsW23D23d3df43
   transMaxWait: 30
   http_read_timeOut: 100000
