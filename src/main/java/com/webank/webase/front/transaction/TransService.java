@@ -473,6 +473,8 @@ public class TransService {
 
         funcParam = funcParam == null ? new ArrayList<>() : funcParam;
         this.validFuncParam(abiStr, funcName, funcParam, groupId);
+        log.debug("abiStr:{} ,funcName:{},funcParam {},groupID {}", abiStr, funcName,
+           funcParam, groupId);
         ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
         byte[] encodeFunction;
         try {
