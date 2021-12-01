@@ -111,7 +111,7 @@ public class RabbitMQUtils {
         // put multiple event in topics[0]
         TopicTools tool = new TopicTools(cryptoSuite);
         topicList.forEach(t ->
-            params.addTopic(0, Numeric.toHexString(tool.stringToTopic(t))));
+            params.addTopic(0, tool.stringToTopic(t)));
 
         return params;
     }
@@ -133,7 +133,7 @@ public class RabbitMQUtils {
         params.addAddress(contractAddress);
 
         // put event name in topics[0],
-        params.addTopic(0, Numeric.toHexString(tool.stringToTopic(eventTopicParam.getEventName())));
+        params.addTopic(0, tool.stringToTopic(eventTopicParam.getEventName()));
         // if indexed param is null, add null, else add its sig value
         params.addTopic(1, Optional
                 .ofNullable(eventTopicParam.getIndexed1())
@@ -163,17 +163,17 @@ public class RabbitMQUtils {
         if (type.contains("int")) {
             return tool.integerToTopic(new BigInteger(value));
         } else if ("string".equals(type)) {
-            return Numeric.toHexString(tool.stringToTopic(value));
+            return tool.stringToTopic(value);
         } else if ("bool".equals(type)) {
             return tool.boolToTopic(Boolean.parseBoolean(value));
         } else if ("address".equals(type)){
             return tool.addressToTopic(value);
         } else if (type.contains("bytes")) {
             if ("bytes".equals(type)) {
-                return Numeric.toHexString(tool.bytesToTopic(Numeric.hexStringToByteArray(value)));
+                return tool.bytesToTopic(Numeric.hexStringToByteArray(value));
             } else {
                 // bytesN
-                return Numeric.toHexString(tool.byteNToTopic(Numeric.hexStringToByteArray(value)));
+                return tool.byteNToTopic(Numeric.hexStringToByteArray(value));
             }
         } else {
             return null;
