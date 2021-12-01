@@ -90,6 +90,13 @@ export function reviseParam(necessary, query) {
     querys
   }
 }
+export function resizeParam(necessary, query) {
+  let params = arguments[0],
+      querys = arguments[1],
+      param =params.groupId+'/'+params.data.substring(0,10)
+  return param
+}
+
 
 
 /** get cookie*/
