@@ -358,8 +358,8 @@ public class CRUDParseUtils {
             BinaryExpression expr2 = (BinaryExpression) (where);
             handleExpression(condition, expr2);
         }
-        Limit limit = update.getLimit();
-        //parseLimit(condition, limit);
+//        Limit limit = update.getLimit();
+//        parseLimit(condition, limit);
     }
 
     public static void parseRemove(String sql, Table table, Condition condition)
@@ -377,8 +377,8 @@ public class CRUDParseUtils {
             BinaryExpression expr = (BinaryExpression) (where);
             handleExpression(condition, expr);
         }
-        Limit limit = delete.getLimit();
-        //parseLimit(condition, limit);
+//        Limit limit = delete.getLimit();
+//        parseLimit(condition, limit);
     }
 
 //    private static void parseLimit(Condition condition, Limit limit)
