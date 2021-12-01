@@ -60,7 +60,8 @@
 import contentHead from "@/components/contentHead";
 import abiDialog from "@/components/abiDialog";
 import sendTransation from "@/components/sendTransaction"
-import editor from "@/components/editor"
+import editor from "@/views/chaincode/dialog/editor"
+// import editor from "@/components/editor"
 import importAbi from "./components/importAbi"
 import updateAbi from "./components/updateAbi"
 import { getAbiList, deleteImportAbi } from "@/util/api"
