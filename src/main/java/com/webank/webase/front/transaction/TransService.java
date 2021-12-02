@@ -194,7 +194,6 @@ public class TransService {
         // cover null message through statusCode
         String receiptMsg = txDecoder.decodeReceiptStatus(transactionReceipt).getReceiptMessages();
         transactionReceipt.setMessage(receiptMsg);
-        CommonUtils.processReceiptHexNumber(transactionReceipt);
         log.info("execTransaction end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return transactionReceipt;
@@ -237,7 +236,7 @@ public class TransService {
         log.debug("sendMessage signMsg:{}", JsonUtils.objToString(signMsg));
         TransactionReceipt receipt = txPusher.push(signMsg);
         log.debug("handleTransaction receipt:{}", JsonUtils.objToString(receipt));
-        this.decodeReceipt(receipt);
+        this.decodeReceipt(client, receipt);
         return receipt;
     }
 
@@ -277,7 +276,7 @@ public class TransService {
         Client client = web3ApiService.getWeb3j(groupId);
         if (sync) {
             TransactionReceipt receipt = sendMessage(client, signedStr);
-            this.decodeReceipt(receipt);
+            this.decodeReceipt(client, receipt);
             return receipt;
         } else {
             TransactionPusherService txPusher = new TransactionPusherService(client);
@@ -616,7 +615,7 @@ public class TransService {
         TransactionProcessor txProcessor = TransactionProcessorFactory.createTransactionProcessor(client, cryptoKeyPair);
         TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair, USE_SOLIDITY);
         // cover null message through statusCode
-        this.decodeReceipt(receipt);
+        this.decodeReceipt(client, receipt);
         log.info("execTransaction end useTime:{},receipt:{}",
             Duration.between(startTime, Instant.now()).toMillis(), receipt);
         return receipt;
@@ -639,7 +638,7 @@ public class TransService {
         Instant nodeStartTime = Instant.now();
         // send transaction
         TransactionReceipt receipt = sendMessage(client, signedMessageStr);
-        this.decodeReceipt(receipt);
+        this.decodeReceipt(client, receipt);
         log.info("***node cost time***: {}",
             Duration.between(nodeStartTime, Instant.now()).toMillis());
         return receipt;
@@ -667,13 +666,16 @@ public class TransService {
         return signData;
     }
 
-    @Deprecated
-    public void decodeReceipt(TransactionReceipt receipt) {
-//        // decode receipt todo 待确认是否由sdk完成解析
-//        TransactionDecoderService txDecoder = new TransactionDecoderService(web3ApiService.getCryptoSuite(receipt.ge), false);
-//        String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
-//        receipt.setMessage(receiptMsg);
-//        CommonUtils.processReceiptHexNumber(receipt);
+    /**
+     * sdk仅用于了预编译合约，其余解析需要自行完成
+     * @param client
+     * @param receipt
+     */
+    public void decodeReceipt(Client client, TransactionReceipt receipt) {
+//        // decode receipt
+        TransactionDecoderService txDecoder = new TransactionDecoderService(client.getCryptoSuite(), false);
+        String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
+        receipt.setMessage(receiptMsg);
     }
 
 
