@@ -34,14 +34,14 @@ public class PrecompiledCommonInfo {
     public static String getAddress(PrecompiledTypes types) {
         switch (types) {
             case SYSTEM_CONFIG:
-                return PrecompiledAddress.SYSCONFIG_PRECOMPILED_ADDRESS;
-            case TABLE_FACTORY: // todo check
-            case CRUD:
-                return PrecompiledAddress.TABLEFACTORY_PRECOMPILED_ADDRESS;
+                return PrecompiledAddress.SYS_CONFIG_PRECOMPILED_ADDRESS;
+//            case TABLE_FACTORY: // todo check
+//            case CRUD:
+//                return PrecompiledAddress.KV_TABLE_PRECOMPILED_ADDRESS  ;
             case CONSENSUS:
                 return PrecompiledAddress.CONSENSUS_PRECOMPILED_ADDRESS;
-            case CNS:
-                return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
+//            case CNS:
+//                return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
             default:
                 return "";
         }
