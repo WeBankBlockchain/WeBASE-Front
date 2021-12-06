@@ -1016,6 +1016,38 @@ let errCode = {
         en: "Please provide field 'in field list",
         zh: "请在字段列表中提供字段。"
     },
+    "201600": {
+        en: "BcosSDK is empty, call config api to init one bcosSDK",
+        zh: "BcosSDK为空，调用配置api来初始化一个BcosSDK"
+    },
+    "201601": {
+        en: "Sdk's peers cannot be empty",
+        zh: "Sdk的对等体不能为空"
+    },
+    "201602": {
+        en: "Sdk's sdk certificates and key cannot be empty",
+        zh: "Sdk的Sdk证书和密钥不能为空"
+    },
+    "201603": {
+        en: "Sdk's peers same with new peers",
+        zh: "Sdk的对等体与新对等体相同"
+    },
+    "201604": {
+        en: "webase-front connect to new peers ip port failed!",
+        zh: "web -front连接到新对等点IP端口失败!"
+    },
+    "201605": {
+        en: "Build client instance of new group failed",
+        zh: "构建新组的客户端实例失败"
+    },
+    "201665": {
+        en: "Build eventSubscribe instance of new group failed",
+        zh: "创建新组的eventSubscribe实例失败"
+    },
+    "201621": {
+        en: "Sealer's weight cannot be null",
+        zh: "共识的weight不能为空"
+    },
 }
 export function chooseLang(code) {
     let lang = localStorage.getItem('lang')

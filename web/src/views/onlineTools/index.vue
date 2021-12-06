@@ -82,9 +82,9 @@
                 <el-tab-pane :label="$t('route.parseAbi')" name="third">
                     <parse-abi></parse-abi>
                 </el-tab-pane>
-                <el-tab-pane :label="$t('route.eventCheck')" name="fourth">
+                <!-- <el-tab-pane :label="$t('route.eventCheck')" name="fourth">
                     <event-check ref="event" :groupId="groupId"></event-check>
-                </el-tab-pane>
+                </el-tab-pane> -->
             </el-tabs>
         </div>
     </div>

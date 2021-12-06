@@ -282,6 +282,7 @@ export default {
         },
         getEncryption: function (callback) {
             this.loading = true
+            this.groupId=localStorage.getItem('groupId')
             encryption(this.groupId).then(res => {
                 if (res.status == 200) {
                     localStorage.setItem("encryptionId", res.data)
