@@ -338,7 +338,13 @@ export default {
         //             });
         //         });
         // },
+         initVersion() {
+            localStorage.removeItem('solcName')
+        },
         changeGroup: function () {
+            this.initVersion()
+            this.versionList=[];
+            this.getEncryption(this.querySolcList); 
             this.$refs.menu.getContractPaths()
         },
         dragDetailWeight: function (e) {
