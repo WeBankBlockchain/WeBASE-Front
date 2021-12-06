@@ -35,13 +35,13 @@ public class PrecompiledCommonInfo {
         switch (types) {
             case SYSTEM_CONFIG:
                 return PrecompiledAddress.SYS_CONFIG_PRECOMPILED_ADDRESS;
-            case TABLE_FACTORY: // todo check
-            case CRUD:
-                return PrecompiledAddress.KV_TABLE_PRECOMPILED_ADDRESS;
+//            case TABLE_FACTORY: // todo check
+//            case CRUD:
+//                return PrecompiledAddress.KV_TABLE_PRECOMPILED_ADDRESS  ;
             case CONSENSUS:
                 return PrecompiledAddress.CONSENSUS_PRECOMPILED_ADDRESS;
-            case CNS:
-                return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
+//            case CNS:
+//                return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
             default:
                 return "";
         }
