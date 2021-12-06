@@ -37,7 +37,7 @@
                         <span>{{item}}：</span>
                     </el-col>
                     <el-col :xs='24' :sm="24" :md="18" :lg="20" :xl="22">
-                        <template v-if="item == 'logs'">
+                        <template v-if="item == 'logEntries'">
                             <p class="base-p" v-html="txInfoReceiptMap[item]"></p>
                             <div v-show="!showReceiptDecode">
                                 解码后
@@ -85,31 +85,31 @@ export default {
                 ? localStorage.getItem("groupId")
                 : "1",
             txInfoList: [
-                "blockHash",
-                "blockNumber",
-                "gas",
+               // "blockHash",
+               // "blockNumber",
+               // "gas",
                 "from",
-                "transactionIndex",
+               // "transactionIndex",
                 "to",
-                "nonceRaw",
-                "value",
+               // "nonceRaw",
+               // "value",
                 "hash",
-                "gasPrice",
+               // "gasPrice",
                 "input"
             ],
             txReceiptInfoList: [
                 "output",
-                "blockHash",
+                //"blockHash",
                 "gasUsed",
                 "blockNumber",
                 "contractAddress",
                 "from",
-                "transactionIndex",
+               // "transactionIndex",
                 "to",
-                "logsBloom",
+               //  "logsBloom",
                 "transactionHash",
                 "status",
-                "logs"
+                "logEntries"
             ]
         };
     },
