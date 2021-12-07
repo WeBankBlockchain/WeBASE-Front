@@ -170,8 +170,10 @@ public class PresetDataService {
                 ToolsConstantContext.LIB_STRING_MD,ToolsConstantContext.LIB_STRING_MD);
         insertContractItem(contractIndex++,toolboxId,"SafeMath",ToolsConstantContext.SAFE_MATH_SOURCE,
                 ToolsConstantContext.SAFE_MATH_MD,ToolsConstantContext.SAFE_MATH_MD);
-//        insertContractItem(contractIndex++,toolboxId,"Table",ToolsConstantContext.TABLE_SOURCE,
-//                ToolsConstantContext.TABLE_MD,ToolsConstantContext.TABLE_MD);
+        insertContractItem(contractIndex++,toolboxId,"KVTable",ToolsConstantContext.KV_TABLE_SOURCE,
+                ToolsConstantContext.TABLE_MD,ToolsConstantContext.TABLE_MD);
+        insertContractItem(contractIndex++,toolboxId,"KVTableTest",ToolsConstantContext.KV_TABLE_TEST_SOURCE,
+                ToolsConstantContext.TABLE_MD,ToolsConstantContext.TABLE_MD);
         insertContractItem(contractIndex++,toolboxId,"Roles",ToolsConstantContext.ROLES_SOURCE,
                 ToolsConstantContext.ROLES_MD,ToolsConstantContext.ROLES_MD);
 
