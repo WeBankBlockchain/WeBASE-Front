@@ -674,7 +674,13 @@ public class TransService {
         receipt.setMessage(receiptMsg);
     }
 
-
+    /**
+     * check input
+     * @param contractAbiStr
+     * @param funcName
+     * @param funcParam
+     * @param groupId
+     */
     private void validFuncParam(String contractAbiStr, String funcName, List<Object> funcParam, String groupId) {
         ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName, groupId);
         List<NamedType> inputTypeList = abiDefinition.getInputs();
@@ -688,7 +694,8 @@ public class TransService {
                 if (type.contains("[][]")) {
                     // todo bytes[][]
                     log.warn("validFuncParam param, not support bytes 2d array or more");
-                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
+//                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
+                    return;
                 }
                 // if not bytes[], bytes or bytesN
                 if (!type.endsWith("[]")) {
@@ -734,51 +741,6 @@ public class TransService {
         }
     }
 
-    /**
-     * parse bytes, bytesN, bytesN[], bytes[] from base64 string to hex string
-     *  todo 应该在sdk中完成
-     * @param abiStr
-     * @param funcName
-     * @param outputValues
-     */
-    private void handleFuncOutput(String abiStr, String funcName, List<String> outputValues, String groupId) {
-        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName, groupId);
-        List<NamedType> outputTypeList = abiDefinition.getOutputs();
-        for (int i = 0; i < outputTypeList.size(); i++) {
-            String type = outputTypeList.get(i).getType();
-            if (type.startsWith("bytes")) {
-                if (type.contains("[][]")) { // todo bytes[][]
-                    log.warn("validFuncParam param, not support bytes 2d array or more");
-                    continue;
-                }
-                // if not bytes[], bytes or bytesN
-                if (!type.endsWith("[]")) {
-                    // update funcParam
-                    String bytesBase64Str = outputValues.get(i);
-                    if (bytesBase64Str.startsWith("base64://")) {
-                        bytesBase64Str = bytesBase64Str.substring("base64://".length());
-                    }
-                    byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
-                    // replace hexString with array
-                    outputValues.set(i, Numeric.toHexString(inputArray));
-                } else {
-                    // if bytes[] or bytes32[]
-                    List<String> base64StrArray = JsonUtils.toJavaObject(outputValues.get(i), List.class);
-                    List<String> bytesArray = new ArrayList<>(base64StrArray.size());
-                    for (int j = 0; j < base64StrArray.size(); j++) {
-                        String bytesBase64Str = base64StrArray.get(j);
-                        if (bytesBase64Str.startsWith("base64://")) {
-                            bytesBase64Str = bytesBase64Str.substring("base64://".length());
-                        }
-                        byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
-                        bytesArray.add(Numeric.toHexString(inputArray));
-                    }
-                    // replace hexString with array
-                    outputValues.set(i, JsonUtils.objToString(bytesArray));
-                }
-            }
-        }
-    }
 
 }
 
