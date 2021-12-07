@@ -20,7 +20,6 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
-import com.webank.webase.front.web3api.entity.RspTransCountInfo;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,10 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
@@ -49,7 +48,6 @@ import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -72,7 +70,7 @@ public class Web3ApiService {
     @Autowired
     private Web3Config web3ConfigConstants;
 
-    private static Map<String, String> NODE_ID_2_NODE_NAME = new HashMap<>();
+    private static Map<String, String> NODE_ID_2_NODE_NAME = new ConcurrentHashMap<>();
     private static final int HASH_OF_TRANSACTION_LENGTH = 66;
 
 
@@ -231,7 +229,7 @@ public class Web3ApiService {
         for (String nodeId : NODE_ID_2_NODE_NAME.keySet()) {
             String nodeName = NODE_ID_2_NODE_NAME.get(nodeId);
             log.info("getNodeStatusList nodeId:{},nodeName:{}", nodeId, nodeName);
-            // check nodeType if observer or sealer todo 观察节点也适用timeout
+            // check nodeType if observer or sealer
 
             ConsensusStatusInfo consensusStatusInfo = this.getConsensusStatus(groupId, nodeName);
             log.info("getNodeStatusList consensusStatusInfo{}", consensusStatusInfo);
@@ -470,6 +468,11 @@ public class Web3ApiService {
 
     private void refreshNodeNameMap(String groupId) {
         log.info("refreshNodeNameMap groupId:{}", groupId);
+        // add all node into map, and set nodeId as its default nodeName
+        List<String> groupPeers = this.getGroupPeers(groupId);
+        for (String nodeId : groupPeers) {
+            NODE_ID_2_NODE_NAME.put(nodeId, nodeId);
+        }
         List<GroupNodeInfo> nodeInfoList = this.getGroupInfo(groupId).getNodeList();
         for (GroupNodeInfo node : nodeInfoList) {
             NODE_ID_2_NODE_NAME.put(node.getIniConfig().getNodeID(), node.getName());
