@@ -154,51 +154,6 @@ public class TransService {
 
     }
 
-
-    /**
-     * execCall through common contract
-     *
-     * @param funOutputTypes list
-     * @param function function
-     * @param commonContract contract
-     */
-    @Deprecated
-    public static Object execCall(List<String> funOutputTypes, Function function,
-            CommonContract commonContract) throws FrontException {
-        try {
-            List<Type> typeList = commonContract.execCall(function);
-            Object result = null;
-            if (typeList.size() > 0) {
-                result = AbiUtil.callResultParse(funOutputTypes, typeList);
-            }
-            return result;
-        } catch (ContractException e) {
-            log.error("execCall failed of ContractException:{}", e);
-            throw new FrontException(ConstantCode.TRANSACTION_QUERY_FAILED.getCode(),
-                    e.getMessage());
-        }
-    }
-
-    /**
-     * execTransaction through common contract
-     *
-     * @param function function
-     * @param commonContract contract
-     */
-    @Deprecated
-    public static TransactionReceipt execTransaction(Function function,
-            CommonContract commonContract, TransactionDecoderService txDecoder) throws FrontException {
-        Instant startTime = Instant.now();
-        log.info("execTransaction start startTime:{}", startTime.toEpochMilli());
-        TransactionReceipt transactionReceipt = commonContract.execTransaction(function);
-        // cover null message through statusCode
-        String receiptMsg = txDecoder.decodeReceiptStatus(transactionReceipt).getReceiptMessages();
-        transactionReceipt.setMessage(receiptMsg);
-        log.info("execTransaction end  useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        return transactionReceipt;
-    }
-
     /**
      * signMessage to create raw transaction and encode data
      *
@@ -482,7 +437,7 @@ public class TransService {
             log.error("transHandleWithSign encode fail:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
         }
-        log.info("encodeFunction2Str encodeFunction:{}", encodeFunction);
+        log.debug("encodeFunction2Str encodeFunction:{}", encodeFunction);
         return encodeFunction;
     }
 
@@ -574,12 +529,11 @@ public class TransService {
                 RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
             log.error("call contract error:{}", parseResult);
             String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
-//            return Collections.singletonList("Call contract return error: " + parseResultStr);
-            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR);
+            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR.getCode(), parseResultStr);
         } else {
             ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
             try {
-                log.error("todo========= callOutput.getOutput():{}", callOutput.getOutput());
+                log.debug("========= callOutput.getOutput():{}", callOutput.getOutput());
                 //  [
                 //  {
                 //    "value": "Hello, World!",
@@ -587,12 +541,9 @@ public class TransService {
                 //  }
                 //]
                 List<Type> typeList = abiCodec.decodeMethodAndGetOutputObject(abiStr, funcName, callOutput.getOutput());
-//                List<String> res = typeList.stream().map(Type::getValue).collect(Collectors.toList());
-//                log.info("call contract res before decode:{}", typeList);
-                // bytes类型转十六进制 todo 待sdk实现
+                // bytes类型转十六进制
                 // todo output is byte[] or string  Numeric.hexStringToByteArray
-//                this.handleFuncOutput(abiStr, funcName, res, groupId);
-                log.info("call contract res:{}", typeList);
+                log.info("call contract res:{}", JsonUtils.objToString(typeList));
                 return typeList;
             } catch (ABICodecException e) {
                 log.error("handleCall decode call output fail:[]", e);
@@ -674,13 +625,19 @@ public class TransService {
      * @param receipt
      */
     public void decodeReceipt(Client client, TransactionReceipt receipt) {
-//        // decode receipt
+        // decode receipt
         TransactionDecoderService txDecoder = new TransactionDecoderService(client.getCryptoSuite(), false);
         String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
         receipt.setMessage(receiptMsg);
     }
 
-
+    /**
+     * check input
+     * @param contractAbiStr
+     * @param funcName
+     * @param funcParam
+     * @param groupId
+     */
     private void validFuncParam(String contractAbiStr, String funcName, List<Object> funcParam, String groupId) {
         ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName, groupId);
         List<NamedType> inputTypeList = abiDefinition.getInputs();
@@ -694,7 +651,8 @@ public class TransService {
                 if (type.contains("[][]")) {
                     // todo bytes[][]
                     log.warn("validFuncParam param, not support bytes 2d array or more");
-                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
+//                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
+                    return;
                 }
                 // if not bytes[], bytes or bytesN
                 if (!type.endsWith("[]")) {
@@ -740,51 +698,6 @@ public class TransService {
         }
     }
 
-    /**
-     * parse bytes, bytesN, bytesN[], bytes[] from base64 string to hex string
-     *  todo 应该在sdk中完成
-     * @param abiStr
-     * @param funcName
-     * @param outputValues
-     */
-    private void handleFuncOutput(String abiStr, String funcName, List<String> outputValues, String groupId) {
-        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName, groupId);
-        List<NamedType> outputTypeList = abiDefinition.getOutputs();
-        for (int i = 0; i < outputTypeList.size(); i++) {
-            String type = outputTypeList.get(i).getType();
-            if (type.startsWith("bytes")) {
-                if (type.contains("[][]")) { // todo bytes[][]
-                    log.warn("validFuncParam param, not support bytes 2d array or more");
-                    continue;
-                }
-                // if not bytes[], bytes or bytesN
-                if (!type.endsWith("[]")) {
-                    // update funcParam
-                    String bytesBase64Str = outputValues.get(i);
-                    if (bytesBase64Str.startsWith("base64://")) {
-                        bytesBase64Str = bytesBase64Str.substring("base64://".length());
-                    }
-                    byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
-                    // replace hexString with array
-                    outputValues.set(i, Numeric.toHexString(inputArray));
-                } else {
-                    // if bytes[] or bytes32[]
-                    List<String> base64StrArray = JsonUtils.toJavaObject(outputValues.get(i), List.class);
-                    List<String> bytesArray = new ArrayList<>(base64StrArray.size());
-                    for (int j = 0; j < base64StrArray.size(); j++) {
-                        String bytesBase64Str = base64StrArray.get(j);
-                        if (bytesBase64Str.startsWith("base64://")) {
-                            bytesBase64Str = bytesBase64Str.substring("base64://".length());
-                        }
-                        byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
-                        bytesArray.add(Numeric.toHexString(inputArray));
-                    }
-                    // replace hexString with array
-                    outputValues.set(i, JsonUtils.objToString(bytesArray));
-                }
-            }
-        }
-    }
 
 }
 
