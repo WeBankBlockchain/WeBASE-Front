@@ -170,8 +170,8 @@ public class PresetDataService {
                 ToolsConstantContext.LIB_STRING_MD,ToolsConstantContext.LIB_STRING_MD);
         insertContractItem(contractIndex++,toolboxId,"SafeMath",ToolsConstantContext.SAFE_MATH_SOURCE,
                 ToolsConstantContext.SAFE_MATH_MD,ToolsConstantContext.SAFE_MATH_MD);
-        insertContractItem(contractIndex++,toolboxId,"Table",ToolsConstantContext.TABLE_SOURCE,
-                ToolsConstantContext.TABLE_MD,ToolsConstantContext.TABLE_MD);
+//        insertContractItem(contractIndex++,toolboxId,"Table",ToolsConstantContext.TABLE_SOURCE,
+//                ToolsConstantContext.TABLE_MD,ToolsConstantContext.TABLE_MD);
         insertContractItem(contractIndex++,toolboxId,"Roles",ToolsConstantContext.ROLES_SOURCE,
                 ToolsConstantContext.ROLES_MD,ToolsConstantContext.ROLES_MD);
 
@@ -206,12 +206,12 @@ public class PresetDataService {
             ToolsConstantContext.CRYPTO_SHA_TEST_MD,ToolsConstantContext.CRYPTO_SHA_TEST_MD);
         insertContractItem(contractIndex++,smartDevToolFolderId,"HelloWorld",ToolsConstantContext.HELLO_WORLD_SOURCE,
             ToolsConstantContext.HELLO_WORLD_MD,ToolsConstantContext.HELLO_WORLD_MD);
-        insertContractItem(contractIndex++,smartDevToolFolderId,"KVTableTest",ToolsConstantContext.KV_TABLE_TEST_SOURCE,
-            ToolsConstantContext.KVTABLE_TEST_MD,ToolsConstantContext.KVTABLE_TEST_MD);
-        insertContractItem(contractIndex++,smartDevToolFolderId,"Table",ToolsConstantContext.TABLE_SOURCE,
-            ToolsConstantContext.TABLE_CRUD_MD,ToolsConstantContext.TABLE_CRUD_MD);
-        insertContractItem(contractIndex++,smartDevToolFolderId,"TableTest",ToolsConstantContext.TABLE_TEST_SOURCE,
-            ToolsConstantContext.TABLE_CRUD_TEST_MD,ToolsConstantContext.TABLE_CRUD_TEST_MD);
+//        insertContractItem(contractIndex++,smartDevToolFolderId,"KVTableTest",ToolsConstantContext.KV_TABLE_TEST_SOURCE,
+//            ToolsConstantContext.KVTABLE_TEST_MD,ToolsConstantContext.KVTABLE_TEST_MD);
+//        insertContractItem(contractIndex++,smartDevToolFolderId,"Table",ToolsConstantContext.TABLE_SOURCE,
+//            ToolsConstantContext.TABLE_CRUD_MD,ToolsConstantContext.TABLE_CRUD_MD);
+//        insertContractItem(contractIndex++,smartDevToolFolderId,"TableTest",ToolsConstantContext.TABLE_TEST_SOURCE,
+//            ToolsConstantContext.TABLE_CRUD_TEST_MD,ToolsConstantContext.TABLE_CRUD_TEST_MD);
         // evidence
         insertContractItem(contractIndex++,smartDevEvidenceFolderId,"EvidenceController", SmartDevConstantContext.EVI_CONTROLLER_SOURCE,
             SmartDevConstantContext.EVIDENCE_API_MD,SmartDevConstantContext.EVIDENCE_API_MD);
