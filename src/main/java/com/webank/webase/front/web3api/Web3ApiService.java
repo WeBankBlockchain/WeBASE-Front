@@ -246,6 +246,18 @@ public class Web3ApiService {
             statusList.add(new NodeStatusInfo(nodeId, status, blockNumber, view));
         }
 
+        SyncStatusInfo syncStatusInfo = this.getSyncStatus(groupId);
+        long highestBlockNum = syncStatusInfo.getKnownHighestNumber();
+        for (PeersInfo peersInfo : syncStatusInfo.getPeers()) {
+            if (!NODE_ID_2_NODE_NAME.containsKey(peersInfo.getNodeId())) {
+                // todo syncStatusInfo check not connected node's block number
+                // todo check block number is changing to set normal or invalid
+                long peerBlockNum = peersInfo.getBlockNumber();
+                NodeStatus status = peerBlockNum == highestBlockNum ? NodeStatus.NORMAL: NodeStatus.INVALID;
+                statusList.add(new NodeStatusInfo(peersInfo.getNodeId(), status, peerBlockNum, 0));
+            }
+        }
+
         log.info("end getNodeStatusList. groupId:{} statusList:{}", groupId,
                 JsonUtils.toJSONString(statusList));
         return statusList;
@@ -455,10 +467,6 @@ public class Web3ApiService {
     private void refreshNodeNameMap(String groupId) {
         log.info("refreshNodeNameMap groupId:{}", groupId);
         // add all node into map, and set nodeId as its default nodeName
-        List<String> groupPeers = this.getGroupPeers(groupId);
-        for (String nodeId : groupPeers) {
-            NODE_ID_2_NODE_NAME.put(nodeId, nodeId);
-        }
         List<GroupNodeInfo> nodeInfoList = this.getGroupInfo(groupId).getNodeList();
         for (GroupNodeInfo node : nodeInfoList) {
             NODE_ID_2_NODE_NAME.put(node.getIniConfig().getNodeID(), node.getName());
