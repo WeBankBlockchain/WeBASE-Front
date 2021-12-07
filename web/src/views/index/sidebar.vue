@@ -115,6 +115,7 @@ export default {
                         break;
                     case 'subscribeEvent':
                         item.name = this.$t('route.subscribeEvent')
+                        item.menuShow = false
                         break;
 
                 }
@@ -166,7 +167,6 @@ export default {
                         }
                     })
                 }
-
             }))
             return list;
         },

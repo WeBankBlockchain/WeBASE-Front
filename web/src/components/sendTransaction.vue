@@ -296,14 +296,16 @@ export default {
       }
       if (this.transation.funcValue.length) {
         for (let i = 0; i < this.transation.funcValue.length; i++) {
-          let datas = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
-          if (datas && isJson(datas)) {
+          let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
+          if (data && isJson(data)) {
             try {
-              this.transation.reqVal[i] = JSON.parse(datas);
+              this.transation.reqVal[i] = JSON.parse(data);
             } catch (error) {
               console.log(error);
             }
-          } else {
+          } else if(data === 'true' || data === 'false'){
+                             this.transation.reqVal[i] =  eval(data.toLowerCase())
+                    } else {
             this.transation.reqVal[i] = datas;
           }
         }

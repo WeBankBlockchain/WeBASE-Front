@@ -383,6 +383,12 @@
     padding-top: 20px;
     padding-bottom: 20px;
 }
+.el-tooltip__popper{
+    font-size: 14px;
+     max-width:50% !important;
+     max-height:40% !important;
+   overflow: hidden;
+}
 
 .el-dialog__footer {
     background-color: #2f3b52;
