@@ -299,7 +299,7 @@ public class ContractService {
         CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);
         // contract deploy
         String contractAddress =
-                deployContract(groupId, encodedConstructor, cryptoKeyPair);
+            deployContract(groupId, encodedConstructor, cryptoKeyPair);
 
         log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
@@ -404,6 +404,12 @@ public class ContractService {
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
         TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
+        transService.decodeReceipt(client, receipt);
+        int status = receipt.getStatus();
+        if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())) {
+            log.error("deployContract locally error, receipt status:{},hash:{}", status, receipt.getTransactionHash());
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
+        }
         return receipt.getContractAddress();
     }
 

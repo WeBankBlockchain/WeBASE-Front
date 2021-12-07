@@ -572,12 +572,11 @@ public class TransService {
                 RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
             log.error("call contract error:{}", parseResult);
             String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
-//            return Collections.singletonList("Call contract return error: " + parseResultStr);
-            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR);
+            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR.getCode(), parseResultStr);
         } else {
             ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
             try {
-                log.error("todo========= callOutput.getOutput():{}", callOutput.getOutput());
+                log.debug("========= callOutput.getOutput():{}", callOutput.getOutput());
                 //  [
                 //  {
                 //    "value": "Hello, World!",
@@ -585,12 +584,9 @@ public class TransService {
                 //  }
                 //]
                 List<Type> typeList = abiCodec.decodeMethodAndGetOutputObject(abiStr, funcName, callOutput.getOutput());
-//                List<String> res = typeList.stream().map(Type::getValue).collect(Collectors.toList());
-//                log.info("call contract res before decode:{}", typeList);
-                // bytes类型转十六进制 todo 待sdk实现
+                // bytes类型转十六进制
                 // todo output is byte[] or string  Numeric.hexStringToByteArray
-//                this.handleFuncOutput(abiStr, funcName, res, groupId);
-                log.info("call contract res:{}", typeList);
+                log.info("call contract res:{}", JsonUtils.objToString(typeList));
                 return typeList;
             } catch (ABICodecException e) {
                 log.error("handleCall decode call output fail:[]", e);
@@ -672,7 +668,7 @@ public class TransService {
      * @param receipt
      */
     public void decodeReceipt(Client client, TransactionReceipt receipt) {
-//        // decode receipt
+        // decode receipt
         TransactionDecoderService txDecoder = new TransactionDecoderService(client.getCryptoSuite(), false);
         String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
         receipt.setMessage(receiptMsg);
