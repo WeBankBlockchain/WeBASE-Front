@@ -244,6 +244,10 @@ public class ContractService {
 
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
+        if (client.isWASM()) {
+            log.error("deployWithSign error, this group:{} only support wasm", groupId);
+            throw new FrontException(ConstantCode.CLIENT_ONLY_SUPPORT_WASM);
+        }
 
         if (client == null) {
             throw new FrontException(GROUPID_NOT_EXIST);
@@ -386,6 +390,10 @@ public class ContractService {
         Client client = web3ApiService.getWeb3j(groupId);
         if (client == null) {
             throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+        }
+        if (client.isWASM()) {
+            log.error("deployContract locally error, this group:{} only support wasm", groupId);
+            throw new FrontException(ConstantCode.CLIENT_ONLY_SUPPORT_WASM);
         }
         AssembleTransactionProcessor assembleTxProcessor = null;
         try {
