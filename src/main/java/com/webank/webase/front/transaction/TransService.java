@@ -154,51 +154,6 @@ public class TransService {
 
     }
 
-
-    /**
-     * execCall through common contract
-     *
-     * @param funOutputTypes list
-     * @param function function
-     * @param commonContract contract
-     */
-    @Deprecated
-    public static Object execCall(List<String> funOutputTypes, Function function,
-            CommonContract commonContract) throws FrontException {
-        try {
-            List<Type> typeList = commonContract.execCall(function);
-            Object result = null;
-            if (typeList.size() > 0) {
-                result = AbiUtil.callResultParse(funOutputTypes, typeList);
-            }
-            return result;
-        } catch (ContractException e) {
-            log.error("execCall failed of ContractException:{}", e);
-            throw new FrontException(ConstantCode.TRANSACTION_QUERY_FAILED.getCode(),
-                    e.getMessage());
-        }
-    }
-
-    /**
-     * execTransaction through common contract
-     *
-     * @param function function
-     * @param commonContract contract
-     */
-    @Deprecated
-    public static TransactionReceipt execTransaction(Function function,
-            CommonContract commonContract, TransactionDecoderService txDecoder) throws FrontException {
-        Instant startTime = Instant.now();
-        log.info("execTransaction start startTime:{}", startTime.toEpochMilli());
-        TransactionReceipt transactionReceipt = commonContract.execTransaction(function);
-        // cover null message through statusCode
-        String receiptMsg = txDecoder.decodeReceiptStatus(transactionReceipt).getReceiptMessages();
-        transactionReceipt.setMessage(receiptMsg);
-        log.info("execTransaction end  useTime:{}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        return transactionReceipt;
-    }
-
     /**
      * signMessage to create raw transaction and encode data
      *
@@ -480,7 +435,7 @@ public class TransService {
             log.error("transHandleWithSign encode fail:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
         }
-        log.info("encodeFunction2Str encodeFunction:{}", encodeFunction);
+        log.debug("encodeFunction2Str encodeFunction:{}", encodeFunction);
         return encodeFunction;
     }
 
