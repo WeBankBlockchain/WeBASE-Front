@@ -59,7 +59,7 @@ public class FrontCertService {
     private static final String crtContentHead = "-----BEGIN CERTIFICATE-----\n";
     private static final String crtContentTail = "-----END CERTIFICATE-----\n";
 
-    // 前置的sdk证书 todo 从路径读，换成db获取
+    // 前置的sdk证书
     // ecdsa
     public static final String frontSdkCaCrt = "ca.crt";
     public static final String frontSdkNodeCrt = "sdk.crt";
@@ -85,13 +85,15 @@ public class FrontCertService {
      * excluding ca.crt because node's certs already including ca.crt
      * @return
      */
-    public List<String> getSDKNodeCert() {
-        List<String> sdkCertMap = new ArrayList<>();
+    public Map<String, String> getSDKNodeCert() {
+        Map<String, String> sdkCertMap = this.getSDKCertKeyMap();
         log.debug("start getSDKNodeCerts.");
-        // add sdk cert: node.crt
-        // v1.5.0 change node.crt to sdk.crt
-        loadCrtContentByStringPath(frontSdkNodeCrt, sdkCertMap);
-        loadCrtContentByStringPath(frontSdkCaCrt, sdkCertMap);
+        // rm key files
+        for (String key : sdkCertMap.keySet()) {
+            if (key.endsWith(".key")) {
+                sdkCertMap.remove(key);
+            }
+        }
         log.debug("end getSDKNodeCerts sdkCertStr []" + sdkCertMap);
         return sdkCertMap;
     }
