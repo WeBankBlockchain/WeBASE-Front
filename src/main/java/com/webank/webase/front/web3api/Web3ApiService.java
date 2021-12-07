@@ -173,16 +173,9 @@ public class Web3ApiService {
         return transaction;
     }
 
-    /**
-     * getClientVersion. todo
-//     */
-//    public ClientVersion getClientVersion(String groupId) {
-//        ClientVersion version = getWeb3j(groupId).get()).getNodeVersion();
-//        return version;
-//    }
 
     /**
-     * getCode. todo 底层未支持
+     * getCode.
      *
      * @param address address
      * @param blockNumber blockNumber
@@ -360,13 +353,6 @@ public class Web3ApiService {
                 .getSystemConfig().getValue();
     }
 
-    /**
-     * get node config info todo
-     * @return
-     */
-//    public Object getNodeConfig() {
-//        return JsonUtils.toJavaObject(nodeConfig.toString(), Object.class);
-//    }
 
     public int getPendingTransactionsSize(String groupId) {
         return getWeb3j(groupId).getPendingTxSize().getPendingTxSize().intValue();
@@ -395,7 +381,7 @@ public class Web3ApiService {
             throw new FrontException(ConstantCode.PARAM_ERROR);
         }
         if (StringUtils.isNumeric(input)) {
-            return getBlockByNumber(groupId, new BigInteger(input),false); // todo check
+            return getBlockByNumber(groupId, new BigInteger(input),false);
         } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
             JsonTransactionResponse txResponse = getTransactionByHash(groupId, input, true);
             return txResponse;

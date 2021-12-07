@@ -118,12 +118,6 @@ public class Web3ApiController {
         return web3ApiService.getTransactionByHash(groupId, transHash, withProof);
     }
 
-//    @ApiOperation(value = "getClientVersion", notes = "Get the web3j version") todo
-//    @GetMapping("/clientVersion")
-//    public ClientVersion getClientVersion() {
-//        return web3ApiService.getClientVersion();
-//    }
-
     @ApiOperation(value = "getCode",
             notes = "Get the binary code of the specified contract for the specified block")
     @ApiImplicitParams({
