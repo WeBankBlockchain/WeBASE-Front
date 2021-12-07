@@ -52,46 +52,25 @@ public class FrontCertController {
     @Autowired
     FrontCertService certService;
 
+    /**
+     * get sdk cert without head and tail of "----BEGIN ----"
+     * @return
+     */
     @GetMapping("")
     public Object getFrontSdkCerts() {
         Instant startTime = Instant.now();
         log.info("start getFrontSdkCerts. startTime:{}", startTime.toEpochMilli());
-        String sdkChainCrtStr;
-        String sdkAgencyCrtStr;
-        String sdkNodeCrtStr;
         // node的crt文件可能包含节点、机构、链证书三个
         // sdk的node.crt文件一般包含sdk节点证书，机构证书两个
 
         // one crt file has multiple certs string
-        List<String> sdkCertList = new ArrayList<>();
+        Map<String, String> map = new HashMap<>();
         try {
-            sdkCertList = certService.getSDKNodeCert();
+            map = certService.getSDKNodeCert();
         }catch (FrontException e) {
             log.error("FrontCertController load [sdk] cert error: e:[]", e);
         }
-        Map<String, String> map = new HashMap<>();
 
-        if (!sdkCertList.isEmpty()) {
-            // sdk's chain.crt (sdk.crt)
-            sdkChainCrtStr = sdkCertList.get(0);
-            if (!StringUtils.isEmpty(sdkChainCrtStr)) {
-                map.put("sdkca", sdkChainCrtStr);
-            }
-            // sdk's agency.crt (sdk.crt)
-            if (sdkCertList.size() >= 2) {
-                sdkAgencyCrtStr = sdkCertList.get(1);
-                if (!StringUtils.isEmpty(sdkAgencyCrtStr)) {
-                    map.put("sdkagency", sdkAgencyCrtStr);
-                }
-            }
-            // sdk's node.crt (sdk.crt)
-            if (sdkCertList.size() >= 3) {
-                sdkNodeCrtStr = sdkCertList.get(2);
-                if (!StringUtils.isEmpty(sdkNodeCrtStr)) {
-                    map.put("sdknode", sdkNodeCrtStr);
-                }
-            }
-        }
         log.info("end getFrontSdkCerts. startTime:{}, certMap:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), map);
         return map;

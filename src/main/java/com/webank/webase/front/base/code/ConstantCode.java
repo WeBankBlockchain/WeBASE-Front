@@ -252,6 +252,8 @@ public class ConstantCode {
     public static final RetCode SAME_SDK_PEERS_ERROR = RetCode.mark(201603, "Sdk's peers same with new peers");
     public static final RetCode CONNECT_TO_NEW_PEERS_FAILED = RetCode.mark(201604, "webase-front connect to new peers ip port failed!");
     public static final RetCode BUILD_NEW_CLIENT_FAILED = RetCode.mark(201605, "Build client instance of new group failed");
+    public static final RetCode CLIENT_ONLY_SUPPORT_WASM = RetCode.mark(201606, "This group only support Liquid contract of wasm");
+
     public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
 
     public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
