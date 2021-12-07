@@ -195,12 +195,12 @@ export default {
                     this.versionList.push(this.allVersion[i])
                 }
             }
-            if (!localStorage.getItem('solcName')) {
+            //if (!localStorage.getItem('solcName')) {
                 this.version = this.versionList[0]['solcName'];
                 this.versionId = this.versionList[0]['id'];
                 localStorage.setItem("solcName", this.versionList[0]['solcName'])
                 localStorage.setItem("versionId", this.versionList[0]['versionId'])
-            }
+           // }
             this.initSolc(localStorage.getItem("versionId"))
         },
         initSolc(versionId) {

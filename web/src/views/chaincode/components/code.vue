@@ -15,65 +15,32 @@
  */
  
 <template>
-  <div
-    class="contract-code"
-    :class="{ changeActive: changeWidth }"
-    v-loading="loadingAce"
-  >
+  <div class="contract-code" :class="{ changeActive: changeWidth }" v-loading="loadingAce">
     <div class="contract-code-head">
-      <span
-        class="contract-code-title"
-        v-show="codeShow"
-        :class="{ titleActive: changeWidth }"
-      >
+      <span class="contract-code-title" v-show="codeShow" :class="{ titleActive: changeWidth }">
         <span ref="setReadOnly">{{ contractName + ".sol" }}</span>
       </span>
       <span class="contract-code-handle" v-show="codeShow">
         <span class="contract-code-done noBlur" @click="saveCode" id="saveId">
-          <el-tooltip
-            class="item"
-            effect="dark"
-            :content="$t('title.handleSave')"
-            placement="top-start"
-          >
+          <el-tooltip class="item" effect="dark" :content="$t('title.handleSave')" placement="top-start">
             <i class="wbs-icon-baocun contract-icon-style font-16"></i>
           </el-tooltip>
           <span>{{ $t("title.save") }}</span>
         </span>
-        <span
-          class="contract-code-done noBlur"
-          @click="compile"
-          v-if="!loadingAce"
-          id="compileId"
-        >
-          <el-tooltip
-            class="item"
-            effect="dark"
-            :content="$t('title.handleCompile')"
-            placement="top-start"
-          >
+        <span class="contract-code-done noBlur" @click="compile" v-if="!loadingAce" id="compileId">
+          <el-tooltip class="item" effect="dark" :content="$t('title.handleCompile')" placement="top-start">
             <i class="wbs-icon-bianyi contract-icon-style font-16"></i>
           </el-tooltip>
           <span>{{ $t("title.compile") }}</span>
         </span>
         <span class="contract-code-done" @click="deploying">
-          <el-tooltip
-            class="item"
-            effect="dark"
-            :content="$t('title.handleDeploy')"
-            placement="top-start"
-          >
+          <el-tooltip class="item" effect="dark" :content="$t('title.handleDeploy')" placement="top-start">
             <i class="wbs-icon-deploy contract-icon-style font-16"></i>
           </el-tooltip>
           <span>{{ $t("title.deploy") }}</span>
         </span>
         <span class="contract-code-done" @click="send">
-          <el-tooltip
-            class="item"
-            effect="dark"
-            :content="$t('title.handleCallContract')"
-            placement="top-start"
-          >
+          <el-tooltip class="item" effect="dark" :content="$t('title.handleCallContract')" placement="top-start">
             <i class="wbs-icon-send contract-icon-style font-16"></i>
           </el-tooltip>
           <span>{{ $t("title.callContract") }}</span>
@@ -86,90 +53,51 @@
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportSdk") }}</span>
         </span>
-        <span class="contract-code-done" @click="exportJava">
+        <!-- <span class="contract-code-done" @click="exportJava">
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportJavaProject") }}</span>
-        </span>
+        </span> -->
       </span>
       <div class="search-model" v-if="searchVisibility">
-        <el-input
-          v-model="keyword"
-          placeholder="搜索"
-          style="width: 266px; margin-left: 10px"
-          ref="searchInput"
-          @keyup.esc.native="closeBtn"
-          @keyup.enter.native="searchBtn"
-          @keyup.down.native="nextBtn"
-          @keyup.up.native="previousBtn"
-        ></el-input>
-        <span
-          class="search-btn bf-58cb7d cursor-pointer no-chase"
-          @click="searchBtn"
-          >查找</span
-        >
+        <el-input v-model="keyword" placeholder="搜索" style="width: 266px; margin-left: 10px" ref="searchInput" @keyup.esc.native="closeBtn" @keyup.enter.native="searchBtn" @keyup.down.native="nextBtn"
+          @keyup.up.native="previousBtn"></el-input>
+        <span class="search-btn bf-58cb7d cursor-pointer no-chase" @click="searchBtn">查找</span>
         <span class="search-span-info" @click="previousBtn">
-          <i
-            class="
+          <i class="
               el-icon-back
               iconfont-info
               font-color-58cb7d font-15
               cursor-pointer
               no-chase
-            "
-          ></i>
+            "></i>
         </span>
         <span class="search-span-info" @click="nextBtn">
-          <i
-            class="
+          <i class="
               el-icon-right
               iconfont-info
               font-color-58cb7d font-15
               cursor-pointer
               no-chase
-            "
-          ></i>
+            "></i>
         </span>
-        <span
-          class="close-search cursor-pointer search-span-info"
-          @click="closeBtn"
-        >
+        <span class="close-search cursor-pointer search-span-info" @click="closeBtn">
           <i class="el-icon-close font-15"></i>
         </span>
       </div>
     </div>
     <div class="contract-code-content" :class="{ infoHide: !successHide }">
-      <div
-        class="contract-code-mirror"
-        :style="{ height: codeHight }"
-        ref="codeContent"
-      >
+      <div class="contract-code-mirror" :style="{ height: codeHight }" ref="codeContent">
         <div style="padding-top: 60px; text-align: center" v-show="!codeShow">
           <span class="font-color-9da2ab">{{ $t("text.noContract") }}</span>
         </div>
         <div class="ace-editor" ref="ace" v-show="codeShow"></div>
       </div>
-      <div
-        class="contract-info"
-        v-show="successHide"
-        :style="{ height: infoHeight + 'px' }"
-      >
-        <div
-          class="move"
-          @mousedown="dragDetailWeight($event)"
-          @mouseup="resizeCode"
-        ></div>
-        <div
-          class="contract-info-title"
-          @mouseover="mouseHover = true"
-          @mouseleave="mouseHover = false"
-          v-show="abiFile || contractAddress"
-          @click="collapse"
-        >
-          <i
-            :class="[
+      <div class="contract-info" v-show="successHide" :style="{ height: infoHeight + 'px' }">
+        <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
+        <div class="contract-info-title" @mouseover="mouseHover = true" @mouseleave="mouseHover = false" v-show="abiFile || contractAddress" @click="collapse">
+          <i :class="[
               showCompileText ? 'el-icon-caret-bottom' : 'el-icon-caret-top',
-            ]"
-          >
+            ]">
           </i>
           <template v-if="showCompileText && mouseHover">
             {{ $t("text.hide") }}
@@ -180,18 +108,10 @@
         </div>
         <div>
           <div class="contract-info-list1" v-html="compileinfo"></div>
-          <div
-            class="contract-info-list1"
-            style="color: #f56c6c"
-            v-show="errorInfo"
-          >
+          <div class="contract-info-list1" style="color: #f56c6c" v-show="errorInfo">
             {{ errorInfo }}
           </div>
-          <div
-            class="contract-info-list1 error-item"
-            style="color: #f56c6c"
-            v-show="errorInfo"
-          >
+          <div class="contract-info-list1 error-item" style="color: #f56c6c" v-show="errorInfo">
             <!-- <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage">{{index+1}}、{{item}}</span> -->
             <!-- <span style="display:inline-block;width:calc(100% - 120px);word-wrap:break-word" v-for="(item, index) in errorMessage" :style="{'color' : severityColor(item)}">
                             {{index+1}}: {{item | formatErrorMessage}}
@@ -203,22 +123,15 @@
                             </span>
                         </span> -->
             <el-collapse v-model="activeNames" @change="handleChange">
-              <el-collapse-item
-                :name="index"
-                v-for="(item, index) in errorMessage"
-                :key="index"
-                :style="{ color: severityColor(item) }"
-              >
+              <el-collapse-item :name="index" v-for="(item, index) in errorMessage" :key="index" :style="{ color: severityColor(item) }">
                 <template slot="title">
                   {{ index + 1 }}、{{ item | formatErrorMessage }}
                 </template>
-                <span
-                  style="
+                <span style="
                     display: inline-block;
                     width: calc(100% - 120px);
                     word-wrap: break-word;
-                  "
-                >
+                  ">
                   <span>
                     <pre :style="{ color: severityColor(item) }">{{
                       item
@@ -228,28 +141,18 @@
               </el-collapse-item>
             </el-collapse>
           </div>
-          <div
-            style="color: #68e600; padding-bottom: 15px"
-            v-show="abiFileShow"
-          >
+          <div style="color: #68e600; padding-bottom: 15px" v-show="abiFileShow">
             {{ successInfo }}
           </div>
           <div class="contract-info-list" v-if="contractAddress">
-            <span class="contract-info-list-title" style="color: #0b8aee"
-              >contractAddress
-              <i
-                class="wbs-icon-copy font-12 copy-public-key"
-                @click="copyKey(contractAddress)"
-                :title="$t('title.copyContractAddress')"
-              ></i>
+            <span class="contract-info-list-title" style="color: #0b8aee">contractAddress
+              <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(contractAddress)" :title="$t('title.copyContractAddress')"></i>
             </span>
-            <span
-              style="
+            <span style="
                 display: inline-block;
                 width: calc(100% - 120px);
                 word-wrap: break-word;
-              "
-            >
+              ">
               {{ contractAddress }}
               <!-- <span v-if="reqVersion" style="margin-left: 10px"
                 >(CNS: {{ cnsName }} {{ reqVersion }})</span
@@ -263,147 +166,62 @@
             </span>
           </div>
           <div v-else v-show="abiFile" class="contract-info-list">
-            <span
-              v-if="!abiEmpty"
-              class="contract-info-list-title"
-              style="color: #0b8aee"
-              >contractAddress
+            <span v-if="!abiEmpty" class="contract-info-list-title" style="color: #0b8aee">contractAddress
             </span>
-            <span
-              v-if="!abiEmpty"
-              style="color: #1f83e7; cursor: pointer; margin-left: 10px"
-              @click="addContractAddress"
-              >{{ $t("text.addContractAddress") }}</span
-            >
+            <span v-if="!abiEmpty" style="color: #1f83e7; cursor: pointer; margin-left: 10px" @click="addContractAddress">{{ $t("text.addContractAddress") }}</span>
           </div>
           <div class="contract-info-list" v-if="abiFile">
-            <span class="contract-info-list-title" style="color: #0b8aee"
-              >contractName
-              <i
-                class="wbs-icon-copy font-12 copy-public-key"
-                @click="copyKey(contractName)"
-                :title="$t('title.copyContractName')"
-              ></i>
+            <span class="contract-info-list-title" style="color: #0b8aee">contractName
+              <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(contractName)" :title="$t('title.copyContractName')"></i>
             </span>
-            <span
-              style="
+            <span style="
                 display: inline-block;
                 width: calc(100% - 120px);
                 word-wrap: break-word;
-              "
-            >
+              ">
               {{ contractName }}
             </span>
           </div>
           <div class="contract-info-list" v-show="abiFile">
-            <span class="contract-info-list-title" style="color: #0b8aee"
-              >abi
-              <i
-                class="wbs-icon-copy font-12 copy-public-key"
-                @click="copyKey(abiFile)"
-                :title="$t('title.copyAbi')"
-              ></i>
+            <span class="contract-info-list-title" style="color: #0b8aee">abi
+              <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(abiFile)" :title="$t('title.copyAbi')"></i>
             </span>
             <span class="showText" ref="showAbiText">
               {{ abiFile }}
             </span>
-            <i
-              :class="[
+            <i :class="[
                 showAbi ? 'el-icon-arrow-down' : 'el-icon-arrow-up',
                 'font-13',
                 'cursor-pointer',
                 'visibility-wrapper',
-              ]"
-              v-if="complieAbiTextHeight"
-              @click="showAbiText"
-            ></i>
+              ]" v-if="complieAbiTextHeight" @click="showAbiText"></i>
           </div>
-          <div
-            class="contract-info-list"
-            style="border-bottom: 1px solid #242e42"
-            v-show="abiFile"
-          >
-            <span class="contract-info-list-title" style="color: #0b8aee"
-              >bytecodeBin
-              <i
-                class="wbs-icon-copy font-12 copy-public-key"
-                @click="copyKey(bytecodeBin)"
-                :title="$t('title.copyBin')"
-              ></i>
+          <div class="contract-info-list" style="border-bottom: 1px solid #242e42" v-show="abiFile">
+            <span class="contract-info-list-title" style="color: #0b8aee">bytecodeBin
+              <i class="wbs-icon-copy font-12 copy-public-key" @click="copyKey(bytecodeBin)" :title="$t('title.copyBin')"></i>
             </span>
             <span class="showText" ref="showBinText">
               {{ bytecodeBin }}
             </span>
-            <i
-              :class="[
+            <i :class="[
                 showBin ? 'el-icon-arrow-down' : 'el-icon-arrow-up',
                 'font-13',
                 'cursor-pointer',
                 'visibility-wrapper',
-              ]"
-              v-if="complieBinTextHeight"
-              @click="showBinText"
-            ></i>
+              ]" v-if="complieBinTextHeight" @click="showBinText"></i>
           </div>
         </div>
       </div>
     </div>
-    <el-dialog
-      :title="$t('title.callContract')"
-      :visible.sync="dialogVisible"
-      width="500px"
-      :before-close="sendClose"
-      v-if="dialogVisible"
-      center
-      class="send-dialog"
-    >
-      <v-transaction
-        @success="sendSuccess($event)"
-        @close="handleClose"
-        ref="send"
-        :sendErrorMessage="sendErrorMessage"
-        :data="data"
-        :abi="abiFile"
-        :version="version"
-      ></v-transaction>
+    <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
+      <v-transaction @success="sendSuccess($event)" @close="handleClose" ref="send" :sendErrorMessage="sendErrorMessage" :data="data" :abi="abiFile" :version="version"></v-transaction>
     </el-dialog>
-    <el-dialog
-      :title="$t('title.selectAccountAddress')"
-      :visible.sync="dialogUser"
-      width="550px"
-      v-if="dialogUser"
-      center
-      class="send-dialog"
-    >
-      <v-user
-        @change="deployContract(arguments)"
-        @close="userClose"
-        :contractName="contractName"
-        :abi="abiFile"
-      ></v-user>
+    <el-dialog :title="$t('title.selectAccountAddress')" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
+      <v-user @change="deployContract(arguments)" @close="userClose" :contractName="contractName" :abi="abiFile"></v-user>
     </el-dialog>
-    <v-editor
-      v-if="editorShow"
-      :show="editorShow"
-      :data="editorData"
-      :sendConstant="sendConstant"
-      @close="editorClose"
-      ref="editor"
-      :input="editorInput"
-      :editorOutput="editorOutput"
-    ></v-editor>
-    <el-dialog
-      :title="$t('title.writeJavaName')"
-      :visible.sync="javaClassDialogVisible"
-      width="500px"
-      center
-      class="send-dialog"
-      @close="initJavaClass"
-    >
-      <el-input
-        v-model="javaClassName"
-        :placeholder="$t('placeholder.javaPackage')"
-      ></el-input>
+    <v-editor v-if="editorShow" :show="editorShow" :data="editorData" :sendConstant="sendConstant" @close="editorClose" ref="editor" :input="editorInput" :editorOutput="editorOutput"></v-editor>
+    <el-dialog :title="$t('title.writeJavaName')" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
+      <el-input v-model="javaClassName" :placeholder="$t('placeholder.javaPackage')"></el-input>
       <span class="font-12 font-color-ed5454" style="margin-left: 5px">{{
         $t("dialog.exportJavaNote")
       }}</span>
@@ -414,46 +232,21 @@
         }}</el-button>
       </div>
     </el-dialog>
-    <el-dialog
-      v-if="mgmtCnsVisible"
-      :title="$t('text.cns')"
-      :visible.sync="mgmtCnsVisible"
-      width="470px"
-      center
-      class="send-dialog"
-    >
-      <mgmt-cns
-        :mgmtCnsItem="mgmtCnsItem"
-        @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)"
-        @mgmtCnsResultClose="mgmtCnsResultClose"
-      ></mgmt-cns>
+    <el-dialog v-if="mgmtCnsVisible" :title="$t('text.cns')" :visible.sync="mgmtCnsVisible" width="470px" center class="send-dialog">
+      <mgmt-cns :mgmtCnsItem="mgmtCnsItem" @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)" @mgmtCnsResultClose="mgmtCnsResultClose"></mgmt-cns>
     </el-dialog>
 
-    <el-dialog
-      :visible.sync="addContractAddressVisible"
-      :title="$t('dialog.addContractAddress')"
-      width="400px"
-      class="dialog-wrapper"
-      center
-      v-if="addContractAddressVisible"
-    >
+    <el-dialog :visible.sync="addContractAddressVisible" :title="$t('dialog.addContractAddress')" width="400px" class="dialog-wrapper" center v-if="addContractAddressVisible">
       <el-form ref="contractForm" :model="contractForm">
-        <el-form-item label="" prop="contractAddress">
-          <el-input
-            v-model="contractForm.contractAddress"
-            :placeholder="$t('contracts.contractAddressInput')"
-          ></el-input>
+        <el-form-item label=""  prop="contractAddress">
+          <el-input v-model="contractForm.contractAddress" :placeholder="$t('contracts.contractAddressInput')"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="text-right">
         <el-button @click="closeContractAddress">{{
           $t("table.cancel")
         }}</el-button>
-        <el-button
-          type="primary"
-          @click="sureContractAddress('contractForm')"
-          >{{ $t("table.confirm") }}</el-button
-        >
+        <el-button type="primary" @click="sureContractAddress('contractForm')">{{ $t("table.confirm") }}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -554,6 +347,26 @@ export default {
       contractForm: {
         contractAddress: "",
       },
+       rules: {
+                contractAddress: [
+                     {
+                        required: true,
+                        message: this.$t("rule.contractAddress"),
+                        trigger: "blur",
+                    },
+                    {
+                        pattern: /^[0x|0X]+[A-Fa-f0-9]+$/,
+                        message: this.$t("rule.contractAddressHex"),
+                        trigger: "blur",
+                    },
+                    {
+                        min: 42,
+                        max: 42,
+                        message: this.$t("rule.contractAddressLong"),
+                        trigger: "blur",
+                    },
+                ]
+            }
     };
   },
   watch: {
@@ -648,9 +461,9 @@ export default {
           this.aceEditor.setReadOnly(false);
         }
       });
-      if (this.data.contractAddress) {
-        this.queryFindCnsInfo();
-      }
+      // if (this.data.contractAddress) {
+      //   this.queryFindCnsInfo();
+      // }
     });
     Bus.$on("noData", (data) => {
       this.codeShow = false;
@@ -1025,7 +838,7 @@ export default {
           console.log(JSON.parse(ev.data.data));
         }
       };
-      
+
       w.addEventListener("error", function (ev) {
         that.errorInfo = ev;
         that.errorMessage = ev;
@@ -1280,9 +1093,9 @@ export default {
           this.data.contractSource = Base64.encode(this.content);
           this.data.contractAddress = this.contractAddress;
           this.data.contractVersion = this.version;
-          if (cns.saveEnabled) {
-            this.queryRegisterCns(val, cns);
-          }
+          // if (cns.saveEnabled) {
+          //   this.queryRegisterCns(val, cns);
+          // }
           Bus.$emit("deploy", this.data);
         } else {
           this.status = 3;
@@ -1604,33 +1417,22 @@ export default {
       this.contractForm.contractAddress = "";
     },
     sureContractAddress(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          if (
-            this.contractForm.contractAddress == "" ||
-            this.contractForm.contractAddress == null
-          ) {
-            this.$message({
-              type: "error",
-              message: this.$t("contracts.contractAddressInput"),
+            this.$refs[formName].validate(valid => {
+                if (valid) {
+                    if (this.contractForm.contractAddress=='' || this.contractForm.contractAddress==null) {
+                        this.$message({
+                            type: "error",
+                            message: this.$t('contracts.contractAddressInput')
+                        });
+                    } else {
+                        this.addContractAddressVisible = false;
+                        this.addContract()
+                    }
+                } else {
+                    return false;
+                }
             });
-          } else {
-            let web3Utils = require("web3-utils");
-            if (web3Utils.isAddress(this.contractForm.contractAddress)) {
-              this.addContractAddressVisible = false;
-              this.addContract();
-            } else {
-              this.$message({
-                type: "error",
-                message: this.$t("contracts.contractAddressInput"),
-              });
-            }
-          }
-        } else {
-          return false;
-        }
-      });
-    },
+        },
     addContract: function () {
       let reqData = {
         groupId: localStorage.getItem("groupId"),

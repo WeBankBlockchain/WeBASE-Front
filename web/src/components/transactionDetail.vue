@@ -108,6 +108,7 @@ export default {
                 "to",
                //  "logsBloom",
                 "transactionHash",
+                "message",
                 "status",
                 "logEntries"
             ]
