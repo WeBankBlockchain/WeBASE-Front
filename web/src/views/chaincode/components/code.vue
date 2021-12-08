@@ -1532,6 +1532,8 @@ export default {
   border-left: 1px solid #242e42;
   height: calc(100% - 50px);
   box-sizing: border-box;
+  min-width: 960px;
+
 }
 .contract-code-mirror {
   width: 100%;
