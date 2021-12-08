@@ -151,8 +151,7 @@ public class Web3Config {
             EventSubscribe eventSubscribe = EventSubscribe.build(groupId, configOption);
             eventSubscribeMap.put(groupId, eventSubscribe);
         }
-        log.info("getEventSubMap success, size:{}, details:{}", eventSubscribeMap.size(),
-            JsonUtils.objToString(eventSubscribeMap));
+        log.info("getEventSubMap success, size:{}", eventSubscribeMap.size());
 
         return eventSubscribeMap;
     }
