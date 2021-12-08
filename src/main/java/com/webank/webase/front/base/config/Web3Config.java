@@ -108,8 +108,7 @@ public class Web3Config {
             Client client = Client.build(groupId, configOption);
             clientMap.put(groupId, client);
         }
-        log.info("getClientMap success, size:{}, details:{}", clientMap.size(),
-            JsonUtils.objToString(clientMap));
+        log.info("getClientMap success, size:{}", clientMap.size());
 
         return clientMap;
     }
