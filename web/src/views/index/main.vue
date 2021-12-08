@@ -255,7 +255,7 @@ export default {
     bottom: 0;
     overflow-x: hidden;
     overflow-y: auto;
-    z-index: 999999;
+    z-index: 666;
 }
 .view-wrapper {
     height: 100%;
