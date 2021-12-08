@@ -14,6 +14,7 @@
 package com.webank.webase.front.web3api.entity;
 
 import com.webank.webase.front.base.enums.NodeStatus;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,13 +26,13 @@ public class NodeStatusInfo {
 
     private String nodeId;
     private long blockNumber;
-    private long pbftView;
     private Integer status;
+    private LocalDateTime modifyTime;
 
-    public NodeStatusInfo(String nodeId, NodeStatus status, long blockNumber, long pbftView) {
+    public NodeStatusInfo(String nodeId, NodeStatus status, long blockNumber, LocalDateTime modifyTime) {
         this.nodeId = nodeId;
         this.blockNumber = blockNumber;
-        this.pbftView = pbftView;
         this.status = status.getValue();
+        this.modifyTime = modifyTime;
     }
 }
