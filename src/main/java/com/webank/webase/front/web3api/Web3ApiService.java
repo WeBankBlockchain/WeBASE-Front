@@ -362,7 +362,7 @@ public class Web3ApiService {
      * @param nodeName
      * @return
      */
-    public ConsensusStatusInfo getConsensusStatus(String groupId, String nodeName) {
+    private ConsensusStatusInfo getConsensusStatus(String groupId, String nodeName) {
         log.info("getConsensusStatus groupId{},nodeName:{}", groupId, nodeName);
         return getWeb3j(groupId).getConsensusStatus(nodeName).getConsensusStatus();
     }
@@ -377,7 +377,7 @@ public class Web3ApiService {
      * @param nodeName
      * @return
      */
-    public SyncStatusInfo getSyncStatus(String groupId, String nodeName) {
+    private SyncStatusInfo getSyncStatus(String groupId, String nodeName) {
         return getWeb3j(groupId).getSyncStatus(nodeName).getSyncStatus();
     }
 
