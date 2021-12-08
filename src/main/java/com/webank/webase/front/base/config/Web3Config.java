@@ -108,8 +108,7 @@ public class Web3Config {
             Client client = Client.build(groupId, configOption);
             clientMap.put(groupId, client);
         }
-        log.info("getClientMap success, size:{}, details:{}", clientMap.size(),
-            JsonUtils.objToString(clientMap));
+        log.info("getClientMap success, size:{}", clientMap.size());
 
         return clientMap;
     }
@@ -152,8 +151,7 @@ public class Web3Config {
             EventSubscribe eventSubscribe = EventSubscribe.build(groupId, configOption);
             eventSubscribeMap.put(groupId, eventSubscribe);
         }
-        log.info("getEventSubMap success, size:{}, details:{}", eventSubscribeMap.size(),
-            JsonUtils.objToString(eventSubscribeMap));
+        log.info("getEventSubMap success, size:{}", eventSubscribeMap.size());
 
         return eventSubscribeMap;
     }

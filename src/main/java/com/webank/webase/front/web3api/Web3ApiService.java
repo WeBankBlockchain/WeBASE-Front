@@ -21,6 +21,8 @@ import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,8 +61,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class Web3ApiService {
 
-//    @Autowired
-//    private Stack<BcosSDK> bcosSDKs;
     @Autowired
     @Qualifier("rpcClient")
     private Client rpcWeb3j;
@@ -70,8 +70,13 @@ public class Web3ApiService {
     @Autowired
     private Web3Config web3ConfigConstants;
 
+    /**
+     * nodes connected with front
+     */
     private static Map<String, String> NODE_ID_2_NODE_NAME = new ConcurrentHashMap<>();
     private static final int HASH_OF_TRANSACTION_LENGTH = 66;
+    private static Map<String, NodeStatusInfo> NODE_STATUS_MAP = new ConcurrentHashMap<>();
+    private static final int CHECK_NODE_STATUS_INTERVAL_TIME = 3500; //ms
 
 
     /**
@@ -135,15 +140,6 @@ public class Web3ApiService {
         return result;
     }
 
-    /**
-     * @param groupId
-     * @return
-     */
-    public BigInteger getPbftView(String groupId, String nodeName) {
-
-        BigInteger result = getWeb3j(groupId).getPbftView().getPbftView();
-        return result;
-    }
 
     /**
      * getTransactionReceipt.
@@ -213,22 +209,20 @@ public class Web3ApiService {
      */
     public List<NodeStatusInfo> getNodeStatusList(String groupId) {
         log.info("start getNodeStatusList. groupId:{}", groupId);
-        List<NodeStatusInfo> statusList = new ArrayList<>();
-
         // include observer, sealer, exclude removed nodes
         this.refreshNodeNameMap(groupId);
-        log.info("getNodeStatusList NODE_ID_2_NODE_NAME:{}", JsonUtils.objToString(NODE_ID_2_NODE_NAME));
-        // get local node
+
+        LocalDateTime now = LocalDateTime.now();
+        log.info("getNodeStatusList NODE_ID_2_NODE_NAME:{},now:{}",
+            JsonUtils.objToString(NODE_ID_2_NODE_NAME), now);
+        // 1. get nodes connected with front
         for (String nodeId : NODE_ID_2_NODE_NAME.keySet()) {
             String nodeName = NODE_ID_2_NODE_NAME.get(nodeId);
             log.info("getNodeStatusList nodeId:{},nodeName:{}", nodeId, nodeName);
-            // check nodeType if observer or sealer
 
             ConsensusStatusInfo consensusStatusInfo = this.getConsensusStatus(groupId, nodeName);
             log.info("getNodeStatusList consensusStatusInfo{}", consensusStatusInfo);
             int blockNumber = consensusStatusInfo.getBlockNumber();
-            // if timeout true, view increase
-            int view = consensusStatusInfo.getView();
 
             // normal => timeout false, else true
             boolean ifTimeout = consensusStatusInfo.getTimeout();
@@ -236,30 +230,57 @@ public class Web3ApiService {
             // if syncing, always timeout until syncing finish
             NodeStatus status = NodeStatus.NORMAL;
             if (ifTimeout) {
-                status = NodeStatus.INVALID;
                 SyncStatusInfo syncStatusInfo = this.getSyncStatus(groupId, nodeName);
-                if (syncStatusInfo.getIsSyncing()) {
-                    status = NodeStatus.SYNCING;
-                }
+                status = syncStatusInfo.getIsSyncing() ? NodeStatus.SYNCING : NodeStatus.INVALID ;
             }
             // check node status
-            statusList.add(new NodeStatusInfo(nodeId, status, blockNumber, view));
+            NODE_STATUS_MAP.put(nodeId, new NodeStatusInfo(nodeId, status, blockNumber, now));
         }
 
+        // 2. check nodes not connected with front
         SyncStatusInfo syncStatusInfo = this.getSyncStatus(groupId);
         long highestBlockNum = syncStatusInfo.getKnownHighestNumber();
         for (PeersInfo peersInfo : syncStatusInfo.getPeers()) {
+            String nodeId = peersInfo.getNodeId();
+            long peerBlockNum = peersInfo.getBlockNumber();
+            // to check nodes that not connected with front
             if (!NODE_ID_2_NODE_NAME.containsKey(peersInfo.getNodeId())) {
-                // todo syncStatusInfo check not connected node's block number
-                // todo check block number is changing to set normal or invalid
-                long peerBlockNum = peersInfo.getBlockNumber();
-                NodeStatus status = peerBlockNum == highestBlockNum ? NodeStatus.NORMAL: NodeStatus.INVALID;
-                statusList.add(new NodeStatusInfo(peersInfo.getNodeId(), status, peerBlockNum, 0));
+                // check block number is changing to set normal or invalid
+                if (peerBlockNum == highestBlockNum) {
+                    NODE_STATUS_MAP.put(nodeId, new NodeStatusInfo(nodeId, NodeStatus.NORMAL, peerBlockNum, now));
+                } else {
+                    // if not equal highest block number, check by caching
+                    // if cache is null, default normal and set as INVALID for block num not equal highest
+                    if (NODE_STATUS_MAP.get(nodeId) == null) {
+                        NODE_STATUS_MAP.put(nodeId, new NodeStatusInfo(nodeId, NodeStatus.INVALID, peerBlockNum, now));
+                    } else {
+                        // if not equal highest block num, check whether over 3000ms interval,
+                        // if within interval: only update block num, and not update status,
+                        // else beyond interval:  check block number whether changing and update status
+                        NodeStatusInfo oldStatusInfo = NODE_STATUS_MAP.get(nodeId);
+                        Long subTime = Duration.between(oldStatusInfo.getModifyTime(), now).toMillis();
+                        if (subTime < (NODE_STATUS_MAP.size() * 500 + CHECK_NODE_STATUS_INTERVAL_TIME)) {
+                            log.warn("checkNodeStatus skip for time internal subTime:{}", subTime);
+                            // only update block num, not update time and status
+                            oldStatusInfo.setBlockNumber(peerBlockNum);
+                        } else {
+                            // if block num not changing ,invalid
+                            if (peerBlockNum == oldStatusInfo.getBlockNumber()) {
+                                oldStatusInfo.setBlockNumber(peerBlockNum);
+                                oldStatusInfo.setStatus(NodeStatus.INVALID.getValue());
+                            } else {
+                                oldStatusInfo.setBlockNumber(peerBlockNum);
+                                oldStatusInfo.setStatus(NodeStatus.NORMAL.getValue());
+                            }
+                        }
+                        // update cache
+                        NODE_STATUS_MAP.put(nodeId, oldStatusInfo);
+                    }
+                }
             }
         }
-
-        log.info("end getNodeStatusList. groupId:{} statusList:{}", groupId,
-                JsonUtils.toJSONString(statusList));
+        List<NodeStatusInfo> statusList = new ArrayList<>(NODE_STATUS_MAP.values());
+        log.info("end getNodeStatusList. groupId:{} statusList:{}", groupId, JsonUtils.objToString(statusList));
         return statusList;
 
     }
@@ -336,6 +357,7 @@ public class Web3ApiService {
 
     /**
      * getConsensusStatus by node name
+     * @mark： only support query from connected node
      * @param groupId
      * @param nodeName
      * @return
@@ -349,6 +371,12 @@ public class Web3ApiService {
         return getWeb3j(groupId).getSyncStatus().getSyncStatus();
     }
 
+    /**
+     * @mark： only support query from connected node
+     * @param groupId
+     * @param nodeName
+     * @return
+     */
     public SyncStatusInfo getSyncStatus(String groupId, String nodeName) {
         return getWeb3j(groupId).getSyncStatus(nodeName).getSyncStatus();
     }
@@ -466,7 +494,6 @@ public class Web3ApiService {
 
     private void refreshNodeNameMap(String groupId) {
         log.info("refreshNodeNameMap groupId:{}", groupId);
-        // add all node into map, and set nodeId as its default nodeName
         List<GroupNodeInfo> nodeInfoList = this.getGroupInfo(groupId).getNodeList();
         for (GroupNodeInfo node : nodeInfoList) {
             NODE_ID_2_NODE_NAME.put(node.getIniConfig().getNodeID(), node.getName());
