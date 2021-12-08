@@ -34,7 +34,7 @@ checkProcess(){
 }
 
 JAVA_OPTS=" -Dfile.encoding=UTF-8"
-JAVA_OPTS+=" -Xmx512m -Xms512m -Xmn256m -Xss512k -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=512m"
+JAVA_OPTS+=" -Xmx1024m -Xms1024m -Xmn512m -Xss512k -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m"
 JAVA_OPTS+=" -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOG_DIR}/heap_error.log"
 
 start(){
