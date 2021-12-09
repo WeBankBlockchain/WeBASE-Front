@@ -112,29 +112,6 @@ public class Web3Config {
 
         return clientMap;
     }
-//        log.info("getClientMap loadFromDb:{}", loadFromDb);
-//        if (loadFromDb) {
-//            ConfigOption configOption = null;
-//            try {
-//                configOption = configService.initConfigOptionFromDb();
-//            } catch (FrontException e) {
-//                log.error("getClientMap not config in db:[]", e);
-//            } catch (Exception e) {
-//                log.error("getClientMap from db failed:[]", e);
-//            }
-//            // if db empty config, return empty map and wait to init
-//            if (configOption == null) {
-//                log.error("getClientMap from db failed, configOption is null");
-//                return clientMap;
-//            }
-//            try {
-//                clientMap = this.initMap(configOption);
-//            } catch (JniException e) {
-//                log.error("getClientMap from db failed, initMap configOption not match:[]", e);
-//            } catch (Exception e) {
-//                log.error("getClientMap from db failed, initMap:[]", e);
-//            }
-//        } else { // load from file
 
 
     @Bean(name = "eventSubMap")
@@ -155,53 +132,6 @@ public class Web3Config {
 
         return eventSubscribeMap;
     }
-
-//    private Map<String, Client> initMap(ConfigOption configOption) throws JniException {
-//        Map<String, Client> clientMap = new HashMap<>();
-//        Client rpcClient = getRpcWeb3j(configOption);
-//        List<String> groupList = rpcClient.getGroupList().getResult().getGroupList();
-//        log.info("getClientMap groupList:{}", groupList);
-//        if (groupList.isEmpty()) {
-//            log.warn("**** getClientMap group list is empty!");
-//            return clientMap;
-//        }
-//        for (String groupId : groupList) {
-//            Client client = Client.build(groupId, configOption);
-//            clientMap.put(groupId, client);
-//        }
-//        return clientMap;
-//    }
-
-//    @Bean
-//    public Stack<BcosSDK> getBcosSDK() throws ConfigException {
-//        Stack<BcosSDK> bcosSDKs = new Stack<>();
-//        log.info("getBcosSDK loadFromDb:{}", loadFromDb);
-//        if (loadFromDb) {
-//            ConfigOption configOption = null;
-//            try {
-//                configOption = configService.initConfigOptionFromDb();
-//            } catch (FrontException e) {
-//                log.error("Config of sdk not config:[]", e);
-//            } catch (Exception e) {
-//                log.error("Init bcosSDK from db failed:[]", e);
-//            }
-//            if (configOption == null) {
-//                log.error("Init bcosSDK configOption from db failed, configOption is null");
-//                return bcosSDKs;
-//            }
-//            BcosSDK bcosSDK = new BcosSDK(configOption);
-//            log.info("getBcosSDK bcosSDK:{}", JsonUtils.objToString(bcosSDK));
-//            bcosSDKs.push(bcosSDK);
-//        } else {
-//            ConfigOption configOption = this.initConfigOptionFromFile();
-//            BcosSDK bcosSDK = new BcosSDK(configOption);
-//            log.info("getBcosSDK bcosSDK:{}", JsonUtils.objToString(bcosSDK));
-//            bcosSDKs.push(bcosSDK);
-//        }
-//        log.info("getBcosSDK bcosSDKs:{}", JsonUtils.objToString(bcosSDKs));
-//
-//        return bcosSDKs;
-//    }
 
 
 }

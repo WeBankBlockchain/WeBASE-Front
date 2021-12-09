@@ -253,6 +253,7 @@ public class ConstantCode {
     public static final RetCode CONNECT_TO_NEW_PEERS_FAILED = RetCode.mark(201604, "webase-front connect to new peers ip port failed!");
     public static final RetCode BUILD_NEW_CLIENT_FAILED = RetCode.mark(201605, "Build client instance of new group failed");
     public static final RetCode CLIENT_ONLY_SUPPORT_WASM = RetCode.mark(201606, "This group only support Liquid contract of wasm");
+    public static final RetCode CLIENT_NOT_CONNECTED_WITH_THIS_GROUP = RetCode.mark(201607, "This group not connected with front's rpc peers");
 
     public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
 
