@@ -1048,6 +1048,14 @@ let errCode = {
         en: "Sealer's weight cannot be null",
         zh: "共识的weight不能为空"
     },
+    "201606": {
+        en: "This group only support Liquid contract of wasm",
+        zh: "这个群组只支持wasm的Liquid契约"
+    },
+    "201607": {
+        en: "This group not connected with front's rpc peers",
+        zh: "这个群组没有与front的rpc对等体连接"
+    },
 }
 export function chooseLang(code) {
     let lang = localStorage.getItem('lang')
