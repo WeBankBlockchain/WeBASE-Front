@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -73,7 +74,7 @@ public class Web3ApiService {
     /**
      * nodes connected with front, key:nodeId, value:nodeName
      */
-    private static Map<String, String> NODE_ID_2_NODE_NAME = new ConcurrentHashMap<>();
+//    private static Map<String, String> NODE_ID_2_NODE_NAME = new ConcurrentHashMap<>();
     private static final int HASH_OF_TRANSACTION_LENGTH = 66;
     /**
      * key: nodeId, value: nodeStatusInfo cached
@@ -266,18 +267,17 @@ public class Web3ApiService {
     public List<NodeStatusInfo> getNodeStatusList(String groupId) {
         log.info("start getNodeStatusList. groupId:{}", groupId);
         // include observer, sealer, exclude removed nodes
-        this.refreshNodeNameMap(groupId);
+        Map<String, String> nodeIdNameMap = this.getNodeIdNameMap(groupId);
 
         LocalDateTime now = LocalDateTime.now();
-        log.info("getNodeStatusList NODE_ID_2_NODE_NAME:{},now:{}",
-            JsonUtils.objToString(NODE_ID_2_NODE_NAME), now);
+        log.debug("getNodeStatusList NODE_ID_2_NODE_NAME:{},now:{}", JsonUtils.objToString(nodeIdNameMap), now);
         // 1. get nodes connected with front
-        for (String nodeId : NODE_ID_2_NODE_NAME.keySet()) {
-            String nodeName = NODE_ID_2_NODE_NAME.get(nodeId);
-            log.info("getNodeStatusList nodeId:{},nodeName:{}", nodeId, nodeName);
+        for (String nodeId : nodeIdNameMap.keySet()) {
+            String nodeName = nodeIdNameMap.get(nodeId);
+            log.debug("getNodeStatusList nodeId:{},nodeName:{}", nodeId, nodeName);
 
             ConsensusStatusInfo consensusStatusInfo = this.getConsensusStatus(groupId, nodeName);
-            log.info("getNodeStatusList consensusStatusInfo{}", consensusStatusInfo);
+            log.debug("getNodeStatusList consensusStatusInfo{}", consensusStatusInfo);
             int blockNumber = consensusStatusInfo.getBlockNumber();
 
             // normal => timeout false, else true
@@ -300,7 +300,7 @@ public class Web3ApiService {
             String nodeId = peersInfo.getNodeId();
             long peerBlockNum = peersInfo.getBlockNumber();
             // to check nodes that not connected with front
-            if (!NODE_ID_2_NODE_NAME.containsKey(peersInfo.getNodeId())) {
+            if (!nodeIdNameMap.containsKey(peersInfo.getNodeId())) {
                 // check block number is changing to set normal or invalid
                 if (peerBlockNum == highestBlockNum) {
                     NODE_STATUS_MAP.put(nodeId, new NodeStatusInfo(nodeId, NodeStatus.NORMAL, peerBlockNum, now));
@@ -516,13 +516,16 @@ public class Web3ApiService {
         return groupNodeInfos;
     }
 
-    private void refreshNodeNameMap(String groupId) {
-        log.info("refreshNodeNameMap groupId:{}", groupId);
+    private Map<String, String> getNodeIdNameMap(String groupId) {
+        log.debug("refreshAndGetNodeNameMap groupId:{}", groupId);
+        Map<String, String> nodeIdNameMap = new HashMap<>();
         List<GroupNodeInfo> nodeInfoList = this.getGroupNodeInfo(groupId);
         for (GroupNodeInfo node : nodeInfoList) {
-            NODE_ID_2_NODE_NAME.put(node.getIniConfig().getNodeID(), node.getName());
+            String nodeId = node.getIniConfig().getNodeID();
+            nodeIdNameMap.put(nodeId, node.getName());
         }
-        log.info("end refreshNodeNameMap groupId:{}", groupId);
+        log.debug("end refreshAndGetNodeNameMap groupId:{},nodeIdNameMap:{}", groupId, nodeIdNameMap);
+        return nodeIdNameMap;
     }
 
     /**
