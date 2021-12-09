@@ -20,6 +20,7 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
+import com.webank.webase.front.web3api.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -50,6 +51,7 @@ import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -424,7 +426,12 @@ public class Web3ApiService {
             return getBlockByNumber(groupId, new BigInteger(input),false);
         } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
             JsonTransactionResponse txResponse = getTransactionByHash(groupId, input, true);
-            return txResponse;
+            // get block number
+            TransactionReceipt receipt = getTransactionReceipt(groupId, input);
+
+            TransactionInfo transactionInfo = new TransactionInfo(txResponse,
+                receipt.getBlockNumber());
+            return transactionInfo;
         }
         return null;
     }
