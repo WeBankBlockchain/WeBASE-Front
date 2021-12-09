@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "/web3", tags = "web3j interface")
 @RestController
 @RequestMapping(value = "/{groupId}/web3")
-@ApiImplicitParams(@ApiImplicitParam(name = "groupId", value = "groupId",required = true,dataType = "Integer", paramType = "path"))
+@ApiImplicitParams(@ApiImplicitParam(name = "groupId", value = "groupId",required = true,dataType = "String", paramType = "path"))
 public class Web3ApiController {
 
     @Autowired
@@ -143,7 +143,7 @@ public class Web3ApiController {
             notes = "Get the  total number of execution transactions count ")
     @ApiImplicitParams(
             @ApiImplicitParam(name = "groupId", value = "groupId", required = true,
-                    dataType = "int", paramType = "path"))
+                    dataType = "String", paramType = "path"))
     @GetMapping("/transaction-total")
     public TransactionCountInfo getTransTotalCnt(@PathVariable String groupId) {
         return web3ApiService.getTransCnt(groupId);
