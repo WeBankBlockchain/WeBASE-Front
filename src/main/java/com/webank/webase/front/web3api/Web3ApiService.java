@@ -20,11 +20,11 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
+import com.webank.webase.front.web3api.entity.TransactionInfo;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -71,13 +71,69 @@ public class Web3ApiService {
     private Web3Config web3ConfigConstants;
 
     /**
-     * nodes connected with front
+     * nodes connected with front, key:nodeId, value:nodeName
      */
     private static Map<String, String> NODE_ID_2_NODE_NAME = new ConcurrentHashMap<>();
     private static final int HASH_OF_TRANSACTION_LENGTH = 66;
+    /**
+     * key: nodeId, value: nodeStatusInfo cached
+     */
     private static Map<String, NodeStatusInfo> NODE_STATUS_MAP = new ConcurrentHashMap<>();
     private static final int CHECK_NODE_STATUS_INTERVAL_TIME = 3500; //ms
+    /**
+     * key: groupId, value, boolean of whether available
+     */
+    private static Map<String, Boolean> GROUP_AVAILABLE_MAP = new ConcurrentHashMap<>();
 
+
+    /**
+     * get first web3j in web3jMap
+     * @return
+     */
+    public Client getWeb3j() {
+        return rpcWeb3j;
+    }
+
+    /**
+     * check client connected with group and get target group's web3j
+     * @param groupId
+     * @return
+     */
+    public Client getWeb3j(String groupId) {
+        // check group avaible
+        if (GROUP_AVAILABLE_MAP.get(groupId) != null && !GROUP_AVAILABLE_MAP.get(groupId)) {
+            log.error("getWeb3j peers of this groupId:[{}] not connected", groupId);
+            throw new FrontException(ConstantCode.CLIENT_NOT_CONNECTED_WITH_THIS_GROUP);
+        }
+        return getWeb3jRaw(groupId);
+    }
+
+    /**
+     * get target group's web3j directly
+     * @param groupId
+     * @return
+     */
+    private Client getWeb3jRaw(String groupId) throws FrontException {
+        Client client = clientMap.get(groupId);
+        if (client == null) {
+            List<String> groupList = this.getGroupList();
+            if (!groupList.contains(groupId)) {
+                log.error("getClient group id not exist! groupId:{}", groupId);
+                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+            }
+            // else, groupList contains this groupId, try to build new client
+            try {
+                Client clientNew = Client.build(groupId, web3ConfigConstants.getConfigOptionFromFile());
+                log.info("getClient clientNew:{}", clientNew);
+                clientMap.put(groupId, clientNew);
+                return clientNew;
+            } catch (ConfigException | JniException e) {
+                log.error("build new client of groupId:{} failed:{}", groupId, e);
+                throw new FrontException(ConstantCode.BUILD_NEW_CLIENT_FAILED);
+            }
+        }
+        return client;
+    }
 
     /**
      * getBlockNumber.
@@ -307,18 +363,6 @@ public class Web3ApiService {
         return latestNumber;
     }
 
-
-    public GroupInfo getGroupInfo(String groupId) {
-        GroupInfo groupInfo = getWeb3j(groupId).getGroupInfo().getResult();
-        return groupInfo;
-    }
-
-
-    public List<GroupNodeInfo> getGroupNodeInfo(String groupId) {
-        List<GroupNodeInfo> groupNodeInfos = getWeb3j(groupId).getGroupInfo().getResult().getNodeList();
-        return groupNodeInfos;
-    }
-
     /**
      * get group list and refresh web3j map
      * @return
@@ -328,6 +372,7 @@ public class Web3ApiService {
         List<String> groupIdList = getWeb3j()
             .getGroupList().getResult()
             .getGroupList();
+        log.debug("end getGroupList :{}", groupIdList);
         return groupIdList;
     }
 
@@ -362,7 +407,7 @@ public class Web3ApiService {
      * @param nodeName
      * @return
      */
-    public ConsensusStatusInfo getConsensusStatus(String groupId, String nodeName) {
+    private ConsensusStatusInfo getConsensusStatus(String groupId, String nodeName) {
         log.info("getConsensusStatus groupId{},nodeName:{}", groupId, nodeName);
         return getWeb3j(groupId).getConsensusStatus(nodeName).getConsensusStatus();
     }
@@ -377,7 +422,7 @@ public class Web3ApiService {
      * @param nodeName
      * @return
      */
-    public SyncStatusInfo getSyncStatus(String groupId, String nodeName) {
+    private SyncStatusInfo getSyncStatus(String groupId, String nodeName) {
         return getWeb3j(groupId).getSyncStatus(nodeName).getSyncStatus();
     }
 
@@ -424,7 +469,12 @@ public class Web3ApiService {
             return getBlockByNumber(groupId, new BigInteger(input),false);
         } else if (input.length() == HASH_OF_TRANSACTION_LENGTH) {
             JsonTransactionResponse txResponse = getTransactionByHash(groupId, input, true);
-            return txResponse;
+            // get block number
+            TransactionReceipt receipt = getTransactionReceipt(groupId, input);
+
+            TransactionInfo transactionInfo = new TransactionInfo(txResponse,
+                receipt.getBlockNumber());
+            return transactionInfo;
         }
         return null;
     }
@@ -448,42 +498,6 @@ public class Web3ApiService {
     }
 
 
-
-    /**
-     * get first web3j in web3jMap
-     * @return
-     */
-    public Client getWeb3j() {
-        return rpcWeb3j;
-    }
-
-    /**
-     * get target group's web3j
-     * @param groupId
-     * @return
-     */
-    public Client getWeb3j(String groupId) {
-        Client client = clientMap.get(groupId);
-        if (client == null) {
-            List<String> groupList = this.getGroupList();
-            if (!groupList.contains(groupId)) {
-                log.error("getClient group id not exist! groupId:{}", groupId);
-                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-            }
-            // else, groupList contains this groupId, try to build new client
-            try {
-                Client clientNew = Client.build(groupId, web3ConfigConstants.getConfigOptionFromFile());
-                log.info("getClient clientNew:{}", clientNew);
-                clientMap.put(groupId, clientNew);
-                return clientNew;
-            } catch (ConfigException | JniException e) {
-                log.error("build new client of groupId:{} failed:{}", groupId, e);
-                throw new FrontException(ConstantCode.BUILD_NEW_CLIENT_FAILED);
-            }
-        }
-        return client;
-    }
-
     public CryptoSuite getCryptoSuite(String groupId) {
         return this.getWeb3j(groupId).getCryptoSuite();
     }
@@ -492,12 +506,46 @@ public class Web3ApiService {
         return this.getWeb3j(groupId).getCryptoType();
     }
 
+    public GroupInfo getGroupInfo(String groupId) {
+        GroupInfo groupInfo = getWeb3j(groupId).getGroupInfo().getResult();
+        return groupInfo;
+    }
+
+    public List<GroupNodeInfo> getGroupNodeInfo(String groupId) {
+        List<GroupNodeInfo> groupNodeInfos = getWeb3j(groupId).getGroupInfo().getResult().getNodeList();
+        return groupNodeInfos;
+    }
+
     private void refreshNodeNameMap(String groupId) {
         log.info("refreshNodeNameMap groupId:{}", groupId);
-        List<GroupNodeInfo> nodeInfoList = this.getGroupInfo(groupId).getNodeList();
+        List<GroupNodeInfo> nodeInfoList = this.getGroupNodeInfo(groupId);
         for (GroupNodeInfo node : nodeInfoList) {
             NODE_ID_2_NODE_NAME.put(node.getIniConfig().getNodeID(), node.getName());
         }
         log.info("end refreshNodeNameMap groupId:{}", groupId);
+    }
+
+    /**
+     * refresh available group map
+     */
+    public void refreshAvailableGroupMap() {
+        List<String> groupList = this.getGroupList();
+        if (groupList == null || groupList.isEmpty()) {
+            log.warn("refreshAvailableGroupMap group list empty!");
+            return;
+        }
+        for (String groupId : groupList) {
+            // group info get from raw client
+            List<GroupNodeInfo> nodeInfoList;
+            try {
+                nodeInfoList = this.getWeb3jRaw(groupId).getGroupInfo().getResult().getNodeList();
+            } catch (FrontException e) {
+                log.error("refreshAvailableGroupMap get nodeInfoList failed:[]", e);
+                continue;
+            }
+            // if not empty, available true
+            GROUP_AVAILABLE_MAP.put(groupId, !nodeInfoList.isEmpty());
+        }
+
     }
 }

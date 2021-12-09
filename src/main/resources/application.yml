@@ -11,8 +11,8 @@ server:
 
 sdk:
   useSmSsl: false  # sdk whether enable sm ssl(guomi)
-  certPath: conf  # sdk cert path of relative or absolute
   peers: ['127.0.0.1:20200','127.0.0.1:20201']
+  certPath: conf  # sdk cert path of relative or absolute, default 'conf'
   threadPoolSize: 50 # thread pool of sdk
 
 spring:
@@ -72,9 +72,10 @@ constant:
   transMaxWait: 30
   http_read_timeOut: 100000
   http_connect_timeOut: 100000
-  # event sync map task (unit: ms)
+  # task fixed delay (unit: ms)
   eventRegisterTaskFixedDelay: 5000
   syncEventMapTaskFixedDelay: 60000
+  syncAvailableGroupTaskFixedDelay: 10000
   # sync stat log data task (unit: ms)
   syncStatLogTime: 5000
   syncStatLogCountLimit: 10000
