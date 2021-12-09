@@ -16,13 +16,17 @@ package com.webank.webase.front.web3api.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.springframework.beans.BeanUtils;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class TransactionInfo extends JsonTransactionResponse {
     private String blockNumber;
 
