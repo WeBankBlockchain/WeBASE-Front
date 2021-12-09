@@ -277,7 +277,7 @@ public class Web3ApiService {
             log.info("getNodeStatusList nodeId:{},nodeName:{}", nodeId, nodeName);
 
             ConsensusStatusInfo consensusStatusInfo = this.getConsensusStatus(groupId, nodeName);
-            log.info("getNodeStatusList consensusStatusInfo{}", consensusStatusInfo);
+            log.debug("getNodeStatusList consensusStatusInfo{}", consensusStatusInfo);
             int blockNumber = consensusStatusInfo.getBlockNumber();
 
             // normal => timeout false, else true
@@ -520,7 +520,9 @@ public class Web3ApiService {
         log.info("refreshNodeNameMap groupId:{}", groupId);
         List<GroupNodeInfo> nodeInfoList = this.getGroupNodeInfo(groupId);
         for (GroupNodeInfo node : nodeInfoList) {
-            NODE_ID_2_NODE_NAME.put(node.getIniConfig().getNodeID(), node.getName());
+            String nodeId = node.getIniConfig().getNodeID();
+            NODE_ID_2_NODE_NAME.remove(nodeId);
+            NODE_ID_2_NODE_NAME.put(nodeId, node.getName());
         }
         log.info("end refreshNodeNameMap groupId:{}", groupId);
     }
