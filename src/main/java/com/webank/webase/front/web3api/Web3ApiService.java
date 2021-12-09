@@ -267,7 +267,7 @@ public class Web3ApiService {
     public List<NodeStatusInfo> getNodeStatusList(String groupId) {
         log.info("start getNodeStatusList. groupId:{}", groupId);
         // include observer, sealer, exclude removed nodes
-        Map<String, String> nodeIdNameMap = this.refreshAndGetNodeNameMap(groupId);
+        Map<String, String> nodeIdNameMap = this.getNodeIdNameMap(groupId);
 
         LocalDateTime now = LocalDateTime.now();
         log.debug("getNodeStatusList NODE_ID_2_NODE_NAME:{},now:{}", JsonUtils.objToString(nodeIdNameMap), now);
@@ -516,7 +516,7 @@ public class Web3ApiService {
         return groupNodeInfos;
     }
 
-    private Map<String, String> refreshAndGetNodeNameMap(String groupId) {
+    private Map<String, String> getNodeIdNameMap(String groupId) {
         log.debug("refreshAndGetNodeNameMap groupId:{}", groupId);
         Map<String, String> nodeIdNameMap = new HashMap<>();
         List<GroupNodeInfo> nodeInfoList = this.getGroupNodeInfo(groupId);
