@@ -335,7 +335,13 @@ public class Web3ApiService {
                 }
             }
         }
-        List<NodeStatusInfo> statusList = new ArrayList<>(NODE_STATUS_MAP.values());
+        List<NodeStatusInfo> statusList = new ArrayList<>();
+        List<String> groupPeers = this.getGroupPeers(groupId);
+        for (String nodeId : NODE_STATUS_MAP.keySet()) {
+            if (groupPeers.contains(nodeId)) {
+                statusList.add(NODE_STATUS_MAP.get(nodeId));
+            }
+        }
         log.info("end getNodeStatusList. groupId:{} statusList:{}", groupId, JsonUtils.objToString(statusList));
         return statusList;
 
