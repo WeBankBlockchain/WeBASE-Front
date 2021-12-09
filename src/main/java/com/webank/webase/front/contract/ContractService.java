@@ -200,18 +200,18 @@ public class ContractService {
         // deploy locally or webase-sign
         if (doLocally) {
             // check deploy permission
-            checkDeployPermission(req.getGroupId(), req.getUser());
+//            checkDeployPermission(req.getGroupId(), req.getUser());
             contractAddress = deployLocally(req);
         } else {
-            // check deploy permission
-            String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
-            if (StringUtils.isNotBlank(userAddress)) {
-                checkDeployPermission(req.getGroupId(), userAddress);
-            }
+//            // check deploy permission
+//            String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
+//            if (StringUtils.isNotBlank(userAddress)) {
+//                checkDeployPermission(req.getGroupId(), userAddress);
+//            }
             contractAddress = deployWithSign(req);
         }
         if (StringUtils.isNotBlank(contractAddress)
-                || !Address.DEFAULT.getValue().equals(contractAddress)) {
+                && !Address.DEFAULT.getValue().equals(contractAddress)) {
             // save address
             BeanUtils.copyProperties(req, contract);
             contract.setContractAddress(contractAddress);
@@ -271,7 +271,7 @@ public class ContractService {
         String groupId = req.getGroupId();
         String userAddress = req.getUser();
         // check deploy permission
-        checkDeployPermission(groupId, userAddress);
+//        checkDeployPermission(groupId, userAddress);
 
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
@@ -875,7 +875,7 @@ public class ContractService {
     /**
      * check user deploy permission
      */
-    private void checkDeployPermission(String groupId, String userAddress) {
+//    private void checkDeployPermission(String groupId, String userAddress) {
         // get deploy permission list
 //        List<PermissionInfo> deployUserList =
 //                permissionManageService.listDeployAndCreateManager(groupId);
@@ -893,8 +893,8 @@ public class ContractService {
 //                throw new FrontException(ConstantCode.PERMISSION_DENIED);
 //            }
 //        }
-
-    }
+//
+//    }
 
     /**
      * batch delete contract by path if path contain deployed
