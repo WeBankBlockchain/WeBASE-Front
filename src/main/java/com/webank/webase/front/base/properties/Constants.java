@@ -72,7 +72,6 @@ public class Constants {
     private String monitorDisk = "/";
     private boolean monitorEnabled = true;
     private String aesKey = "EfdsW23D23d3df43";
-    private String nodePath = "/fisco/nodes/127.0.0.1/node0";
     private Integer eventRegisterTaskFixedDelay = 5000;
     private Integer syncEventMapTaskFixedDelay = 60000;
     private boolean statLogEnabled = false;
