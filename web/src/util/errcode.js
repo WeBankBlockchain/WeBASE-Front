@@ -1022,7 +1022,7 @@ let errCode = {
     },
     "201601": {
         en: "Sdk's peers cannot be empty",
-        zh: "Sdk的对等体不能为空"
+        zh: "Sdk的peers不能为空"
     },
     "201602": {
         en: "Sdk's sdk certificates and key cannot be empty",
@@ -1030,31 +1030,31 @@ let errCode = {
     },
     "201603": {
         en: "Sdk's peers same with new peers",
-        zh: "Sdk的对等体与新对等体相同"
+        zh: "Sdk的peers与新peers相同"
     },
     "201604": {
         en: "webase-front connect to new peers ip port failed!",
-        zh: "web -front连接到新对等点IP端口失败!"
+        zh: "节点前置连接到新peers IP端口失败!"
     },
     "201605": {
         en: "Build client instance of new group failed",
-        zh: "构建新组的客户端实例失败"
+        zh: "创建新群组的Client实例失败"
     },
     "201665": {
         en: "Build eventSubscribe instance of new group failed",
-        zh: "创建新组的eventSubscribe实例失败"
+        zh: "创建新群组的EventSub实例失败"
     },
     "201621": {
         en: "Sealer's weight cannot be null",
-        zh: "共识的weight不能为空"
+        zh: "共识节点的权重值不可为空"
     },
     "201606": {
         en: "This group only support Liquid contract of wasm",
-        zh: "这个群组只支持wasm的Liquid契约"
+        zh: "当前群组仅支持Liquid合约"
     },
     "201607": {
         en: "This group not connected with front's rpc peers",
-        zh: "这个群组没有与front的rpc对等体连接"
+        zh: "节点前置无法通过已连接的rpc节点访问该群组"
     },
 }
 export function chooseLang(code) {
