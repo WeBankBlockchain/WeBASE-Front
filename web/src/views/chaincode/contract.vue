@@ -195,12 +195,12 @@ export default {
                     this.versionList.push(this.allVersion[i])
                 }
             }
-            if (!localStorage.getItem('solcName')) {
+            //if (!localStorage.getItem('solcName')) {
                 this.version = this.versionList[0]['solcName'];
                 this.versionId = this.versionList[0]['id'];
                 localStorage.setItem("solcName", this.versionList[0]['solcName'])
                 localStorage.setItem("versionId", this.versionList[0]['versionId'])
-            }
+           // }
             this.initSolc(localStorage.getItem("versionId"))
         },
         initSolc(versionId) {
@@ -282,6 +282,7 @@ export default {
         },
         getEncryption: function (callback) {
             this.loading = true
+            this.groupId=localStorage.getItem('groupId')
             encryption(this.groupId).then(res => {
                 if (res.status == 200) {
                     localStorage.setItem("encryptionId", res.data)
@@ -337,7 +338,13 @@ export default {
         //             });
         //         });
         // },
+         initVersion() {
+            localStorage.removeItem('solcName')
+        },
         changeGroup: function () {
+            this.initVersion()
+            this.versionList=[];
+            this.getEncryption(this.querySolcList); 
             this.$refs.menu.getContractPaths()
         },
         dragDetailWeight: function (e) {

@@ -157,6 +157,7 @@ export default {
     },
     methods: {
         getEncryption: function () {
+            this.groupId=localStorage.getItem('groupId')
             encryption(this.groupId).then(res => {
                 if (res.status == 200) {
                      if (res.data != this.encryptionId) {
@@ -254,6 +255,7 @@ export default {
     bottom: 0;
     overflow-x: hidden;
     overflow-y: auto;
+    z-index: 666;
 }
 .view-wrapper {
     height: 100%;

@@ -115,6 +115,7 @@ export default {
                         break;
                     case 'subscribeEvent':
                         item.name = this.$t('route.subscribeEvent')
+                        item.menuShow = false
                         break;
 
                 }
@@ -166,7 +167,6 @@ export default {
                         }
                     })
                 }
-
             }))
             return list;
         },
@@ -258,7 +258,7 @@ export default {
                         for (let i = 0; i < arr.length; i++) {
                             list.push({
                                 group: arr[i],
-                                groupName: `group${arr[i]}`
+                                groupName: `${arr[i]}`
                             });
                         }
                         
