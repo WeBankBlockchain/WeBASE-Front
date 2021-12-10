@@ -79,7 +79,7 @@ export default {
                         for (let i = 0; i < arr.length; i++) {
                             list.push({
                                 group: arr[i],
-                                groupName: `group${arr[i]}`
+                                groupName: `${arr[i]}`
                             });
                         }
                         this.groupList = list;

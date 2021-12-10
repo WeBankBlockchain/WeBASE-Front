@@ -29,7 +29,7 @@
                             </template>
                             <template v-else>
                                 <el-button :disabled="!scope.row.contractAddress" :class="{'grayColor': !scope.row.contractAddress}" @click="send(scope.row)" type="text" size="small">{{$t('contracts.sendTransaction')}}</el-button>
-                                <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress}" @click="checkEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
+                                <!-- <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress}" @click="checkEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button> -->
                                 <el-button @click="updateAbi(scope.row)" type="text" size="small">{{$t('contracts.updateAbi')}}</el-button>
                                 <el-button @click="deleteAbi(scope.row)" type="text" size="small">{{$t('contracts.deleteAbi')}}</el-button>
 
@@ -46,7 +46,7 @@
         <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
             <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :data="data" :abi='abiData' :version='version'></send-transation>
         </el-dialog>
-        <editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose'></editor>
+        <editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' :input="editorInput" :editorOutput="editorOutput"></editor>
         <el-dialog :title="$t('nodes.addAbi')" :visible.sync="importVisibility" width="500px" v-if="importVisibility" center class="send-dialog">
             <import-abi @importSuccess="importSuccess" @closeImport="closeImport"></import-abi>
         </el-dialog>
@@ -60,7 +60,8 @@
 import contentHead from "@/components/contentHead";
 import abiDialog from "@/components/abiDialog";
 import sendTransation from "@/components/sendTransaction"
-import editor from "@/components/editor"
+import editor from "@/views/chaincode/dialog/editor"
+// import editor from "@/components/editor"
 import importAbi from "./components/importAbi"
 import updateAbi from "./components/updateAbi"
 import { getAbiList, deleteImportAbi } from "@/util/api"
@@ -241,6 +242,7 @@ export default {
             this.dialogVisible = false
         },
         sendSuccess(val) {
+            
             this.dialogVisible = false;
             this.editorShow = true;
             this.editorData = null;

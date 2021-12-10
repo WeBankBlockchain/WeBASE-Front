@@ -60,11 +60,11 @@ export default {
                     name: this.$t('table.blockHeight'),
                     width: 180
                 },
-                {
-                    enName: "pbftView",
-                    name: this.$t('table.pbftView'),
-                    width: 180
-                },
+                // {
+                //     enName: "pbftView",
+                //     name: this.$t('table.pbftView'),
+                //     width: 180
+                // },
                 {
                     enName: "status",
                     name: this.$t('table.status'),
