@@ -302,18 +302,11 @@ export default {
                         } catch (error) {
                             console.log(error)
                         }
-                    } else {
-                        switch (data) {
-                           case "true":
-                             this.transation.reqVal[i] = true
-                             break
-                           case "false":
-                             this.transation.reqVal[i] = false
-                             break
-                           default:
-                             this.transation.reqVal[i] = data
-                             break
-                        }
+                    } else if (data === "true" || data === "false") {
+            this.transation.reqVal[i] = eval(data.toLowerCase());
+          }
+                    else {
+                        this.transation.reqVal[i] = data;
                     }
                 }
             }
