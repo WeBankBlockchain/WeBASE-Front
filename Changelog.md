@@ -1,13 +1,13 @@
 
-### v2.0.0-rc1(2021-12-09)
+### lab-rc1(2021-12-09)
 
 **Add**
 - 适配兼容FISCO BCOS v3.0.0
 
 **兼容性**
 - 支持FISCO-BCOS v3.0.0 及以上版本
-- WeBASE-Node-Manager v2.0.0-rc1
-- WeBASE-Sign v2.0.0-rc1
+- WeBASE-Node-Manager lab-rc1
+- WeBASE-Sign lab-rc1
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
 
 
