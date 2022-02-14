@@ -357,11 +357,10 @@
     border: 1px solid #2f3b52;
     /* box-shadow:0 12px 27px 0 rgba(159,166,189,0.33); */
     border-radius: 8px;
+    background-color: #2f3b52;
 }
 
-.el-dialog, .el-pager li {
-    background: none;
-}
+
 
 .el-dialog__header {
     padding: 24px 24px 0 24px;
@@ -380,7 +379,9 @@
     background-color: #2f3b52;
     color: #fff !important;
     padding: 24px 24px 0 24px !important;
-   max-height: 500px;
+    max-height: 500px;
+    margin-bottom: 24px;
+    overflow-y: auto;
 }
 
 .el-dialog__footer {
