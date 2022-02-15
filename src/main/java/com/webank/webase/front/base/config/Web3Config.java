@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
@@ -79,6 +80,11 @@ public class Web3Config {
         ConfigOption configOption = new ConfigOption(configProperty);
         log.info("initConfigOptionFromFile init configOption :{}", configOption);
         return configOption;
+    }
+
+    @Bean
+    public BcosSDK getBcosSDK(ConfigOption configOption) {
+        return new BcosSDK(configOption);
     }
 
     /**

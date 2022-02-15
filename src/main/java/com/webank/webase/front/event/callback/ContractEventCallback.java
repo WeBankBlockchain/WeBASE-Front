@@ -19,9 +19,11 @@ package com.webank.webase.front.event.callback;
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.message.EventLogPushMessage;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import org.fisco.bcos.sdk.codec.ABICodec;
+import org.fisco.bcos.sdk.codec.ABICodecException;
 import org.fisco.bcos.sdk.eventsub.EventSubCallback;
 import org.fisco.bcos.sdk.model.EventLog;
 import org.slf4j.Logger;
@@ -44,8 +46,6 @@ public class ContractEventCallback implements EventSubCallback {
     private String routingKey;
     private String groupId;
     private String appId;
-//    @Setter
-//    private boolean running = false;
     private ABICodec abiCodec;
     private String contractAbi;
     private List<String> eventNameList;

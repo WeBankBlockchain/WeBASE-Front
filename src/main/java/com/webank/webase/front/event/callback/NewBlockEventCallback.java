@@ -16,6 +16,8 @@
 
 package com.webank.webase.front.event.callback;
 
+import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
+
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.PublisherHelper;
@@ -23,9 +25,8 @@ import com.webank.webase.front.event.entity.message.BlockPushMessage;
 import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.fisco.bcos.sdk.service.callback.BlockNumberNotifyCallback;
-import org.fisco.bcos.sdk.service.model.BlockNumberNotification;
+import lombok.Setter;
+import org.fisco.bcos.sdk.jni.BlockNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,39 +36,32 @@ import org.slf4j.LoggerFactory;
  */
 @Data
 @AllArgsConstructor
-public class NewBlockEventCallback implements BlockNumberNotifyCallback {
+public class NewBlockEventCallback implements BlockNotifier {
 
     private static Logger logger = LoggerFactory.getLogger(NewBlockEventCallback.class);
 
     private MQPublisher MQPublisher;
     private String groupId;
     private PublisherHelper blockPublishInfo;
+    @Setter
+    private Boolean running = true;
 
     @Override
-    public void onReceiveBlockNumberInfo(String peerIpAndPort,
-        BlockNumberNotification blockNumberNotification) {
-        String groupId = blockNumberNotification.getGroupId();
-        String blockNumber = blockNumberNotification.getBlockNumber();
-        logger.info("NewBlockEventCallBack peerIpAndPort:{}, groupId:{}, blockNumber:{}",
-            peerIpAndPort, groupId, blockNumber);
-
+    public void onResponse(String groupId, BigInteger blockNumber) {
+        logger.info("NewBlockEventCallBack groupId:{}, blockNumber:{}",
+            groupId, blockNumber);
+        if (!running) {
+            logger.debug("NewBlockEventCallBack skip because already unregister blockPublishInfo:{}", blockPublishInfo);
+            return;
+        }
         BlockPushMessage blockPushMessage = new BlockPushMessage();
-        blockPushMessage.setBlockNumber(new BigInteger(blockNumber));
+        blockPushMessage.setBlockNumber(blockNumber);
         blockPushMessage.setGroupId(groupId);
-        blockPushMessage.setPeerIpPort(peerIpAndPort);
         blockPushMessage.setEventType(EventTypes.BLOCK_NOTIFY.getValue());
-        if (groupId == this.groupId) {
+        if (groupId.equals(this.groupId)) {
             pushMessage2MQ(blockPublishInfo.getExchangeName(),
                 blockPublishInfo.getRoutingKey(), blockPushMessage);
         }
-        /*for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
-            blockPushMessage.setAppId(appId);
-            PublisherHelper blockPublishInfo = BLOCK_ROUTING_KEY_MAP.get(appId);
-            if (groupId == blockPublishInfo.getGroupId()) {
-                pushMessage2MQ(blockPublishInfo.getExchangeName(),
-                    blockPublishInfo.getRoutingKey(), blockPushMessage);
-            }
-        }*/
     }
 
     /**
