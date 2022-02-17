@@ -120,12 +120,6 @@ public class TransService {
     @Autowired
     private ContractRepository contractRepository;
     @Autowired
-    @Qualifier(value = "sm")
-    private CryptoSuite smCryptoSuite;
-    @Autowired
-    @Qualifier(value = "ecdsa")
-    private CryptoSuite ecdsaCryptoSuite;
-    @Autowired
     @Qualifier(value = "common")
     private CryptoSuite cryptoSuite;
     @Autowired
@@ -641,9 +635,9 @@ public class TransService {
     public SignatureResult signMessageHashByType(String messageHash, CryptoKeyPair cryptoKeyPair, int encryptType) {
         try {
             if (encryptType == CryptoType.SM_TYPE) {
-                return smCryptoSuite.sign(messageHash, cryptoKeyPair);
+                return new CryptoSuite(CryptoType.SM_TYPE).sign(messageHash, cryptoKeyPair);
             } else {
-                return ecdsaCryptoSuite.sign(messageHash, cryptoKeyPair);
+                return new CryptoSuite(CryptoType.ECDSA_TYPE).sign(messageHash, cryptoKeyPair);
             }
         } catch (Exception e) {
             log.error("signMessageHashByType failed:[]", e);
@@ -691,7 +685,7 @@ public class TransService {
         log.info("transHandle start. ReqSignMessageHash:[{}]", JsonUtils.toJSONString(req));
         RspUserInfo rspUserInfo = keyStoreService.getUserInfoWithSign(req.getSignUserId(),true);
         String privateKeyRaw = new String(Base64.getDecoder().decode(rspUserInfo.getPrivateKey()));
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKeyRaw);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(privateKeyRaw);
         SignatureResult signResult = signMessageHashByType(
                 org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()),cryptoKeyPair,
                 cryptoSuite.cryptoTypeConfig
