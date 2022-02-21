@@ -122,13 +122,13 @@ public class EventService {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
 //        String registerId = null;
         try {
-            log.info("registerNewBlockEvent saved to db successfully");
             NewBlockEventCallback callback = new NewBlockEventCallback(mqPublisher, groupId,
                 new PublisherHelper(groupId, exchangeName, routingKey), true);
             bcosSDK.registerBlockNotifier(groupId, callback);
             // save to db 通过db来保证不重复注册
             String infoId = addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
                 appId, groupId, exchangeName, queueName, routingKey, null);
+            log.info("registerNewBlockEvent saved to db successfully");
             // record groupId, exchange, routingKey for all block notify
             BLOCK_ROUTING_KEY_MAP.put(infoId, callback);
             log.info("end registerNewBlockEvent, infoId:{}", infoId);
@@ -153,8 +153,8 @@ public class EventService {
     public List<ContractEventInfo> registerContractEvent(String appId, String groupId, String exchangeName, String queueName,
                                                          String abi, String fromBlock, String toBlock,
                                                          String contractAddress, List<String> topicList) {
-        log.info("start registerContractEvent appId:{},groupId:{},contractAddress:{},params:{},exchangeName:{},queueName:{}",
-                appId, groupId, abi, contractAddress , exchangeName, queueName);
+        log.info("start registerContractEvent appId:{},groupId:{},abi:{},contractAddress:{},exchangeName:{},queueName:{},topicList:{}",
+                appId, groupId, abi, contractAddress, exchangeName, queueName, topicList);
         // String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
         String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4);
         String routingKey = appId + "_" + ROUTING_KEY_EVENT + "_" + randomStr;
@@ -171,7 +171,6 @@ public class EventService {
         EventSubscribe eventSubscribe = this.getEventSubscribe(String.valueOf(groupId));
         String registerId = null;
         try {
-            log.info("registerContractEvent saved to db successfully");
             // init EventLogUserParams for register
             EventSubParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
                 toBlock, contractAddress, topicList, web3ApiService.getWeb3j(groupId).getCryptoSuite());
@@ -183,6 +182,7 @@ public class EventService {
             String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
                 exchangeName, queueName, routingKey, abi, fromBlock, toBlock, contractAddress, topicList,
                 registerId);
+            log.info("registerContractEvent saved to db successfully");
             CONTRACT_EVENT_CALLBACK_MAP.put(registerId, callback);
             log.info("end registerContractEvent infoId:{}, registerId:{}", infoId, registerId);
         } catch (Exception e) {

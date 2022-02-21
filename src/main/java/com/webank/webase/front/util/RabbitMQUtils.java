@@ -103,6 +103,12 @@ public class RabbitMQUtils {
     public static EventSubParams initSingleEventLogUserParams(String fromBlock, String toBlock,
         String contractAddress, List<String> topicList, CryptoSuite cryptoSuite) {
         EventSubParams params = new EventSubParams();
+        if ("latest".equals(fromBlock)) {
+            fromBlock = "-1";
+        }
+        if ("latest".equals(toBlock)) {
+            toBlock = "-1";
+        }
         params.setFromBlock(new BigInteger(fromBlock));
         params.setToBlock(new BigInteger(toBlock));
 
