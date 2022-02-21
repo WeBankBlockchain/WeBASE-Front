@@ -72,7 +72,7 @@ public class ContractEventCallback implements EventSubCallback {
     @Override
     public void onReceiveLog(String eventSubId, int status, List<EventLog> logs) {
         logger.info(
-                "ContractEventCallback onPushEventLog" +
+                "ContractEventCallback onPushEventLog " +
                         "eventSubId:{} status: {}, logs: {}", eventSubId, status, logs);
         // decode event
         // todo event decode result entity
