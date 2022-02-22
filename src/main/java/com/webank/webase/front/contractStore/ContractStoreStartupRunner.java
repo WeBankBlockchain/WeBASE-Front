@@ -5,7 +5,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ContractStroeStartupRunner implements CommandLineRunner {
+public class ContractStoreStartupRunner implements CommandLineRunner {
 
     @Autowired
     PresetDataService presetDataService;

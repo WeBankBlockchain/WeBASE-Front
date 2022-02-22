@@ -95,7 +95,7 @@ public class ContractControllerTest extends SpringTestBase {
     @Test
     public void testDeploy() throws Exception {
         String abiInfo = "[{\"constant\":false,\"inputs\":[{\"name\":\"num\",\"type\":\"uint256\"}],\"name\":\"trans\",\"outputs\":[],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"type\":\"constructor\"}]";
-        List<ABIDefinition> list = JsonUtils.toJavaObjectList(abiInfo, ABIDefinition.class);
+        List<Object> list = JsonUtils.toJavaObjectList(abiInfo, Object.class);
         //param
         ReqDeploy deployInputParam = new ReqDeploy();
         deployInputParam.setGroupId(groupId);

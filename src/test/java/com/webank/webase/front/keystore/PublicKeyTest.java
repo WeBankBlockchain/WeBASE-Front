@@ -41,7 +41,7 @@ public class PublicKeyTest extends SpringTestBase {
         String defaultUserPrivateKey = aesUtils.aesDecrypt(defaultUserPrivateKeyAfterAes);
         System.out.println("decrypt aes");
         System.out.println(defaultUserPrivateKey);
-        CryptoKeyPair credential = cryptoSuite.createKeyPair(defaultUserPrivateKey);
+        CryptoKeyPair credential = cryptoSuite.getKeyPairFactory().createKeyPair(defaultUserPrivateKey);
         System.out.println("private: ");
         System.out.println(credential.getHexPrivateKey());
         System.out.println("pub: ");
