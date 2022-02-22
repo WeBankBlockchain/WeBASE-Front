@@ -513,7 +513,7 @@ export default {
                 this.$message({
                   type: "error",
                   message: this.$t("text.txnFailed"),
-                });
+                  })
               }
             }
           } else {
