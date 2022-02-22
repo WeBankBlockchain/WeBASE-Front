@@ -391,6 +391,7 @@ public class ContractService {
     /**
      * encode constructor function
      */
+    @Deprecated
     private static String constructorEncoded(String contractName,
             ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
         // Constructor encoded

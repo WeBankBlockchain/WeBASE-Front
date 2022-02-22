@@ -25,8 +25,7 @@
     <div
       v-if="transationData && !transationData.logs"
       slot
-      :style="{ height: editorHeight + 'px' }"
-      style="overflow-y: auto"
+      style="overflow-y: scroll; height: 500px"
     >
       <json-viewer
         :value="transationData"
@@ -37,8 +36,7 @@
     <div
       v-if="transationData && transationData.logs"
       slot
-      :style="{ height: editorHeight + 'px' }"
-      style="overflow-y: auto"
+      style="overflow-y: scroll; height: 500px"
     >
       <div>{</div>
       <div v-for="(val, key) in transationData" style="padding-left: 10px">
@@ -146,9 +144,7 @@
                     class="transation-content null-color"
                     >{{ item.logIndex }}null</span
                   > -->
-                  <span  class="transation-content">{{
-                    item.logIndex
-                  }}</span>
+                  <span class="transation-content">{{ item.logIndex }}</span>
                 </div>
                 <div>
                   <span class="transation-title">transactionIndex:</span>
@@ -157,7 +153,7 @@
                     class="transation-content null-color"
                     >{{ item.transactionIndex }}null</span
                   > -->
-                  <span  class="transation-content">{{
+                  <span class="transation-content">{{
                     item.transactionIndex
                   }}</span>
                 </div>
@@ -374,15 +370,17 @@ export default {
   methods: {
     abc(arr) {
       // return arr.replace(/\'/g, "");
-          if(!Array.isArray(arr)){return arr}
-          return '['+arr.toString()+']'
-        //   var str = "[";
-        //   arr.forEach(function(item,index,arr){
-        //     str += item+',';
-        // })
-        //    var a= str.substring(0,(str.length-1));
-        //  return a+"]";
-      
+      if (!Array.isArray(arr)) {
+        return arr;
+      }
+      return "[" + arr.toString() + "]";
+      //   var str = "[";
+      //   arr.forEach(function(item,index,arr){
+      //     str += item+',';
+      // })
+      //    var a= str.substring(0,(str.length-1));
+      //  return a+"]";
+
       //  abc(arr){
       //     arr.forEach(function(item,index,arrs){
       //       if(Number(item)){

@@ -120,12 +120,6 @@ public class TransService {
     @Autowired
     private ContractRepository contractRepository;
     @Autowired
-    @Qualifier(value = "sm")
-    private CryptoSuite smCryptoSuite;
-    @Autowired
-    @Qualifier(value = "ecdsa")
-    private CryptoSuite ecdsaCryptoSuite;
-    @Autowired
     @Qualifier(value = "common")
     private CryptoSuite cryptoSuite;
     @Autowired
@@ -231,12 +225,10 @@ public class TransService {
             }
         } else {
             // data sign
-            String signMsg =
-                    signMessage(groupId, client, signUserId, contractAddress, encodedFunction);
+            String signMsg = signMessage(groupId, client, signUserId, contractAddress, encodedFunction);
             Instant nodeStartTime = Instant.now();
             // send transaction
             TransactionReceipt responseReceipt = sendMessage(client, signMsg);
-            this.decodeReceipt(responseReceipt);
             response = responseReceipt;
             log.info("***node cost time***: {}",
                     Duration.between(nodeStartTime, Instant.now()).toMillis());
@@ -307,6 +299,7 @@ public class TransService {
      * @param function function
      * @param commonContract contract
      */
+    @Deprecated
     public static TransactionReceipt execTransaction(Function function,
             CommonContract commonContract, TransactionDecoderService txDecoder) throws FrontException {
         Instant startTime = Instant.now();
@@ -565,7 +558,6 @@ public class TransService {
         Client client = web3ApiService.getWeb3j(groupId);
         if (sync) {
             TransactionReceipt receipt = sendMessage(client, signedStr);
-            this.decodeReceipt(receipt);
             return receipt;
         } else {
             TransactionPusherService txPusher = new TransactionPusherService(client);
@@ -643,9 +635,9 @@ public class TransService {
     public SignatureResult signMessageHashByType(String messageHash, CryptoKeyPair cryptoKeyPair, int encryptType) {
         try {
             if (encryptType == CryptoType.SM_TYPE) {
-                return smCryptoSuite.sign(messageHash, cryptoKeyPair);
+                return new CryptoSuite(CryptoType.SM_TYPE).sign(messageHash, cryptoKeyPair);
             } else {
-                return ecdsaCryptoSuite.sign(messageHash, cryptoKeyPair);
+                return new CryptoSuite(CryptoType.ECDSA_TYPE).sign(messageHash, cryptoKeyPair);
             }
         } catch (Exception e) {
             log.error("signMessageHashByType failed:[]", e);
@@ -693,7 +685,7 @@ public class TransService {
         log.info("transHandle start. ReqSignMessageHash:[{}]", JsonUtils.toJSONString(req));
         RspUserInfo rspUserInfo = keyStoreService.getUserInfoWithSign(req.getSignUserId(),true);
         String privateKeyRaw = new String(Base64.getDecoder().decode(rspUserInfo.getPrivateKey()));
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKeyRaw);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(privateKeyRaw);
         SignatureResult signResult = signMessageHashByType(
                 org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()),cryptoKeyPair,
                 cryptoSuite.cryptoTypeConfig
@@ -926,7 +918,6 @@ public class TransService {
         Instant nodeStartTime = Instant.now();
         // send transaction
         TransactionReceipt receipt = sendMessage(client, signedMessageStr);
-        this.decodeReceipt(receipt);
         log.info("***node cost time***: {}",
             Duration.between(nodeStartTime, Instant.now()).toMillis());
         return receipt;

@@ -48,13 +48,11 @@ import org.fisco.bcos.sdk.client.protocol.model.GroupStatus;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
 import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
-import org.fisco.bcos.sdk.client.protocol.response.NodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
@@ -64,6 +62,7 @@ import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
@@ -81,6 +80,7 @@ public class Web3ApiService {
     @Autowired
     private BcosSDK bcosSDK;
     @Autowired
+    @Qualifier("rpcClient")
     private Client rpcWeb3j;
     @Autowired
     private Web3Config web3ConfigConstants;
@@ -169,6 +169,7 @@ public class Web3ApiService {
         if (opt.isPresent()) {
             transactionReceipt = opt.get();
         }
+        CommonUtils.decodeReceipt(transactionReceipt, getWeb3j(groupId).getCryptoSuite());
         CommonUtils.processReceiptHexNumber(transactionReceipt);
         return transactionReceipt;
     }
@@ -194,8 +195,7 @@ public class Web3ApiService {
      * getClientVersion.
      */
     public ClientVersion getClientVersion() {
-        ClientVersion version;
-        version = getWeb3j().getNodeVersion().getNodeVersion();
+        ClientVersion version = getWeb3j().getNodeVersion(getNodeIpPort()).getNodeVersion();
         return version;
     }
 
@@ -449,8 +449,8 @@ public class Web3ApiService {
      * @return
      */
     public List<String> getGroupList() {
-        log.debug("getGroupList. ");
-        List<String> groupIdList = getWeb3j().getGroupList().getGroupList();
+        log.info("getGroupList. ");
+        List<String> groupIdList = getWeb3j().getGroupList(getNodeIpPort()).getGroupList();
         // check web3jMap, if not match groupIdList, refresh web3jMap in front
         refreshWeb3jMap(groupIdList);
         return groupIdList;
@@ -458,7 +458,7 @@ public class Web3ApiService {
 
     public List<String> getNodeIdList() {
         return getWeb3j()
-                .getNodeIDList()
+                .getNodeIDList(getNodeIpPort())
                 .getNodeIDList();
     }
 
@@ -526,8 +526,7 @@ public class Web3ApiService {
      * getNodeInfo.
      */
     public NodeInformation getNodeInfo() {
-        String nodeIpPort = web3ConfigConstants.getIp() + ":" + web3ConfigConstants.getChannelPort();
-        return getWeb3j().getNodeInfo(nodeIpPort).getNodeInfo();
+        return getWeb3j().getNodeInfo(getNodeIpPort()).getNodeInfo();
     }
 
     /**
@@ -851,5 +850,9 @@ public class Web3ApiService {
         if (!Web3Config.PEER_CONNECTED) {
             throw new FrontException(ConstantCode.SYSTEM_ERROR_NODE_INACTIVE);
         }
+    }
+
+    private String getNodeIpPort() {
+        return web3ConfigConstants.getIp() + ":" + web3ConfigConstants.getChannelPort();
     }
 }
