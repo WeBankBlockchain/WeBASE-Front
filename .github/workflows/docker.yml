@@ -111,10 +111,9 @@ jobs:
       # todo get fisco's tag. temporarily use variable of DOCKER_FISCO_TAG
       - name: Set docker tag from tag
         id: set_docker_tag
-        run: |
+        run:
 #          [[ ${{github.ref}} == */tags/* ]] && DOCKER_TAG="${GIT_TAG_NAME}" || DOCKER_TAG="${BRANCH_NAME}"
 #          DOCKER_TAG="${{ secrets.DOCKERHUB_ORG }}/${DOCKER_FISCO_REPOSITORY}:${DOCKER_FISCO_TAG}"
-
           echo "New docker tag is ${DOCKER_FISCO_TAG}"
           echo "::set-output name=docker_tag::$(echo ${DOCKER_FISCO_TAG})"
 
