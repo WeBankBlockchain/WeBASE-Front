@@ -24,8 +24,10 @@ import com.webank.webase.front.event.EventService;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.MQService;
 import com.webank.webase.front.event.NewBlockEventInfoRepository;
+import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
+import com.webank.webase.front.event.entity.PublisherHelper;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.List;
@@ -61,7 +63,7 @@ public class EventRegisterInitTask {
     /**
      * Callback used to run the bean.
      */
-//    @Scheduled(fixedDelayString = "${constant.eventRegisterTaskFixedDelay}") todo
+    @Scheduled(fixedDelayString = "${constant.eventRegisterTaskFixedDelay}")
     public void taskStart() {
         syncEventRegisterTask();
     }
@@ -81,7 +83,8 @@ public class EventRegisterInitTask {
                         groupId, newBlockEventInfoList.size(), contractEventInfoList.size());
                 // foreach register
                 newBlockEventInfoList.stream()
-                        .filter(info -> !BLOCK_ROUTING_KEY_MAP.containsKey(info.getRegisterId()))
+//                        .filter(info -> !BLOCK_ROUTING_KEY_MAP.containsKey(info.getRegisterId()))
+                        .filter(info -> !BLOCK_ROUTING_KEY_MAP.containsKey(info.getId()))
                         .forEach(this::registerNewBlockEvent);
                 contractEventInfoList.stream()
                         .filter(info -> !CONTRACT_EVENT_CALLBACK_MAP.containsKey(info.getRegisterId()))

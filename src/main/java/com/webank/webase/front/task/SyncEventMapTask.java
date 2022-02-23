@@ -16,19 +16,20 @@
 
 package com.webank.webase.front.task;
 
+import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
 import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
 
 import com.google.common.collect.Lists;
-import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.event.ContractEventInfoRepository;
 import com.webank.webase.front.event.EventService;
 import com.webank.webase.front.event.NewBlockEventInfoRepository;
 import com.webank.webase.front.event.callback.ContractEventCallback;
+import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
+import com.webank.webase.front.event.entity.NewBlockEventInfo;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,7 +52,7 @@ public class SyncEventMapTask {
     @Autowired
     private EventService eventService;
 
-//    @Scheduled(fixedDelayString = "${constant.syncEventMapTaskFixedDelay}") todo
+    @Scheduled(fixedDelayString = "${constant.syncEventMapTaskFixedDelay}")
     public void taskStart() {
         syncEventMapTask();
     }
@@ -67,21 +68,23 @@ public class SyncEventMapTask {
     private void cleanNewBlockEventMap() {
         log.debug("start cleanNewBlockEventMap. ");
         int removeCount = 0;
-//        GroupManagerService groupManagerService = bcosSDK.getGroupManagerService(); todo 取消注册
-//        List<NewBlockEventInfo> blockInfoList = Lists.newArrayList(newBlockEventInfoRepository.findAll());
-//        for (String registerId : BLOCK_ROUTING_KEY_MAP.keySet()) {
-//            // check whether map contains callback that not in db
-//            long equalCount = blockInfoList.stream()
+        List<NewBlockEventInfo> blockInfoList = Lists.newArrayList(newBlockEventInfoRepository.findAll());
+        for (String registerId : BLOCK_ROUTING_KEY_MAP.keySet()) {
+            // check whether map contains callback that not in db
+            long equalCount = blockInfoList.stream()
 //                    .filter(info -> registerId.equals(info.getRegisterId()))
-//                    .count();
-//            // remove from map that not in db's list
-//            if (equalCount == 0) {
-//                log.debug("remove new block callback of registerId:{}", registerId);
-//                groupManagerService.eraseBlockNotifyCallback(registerId);
-//                BLOCK_ROUTING_KEY_MAP.remove(registerId);
-//                removeCount++;
-//            }
-//        }
+                    .filter(info -> registerId.equals(info.getId()))
+                    .count();
+            // remove from map that not in db's list
+            if (equalCount == 0) {
+                log.debug("remove new block callback of registerId:{}", registerId);
+//                groupManagerService.eraseBlockNotifyCallback(registerId); todo 取消注册
+                NewBlockEventCallback callback = BLOCK_ROUTING_KEY_MAP.get(registerId);
+                callback.setRunning(false);
+                BLOCK_ROUTING_KEY_MAP.remove(registerId);
+                removeCount++;
+            }
+        }
         log.debug("end cleanNewBlockEventMap. removeCount:{}", removeCount);
     }
 

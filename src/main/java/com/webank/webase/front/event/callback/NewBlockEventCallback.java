@@ -16,8 +16,6 @@
 
 package com.webank.webase.front.event.callback;
 
-import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
-
 import com.webank.webase.front.base.enums.EventTypes;
 import com.webank.webase.front.event.MQPublisher;
 import com.webank.webase.front.event.entity.PublisherHelper;
@@ -48,6 +46,7 @@ public class NewBlockEventCallback implements BlockNotifier {
 
     @Override
     public void onResponse(String groupId, BigInteger blockNumber) {
+//        System.out.println("NewBlockEventCallBack blockNumber "+ blockNumber);
         logger.info("NewBlockEventCallBack groupId:{}, blockNumber:{}",
             groupId, blockNumber);
         if (!running) {
