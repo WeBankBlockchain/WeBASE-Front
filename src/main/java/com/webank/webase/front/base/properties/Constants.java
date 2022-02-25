@@ -87,5 +87,6 @@ public class Constants {
 
     // second
     private Integer eventCallbackWait = 10;
+    private Integer liquidCompileTimeout = 10;
 
 }

@@ -255,9 +255,12 @@ public class ConstantCode {
     public static final RetCode CLIENT_ONLY_SUPPORT_WASM = RetCode.mark(201606, "This group only support Liquid contract of wasm");
     public static final RetCode CLIENT_NOT_CONNECTED_WITH_THIS_GROUP = RetCode.mark(201607, "This group not connected with front's rpc peers");
 
-    public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
-
     public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
 
+    /* rc2 liquid */
+    public static final RetCode EXEC_JAVA_COMMAND_TIMEOUT = RetCode.mark(201631, "Sealer's weight cannot be null");
+    public static final RetCode EXEC_JAVA_COMMAND_RETURN_FAILED = RetCode.mark(201632, "Sealer's weight cannot be null");
+
+    public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
 
 }
