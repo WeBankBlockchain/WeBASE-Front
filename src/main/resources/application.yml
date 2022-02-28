@@ -81,3 +81,5 @@ constant:
   statLogEnabled: false
   # get event callback wait (s)
   eventCallbackWait: 4
+  # compile liquid timeout (ms)
+  liquidCompileTimeout: 30000
