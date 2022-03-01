@@ -36,6 +36,8 @@ import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import com.webank.webase.front.contract.entity.wasm.CompileTask;
+import com.webank.webase.front.contract.entity.wasm.ReqCompileTask;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
@@ -436,61 +438,58 @@ public class ContractController extends BaseController {
         return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 
-    // new contract project todo 如果是node-mgr传入的合约名要加上一个唯一值，以区分front自己的和node-mgr的
-    @PostMapping(value = "/liquid/new")
-    public BaseResponse newLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) throws IOException {
-        Instant now = Instant.now();
-        log.info("newLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
-        checkParamResult(result);
-        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
-        liquidCompileService.execLiquidNewContract(req.getGroupId(), req.getContractName(), req.getContractSource());
-        log.info("newLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
-        return response;
-    }
+//    // new contract project todo 如果是node-mgr传入，合约名要加上一个唯一值，以区分front自己的和node-mgr的
+//    @PostMapping(value = "/liquid/new")
+//    public BaseResponse newLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) {
+//        Instant now = Instant.now();
+//        log.info("newLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
+//        checkParamResult(result);
+//        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+//        liquidCompileService.execLiquidNewContract(req.getGroupId(), req.getContractName(), req.getContractSource());
+//        log.info("newLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
+//        return response;
+//    }
 
-    // save contract api (new project and save)
-    @PostMapping(value = "/liquid/newAndSave")
-    public BaseResponse newAndSaveLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) throws IOException {
-        Instant now = Instant.now();
-        log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
-        checkParamResult(result);
-        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
-        contractService.newAndSaveLiquidContract(req);
-        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
-        return response;
-    }
+//    // save contract api (new project and save)
+//    @PostMapping(value = "/liquid/newAndSave")
+//    public BaseResponse newLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) {
+//        Instant now = Instant.now();
+//        log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
+//        checkParamResult(result);
+//        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+//        contractService.newAndSaveLiquidContract(req);
+//        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
+//        return response;
+//    }
 
-    // compile
+    /**
+     * 执行编译的时候，直接new操作，并且执行编译操作，new是同步的，编译是异步的
+     * todo 如何处理重复的liquid合约目录
+     * 一个单独的异步表记录当前异步编译状态
+     * @param req
+     * @param result
+     * @return
+     */
     @PostMapping(value = "/liquid/compile")
-    public BaseResponse asyncCompileLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) throws IOException {
+    public BaseResponse newAndCompileLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) {
         Instant now = Instant.now();
         log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
         checkParamResult(result);
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
-        contractService.newAndSaveLiquidContract(req);
+        contractService.newAndCompileLiquidContract(req);
         log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
         return response;
     }
 
     @ApiOperation(value = "check compile", notes = "check liquid compile finished")
-    @GetMapping(value = "/liquid/compile/check")
-    public BaseResponse checkLiquidContractCompile() {
-        log.info("checkLiquidContractCompile start.");
-//        contractService.getLiquidContract();
-        return new BaseResponse(ConstantCode.RET_SUCCEED);
+    @PostMapping(value = "/liquid/compile/check/")
+    public BaseResponse checkLiquidContractCompile(@Valid @RequestBody ReqCompileTask req, BindingResult result) {
+        log.info("checkLiquidContractCompile start. req:{}", req);
+        checkParamResult(result);
+        CompileTask taskInfo = contractService.getLiquidContract(req.getGroupId(), req.getContractPath(), req.getContractName());
+        return new BaseResponse(ConstantCode.RET_SUCCEED, taskInfo);
     }
 
-    // deploy by wasm
-    @PostMapping(value = "/liquid/deploy")
-    public BaseResponse deployLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) throws IOException {
-        Instant now = Instant.now();
-        log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
-        checkParamResult(result);
-        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
-        contractService.newAndSaveLiquidContract(req);
-        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
-        return response;
-    }
 
 
 }

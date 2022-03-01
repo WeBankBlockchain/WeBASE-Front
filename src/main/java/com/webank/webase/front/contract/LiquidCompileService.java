@@ -14,24 +14,20 @@
 
 package com.webank.webase.front.contract;
 
-import static java.io.File.separator;
-
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.entity.wasm.AbiBinInfo;
+import com.webank.webase.front.contract.entity.wasm.CompileTask;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.cmd.ExecuteResult;
 import com.webank.webase.front.util.cmd.JavaCommandExecutor;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.utils.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,12 +83,13 @@ public class LiquidCompileService {
 
 
     /**
+     * todo 加上合约路径
      * 检查目录是否已存在，然后再创建
-     * groupId + _ + contractName
+     * groupId + _ + contractPath + _ + contractName
      * @param contractName
      * @param contractSource base64 encoded, required decode before write to file
      */
-    public void execLiquidNewContract(String groupId, String contractName, String contractSource) {
+    public void execLiquidNewContract(String groupId, String contractPath, String contractName, String contractSource) {
         this.mkdirIfNotExist();
         String contractDir = groupId + "_" + contractName;
         // todo check contractDir exist
@@ -162,7 +159,7 @@ public class LiquidCompileService {
      * @param contractName
      * @return
      */
-    public AbiBinInfo compileAndReturn(String groupId, String contractName) {
+    public AbiBinInfo compileAndReturn(String groupId, String contractPath, String contractName) {
         String contractDir = groupId + "_" + contractName;
         // compile
         this.execLiquidCompile(contractDir);
@@ -190,6 +187,5 @@ public class LiquidCompileService {
         }
 
     }
-
 
 }

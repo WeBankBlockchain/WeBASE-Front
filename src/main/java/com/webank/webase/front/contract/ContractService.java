@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.contract;
 
-import static com.webank.webase.front.base.code.ConstantCode.GROUPID_NOT_EXIST;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
@@ -43,6 +42,8 @@ import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import com.webank.webase.front.contract.entity.wasm.CompileTask;
+import com.webank.webase.front.contract.entity.wasm.CompileTaskRepository;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
@@ -125,6 +126,10 @@ public class ContractService {
     private PrecompiledWithSignService precompiledWithSignService;
     @Autowired
     private PrecompiledService precompiledService;
+    @Autowired
+    private LiquidCompileService liquidCompileService;
+    @Autowired
+    private CompileTaskRepository compileTaskRepository;
 
     /**
      * sendAbi.
@@ -232,19 +237,17 @@ public class ContractService {
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        boolean isWasm = req.getIsWasm() != null && req.getIsWasm();
 
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
-        if (client.isWASM()) {
-            log.error("deployWithSign error, this group:{} only support wasm", groupId);
-            throw new FrontException(ConstantCode.CLIENT_ONLY_SUPPORT_WASM);
+        // check if wasm
+        if (client.isWASM() != isWasm) {
+            log.error("deployWithSign error, this group:{} not match with contract type(solidity/liquid)", groupId);
+            throw new FrontException(ConstantCode.GROUP_SOL_WASM_NOT_MATCH);
         }
 
-        if (client == null) {
-            throw new FrontException(GROUPID_NOT_EXIST);
-        }
-
-        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
+        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), isWasm);
         byte[] encodedConstructor;
         try {
             encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
@@ -276,8 +279,16 @@ public class ContractService {
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        boolean isWasm = req.getIsWasm() != null && req.getIsWasm();
 
-        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
+        Client client = web3ApiService.getWeb3j(groupId);
+        // check if wasm
+        if (client.isWASM() != isWasm) {
+            log.error("deployLocally error, this group:{} not match with contract type(solidity/liquid)", groupId);
+            throw new FrontException(ConstantCode.GROUP_SOL_WASM_NOT_MATCH);
+        }
+
+        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), req.getIsWasm());
 
         byte[] encodedConstructor;
         try {
@@ -290,7 +301,7 @@ public class ContractService {
         CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);
         // contract deploy
         String contractAddress =
-            deployContract(groupId, encodedConstructor, cryptoKeyPair);
+            deployContract(client, encodedConstructor, cryptoKeyPair);
 
         log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
@@ -376,16 +387,9 @@ public class ContractService {
         }
     }
 
-    private String deployContract(String groupId, byte[] encodedConstructor,
+    private String deployContract(Client client, byte[] encodedConstructor,
             CryptoKeyPair cryptoKeyPair) throws FrontException {
-        Client client = web3ApiService.getWeb3j(groupId);
-        if (client == null) {
-            throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-        }
-        if (client.isWASM()) {
-            log.error("deployContract locally error, this group:{} only support wasm", groupId);
-            throw new FrontException(ConstantCode.CLIENT_ONLY_SUPPORT_WASM);
-        }
+
         AssembleTransactionProcessor assembleTxProcessor = null;
         try {
             assembleTxProcessor = TransactionProcessorFactory
@@ -959,30 +963,56 @@ public class ContractService {
         return cnsRepository.findByAddressLimitOne(req.getGroupId(), req.getContractAddress());
     }
 
-    /* liquid save */
-
+    // todo 如果同时多人编译同一个合约，则提示running
     // todo new liquid contract and save into db
-    public Contract newAndSaveLiquidContract(ReqContractSave contractReq) {
-        return null;
-    }
-    // todo compile and save abi/bin and async update compile status
-    public Contract compileLiquidContract(ReqContractSave contractReq) {
+    public Contract newAndCompileLiquidContract(ReqContractSave contractReq) {
+        String groupId = contractReq.getGroupId();
+        String contractPath = contractReq.getContractPath();
+        String contractName = contractReq.getContractName();
+        String contractSource = contractReq.getContractSource();
+        // check by compile task if already new liquid project
+        CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+        if (taskInfo != null) {
+            if (taskInfo.getStatus() == 1) {
+                log.warn("task of [{}_{}_{}] already compiling", groupId, contractPath, contractName);
+                throw new FrontException(ConstantCode.LIQUID_CONTRACT_ALREADY_COMPILING);
+            }
+        } else {
+            // 如果合约第一次创建，则new一个project
+            liquidCompileService.execLiquidNewContract(groupId, contractPath, contractName, contractSource);
+        }
+        // 保存到task服务，running
+        CompileTask compileTask = new CompileTask();
+        compileTask.setGroupId(groupId);
+        compileTask.setContractPath(contractPath);
+        compileTask.setContractName(contractName);
+        compileTask.setStatus(1);
+        LocalDateTime now = LocalDateTime.now();
+        compileTask.setCreateTime(now);
+        compileTask.setModifyTime(now);
+        compileTaskRepository.save(compileTask);
+
+        // todo async
+        liquidCompileService.compileAndReturn(groupId, contractPath, contractName);
+
+        // todo after async, update task info status, update contract info (abi, bin)
         return null;
     }
 
     /**
      * get contract if status is already compiled
-     * @param contractId
      * @return
      */
-    public Contract getLiquidContract(Integer contractId) {
-        return null;
+    public CompileTask getLiquidContract(String groupId, String contractPath, String contractName) {
+        // if not exist
+        // check by compile task if already new liquid project
+        CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+        if (taskInfo == null) {
+            log.error("Compile task of this liquid contract not exists.");
+            throw new FrontException(ConstantCode.LIQUID_CONTRACT_TASK_NOT_EXIST);
+        }
+        return taskInfo;
     }
+    /* liquid */
 
-    // todo deploy by wasm
-    public String deployLiquid() {
-        // call old deploy method
-        return "";
-
-    }
 }
