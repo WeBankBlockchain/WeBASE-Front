@@ -254,6 +254,9 @@ public class ConstantCode {
     public static final RetCode BUILD_NEW_CLIENT_FAILED = RetCode.mark(201605, "Build client instance of new group failed");
     public static final RetCode CLIENT_ONLY_SUPPORT_WASM = RetCode.mark(201606, "This group only support Liquid contract of wasm");
     public static final RetCode CLIENT_NOT_CONNECTED_WITH_THIS_GROUP = RetCode.mark(201607, "This group not connected with front's rpc peers");
+    public static final RetCode GROUP_SOL_WASM_NOT_MATCH = RetCode.mark(201608, "Deploying contract not match with the group(solidity/liquid)");
+    public static final RetCode LIQUID_CONTRACT_ALREADY_COMPILING = RetCode.mark(201609, "This liquid contract already compiling, please wait...");
+    public static final RetCode LIQUID_CONTRACT_TASK_NOT_EXIST = RetCode.mark(201610, "Contract compile task not exist");
 
     public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
 

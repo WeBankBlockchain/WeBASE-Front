@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class WasmServiceTest extends SpringTestBase {
 
     @Autowired
-    WasmContractService wasmContractService;
+    LiquidCompileService liquidCompileService;
 
     private static final String groupId = "group";
     private static final String contractName = "hello";
@@ -82,17 +82,17 @@ public class WasmServiceTest extends SpringTestBase {
 
     @Test
     public void testCheck() {
-        wasmContractService.checkLiquidEnv();
+        liquidCompileService.checkLiquidEnv();
     }
 
     @Test
     public void testNewContract() {
-        wasmContractService.execLiquidNewContract(groupId, contractName, source);
+        liquidCompileService.execLiquidNewContract(groupId, "", contractName, source);
     }
 
     @Test
     public void testCompileLiquid() {
-        AbiBinInfo abiBinInfo = wasmContractService.compileAndReturn(groupId, contractName);
+        AbiBinInfo abiBinInfo = liquidCompileService.compileAndReturn(groupId, "", contractName);
         System.out.println(JsonUtils.objToString(abiBinInfo));
     }
 
