@@ -19,6 +19,7 @@ import static java.io.File.separator;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
+import com.webank.webase.front.contract.entity.wasm.AbiBinInfo;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.cmd.ExecuteResult;
 import com.webank.webase.front.util.cmd.JavaCommandExecutor;
@@ -47,8 +48,10 @@ public class WasmContractService {
     @Autowired
     private Constants constants;
 
-    private static String getContractPath(String contractDir) {
-        return Paths.get(LIQUID_DIR, contractDir).toString();
+    public static String getContractPath(String contractDir) {
+        String path = Paths.get(LIQUID_DIR, contractDir).toString();
+        log.info("getContractPath path:{}", path);
+        return path;
     }
 
     public void checkLiquidEnv() {
@@ -72,38 +75,53 @@ public class WasmContractService {
         if (resultRustc.failed()) {
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(resultRustc.getExecuteOut()));
         }
-
+        this.mkdirIfNotExist();
 
     }
+
+    private void mkdirIfNotExist() {
+        // if liquid dir not exist, build dir
+        File targetDirFile = Paths.get(LIQUID_DIR).toFile();
+        if (!targetDirFile.exists()) {
+            boolean mkdirResult = targetDirFile.mkdir();
+            log.info("mkdir of liquid, result:{{}", mkdirResult);
+        }
+
+    }
+
 
     /**
      * 检查目录是否已存在，然后再创建
      * groupId + _ + contractName
      * @param contractName
+     * @param contractSource base64 encoded, required decode before write to file
      */
-    public void execNewContract(String groupId, String contractName, String contractSource) {
+    public void execLiquidNewContract(String groupId, String contractName, String contractSource) {
+        this.mkdirIfNotExist();
+
         String contractDir = groupId + "_" + contractName;
         // todo check dir exist
-        String command = String.format("cargo liquid new contract %s",
-            contractDir);
+        String command = String.format("cd %s && cargo liquid new contract %s", LIQUID_DIR, contractDir);
         // todo cargo liquid new contract XXX, sed -i gitee
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constants.getLiquidCompileTimeout());
+        log.info("execNewContract new contract Result:{}", result);
         if (result.failed()) {
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
         }
 
         // cd $contractDir
         // sed github as gitee
-        String sed = "sed -i \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" Cargo.toml";
-        String sed2 = "sed -i \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" .liquid/abi_gen/Cargo.toml";
-        String sedCommand = String.format("cd %s && %s && %s", getContractPath(contractDir), sed, sed2);
-        ExecuteResult sedResult = JavaCommandExecutor.executeCommand(sedCommand, constants.getLiquidCompileTimeout());
-        log.info("execNewContract sedResult:{}", sedResult);
-        if (sedResult.failed()) {
+        // todo mac add "", linux might not
+        String sed = String.format("sed -i \"\" \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/Cargo.toml", getContractPath(contractDir));
+        String sed2 = String.format("sed -i \"\" \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/.liquid/abi_gen/Cargo.toml", getContractPath(contractDir));
+        ExecuteResult sedResult = JavaCommandExecutor.executeCommand(sed, constants.getLiquidCompileTimeout());
+        ExecuteResult sedResult2 = JavaCommandExecutor.executeCommand(sed2, constants.getLiquidCompileTimeout());
+        log.info("execNewContract sedResult:{},sedResult2:{}", sedResult, sedResult2);
+        if (sedResult.failed()||sedResult2.failed()) {
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(sedResult.getExecuteOut()));
         }
 
-        // todo write contract source: lib.rs
+        //  write contract source: lib.rs
         File contractFile = Paths.get(LIQUID_DIR, contractDir, "src", "lib.rs").toFile();
         try {
             FileUtils.write(contractFile, contractSource, StandardCharsets.UTF_8);
@@ -114,7 +132,7 @@ public class WasmContractService {
 
     }
 
-    public void execTest(String groupId, String contractName) {
+    public void execCargoTest(String groupId, String contractName) {
         String contractDir = groupId + "_" + contractName;
         String testCommand = "cargo test";
         String command = String.format("cd %s && %s", getContractPath(contractDir), testCommand);
@@ -125,7 +143,12 @@ public class WasmContractService {
         }
     }
 
-    public void execCompile(String contractDir) {
+    /**
+     * cargo liquid build
+     * todo 换成异步，在合约状态中更新是否1已编译
+     * @param contractDir
+     */
+    public void execLiquidCompile(String contractDir) {
         // cargo liquid build
         String testCommand = "cargo liquid build";
         String command = String.format("cd %s && %s", getContractPath(contractDir), testCommand);
@@ -136,10 +159,16 @@ public class WasmContractService {
         }
     }
 
-    public int compileAndReturn(String groupId, String contractName) {
+    /**
+     * check contract project dir exist before build
+     * @param groupId
+     * @param contractName
+     * @return
+     */
+    public AbiBinInfo compileAndReturn(String groupId, String contractName) {
         String contractDir = groupId + "_" + contractName;
         // compile
-        this.execCompile(contractDir);
+        this.execLiquidCompile(contractDir);
         // check target dir exist, or compile failed
         String targetPath = Paths.get(LIQUID_DIR, contractDir, "target").toString();
         File targetDirFile = new File(targetPath);
@@ -149,15 +178,15 @@ public class WasmContractService {
         }
 
         // read .abi and .wasm(byte to hexString)
-        String abiPath = Paths.get(LIQUID_DIR, contractDir, "target", contractName + ".abi").toString();
-        String wasmBinPath = Paths.get(LIQUID_DIR, contractDir, "target", contractName + ".wasm").toString();
+        String abiPath = Paths.get(LIQUID_DIR, contractDir, "target", contractDir + ".abi").toString();
+        String wasmBinPath = Paths.get(LIQUID_DIR, contractDir, "target", contractDir + ".wasm").toString();
         File abiFile = new File(abiPath);
         File binFile = new File(wasmBinPath);
         try {
             byte[] bin = CommonUtils.readBytes(binFile);
             String binStr = Hex.toHexString(bin);
             String abi = FileUtils.readFileToString(abiFile);
-            return 0;
+            return new AbiBinInfo(abi, binStr);
         } catch (IOException e) {
             log.error("compileAndReturn get abi and bin error:", e);
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED);

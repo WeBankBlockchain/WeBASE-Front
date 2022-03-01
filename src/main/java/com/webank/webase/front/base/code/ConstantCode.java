@@ -258,8 +258,8 @@ public class ConstantCode {
     public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
 
     /* rc2 liquid */
-    public static final RetCode EXEC_JAVA_COMMAND_TIMEOUT = RetCode.mark(201631, "Sealer's weight cannot be null");
-    public static final RetCode EXEC_JAVA_COMMAND_RETURN_FAILED = RetCode.mark(201632, "Sealer's weight cannot be null");
+    public static final RetCode EXEC_JAVA_COMMAND_TIMEOUT = RetCode.mark(201631, "Java Command exec timeout");
+    public static final RetCode EXEC_JAVA_COMMAND_RETURN_FAILED = RetCode.mark(201632, "Java Command return error");
 
     public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
 
