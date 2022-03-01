@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class WasmContractService {
+public class LiquidCompileService {
 
     private static final String LIQUID_DIR = "liquid";
     @Autowired
@@ -58,13 +58,9 @@ public class WasmContractService {
         String commandCargo = "cargo -V";
         // cargo -V
         //cargo 1.56.0 (4ed5d137b 2021-10-04)
-        String commandRustc = "cargo -V";
+        String commandRustc = "rustc -V";
         // rustc -V
         //rustc 1.56.1 (59eed8a2a 2021-11-01)
-
-//        String commandLiquid = "cargo liquid -V";
-        // cargo liquid -V
-        //error: no such subcommand: `liquid`
 
         ExecuteResult result = JavaCommandExecutor.executeCommand(commandCargo, constants.getLiquidCompileTimeout());
         if (result.failed()) {
@@ -98,8 +94,9 @@ public class WasmContractService {
      */
     public void execLiquidNewContract(String groupId, String contractName, String contractSource) {
         this.mkdirIfNotExist();
-
         String contractDir = groupId + "_" + contractName;
+        // todo check contractDir exist
+
         // todo check dir exist
         String command = String.format("cd %s && cargo liquid new contract %s", LIQUID_DIR, contractDir);
         // todo cargo liquid new contract XXX, sed -i gitee

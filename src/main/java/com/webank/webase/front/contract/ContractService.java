@@ -958,4 +958,31 @@ public class ContractService {
         // get from database
         return cnsRepository.findByAddressLimitOne(req.getGroupId(), req.getContractAddress());
     }
+
+    /* liquid save */
+
+    // todo new liquid contract and save into db
+    public Contract newAndSaveLiquidContract(ReqContractSave contractReq) {
+        return null;
+    }
+    // todo compile and save abi/bin and async update compile status
+    public Contract compileLiquidContract(ReqContractSave contractReq) {
+        return null;
+    }
+
+    /**
+     * get contract if status is already compiled
+     * @param contractId
+     * @return
+     */
+    public Contract getLiquidContract(Integer contractId) {
+        return null;
+    }
+
+    // todo deploy by wasm
+    public String deployLiquid() {
+        // call old deploy method
+        return "";
+
+    }
 }

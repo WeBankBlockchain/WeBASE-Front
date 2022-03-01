@@ -76,6 +76,8 @@ public class ContractController extends BaseController {
 
     @Autowired
     ContractService contractService;
+    @Autowired
+    LiquidCompileService liquidCompileService;
 
     /**
      * deploy.
@@ -418,4 +420,77 @@ public class ContractController extends BaseController {
         response.setData(cns);
         return response;
     }
+
+    /**
+     * compile liquid contract
+     */
+    // check env api
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "check", notes = "check cargo liquid env")
+    @GetMapping(value = "/liquid/check")
+    public BaseResponse checkLiquidEnv() {
+        log.info("checkLiquidEnv start.");
+        liquidCompileService.checkLiquidEnv();
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    // new contract project todo 如果是node-mgr传入的合约名要加上一个唯一值，以区分front自己的和node-mgr的
+    @PostMapping(value = "/liquid/new")
+    public BaseResponse newLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) throws IOException {
+        Instant now = Instant.now();
+        log.info("newLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        liquidCompileService.execLiquidNewContract(req.getGroupId(), req.getContractName(), req.getContractSource());
+        log.info("newLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
+        return response;
+    }
+
+    // save contract api (new project and save)
+    @PostMapping(value = "/liquid/newAndSave")
+    public BaseResponse newAndSaveLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) throws IOException {
+        Instant now = Instant.now();
+        log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        contractService.newAndSaveLiquidContract(req);
+        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
+        return response;
+    }
+
+    // compile
+    @PostMapping(value = "/liquid/compile")
+    public BaseResponse asyncCompileLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) throws IOException {
+        Instant now = Instant.now();
+        log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        contractService.newAndSaveLiquidContract(req);
+        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
+        return response;
+    }
+
+    @ApiOperation(value = "check compile", notes = "check liquid compile finished")
+    @GetMapping(value = "/liquid/compile/check")
+    public BaseResponse checkLiquidContractCompile() {
+        log.info("checkLiquidContractCompile start.");
+//        contractService.getLiquidContract();
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    // deploy by wasm
+    @PostMapping(value = "/liquid/deploy")
+    public BaseResponse deployLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) throws IOException {
+        Instant now = Instant.now();
+        log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
+        contractService.newAndSaveLiquidContract(req);
+        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
+        return response;
+    }
+
+
 }
