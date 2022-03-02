@@ -974,26 +974,28 @@ public class ContractService {
         return cnsRepository.findByAddressLimitOne(req.getGroupId(), req.getContractAddress());
     }
 
-    // todo 如果同时多人编译同一个合约，则提示running
-    // todo new liquid contract and save into db
+    // 如果同时多人编译同一个合约，则提示running
+    // new liquid contract and save into db
     public Boolean newAndCompileLiquidContract(ReqContractSave contractReq) {
         String groupId = contractReq.getGroupId();
-        String contractPath = contractReq.getContractPath();
         String contractName = contractReq.getContractName();
         String contractSource = contractReq.getContractSource();
         if (StringUtils.isBlank(contractSource)) {
             log.error("contract source cannot be empty!");
             throw new FrontException(ConstantCode.PARAM_ERROR);
         }
+        // if contractPath is "/"
+        String contractPath = contractReq.getContractPath();
+        if ("/".equals(contractPath)) {
+            contractPath = "";
+        }
         // check by compile task if already new liquid project
         CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
         // todo debug log
         log.info("newAndCompileLiquidContract taskInfo:{}", taskInfo);
-        if (taskInfo != null) {
-            if (taskInfo.getStatus() == 1) {
-                log.warn("newAndCompileLiquidContract task of [{}_{}_{}] already compiling", groupId, contractPath, contractName);
-                throw new FrontException(ConstantCode.LIQUID_CONTRACT_ALREADY_COMPILING);
-            }
+        if (taskInfo != null && taskInfo.getStatus() == 1) {
+            log.warn("newAndCompileLiquidContract task of [{}_{}_{}] already compiling", groupId, contractPath, contractName);
+            throw new FrontException(ConstantCode.LIQUID_CONTRACT_ALREADY_COMPILING);
         } else {
             // 如果合约第一次创建，则new一个project
             log.info("newAndCompileLiquidContract new liquid contract {}_{}_{}:{}", groupId, contractPath, contractName, contractSource);
@@ -1011,16 +1013,17 @@ public class ContractService {
             compileTaskRepository.save(compileTask);
         }
         // check if host check success
+        String finalContractPath = contractPath;
         Future<?> task = threadPoolTaskScheduler.submit(() -> {
             try {
                 Instant now = Instant.now();
                 log.info("start thread to compile");
                 // compile
-                AbiBinInfo abiBinInfo = liquidCompileService.compileAndReturn(groupId, contractPath, contractName, constants.getLiquidCompileTimeout());
+                AbiBinInfo abiBinInfo = liquidCompileService.compileAndReturn(groupId, finalContractPath, contractName, constants.getLiquidCompileTimeout());
                 log.info("finish compile, now start to update db status, duration:{}", Duration.between(now, Instant.now()).toMillis());
 
                 // update contract and task info
-                Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+                Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(groupId, finalContractPath, contractName);
                 // if contract not null, contract is in front, else, in node-mgr
                 if (contract != null) {
                     contract.setContractAbi(abiBinInfo.getAbiInfo());
@@ -1029,18 +1032,20 @@ public class ContractService {
                     contract.setModifyTime(LocalDateTime.now());
                     contractRepository.save(contract);
                 }
-                CompileTask compileTaskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+                CompileTask compileTaskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, finalContractPath, contractName);
                 compileTaskInfo.setStatus(2);
                 compileTaskInfo.setAbi(abiBinInfo.getAbiInfo());
                 compileTaskInfo.setBin(abiBinInfo.getBinInfo());
+                compileTaskInfo.setDescription("success");
                 compileTaskInfo.setModifyTime(LocalDateTime.now());
                 compileTaskRepository.save(compileTaskInfo);
                 log.info("newAndCompileLiquidContract finish update compile success status");
             } catch (Exception e) {
-                log.error("newAndCompileLiquidContract:[{}_{}_{}], with unknown error", groupId, contractPath, contractName, e);
+                log.error("newAndCompileLiquidContract error :[{}_{}_{}], with unknown error", groupId, finalContractPath, contractName, e);
                 // update task
-                CompileTask compileTaskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+                CompileTask compileTaskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, finalContractPath, contractName);
                 compileTaskInfo.setStatus(3);
+                compileTaskInfo.setDescription(e.getMessage());
                 compileTaskInfo.setModifyTime(LocalDateTime.now());
                 compileTaskRepository.save(compileTaskInfo);
                 log.info("newAndCompileLiquidContract finish update compile fail status");
@@ -1065,6 +1070,10 @@ public class ContractService {
      * @return
      */
     public CompileTask getLiquidContract(String groupId, String contractPath, String contractName) {
+        // if contractPath is "/"
+        if ("/".equals(contractPath)) {
+            contractPath = "";
+        }
         // if not exist
         // check by compile task if already new liquid project
         CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);

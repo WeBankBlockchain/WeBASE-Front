@@ -80,10 +80,12 @@ public class LiquidCompileService {
     /**
      * 检查目录是否已存在，然后再创建
      * groupId + _ + contractPath + _ + contractName
+     * @param groupId
+     * @param contractPath
      * @param contractName
-     * @param contractSource base64 encoded, required decode before write to file
+     * @param contractSourceBase64 base64 encoded, required decode before write to file
      */
-    public void execLiquidNewContract(String groupId, String contractPath, String contractName, String contractSource) {
+    public void execLiquidNewContract(String groupId, String contractPath, String contractName, String contractSourceBase64) {
         this.mkdirIfNotExist();
         String contractDir = getContractDir(groupId, contractPath, contractName);
         String contractLiquidPath = getLiquidContractPath(contractDir);
@@ -119,7 +121,7 @@ public class LiquidCompileService {
         //  write contract source: lib.rs
         File contractFile = Paths.get(LIQUID_DIR, contractDir, "src", "lib.rs").toFile();
         try {
-            FileUtils.write(contractFile, contractSource, StandardCharsets.UTF_8);
+            FileUtils.write(contractFile, CommonUtils.base64Decode(contractSourceBase64), StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error("execNewContract save contract source code error:", e);
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED);
@@ -180,7 +182,9 @@ public class LiquidCompileService {
             byte[] bin = CommonUtils.readBytes(binFile);
             String binStr = Hex.toHexString(bin);
             String abi = FileUtils.readFileToString(abiFile);
-            return new AbiBinInfo(abi, binStr);
+            AbiBinInfo abiBinInfo = new AbiBinInfo(abi, binStr);
+            log.info("compileAndReturn abiBin:{}", abiBinInfo);
+            return abiBinInfo;
         } catch (IOException e) {
             log.error("compileAndReturn get abi and bin error:", e);
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED);

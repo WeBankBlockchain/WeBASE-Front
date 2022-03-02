@@ -53,6 +53,9 @@ public class CompileTask {
     private String abi;
     @Column(columnDefinition = "mediumtext")
     private String bin;
+    @Column(columnDefinition = "text")
+    private String description;
+
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 }
