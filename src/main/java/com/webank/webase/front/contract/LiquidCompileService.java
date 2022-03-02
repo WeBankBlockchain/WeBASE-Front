@@ -18,19 +18,19 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.entity.wasm.AbiBinInfo;
-import com.webank.webase.front.contract.entity.wasm.CompileTask;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.cmd.ExecuteResult;
 import com.webank.webase.front.util.cmd.JavaCommandExecutor;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.fisco.bcos.sdk.utils.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 
 /**
  * use command line to compile liquid contract and return abi & bin
@@ -44,11 +44,6 @@ public class LiquidCompileService {
     @Autowired
     private Constants constants;
 
-    public static String getContractPath(String contractDir) {
-        String path = Paths.get(LIQUID_DIR, contractDir).toString();
-        log.info("getContractPath path:{}", path);
-        return path;
-    }
 
     public void checkLiquidEnv() {
         String commandCargo = "cargo -V";
@@ -58,12 +53,12 @@ public class LiquidCompileService {
         // rustc -V
         //rustc 1.56.1 (59eed8a2a 2021-11-01)
 
-        ExecuteResult result = JavaCommandExecutor.executeCommand(commandCargo, constants.getLiquidCompileTimeout());
+        ExecuteResult result = JavaCommandExecutor.executeCommand(commandCargo, constants.getCommandLineTimeout());
         if (result.failed()) {
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
         }
 
-       ExecuteResult resultRustc = JavaCommandExecutor.executeCommand(commandRustc, constants.getLiquidCompileTimeout());
+       ExecuteResult resultRustc = JavaCommandExecutor.executeCommand(commandRustc, constants.getCommandLineTimeout());
         if (resultRustc.failed()) {
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(resultRustc.getExecuteOut()));
         }
@@ -83,7 +78,6 @@ public class LiquidCompileService {
 
 
     /**
-     * todo 加上合约路径
      * 检查目录是否已存在，然后再创建
      * groupId + _ + contractPath + _ + contractName
      * @param contractName
@@ -91,13 +85,20 @@ public class LiquidCompileService {
      */
     public void execLiquidNewContract(String groupId, String contractPath, String contractName, String contractSource) {
         this.mkdirIfNotExist();
-        String contractDir = groupId + "_" + contractName;
-        // todo check contractDir exist
+        String contractDir = getContractDir(groupId, contractPath, contractName);
+        String contractLiquidPath = getLiquidContractPath(contractDir);
 
-        // todo check dir exist
+        // check contractDir exist, if exist, delete
+        File check = new File(contractLiquidPath);
+        if (check.exists()) {
+            log.warn("execLiquidNewContract [{}] already exist, skip new contract", contractLiquidPath);
+            boolean result = check.delete();
+            log.info("execLiquidNewContract delete old contract, result:{}", result);
+        }
+
+        // new liquid project, cargo liquid new contract XXX
         String command = String.format("cd %s && cargo liquid new contract %s", LIQUID_DIR, contractDir);
-        // todo cargo liquid new contract XXX, sed -i gitee
-        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constants.getLiquidCompileTimeout());
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constants.getCommandLineTimeout());
         log.info("execNewContract new contract Result:{}", result);
         if (result.failed()) {
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
@@ -106,10 +107,10 @@ public class LiquidCompileService {
         // cd $contractDir
         // sed github as gitee
         // todo mac add "", linux might not
-        String sed = String.format("sed -i \"\" \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/Cargo.toml", getContractPath(contractDir));
-        String sed2 = String.format("sed -i \"\" \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/.liquid/abi_gen/Cargo.toml", getContractPath(contractDir));
-        ExecuteResult sedResult = JavaCommandExecutor.executeCommand(sed, constants.getLiquidCompileTimeout());
-        ExecuteResult sedResult2 = JavaCommandExecutor.executeCommand(sed2, constants.getLiquidCompileTimeout());
+        String sed = String.format("sed -i \"\" \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/Cargo.toml", contractLiquidPath);
+        String sed2 = String.format("sed -i \"\" \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/.liquid/abi_gen/Cargo.toml", contractLiquidPath);
+        ExecuteResult sedResult = JavaCommandExecutor.executeCommand(sed, constants.getCommandLineTimeout());
+        ExecuteResult sedResult2 = JavaCommandExecutor.executeCommand(sed2, constants.getCommandLineTimeout());
         log.info("execNewContract sedResult:{},sedResult2:{}", sedResult, sedResult2);
         if (sedResult.failed()||sedResult2.failed()) {
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(sedResult.getExecuteOut()));
@@ -126,11 +127,11 @@ public class LiquidCompileService {
 
     }
 
-    public void execCargoTest(String groupId, String contractName) {
+    public void execCargoTest(String groupId, String contractName, int compileTimeout) {
         String contractDir = groupId + "_" + contractName;
         String testCommand = "cargo test";
-        String command = String.format("cd %s && %s", getContractPath(contractDir), testCommand);
-        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constants.getLiquidCompileTimeout());
+        String command = String.format("cd %s && %s", getLiquidContractPath(contractDir), testCommand);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, compileTimeout);
         log.info("execTest result:{}", result);
         if (result.failed()) {
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
@@ -139,14 +140,13 @@ public class LiquidCompileService {
 
     /**
      * cargo liquid build
-     * todo 换成异步，在合约状态中更新是否1已编译
      * @param contractDir
      */
-    public void execLiquidCompile(String contractDir) {
+    public void execLiquidCompile(String contractDir, int compileTimeout) {
         // cargo liquid build
         String testCommand = "cargo liquid build";
-        String command = String.format("cd %s && %s", getContractPath(contractDir), testCommand);
-        ExecuteResult result = JavaCommandExecutor.executeCommand(command, constants.getLiquidCompileTimeout());
+        String command = String.format("cd %s && %s", getLiquidContractPath(contractDir), testCommand);
+        ExecuteResult result = JavaCommandExecutor.executeCommand(command, compileTimeout);
         log.info("execCompile result:{}", result);
         if (result.failed()) {
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
@@ -159,11 +159,11 @@ public class LiquidCompileService {
      * @param contractName
      * @return
      */
-    public AbiBinInfo compileAndReturn(String groupId, String contractPath, String contractName) {
-        String contractDir = groupId + "_" + contractName;
+    public AbiBinInfo compileAndReturn(String groupId, String contractPath, String contractName, int compileTimeout) {
+        String contractDir = getContractDir(groupId, contractPath, contractName);
         // compile
-        this.execLiquidCompile(contractDir);
-        // check target dir exist, or compile failed
+        this.execLiquidCompile(contractDir, compileTimeout);
+        // check target dir exist, 如果已存在则删除，因为此时要重新编译
         String targetPath = Paths.get(LIQUID_DIR, contractDir, "target").toString();
         File targetDirFile = new File(targetPath);
         if (!targetDirFile.exists()) {
@@ -188,4 +188,13 @@ public class LiquidCompileService {
 
     }
 
+    private static String getContractDir(String groupId, String contractPath, String contractName) {
+        return groupId + "_" + contractPath + "_" + contractName;
+    }
+
+    public static String getLiquidContractPath(String contractDir) {
+        String path = Paths.get(LIQUID_DIR, contractDir).toString();
+        log.info("getLiquidContractPath path:{}", path);
+        return path;
+    }
 }

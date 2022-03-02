@@ -42,6 +42,7 @@ import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import com.webank.webase.front.contract.entity.wasm.AbiBinInfo;
 import com.webank.webase.front.contract.entity.wasm.CompileTask;
 import com.webank.webase.front.contract.entity.wasm.CompileTaskRepository;
 import com.webank.webase.front.keystore.KeyStoreService;
@@ -61,11 +62,14 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Future;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -93,11 +97,13 @@ import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -130,6 +136,11 @@ public class ContractService {
     private LiquidCompileService liquidCompileService;
     @Autowired
     private CompileTaskRepository compileTaskRepository;
+    @Qualifier(value = "compileAsyncScheduler")
+    @Autowired
+    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    @Autowired
+    private Constants constants;
 
     /**
      * sendAbi.
@@ -965,38 +976,88 @@ public class ContractService {
 
     // todo 如果同时多人编译同一个合约，则提示running
     // todo new liquid contract and save into db
-    public Contract newAndCompileLiquidContract(ReqContractSave contractReq) {
+    public Boolean newAndCompileLiquidContract(ReqContractSave contractReq) {
         String groupId = contractReq.getGroupId();
         String contractPath = contractReq.getContractPath();
         String contractName = contractReq.getContractName();
         String contractSource = contractReq.getContractSource();
+        if (StringUtils.isBlank(contractSource)) {
+            log.error("contract source cannot be empty!");
+            throw new FrontException(ConstantCode.PARAM_ERROR);
+        }
         // check by compile task if already new liquid project
         CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+        // todo debug log
+        log.info("newAndCompileLiquidContract taskInfo:{}", taskInfo);
         if (taskInfo != null) {
             if (taskInfo.getStatus() == 1) {
-                log.warn("task of [{}_{}_{}] already compiling", groupId, contractPath, contractName);
+                log.warn("newAndCompileLiquidContract task of [{}_{}_{}] already compiling", groupId, contractPath, contractName);
                 throw new FrontException(ConstantCode.LIQUID_CONTRACT_ALREADY_COMPILING);
             }
         } else {
             // 如果合约第一次创建，则new一个project
+            log.info("newAndCompileLiquidContract new liquid contract {}_{}_{}:{}", groupId, contractPath, contractName, contractSource);
             liquidCompileService.execLiquidNewContract(groupId, contractPath, contractName, contractSource);
+            // 保存到task服务，running
+            CompileTask compileTask = new CompileTask();
+            compileTask.setGroupId(groupId);
+            compileTask.setContractPath(contractPath);
+            compileTask.setContractName(contractName);
+            compileTask.setStatus(1);
+            LocalDateTime now = LocalDateTime.now();
+            compileTask.setCreateTime(now);
+            compileTask.setModifyTime(now);
+            log.info("newAndCompileLiquidContract new compileTask:{}", compileTask);
+            compileTaskRepository.save(compileTask);
         }
-        // 保存到task服务，running
-        CompileTask compileTask = new CompileTask();
-        compileTask.setGroupId(groupId);
-        compileTask.setContractPath(contractPath);
-        compileTask.setContractName(contractName);
-        compileTask.setStatus(1);
-        LocalDateTime now = LocalDateTime.now();
-        compileTask.setCreateTime(now);
-        compileTask.setModifyTime(now);
-        compileTaskRepository.save(compileTask);
+        // check if host check success
+        Future<?> task = threadPoolTaskScheduler.submit(() -> {
+            try {
+                Instant now = Instant.now();
+                log.info("start thread to compile");
+                // compile
+                AbiBinInfo abiBinInfo = liquidCompileService.compileAndReturn(groupId, contractPath, contractName, constants.getLiquidCompileTimeout());
+                log.info("finish compile, now start to update db status, duration:{}", Duration.between(now, Instant.now()).toMillis());
 
-        // todo async
-        liquidCompileService.compileAndReturn(groupId, contractPath, contractName);
+                // update contract and task info
+                Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+                // if contract not null, contract is in front, else, in node-mgr
+                if (contract != null) {
+                    contract.setContractAbi(abiBinInfo.getAbiInfo());
+                    // bytecode bin
+                    contract.setBytecodeBin(abiBinInfo.getBinInfo());
+                    contract.setModifyTime(LocalDateTime.now());
+                    contractRepository.save(contract);
+                }
+                CompileTask compileTaskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+                compileTaskInfo.setStatus(2);
+                compileTaskInfo.setAbi(abiBinInfo.getAbiInfo());
+                compileTaskInfo.setBin(abiBinInfo.getBinInfo());
+                compileTaskInfo.setModifyTime(LocalDateTime.now());
+                compileTaskRepository.save(compileTaskInfo);
+                log.info("newAndCompileLiquidContract finish update compile success status");
+            } catch (Exception e) {
+                log.error("newAndCompileLiquidContract:[{}_{}_{}], with unknown error", groupId, contractPath, contractName, e);
+                // update task
+                CompileTask compileTaskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+                compileTaskInfo.setStatus(3);
+                compileTaskInfo.setModifyTime(LocalDateTime.now());
+                compileTaskRepository.save(compileTaskInfo);
+                log.info("newAndCompileLiquidContract finish update compile fail status");
+            }
+        });
+        // 此处不能阻塞，而是直接返回编译中，
+        // 后台定时任务根据db的状态是否已更新判断，超时未更新，否则就根据超时设为失败
+        // 等待50s后，仍未完成，则返回，提示正在后台编译中
+        try {
+            Thread.sleep(constants.getCommandLineTimeout() * 2L);
+        } catch (InterruptedException e) {
+            log.error("wait for max timeout");
+        }
+        boolean ifDoneYet = task.isDone();
+        log.info("end newAndCompileLiquidContract :{}", ifDoneYet);
+        return ifDoneYet;
 
-        // todo after async, update task info status, update contract info (abi, bin)
-        return null;
     }
 
     /**

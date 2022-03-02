@@ -49,8 +49,10 @@ public class CompileTask {
      * compile status: 1-running, 2-success, 3-fail
      */
     private Integer status;
-//    @Column(columnDefinition = "mediumtext")
-//    private String contractSource;
+    @Column(columnDefinition = "mediumtext")
+    private String abi;
+    @Column(columnDefinition = "mediumtext")
+    private String bin;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 }

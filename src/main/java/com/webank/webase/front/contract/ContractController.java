@@ -424,10 +424,6 @@ public class ContractController extends BaseController {
     }
 
     /**
-     * compile liquid contract
-     */
-    // check env api
-    /**
      * query list of contract only contain groupId and contractAddress and contractName
      */
     @ApiOperation(value = "check", notes = "check cargo liquid env")
@@ -438,33 +434,9 @@ public class ContractController extends BaseController {
         return new BaseResponse(ConstantCode.RET_SUCCEED);
     }
 
-//    // new contract project todo 如果是node-mgr传入，合约名要加上一个唯一值，以区分front自己的和node-mgr的
-//    @PostMapping(value = "/liquid/new")
-//    public BaseResponse newLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) {
-//        Instant now = Instant.now();
-//        log.info("newLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
-//        checkParamResult(result);
-//        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
-//        liquidCompileService.execLiquidNewContract(req.getGroupId(), req.getContractName(), req.getContractSource());
-//        log.info("newLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
-//        return response;
-//    }
-
-//    // save contract api (new project and save)
-//    @PostMapping(value = "/liquid/newAndSave")
-//    public BaseResponse newLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) {
-//        Instant now = Instant.now();
-//        log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
-//        checkParamResult(result);
-//        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
-//        contractService.newAndSaveLiquidContract(req);
-//        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
-//        return response;
-//    }
-
     /**
      * 执行编译的时候，直接new操作，并且执行编译操作，new是同步的，编译是异步的
-     * todo 如何处理重复的liquid合约目录
+     * 在db记录已存在的合约目录，已存在且正在running，则报错正在运行；；如果已存在但是已结束，则删除重复的liquid合约目录，删除
      * 一个单独的异步表记录当前异步编译状态
      * @param req
      * @param result
@@ -475,10 +447,9 @@ public class ContractController extends BaseController {
         Instant now = Instant.now();
         log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
         checkParamResult(result);
-        BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
-        contractService.newAndCompileLiquidContract(req);
-        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()));
-        return response;
+        boolean taskDone = contractService.newAndCompileLiquidContract(req);
+        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()).toMillis());
+        return new BaseResponse(ConstantCode.RET_SUCCEED, taskDone);
     }
 
     @ApiOperation(value = "check compile", notes = "check liquid compile finished")
