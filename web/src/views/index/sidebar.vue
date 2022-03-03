@@ -115,7 +115,7 @@ export default {
                         break;
                     case 'subscribeEvent':
                         item.name = this.$t('route.subscribeEvent')
-                        item.menuShow = false
+                        item.menuShow = true
                         break;
 
                 }
