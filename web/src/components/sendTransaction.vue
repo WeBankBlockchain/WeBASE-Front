@@ -73,26 +73,29 @@
         </span>
         <el-button v-if="isShowAddUserBtn" type="text" size="mini" @click="createUser()">{{ $t("privateKey.addUser") }}</el-button>
       </div>
-      <div v-show="pramasData.length" class="send-item">
-        <el-form class="send-item" v-show="pramasData.length" style="line-height: 25px" :rules="rules" :model="ruleForm" ref="sendTransation">
+      <div v-show="form.pramasData.length" class="send-item">
+        <el-form class="send-item" v-show="form.pramasData.length" style="line-height: 25px" :rules="rules" :model="form" ref="sendTransation">
           <span class="send-item-title" style="position: relative; top: 5px">{{ this.$t("contracts.params") }}:</span>
-          <el-form-item style="position: relative; top: -25px" v-for="(item, index) in pramasData" :prop="item.type" :key="item.name">
+          <div v-for="(item, index) in form.pramasData" :key='index'>
+            <el-form-item style="position: relative; top: -25px"  :prop="'pramasData.'+index+'.value'"  :rules='rules[item.type]'>
             <span class="send-item-title"></span>
             <template v-if="item.type == 'string'">
-              <el-input v-model="ruleForm[item.name]" style="width: 400px" :placeholder="item.type">
+              <el-input v-model="item.value" style="width: 400px" :placeholder="item.type">
                 <template slot="prepend">
                   <span class="">{{ item.name }}</span>
                 </template>
               </el-input>
             </template>
             <template v-else>
-              <el-input v-model="ruleForm[item.name]" style="width: 400px" :placeholder="placeholderText(item.type)">
+              <el-input v-model="item.value" style="width: 400px" :placeholder="placeholderText(item.type)">
                 <template slot="prepend">
                   <span class="">{{ item.name }}</span>
                 </template>
               </el-input>
             </template>
           </el-form-item>
+          </div>
+      
           <div style="padding: 5px 0 0 28px; color: 'gray'">
             <i class="el-icon-info" style="padding-right: 4px"></i>{{ this.$t("contracts.paramsInfo") }}
           </div>
@@ -177,7 +180,7 @@ export default {
       userId: "",
       userList: [],
       abiList: [],
-      pramasData: [],
+      form:{pramasData: []},
       funcList: [],
       buttonClick: false,
       contractVersion: this.version,
@@ -205,6 +208,41 @@ export default {
           {
             pattern: /^-?[1-9]\d*$/,
             message: "可以是负数",
+            trigger: "blur",
+          },
+        ],
+          string: [
+          {
+            required: true,
+            message: this.$t("text.sendInput"),
+            trigger: "blur",
+          },
+        ],
+         uint256: [
+          {
+            required: true,
+            message: this.$t("text.sendInput"),
+            trigger: "blur",
+          },
+        ],
+          int256: [
+          {
+            required: true,
+            message: this.$t("text.sendInput"),
+            trigger: "blur",
+          },
+        ],
+          bytes: [
+          {
+            required: true,
+            message: this.$t("text.sendInput"),
+            trigger: "blur",
+          },
+        ],
+          tuple: [
+          {
+            required: true,
+            message: this.$t("text.sendInput"),
             trigger: "blur",
           },
         ],
@@ -276,8 +314,8 @@ export default {
   },
   methods: {
        arrayLimit() {
-      console.log(this.pramasData);
-      this.pramasData.map((item, index) => {
+      console.log(this.form.pramasData);
+      this.form.pramasData.map((item, index) => {
         if (item.type.indexOf("[]") != -1) {
           this.rules[item.type] = [
             {
@@ -292,6 +330,9 @@ export default {
             },
           ];
         }
+        // if(item.name==''){
+        //   item.name='param'+index
+        // }
       });
     },
      placeholderText(type) {
@@ -379,7 +420,7 @@ export default {
       } else if (val && val === "constructor") {
         this.abiList.forEach((value) => {
           if (value.type === val) {
-            this.pramasData = value.inputs;
+            this.form.pramasData = value.inputs;
             this.pramasObj = value;
             this.arrayLimit();
           }
@@ -409,7 +450,7 @@ export default {
       this.constant = false;
       this.funcList.forEach((value) => {
         if (value.funcId === this.transation.funcName) {
-          this.pramasData = value.inputs;
+          this.form.pramasData = value.inputs;
           this.constant = value.constant;
           this.pramasObj = value;
           this.stateMutability = value.stateMutability;
@@ -426,27 +467,34 @@ export default {
       if (this.transation.funcType === "constructor") {
         this.transation.funcName = this.data.contractName;
       }
-      for (let item in this.ruleForm) {
-        let data = this.ruleForm[item];
+      for (let item in this.form.pramasData) {
+        let data = this.form.pramasData[item].value;
         if (data && isJson(data)) {
           try {
-            this.ruleForms[item] = JSON.parse(data);
+             this.form.pramasData[item].value = JSON.parse(data);
           } catch (error) {
             console.log(error);
           }
         } else if (data === "true" || data === "false") {
-          this.ruleForms[item] = eval(data.toLowerCase());
+          this.form.pramasData[item].value = eval(data.toLowerCase());
         }
          else {
-          this.ruleForms[item] = data;
+          this.form.pramasData[item].value = data;
         }
       } 
       let rules = [];
-      for (var i in this.pramasData) {
-        for (var key in this.ruleForms) {
-          if (this.pramasData[i].name == key) rules.push(this.ruleForms[key]);
-        }
-      }
+       this.form.pramasData.map((item,index)=>{
+         if(item.value){
+                  rules.push(item.value);  
+         }else{
+                  rules.push('');  
+         }
+       })
+      // for (var i in this.form.pramasData) {
+      //   for (var key in this.ruleForms) {
+      //     if (this.form.pramasData[i].name == key) rules.push(this.ruleForms[key]);
+      //   }
+      // }
 
       let functionName = "";
       this.funcList.forEach((value) => {
@@ -466,7 +514,7 @@ export default {
         contractPath: this.data.contractPath,
         version: this.isCNS && this.cnsVersion ? this.cnsVersion : "",
         funcName: functionName || "",
-        funcParam: rules,
+        funcParam:  rules,
         contractAddress: this.isCNS ? "" : this.contractAddress,
         contractAbi: [this.pramasObj],
         useAes: false,
@@ -484,7 +532,7 @@ export default {
               resData: resData,
               input: {
                 name: functionName,
-                inputs: this.pramasData,
+                inputs: this.form.pramasData,
               },
               data: this.pramasObj,
             };
