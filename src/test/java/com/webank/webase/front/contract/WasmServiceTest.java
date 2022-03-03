@@ -17,6 +17,7 @@ package com.webank.webase.front.contract;
 
 import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.contract.entity.ReqContractSave;
+import com.webank.webase.front.contract.entity.ReqDeploy;
 import com.webank.webase.front.contract.entity.wasm.AbiBinInfo;
 import com.webank.webase.front.contract.entity.wasm.CompileTask;
 import com.webank.webase.front.util.JsonUtils;
@@ -75,8 +76,38 @@ public class WasmServiceTest extends SpringTestBase {
     @Test
     public void testGetTaskInfo() {
         CompileTask compileTask = contractService.getLiquidContract(groupId, contractPath, contractName);
-        assert compileTask != null;
         System.out.println("compileTask " + JsonUtils.objToString(compileTask));
+
+    }
+
+    @Test
+    public void testSaveContractDeploy() {
+        CompileTask compileTask = contractService.getLiquidContract(groupId, contractPath, contractName);
+        ReqContractSave reqContractSave = new ReqContractSave();
+        reqContractSave.setGroupId(groupId);
+        reqContractSave.setContractName(contractName);
+        reqContractSave.setContractPath(contractPath);
+        reqContractSave.setContractSource(source);
+        reqContractSave.setContractAbi(compileTask.getAbi());
+        reqContractSave.setBytecodeBin(compileTask.getBin());
+        contractService.saveContract(reqContractSave);
+
+    }
+
+    @Test
+    public void testDeploy() {
+        CompileTask compileTask = contractService.getLiquidContract(groupId, contractPath, contractName);
+        ReqDeploy reqDeploy = new ReqDeploy();
+        reqDeploy.setGroupId(groupId);
+        reqDeploy.setContractName(contractName);
+        reqDeploy.setContractPath(contractPath);
+        reqDeploy.setContractSource(source);
+        reqDeploy.setAbiInfo(JsonUtils.toList(compileTask.getAbi()));
+        reqDeploy.setBytecodeBin(compileTask.getBin());
+
+        contractService.deployLocally(reqDeploy);
+
+
     }
 
 }

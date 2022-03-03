@@ -199,11 +199,11 @@ public class CommonUtils {
      * @param str String
      * @return
      */
-    public static byte[] base64Decode(String str) {
+    public static String base64Decode(String str) {
         if (str == null) {
-            return new byte[0];
+            return "";
         }
-        return Base64.getDecoder().decode(str);
+        return new String(Base64.getDecoder().decode(str));
     }
 
     /**

@@ -1,5 +1,5 @@
 # server version
-version: lab-rc1
+version: lab-rc2
 
 server:
   port: ${SERVER_PORT:5002}
@@ -82,4 +82,5 @@ constant:
   # get event callback wait (s)
   eventCallbackWait: 4
   # compile liquid timeout (ms)
-  liquidCompileTimeout: 30000
+  commandLineTimeout: 10000
+  liquidCompileTimeout: 120000
