@@ -351,7 +351,7 @@
     <el-dialog
       :title="$t('title.callContract')"
       :visible.sync="dialogVisible"
-      width="500px"
+      width="600px"
       :before-close="sendClose"
       v-if="dialogVisible"
       center
@@ -554,6 +554,7 @@ export default {
       contractForm: {
         contractAddress: "",
       },
+      nolimit:true
     };
   },
   watch: {
@@ -666,6 +667,13 @@ export default {
       this.content = "";
       this.bin = "";
     });
+      Bus.$on("limit", (data) => {
+      this.nolimit = false;
+      let that = this;
+      setTimeout(() => {
+        that.nolimit = true;
+      }, 500);
+    });
     [...document.querySelectorAll(".noBlur")].map((item) => {
       item.onmousedown = (e) => {
         if (e && e.preventDefault) {
@@ -760,7 +768,7 @@ export default {
       //     this.saveCode()
       // }
       //  this.saveShow = true;
-      if (this.data.contractSource != data) {
+      if (this.data.contractSource != data && this.nolimit) {
         console.log("合约改变弹框提示");
         this.$confirm(
           `${this.$t("text.unsavedContract")}？`,
@@ -1843,7 +1851,7 @@ export default {
   padding-left: 40px;
 }
 .send-dialog >>> .el-dialog--center .el-dialog__body {
-  padding: 10px 25px 15px;
+
 }
 .send-dialog >>> .el-dialog__footer {
   padding-top: 0;

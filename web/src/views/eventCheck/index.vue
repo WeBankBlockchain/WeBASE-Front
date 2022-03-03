@@ -2,24 +2,9 @@
   <div class="rivate-key-management-wrapper">
     <div class="">
       <div class="">
-        <el-form
-          :model="contractEventForm"
-          :rules="rules"
-          ref="contractEventForm"
-          class="demo-ruleForm"
-          label-width="110px"
-        >
-          <el-form-item
-            :label="$t('table.contractAddress')"
-            prop="contractAddress"
-          >
-            <el-autocomplete
-              v-model.trim="contractEventForm.contractAddress"
-              :fetch-suggestions="querySearch"
-              @select="selectAddress"
-              style="width: 500px"
-              clearable
-            >
+        <el-form :model="contractEventForm" :rules="rules" ref="contractEventForm" class="demo-ruleForm" label-width="110px">
+          <el-form-item :label="$t('table.contractAddress')" prop="contractAddress">
+            <el-autocomplete v-model.trim="contractEventForm.contractAddress" :fetch-suggestions="querySearch" @select="selectAddress" style="width: 500px" clearable>
               <template slot-scope="{ item }">
                 <div class="name">
                   {{ item.contractAddress }} {{ item.contractName }}
@@ -29,63 +14,29 @@
             <span></span>
           </el-form-item>
           <el-form-item :label="$t('table.contractAbi')" prop="contractAbi">
-            <el-input
-              v-model="contractEventForm.contractAbi"
-              :rows="1"
-              type="textarea"
-              style="width: 500px"
-            ></el-input>
+            <el-input v-model="contractEventForm.contractAbi" :rows="1" type="textarea" style="width: 500px"></el-input>
           </el-form-item>
           <div class="block-wrapper">
             <el-form-item :label="$t('table.fromBlock')" prop="fromBlock">
-              <el-input
-                v-model.number="contractEventForm.fromBlock"
-                clearable
-                style="width: 195px"
-              ></el-input>
+              <el-input v-model.number="contractEventForm.fromBlock" clearable style="width: 195px"></el-input>
             </el-form-item>
             <el-form-item :label="$t('table.toBlock')" prop="toBlock">
-              <el-input
-                v-model.number="contractEventForm.toBlock"
-                clearable
-                style="width: 195px"
-              ></el-input>
+              <el-input v-model.number="contractEventForm.toBlock" clearable style="width: 195px"></el-input>
             </el-form-item>
+            <el-tooltip effect="dark" :content="$t('transaction.blockTips')" placement="top-start" style="margin-top:12px">
+              <i class="el-icon-info contract-icon font-15"></i>
+            </el-tooltip>
           </div>
-          <el-form-item
-            :label="$t('table.eventName')"
-            prop="eventName"
-            class="event-option"
-          >
-            <el-select
-              v-model="contractEventForm.eventName"
-              :placeholder="$t('placeholder.selected')"
-              style="width: 500px"
-              @change="changeEventName"
-              class="event-name"
-            >
-              <el-option
-                v-for="item in eventNameList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              >
+          <el-form-item :label="$t('table.eventName')" prop="eventName" class="event-option">
+            <el-select v-model="contractEventForm.eventName" :placeholder="$t('placeholder.selected')" style="width: 500px" @change="changeEventName" class="event-name">
+              <el-option v-for="item in eventNameList" :key="item.value" :label="item.label" :value="item.value">
               </el-option>
             </el-select>
             <li v-for="item in inputList" class="event-info">
               <div v-if="item.indexed" style="position: relative">
                 <div class="param-name">{{ item.name }}:</div>
-                <el-input
-                  v-model="item.value"
-                  :placeholder="item.type"
-                  style="width: 500px"
-                  @input="(e) => (item.msgObj = isType(e, item.type))"
-                ></el-input>
-                <span
-                  v-if="item.msgObj && !item.msgObj.is"
-                  class="font-color-ed5454 font-12 form-error"
-                  style="display: inline-block"
-                >
+                <el-input v-model="item.value" :placeholder="item.type" style="width: 500px" @input="(e) => (item.msgObj = isType(e, item.type))"></el-input>
+                <span v-if="item.msgObj && !item.msgObj.is" class="font-color-ed5454 font-12 form-error" style="display: inline-block">
                   {{ item.msgObj.msg }}
                 </span>
               </div>
@@ -93,12 +44,7 @@
           </el-form-item>
           <el-form-item>
             <div class="text-center" style="width: 500px">
-              <el-button
-                type="primary"
-                @click="submit('contractEventForm')"
-                :loading="loading"
-                >{{ $t("dialog.search") }}</el-button
-              >
+              <el-button type="primary" @click="submit('contractEventForm')" :loading="loading">{{ $t("dialog.search") }}</el-button>
               <span class="font-color-fff" v-text="searchMessage"></span>
             </div>
           </el-form-item>
@@ -106,36 +52,17 @@
       </div>
     </div>
     <div class="module-wrapper">
-      <div
-        class="search-table"
-        v-if="eventList.length > 0"
-        style="padding-bottom: 13px"
-      >
+      <div class="search-table" v-if="eventList.length > 0" style="padding-bottom: 13px">
         <el-table :data="eventList" tooltip-effect="dark" v-loading="loading">
-          <el-table-column
-            prop="log"
-            :label="$t('table.blockHeight')"
-            show-overflow-tooltip
-            width="120"
-            align="center"
-          >
+          <el-table-column prop="log" :label="$t('table.blockHeight')" show-overflow-tooltip width="120" align="center">
             <template slot-scope="scope">
               <span>{{ scope.row.log.blockNumber }}</span>
             </template>
           </el-table-column>
-          <el-table-column
-            prop="eventVal"
-            :label="$t('table.eventValue')"
-            show-overflow-tooltip
-            align="center"
-          ></el-table-column>
+          <el-table-column prop="eventVal" :label="$t('table.eventValue')" show-overflow-tooltip align="center"></el-table-column>
         </el-table>
       </div>
-      <div
-        v-if="isSearch && eventList.length == 0"
-        class="text-center"
-        style="padding: 10px 0"
-      >
+      <div v-if="isSearch && eventList.length == 0" class="text-center" style="padding: 10px 0">
         <span class="font-color-fff">{{ $t("text.noData") }}</span>
       </div>
     </div>
@@ -184,10 +111,10 @@ export default {
         if (!Number.isInteger(value)) {
           callback(new Error(this.$t("rule.inputIsNumber")));
         } else {
-          if (value <= 0) {
-            callback(new Error(this.$t("rule.blockNumber")));
-          } else {
+          if (value > 0 || value == -1) {
             callback();
+          } else {
+            callback(new Error(this.$t("rule.blockNumber")));
           }
         }
       }
@@ -649,7 +576,9 @@ export default {
               return;
             }
             eventList.forEach((item) => {
-              newEventList.push(item);
+              if (item != null) {
+                newEventList.push(item);
+              }
             });
             if (newEventList && newEventList.length) {
               newEventList.forEach((item) => {
