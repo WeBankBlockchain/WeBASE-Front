@@ -79,14 +79,14 @@
           <el-form-item style="position: relative; top: -25px" v-for="(item, index) in pramasData" :prop="item.type" :key="item.name">
             <span class="send-item-title"></span>
             <template v-if="item.type == 'string'">
-              <el-input v-model="ruleForm[item.type]" style="width: 400px" :placeholder="item.type">
+              <el-input v-model="ruleForm[item.name]" style="width: 400px" :placeholder="item.type">
                 <template slot="prepend">
                   <span class="">{{ item.name }}</span>
                 </template>
               </el-input>
             </template>
             <template v-else>
-              <el-input v-model="ruleForm[item.type]" style="width: 400px" :placeholder="placeholderText(item.type)">
+              <el-input v-model="ruleForm[item.name]" style="width: 400px" :placeholder="placeholderText(item.type)">
                 <template slot="prepend">
                   <span class="">{{ item.name }}</span>
                 </template>
@@ -444,7 +444,7 @@ export default {
       let rules = [];
       for (var i in this.pramasData) {
         for (var key in this.ruleForms) {
-          if (this.pramasData[i].type == key) rules.push(this.ruleForms[key]);
+          if (this.pramasData[i].name == key) rules.push(this.ruleForms[key]);
         }
       }
 
