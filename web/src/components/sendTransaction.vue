@@ -207,7 +207,7 @@ export default {
           },
           {
             pattern: /^-?[1-9]\d*$/,
-            message: "可以是负数",
+            message: "必须是数字，可以是负数",
             trigger: "blur",
           },
         ],
@@ -224,6 +224,11 @@ export default {
             message: this.$t("text.sendInput"),
             trigger: "blur",
           },
+          {
+            pattern: /^[1-9]\d*$/,
+            message: "必须是数字，不可以是负数",
+            trigger: "blur",
+          },
         ],
           int256: [
           {
@@ -231,8 +236,20 @@ export default {
             message: this.$t("text.sendInput"),
             trigger: "blur",
           },
+          {
+            pattern: /^-?[1-9]\d*$/,
+            message: "必须是数字，可以是负数",
+            trigger: "blur",
+          },
         ],
           bytes: [
+          {
+            required: true,
+            message: this.$t("text.sendInput"),
+            trigger: "blur",
+          },
+        ],
+        bool: [
           {
             required: true,
             message: this.$t("text.sendInput"),
@@ -246,6 +263,18 @@ export default {
             trigger: "blur",
           },
         ],
+          address: [
+          {
+            required: true,
+            message: this.$t("text.sendInput"),
+            trigger: "blur",
+          },
+          {
+            pattern: `^0[xX][0-9a-fA-F]{40}$`,
+            message: "必须是十六进制的数字或字母,长度是42",
+            trigger: "blur",
+          },
+        ],
         uint: [
           {
             required: true,
@@ -254,7 +283,7 @@ export default {
           },
           {
             pattern: /^[1-9]\d*$/,
-            message: "不可以是负数",
+            message: "必须是数字，不可以是负数",
             trigger: "blur",
           },
         ],
@@ -467,29 +496,23 @@ export default {
       if (this.transation.funcType === "constructor") {
         this.transation.funcName = this.data.contractName;
       }
+      let rules = [];
       for (let item in this.form.pramasData) {
         let data = this.form.pramasData[item].value;
         if (data && isJson(data)) {
           try {
-             this.form.pramasData[item].value = JSON.parse(data);
+             rules.push(JSON.parse(data))
           } catch (error) {
             console.log(error);
           }
         } else if (data === "true" || data === "false") {
-          this.form.pramasData[item].value = eval(data.toLowerCase());
+             rules.push(eval(data.toLowerCase()))
         }
          else {
-          this.form.pramasData[item].value = data;
+          rules.push(data)
         }
       } 
-      let rules = [];
-       this.form.pramasData.map((item,index)=>{
-         if(item.value){
-                  rules.push(item.value);  
-         }else{
-                  rules.push('');  
-         }
-       })
+      
       // for (var i in this.form.pramasData) {
       //   for (var key in this.ruleForms) {
       //     if (this.form.pramasData[i].name == key) rules.push(this.ruleForms[key]);
