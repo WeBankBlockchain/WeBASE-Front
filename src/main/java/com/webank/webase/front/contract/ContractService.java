@@ -93,6 +93,7 @@ import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.manager.AssembleTransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
+import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
@@ -207,7 +208,7 @@ public class ContractService {
      * @param req
      * @param doLocally deploy contract locally or through webase-sign
      */
-    private String deployByLocalContract(ReqDeploy req, boolean doLocally) {
+    public String deployByLocalContract(ReqDeploy req, boolean doLocally) {
         // check contract status
         Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
 
@@ -299,21 +300,38 @@ public class ContractService {
             throw new FrontException(ConstantCode.GROUP_SOL_WASM_NOT_MATCH);
         }
 
-        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), req.getIsWasm());
+        String contractAddress;
+        if (isWasm) {
+            // get privateKey
+            CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);
+            // params to list of string
+            List<String> paramStrList = new ArrayList<>();
+            params.forEach(p -> {
+                paramStrList.add(JsonUtils.objToString(paramStrList));
+            });
+            try{
+                contractAddress = deployContract(client, abiStr, bytecodeBin,
+                        req.getBfsPath(), paramStrList, cryptoKeyPair);
+            } catch (ABICodecException e) {
+                log.error("deployLocally encode fail:[]", e);
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            }
+        } else {
+            ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), req.getIsWasm());
+            byte[] encodedConstructor;
+            try {
+                encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+            } catch (ABICodecException e) {
+                log.error("deployLocally encode fail:[]", e);
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            }
+            // get privateKey
+            CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);
+            // contract deploy
+            contractAddress =
+                    deployContract(client, encodedConstructor, cryptoKeyPair);
 
-        byte[] encodedConstructor;
-        try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
-        } catch (ABICodecException e) {
-            log.error("deployLocally encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
         }
-        // get privateKey
-        CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);
-        // contract deploy
-        String contractAddress =
-            deployContract(client, encodedConstructor, cryptoKeyPair);
-
         log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -398,6 +416,14 @@ public class ContractService {
         }
     }
 
+    /**
+     * support solidity
+     * @param client
+     * @param encodedConstructor
+     * @param cryptoKeyPair
+     * @return
+     * @throws FrontException
+     */
     private String deployContract(Client client, byte[] encodedConstructor,
             CryptoKeyPair cryptoKeyPair) throws FrontException {
 
@@ -410,6 +436,41 @@ public class ContractService {
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
         TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
+        transService.decodeReceipt(client, receipt);
+        int status = receipt.getStatus();
+        if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())) {
+            log.error("deployContract locally error, receipt status:{},hash:{}", status, receipt.getTransactionHash());
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
+        }
+        return receipt.getContractAddress();
+    }
+
+    /**
+     *
+     * @param client
+     * @param abi
+     * @param binStr
+     * @param path 每一次部署的path就是合约的地址，每次部署的地址都要不一样
+     * @param params
+     * @param cryptoKeyPair
+     * @return
+     * @throws ABICodecException
+     */
+    private String deployContract(Client client, String abi, String binStr, String path,
+                                        List<String> params, CryptoKeyPair cryptoKeyPair) throws ABICodecException {
+        AssembleTransactionProcessor assembleTxProcessor = null;
+        try {
+            assembleTxProcessor = TransactionProcessorFactory
+                    .createAssembleTransactionProcessor(client, cryptoKeyPair);
+        } catch (Exception e) {
+            log.error("deployContract getAssembleTransactionProcessor error:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+        }
+        TransactionResponse response =
+                assembleTxProcessor.deployAndGetResponseWithStringParams(
+                        abi, binStr, params, path);
+        log.debug("deployContract liquid:{}", JsonUtils.objToString(response));
+        TransactionReceipt receipt = response.getTransactionReceipt();
         transService.decodeReceipt(client, receipt);
         int status = receipt.getStatus();
         if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())) {

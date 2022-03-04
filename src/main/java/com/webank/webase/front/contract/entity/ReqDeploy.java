@@ -63,4 +63,5 @@ public class ReqDeploy {
      * if liquid(use wasm)
      */
     private Boolean isWasm = false;
+    private String bfsPath;
 }

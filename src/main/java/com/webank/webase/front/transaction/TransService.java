@@ -626,7 +626,7 @@ public class TransService {
      */
     public void decodeReceipt(Client client, TransactionReceipt receipt) {
         // decode receipt
-        TransactionDecoderService txDecoder = new TransactionDecoderService(client.getCryptoSuite(), false);
+        TransactionDecoderService txDecoder = new TransactionDecoderService(client.getCryptoSuite(), client.isWASM());
         String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
         receipt.setMessage(receiptMsg);
     }
