@@ -16,6 +16,7 @@
 package com.webank.webase.front.contract;
 
 import com.webank.webase.front.base.SpringTestBase;
+import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
 import com.webank.webase.front.contract.entity.wasm.AbiBinInfo;
@@ -31,12 +32,13 @@ public class WasmServiceTest extends SpringTestBase {
     LiquidCompileService liquidCompileService;
     @Autowired
     ContractService contractService;
-
-    private static final String groupId = "group";
+    @Autowired
+    ContractRepository contractRepository;
+    private static final String groupId = "group0";
     private static final String contractPath = "/";
     private static final String contractName = "hello";
     private static final String source = "IyFbY2ZnX2F0dHIobm90KGZlYXR1cmUgPSAic3RkIiksIG5vX3N0ZCldCgp1c2UgbGlxdWlkOjpzdG9yYWdlOwp1c2UgbGlxdWlkX2xhbmcgYXMgbGlxdWlkOwoKI1tsaXF1aWQ6OmNvbnRyYWN0XQptb2QgaGVsbG9fd29ybGQgewogICAgdXNlIHN1cGVyOjoqOwoKICAgICNbbGlxdWlkKHN0b3JhZ2UpXQogICAgc3RydWN0IEhlbGxvV29ybGQgewogICAgICAgIG5hbWU6IHN0b3JhZ2U6OlZhbHVlPFN0cmluZz4sCiAgICB9CgogICAgI1tsaXF1aWQobWV0aG9kcyldCiAgICBpbXBsIEhlbGxvV29ybGQgewogICAgICAgIHB1YiBmbiBuZXcoJm11dCBzZWxmKSB7CiAgICAgICAgICAgIHNlbGYubmFtZS5pbml0aWFsaXplKFN0cmluZzo6ZnJvbSgiQWxpY2UiKSk7CiAgICAgICAgfQoKICAgICAgICBwdWIgZm4gZ2V0KCZzZWxmKSAtPiBTdHJpbmcgewogICAgICAgICAgICBzZWxmLm5hbWUuY2xvbmUoKQogICAgICAgIH0KCiAgICAgICAgcHViIGZuIHNldCgmbXV0IHNlbGYsIG5hbWU6IFN0cmluZykgewogICAgICAgICAgICBzZWxmLm5hbWUuc2V0KG5hbWUpCiAgICAgICAgfQogICAgfQoKICAgICNbY2ZnKHRlc3QpXQogICAgbW9kIHRlc3RzIHsKICAgICAgICB1c2Ugc3VwZXI6Oio7CgogICAgICAgICNbdGVzdF0KICAgICAgICBmbiBnZXRfd29ya3MoKSB7CiAgICAgICAgICAgIGxldCBjb250cmFjdCA9IEhlbGxvV29ybGQ6Om5ldygpOwogICAgICAgICAgICBhc3NlcnRfZXEhKGNvbnRyYWN0LmdldCgpLCAiQWxpY2UiKTsKICAgICAgICB9CgogICAgICAgICNbdGVzdF0KICAgICAgICBmbiBzZXRfd29ya3MoKSB7CiAgICAgICAgICAgIGxldCBtdXQgY29udHJhY3QgPSBIZWxsb1dvcmxkOjpuZXcoKTsKCiAgICAgICAgICAgIGxldCBuZXdfbmFtZSA9IFN0cmluZzo6ZnJvbSgiQm9iIik7CiAgICAgICAgICAgIGNvbnRyYWN0LnNldChuZXdfbmFtZS5jbG9uZSgpKTsKICAgICAgICAgICAgYXNzZXJ0X2VxIShjb250cmFjdC5nZXQoKSwgIkJvYiIpOwogICAgICAgIH0KICAgIH0KfQ==";
-
+    private static final String userAddress = "0x90c647e80d787f4a8763073077224915501f1c92";
 
     @Test
     public void testCheck() {
@@ -81,7 +83,7 @@ public class WasmServiceTest extends SpringTestBase {
     }
 
     @Test
-    public void testSaveContractDeploy() {
+    public void testSaveContract() {
         CompileTask compileTask = contractService.getLiquidContract(groupId, contractPath, contractName);
         ReqContractSave reqContractSave = new ReqContractSave();
         reqContractSave.setGroupId(groupId);
@@ -96,17 +98,22 @@ public class WasmServiceTest extends SpringTestBase {
 
     @Test
     public void testDeploy() {
-        CompileTask compileTask = contractService.getLiquidContract(groupId, contractPath, contractName);
+        Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+        System.out.println("contract " + contract);
         ReqDeploy reqDeploy = new ReqDeploy();
+        reqDeploy.setContractId(contract.getId());
+        reqDeploy.setBfsPath("/test_2"); // 每次部署的合约地址都必须不一样
         reqDeploy.setGroupId(groupId);
         reqDeploy.setContractName(contractName);
         reqDeploy.setContractPath(contractPath);
         reqDeploy.setContractSource(source);
-        reqDeploy.setAbiInfo(JsonUtils.toList(compileTask.getAbi()));
-        reqDeploy.setBytecodeBin(compileTask.getBin());
+        reqDeploy.setAbiInfo(JsonUtils.toList(contract.getContractAbi()));
+        reqDeploy.setBytecodeBin(contract.getBytecodeBin());
+        reqDeploy.setIsWasm(true);
+        reqDeploy.setUser(userAddress);
 
-        contractService.deployLocally(reqDeploy);
-
+        String address = contractService.deployByLocalContract(reqDeploy, true);
+        System.out.println("deploy " + address);
 
     }
 
