@@ -252,7 +252,8 @@ public class TransController extends BaseController {
         String encodedOrSignedResult =  transServiceImpl.createRawTxEncoded(true, reqTransHandle.getUser(),
             reqTransHandle.getGroupId(), reqTransHandle.getContractAddress(), reqTransHandle.getContractAbi(),
             reqTransHandle.isUseCns(), reqTransHandle.getVersion(), reqTransHandle.getVersion(),
-            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam());
+            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam(),
+                reqTransHandle.getIsWasm());
         log.info("transToRawTxStrLocal end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;
@@ -292,7 +293,8 @@ public class TransController extends BaseController {
         String encodedOrSignedResult =  transServiceImpl.createRawTxEncoded(false, reqTransHandle.getSignUserId(),
             reqTransHandle.getGroupId(), reqTransHandle.getContractAddress(), reqTransHandle.getContractAbi(),
             reqTransHandle.isUseCns(), reqTransHandle.getCnsName(), reqTransHandle.getVersion(),
-            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam());
+            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam(),
+                reqTransHandle.getIsWasm());
         log.info("transToRawTxStrWithSign end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;
@@ -317,7 +319,7 @@ public class TransController extends BaseController {
         String groupId = reqEncodeFunction.getGroupId();
         String encodedOrSignedResult =  transServiceImpl.encodeFunction2Str(
             JsonUtils.objToString(reqEncodeFunction.getContractAbi()),
-            reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam(), groupId);
+            reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam(), groupId, reqEncodeFunction.getIsWasm());
         log.info("transEncoded2Str end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;

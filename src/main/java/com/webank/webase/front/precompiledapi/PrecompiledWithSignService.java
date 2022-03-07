@@ -79,7 +79,7 @@ public class PrecompiledWithSignService {
         // execute set method
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, contractAddress, abiStr, FUNC_SETVALUEBYKEY, funcParams);
+                        signUserId, contractAddress, abiStr, FUNC_SETVALUEBYKEY, funcParams, false);
         return this.handleTransactionReceipt(receipt);
     }
 
@@ -169,7 +169,7 @@ public class PrecompiledWithSignService {
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, contractAddress, abiStr, FUNC_ADDSEALER, funcParams);
+                        signUserId, contractAddress, abiStr, FUNC_ADDSEALER, funcParams, false);
         return this.handleTransactionReceipt(receipt);
     }
 
@@ -193,7 +193,7 @@ public class PrecompiledWithSignService {
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, contractAddress, abiStr, FUNC_ADDOBSERVER, funcParams);
+                        signUserId, contractAddress, abiStr, FUNC_ADDOBSERVER, funcParams, false);
         return this.handleTransactionReceipt(receipt);
     }
 
@@ -213,7 +213,7 @@ public class PrecompiledWithSignService {
         TransactionReceipt receipt = new TransactionReceipt();
         try {
             receipt = (TransactionReceipt) transService.transHandleWithSign(groupId,
-                    signUserId, contractAddress, abiStr, FUNC_REMOVE, funcParams);
+                    signUserId, contractAddress, abiStr, FUNC_REMOVE, funcParams, false);
         } catch (RuntimeException e) {
             // firstly remove node that sdk connected to the node, return the request that present
             // susscces
@@ -255,7 +255,7 @@ public class PrecompiledWithSignService {
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.TABLE_FACTORY);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, contractAddress, abiStr, FUNC_CREATETABLE, funcParams);
+                        signUserId, contractAddress, abiStr, FUNC_CREATETABLE, funcParams, false);
         return this.handleTransactionReceipt(receipt);
     }
 
@@ -291,7 +291,7 @@ public class PrecompiledWithSignService {
         log.debug("contractAddress is {}", contractAddress);
         TransactionReceipt receipt =
             (TransactionReceipt) transService.transHandleWithSign(groupId,
-                signUserId, contractAddress, abiStr, FUNC_INSERT, funcParams);
+                signUserId, contractAddress, abiStr, FUNC_INSERT, funcParams, false);
         return this.handleTransactionReceipt(receipt);
     }
 
@@ -323,7 +323,7 @@ public class PrecompiledWithSignService {
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CRUD);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, contractAddress, abiStr, FUNC_UPDATE, funcParams);
+                        signUserId, contractAddress, abiStr, FUNC_UPDATE, funcParams, false);
         return this.handleTransactionReceipt(receipt);
     }
 
@@ -350,7 +350,7 @@ public class PrecompiledWithSignService {
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CRUD);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, contractAddress, abiStr, FUNC_REMOVE, funcParams);
+                        signUserId, contractAddress, abiStr, FUNC_REMOVE, funcParams, false);
         return this.handleTransactionReceipt(receipt);
     }
 
@@ -481,7 +481,7 @@ public class PrecompiledWithSignService {
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CNS);
         TransactionReceipt receipt =
                 (TransactionReceipt) transService.transHandleWithSign(groupId,
-                        signUserId, precompiledAddress, abiStr, CNSPrecompiled.FUNC_INSERT, funcParams);
+                        signUserId, precompiledAddress, abiStr, CNSPrecompiled.FUNC_INSERT, funcParams, false);
         return this.handleTransactionReceipt(receipt);
     }
 
