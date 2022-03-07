@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 
 public class WasmServiceTest extends SpringTestBase {
@@ -157,7 +158,10 @@ public class WasmServiceTest extends SpringTestBase {
 
         // todo test set
         transHandle.setFuncName("set");
-        transHandle.setFuncParam(Collections.singletonList("Bob"));
+        List<Object> param = new ArrayList<>();
+        param.add("Bob");
+
+        transHandle.setFuncParam(param);
         Object res2 = transService.transHandleLocal(transHandle);
         System.out.println("res2 " + JsonUtils.objToString(res2));
 
