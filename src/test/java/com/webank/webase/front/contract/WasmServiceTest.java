@@ -21,9 +21,15 @@ import com.webank.webase.front.contract.entity.ReqContractSave;
 import com.webank.webase.front.contract.entity.ReqDeploy;
 import com.webank.webase.front.contract.entity.wasm.AbiBinInfo;
 import com.webank.webase.front.contract.entity.wasm.CompileTask;
+import com.webank.webase.front.transaction.TransService;
+import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.util.JsonUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 
 public class WasmServiceTest extends SpringTestBase {
@@ -34,6 +40,9 @@ public class WasmServiceTest extends SpringTestBase {
     ContractService contractService;
     @Autowired
     ContractRepository contractRepository;
+    @Autowired
+    TransService transService;
+
     private static final String groupId = "group0";
     private static final String contractPath = "/";
     private static final String contractName = "hello";
@@ -117,4 +126,40 @@ public class WasmServiceTest extends SpringTestBase {
 
     }
 
+    @Test
+    public void testCallLiquid() {
+        Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+        ReqTransHandle transHandle = new ReqTransHandle();
+        transHandle.setContractAbi(JsonUtils.toList(contract.getContractAbi()));
+        transHandle.setContractAddress("/test_2");
+        transHandle.setUser(userAddress);
+        transHandle.setGroupId(groupId);
+        transHandle.setIsWasm(true);
+
+        // todo test call test_2 group0 contract
+        transHandle.setFuncName("get");
+        transHandle.setFuncParam(new ArrayList<>());
+        Object res1 = transService.transHandleLocal(transHandle);
+        System.out.println("res1 " + JsonUtils.objToString(res1));
+
+    }
+
+
+    @Test
+    public void testCallLiquid() {
+        Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
+        ReqTransHandle transHandle = new ReqTransHandle();
+        transHandle.setContractAbi(JsonUtils.toList(contract.getContractAbi()));
+        transHandle.setContractAddress("/test_2");
+        transHandle.setUser(userAddress);
+        transHandle.setGroupId(groupId);
+        transHandle.setIsWasm(true);
+
+        // todo test set
+        transHandle.setFuncName("set");
+        transHandle.setFuncParam(Collections.singletonList("Bob"));
+        Object res2 = transService.transHandleLocal(transHandle);
+        System.out.println("res2 " + JsonUtils.objToString(res2));
+
+    }
 }
