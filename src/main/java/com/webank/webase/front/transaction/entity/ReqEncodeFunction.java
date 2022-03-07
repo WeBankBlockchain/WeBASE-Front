@@ -33,4 +33,5 @@ public class ReqEncodeFunction {
     private List<Object> funcParam;
     @NotBlank
     private String groupId;
+    private Boolean isWasm = false;
 }
