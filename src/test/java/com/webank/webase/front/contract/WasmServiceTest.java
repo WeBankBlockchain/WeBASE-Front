@@ -146,7 +146,7 @@ public class WasmServiceTest extends SpringTestBase {
 
 
     @Test
-    public void testCallLiquid() {
+    public void testExecLiquid() {
         Contract contract = contractRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
         ReqTransHandle transHandle = new ReqTransHandle();
         transHandle.setContractAbi(JsonUtils.toList(contract.getContractAbi()));
