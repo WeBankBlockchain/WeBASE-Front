@@ -13,19 +13,17 @@
  */
 package com.webank.webase.front.transaction;
 
-
 import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
-
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
-import com.webank.webase.front.contract.CommonContract;
 import com.webank.webase.front.contract.ContractRepository;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
-import com.webank.webase.front.precompiledapi.PrecompiledService;
+import com.webank.webase.front.rpc.precompiled.cns.CNSServiceInWebase;
+import com.webank.webase.front.rpc.precompiled.sysconf.SysConfigServiceInWebase;
 import com.webank.webase.front.transaction.entity.ReqSignMessageHash;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
@@ -50,7 +48,6 @@ import org.fisco.bcos.sdk.codec.ABICodec;
 import org.fisco.bcos.sdk.codec.ABICodecException;
 import org.fisco.bcos.sdk.codec.Utils;
 import org.fisco.bcos.sdk.codec.abi.FunctionReturnDecoder;
-import org.fisco.bcos.sdk.codec.datatypes.Function;
 import org.fisco.bcos.sdk.codec.datatypes.Type;
 import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
 import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
@@ -72,7 +69,6 @@ import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.transaction.pusher.TransactionPusherService;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +97,9 @@ public class TransService {
     @Qualifier(value = "ecdsa")
     private CryptoSuite ecdsaCryptoSuite;
     @Autowired
-    private PrecompiledService precompiledService;
+    private SysConfigServiceInWebase sysConfigServiceInWebase;
+    @Autowired
+    private CNSServiceInWebase cnsServiceInWebase;
     /**
      * if use wasm(liquid), use 1
      */
@@ -175,8 +173,8 @@ public class TransService {
 
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
         byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
-//        return Numeric.toHexString(signedMessage);
-        return Base64.getEncoder().encodeToString(signedMessage);
+        return Numeric.toHexString(signedMessage);
+//        return Base64.getEncoder().encodeToString(signedMessage);
 
     }
 
@@ -397,7 +395,7 @@ public class TransService {
         String funcName, List<Object> funcParam) throws Exception {
 
         if (isUseCns) {
-            Tuple2<String, String> cnsInfo = precompiledService.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
+            Tuple2<String, String> cnsInfo = cnsServiceInWebase.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
             contractAddress = cnsInfo.getValue1();
             log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
         }

@@ -1,5 +1,5 @@
 # server version
-version: lab-rc1
+version: lab-rc2
 
 server:
   port: 5002

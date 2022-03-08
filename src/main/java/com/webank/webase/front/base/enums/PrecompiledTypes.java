@@ -19,47 +19,39 @@ package com.webank.webase.front.base.enums;
  */
 public enum PrecompiledTypes {
     /**
-     * System Config Precompile
+     * System Config
      */
     SYSTEM_CONFIG(1000),
 
     /**
-     * Table Factory Precompile
+     * CRUD
      */
-    TABLE_FACTORY(1001),
+    CRUD(1009),
 
     /**
-     * CRUD Precompile
-     */
-    CRUD(1002),
-
-    /**
-     * Consensus Precompile
+     * Consensus
      */
     CONSENSUS(1003),
 
     /**
-     * Registry Contract
+     * Contract
      */
     CNS(1004),
     /**
-     * Permission Precompile
+     * CONTRACT AUTH
      */
-    PERMISSION(1005),
+    CONTRACT_AUTH(1005),
     /**
-     * Contract status Manage (Contract life cycle)
+     * BFS
      */
-    CSM(1007),
+    BFS(100111),
     /**
-     * Chain governance
+     * Committee Manager
      */
-    CHAIN_GOVERN(1008),
-    /**
-     * Chain governance
-     */
-    KV_TABLE(1010);
+    COMMITTEE_MANAGER(10001);
 
-    private int value;
+
+  private int value;
 
     PrecompiledTypes(Integer type) {
         this.value = type;

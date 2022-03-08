@@ -26,6 +26,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,6 +42,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
@@ -50,6 +52,7 @@ import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.Transac
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.jni.common.JniException;
+import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -522,7 +525,13 @@ public class Web3ApiService {
         return groupNodeInfos;
     }
 
-    private Map<String, String> getNodeIdNameMap(String groupId) {
+    public List<String> getNodeList(String groupId) {
+        GroupPeers groupPeers = getWeb3j(groupId).getGroupPeers();
+        List<String> nodeList =  groupPeers.getGroupPeers();
+        return nodeList;
+    }
+
+    public Map<String, String> getNodeIdNameMap(String groupId) {
         log.debug("refreshAndGetNodeNameMap groupId:{}", groupId);
         Map<String, String> nodeIdNameMap = new HashMap<>();
         List<GroupNodeInfo> nodeInfoList = this.getGroupNodeInfo(groupId);
