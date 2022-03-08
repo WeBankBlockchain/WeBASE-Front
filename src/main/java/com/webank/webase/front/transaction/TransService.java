@@ -103,7 +103,9 @@ public class TransService {
     /**
      * if use wasm(liquid), use 1
      */
-    private static final int USE_SOLIDITY = 0; 
+    private static final int USE_SOLIDITY = 1;
+    private static final int USE_WASM = 2;
+    private static final int USE_WASM_DEPLOY = 8;
 
     /**
      * transHandleWithSign.
@@ -172,7 +174,7 @@ public class TransService {
         byte[] encodedTransaction = encoderService.encode(rawTransaction);
 
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
-        byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
+        byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, client.isWASM() ? USE_WASM : USE_SOLIDITY);
         return Numeric.toHexString(signedMessage);
 //        return Base64.getEncoder().encodeToString(signedMessage);
 
@@ -479,7 +481,7 @@ public class TransService {
                 SignatureResult signData = signMessageHashByType(hashMessageStr,
                     cryptoKeyPair, client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
+                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, client.isWASM() ? USE_WASM : USE_SOLIDITY);
                 signResultStr = Numeric.toHexString(signedMessage);
             } else {
                 // sign by webase-sign
@@ -488,7 +490,7 @@ public class TransService {
                 EncodeInfo encodeInfo = new EncodeInfo(user, hashMessageStr);
                 String signDataStr = keyStoreService.getSignData(encodeInfo);
                 SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, client.getCryptoSuite().cryptoTypeConfig);
-                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
+                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, client.isWASM() ? USE_WASM : USE_SOLIDITY);
                 signResultStr = Numeric.toHexString(signedMessage);
             }
             log.info("createRawTxEncoded signResultStr:{}", signResultStr);
@@ -514,10 +516,10 @@ public class TransService {
     public List<Type> handleCall(String groupId, String userAddress, String contractAddress,
         byte[] encodedFunction, String abiStr, String funcName, boolean isWasm) {
 
-        Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory
-            .getChainIdAndGroupId(web3ApiService.getWeb3j(groupId));
-        TransactionProcessor transactionProcessor = new TransactionProcessor(
-            web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(groupId),
+        Client client = web3ApiService.getWeb3j(groupId);
+        Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
+        TransactionProcessor transactionProcessor = new TransactionProcessor(client,
+            keyStoreService.getCredentialsForQuery(groupId),
             String.valueOf(groupId), chainIdAndGroupId.getLeft());
         CallOutput callOutput = transactionProcessor
             .executeCall(userAddress, contractAddress, encodedFunction)
@@ -530,9 +532,9 @@ public class TransService {
             String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
             throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR.getCode(), parseResultStr);
         } else {
-            ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), isWasm);
+            ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), client.isWASM());
             try {
-                log.info("========= callOutput.getOutput():{}", callOutput.getOutput());
+                log.debug("========= callOutput.getOutput():{}", callOutput.getOutput());
                 //  [
                 //  {
                 //    "value": "Hello, World!",
@@ -565,7 +567,7 @@ public class TransService {
         log.info("handleTransaction start startTime:{}", startTime.toEpochMilli());
         // send tx
         TransactionProcessor txProcessor = TransactionProcessorFactory.createTransactionProcessor(client, cryptoKeyPair);
-        TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair, USE_SOLIDITY);
+        TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair, client.isWASM() ? USE_WASM : USE_SOLIDITY);
         // cover null message through statusCode
         this.decodeReceipt(client, receipt);
         log.info("execTransaction end useTime:{},receipt:{}",

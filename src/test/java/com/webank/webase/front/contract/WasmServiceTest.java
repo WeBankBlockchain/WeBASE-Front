@@ -165,5 +165,11 @@ public class WasmServiceTest extends SpringTestBase {
         Object res2 = transService.transHandleLocal(transHandle);
         System.out.println("res2 " + JsonUtils.objToString(res2));
 
+        // todo test call test_2 group0 contract
+        transHandle.setFuncName("get");
+        transHandle.setFuncParam(new ArrayList<>());
+        Object res1 = transService.transHandleLocal(transHandle);
+        System.out.println("res1 " + JsonUtils.objToString(res1));
+
     }
 }
