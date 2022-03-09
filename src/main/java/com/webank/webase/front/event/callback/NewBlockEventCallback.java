@@ -23,9 +23,7 @@ import com.webank.webase.front.event.entity.message.BlockPushMessage;
 import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.fisco.bcos.sdk.service.callback.BlockNumberNotifyCallback;
-import org.fisco.bcos.sdk.service.model.BlockNumberNotification;
+import org.fisco.bcos.sdk.jni.BlockNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,26 +33,20 @@ import org.slf4j.LoggerFactory;
  */
 @Data
 @AllArgsConstructor
-public class NewBlockEventCallback implements BlockNumberNotifyCallback {
+public class NewBlockEventCallback implements BlockNotifier {
 
     private static Logger logger = LoggerFactory.getLogger(NewBlockEventCallback.class);
-
     private MQPublisher MQPublisher;
     private String groupId;
     private PublisherHelper blockPublishInfo;
 
     @Override
-    public void onReceiveBlockNumberInfo(String peerIpAndPort,
-        BlockNumberNotification blockNumberNotification) {
-        String groupId = blockNumberNotification.getGroupId();
-        String blockNumber = blockNumberNotification.getBlockNumber();
-        logger.info("NewBlockEventCallBack peerIpAndPort:{}, groupId:{}, blockNumber:{}",
-            peerIpAndPort, groupId, blockNumber);
+    public void onResponse(String groupId, BigInteger blockNumber) {
 
+        logger.info("NewBlockEventCallBack groupId:{}, blockNumber:{}", groupId, blockNumber);
         BlockPushMessage blockPushMessage = new BlockPushMessage();
-        blockPushMessage.setBlockNumber(new BigInteger(blockNumber));
+        blockPushMessage.setBlockNumber(blockNumber);
         blockPushMessage.setGroupId(groupId);
-        blockPushMessage.setPeerIpPort(peerIpAndPort);
         blockPushMessage.setEventType(EventTypes.BLOCK_NOTIFY.getValue());
         if (groupId == this.groupId) {
             pushMessage2MQ(blockPublishInfo.getExchangeName(),

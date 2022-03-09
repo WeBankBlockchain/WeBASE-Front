@@ -244,6 +244,9 @@ public class ConstantCode {
     public static final RetCode ALREADY_EXISTS_IN_SEALER_LIST = RetCode.mark(-51104, "The node already exists in the sealerList");
     public static final RetCode ALREADY_EXISTS_IN_OBSERVER_LIST = RetCode.mark(-51105, "The node already exists in the observerList");
     //public static final RetCode ALREADY_EXISTS_IN_OBSERVER_LIST = RetCode.mark(51105, "The");
+    public static final RetCode PEERS_NOT_CONNECTED = RetCode.mark(201128, "group peers not connected");
+    public static final RetCode GENESIS_CONF_NOT_FOUND = RetCode.mark(201131, "group genesis conf not found");
+
 
     /* fit in 3.0 */
     public static final RetCode BCOS_SDK_EMPTY = RetCode.mark(201600, "BcosSDK is empty, call config api to init one bcosSDK");

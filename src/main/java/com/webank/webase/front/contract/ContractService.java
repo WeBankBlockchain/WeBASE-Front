@@ -44,8 +44,9 @@ import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.precompiledapi.PrecompiledService;
-import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
+import com.webank.webase.front.rpc.authmanager.everyone.EveryoneService;
+import com.webank.webase.front.rpc.precompiled.cns.CNSServiceInWebase;
+import com.webank.webase.front.rpc.precompiled.sysconf.SysConfigServiceInWebase;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CleanPathUtil;
@@ -88,6 +89,7 @@ import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.manager.AssembleTransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
@@ -106,856 +108,851 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 public class ContractService {
-    private static final String BASE_FILE_PATH = "./temp" + File.separator;
-    private static final String CONTRACT_FILE_TEMP = BASE_FILE_PATH + "%1s.sol";
+  private static final String BASE_FILE_PATH = "./temp" + File.separator;
+  private static final String CONTRACT_FILE_TEMP = BASE_FILE_PATH + "%1s.sol";
 
-    @Autowired
-    private ContractRepository contractRepository;
-    @Autowired
-    private ContractPathRepository contractPathRepository;
-    @Autowired
-    private CnsRepository cnsRepository;
-    @Autowired
-    private TransService transService;
-    @Autowired
-    private KeyStoreService keyStoreService;
-    @Autowired
-    private Web3ApiService web3ApiService;
-    @Autowired
-    private PrecompiledWithSignService precompiledWithSignService;
-    @Autowired
-    private PrecompiledService precompiledService;
+  @Autowired
+  private ContractRepository contractRepository;
+  @Autowired
+  private ContractPathRepository contractPathRepository;
+  @Autowired
+  private CnsRepository cnsRepository;
+  @Autowired
+  private TransService transService;
+  @Autowired
+  private KeyStoreService keyStoreService;
+  @Autowired
+  private Web3ApiService web3ApiService;
+  @Autowired
+  private CNSServiceInWebase cnsServiceInWebase;
+  @Autowired
+  private SysConfigServiceInWebase sysConfigServiceInWebase;
+  @Autowired
+  private EveryoneService everyoneService;
 
-    /**
-     * sendAbi.
-     *
-     * @param req request data
-     */
-    public void sendAbi(ReqSendAbi req) {
+  /**
+   * sendAbi.
+   *
+   * @param req request data
+   */
+  public void sendAbi(ReqSendAbi req) {
 
-        String contractName = req.getContractName();
-        String address = req.getAddress();
-        List<ABIDefinition> abiInfos = req.getAbiInfo();
+    String contractName = req.getContractName();
+    String address = req.getAddress();
+    List<ABIDefinition> abiInfos = req.getAbiInfo();
 
-        // check address is valid
-        addressIsValid(req.getGroupId(), req.getAddress(), req.getContractBin());
-        // Check if it has been deployed based on the contract name and version number
-        checkContractAbiExistedAndSave(contractName, address.substring(2), abiInfos);
-        log.info("sendAbi end. contractname:{} ,version:{}", contractName, address);
+    // check address is valid
+    addressIsValid(req.getGroupId(), req.getAddress(), req.getContractBin());
+    // Check if it has been deployed based on the contract name and version number
+    checkContractAbiExistedAndSave(contractName, address.substring(2), abiInfos);
+    log.info("sendAbi end. contractname:{} ,version:{}", contractName, address);
+  }
+
+  /**
+   * check address is valid.
+   */
+  private void addressIsValid(String groupId, String contractAddress, String contractBin) {
+    if (StringUtils.isBlank(contractAddress)) {
+      log.error("fail addressIsValid. contractAddress is empty");
+      throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
+    }
+    if (StringUtils.isBlank(contractBin)) {
+      log.error("fail addressIsValid. bytecodeBin is empty");
+      throw new FrontException(ConstantCode.CONTRACT_BIN_NULL);
+    }
+    // getCode
+    String binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+
+    log.debug("addressIsValid address:{} binOnChain:{}", contractAddress, binOnChain);
+    if (StringUtils.isBlank(binOnChain)) {
+      log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
+      throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
     }
 
-    /**
-     * check address is valid.
-     */
-    private void addressIsValid(String groupId, String contractAddress, String contractBin) {
-        if (StringUtils.isBlank(contractAddress)) {
-            log.error("fail addressIsValid. contractAddress is empty");
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_NULL);
-        }
-        if (StringUtils.isBlank(contractBin)) {
-            log.error("fail addressIsValid. bytecodeBin is empty");
-            throw new FrontException(ConstantCode.CONTRACT_BIN_NULL);
-        }
-        // getCode
-        String binOnChain = web3ApiService.getCode(groupId, contractAddress, BigInteger.ZERO);
+  }
 
-        log.debug("addressIsValid address:{} binOnChain:{}", contractAddress, binOnChain);
-        if (StringUtils.isBlank(binOnChain)) {
-            log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
-        }
+  /**
+   * case deploy type: deploy by abi or deploy by local contract
+   *
+   * @param: ReqDeploy'scontractId
+   * @param: doLocally deploy contract locally or through webase-sign
+   */
+  public String caseDeploy(ReqDeploy req, boolean doLocally) throws ContractException {
+    if (Objects.nonNull(req.getContractId())) {
+      return deployByLocalContract(req, doLocally);
+    } else {
+      if (doLocally) {
+        return deployLocally(req);
+      } else {
+        return deployWithSign(req);
+      }
+    }
+  }
 
+  /**
+   * check contract exists before deploy
+   *
+   * @param req
+   * @param doLocally deploy contract locally or through webase-sign
+   */
+  private String deployByLocalContract(ReqDeploy req, boolean doLocally)
+      throws ContractException {
+    // check contract status
+    Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
+
+    // deploy
+    String contractAddress;
+    // deploy locally or webase-sign
+    if (doLocally) {
+      //check deploy permission
+      checkDeployPermission(req.getGroupId(), req.getUser());
+      contractAddress = deployLocally(req);
+    } else {
+      // check deploy permission
+      String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
+      if (StringUtils.isNotBlank(userAddress)) {
+        checkDeployPermission(req.getGroupId(), userAddress);
+      }
+      contractAddress = deployWithSign(req);
+    }
+    if (StringUtils.isNotBlank(contractAddress)
+        && !Address.DEFAULT.getValue().equals(contractAddress)) {
+      // save address
+      BeanUtils.copyProperties(req, contract);
+      contract.setContractAddress(contractAddress);
+      contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+      contract.setDeployTime(LocalDateTime.now());
+      contract.setModifyTime(contract.getDeployTime());
+      contractRepository.save(contract);
+    }
+    return contractAddress;
+  }
+
+  /**
+   * deploy through webase-sign
+   */
+  public String deployWithSign(ReqDeploy req) {
+    String groupId = req.getGroupId();
+    String signUserId = req.getSignUserId();
+    String abiStr = JsonUtils.objToString(req.getAbiInfo());
+    String bytecodeBin = req.getBytecodeBin();
+    List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+
+    // check groupId
+    Client client = web3ApiService.getWeb3j(groupId);
+    if (client.isWASM()) {
+      log.error("deployWithSign error, this group:{} only support wasm", groupId);
+      throw new FrontException(ConstantCode.CLIENT_ONLY_SUPPORT_WASM);
     }
 
-    /**
-     * case deploy type: deploy by abi or deploy by local contract
-     *
-     * @param: ReqDeploy'scontractId
-     * @param: doLocally deploy contract locally or through webase-sign
-     */
-    public String caseDeploy(ReqDeploy req, boolean doLocally) {
-        if (Objects.nonNull(req.getContractId())) {
-            return deployByLocalContract(req, doLocally);
-        } else {
-            if (doLocally) {
-                return deployLocally(req);
-            } else {
-                return deployWithSign(req);
-            }
-        }
+    if (client == null) {
+      throw new FrontException(GROUPID_NOT_EXIST);
     }
 
-    /**
-     * check contract exists before deploy
-     * 
-     * @param req
-     * @param doLocally deploy contract locally or through webase-sign
-     */
-    private String deployByLocalContract(ReqDeploy req, boolean doLocally) {
-        // check contract status
-        Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
-
-        // deploy
-        String contractAddress;
-        // deploy locally or webase-sign
-        if (doLocally) {
-            // check deploy permission
-//            checkDeployPermission(req.getGroupId(), req.getUser());
-            contractAddress = deployLocally(req);
-        } else {
-//            // check deploy permission
-//            String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
-//            if (StringUtils.isNotBlank(userAddress)) {
-//                checkDeployPermission(req.getGroupId(), userAddress);
-//            }
-            contractAddress = deployWithSign(req);
-        }
-        if (StringUtils.isNotBlank(contractAddress)
-                && !Address.DEFAULT.getValue().equals(contractAddress)) {
-            // save address
-            BeanUtils.copyProperties(req, contract);
-            contract.setContractAddress(contractAddress);
-            contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-            contract.setDeployTime(LocalDateTime.now());
-            contract.setModifyTime(contract.getDeployTime());
-            contractRepository.save(contract);
-        }
-        return contractAddress;
+    ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
+    byte[] encodedConstructor;
+    try {
+      encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+    } catch (ABICodecException e) {
+      log.error("deployWithSign encode fail:[]", e);
+      throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
     }
 
-    /**
-     * deploy through webase-sign
-     */
-    public String deployWithSign(ReqDeploy req) {
-        String groupId = req.getGroupId();
-        String signUserId = req.getSignUserId();
-        String abiStr = JsonUtils.objToString(req.getAbiInfo());
-        String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
-
-        // check groupId
-        Client client = web3ApiService.getWeb3j(groupId);
-        if (client.isWASM()) {
-            log.error("deployWithSign error, this group:{} only support wasm", groupId);
-            throw new FrontException(ConstantCode.CLIENT_ONLY_SUPPORT_WASM);
-        }
-
-        if (client == null) {
-            throw new FrontException(GROUPID_NOT_EXIST);
-        }
-
-        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
-        byte[] encodedConstructor;
-        try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
-        } catch (ABICodecException e) {
-            log.error("deployWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
-        }
-
-        // data sign
+    // data sign
 //        String signMsg = transService.signMessage(groupId, client, signUserId, "", encodedConstructor);
-        String signMsg = transService.signMessage(groupId, client, signUserId, null, encodedConstructor);
-        // send transaction
-        TransactionReceipt receipt = transService.sendMessage(client, signMsg);
-        String contractAddress = receipt.getContractAddress();
+    String signMsg = transService.signMessage(groupId, client, signUserId, null, encodedConstructor);
+    // send transaction
+    TransactionReceipt receipt = transService.sendMessage(client, signMsg);
+    String contractAddress = receipt.getContractAddress();
 
-        log.info("success deployWithSign. contractAddress:{}", contractAddress);
-        return contractAddress;
+    log.info("success deployWithSign. contractAddress:{}", contractAddress);
+    return contractAddress;
+  }
+
+  /**
+   * deploy locally, not through webase-sign
+   */
+  public String deployLocally(ReqDeploy req) throws ContractException {
+    String groupId = req.getGroupId();
+    String userAddress = req.getUser();
+    // check deploy permission
+    checkDeployPermission(groupId, userAddress);
+
+    String abiStr = JsonUtils.objToString(req.getAbiInfo());
+    String bytecodeBin = req.getBytecodeBin();
+    List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+
+    ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
+
+    byte[] encodedConstructor;
+    try {
+      encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+    } catch (ABICodecException e) {
+      log.error("deployLocally encode fail:[]", e);
+      throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
     }
+    // get privateKey
+    CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);
+    // contract deploy
+    String contractAddress =
+        deployContract(groupId, encodedConstructor, cryptoKeyPair);
 
-    /**
-     * deploy locally, not through webase-sign
-     */
-    public String deployLocally(ReqDeploy req) {
-        String groupId = req.getGroupId();
-        String userAddress = req.getUser();
-        // check deploy permission
-//        checkDeployPermission(groupId, userAddress);
+    log.info("success deployLocally. contractAddress:{}", contractAddress);
+    return contractAddress;
+  }
 
-        String abiStr = JsonUtils.objToString(req.getAbiInfo());
-        String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
-
-        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
-
-        byte[] encodedConstructor;
-        try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
-        } catch (ABICodecException e) {
-            log.error("deployLocally encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
-        }
-        // get privateKey
-        CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);
-        // contract deploy
-        String contractAddress =
-            deployContract(groupId, encodedConstructor, cryptoKeyPair);
-
-        log.info("success deployLocally. contractAddress:{}", contractAddress);
-        return contractAddress;
-    }
-
-    /**
-     * registerCns.
-     */
-    public void registerCns(ReqRegisterCns req) throws Exception {
-        String groupId = req.getGroupId();
-        String cnsName = req.getCnsName();
-        String version = req.getVersion();
-        String contractAddress = req.getContractAddress();
-        String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
-        Tuple2<String, String> cnsList =
-                precompiledService.queryCnsByNameAndVersion(groupId, cnsName, version);
+  /**
+   * registerCns.
+   */
+  public void registerCns(ReqRegisterCns req) throws Exception {
+    String groupId = req.getGroupId();
+    String cnsName = req.getCnsName();
+    String version = req.getVersion();
+    String contractName = req.getContractName();
+    String contractAddress = req.getContractAddress();
+    String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
+    String signUserId =req.getSignUserId();
+    Tuple2<String, String> cnsList =
+        cnsServiceInWebase.queryCnsByNameAndVersion(groupId, cnsName, version);
 //        if (!CollectionUtils.isEmpty(cnsList)) { todo 返回为空时怎么判断
 //            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
 //            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
 //        }
-        // locally
-        if (req.isSaveEnabled()) {
-            if (StringUtils.isBlank(req.getContractPath())) {
-                throw new FrontException(ConstantCode.PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING);
-            }
-            if (StringUtils.isBlank(req.getUserAddress())) {
-                throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
-            }
-            CryptoKeyPair credentials = keyStoreService.getCredentials(req.getUserAddress(), groupId);
-            CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId), credentials);
-            try {
-                cnsService.registerCNS(cnsName, version, contractAddress, abiInfo);
-            } catch (Exception e) {
-                log.error("fail registerCns. cnsName:{}", cnsName);
-                throw new FrontException(ConstantCode.CNS_REGISTER_FAIL);
-            }
-            Cns cns = new Cns();
-            cns.setContractAbi(abiInfo);
-            BeanUtils.copyProperties(req, cns);
-            cns.setCreateTime(LocalDateTime.now());
-            cns.setModifyTime(LocalDateTime.now());
-            cnsRepository.save(cns);
-        } else {
-            // from node mgr
-            if (StringUtils.isBlank(req.getSignUserId())) {
-                throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
-            }
-            precompiledWithSignService.registerCns(groupId, req.getSignUserId(), cnsName,
-                    req.getVersion(), contractAddress, abiInfo);
-        }
+    // locally
+    if (req.isSaveEnabled()) {
+      if (StringUtils.isBlank(req.getContractPath())) {
+        throw new FrontException(ConstantCode.PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING);
+      }
+      if (StringUtils.isBlank(req.getUserAddress())) {
+        throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
+      }
+      CryptoKeyPair credentials = keyStoreService.getCredentials(req.getUserAddress(), groupId);
+      CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId), credentials);
+      try {
+        cnsService.registerCNS(cnsName, version, contractAddress, abiInfo);
+      } catch (Exception e) {
+        log.error("fail registerCns. cnsName:{}", cnsName);
+        throw new FrontException(ConstantCode.CNS_REGISTER_FAIL);
+      }
+      Cns cns = new Cns();
+      cns.setContractAbi(abiInfo);
+      BeanUtils.copyProperties(req, cns);
+      cns.setCreateTime(LocalDateTime.now());
+      cns.setModifyTime(LocalDateTime.now());
+      cnsRepository.save(cns);
+    } else {
+      // from node mgr
+      if (StringUtils.isBlank(req.getSignUserId())) {
+        throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
+      }
+      cnsServiceInWebase.registerCNS(groupId, signUserId, contractName,
+          req.getVersion(), contractAddress, abiInfo);
+      //(String groupId, String contractName, String contractVersion,
+      //      String contractAddress, String abiData)
     }
+  }
 
-    /**
-     * encode constructor function
-     */
-    private static byte[] constructorEncoded(String contractName,
-            ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
-        // Constructor encoded
-        byte[] encodedConstructor = null;
-        String functionName = contractName;
-        // input handle
-        List<String> funcInputTypes = versionEvent.getFuncInputs().get(functionName);
+  /**
+   * encode constructor function
+   */
+  private static byte[] constructorEncoded(String contractName,
+      ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
+    // Constructor encoded
+    byte[] encodedConstructor = null;
+    String functionName = contractName;
+    // input handle
+    List<String> funcInputTypes = versionEvent.getFuncInputs().get(functionName);
 
-        if (funcInputTypes != null && funcInputTypes.size() > 0) {
-            if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deploy encodedConstructor:{}", encodedConstructor);
-            } else {
-                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-            }
-        }
-        return encodedConstructor;
+    if (funcInputTypes != null && funcInputTypes.size() > 0) {
+      if (funcInputTypes.size() == params.size()) {
+        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
+        encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
+        log.info("deploy encodedConstructor:{}", encodedConstructor);
+      } else {
+        log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
+        throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
+      }
     }
+    return encodedConstructor;
+  }
 
 
-    private void checkContractAbiExistedAndSave(String contractName, String version,
-            List<ABIDefinition> abiInfos) throws FrontException {
-        boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
-        if (!ifExisted) {
-            ContractAbiUtil.setContractWithAbi(contractName, version, abiInfos, true);
-        }
+  private void checkContractAbiExistedAndSave(String contractName, String version,
+      List<ABIDefinition> abiInfos) throws FrontException {
+    boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
+    if (!ifExisted) {
+      ContractAbiUtil.setContractWithAbi(contractName, version, abiInfos, true);
     }
+  }
 
-    private String deployContract(String groupId, byte[] encodedConstructor,
-            CryptoKeyPair cryptoKeyPair) throws FrontException {
-        Client client = web3ApiService.getWeb3j(groupId);
-        if (client == null) {
-            throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-        }
-        if (client.isWASM()) {
-            log.error("deployContract locally error, this group:{} only support wasm", groupId);
-            throw new FrontException(ConstantCode.CLIENT_ONLY_SUPPORT_WASM);
-        }
-        AssembleTransactionProcessor assembleTxProcessor = null;
-        try {
-            assembleTxProcessor = TransactionProcessorFactory
-                .createAssembleTransactionProcessor(client, cryptoKeyPair);
-        } catch (Exception e) {
-            log.error("deployContract getAssembleTransactionProcessor error:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
-        }
-        TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
-        transService.decodeReceipt(client, receipt);
-        int status = receipt.getStatus();
-        if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())) {
-            log.error("deployContract locally error, receipt status:{},hash:{}", status, receipt.getTransactionHash());
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
-        }
-        return receipt.getContractAddress();
+  private String deployContract(String groupId, byte[] encodedConstructor,
+      CryptoKeyPair cryptoKeyPair) throws FrontException {
+    Client client = web3ApiService.getWeb3j(groupId);
+    if (client == null) {
+      throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
     }
-
-    /**
-     * deleteAbi.
-     *
-     * @param contractName not null
-     * @param version not null
-     */
-    public BaseResponse deleteAbi(String contractName, String version) throws FrontException {
-        BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
-        boolean result = CommonUtils.deleteFile(
-                Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
-        if (!result) {
-            log.warn("deleteAbi fail. contractname:{} ,version:{}", contractName, version);
-            throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
-        }
-        return baseRsp;
+    if (client.isWASM()) {
+      log.error("deployContract locally error, this group:{} only support wasm", groupId);
+      throw new FrontException(ConstantCode.CLIENT_ONLY_SUPPORT_WASM);
     }
-
-    public static FileContentHandle compileToJavaFile(String contractName,
-            List<ABIDefinition> abiInfo, String contractBin, String packageName)
-            throws IOException {
-
-        File abiFile = new File(CleanPathUtil
-                .cleanString(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi"));
-        FrontUtils.createFileIfNotExist(abiFile, true);
-        FileUtils.writeStringToFile(abiFile, JsonUtils.toJSONString(abiInfo));
-        File binFile = new File(CleanPathUtil
-                .cleanString(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin"));
-        FrontUtils.createFileIfNotExist(binFile, true);
-        FileUtils.writeStringToFile(binFile, contractBin);
-
-        String outputDirectory = "";
-        if (StringUtils.isNotBlank(packageName)) {
-            outputDirectory = packageName.replace(".", File.separator);
-        }
-        if (contractName.length() > 1) {
-            contractName = contractName.substring(0, 1).toUpperCase() + contractName.substring(1);
-        }
-        File outputDir = new File(CleanPathUtil.cleanString(Constants.JAVA_DIR));
-
-        generateJavaFile(packageName, abiFile, binFile, outputDir);
-
-        // generated java file is in outputDir/xxx.java
-        String filePath = Constants.JAVA_DIR + File.separator + outputDirectory + File.separator
-                + contractName + ".java";
-        File file = new File(CleanPathUtil.cleanString(filePath));
-        FrontUtils.createFileIfNotExist(file, true);
-        InputStream targetStream = new FileInputStream(file);
-        return new FileContentHandle(contractName + ".java", targetStream);
+    AssembleTransactionProcessor assembleTxProcessor = null;
+    try {
+      assembleTxProcessor = TransactionProcessorFactory
+          .createAssembleTransactionProcessor(client, cryptoKeyPair);
+    } catch (Exception e) {
+      log.error("deployContract getAssembleTransactionProcessor error:[]", e);
+      throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
     }
-
-    private static synchronized void generateJavaFile(String packageName, File abiFile,
-            File binFile, File outputDir) {
-        try {
-            MySecurityManagerConfig.forbidSystemExitCall();
-            // sm bin use same bin
-            ContractGenerator generator = new ContractGenerator(binFile, binFile,
-                    abiFile, outputDir, packageName);
-            generator.generateJavaFiles();
-        } catch (IOException | ClassNotFoundException e) {
-            log.error("generateJavaFile error for io error/file not found:[]", e);
-        } catch (CodeGenException e) {
-            log.error("generateJavaFile error code gen:[]", e);
-        } finally {
-            MySecurityManagerConfig.enableSystemExitCall();
-        }
+    TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
+    transService.decodeReceipt(client, receipt);
+    int status = receipt.getStatus();
+    if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())) {
+      log.error("deployContract locally error, receipt status:{},hash:{}", status, receipt.getTransactionHash());
+      throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
     }
+    return receipt.getContractAddress();
+  }
 
-
-    /**
-     * delete contract by contractId.
-     */
-    public void deleteContract(Long contractId, String groupId) {
-        log.debug("start deleteContract contractId:{} groupId:{}", contractId, groupId);
-        // check contract id
-        verifyContractIdExist(contractId, groupId);
-        // remove
-        contractRepository.delete(contractId);
-        log.debug("end deleteContract");
+  /**
+   * deleteAbi.
+   *
+   * @param contractName not null
+   * @param version not null
+   */
+  public BaseResponse deleteAbi(String contractName, String version) throws FrontException {
+    BaseResponse baseRsp = new BaseResponse(ConstantCode.RET_SUCCEED);
+    boolean result = CommonUtils.deleteFile(
+        Constants.ABI_DIR + Constants.DIAGONAL + contractName + Constants.SEP + version);
+    if (!result) {
+      log.warn("deleteAbi fail. contractname:{} ,version:{}", contractName, version);
+      throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
     }
+    return baseRsp;
+  }
 
-    /**
-     * save contract data.
-     */
-    public Contract saveContract(ReqContractSave contractReq) {
-        log.info("start saveContract contractReq:{}", JsonUtils.toJSONString(contractReq));
-        if (contractReq.getContractId() == null) {
-            // new
-            return newContract(contractReq);
-        } else {
-            // update
-            return updateContract(contractReq);
-        }
+  public static FileContentHandle compileToJavaFile(String contractName,
+      List<ABIDefinition> abiInfo, String contractBin, String packageName)
+      throws IOException {
+
+    File abiFile = new File(CleanPathUtil
+        .cleanString(Constants.ABI_DIR + Constants.DIAGONAL + contractName + ".abi"));
+    FrontUtils.createFileIfNotExist(abiFile, true);
+    FileUtils.writeStringToFile(abiFile, JsonUtils.toJSONString(abiInfo));
+    File binFile = new File(CleanPathUtil
+        .cleanString(Constants.BIN_DIR + Constants.DIAGONAL + contractName + ".bin"));
+    FrontUtils.createFileIfNotExist(binFile, true);
+    FileUtils.writeStringToFile(binFile, contractBin);
+
+    String outputDirectory = "";
+    if (StringUtils.isNotBlank(packageName)) {
+      outputDirectory = packageName.replace(".", File.separator);
     }
-
-    /**
-     * copyContracts
-     */
-    @Transactional
-    public void copyContracts(ReqCopyContracts reqCopyContracts) {
-        log.debug("start saveContractBatch ReqContractList:{}",
-                JsonUtils.toJSONString(reqCopyContracts));
-        reqCopyContracts.getContractItems().forEach(c -> {
-            ReqContractSave reqContractSave = new ReqContractSave();
-            reqContractSave.setContractName(c.getContractName());
-            reqContractSave.setContractSource(c.getContractSource());
-            reqContractSave.setContractPath(reqCopyContracts.getContractPath());
-            reqContractSave.setGroupId(reqCopyContracts.getGroupId());
-            newContract(reqContractSave);
-        });
+    if (contractName.length() > 1) {
+      contractName = contractName.substring(0, 1).toUpperCase() + contractName.substring(1);
     }
+    File outputDir = new File(CleanPathUtil.cleanString(Constants.JAVA_DIR));
 
+    generateJavaFile(packageName, abiFile, binFile, outputDir);
 
-    /**
-     * save new contract.
-     */
-    @Transactional
-    public Contract newContract(ReqContractSave contractReq) {
-        // check contract not exist.
-        verifyContractNotExist(contractReq.getGroupId(), contractReq.getContractPath(),
-                contractReq.getContractName());
+    // generated java file is in outputDir/xxx.java
+    String filePath = Constants.JAVA_DIR + File.separator + outputDirectory + File.separator
+        + contractName + ".java";
+    File file = new File(CleanPathUtil.cleanString(filePath));
+    FrontUtils.createFileIfNotExist(file, true);
+    InputStream targetStream = new FileInputStream(file);
+    return new FileContentHandle(contractName + ".java", targetStream);
+  }
 
-        // add to database.
-        Contract contract = new Contract();
-        BeanUtils.copyProperties(contractReq, contract);
-        contract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
-        contract.setCreateTime(LocalDateTime.now());
-        contract.setModifyTime(contract.getCreateTime());
-        contractRepository.save(contract);
-        // update time
-        ContractPath contractPathVo = new ContractPath();
-        contractPathVo.setGroupId(contractReq.getGroupId());
-        contractPathVo.setContractPath(contractReq.getContractPath());
-        contractPathVo.setModifyTime(LocalDateTime.now());
-        contractPathRepository.save(contractPathVo);
-
-        return contract;
+  private static synchronized void generateJavaFile(String packageName, File abiFile,
+      File binFile, File outputDir) {
+    try {
+      MySecurityManagerConfig.forbidSystemExitCall();
+      // sm bin use same bin
+      ContractGenerator generator = new ContractGenerator(binFile, binFile,
+          abiFile, outputDir, packageName);
+      generator.generateJavaFiles();
+    } catch (IOException | ClassNotFoundException e) {
+      log.error("generateJavaFile error for io error/file not found:[]", e);
+    } catch (CodeGenException e) {
+      log.error("generateJavaFile error code gen:[]", e);
+    } finally {
+      MySecurityManagerConfig.enableSystemExitCall();
     }
+  }
 
 
-    /**
-     * update contract.
-     */
-    @Transactional
-    public Contract updateContract(ReqContractSave contractReq) {
-        // check contract exist
-        Contract contract =
-                verifyContractIdExist(contractReq.getContractId(), contractReq.getGroupId());
-        // check contractName
-        verifyContractNameNotExist(contractReq.getGroupId(), contractReq.getContractPath(),
-                contractReq.getContractName(), contractReq.getContractId());
-        BeanUtils.copyProperties(contractReq, contract);
-        contract.setModifyTime(LocalDateTime.now());
-        if(contract.getContractAddress()!=null && contract.getContractAddress().length()>("0x").length())
-        {
-            contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
-            contract.setDeployTime(LocalDateTime.now());
-        }
-        contractRepository.save(contract);
-        // update time
-        ContractPath contractPathVo = new ContractPath();
-        contractPathVo.setGroupId(contractReq.getGroupId());
-        contractPathVo.setContractPath(contractReq.getContractPath());
-        contractPathVo.setModifyTime(LocalDateTime.now());
-        contractPathRepository.save(contractPathVo);
+  /**
+   * delete contract by contractId.
+   */
+  public void deleteContract(Long contractId, String groupId) {
+    log.debug("start deleteContract contractId:{} groupId:{}", contractId, groupId);
+    // check contract id
+    verifyContractIdExist(contractId, groupId);
+    // remove
+    contractRepository.delete(contractId);
+    log.debug("end deleteContract");
+  }
 
-        return contract;
+  /**
+   * save contract data.
+   */
+  public Contract saveContract(ReqContractSave contractReq) {
+    log.info("start saveContract contractReq:{}", JsonUtils.toJSONString(contractReq));
+    if (contractReq.getContractId() == null) {
+      // new
+      return newContract(contractReq);
+    } else {
+      // update
+      return updateContract(contractReq);
     }
+  }
 
-    /**
-     * find contract by page with contract content
-     */
-    @Transactional
-    public Page<Contract> findContractByPage(ReqPageContract param) throws IOException {
-        // init templates
-        initDefaultContract(param.getGroupId());
-        // findContractByPage
-        // page start from index 1 instead of 0
-        int pageNumber = param.getPageNumber() - 1;
-        Pageable pageable =
-                new PageRequest(pageNumber, param.getPageSize(), Direction.DESC, "modifyTime");
-        Page<Contract> contractPage = contractRepository.findAll(
-                (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
-                    // v1.4.2, param add contractPath to filter
-                    Predicate predicate = FrontUtils.buildPredicate(root, criteriaBuilder, param);
-                    query.where(predicate);
-                    return query.getRestriction();
-                }, pageable);
-        return contractPage;
+  /**
+   * copyContracts
+   */
+  @Transactional
+  public void copyContracts(ReqCopyContracts reqCopyContracts) {
+    log.debug("start saveContractBatch ReqContractList:{}",
+        JsonUtils.toJSONString(reqCopyContracts));
+    reqCopyContracts.getContractItems().forEach(c -> {
+      ReqContractSave reqContractSave = new ReqContractSave();
+      reqContractSave.setContractName(c.getContractName());
+      reqContractSave.setContractSource(c.getContractSource());
+      reqContractSave.setContractPath(reqCopyContracts.getContractPath());
+      reqContractSave.setGroupId(reqCopyContracts.getGroupId());
+      newContract(reqContractSave);
+    });
+  }
+
+
+  /**
+   * save new contract.
+   */
+  @Transactional
+  public Contract newContract(ReqContractSave contractReq) {
+    // check contract not exist.
+    verifyContractNotExist(contractReq.getGroupId(), contractReq.getContractPath(),
+        contractReq.getContractName());
+
+    // add to database.
+    Contract contract = new Contract();
+    BeanUtils.copyProperties(contractReq, contract);
+    contract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
+    contract.setCreateTime(LocalDateTime.now());
+    contract.setModifyTime(contract.getCreateTime());
+    contractRepository.save(contract);
+    // update time
+    ContractPath contractPathVo = new ContractPath();
+    contractPathVo.setGroupId(contractReq.getGroupId());
+    contractPathVo.setContractPath(contractReq.getContractPath());
+    contractPathVo.setModifyTime(LocalDateTime.now());
+    contractPathRepository.save(contractPathVo);
+
+    return contract;
+  }
+
+
+  /**
+   * update contract.
+   */
+  @Transactional
+  public Contract updateContract(ReqContractSave contractReq) {
+    // check contract exist
+    Contract contract =
+        verifyContractIdExist(contractReq.getContractId(), contractReq.getGroupId());
+    // check contractName
+    verifyContractNameNotExist(contractReq.getGroupId(), contractReq.getContractPath(),
+        contractReq.getContractName(), contractReq.getContractId());
+    BeanUtils.copyProperties(contractReq, contract);
+    contract.setModifyTime(LocalDateTime.now());
+    if(contract.getContractAddress()!=null && contract.getContractAddress().length()>("0x").length())
+    {
+      contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
+      contract.setDeployTime(LocalDateTime.now());
     }
+    contractRepository.save(contract);
+    // update time
+    ContractPath contractPathVo = new ContractPath();
+    contractPathVo.setGroupId(contractReq.getGroupId());
+    contractPathVo.setContractPath(contractReq.getContractPath());
+    contractPathVo.setModifyTime(LocalDateTime.now());
+    contractPathRepository.save(contractPathVo);
 
-    /**
-     * find all contract without contract content
-     */
-    public List<RspContractNoAbi> findAllContractNoAbi(String groupId, int contractStatus)
-            throws IOException {
-        // init templates
-        initDefaultContract(groupId);
-        // find all
-        List<Contract> contractList =
-                contractRepository.findByGroupIdAndContractStatus(groupId, contractStatus);
-        List<RspContractNoAbi> resultList = new ArrayList<>();
-        contractList.forEach(c -> {
-            RspContractNoAbi rsp = new RspContractNoAbi();
-            BeanUtils.copyProperties(c, rsp);
-            resultList.add(rsp);
-        });
-        return resultList;
+    return contract;
+  }
+
+  /**
+   * find contract by page with contract content
+   */
+  @Transactional
+  public Page<Contract> findContractByPage(ReqPageContract param) throws IOException {
+    // init templates
+    initDefaultContract(param.getGroupId());
+    // findContractByPage
+    // page start from index 1 instead of 0
+    int pageNumber = param.getPageNumber() - 1;
+    Pageable pageable =
+        new PageRequest(pageNumber, param.getPageSize(), Direction.DESC, "modifyTime");
+    Page<Contract> contractPage = contractRepository.findAll(
+        (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+          // v1.4.2, param add contractPath to filter
+          Predicate predicate = FrontUtils.buildPredicate(root, criteriaBuilder, param);
+          query.where(predicate);
+          return query.getRestriction();
+        }, pageable);
+    return contractPage;
+  }
+
+  /**
+   * find all contract without contract content
+   */
+  public List<RspContractNoAbi> findAllContractNoAbi(String groupId, int contractStatus)
+      throws IOException {
+    // init templates
+    initDefaultContract(groupId);
+    // find all
+    List<Contract> contractList =
+        contractRepository.findByGroupIdAndContractStatus(groupId, contractStatus);
+    List<RspContractNoAbi> resultList = new ArrayList<>();
+    contractList.forEach(c -> {
+      RspContractNoAbi rsp = new RspContractNoAbi();
+      BeanUtils.copyProperties(c, rsp);
+      resultList.add(rsp);
+    });
+    return resultList;
+  }
+
+
+  /**
+   * save default contract in path '/template' to db
+   *
+   * @param groupId
+   * @throws IOException
+   */
+  private void initDefaultContract(String groupId) throws IOException {
+    String contractPath = "template";
+    List<Contract> contracts =
+        contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
+    // if no template contracts in db, load contract file in template; else, not load
+    List<String> templates = null;
+    if (contracts.isEmpty()) {
+      templates = CommonUtils.readFileToList(Constants.TEMPLATE);
     }
-
-
-    /**
-     * save default contract in path '/template' to db
-     * 
-     * @param groupId
-     * @throws IOException
-     */
-    private void initDefaultContract(String groupId) throws IOException {
-        String contractPath = "template";
-        List<Contract> contracts =
-                contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
-        // if no template contracts in db, load contract file in template; else, not load
-        List<String> templates = null;
-        if (contracts.isEmpty()) {
-            templates = CommonUtils.readFileToList(Constants.TEMPLATE);
-        }
-        if ((contracts.isEmpty() && !Objects.isNull(templates)) || (!contracts.isEmpty()
-                && !Objects.isNull(templates) && templates.size() != contracts.size())) {
-            for (String template : templates) {
-                Contract localContract =
-                        contractRepository.findByGroupIdAndContractPathAndContractName(groupId,
-                                contractPath, template.split(",")[0]);
-                if (Objects.isNull(localContract)) {
-                    log.info("init template contract:{}", template.split(",")[0]);
-                    Contract contract = new Contract();
-                    contract.setGroupId(groupId);
-                    contract.setContractName(template.split(",")[0]);
-                    contract.setContractSource(template.split(",")[1]);
-                    contract.setContractPath(contractPath);
-                    contract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
-                    contract.setCreateTime(LocalDateTime.now());
-                    contract.setModifyTime(contract.getCreateTime());
-                    contractRepository.save(contract);
-                }
-            }
-            ContractPath contractPathVo = new ContractPath();
-            contractPathVo.setGroupId(groupId);
-            contractPathVo.setContractPath(contractPath);
-            contractPathVo.setCreateTime(LocalDateTime.now());
-            contractPathVo.setModifyTime(contractPathVo.getCreateTime());
-            contractPathRepository.save(contractPathVo);
-        }
-    }
-
-    /**
-     * verify contract not exist.
-     */
-    private void verifyContractNotExist(String groupId, String path, String name) {
-        Contract contract =
-                contractRepository.findByGroupIdAndContractPathAndContractName(groupId, path, name);
-        if (Objects.nonNull(contract)) {
-            log.warn("contract is exist. groupId:{} name:{} path:{}", groupId, name, path);
-            throw new FrontException(ConstantCode.CONTRACT_EXISTS);
-        }
-    }
-
-    /**
-     * verify that the contract had not deployed.
-     */
-    private Contract verifyContractNotDeploy(Long contractId, String groupId) {
-        Contract contract = verifyContractIdExist(contractId, groupId);
-        if (ContractStatus.DEPLOYED.getValue() == contract.getContractStatus()) {
-            log.info("contract had bean deployed contract", contractId);
-            throw new FrontException(ConstantCode.CONTRACT_HAS_BEAN_DEPLOYED);
-        }
-        return contract;
-    }
-
-    /**
-     * verify that the contractId is exist.
-     */
-    private Contract verifyContractIdExist(Long contractId, String groupId) {
-        Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
-        if (Objects.isNull(contract)) {
-            log.info("contractId is invalid. contractId:{}", contractId);
-            throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
-        }
-        return contract;
-    }
-
-    /**
-     * verify that if the contract changed.
-     */
-    public boolean verifyContractChange(Long contractId, String groupId) {
-        Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
-        log.debug("verifyContractChange contract:{}", contract);
-        // contract is deployed and modify time not equal
-        if (Objects.nonNull(contract) && contract.getContractStatus() == ContractStatus.DEPLOYED.getValue()
-                && !contract.getDeployTime().isEqual(contract.getModifyTime())) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * contract name can not be repeated.
-     */
-    private void verifyContractNameNotExist(String groupId, String path, String name,
-            Long contractId) {
+    if ((contracts.isEmpty() && !Objects.isNull(templates)) || (!contracts.isEmpty()
+        && !Objects.isNull(templates) && templates.size() != contracts.size())) {
+      for (String template : templates) {
         Contract localContract =
-                contractRepository.findByGroupIdAndContractPathAndContractName(groupId, path, name);
+            contractRepository.findByGroupIdAndContractPathAndContractName(groupId,
+                contractPath, template.split(",")[0]);
         if (Objects.isNull(localContract)) {
-            return;
+          log.info("init template contract:{}", template.split(",")[0]);
+          Contract contract = new Contract();
+          contract.setGroupId(groupId);
+          contract.setContractName(template.split(",")[0]);
+          contract.setContractSource(template.split(",")[1]);
+          contract.setContractPath(contractPath);
+          contract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
+          contract.setCreateTime(LocalDateTime.now());
+          contract.setModifyTime(contract.getCreateTime());
+          contractRepository.save(contract);
         }
-        if (Objects.isNull(contractId)) {
-            log.warn("fail verifyContractNameNotExist. contractId is null");
-            throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
+      }
+      ContractPath contractPathVo = new ContractPath();
+      contractPathVo.setGroupId(groupId);
+      contractPathVo.setContractPath(contractPath);
+      contractPathVo.setCreateTime(LocalDateTime.now());
+      contractPathVo.setModifyTime(contractPathVo.getCreateTime());
+      contractPathRepository.save(contractPathVo);
+    }
+  }
+
+  /**
+   * verify contract not exist.
+   */
+  private void verifyContractNotExist(String groupId, String path, String name) {
+    Contract contract =
+        contractRepository.findByGroupIdAndContractPathAndContractName(groupId, path, name);
+    if (Objects.nonNull(contract)) {
+      log.warn("contract is exist. groupId:{} name:{} path:{}", groupId, name, path);
+      throw new FrontException(ConstantCode.CONTRACT_EXISTS);
+    }
+  }
+
+  /**
+   * verify that the contract had not deployed.
+   */
+  private Contract verifyContractNotDeploy(Long contractId, String groupId) {
+    Contract contract = verifyContractIdExist(contractId, groupId);
+    if (ContractStatus.DEPLOYED.getValue() == contract.getContractStatus()) {
+      log.info("contract had bean deployed contract", contractId);
+      throw new FrontException(ConstantCode.CONTRACT_HAS_BEAN_DEPLOYED);
+    }
+    return contract;
+  }
+
+  /**
+   * verify that the contractId is exist.
+   */
+  private Contract verifyContractIdExist(Long contractId, String groupId) {
+    Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
+    if (Objects.isNull(contract)) {
+      log.info("contractId is invalid. contractId:{}", contractId);
+      throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
+    }
+    return contract;
+  }
+
+  /**
+   * verify that if the contract changed.
+   */
+  public boolean verifyContractChange(Long contractId, String groupId) {
+    Contract contract = contractRepository.findByGroupIdAndId(groupId, contractId);
+    log.debug("verifyContractChange contract:{}", contract);
+    // contract is deployed and modify time not equal
+    if (Objects.nonNull(contract) && contract.getContractStatus() == ContractStatus.DEPLOYED.getValue()
+        && !contract.getDeployTime().isEqual(contract.getModifyTime())) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * contract name can not be repeated.
+   */
+  private void verifyContractNameNotExist(String groupId, String path, String name,
+      Long contractId) {
+    Contract localContract =
+        contractRepository.findByGroupIdAndContractPathAndContractName(groupId, path, name);
+    if (Objects.isNull(localContract)) {
+      return;
+    }
+    if (Objects.isNull(contractId)) {
+      log.warn("fail verifyContractNameNotExist. contractId is null");
+      throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
+    }
+    Long localId = localContract.getId();
+    if (contractId.longValue() != localId.longValue()) {
+      log.info("contract name repeat. groupId:{} path:{} name:{} contractId:{} localId:{}",
+          groupId, path, name, contractId, localId);
+      throw new FrontException(ConstantCode.CONTRACT_NAME_REPEAT);
+    }
+  }
+
+  /**
+   * compile contract.
+   */
+  public RspContractCompile contractCompile(String contractName, String sourceBase64, String groupId) {
+    File contractFile = null;
+
+    try {
+      // whether use guomi to compile
+      boolean useSM2 = web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE;
+      // decode
+      byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
+      String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
+      // save contract to file
+      contractFile = new File(CleanPathUtil.cleanString(contractFilePath));
+      FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
+      // compile
+      SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, useSM2, true, ABI,
+          BIN, INTERFACE, METADATA);
+      if ("".equals(res.getOutput())) {
+        log.error("contractCompile error", res.getErrors());
+        throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(),
+            res.getErrors());
+      }
+      // compile result
+      CompilationResult result = CompilationResult.parse(res.getOutput());
+      CompilationResult.ContractMetadata meta = result.getContract(contractName);
+      RspContractCompile compileResult =
+          new RspContractCompile(contractName, meta.abi, meta.bin, res.getErrors());
+      return compileResult;
+    } catch (Exception ex) {
+      log.error("contractCompile error", ex);
+      throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), ex.getMessage());
+    } finally {
+      if (contractFile != null) {
+        contractFile.deleteOnExit();
+      }
+    }
+  }
+
+  public List<RspMultiContractCompile> multiContractCompile(ReqMultiContractCompile inputParam)
+      throws IOException {
+    // clear temp folder
+    CommonUtils.deleteFiles(BASE_FILE_PATH);
+
+    // unzip
+    CommonUtils.zipBase64ToFile(inputParam.getContractZipBase64(), BASE_FILE_PATH);
+
+    // get sol files
+    File solFileList = new File(BASE_FILE_PATH);
+    File[] solFiles = solFileList.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String fileName) {
+        if (!fileName.toLowerCase().endsWith(".sol")) {
+          return false;
         }
-        Long localId = localContract.getId();
-        if (contractId.longValue() != localId.longValue()) {
-            log.info("contract name repeat. groupId:{} path:{} name:{} contractId:{} localId:{}",
-                    groupId, path, name, contractId, localId);
-            throw new FrontException(ConstantCode.CONTRACT_NAME_REPEAT);
-        }
+        return true;
+      }
+    });
+    if (solFiles == null || solFiles.length == 0) {
+      log.error("There is no sol files in source.");
+      throw new FrontException(ConstantCode.NO_SOL_FILES);
+    }
+    String groupId = inputParam.getGroupId();
+    // whether use guomi to compile
+    boolean useSM2 = web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE;
+
+    List<RspMultiContractCompile> compileInfos = new ArrayList<>();
+    for (File solFile : solFiles) {
+      String contractName =
+          solFile.getName().substring(0, solFile.getName().lastIndexOf("."));
+      // compile
+      SolidityCompiler.Result res = SolidityCompiler.compile(solFile, useSM2, true, ABI,
+          SolidityCompiler.Options.BIN);
+      // check result
+      if (res.isFailed()) {
+        log.error("multiContractCompile fail. contract:{} compile error. {}", contractName,
+            res.getErrors());
+        throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(),
+            res.getErrors());
+      }
+      // parse result
+      CompilationResult result = CompilationResult.parse(res.getOutput());
+      List<CompilationResult.ContractMetadata> contracts = result.getContracts();
+      if (contracts.size() > 0) {
+        RspMultiContractCompile compileInfo = new RspMultiContractCompile();
+        compileInfo.setContractName(contractName);
+        compileInfo.setBytecodeBin(result.getContract(contractName).bin);
+        compileInfo.setContractAbi(result.getContract(contractName).abi);
+        compileInfo.setContractSource(
+            CommonUtils.fileToBase64(BASE_FILE_PATH + solFile.getName()));
+        compileInfos.add(compileInfo);
+      }
     }
 
-    /**
-     * compile contract.
-     */
-    public RspContractCompile contractCompile(String contractName, String sourceBase64, String groupId) {
-        File contractFile = null;
+    log.debug("end multiContractCompile.");
+    return compileInfos;
+  }
 
-        try {
-            // whether use guomi to compile
-            boolean useSM2 = web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE;
-            // decode
-            byte[] contractSourceByteArr = Base64.getDecoder().decode(sourceBase64);
-            String contractFilePath = String.format(CONTRACT_FILE_TEMP, contractName);
-            // save contract to file
-            contractFile = new File(CleanPathUtil.cleanString(contractFilePath));
-            FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
-            // compile
-            SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, useSM2, true, ABI,
-                    BIN, INTERFACE, METADATA);
-            if ("".equals(res.getOutput())) {
-                log.error("contractCompile error", res.getErrors());
-                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(),
-                        res.getErrors());
-            }
-            // compile result
-            CompilationResult result = CompilationResult.parse(res.getOutput());
-            CompilationResult.ContractMetadata meta = result.getContract(contractName);
-            RspContractCompile compileResult =
-                    new RspContractCompile(contractName, meta.abi, meta.bin, res.getErrors());
-            return compileResult;
-        } catch (Exception ex) {
-            log.error("contractCompile error", ex);
-            throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), ex.getMessage());
-        } finally {
-            if (contractFile != null) {
-                contractFile.deleteOnExit();
-            }
-        }
+  /**
+   * addContractPath.
+   */
+  public ContractPath addContractPath(ReqContractPath req) {
+    ContractPathKey pathKey = new ContractPathKey(req.getGroupId(), req.getContractPath());
+    ContractPath check = contractPathRepository.findOne(pathKey);
+    if (check != null) {
+      log.error("addContractPath fail, path exists check:{}", check);
+      throw new FrontException(ConstantCode.CONTRACT_PATH_IS_EXISTS);
     }
+    // add to database.
+    ContractPath contractPath = new ContractPath();
+    BeanUtils.copyProperties(req, contractPath);
+    contractPath.setCreateTime(LocalDateTime.now());
+    contractPath.setModifyTime(contractPath.getCreateTime());
+    contractPathRepository.save(contractPath);
+    return contractPath;
+  }
 
-    public List<RspMultiContractCompile> multiContractCompile(ReqMultiContractCompile inputParam)
-            throws IOException {
-        // clear temp folder
-        CommonUtils.deleteFiles(BASE_FILE_PATH);
+  /**
+   * addContractPath.
+   */
+  public List<ContractPath> findPathList(String groupId) throws IOException {
+    // init default contracts and dir
+    initDefaultContract(groupId);
+    // get from database
+    Sort sort = new Sort(Sort.Direction.DESC, "modifyTime");
+    List<ContractPath> contractPaths = contractPathRepository.findAll((Root<ContractPath> root,
+        CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+      Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
+      return criteriaBuilder.and(predicate);
+    }, sort);
+    return contractPaths;
+  }
 
-        // unzip
-        CommonUtils.zipBase64ToFile(inputParam.getContractZipBase64(), BASE_FILE_PATH);
+  /**
+   * deletePath.
+   */
+  public void deletePath(String groupId, String contractPath) {
+    ContractPathKey contractPathKey = new ContractPathKey();
+    contractPathKey.setGroupId(groupId);
+    contractPathKey.setContractPath(contractPath);
+    contractPathRepository.delete(contractPathKey);
+  }
 
-        // get sol files
-        File solFileList = new File(BASE_FILE_PATH);
-        File[] solFiles = solFileList.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String fileName) {
-                if (!fileName.toLowerCase().endsWith(".sol")) {
-                    return false;
-                }
-                return true;
-            }
-        });
-        if (solFiles == null || solFiles.length == 0) {
-            log.error("There is no sol files in source.");
-            throw new FrontException(ConstantCode.NO_SOL_FILES);
-        }
-        String groupId = inputParam.getGroupId();
-        // whether use guomi to compile
-        boolean useSM2 = web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE;
+  /**
+   * check user deploy permission
+   */
+  private boolean checkDeployPermission(String groupId, String userAddress)
+      throws ContractException {
+    log.info("civilian service check deploy permission");
+    Boolean res = everyoneService.checkDeployAuth(groupId,
+        userAddress);
+    log.info("check deploy permission result is {}",res.toString());
+    return res;
+  }
 
-        List<RspMultiContractCompile> compileInfos = new ArrayList<>();
-        for (File solFile : solFiles) {
-            String contractName =
-                    solFile.getName().substring(0, solFile.getName().lastIndexOf("."));
-            // compile
-            SolidityCompiler.Result res = SolidityCompiler.compile(solFile, useSM2, true, ABI,
-                    SolidityCompiler.Options.BIN);
-            // check result
-            if (res.isFailed()) {
-                log.error("multiContractCompile fail. contract:{} compile error. {}", contractName,
-                        res.getErrors());
-                throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(),
-                        res.getErrors());
-            }
-            // parse result
-            CompilationResult result = CompilationResult.parse(res.getOutput());
-            List<CompilationResult.ContractMetadata> contracts = result.getContracts();
-            if (contracts.size() > 0) {
-                RspMultiContractCompile compileInfo = new RspMultiContractCompile();
-                compileInfo.setContractName(contractName);
-                compileInfo.setBytecodeBin(result.getContract(contractName).bin);
-                compileInfo.setContractAbi(result.getContract(contractName).abi);
-                compileInfo.setContractSource(
-                        CommonUtils.fileToBase64(BASE_FILE_PATH + solFile.getName()));
-                compileInfos.add(compileInfo);
-            }
-        }
+  /**
+   * batch delete contract by path if path contain deployed
+   *
+   * @param groupId
+   * @param contractPath
+   * @return
+   */
+  public void batchDeleteByPath(String groupId, String contractPath) {
+    log.debug("start batchDeleteByPath groupId:{},contractPath:{}", groupId, contractPath);
+    List<Contract> contractList =
+        contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
+    log.debug("batchDeleteByPath delete contracts");
+    contractList.forEach(c -> contractRepository.delete(c.getId()));
+    log.debug("batchDeleteByPath delete contracts");
+    contractPathRepository.delete(new ContractPathKey(groupId, contractPath));
+    log.debug("batchDeleteByPath delete contract path");
+  }
 
-        log.debug("end multiContractCompile.");
-        return compileInfos;
+  public Contract findById(Long contractId) {
+    Contract contract = contractRepository.findOne(contractId);
+    if (Objects.isNull(contract)) {
+      throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
     }
+    return contract;
+  }
 
-    /**
-     * addContractPath.
-     */
-    public ContractPath addContractPath(ReqContractPath req) {
-        ContractPathKey pathKey = new ContractPathKey(req.getGroupId(), req.getContractPath());
-        ContractPath check = contractPathRepository.findOne(pathKey);
-        if (check != null) {
-            log.error("addContractPath fail, path exists check:{}", check);
-            throw new FrontException(ConstantCode.CONTRACT_PATH_IS_EXISTS);
-        }
-        // add to database.
-        ContractPath contractPath = new ContractPath();
-        BeanUtils.copyProperties(req, contractPath);
-        contractPath.setCreateTime(LocalDateTime.now());
-        contractPath.setModifyTime(contractPath.getCreateTime());
-        contractPathRepository.save(contractPath);
-        return contractPath;
+  public Contract findByGroupIdAndAddress(String groupId, String contractAddress) {
+    Contract contract =
+        contractRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
+    if (Objects.isNull(contract)) {
+      throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
     }
+    return contract;
+  }
 
-    /**
-     * addContractPath.
-     */
-    public List<ContractPath> findPathList(String groupId) throws IOException {
-        // init default contracts and dir
-        initDefaultContract(groupId);
-        // get from database
-        Sort sort = new Sort(Sort.Direction.DESC, "modifyTime");
-        List<ContractPath> contractPaths = contractPathRepository.findAll((Root<ContractPath> root,
-                CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
-            Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
-            return criteriaBuilder.and(predicate);
-        }, sort);
-        return contractPaths;
+  /**
+   * list contract by path list
+   *
+   * @param param
+   * @return
+   */
+  public List<Contract> listContractByMultiPath(ReqListContract param) {
+    log.debug("start listContractByMultiPath ReqListContract:{},", param);
+    List<Contract> resultList = new ArrayList<>();
+    String groupId = param.getGroupId();
+    List<String> contractPathList = param.getContractPathList();
+    for (String contractPath : contractPathList) {
+      List<Contract> contractList =
+          contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
+      resultList.addAll(contractList);
     }
+    log.debug("end listContractByMultiPath result size:{},", resultList.size());
+    return resultList;
+  }
 
-    /**
-     * deletePath.
-     */
-    public void deletePath(String groupId, String contractPath) {
-        ContractPathKey contractPathKey = new ContractPathKey();
-        contractPathKey.setGroupId(groupId);
-        contractPathKey.setContractPath(contractPath);
-        contractPathRepository.delete(contractPathKey);
-    }
-
-    /**
-     * check user deploy permission
-     */
-//    private void checkDeployPermission(String groupId, String userAddress) {
-        // get deploy permission list
-//        List<PermissionInfo> deployUserList =
-//                permissionManageService.listDeployAndCreateManager(groupId);
-//
-//        // check user in the list,
-//        if (deployUserList.isEmpty()) {
-//            return;
-//        } else {
-//            long count = 0;
-//            count = deployUserList.stream().filter(admin -> admin.getAddress().equals(userAddress))
-//                    .count();
-//            // if not in the list, permission denied
-//            if (count == 0) {
-//                log.error("checkDeployPermission permission denied for user:{}", userAddress);
-//                throw new FrontException(ConstantCode.PERMISSION_DENIED);
-//            }
-//        }
-//
-//    }
-
-    /**
-     * batch delete contract by path if path contain deployed
-     * 
-     * @param groupId
-     * @param contractPath
-     * @return
-     */
-    public void batchDeleteByPath(String groupId, String contractPath) {
-        log.debug("start batchDeleteByPath groupId:{},contractPath:{}", groupId, contractPath);
-        List<Contract> contractList =
-                contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
-        log.debug("batchDeleteByPath delete contracts");
-        contractList.forEach(c -> contractRepository.delete(c.getId()));
-        log.debug("batchDeleteByPath delete contracts");
-        contractPathRepository.delete(new ContractPathKey(groupId, contractPath));
-        log.debug("batchDeleteByPath delete contract path");
-    }
-
-    public Contract findById(Long contractId) {
-        Contract contract = contractRepository.findOne(contractId);
-        if (Objects.isNull(contract)) {
-            throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
-        }
-        return contract;
-    }
-
-    public Contract findByGroupIdAndAddress(String groupId, String contractAddress) {
-        Contract contract =
-                contractRepository.findByGroupIdAndContractAddress(groupId, contractAddress);
-        if (Objects.isNull(contract)) {
-            throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
-        }
-        return contract;
-    }
-
-    /**
-     * list contract by path list
-     * 
-     * @param param
-     * @return
-     */
-    public List<Contract> listContractByMultiPath(ReqListContract param) {
-        log.debug("start listContractByMultiPath ReqListContract:{},", param);
-        List<Contract> resultList = new ArrayList<>();
-        String groupId = param.getGroupId();
-        List<String> contractPathList = param.getContractPathList();
-        for (String contractPath : contractPathList) {
-            List<Contract> contractList =
-                    contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
-            resultList.addAll(contractList);
-        }
-        log.debug("end listContractByMultiPath result size:{},", resultList.size());
-        return resultList;
-    }
-
-    /**
-     * findCns.
-     */
-    public Cns findCns(ReqQueryCns req) {
-        // get from database
-        return cnsRepository.findByAddressLimitOne(req.getGroupId(), req.getContractAddress());
-    }
+  /**
+   * findCns.
+   */
+  public Cns findCns(ReqQueryCns req) {
+    // get from database
+    return cnsRepository.findByAddressLimitOne(req.getGroupId(), req.getContractAddress());
+  }
 }
