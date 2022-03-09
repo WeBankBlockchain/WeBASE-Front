@@ -447,17 +447,19 @@ public class ContractController extends BaseController {
         Instant now = Instant.now();
         log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
         checkParamResult(result);
-        boolean taskDone = contractService.newAndCompileLiquidContract(req);
-        log.info("newAndSaveLiquidProject end. usedTime:[{}]", Duration.between(now, Instant.now()).toMillis());
-        return new BaseResponse(ConstantCode.RET_SUCCEED, taskDone);
+        CompileTask compileTask = contractService.newAndCompileLiquidContract(req);
+        log.info("newAndSaveLiquidProject end. usedTime:{}, compileTask:{}", Duration.between(now, Instant.now()).toMillis(), compileTask);
+        return new BaseResponse(ConstantCode.RET_SUCCEED, compileTask);
     }
 
     @ApiOperation(value = "check compile", notes = "check liquid compile finished")
     @PostMapping(value = "/liquid/compile/check/")
     public BaseResponse checkLiquidContractCompile(@Valid @RequestBody ReqCompileTask req, BindingResult result) {
-        log.info("checkLiquidContractCompile start. req:{}", req);
+        Instant now = Instant.now();
+        log.info("checkLiquidContractCompile start. startTime:{},req:{}", now, req);
         checkParamResult(result);
         CompileTask taskInfo = contractService.getLiquidContract(req.getGroupId(), req.getContractPath(), req.getContractName());
+        log.info("newAndSaveLiquidProject end. usedTime:{}, compileTask:{}", Duration.between(now, Instant.now()).toMillis(), taskInfo);
         return new BaseResponse(ConstantCode.RET_SUCCEED, taskInfo);
     }
 

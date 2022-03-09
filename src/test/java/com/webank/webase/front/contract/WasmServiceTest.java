@@ -73,8 +73,8 @@ public class WasmServiceTest extends SpringTestBase {
         reqContractSave.setContractName(contractName);
         reqContractSave.setContractPath(contractPath);
         reqContractSave.setContractSource(source);
-        boolean ifDone = contractService.newAndCompileLiquidContract(reqContractSave);
-        System.out.println(ifDone); // todo 如果异步里失败里，具体错误无法捕获
+        CompileTask compileTaskRes = contractService.newAndCompileLiquidContract(reqContractSave);
+        System.out.println(compileTaskRes); // todo 如果异步里失败里，具体错误无法捕获
         try {
             Thread.sleep(120000L);
             // todo 查看contract的数据库保存成功了没

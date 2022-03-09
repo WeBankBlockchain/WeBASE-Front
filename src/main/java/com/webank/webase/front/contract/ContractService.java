@@ -269,7 +269,6 @@ public class ContractService {
         }
 
         // data sign
-//        String signMsg = transService.signMessage(groupId, client, signUserId, "", encodedConstructor);
         String signMsg = transService.signMessage(groupId, client, signUserId, null, encodedConstructor);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
@@ -605,6 +604,7 @@ public class ContractService {
         Contract contract = new Contract();
         BeanUtils.copyProperties(contractReq, contract);
         contract.setContractStatus(ContractStatus.NOTDEPLOYED.getValue());
+        contract.setIsWasm(contractReq.getIsWasm() ? 1 : 0);
         contract.setCreateTime(LocalDateTime.now());
         contract.setModifyTime(contract.getCreateTime());
         contractRepository.save(contract);
@@ -1037,7 +1037,7 @@ public class ContractService {
 
     // 如果同时多人编译同一个合约，则提示running
     // new liquid contract and save into db
-    public Boolean newAndCompileLiquidContract(ReqContractSave contractReq) {
+    public CompileTask newAndCompileLiquidContract(ReqContractSave contractReq) {
         String groupId = contractReq.getGroupId();
         String contractName = contractReq.getContractName();
         String contractSource = contractReq.getContractSource();
@@ -1052,8 +1052,7 @@ public class ContractService {
         }
         // check by compile task if already new liquid project
         CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
-        // todo debug log
-        log.info("newAndCompileLiquidContract taskInfo:{}", taskInfo);
+        log.debug("newAndCompileLiquidContract taskInfo:{}", taskInfo);
         if (taskInfo != null && taskInfo.getStatus() == 1) {
             log.warn("newAndCompileLiquidContract task of [{}_{}_{}] already compiling", groupId, contractPath, contractName);
             throw new FrontException(ConstantCode.LIQUID_CONTRACT_ALREADY_COMPILING);
@@ -1106,7 +1105,7 @@ public class ContractService {
                 // update task
                 CompileTask compileTaskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, finalContractPath, contractName);
                 compileTaskInfo.setStatus(3);
-                compileTaskInfo.setDescription(e.getMessage());
+                compileTaskInfo.setDescription(e.getMessage());// 此处为java command的编译报错内容
                 compileTaskInfo.setModifyTime(LocalDateTime.now());
                 compileTaskRepository.save(compileTaskInfo);
                 log.info("newAndCompileLiquidContract finish update compile fail status");
@@ -1121,13 +1120,15 @@ public class ContractService {
             log.error("wait for max timeout");
         }
         boolean ifDoneYet = task.isDone();
-        log.info("end newAndCompileLiquidContract :{}", ifDoneYet);
-        return ifDoneYet;
-
+        log.info("newAndCompileLiquidContract ifDoneYet:{}", ifDoneYet);
+        CompileTask taskResult = this.getLiquidContract(groupId, contractPath, contractName);
+        log.info("newAndCompileLiquidContract key:{},compile result:{}", groupId + "_" + contractPath + "_" + contractName, taskResult.getStatus());
+        return taskResult;
     }
 
     /**
      * get contract if status is already compiled
+     * todo 定时任务删除久远的已完成或已失败的task
      * @return
      */
     public CompileTask getLiquidContract(String groupId, String contractPath, String contractName) {
@@ -1142,6 +1143,7 @@ public class ContractService {
             log.error("Compile task of this liquid contract not exists.");
             throw new FrontException(ConstantCode.LIQUID_CONTRACT_TASK_NOT_EXIST);
         }
+        log.debug("getLiquidContract taskInfo:{}", taskInfo);
         return taskInfo;
     }
     /* liquid */

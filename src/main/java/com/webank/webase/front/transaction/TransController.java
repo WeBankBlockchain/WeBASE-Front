@@ -93,7 +93,7 @@ public class TransController extends BaseController {
                 throw new FrontException(PARAM_FAIL_CNS_NAME_IS_EMPTY);
             }
         }
-        Object obj =  transServiceImpl.transHandleWithSign(reqTransHandle);
+        Object obj = transServiceImpl.transHandleWithSign(reqTransHandle);
         log.info("transHandle end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return obj;
