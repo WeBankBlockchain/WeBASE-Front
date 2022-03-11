@@ -176,8 +176,6 @@ public class TransService {
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
         byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, client.isWASM() ? USE_WASM : USE_SOLIDITY);
         return Numeric.toHexString(signedMessage);
-//        return Base64.getEncoder().encodeToString(signedMessage);
-
     }
 
 

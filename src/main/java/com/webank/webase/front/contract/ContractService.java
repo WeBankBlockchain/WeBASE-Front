@@ -20,6 +20,7 @@ import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.MySecurityManagerConfig;
+import com.webank.webase.front.base.enums.CompileStatus;
 import com.webank.webase.front.base.enums.ContractStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
@@ -250,7 +251,13 @@ public class ContractService {
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         boolean isWasm = req.getIsWasm() != null && req.getIsWasm();
-
+        String contractAddress = null;
+        if (isWasm) {
+            contractAddress = req.getContractAddress();
+            if (StringUtils.isBlank(contractAddress)) {
+                throw new FrontException(ConstantCode.DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY);
+            }
+        }
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
         // check if wasm
@@ -269,13 +276,13 @@ public class ContractService {
         }
 
         // data sign
-        String signMsg = transService.signMessage(groupId, client, signUserId, null, encodedConstructor);
+        String signMsg = transService.signMessage(groupId, client, signUserId, contractAddress, encodedConstructor);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
-        String contractAddress = receipt.getContractAddress();
+        String deployedContractAddress = receipt.getContractAddress();
 
-        log.info("success deployWithSign. contractAddress:{}", contractAddress);
-        return contractAddress;
+        log.info("success deployWithSign. deployedContractAddress:{}", deployedContractAddress);
+        return deployedContractAddress;
     }
 
     /**
@@ -310,7 +317,7 @@ public class ContractService {
             });
             try{
                 contractAddress = deployContract(client, abiStr, bytecodeBin,
-                        req.getBfsPath(), paramStrList, cryptoKeyPair);
+                        req.getContractAddress(), paramStrList, cryptoKeyPair);
             } catch (ABICodecException e) {
                 log.error("deployLocally encode fail:[]", e);
                 throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
@@ -1053,7 +1060,7 @@ public class ContractService {
         // check by compile task if already new liquid project
         CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
         log.debug("newAndCompileLiquidContract taskInfo:{}", taskInfo);
-        if (taskInfo != null && taskInfo.getStatus() == 1) {
+        if (taskInfo != null && taskInfo.getStatus() == CompileStatus.RUNNING.getValue()) {
             log.warn("newAndCompileLiquidContract task of [{}_{}_{}] already compiling", groupId, contractPath, contractName);
             throw new FrontException(ConstantCode.LIQUID_CONTRACT_ALREADY_COMPILING);
         } else {
@@ -1065,7 +1072,7 @@ public class ContractService {
             compileTask.setGroupId(groupId);
             compileTask.setContractPath(contractPath);
             compileTask.setContractName(contractName);
-            compileTask.setStatus(1);
+            compileTask.setStatus(CompileStatus.RUNNING.getValue());
             LocalDateTime now = LocalDateTime.now();
             compileTask.setCreateTime(now);
             compileTask.setModifyTime(now);
@@ -1093,7 +1100,7 @@ public class ContractService {
                     contractRepository.save(contract);
                 }
                 CompileTask compileTaskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, finalContractPath, contractName);
-                compileTaskInfo.setStatus(2);
+                compileTaskInfo.setStatus(CompileStatus.SUCCESS.getValue());
                 compileTaskInfo.setAbi(abiBinInfo.getAbiInfo());
                 compileTaskInfo.setBin(abiBinInfo.getBinInfo());
                 compileTaskInfo.setDescription("success");
@@ -1104,7 +1111,7 @@ public class ContractService {
                 log.error("newAndCompileLiquidContract error :[{}_{}_{}], with unknown error", groupId, finalContractPath, contractName, e);
                 // update task
                 CompileTask compileTaskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, finalContractPath, contractName);
-                compileTaskInfo.setStatus(3);
+                compileTaskInfo.setStatus(CompileStatus.FAIL.getValue());
                 compileTaskInfo.setDescription(e.getMessage());// 此处为java command的编译报错内容
                 compileTaskInfo.setModifyTime(LocalDateTime.now());
                 compileTaskRepository.save(compileTaskInfo);

@@ -453,7 +453,7 @@ public class ContractController extends BaseController {
     }
 
     @ApiOperation(value = "check compile", notes = "check liquid compile finished")
-    @PostMapping(value = "/liquid/compile/check/")
+    @PostMapping(value = "/liquid/compile/check")
     public BaseResponse checkLiquidContractCompile(@Valid @RequestBody ReqCompileTask req, BindingResult result) {
         Instant now = Instant.now();
         log.info("checkLiquidContractCompile start. startTime:{},req:{}", now, req);
