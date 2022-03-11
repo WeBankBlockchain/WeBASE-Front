@@ -82,7 +82,9 @@ public class TransController extends BaseController {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
         if (StringUtils.isNotBlank(address)
-            && (address.length() != Address.ValidLen || org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address))) {
+            && ( (!reqTransHandle.getIsWasm() && address.length() != Address.ValidLen)
+                || (!reqTransHandle.getIsWasm() && org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address)) )
+        ) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
@@ -113,7 +115,7 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (!StringUtils.isBlank(address) && address.length() != Address.ValidLen) {
+        if (!reqTransHandle.getIsWasm() && !StringUtils.isBlank(address) && address.length() != Address.ValidLen) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
@@ -238,7 +240,7 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(contractAddress)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (!StringUtils.isBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
+        if (!reqTransHandle.getIsWasm() && !StringUtils.isBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
             throw new FrontException(CONTRACT_ADDRESS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
@@ -279,7 +281,7 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(contractAddress)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (StringUtils.isNotBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
+        if (!reqTransHandle.getIsWasm() && StringUtils.isNotBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
