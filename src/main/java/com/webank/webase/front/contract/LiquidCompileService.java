@@ -108,9 +108,12 @@ public class LiquidCompileService {
 
         // cd $contractDir
         // sed github as gitee
-        // todo mac add "", linux might not
-        String sed = String.format("sed -i \"\" \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/Cargo.toml", contractLiquidPath);
-        String sed2 = String.format("sed -i \"\" \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/.liquid/abi_gen/Cargo.toml", contractLiquidPath);
+        // mac add "", linux not need
+        String osName = System.getProperty("os.name");
+        log.info("now os is [{}]", osName);
+        boolean isMacOS = osName.contains("Mac OS");
+        String sed = String.format("sed -i %s \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/Cargo.toml", isMacOS ? "\"\"" : "", contractLiquidPath);
+        String sed2 = String.format("sed -i %s \"s-https://github.com/WeBankBlockchain-https://gitee.com/WeBankBlockchain-g\" %s/.liquid/abi_gen/Cargo.toml", isMacOS ? "\"\"" : "", contractLiquidPath);
         ExecuteResult sedResult = JavaCommandExecutor.executeCommand(sed, constants.getCommandLineTimeout());
         ExecuteResult sedResult2 = JavaCommandExecutor.executeCommand(sed2, constants.getCommandLineTimeout());
         log.info("execNewContract sedResult:{},sedResult2:{}", sedResult, sedResult2);

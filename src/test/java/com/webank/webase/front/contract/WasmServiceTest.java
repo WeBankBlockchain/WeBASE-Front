@@ -51,6 +51,14 @@ public class WasmServiceTest extends SpringTestBase {
     private static final String userAddress = "0x90c647e80d787f4a8763073077224915501f1c92";
 
     @Test
+    public void testMacOrNot() {
+        String osName = System.getProperty("os.name");
+        System.out.println("now os is " + osName);
+        boolean isMacOS = osName.contains("Mac OS");
+        System.out.println(isMacOS);
+    }
+
+    @Test
     public void testCheck() {
         liquidCompileService.checkLiquidEnv();
     }
@@ -112,7 +120,7 @@ public class WasmServiceTest extends SpringTestBase {
         System.out.println("contract " + contract);
         ReqDeploy reqDeploy = new ReqDeploy();
         reqDeploy.setContractId(contract.getId());
-        reqDeploy.setBfsPath("/test_2"); // 每次部署的合约地址都必须不一样
+        reqDeploy.setContractAddress("/test_2"); // 每次部署的合约地址都必须不一样
         reqDeploy.setGroupId(groupId);
         reqDeploy.setContractName(contractName);
         reqDeploy.setContractPath(contractPath);
