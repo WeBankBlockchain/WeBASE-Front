@@ -273,4 +273,9 @@ public class Web3ApiController {
         return encrypt;
     }
 
+    @GetMapping("isWasm")
+    public Boolean getIsWasmApi(@PathVariable("groupId") String groupId) {
+        return web3ApiService.getIsWasm(groupId);
+    }
+
 }

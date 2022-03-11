@@ -555,6 +555,9 @@ public class Web3ApiService {
             // if not empty, available true
             GROUP_AVAILABLE_MAP.put(groupId, !nodeInfoList.isEmpty());
         }
+    }
 
+    public boolean getIsWasm(String groupId) {
+        return this.getWeb3j(groupId).isWASM();
     }
 }
