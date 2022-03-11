@@ -236,6 +236,9 @@ public class ContractService {
             contract.setContractStatus(ContractStatus.DEPLOYED.getValue());
             contract.setDeployTime(LocalDateTime.now());
             contract.setModifyTime(contract.getDeployTime());
+            // get runtime bin
+            String contractBin = web3ApiService.getCode(req.getGroupId(), contractAddress, BigInteger.ZERO);
+            contract.setContractBin(contractBin);
             contractRepository.save(contract);
         }
         return contractAddress;
@@ -251,10 +254,10 @@ public class ContractService {
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         boolean isWasm = req.getIsWasm() != null && req.getIsWasm();
-        String contractAddress = null;
+        String liquidAddress = null;
         if (isWasm) {
-            contractAddress = req.getContractAddress();
-            if (StringUtils.isBlank(contractAddress)) {
+            liquidAddress = req.getContractAddress();
+            if (StringUtils.isBlank(liquidAddress)) {
                 throw new FrontException(ConstantCode.DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY);
             }
         }
@@ -276,13 +279,24 @@ public class ContractService {
         }
 
         // data sign
-        String signMsg = transService.signMessage(groupId, client, signUserId, contractAddress, encodedConstructor);
+        String signMsg = transService.signMessage(groupId, client, signUserId, liquidAddress, encodedConstructor, true);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
-        String deployedContractAddress = receipt.getContractAddress();
+        log.info("deployWithSign receipt:{}", receipt);
+        log.info("deployWithSign receipt status:{}", receipt.getStatus());
+        log.info("deployWithSign receipt c address:{}", receipt.getContractAddress());
+        log.info("deployWithSign receipt to:{}", receipt.getTo());
+        String contractAddress = "";
+        if (receipt.getStatus() == 0) {
+            log.info("success deployWithSign. deployedContractAddress:{}", liquidAddress);
+            if (client.isWASM()) {
+                contractAddress = liquidAddress;
+            } else {
+                contractAddress = receipt.getContractAddress();
+            }
+        }
 
-        log.info("success deployWithSign. deployedContractAddress:{}", deployedContractAddress);
-        return deployedContractAddress;
+        return contractAddress;
     }
 
     /**

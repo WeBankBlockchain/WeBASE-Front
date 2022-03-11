@@ -63,6 +63,7 @@ import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
 import org.fisco.bcos.sdk.transaction.pusher.TransactionPusherService;
+import org.fisco.bcos.sdk.utils.Hex;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -105,7 +106,7 @@ public class TransService {
      */
     private static final int USE_SOLIDITY = 1;
     private static final int USE_WASM = 2;
-    private static final int USE_WASM_DEPLOY = 8;
+    private static final int USE_WASM_DEPLOY = 10;
 
     /**
      * transHandleWithSign.
@@ -163,7 +164,8 @@ public class TransService {
      * @return
      */
     public String signMessage(String groupId, Client client, String signUserId, String contractAddress,
-            byte[] data) {
+            byte[] data, boolean isDeploy) {
+        log.info("signMessage data:{}", Hex.toHexString(data));
         // to encode raw tx
         Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
         TransactionBuilderService txBuilderService = new TransactionBuilderService(web3ApiService.getWeb3j(groupId));
@@ -174,7 +176,12 @@ public class TransService {
         byte[] encodedTransaction = encoderService.encode(rawTransaction);
 
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
-        byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, client.isWASM() ? USE_WASM : USE_SOLIDITY);
+        int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
+        if (client.isWASM() && isDeploy) {
+            mark = USE_WASM_DEPLOY;
+        }
+        log.info("mark {}", mark);
+        byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, mark);
         return Numeric.toHexString(signedMessage);
     }
 
@@ -186,9 +193,9 @@ public class TransService {
      */
     public TransactionReceipt sendMessage(Client client, String signMsg) {
         TransactionPusherService txPusher = new TransactionPusherService(client);
-        log.debug("sendMessage signMsg:{}", JsonUtils.objToString(signMsg));
+        log.info("sendMessage signMsg:{}", signMsg);
         TransactionReceipt receipt = txPusher.push(signMsg);
-        log.debug("handleTransaction receipt:{}", JsonUtils.objToString(receipt));
+        log.info("sendMessage receipt:{}", JsonUtils.objToString(receipt));
         this.decodeReceipt(client, receipt);
         return receipt;
     }
@@ -446,6 +453,11 @@ public class TransService {
      * if use signed data to send tx, call @send-signed-transaction api
      * @case1 if @userAddress is blank, return not signed raw tx encoded str
      * @case2 if @userAddress not blank, return signed str
+     * todo support deploy
+     * int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
+     *         if (client.isWASM() && isDeploy) {
+     *             mark = USE_WASM_DEPLOY;
+     *         }
      */
     private String convertRawTx2Str(Client client, String contractAddress,
         byte[] encodeFunction, String user, boolean isLocal) {
@@ -585,7 +597,7 @@ public class TransService {
     public TransactionReceipt handleTransaction(Client client, String signUserId, String contractAddress, byte[] encodeFunction) {
         log.debug("handleTransaction signUserId:{},contractAddress:{},encodeFunction:{}",signUserId,contractAddress, encodeFunction);
         String groupId = client.getGroup();
-        String signedMessageStr = this.signMessage(groupId, client, signUserId, contractAddress, encodeFunction);
+        String signedMessageStr = this.signMessage(groupId, client, signUserId, contractAddress, encodeFunction, false);
 
         Instant nodeStartTime = Instant.now();
         // send transaction

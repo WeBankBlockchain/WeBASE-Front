@@ -134,6 +134,14 @@ public class Web3ApiController {
         return web3ApiService.getCode(groupId, address, blockNumber);
     }
 
+    @ApiOperation(value = "getCode",
+        notes = "Get the binary code of the specified contract for the specified block")
+    @GetMapping("/code")
+    public String getCodeWasm(@PathVariable String groupId, @RequestParam String address,
+                          @RequestParam BigInteger blockNumber) {
+        return web3ApiService.getCode(groupId, address, blockNumber);
+    }
+
     /**
      * getTotalTransactionCount
      * @param groupId
