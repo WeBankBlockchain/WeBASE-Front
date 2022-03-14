@@ -316,7 +316,7 @@ public class ContractService {
         Client client = web3ApiService.getWeb3j(groupId);
         // check if wasm
         if (client.isWASM() != isWasm) {
-            log.error("deployLocally error, this group:{} not match with contract type(solidity/liquid)", groupId);
+            log.error("deployLocally error, this group:{} not match with contract type(solidity/liquid),client:{},isWasm:{}", groupId, client.isWASM(), isWasm);
             throw new FrontException(ConstantCode.GROUP_SOL_WASM_NOT_MATCH);
         }
 
