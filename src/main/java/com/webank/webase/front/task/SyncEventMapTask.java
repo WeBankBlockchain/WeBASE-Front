@@ -16,9 +16,6 @@
 
 package com.webank.webase.front.task;
 
-import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
-import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
-
 import com.google.common.collect.Lists;
 import com.webank.webase.front.event.ContractEventInfoRepository;
 import com.webank.webase.front.event.EventService;
@@ -27,13 +24,17 @@ import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.event.entity.ContractEventInfo;
 import com.webank.webase.front.event.entity.NewBlockEventInfo;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
+import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
 
 /**
  * sync event registered map with db's data
@@ -47,10 +48,12 @@ public class SyncEventMapTask {
     NewBlockEventInfoRepository newBlockEventInfoRepository;
     @Autowired
     ContractEventInfoRepository contractEventInfoRepository;
-    @Autowired
-    private Map<String, EventSubscribe> subscribeMap;
+//    @Autowired
+//    private Map<String, EventSubscribe> subscribeMap;
     @Autowired
     private EventService eventService;
+    @Autowired
+    private BcosSDK bcosSDK;
 
     @Scheduled(fixedDelayString = "${constant.syncEventMapTaskFixedDelay}")
     public void taskStart() {
@@ -101,7 +104,7 @@ public class SyncEventMapTask {
             if (equalCount == 0) {
                 log.debug("remove event callback of registerId:{}", registerId);
                 ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(registerId);
-                EventSubscribe eventSubscribe = subscribeMap.get(callback.getGroupId());
+                EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(callback.getGroupId());
                 eventSubscribe.unsubscribeEvent(registerId);
                 CONTRACT_EVENT_CALLBACK_MAP.remove(registerId);
                 removeCount++;

@@ -17,11 +17,13 @@ package com.webank.webase.front.contract.entity.wasm;
 
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 
 @Data
+@NoArgsConstructor
 public class ReqCompileTask {
     @NotNull
     private String groupId;

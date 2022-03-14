@@ -21,19 +21,9 @@ import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.TransactionInfo;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
@@ -47,13 +37,18 @@ import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
-import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Web3Api manage.
@@ -65,9 +60,11 @@ public class Web3ApiService {
     @Autowired
     @Qualifier("rpcClient")
     private Client rpcWeb3j;
+//    @Autowired
+//    @Qualifier("clientMap")
+//    private Map<String, Client> clientMap;
     @Autowired
-    @Qualifier("clientMap")
-    private Map<String, Client> clientMap;
+    private BcosSDK bcosSDK;
     @Autowired
     private Web3Config web3ConfigConstants;
 
@@ -102,11 +99,12 @@ public class Web3ApiService {
      */
     public Client getWeb3j(String groupId) {
         // check group avaible
-        if (GROUP_AVAILABLE_MAP.get(groupId) != null && !GROUP_AVAILABLE_MAP.get(groupId)) {
-            log.error("getWeb3j peers of this groupId:[{}] not connected", groupId);
-            throw new FrontException(ConstantCode.CLIENT_NOT_CONNECTED_WITH_THIS_GROUP);
-        }
-        return getWeb3jRaw(groupId);
+//        if (GROUP_AVAILABLE_MAP.get(groupId) != null && !GROUP_AVAILABLE_MAP.get(groupId)) {
+//            log.error("getWeb3j peers of this groupId:[{}] not connected", groupId);
+//            throw new FrontException(ConstantCode.CLIENT_NOT_CONNECTED_WITH_THIS_GROUP);
+//        }
+//        return getWeb3jRaw(groupId);
+        return bcosSDK.getClient(groupId);
     }
 
     /**
@@ -114,27 +112,27 @@ public class Web3ApiService {
      * @param groupId
      * @return
      */
-    private Client getWeb3jRaw(String groupId) throws FrontException {
-        Client client = clientMap.get(groupId);
-        if (client == null) {
-            List<String> groupList = this.getGroupList();
-            if (!groupList.contains(groupId)) {
-                log.error("getClient group id not exist! groupId:{}", groupId);
-                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-            }
-            // else, groupList contains this groupId, try to build new client
-            try {
-                Client clientNew = Client.build(groupId, web3ConfigConstants.getConfigOptionFromFile());
-                log.info("getClient clientNew:{}", clientNew);
-                clientMap.put(groupId, clientNew);
-                return clientNew;
-            } catch (ConfigException | JniException e) {
-                log.error("build new client of groupId:{} failed:{}", groupId, e);
-                throw new FrontException(ConstantCode.BUILD_NEW_CLIENT_FAILED);
-            }
-        }
-        return client;
-    }
+//    private Client getWeb3jRaw(String groupId) throws FrontException {
+//        Client client = clientMap.get(groupId);
+//        if (client == null) {
+//            List<String> groupList = this.getGroupList();
+//            if (!groupList.contains(groupId)) {
+//                log.error("getClient group id not exist! groupId:{}", groupId);
+//                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+//            }
+//            // else, groupList contains this groupId, try to build new client
+//            try {
+//                Client clientNew = Client.build(groupId, web3ConfigConstants.getConfigOptionFromFile());
+//                log.info("getClient clientNew:{}", clientNew);
+//                clientMap.put(groupId, clientNew);
+//                return clientNew;
+//            } catch (ConfigException | JniException e) {
+//                log.error("build new client of groupId:{} failed:{}", groupId, e);
+//                throw new FrontException(ConstantCode.BUILD_NEW_CLIENT_FAILED);
+//            }
+//        }
+//        return client;
+//    }
 
     /**
      * getBlockNumber.
@@ -547,7 +545,7 @@ public class Web3ApiService {
             // group info get from raw client
             List<GroupNodeInfo> nodeInfoList;
             try {
-                nodeInfoList = this.getWeb3jRaw(groupId).getGroupInfo().getResult().getNodeList();
+                nodeInfoList = this.getWeb3j(groupId).getGroupInfo().getResult().getNodeList();
             } catch (FrontException e) {
                 log.error("refreshAvailableGroupMap get nodeInfoList failed:[]", e);
                 continue;
