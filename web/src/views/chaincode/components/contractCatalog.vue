@@ -28,9 +28,13 @@
         </i>
       </el-tooltip>
       <!-- <el-button type="text" @click="fromGitHub">GitHub</el-button> -->
-      <div>
-        <slot name="footer"></slot>
-      </div>
+      <!-- <el-select v-model="Highlight" class="langChoose" @change="langChange">
+          <el-option v-for="item in Language" :key="item.value" :label="item.label" :value="item.value">
+          </el-option>
+      </el-select> -->
+        <div>
+          <slot name="footer"></slot>
+        </div>
     </div>
 
     <div class="contract-menu-content">
@@ -130,6 +134,8 @@ import {
   deleteSolcId,
   readSolcVersion,
   deletePath,
+  liquidCheck,
+  checkIsWasm
 } from "@/util/api";
 import Bus from "@/bus";
 import Clickoutside from "element-ui/src/utils/clickoutside";
@@ -183,6 +189,14 @@ export default {
       selectFolderData: null,
       loading: false,
       importFromDialog: false,
+       Highlight:true,
+      Language:[{
+          value: true,
+          label: 'javascript'
+        }, {
+          value: false,
+          label: 'rust'
+        }],
     };
   },
   watch: {
@@ -214,6 +228,7 @@ export default {
     });
     Bus.$on("deploy", (data) => {
       this.getContracts("", data);
+      
     });
     Bus.$on("open", (data) => {
       this.contractArry.forEach((value) => {
@@ -1466,6 +1481,10 @@ export default {
   border: 1px solid;
   height: 36px;
   line-height: 36px;
+}
+.langChoose{
+    width: 110px;
+    padding-left: 7px;
 }
 </style>
 

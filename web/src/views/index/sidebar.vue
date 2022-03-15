@@ -89,7 +89,7 @@ export default {
             groupName: "",
             groupVisible: false,
             groupList: [],
-            version: "",
+            version: "3.0.0-rc2",
             group: null,
             screenWidth: null,
             buttomNone: true,

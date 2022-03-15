@@ -236,6 +236,7 @@ export default {
         exportJavaProject: "Export java project",
     },
     text: {
+        Contractcompiling: "contract compilation, please wait...",
         isRedeploy: 'Has the contract been deployed or redeployed?',
         noContract: 'Please create a new contract',
         noStoreContract: 'Please open a contract in the left panel',
