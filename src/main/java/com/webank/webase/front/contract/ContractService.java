@@ -403,29 +403,6 @@ public class ContractService {
         }
     }
 
-    /**
-     * encode constructor function
-     */
-    private static byte[] constructorEncoded(String contractName,
-            ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
-        // Constructor encoded
-        byte[] encodedConstructor = null;
-        String functionName = contractName;
-        // input handle
-        List<String> funcInputTypes = versionEvent.getFuncInputs().get(functionName);
-
-        if (funcInputTypes != null && funcInputTypes.size() > 0) {
-            if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deploy encodedConstructor:{}", encodedConstructor);
-            } else {
-                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-            }
-        }
-        return encodedConstructor;
-    }
 
 
     private void checkContractAbiExistedAndSave(String contractName, String version,

@@ -102,7 +102,7 @@ public class TransService {
     @Autowired
     private PrecompiledService precompiledService;
     /**
-     * if use wasm(liquid), use 1
+     * if use wasm(liquid), use 2
      */
     private static final int USE_SOLIDITY = 1;
     private static final int USE_WASM = 2;
