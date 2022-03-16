@@ -46,11 +46,10 @@ public class NewBlockEventCallback implements BlockNotifier {
 
     @Override
     public void onResponse(String groupId, BigInteger blockNumber) {
-//        System.out.println("NewBlockEventCallBack blockNumber "+ blockNumber);
         logger.info("NewBlockEventCallBack groupId:{}, blockNumber:{}",
             groupId, blockNumber);
         if (!running) {
-            logger.debug("NewBlockEventCallBack skip because already unregister blockPublishInfo:{}", blockPublishInfo);
+            logger.warn("NewBlockEventCallBack skip because already unregister blockPublishInfo:{}", blockPublishInfo);
             return;
         }
         BlockPushMessage blockPushMessage = new BlockPushMessage();
@@ -71,7 +70,7 @@ public class NewBlockEventCallback implements BlockNotifier {
      */
     private void pushMessage2MQ(String exchangeName, String routingKey,
                                 BlockPushMessage blockPushMessage) {
-        logger.debug("NewBlockEventCallBack pushMessage2MQ blockPushMessage:{}",
+        logger.info("NewBlockEventCallBack pushMessage2MQ blockPushMessage:{}",
                 blockPushMessage.toString());
         MQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
                 blockPushMessage.toString());

@@ -74,8 +74,6 @@ public class EventService {
     private MQPublisher mqPublisher;
     @Autowired
     private Web3ApiService web3ApiService;
-//    @Autowired
-//    private Map<String, EventSubscribe> eventSubscribeMap;
     @Autowired
     private Web3Config web3Config;
     @Autowired
@@ -109,7 +107,7 @@ public class EventService {
     @Transactional
     public void handleRegNewBlock(String appId, String groupId, String exchangeName, String queueName,
         String routingKey) {
-//        mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
+        mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
 //        String registerId = null;
         try {
             NewBlockEventCallback callback = new NewBlockEventCallback(mqPublisher, groupId,
@@ -124,7 +122,7 @@ public class EventService {
             log.info("end registerNewBlockEvent, infoId:{}", infoId);
         } catch (Exception e) {
             log.error("register newBlockEvent error:[]", e);
-//            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
 //            groupManagerService.eraseBlockNotifyCallback(registerId); todo
             throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
         }
