@@ -99,11 +99,10 @@ public class Web3ApiService {
      */
     public Client getWeb3j(String groupId) {
         // check group avaible
-//        if (GROUP_AVAILABLE_MAP.get(groupId) != null && !GROUP_AVAILABLE_MAP.get(groupId)) {
-//            log.error("getWeb3j peers of this groupId:[{}] not connected", groupId);
-//            throw new FrontException(ConstantCode.CLIENT_NOT_CONNECTED_WITH_THIS_GROUP);
-//        }
-//        return getWeb3jRaw(groupId);
+        if (GROUP_AVAILABLE_MAP.get(groupId) != null && !GROUP_AVAILABLE_MAP.get(groupId)) {
+            log.error("getWeb3j peers of this groupId:[{}] not connected", groupId);
+            throw new FrontException(ConstantCode.CLIENT_NOT_CONNECTED_WITH_THIS_GROUP);
+        }
         return bcosSDK.getClient(groupId);
     }
 
