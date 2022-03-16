@@ -82,5 +82,5 @@ constant:
   # get event callback wait (s)
   eventCallbackWait: 4
   # compile liquid timeout (ms)
-  commandLineTimeout: 10000
-  liquidCompileTimeout: 120000
+  commandLineTimeout: 5000
+  liquidCompileTimeout: 300000
