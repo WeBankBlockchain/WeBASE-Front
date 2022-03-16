@@ -31,6 +31,7 @@ import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupInfo.GroupInfo;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusStatusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
@@ -519,7 +520,13 @@ public class Web3ApiService {
         return groupNodeInfos;
     }
 
-    private Map<String, String> getNodeIdNameMap(String groupId) {
+    public List<String> getNodeList(String groupId) {
+        GroupPeers groupPeers = getWeb3j(groupId).getGroupPeers();
+        List<String> nodeList =  groupPeers.getGroupPeers();
+        return nodeList;
+    }
+
+    public Map<String, String> getNodeIdNameMap(String groupId) {
         log.debug("refreshAndGetNodeNameMap groupId:{}", groupId);
         Map<String, String> nodeIdNameMap = new HashMap<>();
         List<GroupNodeInfo> nodeInfoList = this.getGroupNodeInfo(groupId);

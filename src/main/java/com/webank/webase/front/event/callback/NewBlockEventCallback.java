@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 public class NewBlockEventCallback implements BlockNotifier {
 
     private static Logger logger = LoggerFactory.getLogger(NewBlockEventCallback.class);
-
     private MQPublisher MQPublisher;
     private String groupId;
     private PublisherHelper blockPublishInfo;

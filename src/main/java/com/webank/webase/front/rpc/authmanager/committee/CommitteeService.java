@@ -1,0 +1,247 @@
+/*
+ * Copyright 2014-2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.webank.webase.front.rpc.authmanager.committee;
+
+import static org.fisco.bcos.sdk.contract.auth.contracts.Committee.FUNC_SETRATE;
+import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATEMODIFYDEPLOYAUTHPROPOSAL;
+import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATERESETADMINPROPOSAL;
+import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATESETDEPLOYAUTHTYPEPROPOSAL;
+import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATESETRATEPROPOSAL;
+import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATEUPDATEGOVERNORPROPOSAL;
+import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_REVOKEPROPOSAL;
+import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_VOTEPROPOSAL;
+
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.enums.PrecompiledTypes;
+import com.webank.webase.front.base.exception.FrontException;
+import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.rpc.precompiled.base.PrecompiledCommonInfo;
+import com.webank.webase.front.transaction.TransService;
+import com.webank.webase.front.web3api.Web3ApiService;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.C;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.codec.ABICodecException;
+import org.fisco.bcos.sdk.contract.auth.contracts.Committee;
+import org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager;
+import org.fisco.bcos.sdk.contract.auth.manager.AuthManager;
+import org.fisco.bcos.sdk.contract.auth.po.AuthType;
+import org.fisco.bcos.sdk.model.RetCode;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.transaction.model.exception.TransactionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ * The service can be requested by committee
+ */
+@Slf4j
+@Service
+public class CommitteeService {
+
+  private BigInteger DEFAULT_BLOCK_NUMBER_INTERVAL = BigInteger.valueOf(3600 * 24 * 7);
+
+  private Client client;
+  @Autowired
+  TransService transService;
+
+  /**
+   * 更新治理委员信息。 如果是新加治理委员，新增地址和权重即可。如果是删除治理委员，将一个治理委员的权重设置为0 即可
+   */
+  public Object updateGovernor(String groupId, String signUserId, String accountAddress,
+      BigInteger weight)
+      throws ContractException, ABICodecException, TransactionException, IOException {
+    return this.updateGovernorHandle(groupId, signUserId, accountAddress, weight);
+  }
+
+  public Object updateGovernorHandle(String groupId, String signUserId, String account,
+      BigInteger weight) {
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(account);
+    funcParams.add(weight);
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    String contractAddress = PrecompiledCommonInfo.getAddress(
+        PrecompiledTypes.COMMITTEE_MANAGER);
+    String abiStr = CommitteeManager.getABI();
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, contractAddress, abiStr, FUNC_CREATEUPDATEGOVERNORPROPOSAL, funcParams);
+    return this.handleTransactionReceipt(receipt);
+  }
+
+  /**
+   * 设置提案阈值，提案阈值分为参与阈值和权重阈值。
+   */
+  public Object setRate(String groupId, String signUserId, BigInteger participatesRate,
+      BigInteger winRate)
+      throws ABICodecException, TransactionException, IOException, ContractException {
+    return this.setRateHandle(groupId, signUserId, participatesRate, winRate);
+  }
+
+  public Object setRateHandle(String groupId, String signUserId, BigInteger participatesRate,
+      BigInteger winRate) throws ContractException {
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(participatesRate);
+    funcParams.add(winRate);
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    String contractAddress = PrecompiledCommonInfo.getAddress(
+        PrecompiledTypes.COMMITTEE_MANAGER);
+    String abiStr = CommitteeManager.getABI();
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, contractAddress, abiStr, FUNC_CREATESETRATEPROPOSAL, funcParams);
+    return this.handleTransactionReceipt(receipt);
+  }
+
+  /**
+   * 设置部署的ACL策略 只支持 white_list 和 black_list 两种策略 type为1时，设置为白名单，type为2时，设置为黑名单。
+   */
+  public Object setDeployAuthType(String groupId, String signUserId, BigInteger deployAuthType) {
+    return this.setDeployAuthTypeHandle(groupId, signUserId, deployAuthType);
+  }
+
+  public String setDeployAuthTypeHandle(String groupId, String signUserId,
+      BigInteger deployAuthType) {
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(deployAuthType);
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    String contractAddress = PrecompiledCommonInfo.getAddress(
+        PrecompiledTypes.COMMITTEE_MANAGER);
+    String abiStr = CommitteeManager.getABI();
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, contractAddress, abiStr, FUNC_CREATESETDEPLOYAUTHTYPEPROPOSAL,
+            funcParams);
+    return this.handleTransactionReceipt(receipt);
+  }
+
+  /**
+   * 修改某个账户的部署权限提案
+   */
+  public Object modifyDeployAuth(String groupId, String signUserId, Boolean openFlag,
+      String userAddress) {
+    return this.modifyDeployAuthHandle(groupId, signUserId, userAddress, openFlag);
+  }
+
+  public Object modifyDeployAuthHandle(String groupId, String signUserId, String userAddress,
+      Boolean openFlag) {
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(userAddress);
+    funcParams.add(openFlag);
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    String contractAddress = PrecompiledCommonInfo.getAddress(
+        PrecompiledTypes.COMMITTEE_MANAGER);
+    String abiStr = CommitteeManager.getABI();
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, contractAddress, abiStr, FUNC_CREATEMODIFYDEPLOYAUTHPROPOSAL,
+            funcParams);
+    return this.handleTransactionReceipt(receipt);
+  }
+
+  /**
+   * 重置某个合约的管理员账号提案
+   */
+  public Object resetAdmin(String groupId, String signUserId, String newAdmin, String contractAddr)
+      throws ContractException, ABICodecException, TransactionException, IOException {
+    return this.resetAdminHandle(groupId, signUserId, newAdmin, contractAddr);
+  }
+
+  public Object resetAdminHandle(String groupId, String signUserId, String newAdmin,
+      String contractAddr) {
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(newAdmin);
+    funcParams.add(contractAddr);
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    String contractAddress = PrecompiledCommonInfo.getAddress(
+        PrecompiledTypes.COMMITTEE_MANAGER);
+    String abiStr = CommitteeManager.getABI();
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, contractAddress, abiStr, FUNC_CREATERESETADMINPROPOSAL,
+            funcParams);
+    return this.handleTransactionReceipt(receipt);
+  }
+
+  /**
+   * 撤销提案的发起，该操作只有发起提案的治理委员才能操作
+   */
+  public Object revokeProposal(String groupId, String signUserId, BigInteger proposalId)
+      throws ContractException, ABICodecException, TransactionException, IOException {
+    return this.revokeProposalHandle(groupId, signUserId, proposalId);
+  }
+
+  public Object revokeProposalHandle(String groupId, String signUserId, BigInteger proposalId) {
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(proposalId);
+    String contractAddress = PrecompiledCommonInfo.getAddress(
+        PrecompiledTypes.COMMITTEE_MANAGER);
+    String abiStr = CommitteeManager.getABI();
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, contractAddress, abiStr, FUNC_REVOKEPROPOSAL,
+            funcParams);
+    return this.handleTransactionReceipt(receipt);
+  }
+
+
+  /**
+   * 向某个提案进行投票
+   */
+  public Object voteProposal(String groupId, String signUserId, BigInteger proposalId,
+      Boolean agree)
+      throws ContractException {
+    return this.voteProposalHandle(groupId, signUserId, proposalId, agree);
+  }
+
+  public String voteProposalHandle(String groupId, String signUserId, BigInteger proposalId,
+      Boolean agree) {
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(proposalId);
+    funcParams.add(agree);
+    String contractAddress = PrecompiledCommonInfo.getAddress(
+        PrecompiledTypes.COMMITTEE_MANAGER);
+    String abiStr = CommitteeManager.getABI();
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, contractAddress, abiStr, FUNC_VOTEPROPOSAL,
+            funcParams);
+    return this.handleTransactionReceipt(receipt);
+  }
+
+
+  private String handleTransactionReceipt(TransactionReceipt receipt) {
+    log.debug("handle tx receipt of precompiled");
+    try {
+      RetCode sdkRetCode = ReceiptParser.parseTransactionReceipt(receipt);
+      log.info("handleTransactionReceipt sdkRetCode:{}", sdkRetCode);
+      if (sdkRetCode.getCode() >= 0) {
+        return new BaseResponse(ConstantCode.RET_SUCCESS,
+            sdkRetCode.getMessage()).toString();
+      } else {
+        throw new FrontException(sdkRetCode.getCode(), sdkRetCode.getMessage());
+      }
+    } catch (ContractException e) {
+      log.error("handleTransactionReceipt e:[]", e);
+      throw new FrontException(e.getErrorCode(), e.getMessage());
+    }
+  }
+}

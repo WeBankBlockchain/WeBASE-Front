@@ -30,7 +30,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class ReqRegisterCns {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY_STRING)
     private String groupId;
-    @Deprecated
     private String contractName;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CNS_NAME_IS_EMPTY_STRING)
     private String cnsName;

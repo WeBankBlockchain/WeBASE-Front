@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.transaction;
 
-
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
@@ -22,7 +21,8 @@ import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
-import com.webank.webase.front.precompiledapi.PrecompiledService;
+import com.webank.webase.front.rpc.precompiled.cns.CNSServiceInWebase;
+import com.webank.webase.front.rpc.precompiled.sysconf.SysConfigServiceInWebase;
 import com.webank.webase.front.transaction.entity.ReqSignMessageHash;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
@@ -100,7 +100,9 @@ public class TransService {
     @Qualifier(value = "ecdsa")
     private CryptoSuite ecdsaCryptoSuite;
     @Autowired
-    private PrecompiledService precompiledService;
+    private SysConfigServiceInWebase sysConfigServiceInWebase;
+    @Autowired
+    private CNSServiceInWebase cnsServiceInWebase;
     /**
      * if use wasm(liquid), use 2
      */
@@ -129,6 +131,10 @@ public class TransService {
         return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, req.getIsWasm());
     }
 
+    public Object transHandleWithSign(String groupId, String signUserId,
+                                      String contractAddress, String abiStr, String funcName, List<Object> funcParam) {
+        return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, false);
+    }
 
     /**
      * send tx with sign (support precomnpiled contract)
@@ -402,7 +408,7 @@ public class TransService {
         String funcName, List<Object> funcParam, boolean isWasm) throws Exception {
 
         if (isUseCns) {
-            Tuple2<String, String> cnsInfo = precompiledService.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
+            Tuple2<String, String> cnsInfo = cnsServiceInWebase.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
             contractAddress = cnsInfo.getValue1();
             log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
         }

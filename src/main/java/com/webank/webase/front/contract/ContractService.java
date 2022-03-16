@@ -47,15 +47,11 @@ import com.webank.webase.front.contract.entity.wasm.AbiBinInfo;
 import com.webank.webase.front.contract.entity.wasm.CompileTask;
 import com.webank.webase.front.contract.entity.wasm.CompileTaskRepository;
 import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.precompiledapi.PrecompiledService;
-import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
+import com.webank.webase.front.rpc.authmanager.everyone.EveryoneService;
+import com.webank.webase.front.rpc.precompiled.cns.CNSServiceInWebase;
+import com.webank.webase.front.rpc.precompiled.sysconf.SysConfigServiceInWebase;
 import com.webank.webase.front.transaction.TransService;
-import com.webank.webase.front.util.AbiUtil;
-import com.webank.webase.front.util.CleanPathUtil;
-import com.webank.webase.front.util.CommonUtils;
-import com.webank.webase.front.util.ContractAbiUtil;
-import com.webank.webase.front.util.FrontUtils;
-import com.webank.webase.front.util.JsonUtils;
+import com.webank.webase.front.util.*;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.File;
 import java.io.FileInputStream;
@@ -95,6 +91,7 @@ import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.manager.AssembleTransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
@@ -108,6 +105,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 /**
  * contract management.
@@ -131,10 +129,6 @@ public class ContractService {
     @Autowired
     private Web3ApiService web3ApiService;
     @Autowired
-    private PrecompiledWithSignService precompiledWithSignService;
-    @Autowired
-    private PrecompiledService precompiledService;
-    @Autowired
     private LiquidCompileService liquidCompileService;
     @Autowired
     private CompileTaskRepository compileTaskRepository;
@@ -143,6 +137,8 @@ public class ContractService {
     private ThreadPoolTaskScheduler threadPoolTaskScheduler;
     @Autowired
     private Constants constants;
+    @Autowired
+    private CNSServiceInWebase cnsServiceInWebase;
 
     /**
      * sendAbi.
@@ -366,7 +362,7 @@ public class ContractService {
         String contractAddress = req.getContractAddress();
         String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
         Tuple2<String, String> cnsList =
-                precompiledService.queryCnsByNameAndVersion(groupId, cnsName, version);
+                cnsServiceInWebase.queryCnsByNameAndVersion(groupId, cnsName, version);
 //        if (!CollectionUtils.isEmpty(cnsList)) { todo 返回为空时怎么判断
 //            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
 //            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
@@ -398,7 +394,7 @@ public class ContractService {
             if (StringUtils.isBlank(req.getSignUserId())) {
                 throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
             }
-            precompiledWithSignService.registerCns(groupId, req.getSignUserId(), cnsName,
+            cnsServiceInWebase.registerCNS(groupId, req.getSignUserId(), cnsName,
                     req.getVersion(), contractAddress, abiInfo);
         }
     }
