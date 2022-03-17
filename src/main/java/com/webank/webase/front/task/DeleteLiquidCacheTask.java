@@ -61,8 +61,11 @@ public class DeleteLiquidCacheTask {
         .forEach(t -> {
           String targetPath = LiquidCompileService.getLiquidTargetPath(t.getGroupId(), t.getContractPath(), t.getContractName());
           File targetFile = new File(targetPath);
-          boolean resultDir = CommonUtils.deleteDir(targetFile);
-          log.warn("delete path [{}], result:{}", targetPath, resultDir);
+          boolean resultDir = false;
+          if (targetFile.exists()) {
+            resultDir = CommonUtils.deleteDir(targetFile);
+            log.warn("delete path [{}], result:{}", targetPath, resultDir);
+          }
           if (resultDir || !targetFile.exists()) {
             t.setStatus(CompileStatus.INIT.getValue());
             compileTaskRepository.save(t);
