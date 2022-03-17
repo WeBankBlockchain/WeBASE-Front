@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -39,7 +38,7 @@ public class DeleteLiquidCacheTask {
   @Autowired
   private CompileTaskRepository compileTaskRepository;
 
-  @Scheduled(fixedDelayString = "${constant.DeleteLiquidCacheTaskFixedDelay}")
+  @Scheduled(fixedDelayString = "${constant.deleteLiquidCacheTaskFixedDelay}")
   public void taskStart() {
     deleteTask();
   }
