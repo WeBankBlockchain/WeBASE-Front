@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -59,9 +60,10 @@ public class DeleteLiquidCacheTask {
         .filter(t -> t.getModifyTime().isBefore(halfHourAgo))
         .forEach(t -> {
           String targetPath = LiquidCompileService.getLiquidTargetPath(t.getGroupId(), t.getContractPath(), t.getContractName());
-          boolean resultDir = CommonUtils.deleteDir(targetPath);
+          File targetFile = new File(targetPath);
+          boolean resultDir = CommonUtils.deleteDir(targetFile);
           log.warn("delete path [{}], result:{}", targetPath, resultDir);
-          if (resultDir) {
+          if (resultDir || !targetFile.exists()) {
             t.setStatus(CompileStatus.INIT.getValue());
             compileTaskRepository.save(t);
             log.debug("update db as deleted");
