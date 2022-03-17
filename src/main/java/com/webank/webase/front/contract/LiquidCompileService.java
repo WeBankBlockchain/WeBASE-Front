@@ -40,7 +40,7 @@ import java.nio.file.Paths;
 @Service
 public class LiquidCompileService {
 
-    private static final String LIQUID_DIR = "liquid";
+    public static final String LIQUID_DIR = "liquid";
     @Autowired
     private Constants constants;
 
@@ -192,10 +192,19 @@ public class LiquidCompileService {
             log.error("compileAndReturn get abi and bin error:", e);
             throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED);
         }
+//        finally {
+//            boolean result = CommonUtils.deleteFiles(targetPath);
+//            log.warn("delete file [{}],result:{} after compiling", targetPath, result);
+//        }
 
     }
 
+
     private static String getContractDir(String groupId, String contractPath, String contractName) {
+        // if contractPath is "/"
+        if ("/".equals(contractPath)) {
+            contractPath = "";
+        }
         return groupId + "_" + contractPath + "_" + contractName;
     }
 
@@ -203,5 +212,12 @@ public class LiquidCompileService {
         String path = Paths.get(LIQUID_DIR, contractDir).toString();
         log.info("getLiquidContractPath path:{}", path);
         return path;
+    }
+
+    public static String getLiquidTargetPath(String groupId, String contractPath, String contractName) {
+        String contractDir = getContractDir(groupId, contractPath, contractName);
+        // check target dir exist, 如果已存在则删除，因为此时要重新编译
+        String targetPath = Paths.get(LIQUID_DIR, contractDir, "target").toString();
+        return targetPath;
     }
 }

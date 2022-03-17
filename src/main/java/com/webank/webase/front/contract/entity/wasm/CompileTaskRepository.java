@@ -27,6 +27,8 @@ public interface CompileTaskRepository extends CrudRepository<CompileTask, Compi
 
     List<CompileTask> findByGroupIdAndStatus(String groupId, Integer status);
 
+    List<CompileTask> findByStatus(Integer status);
+
     CompileTask findByGroupIdAndContractPathAndContractName(String groupId, String contractPath, String contractName);
 
 }

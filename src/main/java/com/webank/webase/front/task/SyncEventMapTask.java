@@ -48,8 +48,6 @@ public class SyncEventMapTask {
     NewBlockEventInfoRepository newBlockEventInfoRepository;
     @Autowired
     ContractEventInfoRepository contractEventInfoRepository;
-//    @Autowired
-//    private Map<String, EventSubscribe> subscribeMap;
     @Autowired
     private EventService eventService;
     @Autowired

@@ -768,11 +768,14 @@ public class CommonUtils {
         return exportedKeyPath;
     }
 
-    /**
-     * delete dir or file whatever
-     * @param dir
-     * @return
-     */
+    public static boolean deleteDir(String dir) {
+        return deleteDir(new File(dir));
+    }
+        /**
+         * delete dir or file whatever
+         * @param dir
+         * @return
+         */
     public static boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
