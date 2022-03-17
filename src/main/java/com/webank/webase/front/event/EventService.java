@@ -35,8 +35,10 @@ import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.codec.ABICodec;
+import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.eventsub.EventSubParams;
 import org.fisco.bcos.sdk.eventsub.EventSubscribe;
+import org.fisco.bcos.sdk.jni.common.JniException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -44,10 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -78,6 +77,8 @@ public class EventService {
     private Web3Config web3Config;
     @Autowired
     private BcosSDK bcosSDK;
+    @Autowired
+    private Map<String ,EventSubscribe> eventSubscribeMap;
     @Autowired
     private Constants constants;
     @Autowired
@@ -449,24 +450,25 @@ public class EventService {
     }
 
     public EventSubscribe getEventSubscribe(String groupId) {
-        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
-//        if (eventSubscribe == null) {
-//            List<String> groupList = web3ApiService.getGroupList();
-//            if (!groupList.contains(groupId)) {
-//                log.error("getEventSubscribe group id not exist! groupId:{}", groupId);
-//                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-//            }
-//            // else, groupList contains this groupId, try to build new eventSubscribe
-//            try {
-//                EventSubscribe eventSubscribeNew = EventSubscribe.build(groupId, web3Config.getConfigOptionFromFile());
-//                log.info("getEventSubscribe eventSubscribeNew:{}", eventSubscribeNew);
-//                eventSubscribeMap.put(groupId, eventSubscribeNew);
-//                return eventSubscribeNew;
-//            } catch (ConfigException | JniException e) {
-//                log.error("build new eventSubscribe of groupId:{} failed:{}", groupId, e);
-//                throw new FrontException(ConstantCode.BUILD_NEW_EVENT_SUBSCRIBE_FAILED);
-//            }
-//        }
+//        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
+        EventSubscribe eventSubscribe = eventSubscribeMap.get(groupId);
+        if (eventSubscribe == null) {
+            List<String> groupList = web3ApiService.getGroupList();
+            if (!groupList.contains(groupId)) {
+                log.error("getEventSubscribe group id not exist! groupId:{}", groupId);
+                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+            }
+            // else, groupList contains this groupId, try to build new eventSubscribe
+            try {
+                EventSubscribe eventSubscribeNew = EventSubscribe.build(groupId, web3Config.getConfigOptionFromFile());
+                log.info("getEventSubscribe eventSubscribeNew:{}", eventSubscribeNew);
+                eventSubscribeMap.put(groupId, eventSubscribeNew);
+                return eventSubscribeNew;
+            } catch (ConfigException | JniException e) {
+                log.error("build new eventSubscribe of groupId:{} failed:{}", groupId, e);
+                throw new FrontException(ConstantCode.BUILD_NEW_EVENT_SUBSCRIBE_FAILED);
+            }
+        }
         return eventSubscribe;
     }
 }

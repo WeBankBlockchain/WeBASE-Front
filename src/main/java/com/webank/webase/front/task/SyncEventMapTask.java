@@ -102,7 +102,8 @@ public class SyncEventMapTask {
             if (equalCount == 0) {
                 log.debug("remove event callback of registerId:{}", registerId);
                 ContractEventCallback callback = CONTRACT_EVENT_CALLBACK_MAP.get(registerId);
-                EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(callback.getGroupId());
+//                EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(callback.getGroupId());
+                EventSubscribe eventSubscribe = eventService.getEventSubscribe(callback.getGroupId());
                 eventSubscribe.unsubscribeEvent(registerId);
                 CONTRACT_EVENT_CALLBACK_MAP.remove(registerId);
                 removeCount++;

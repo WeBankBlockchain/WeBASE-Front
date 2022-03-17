@@ -38,7 +38,9 @@ import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
+import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -61,9 +63,9 @@ public class Web3ApiService {
     @Autowired
     @Qualifier("rpcClient")
     private Client rpcWeb3j;
-//    @Autowired
-//    @Qualifier("clientMap")
-//    private Map<String, Client> clientMap;
+    @Autowired
+    @Qualifier("clientMap")
+    private Map<String, Client> clientMap;
     @Autowired
     private BcosSDK bcosSDK;
     @Autowired
@@ -104,7 +106,8 @@ public class Web3ApiService {
             log.error("getWeb3j peers of this groupId:[{}] not connected", groupId);
             throw new FrontException(ConstantCode.CLIENT_NOT_CONNECTED_WITH_THIS_GROUP);
         }
-        return bcosSDK.getClient(groupId);
+//        return bcosSDK.getClient(groupId);
+        return getWeb3jRaw(groupId);
     }
 
     /**
@@ -112,27 +115,27 @@ public class Web3ApiService {
      * @param groupId
      * @return
      */
-//    private Client getWeb3jRaw(String groupId) throws FrontException {
-//        Client client = clientMap.get(groupId);
-//        if (client == null) {
-//            List<String> groupList = this.getGroupList();
-//            if (!groupList.contains(groupId)) {
-//                log.error("getClient group id not exist! groupId:{}", groupId);
-//                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-//            }
-//            // else, groupList contains this groupId, try to build new client
-//            try {
-//                Client clientNew = Client.build(groupId, web3ConfigConstants.getConfigOptionFromFile());
-//                log.info("getClient clientNew:{}", clientNew);
-//                clientMap.put(groupId, clientNew);
-//                return clientNew;
-//            } catch (ConfigException | JniException e) {
-//                log.error("build new client of groupId:{} failed:{}", groupId, e);
-//                throw new FrontException(ConstantCode.BUILD_NEW_CLIENT_FAILED);
-//            }
-//        }
-//        return client;
-//    }
+    private Client getWeb3jRaw(String groupId) throws FrontException {
+        Client client = clientMap.get(groupId);
+        if (client == null) {
+            List<String> groupList = this.getGroupList();
+            if (!groupList.contains(groupId)) {
+                log.error("getClient group id not exist! groupId:{}", groupId);
+                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+            }
+            // else, groupList contains this groupId, try to build new client
+            try {
+                Client clientNew = Client.build(groupId, web3ConfigConstants.getConfigOptionFromFile());
+                log.info("getClient clientNew:{}", clientNew);
+                clientMap.put(groupId, clientNew);
+                return clientNew;
+            } catch (ConfigException | JniException e) {
+                log.error("build new client of groupId:{} failed:{}", groupId, e);
+                throw new FrontException(ConstantCode.BUILD_NEW_CLIENT_FAILED);
+            }
+        }
+        return client;
+    }
 
     /**
      * getBlockNumber.

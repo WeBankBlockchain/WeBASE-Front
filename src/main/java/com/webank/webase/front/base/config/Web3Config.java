@@ -102,44 +102,44 @@ public class Web3Config {
 
 
 
-//    @Bean(name = "clientMap")
-//    public Map<String, Client> getClientMap(ConfigOption configOption) throws JniException {
-//        Map<String, Client> clientMap = new HashMap<>();
-//        Client rpcClient = getRpcWeb3j(configOption);
-//        List<String> groupList = rpcClient.getGroupList().getResult().getGroupList();
-//        log.info("getClientMap groupList:{}", groupList);
-//        if (groupList.isEmpty()) {
-//            log.error("**** getClientMap group list is empty!");
-//            return clientMap;
-//        }
-//        for (String groupId : groupList) {
-//            Client client = Client.build(groupId, configOption);
-//            clientMap.put(groupId, client);
-//        }
-//        log.info("getClientMap success, size:{}", clientMap.size());
-//
-//        return clientMap;
-//    }
-//
-//
-//    @Bean(name = "eventSubMap")
-//    public Map<String, EventSubscribe> getEventSubMap(ConfigOption configOption) throws JniException {
-//        Map<String, EventSubscribe> eventSubscribeMap = new HashMap<>();
-//        Client rpcClient = getRpcWeb3j(configOption);
-//        List<String> groupList = rpcClient.getGroupList().getResult().getGroupList();
-//        log.info("getEventSubMap groupList:{}", groupList);
-//        if (groupList.isEmpty()) {
-//            log.error("**** getEventSubMap group list is empty!");
-//            return eventSubscribeMap;
-//        }
-//        for (String groupId : groupList) {
-//            EventSubscribe eventSubscribe = EventSubscribe.build(groupId, configOption);
-//            eventSubscribeMap.put(groupId, eventSubscribe);
-//        }
-//        log.info("getEventSubMap success, size:{}", eventSubscribeMap.size());
-//
-//        return eventSubscribeMap;
-//    }
+    @Bean(name = "clientMap")
+    public Map<String, Client> getClientMap(ConfigOption configOption) throws JniException {
+        Map<String, Client> clientMap = new HashMap<>();
+        Client rpcClient = getRpcWeb3j(configOption);
+        List<String> groupList = rpcClient.getGroupList().getResult().getGroupList();
+        log.info("getClientMap groupList:{}", groupList);
+        if (groupList.isEmpty()) {
+            log.error("**** getClientMap group list is empty!");
+            return clientMap;
+        }
+        for (String groupId : groupList) {
+            Client client = Client.build(groupId, configOption);
+            clientMap.put(groupId, client);
+        }
+        log.info("getClientMap success, size:{}", clientMap.size());
+
+        return clientMap;
+    }
+
+
+    @Bean(name = "eventSubMap")
+    public Map<String, EventSubscribe> getEventSubMap(ConfigOption configOption) throws JniException {
+        Map<String, EventSubscribe> eventSubscribeMap = new HashMap<>();
+        Client rpcClient = getRpcWeb3j(configOption);
+        List<String> groupList = rpcClient.getGroupList().getResult().getGroupList();
+        log.info("getEventSubMap groupList:{}", groupList);
+        if (groupList.isEmpty()) {
+            log.error("**** getEventSubMap group list is empty!");
+            return eventSubscribeMap;
+        }
+        for (String groupId : groupList) {
+            EventSubscribe eventSubscribe = EventSubscribe.build(groupId, configOption);
+            eventSubscribeMap.put(groupId, eventSubscribe);
+        }
+        log.info("getEventSubMap success, size:{}", eventSubscribeMap.size());
+
+        return eventSubscribeMap;
+    }
 
 
 }

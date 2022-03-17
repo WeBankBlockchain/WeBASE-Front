@@ -193,13 +193,6 @@ public class ConstantCode {
     public static final RetCode ABI_INFO_NOT_EXISTS = RetCode.mark(201256, "abi info of this id not exists");
     public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(201257, "Abi Id cannot be empty");
 
-    // upload solc js file
-    public static final RetCode PARAM_FAIL_SOLC_FILE_EMPTY = RetCode.mark(201261, "Solc js file cannot be empty");
-    public static final RetCode PARAM_FAIL_SOLC_FILE_NAME_EMPTY = RetCode.mark(201262, "Solc js file name cannot be empty");
-    public static final RetCode PARAM_FAIL_FILE_NAME_EXISTS = RetCode.mark(201263, "Solc js file name already exist");
-    public static final RetCode PARAM_FAIL_FILE_NAME_NOT_EXISTS = RetCode.mark(201263, "Solc js file name not exist in db");
-    public static final RetCode SAVE_SOLC_FILE_ERROR = RetCode.mark(201264, "Save solc js file error");
-    public static final RetCode READ_SOLC_FILE_ERROR = RetCode.mark(201265, "read solc js file error, please check if file deleted");
 
     // chain governance
     public static final RetCode CHAIN_THRESHOLD_PARAM_ERROR = RetCode.mark(201301, "threshold must be greater than zero");
