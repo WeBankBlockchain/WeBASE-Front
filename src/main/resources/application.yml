@@ -75,6 +75,7 @@ constant:
   eventRegisterTaskFixedDelay: 5000
   syncEventMapTaskFixedDelay: 60000
   syncAvailableGroupTaskFixedDelay: 10000
+  DeleteLiquidCacheTaskFixedDelay: 10000
   # sync stat log data task (unit: ms)
   syncStatLogTime: 5000
   syncStatLogCountLimit: 10000
