@@ -21,7 +21,7 @@ public class ThreadPoolConfig {
     public ThreadPoolTaskScheduler compileAsyncScheduler() {
         log.info("start compileAsyncScheduler init...");
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(20);
+        scheduler.setPoolSize(5);
         scheduler.afterPropertiesSet();
         scheduler.setThreadNamePrefix("ThreadPoolTaskScheduler-async-compile:");
         scheduler.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
