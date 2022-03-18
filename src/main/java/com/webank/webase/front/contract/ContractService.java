@@ -139,6 +139,10 @@ public class ContractService {
     private Constants constants;
     @Autowired
     private CNSServiceInWebase cnsServiceInWebase;
+    @Autowired
+    private SysConfigServiceInWebase sysConfigServiceInWebase;
+    @Autowired
+    private EveryoneService everyoneService;
 
     /**
      * sendAbi.
@@ -178,7 +182,6 @@ public class ContractService {
             log.error("fail addressIsValid. binOnChain is null, address:{}", contractAddress);
             throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
         }
-
     }
 
     /**
@@ -187,7 +190,7 @@ public class ContractService {
      * @param: ReqDeploy'scontractId
      * @param: doLocally deploy contract locally or through webase-sign
      */
-    public String caseDeploy(ReqDeploy req, boolean doLocally) {
+    public String caseDeploy(ReqDeploy req, boolean doLocally) throws ContractException {
         if (Objects.nonNull(req.getContractId())) {
             return deployByLocalContract(req, doLocally);
         } else {
@@ -205,7 +208,7 @@ public class ContractService {
      * @param req
      * @param doLocally deploy contract locally or through webase-sign
      */
-    public String deployByLocalContract(ReqDeploy req, boolean doLocally) {
+    public String deployByLocalContract(ReqDeploy req, boolean doLocally) throws ContractException {
         // check contract status
         Contract contract = verifyContractIdExist(req.getContractId(), req.getGroupId());
 
@@ -214,14 +217,14 @@ public class ContractService {
         // deploy locally or webase-sign
         if (doLocally) {
             // check deploy permission
-//            checkDeployPermission(req.getGroupId(), req.getUser());
+            checkDeployPermission(req.getGroupId(), req.getUser());
             contractAddress = deployLocally(req);
         } else {
-//            // check deploy permission
-//            String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
-//            if (StringUtils.isNotBlank(userAddress)) {
-//                checkDeployPermission(req.getGroupId(), userAddress);
-//            }
+            // check deploy permission
+            String userAddress = keyStoreService.getAddressBySignUserId(req.getSignUserId());
+            if (StringUtils.isNotBlank(userAddress)) {
+                checkDeployPermission(req.getGroupId(), userAddress);
+            }
             contractAddress = deployWithSign(req);
         }
         if (StringUtils.isNotBlank(contractAddress)
@@ -298,11 +301,11 @@ public class ContractService {
     /**
      * deploy locally, not through webase-sign
      */
-    public String deployLocally(ReqDeploy req) {
+    public String deployLocally(ReqDeploy req) throws ContractException {
         String groupId = req.getGroupId();
         String userAddress = req.getUser();
         // check deploy permission
-//        checkDeployPermission(groupId, userAddress);
+        checkDeployPermission(groupId, userAddress);
 
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
@@ -361,8 +364,8 @@ public class ContractService {
         String version = req.getVersion();
         String contractAddress = req.getContractAddress();
         String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
-        Tuple2<String, String> cnsList =
-                cnsServiceInWebase.queryCnsByNameAndVersion(groupId, cnsName, version);
+//        Tuple2<String, String> cnsList =
+//                cnsServiceInWebase.queryCnsByNameAndVersion(groupId, cnsName, version);
 //        if (!CollectionUtils.isEmpty(cnsList)) { todo 返回为空时怎么判断
 //            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
 //            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
@@ -945,26 +948,14 @@ public class ContractService {
     /**
      * check user deploy permission
      */
-//    private void checkDeployPermission(String groupId, String userAddress) {
-        // get deploy permission list
-//        List<PermissionInfo> deployUserList =
-//                permissionManageService.listDeployAndCreateManager(groupId);
-//
-//        // check user in the list,
-//        if (deployUserList.isEmpty()) {
-//            return;
-//        } else {
-//            long count = 0;
-//            count = deployUserList.stream().filter(admin -> admin.getAddress().equals(userAddress))
-//                    .count();
-//            // if not in the list, permission denied
-//            if (count == 0) {
-//                log.error("checkDeployPermission permission denied for user:{}", userAddress);
-//                throw new FrontException(ConstantCode.PERMISSION_DENIED);
-//            }
-//        }
-//
-//    }
+    private boolean checkDeployPermission(String groupId, String userAddress)
+        throws ContractException {
+        log.info("civilian service check deploy permission");
+        Boolean res = everyoneService.checkDeployAuth(groupId,
+            userAddress);
+        log.info("check deploy permission result is {}", res.toString());
+        return res;
+    }
 
     /**
      * batch delete contract by path if path contain deployed
