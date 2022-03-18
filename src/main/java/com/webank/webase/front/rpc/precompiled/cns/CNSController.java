@@ -29,7 +29,7 @@ public class CNSController {
   @PostMapping("register")
   public Object registerCNS(@Valid @RequestBody ReqRegisterCnsInfo reqCnsInfo)
       throws ContractException {
-    return cnsServiceInWebase.registerCNS(reqCnsInfo.getGroudId(), reqCnsInfo.getSignUserId(),
+    return cnsServiceInWebase.registerCNS(reqCnsInfo.getGroupId(), reqCnsInfo.getSignUserId(),
         reqCnsInfo.getContractName(), reqCnsInfo.getContractVersion(),
         reqCnsInfo.getContractAddress(), reqCnsInfo.getAbiData());
   }
