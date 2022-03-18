@@ -59,4 +59,9 @@ public class ReqDeploy {
     private boolean useAes;
     @Deprecated
     private String version;
+    /**
+     * if liquid(use wasm)
+     */
+    private Boolean isWasm = false;
+    private String contractAddress;
 }

@@ -33,6 +33,7 @@ public class SyncAvailableGroupTask {
     }
 
     public synchronized void syncGroupListMapTask() {
+
         log.debug("start syncGroupListMapTask task");
         web3ApiService.refreshAvailableGroupMap();
         log.debug("end syncGroupListMapTask task");

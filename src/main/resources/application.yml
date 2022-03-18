@@ -11,7 +11,7 @@ server:
 
 sdk:
   useSmSsl: false  # sdk whether enable sm ssl(guomi)
-  peers: ['127.0.0.1:20200','127.0.0.1:20201']
+  peers: ['127.0.0.1:20200']
   certPath: conf  # sdk cert path of relative or absolute, default 'conf'
   threadPoolSize: 50 # thread pool of sdk
 
@@ -75,9 +75,13 @@ constant:
   eventRegisterTaskFixedDelay: 5000
   syncEventMapTaskFixedDelay: 60000
   syncAvailableGroupTaskFixedDelay: 10000
+  deleteLiquidCacheTaskFixedDelay: 10000
   # sync stat log data task (unit: ms)
   syncStatLogTime: 5000
   syncStatLogCountLimit: 10000
   statLogEnabled: false
   # get event callback wait (s)
   eventCallbackWait: 4
+  # compile liquid timeout (ms)
+  commandLineTimeout: 5000
+  liquidCompileTimeout: 300000

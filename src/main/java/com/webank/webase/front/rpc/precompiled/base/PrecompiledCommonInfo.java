@@ -18,15 +18,12 @@ package com.webank.webase.front.rpc.precompiled.base;
 
 
 import com.webank.webase.front.base.enums.PrecompiledTypes;
-import org.fisco.bcos.sdk.contract.auth.contracts.Committee;
 import org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager;
 import org.fisco.bcos.sdk.contract.auth.contracts.ContractAuthPrecompiled;
-import org.fisco.bcos.sdk.contract.auth.manager.AuthManager;
 import org.fisco.bcos.sdk.contract.precompiled.bfs.BFSPrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.crud.KVTablePrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.crud.TablePrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.model.PrecompiledAddress;
 import org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled;
 

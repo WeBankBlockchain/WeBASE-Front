@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.config.ConfigOption;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
@@ -40,8 +41,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "sdk")
 public class Web3Config {
-    @Autowired
-    private ConfigService configService;
+//    @Autowired
+//    private ConfigService configService;
 //    private boolean loadFromDb;
 
     private String threadPoolSize;
@@ -81,6 +82,11 @@ public class Web3Config {
         return configOption;
     }
 
+    @Bean
+    public BcosSDK getBcosSDK(ConfigOption configOption) {
+        return new BcosSDK(configOption);
+    }
+
     /**
      * only used to get groupList
      * @throws JniException
@@ -93,6 +99,8 @@ public class Web3Config {
         log.info("get rpcWeb3j(only support groupList) client:{}", rpcWeb3j);
         return rpcWeb3j;
     }
+
+
 
     @Bean(name = "clientMap")
     public Map<String, Client> getClientMap(ConfigOption configOption) throws JniException {

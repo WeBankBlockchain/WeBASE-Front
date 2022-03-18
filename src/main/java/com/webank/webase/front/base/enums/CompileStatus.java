@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2022 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.webank.webase.front.abi.entity;
-
-import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
+package com.webank.webase.front.base.enums;
 
 /**
- * unique contractName_groupId
- * @author marsli
+ * compile liquid status
  */
-@Data
-public class ReqImportAbi {
-    private Long abiId;
-    @NotNull
-    private String groupId;
-    @NotBlank
-    private String contractName;
-    @NotBlank
-    private String contractAddress;
-    @NotNull
-    private List<Object> contractAbi;
+public enum CompileStatus {
+  RUNNING(1), SUCCESS(2), FAIL(3), INIT(4);
 
-    private Boolean isWasm = false;
+  private int value;
+
+  CompileStatus(Integer dataStatus) {
+    this.value = dataStatus;
+  }
+
+  public int getValue() {
+    return this.value;
+  }
 }

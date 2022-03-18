@@ -19,7 +19,6 @@ import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.entity.FileContentHandle;
-import com.webank.webase.front.solc.SolcController;
 import com.webank.webase.front.util.FrontUtils;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;

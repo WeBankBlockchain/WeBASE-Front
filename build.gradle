@@ -11,13 +11,17 @@ targetCompatibility = 1.8
 
 // In this section you declare where to find the dependencies of your project
 repositories {
+
+    maven {
+        url "http://maven.aliyun.com/nexus/content/groups/public/"
+    }
     mavenCentral()
-    maven { url "https://maven.aliyun.com/nexus/content/groups/public/" }
     maven { url "https://oss.sonatype.org/service/local/staging/deploy/maven2" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url 'https://dl.bintray.com/ethereum/maven/' }
     maven { url 'http://repo.typesafe.com/typesafe/maven-releases/' }
     mavenLocal()
+
 }
 
 def spring_version="4.3.29.RELEASE"
@@ -53,7 +57,7 @@ List swagger = [
 ]
 
 
-def log4j_version="2.15.0"
+def log4j_version="2.17.1"
 List logger = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -94,21 +98,23 @@ List scaffold = [
 
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat,scaffold
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc2-SNAPSHOT')
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc2-bugfix-SNAPSHOT')
     // cover
     compile 'javax.servlet:javax.servlet-api:4.0.1'
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
     compile 'com.h2database:h2:1.4.200'
-//    compile 'org.fusesource:sigar:1.6.4'
-
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
     compile 'org.projectlombok:lombok:1.18.6'
     compile 'com.github.jsqlparser:jsqlparser:2.0'
     compile 'org.apache.commons:commons-lang3:3.8.1'
+
+    // cover low version
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
-    // cover low version guava
     compile 'com.google.guava:guava:29.0-jre'
+    compile 'org.yaml:snakeyaml:1.30'
+//    compile 'org.hibernate:hibernate-core:5.3.6.Final'
+
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }

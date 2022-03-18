@@ -80,26 +80,26 @@ public class ConfigController {
      * todo test update sdk
      * @return
      */
-    @PostMapping("bcosSDK")
-    public BaseResponse updateSDK(@RequestBody @Valid ReqSdkConfig param) {
-        Instant startTime = Instant.now();
-        log.info("start updateSDKPeers param:{}", param);
-        configService.configBcosSDK(param);
-        log.info("end updateSDKPeers useTime:{}",
-            Duration.between(startTime, Instant.now()).toMillis());
-        return new BaseResponse(ConstantCode.RET_SUCCESS);
-    }
-
-    @ApiOperation(value = "getSDKConfig", notes = "Get the latest sdk config")
-    @GetMapping("bcosSDK")
-    public BaseResponse getSDKConfig() {
-        Instant startTime = Instant.now();
-        log.info("start updateSDKPeers ");
-        Map<String, ConfigInfo> configInfoMap = configService.getConfigInfoSdk();
-        log.info("end updateSDKPeers useTime:{}",
-            Duration.between(startTime, Instant.now()).toMillis());
-        return new BaseResponse(ConstantCode.RET_SUCCESS, configInfoMap);
-    }
+//    @PostMapping("bcosSDK")
+//    public BaseResponse updateSDK(@RequestBody @Valid ReqSdkConfig param) {
+//        Instant startTime = Instant.now();
+//        log.info("start updateSDKPeers param:{}", param);
+//        configService.configBcosSDK(param);
+//        log.info("end updateSDKPeers useTime:{}",
+//            Duration.between(startTime, Instant.now()).toMillis());
+//        return new BaseResponse(ConstantCode.RET_SUCCESS);
+//    }
+//
+//    @ApiOperation(value = "getSDKConfig", notes = "Get the latest sdk config")
+//    @GetMapping("bcosSDK")
+//    public BaseResponse getSDKConfig() {
+//        Instant startTime = Instant.now();
+//        log.info("start updateSDKPeers ");
+//        Map<String, ConfigInfo> configInfoMap = configService.getConfigInfoSdk();
+//        log.info("end updateSDKPeers useTime:{}",
+//            Duration.between(startTime, Instant.now()).toMillis());
+//        return new BaseResponse(ConstantCode.RET_SUCCESS, configInfoMap);
+//    }
 
 
     /**

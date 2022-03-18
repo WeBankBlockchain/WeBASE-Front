@@ -11,36 +11,22 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.webank.webase.front.contract.entity;
+package com.webank.webase.front.contract.entity.wasm;
 
-
-import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import lombok.NoArgsConstructor;
 
+/**
+ * Pk of table contract path.
+ */
 @Data
-public class ReqContractSave {
-
-    @NotNull
+@AllArgsConstructor
+@NoArgsConstructor
+public class CompileTaskKey implements Serializable {
+    private static final long serialVersionUID = 713233686141669429L;
     private String groupId;
-    private Long contractId;
-    @NotBlank
-    private String contractName;
-    private String version;
-    @NotBlank
     private String contractPath;
-    private String contractSource;
-    private String contractAbi;
-    /**
-     * 合约编译的bytecode(bin)，用于部署合约
-     */
-    private String bytecodeBin;
-    /**
-     * 合约编译的runtime-bytecode(runtime-bin)，用于交易解析
-     */
-    private String contractBin;
-
-    private String contractAddress;
-
-    private Boolean isWasm = false;
+    private String contractName;
 }

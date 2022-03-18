@@ -82,7 +82,9 @@ public class TransController extends BaseController {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
         if (StringUtils.isNotBlank(address)
-            && (address.length() != Address.ValidLen || org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address))) {
+            && ( (!reqTransHandle.getIsWasm() && address.length() != Address.ValidLen)
+                || (!reqTransHandle.getIsWasm() && org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address)) )
+        ) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
@@ -93,7 +95,7 @@ public class TransController extends BaseController {
                 throw new FrontException(PARAM_FAIL_CNS_NAME_IS_EMPTY);
             }
         }
-        Object obj =  transServiceImpl.transHandleWithSign(reqTransHandle);
+        Object obj = transServiceImpl.transHandleWithSign(reqTransHandle);
         log.info("transHandle end  useTime:{}",
                 Duration.between(startTime, Instant.now()).toMillis());
         return obj;
@@ -113,7 +115,7 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(address)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (!StringUtils.isBlank(address) && address.length() != Address.ValidLen) {
+        if (!reqTransHandle.getIsWasm() && !StringUtils.isBlank(address) && address.length() != Address.ValidLen) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
@@ -238,7 +240,7 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(contractAddress)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (!StringUtils.isBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
+        if (!reqTransHandle.getIsWasm() && !StringUtils.isBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
             throw new FrontException(CONTRACT_ADDRESS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
@@ -252,7 +254,8 @@ public class TransController extends BaseController {
         String encodedOrSignedResult =  transServiceImpl.createRawTxEncoded(true, reqTransHandle.getUser(),
             reqTransHandle.getGroupId(), reqTransHandle.getContractAddress(), reqTransHandle.getContractAbi(),
             reqTransHandle.isUseCns(), reqTransHandle.getVersion(), reqTransHandle.getVersion(),
-            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam());
+            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam(),
+                reqTransHandle.getIsWasm());
         log.info("transToRawTxStrLocal end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;
@@ -278,7 +281,7 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqTransHandle.getVersion()) && StringUtils.isBlank(contractAddress)) {
             throw new FrontException(VERSION_AND_ADDRESS_CANNOT_ALL_BE_NULL);
         }
-        if (StringUtils.isNotBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
+        if (!reqTransHandle.getIsWasm() && StringUtils.isNotBlank(contractAddress) && contractAddress.length() != Address.ValidLen) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
         if (reqTransHandle.isUseCns()) {
@@ -292,7 +295,8 @@ public class TransController extends BaseController {
         String encodedOrSignedResult =  transServiceImpl.createRawTxEncoded(false, reqTransHandle.getSignUserId(),
             reqTransHandle.getGroupId(), reqTransHandle.getContractAddress(), reqTransHandle.getContractAbi(),
             reqTransHandle.isUseCns(), reqTransHandle.getCnsName(), reqTransHandle.getVersion(),
-            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam());
+            reqTransHandle.getFuncName(), reqTransHandle.getFuncParam(),
+                reqTransHandle.getIsWasm());
         log.info("transToRawTxStrWithSign end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;
@@ -317,7 +321,7 @@ public class TransController extends BaseController {
         String groupId = reqEncodeFunction.getGroupId();
         String encodedOrSignedResult =  transServiceImpl.encodeFunction2Str(
             JsonUtils.objToString(reqEncodeFunction.getContractAbi()),
-            reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam(), groupId);
+            reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam(), groupId, reqEncodeFunction.getIsWasm());
         log.info("transEncoded2Str end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
         return encodedOrSignedResult;

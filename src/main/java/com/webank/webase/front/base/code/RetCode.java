@@ -24,6 +24,7 @@ import lombok.Data;
 public class RetCode {
     private Integer code;
     private String message;
+    private String attachment;
 
     public RetCode() {}
 
@@ -40,8 +41,16 @@ public class RetCode {
         return new RetCode(code, null);
     }
 
+    public RetCode attach(Object attachment) {
+        if (attachment != null){
+            this.attachment = String.valueOf(attachment);
+        }
+        return this;
+    }
+
     @Override
     public String toString() {
-        return "{" + "\"code\":" + code + ", \"msg\":\"" + message + "\"}";
+        return "{" + "\"code\":" + code + ", \"msg\":\"" + message
+            + ", \"attachment\":\"" + attachment + "\"}";
     }
 }

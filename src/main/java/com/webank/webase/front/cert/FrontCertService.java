@@ -17,9 +17,7 @@ package com.webank.webase.front.cert;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
-import com.webank.webase.front.base.enums.CertTypes;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.configapi.ConfigService;
 import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.util.CleanPathUtil;
 import com.webank.webase.front.util.CommonUtils;
@@ -33,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

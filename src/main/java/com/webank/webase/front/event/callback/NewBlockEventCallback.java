@@ -23,6 +23,7 @@ import com.webank.webase.front.event.entity.message.BlockPushMessage;
 import java.math.BigInteger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Setter;
 import org.fisco.bcos.sdk.jni.BlockNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,27 +40,25 @@ public class NewBlockEventCallback implements BlockNotifier {
     private MQPublisher MQPublisher;
     private String groupId;
     private PublisherHelper blockPublishInfo;
+    @Setter
+    private Boolean running = true;
 
     @Override
     public void onResponse(String groupId, BigInteger blockNumber) {
-
-        logger.info("NewBlockEventCallBack groupId:{}, blockNumber:{}", groupId, blockNumber);
+        logger.info("NewBlockEventCallBack groupId:{}, blockNumber:{}",
+            groupId, blockNumber);
+        if (!running) {
+            logger.warn("NewBlockEventCallBack skip because already unregister blockPublishInfo:{}", blockPublishInfo);
+            return;
+        }
         BlockPushMessage blockPushMessage = new BlockPushMessage();
         blockPushMessage.setBlockNumber(blockNumber);
         blockPushMessage.setGroupId(groupId);
         blockPushMessage.setEventType(EventTypes.BLOCK_NOTIFY.getValue());
-        if (groupId == this.groupId) {
+        if (groupId.equals(this.groupId)) {
             pushMessage2MQ(blockPublishInfo.getExchangeName(),
                 blockPublishInfo.getRoutingKey(), blockPushMessage);
         }
-        /*for (String appId: BLOCK_ROUTING_KEY_MAP.keySet()) {
-            blockPushMessage.setAppId(appId);
-            PublisherHelper blockPublishInfo = BLOCK_ROUTING_KEY_MAP.get(appId);
-            if (groupId == blockPublishInfo.getGroupId()) {
-                pushMessage2MQ(blockPublishInfo.getExchangeName(),
-                    blockPublishInfo.getRoutingKey(), blockPushMessage);
-            }
-        }*/
     }
 
     /**
@@ -70,7 +69,7 @@ public class NewBlockEventCallback implements BlockNotifier {
      */
     private void pushMessage2MQ(String exchangeName, String routingKey,
                                 BlockPushMessage blockPushMessage) {
-        logger.debug("NewBlockEventCallBack pushMessage2MQ blockPushMessage:{}",
+        logger.info("NewBlockEventCallBack pushMessage2MQ blockPushMessage:{}",
                 blockPushMessage.toString());
         MQPublisher.sendToTradeFinishedByString(exchangeName, routingKey,
                 blockPushMessage.toString());

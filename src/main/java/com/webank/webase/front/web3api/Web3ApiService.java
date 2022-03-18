@@ -21,20 +21,9 @@ import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.TransactionInfo;
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
@@ -52,11 +41,17 @@ import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount.Transac
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.jni.common.JniException;
-import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Web3Api manage.
@@ -71,6 +66,8 @@ public class Web3ApiService {
     @Autowired
     @Qualifier("clientMap")
     private Map<String, Client> clientMap;
+    @Autowired
+    private BcosSDK bcosSDK;
     @Autowired
     private Web3Config web3ConfigConstants;
 
@@ -109,6 +106,7 @@ public class Web3ApiService {
             log.error("getWeb3j peers of this groupId:[{}] not connected", groupId);
             throw new FrontException(ConstantCode.CLIENT_NOT_CONNECTED_WITH_THIS_GROUP);
         }
+//        return bcosSDK.getClient(groupId);
         return getWeb3jRaw(groupId);
     }
 
@@ -556,7 +554,7 @@ public class Web3ApiService {
             // group info get from raw client
             List<GroupNodeInfo> nodeInfoList;
             try {
-                nodeInfoList = this.getWeb3jRaw(groupId).getGroupInfo().getResult().getNodeList();
+                nodeInfoList = this.getWeb3j(groupId).getGroupInfo().getResult().getNodeList();
             } catch (FrontException e) {
                 log.error("refreshAvailableGroupMap get nodeInfoList failed:[]", e);
                 continue;
@@ -564,6 +562,9 @@ public class Web3ApiService {
             // if not empty, available true
             GROUP_AVAILABLE_MAP.put(groupId, !nodeInfoList.isEmpty());
         }
+    }
 
+    public boolean getIsWasm(String groupId) {
+        return this.getWeb3j(groupId).isWASM();
     }
 }

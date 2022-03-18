@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2022 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webank.webase.front.contract.entity.wasm;
 
-package com.webank.webase.front.solc;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import com.webank.webase.front.solc.entity.SolcInfo;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.CrudRepository;
-
-import java.util.List;
-
-public interface SolcRepository extends CrudRepository<SolcInfo, Integer>,
-        JpaSpecificationExecutor<SolcInfo> {
-
-    List<SolcInfo> findAll();
-
-    SolcInfo findBySolcName(String fileName);
-
-    SolcInfo findByMd5(String md5);
+/**
+ * @author lining
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class AbiBinInfo {
+    /**
+     * json format string
+     */
+    private String abiInfo;
+    /**
+     * bin in hex string
+     */
+    private String binInfo;
 }
