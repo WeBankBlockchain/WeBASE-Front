@@ -100,6 +100,16 @@ public class ContractController extends BaseController {
             log.error("contract deployWithSign error: signUserId is empty");
             throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
         }
+        boolean isWasm = reqDeploy.getIsWasm();
+        String liquidAddress = reqDeploy.getContractAddress();
+        if (isWasm) {
+            if (StringUtils.isBlank(liquidAddress)) {
+                throw new FrontException(ConstantCode.DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY);
+            }
+            if (!liquidAddress.startsWith("/")) {
+                throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+            }
+        }
         String contractAddress = contractService.caseDeploy(reqDeploy, false);
         log.info("success deployWithSign. result:{}", contractAddress);
         return contractAddress;
@@ -119,6 +129,16 @@ public class ContractController extends BaseController {
         if (StringUtils.isBlank(reqDeploy.getUser())) {
             log.error("contract deployLocal error: user(address) is empty");
             throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
+        }
+        boolean isWasm = reqDeploy.getIsWasm();
+        String liquidAddress = reqDeploy.getContractAddress();
+        if (isWasm) {
+            if (StringUtils.isBlank(liquidAddress)) {
+                throw new FrontException(ConstantCode.DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY);
+            }
+            if (!liquidAddress.startsWith("/")) {
+                throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+            }
         }
         String contractAddress = contractService.caseDeploy(reqDeploy, true);
         log.info("success deployLocal. result:{}", contractAddress);
