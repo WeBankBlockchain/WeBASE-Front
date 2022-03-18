@@ -36,6 +36,8 @@ import com.webank.webase.front.contract.entity.ReqSendAbi;
 import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
+import com.webank.webase.front.contract.entity.wasm.CompileTask;
+import com.webank.webase.front.contract.entity.wasm.ReqCompileTask;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.JsonUtils;
 import io.swagger.annotations.Api;
@@ -76,6 +78,8 @@ public class ContractController extends BaseController {
 
     @Autowired
     ContractService contractService;
+    @Autowired
+    LiquidCompileService liquidCompileService;
 
     /**
      * deploy.
@@ -96,6 +100,16 @@ public class ContractController extends BaseController {
             log.error("contract deployWithSign error: signUserId is empty");
             throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
         }
+        boolean isWasm = reqDeploy.getIsWasm();
+        String liquidAddress = reqDeploy.getContractAddress();
+        if (isWasm) {
+            if (StringUtils.isBlank(liquidAddress)) {
+                throw new FrontException(ConstantCode.DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY);
+            }
+            if (!liquidAddress.startsWith("/")) {
+                throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+            }
+        }
         String contractAddress = contractService.caseDeploy(reqDeploy, false);
         log.info("success deployWithSign. result:{}", contractAddress);
         return contractAddress;
@@ -115,6 +129,16 @@ public class ContractController extends BaseController {
         if (StringUtils.isBlank(reqDeploy.getUser())) {
             log.error("contract deployLocal error: user(address) is empty");
             throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
+        }
+        boolean isWasm = reqDeploy.getIsWasm();
+        String liquidAddress = reqDeploy.getContractAddress();
+        if (isWasm) {
+            if (StringUtils.isBlank(liquidAddress)) {
+                throw new FrontException(ConstantCode.DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY);
+            }
+            if (!liquidAddress.startsWith("/")) {
+                throw new FrontException(ConstantCode.CONTRACT_ADDRESS_INVALID);
+            }
         }
         String contractAddress = contractService.caseDeploy(reqDeploy, true);
         log.info("success deployLocal. result:{}", contractAddress);
@@ -418,4 +442,47 @@ public class ContractController extends BaseController {
         response.setData(cns);
         return response;
     }
+
+    /**
+     * query list of contract only contain groupId and contractAddress and contractName
+     */
+    @ApiOperation(value = "check", notes = "check cargo liquid env")
+    @GetMapping(value = "/liquid/check")
+    public BaseResponse checkLiquidEnv() {
+        log.info("checkLiquidEnv start.");
+        liquidCompileService.checkLiquidEnv();
+        return new BaseResponse(ConstantCode.RET_SUCCEED);
+    }
+
+    /**
+     * 执行编译的时候，直接new操作，并且执行编译操作，new是同步的，编译是异步的
+     * 在db记录已存在的合约目录，已存在且正在running，则报错正在运行；；如果已存在但是已结束，则删除重复的liquid合约目录，删除
+     * 一个单独的异步表记录当前异步编译状态
+     * @param req
+     * @param result
+     * @return
+     */
+    @PostMapping(value = "/liquid/compile")
+    public BaseResponse newAndCompileLiquidProject(@Valid @RequestBody ReqContractSave req, BindingResult result) {
+        Instant now = Instant.now();
+        log.info("newAndSaveLiquidProject start. startTime:{},req:[{}]", now, JsonUtils.toJSONString(req));
+        checkParamResult(result);
+        CompileTask compileTask = contractService.newAndCompileLiquidContract(req);
+        log.info("newAndSaveLiquidProject end. usedTime:{}, compileTask:{}", Duration.between(now, Instant.now()).toMillis(), compileTask);
+        return new BaseResponse(ConstantCode.RET_SUCCEED, compileTask);
+    }
+
+    @ApiOperation(value = "check compile", notes = "check liquid compile finished")
+    @PostMapping(value = "/liquid/compile/check")
+    public BaseResponse checkLiquidContractCompile(@Valid @RequestBody ReqCompileTask req, BindingResult result) {
+        Instant now = Instant.now();
+        log.info("checkLiquidContractCompile start. startTime:{},req:{}", now, req);
+        checkParamResult(result);
+        CompileTask taskInfo = contractService.getLiquidContract(req.getGroupId(), req.getContractPath(), req.getContractName());
+        log.info("newAndSaveLiquidProject end. usedTime:{}, compileTask:{}", Duration.between(now, Instant.now()).toMillis(), taskInfo);
+        return new BaseResponse(ConstantCode.RET_SUCCEED, taskInfo);
+    }
+
+
+
 }

@@ -3,7 +3,6 @@ package com.webank.webase.front.contract;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.contract.entity.RspContractCompile;
-import com.webank.webase.front.contractStore.constant.ToolsConstantContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.fisco.solc.compiler.CompilationResult;
@@ -16,11 +15,8 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.Base64;
 
-import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
-import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
-import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
-import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
-import static org.junit.Assert.*;
+import static org.fisco.solc.compiler.SolidityCompiler.Options.*;
+import static org.junit.Assert.assertNotNull;
 
 public class ContractTest{
 

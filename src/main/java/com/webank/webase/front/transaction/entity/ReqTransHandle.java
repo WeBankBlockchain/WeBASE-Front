@@ -47,4 +47,6 @@ public class ReqTransHandle {
     // 1.4.3
     private boolean useCns = false;
     private String cnsName;
+    // 3.0
+    private Boolean isWasm = false;
 }

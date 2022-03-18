@@ -18,6 +18,8 @@ package com.webank.webase.front.cert;
 
 import com.webank.webase.front.base.SpringTestBase;
 import java.util.List;
+import java.util.Map;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -31,9 +33,8 @@ public class SdkCertTest extends SpringTestBase {
     // 依赖配置node
     @Test
     public void testSdkCertService() {
-        List<String> sdkList = frontCertService.getSDKNodeCert();
+        Map<String, String> sdkList = frontCertService.getSDKNodeCert();
         Assert.notNull(sdkList, "load sdk crt error");
-        sdkList.forEach(c -> System.out.println(c));
     }
 
 }

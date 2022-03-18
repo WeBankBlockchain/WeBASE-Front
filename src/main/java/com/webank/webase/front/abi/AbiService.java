@@ -87,6 +87,7 @@ public class AbiService {
         String groupId = param.getGroupId();
         String contractName = param.getContractName();
         String contractAddress = param.getContractAddress();
+        int isWasm = param.getIsWasm() ? 1 : 0;
         String contractAbiStr;
         try {
             contractAbiStr = JsonUtils.toJSONString(param.getContractAbi());
@@ -105,6 +106,7 @@ public class AbiService {
         saveAbi.setContractBin(contractBin);
         saveAbi.setCreateTime(LocalDateTime.now());
         saveAbi.setModifyTime(LocalDateTime.now());
+        saveAbi.setIsWasm(isWasm);
         abiRepository.save(saveAbi);
 
         log.debug("insertAbiInfo saveMethod in abi");

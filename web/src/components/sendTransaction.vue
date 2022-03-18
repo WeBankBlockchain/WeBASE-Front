@@ -135,7 +135,14 @@ export default {
     "v-createUser": createUser,
   },
   name: "sendTransation",
-  props: ["data", "dialogClose", "abi", "version", "sendErrorMessage"],
+  props: [
+    "data",
+    "dialogClose",
+    "abi",
+    "version",
+    "sendErrorMessage",
+    "liquidChecks",
+  ],
   data: function () {
     return {
       transation: {
@@ -164,6 +171,7 @@ export default {
       cnsName: "",
       isShowAddUserBtn: false,
       creatUserNameVisible: false,
+      isWasm: this.liquidChecks,
     };
   },
   computed: {
@@ -335,6 +343,9 @@ export default {
         useCns: this.isCNS,
         cnsName: this.isCNS && this.cnsName ? this.cnsName : "",
       };
+      if (this.isWasm) {
+        data.isWasm = true;
+      }
       sendTransation(data)
         .then((res) => {
           this.buttonClick = false;

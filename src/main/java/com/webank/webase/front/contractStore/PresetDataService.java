@@ -273,6 +273,10 @@ public class PresetDataService {
 //                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
 //        insertContractItem(contractIndex++,proxyFolderId,"Address", ToolsConstantContext.ADDRESS_SOURCE,
 //                ProxyConstantContext.PROXY_MD, ProxyConstantContext.PROXY_MD);
+
+        // liquid
+        insertContractItem(contractIndex++,toolboxId,"LiquidHelloWorld",ToolsConstantContext.LIQUID_HELLO_SOURCE,
+            ToolsConstantContext.LIQUID_HELLO_WORLD_MD,ToolsConstantContext.LIQUID_HELLO_WORLD_MD);
     }
 
 

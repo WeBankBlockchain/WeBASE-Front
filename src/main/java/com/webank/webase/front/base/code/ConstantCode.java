@@ -193,13 +193,6 @@ public class ConstantCode {
     public static final RetCode ABI_INFO_NOT_EXISTS = RetCode.mark(201256, "abi info of this id not exists");
     public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(201257, "Abi Id cannot be empty");
 
-    // upload solc js file
-    public static final RetCode PARAM_FAIL_SOLC_FILE_EMPTY = RetCode.mark(201261, "Solc js file cannot be empty");
-    public static final RetCode PARAM_FAIL_SOLC_FILE_NAME_EMPTY = RetCode.mark(201262, "Solc js file name cannot be empty");
-    public static final RetCode PARAM_FAIL_FILE_NAME_EXISTS = RetCode.mark(201263, "Solc js file name already exist");
-    public static final RetCode PARAM_FAIL_FILE_NAME_NOT_EXISTS = RetCode.mark(201263, "Solc js file name not exist in db");
-    public static final RetCode SAVE_SOLC_FILE_ERROR = RetCode.mark(201264, "Save solc js file error");
-    public static final RetCode READ_SOLC_FILE_ERROR = RetCode.mark(201265, "read solc js file error, please check if file deleted");
 
     // chain governance
     public static final RetCode CHAIN_THRESHOLD_PARAM_ERROR = RetCode.mark(201301, "threshold must be greater than zero");
@@ -257,10 +250,17 @@ public class ConstantCode {
     public static final RetCode BUILD_NEW_CLIENT_FAILED = RetCode.mark(201605, "Build client instance of new group failed");
     public static final RetCode CLIENT_ONLY_SUPPORT_WASM = RetCode.mark(201606, "This group only support Liquid contract of wasm");
     public static final RetCode CLIENT_NOT_CONNECTED_WITH_THIS_GROUP = RetCode.mark(201607, "This group not connected with front's rpc peers");
-
-    public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
+    public static final RetCode GROUP_SOL_WASM_NOT_MATCH = RetCode.mark(201608, "Deploying contract not match with the group(solidity/liquid)");
+    public static final RetCode LIQUID_CONTRACT_ALREADY_COMPILING = RetCode.mark(201609, "This liquid contract already compiling, please wait...");
+    public static final RetCode LIQUID_CONTRACT_TASK_NOT_EXIST = RetCode.mark(201610, "Contract compile task not exist");
 
     public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
 
+    /* rc2 liquid */
+    public static final RetCode EXEC_JAVA_COMMAND_TIMEOUT = RetCode.mark(201631, "Java Command exec timeout");
+    public static final RetCode EXEC_JAVA_COMMAND_RETURN_FAILED = RetCode.mark(201632, "Java Command return error");
+    public static final RetCode DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY = RetCode.mark(201633, "When deploying liquid, contract address must not be empty");
+
+    public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
 
 }

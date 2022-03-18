@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.webank.webase.front.solc.entity;
+package com.webank.webase.front.util.cmd;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-import java.io.InputStream;
-
+/**
+ * result entity of java run command
+ */
 @Data
+@ToString
+@NoArgsConstructor
 @AllArgsConstructor
-public class RspDownload {
-    private String fileName;
-    private InputStream inputStream;
+public class ExecuteResult {
+    private int exitCode;
+    private String executeOut;
+
+    public static ExecuteResult build (int exitCode,String msg){
+        return new ExecuteResult(exitCode,msg);
+    }
+
+    public boolean success(){
+        return exitCode == 0;
+    }
+    public boolean failed(){
+        return !success();
+    }
 }

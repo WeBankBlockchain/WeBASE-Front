@@ -13,7 +13,6 @@
  */
 package com.webank.webase.front.transaction;
 
-import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
@@ -31,12 +30,6 @@ import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -70,10 +63,20 @@ import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
 import org.fisco.bcos.sdk.transaction.pusher.TransactionPusherService;
+import org.fisco.bcos.sdk.utils.Hex;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Objects;
+
+import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
 
 /**
  * TransService. handle transactions of deploy/call contract
@@ -101,9 +104,11 @@ public class TransService {
     @Autowired
     private CNSServiceInWebase cnsServiceInWebase;
     /**
-     * if use wasm(liquid), use 1
+     * if use wasm(liquid), use 2
      */
-    private static final int USE_SOLIDITY = 0; 
+    private static final int USE_SOLIDITY = 1;
+    private static final int USE_WASM = 2;
+    private static final int USE_WASM_DEPLOY = 10;
 
     /**
      * transHandleWithSign.
@@ -123,20 +128,24 @@ public class TransService {
         String funcName = req.getFuncName();
         List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         String contractAddress = req.getContractAddress();
-        return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam);
+        return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, req.getIsWasm());
     }
 
+    public Object transHandleWithSign(String groupId, String signUserId,
+                                      String contractAddress, String abiStr, String funcName, List<Object> funcParam) {
+        return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, false);
+    }
 
     /**
      * send tx with sign (support precomnpiled contract)
      */
     public Object transHandleWithSign(String groupId, String signUserId,
-        String contractAddress, String abiStr, String funcName, List<Object> funcParam)
+        String contractAddress, String abiStr, String funcName, List<Object> funcParam, boolean isWasm)
         throws FrontException {
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
 
-        byte[] encodeFunction = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId);
+        byte[] encodeFunction = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
         String userAddress = keyStoreService.getAddressBySignUserId(signUserId);
         if (StringUtils.isBlank(userAddress)) {
             log.warn("transHandleWithSign this signUser [{}] not record in webase-front", signUserId);
@@ -145,7 +154,7 @@ public class TransService {
 
         boolean isTxConstant = this.getABIDefinition(abiStr, funcName, groupId).isConstant();
         if (isTxConstant) {
-            return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
+            return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName, isWasm);
         } else {
             return this.handleTransaction(client, signUserId, contractAddress, encodeFunction);
         }
@@ -161,7 +170,8 @@ public class TransService {
      * @return
      */
     public String signMessage(String groupId, Client client, String signUserId, String contractAddress,
-            byte[] data) {
+            byte[] data, boolean isDeploy) {
+        log.info("signMessage data:{}", Hex.toHexString(data));
         // to encode raw tx
         Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
         TransactionBuilderService txBuilderService = new TransactionBuilderService(web3ApiService.getWeb3j(groupId));
@@ -172,10 +182,13 @@ public class TransService {
         byte[] encodedTransaction = encoderService.encode(rawTransaction);
 
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
-        byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
+        int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
+        if (client.isWASM() && isDeploy) {
+            mark = USE_WASM_DEPLOY;
+        }
+        log.info("mark {}", mark);
+        byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, mark);
         return Numeric.toHexString(signedMessage);
-//        return Base64.getEncoder().encodeToString(signedMessage);
-
     }
 
 
@@ -186,9 +199,9 @@ public class TransService {
      */
     public TransactionReceipt sendMessage(Client client, String signMsg) {
         TransactionPusherService txPusher = new TransactionPusherService(client);
-        log.debug("sendMessage signMsg:{}", JsonUtils.objToString(signMsg));
+        log.info("sendMessage signMsg:{}", signMsg);
         TransactionReceipt receipt = txPusher.push(signMsg);
-        log.debug("handleTransaction receipt:{}", JsonUtils.objToString(receipt));
+        log.info("sendMessage receipt:{}", JsonUtils.objToString(receipt));
         this.decodeReceipt(client, receipt);
         return receipt;
     }
@@ -202,10 +215,10 @@ public class TransService {
         String funcName = req.getFuncName();
         List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         String userAddress = req.getUser();
-
+        boolean isWasm = req.getIsWasm();
         String contractAddress = req.getContractAddress();
 
-        byte[] encodeFunction = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId);
+        byte[] encodeFunction = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
 
         boolean isTxConstant = this.getABIDefinition(abiStr, funcName, groupId).isConstant();
         // get privateKey
@@ -217,7 +230,7 @@ public class TransService {
             if (StringUtils.isBlank(userAddress)) {
                 userAddress = cryptoKeyPair.getAddress();
             }
-            return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
+            return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName, isWasm);
         } else {
             return this.handleTransaction(client, cryptoKeyPair, contractAddress, encodeFunction);
         }
@@ -392,7 +405,7 @@ public class TransService {
     public String createRawTxEncoded(boolean isLocal, String user,
         String groupId, String contractAddress, List<Object> contractAbi,
         boolean isUseCns, String cnsName, String cnsVersion,
-        String funcName, List<Object> funcParam) throws Exception {
+        String funcName, List<Object> funcParam, boolean isWasm) throws Exception {
 
         if (isUseCns) {
             Tuple2<String, String> cnsInfo = cnsServiceInWebase.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
@@ -400,7 +413,7 @@ public class TransService {
             log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
         }
         // encode function
-        byte[] encodeFunction = this.encodeFunction2ByteArr(JsonUtils.objToString(contractAbi), funcName, funcParam, groupId);
+        byte[] encodeFunction = this.encodeFunction2ByteArr(JsonUtils.objToString(contractAbi), funcName, funcParam, groupId, isWasm);
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
         // isLocal:
@@ -410,8 +423,8 @@ public class TransService {
     }
 
 
-    public String encodeFunction2Str(String abiStr, String funcName, List<Object> funcParam, String groupId) {
-        byte[] encodeFunctionByteArr = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId);
+    public String encodeFunction2Str(String abiStr, String funcName, List<Object> funcParam, String groupId, boolean isWasm) {
+        byte[] encodeFunctionByteArr = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
         return Numeric.toHexString(encodeFunctionByteArr);
     }
     /**
@@ -421,13 +434,14 @@ public class TransService {
      * @param funcParam
      * @return
      */
-    public byte[] encodeFunction2ByteArr(String abiStr, String funcName, List<Object> funcParam, String groupId) {
+    public byte[] encodeFunction2ByteArr(String abiStr, String funcName, List<Object> funcParam, String groupId,
+                                         boolean isWasm) {
 
         funcParam = funcParam == null ? new ArrayList<>() : funcParam;
         this.validFuncParam(abiStr, funcName, funcParam, groupId);
         log.debug("abiStr:{} ,funcName:{},funcParam {},groupID {}", abiStr, funcName,
            funcParam, groupId);
-        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
+        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), isWasm);
         byte[] encodeFunction;
         try {
             encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
@@ -445,6 +459,11 @@ public class TransService {
      * if use signed data to send tx, call @send-signed-transaction api
      * @case1 if @userAddress is blank, return not signed raw tx encoded str
      * @case2 if @userAddress not blank, return signed str
+     * todo support deploy
+     * int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
+     *         if (client.isWASM() && isDeploy) {
+     *             mark = USE_WASM_DEPLOY;
+     *         }
      */
     private String convertRawTx2Str(Client client, String contractAddress,
         byte[] encodeFunction, String user, boolean isLocal) {
@@ -478,7 +497,7 @@ public class TransService {
                 SignatureResult signData = signMessageHashByType(hashMessageStr,
                     cryptoKeyPair, client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
+                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, client.isWASM() ? USE_WASM : USE_SOLIDITY);
                 signResultStr = Numeric.toHexString(signedMessage);
             } else {
                 // sign by webase-sign
@@ -487,7 +506,7 @@ public class TransService {
                 EncodeInfo encodeInfo = new EncodeInfo(user, hashMessageStr);
                 String signDataStr = keyStoreService.getSignData(encodeInfo);
                 SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, client.getCryptoSuite().cryptoTypeConfig);
-                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, USE_SOLIDITY);
+                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, client.isWASM() ? USE_WASM : USE_SOLIDITY);
                 signResultStr = Numeric.toHexString(signedMessage);
             }
             log.info("createRawTxEncoded signResultStr:{}", signResultStr);
@@ -511,12 +530,12 @@ public class TransService {
     }
 
     public List<Type> handleCall(String groupId, String userAddress, String contractAddress,
-        byte[] encodedFunction, String abiStr, String funcName) {
+        byte[] encodedFunction, String abiStr, String funcName, boolean isWasm) {
 
-        Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory
-            .getChainIdAndGroupId(web3ApiService.getWeb3j(groupId));
-        TransactionProcessor transactionProcessor = new TransactionProcessor(
-            web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(groupId),
+        Client client = web3ApiService.getWeb3j(groupId);
+        Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
+        TransactionProcessor transactionProcessor = new TransactionProcessor(client,
+            keyStoreService.getCredentialsForQuery(groupId),
             String.valueOf(groupId), chainIdAndGroupId.getLeft());
         CallOutput callOutput = transactionProcessor
             .executeCall(userAddress, contractAddress, encodedFunction)
@@ -529,7 +548,7 @@ public class TransService {
             String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
             throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR.getCode(), parseResultStr);
         } else {
-            ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
+            ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), client.isWASM());
             try {
                 log.debug("========= callOutput.getOutput():{}", callOutput.getOutput());
                 //  [
@@ -564,7 +583,7 @@ public class TransService {
         log.info("handleTransaction start startTime:{}", startTime.toEpochMilli());
         // send tx
         TransactionProcessor txProcessor = TransactionProcessorFactory.createTransactionProcessor(client, cryptoKeyPair);
-        TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair, USE_SOLIDITY);
+        TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair, client.isWASM() ? USE_WASM : USE_SOLIDITY);
         // cover null message through statusCode
         this.decodeReceipt(client, receipt);
         log.info("execTransaction end useTime:{},receipt:{}",
@@ -584,7 +603,7 @@ public class TransService {
     public TransactionReceipt handleTransaction(Client client, String signUserId, String contractAddress, byte[] encodeFunction) {
         log.debug("handleTransaction signUserId:{},contractAddress:{},encodeFunction:{}",signUserId,contractAddress, encodeFunction);
         String groupId = client.getGroup();
-        String signedMessageStr = this.signMessage(groupId, client, signUserId, contractAddress, encodeFunction);
+        String signedMessageStr = this.signMessage(groupId, client, signUserId, contractAddress, encodeFunction, false);
 
         Instant nodeStartTime = Instant.now();
         // send transaction
@@ -624,7 +643,7 @@ public class TransService {
      */
     public void decodeReceipt(Client client, TransactionReceipt receipt) {
         // decode receipt
-        TransactionDecoderService txDecoder = new TransactionDecoderService(client.getCryptoSuite(), false);
+        TransactionDecoderService txDecoder = new TransactionDecoderService(client.getCryptoSuite(), client.isWASM());
         String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
         receipt.setMessage(receiptMsg);
     }

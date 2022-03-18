@@ -41,4 +41,6 @@ public class ReqContractSave {
     private String contractBin;
 
     private String contractAddress;
+
+    private Boolean isWasm = false;
 }

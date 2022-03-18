@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2022 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.webank.webase.front.contract.entity.wasm;
 
-package com.webank.webase.front.solc.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotBlank;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
 
 @Data
-public class ReqUploadSolc {
-    /**
-     * ex: solc-0.4.25-a0b332...
-     */
-    @NotBlank
-    private String fileName;
+@NoArgsConstructor
+public class ReqCompileTask {
     @NotNull
-    private MultipartFile solcFile;
-    private String description;
+    private String groupId;
+    @NotBlank
+    private String contractPath;
+    @NotBlank
+    private String contractName;
 }

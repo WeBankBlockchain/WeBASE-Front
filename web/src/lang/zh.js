@@ -247,6 +247,7 @@ export default {
         addSDK:'配置SDK'
     },
     text: {
+        contractCompiling:"合约编译中，请稍等...",
         updateSDKsucess:'配置成功',
         isRedeploy: '合约已部署 是否重新部署？',
         noContract: '请在左侧面板点击打开一个合约或新建一个合约',

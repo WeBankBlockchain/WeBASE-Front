@@ -52,4 +52,8 @@ public class AbiInfo {
     // private Integer contractStatus;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
+    /**
+     * 0-solidity, 1-liquid
+     */
+    private Integer isWasm;
 }
