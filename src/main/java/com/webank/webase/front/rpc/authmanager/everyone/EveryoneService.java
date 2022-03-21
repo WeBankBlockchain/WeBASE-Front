@@ -95,6 +95,15 @@ public class EveryoneService {
         return objectList;
     }
 
+    /**
+     * 获取提案总数
+     */
+    public BigInteger queryProposalInfoCount(String groupId)
+        throws ContractException {
+        AuthManager authManager = authManagerService.getAuthManagerService(groupId);
+        BigInteger proposalCount = authManager.proposalCount();
+        return proposalCount;
+    }
 
     /**
      * 获取当前全局部署的权限策略,策略类型：0则无策略，1则为白名单模式，2则为黑名单模式
