@@ -377,7 +377,7 @@ export default {
                 message: this.$t("text.searchSucceeded"),
               });
             } else {
-              if (resData.status == "0x0") {
+              if (resData.status == 0) {
                 this.$message({
                   type: "success",
                   message: this.$t("text.txnSucceeded"),

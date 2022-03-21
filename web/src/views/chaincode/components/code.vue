@@ -22,7 +22,7 @@
         <span ref="setReadOnly" v-if="liquidCheck==false">{{contractName + '.sol'}}</span>
         <span v-else>{{contractName + '.rs'}}</span>
       </span>
-      <span class="contract-code-handle" v-show="codeShow">
+      <span class="contract-code-handle" v-show="navShow">
         <span class="contract-code-done noBlur" @click="saveCode" id="saveId">
           <el-tooltip class="item" effect="dark" :content="$t('title.handleSave')" placement="top-start">
             <i class="wbs-icon-baocun contract-icon-style font-16"></i>
@@ -47,18 +47,18 @@
           </el-tooltip>
           <span>{{ $t("title.callContract") }}</span>
         </span>
-        <span class="contract-code-done" @click="downloadJavaClass">
+        <!-- <span class="contract-code-done" @click="downloadJavaClass">
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportJavaFile") }}</span>
-        </span>
+        </span> -->
         <span class="contract-code-done" @click="exportSdk">
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportSdk") }}</span>
         </span>
-        <span class="contract-code-done" @click="exportJava">
+        <!-- <span class="contract-code-done" @click="exportJava">
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportJavaProject") }}</span>
-        </span>
+        </span> -->
       </span>
       <div class="search-model" v-if="searchVisibility">
         <el-input v-model="keyword" placeholder="搜索" style="width: 266px; margin-left: 10px" ref="searchInput" @keyup.esc.native="closeBtn" @keyup.enter.native="searchBtn" @keyup.down.native="nextBtn"
@@ -279,7 +279,7 @@ import web3 from "@/util/ethAbi";
 import mgmtCns from "../dialog/mgmtCns";
 export default {
   name: "codes",
-  props: ["show", "changeStyle", "liquidChecks"],
+  props: ["show", "changeStyle", "liquidChecks",'navShows'],
   components: {
     "v-transaction": transaction,
     "v-user": changeUser,
@@ -289,6 +289,7 @@ export default {
   data: function () {
     return {
       liquidCheck: this.liquidChecks,
+      navShow:this.navShows,
       successHide: true,
       loadingAce: false,
       content: "",
@@ -409,6 +410,11 @@ export default {
 
   created() {
     clearInterval(this.liquidCheckTimer);
+    Bus.$off("select");
+    Bus.$off("noData");
+  },
+  beforeDestroy() {
+    clearInterval(this.liquidCheckTimer);
   },
   beforeMount() {},
   mounted: function () {
@@ -469,7 +475,7 @@ export default {
           this.aceEditor.setReadOnly(false);
         }
         if (this.contractName && this.firstCall && this.liquidCheck) {
-          this.compileCheck();
+          this.compileCheckEnter();
         }
       });
       if (this.data.contractAddress) {
@@ -768,71 +774,42 @@ export default {
       }
     },
     compileCheckEnter() {
+      this.firstCall = false;
       let reqData = {
         groupId: localStorage.getItem("groupId"),
         contractName: this.contractName,
         contractPath: this.contractPath,
+        contractSource: Base64.encode(this.code),
+        contractAbi: this.abiFile,
+        contractBin: this.bin,
+        bytecodeBin: this.bytecodeBin,
+        version: this.version,
+        contractId: this.contractId,
+        contractAddress: this.contractAddress,
+        isWasm: true,
       };
       let _this = this;
-      _this.liquidCheckTimer = setInterval(function () {
-        liquidCompileCheck(reqData)
-          .then((res) => {
-            if (res.data.code === 0 && res.data.data.status == 2) {
-              _this.loadingAce = false;
-              if (res.data.data != {}) {
-                let compiledMap = res.data.data;
-                _this.abiFileShow = true;
-                _this.successInfo = `< ${_this.$t(
-                  "text.compilationSucceeded"
-                )}`;
-                _this.abiFile = compiledMap.abi;
-                // this.abiFile = JSON.parse(this.abiFile);
-                if (!(!_this.abiFile || _this.abiFile == "[]")) {
-                  _this.abiEmpty = false;
-                }
-                _this.bin = compiledMap.bin;
-                _this.bytecodeBin = compiledMap.bin;
-                _this.data.contractAbi = _this.abiFile;
-                _this.data.contractBin = _this.bin;
-                _this.data.contractSource = Base64.encode(_this.content);
-                _this.$set(_this.data, "bytecodeBin", _this.bytecodeBin);
-                // this.$emit("compile", false)
-                // Bus.$emit("compile", _this.data);
-                clearInterval(_this.liquidCheckTimer);
-              }
-            } else if (res.data.code === 0 && res.data.data.status == 3) {
-              _this.loadingAce = false;
-              clearInterval(_this.liquidCheckTimer);
-              // _this.$message({
-              //   message: _this.$chooseLang(res.data.code),
-              //   type: "error",
-              //   duration: 2000,
-              // });
-            } else if (res.data.code === 0 && res.data.data.status == 1) {
-              // _this.$message({
-              //   message: _this.$t("text.compiling"),
-              //   duration: 2000,
-              // });
-            } else {
-              _this.$message({
-                message: _this.$chooseLang(res.data.code),
-                type: "error",
-                duration: 2000,
-              });
-            }
-          })
-          .catch((err) => {
-            _this.loadingAce = false;
-            _this.$message({
-              message: err.data || _this.$t("text.systemError"),
-              type: "error",
-              duration: 2000,
-            });
+      liquidCompileCheck(reqData)
+        .then((res) => {
+          if (res.data.code === 0 && res.data.data.status == 1) {
+            _this.loadingAce = true;
+            this.compileCheck();
+            // _this.$message({
+            //   message: _this.$t("text.compiling"),
+            //   duration: 2000,
+            // });
+          }
+        })
+        .catch((err) => {
+          _this.loadingAce = false;
+          _this.$message({
+            message: err.data || _this.$t("text.systemError"),
+            type: "error",
+            duration: 2000,
           });
-      }, 5000);
+        });
     },
     compileCheck() {
-      this.firstCall = false;
       let reqData = {
         groupId: localStorage.getItem("groupId"),
         contractName: this.contractName,
@@ -873,20 +850,24 @@ export default {
                 Bus.$emit("compile", _this.data);
                 clearInterval(_this.liquidCheckTimer);
               }
-            } else if (res.data.code === 0 && res.data.data.status == 3) {
+            } else if ((res.data.code === 0 && res.data.data.status == 3)||(res.data.code === 0 && res.data.data.status == 4)) {
               _this.loadingAce = false;
               clearInterval(_this.liquidCheckTimer);
-              // _this.$message({
-              //   message: _this.$chooseLang(res.data.code),
-              //   type: "error",
-              //   duration: 2000,
-              // });
+              _this.$message({
+                message: _this.$chooseLang(res.data.code),
+                type: "error",
+                duration: 2000,
+              });
             } else if (res.data.code === 0 && res.data.data.status == 1) {
+              _this.loadingAce = true;
+              _this.loadingText = _this.$t("text.waitingTip");
               // _this.$message({
               //   message: _this.$t("text.compiling"),
               //   duration: 2000,
               // });
             } else {
+                clearInterval(_this.liquidCheckTimer);
+              _this.loadingAce = false;
               _this.$message({
                 message: _this.$chooseLang(res.data.code),
                 type: "error",
@@ -896,6 +877,7 @@ export default {
           })
           .catch((err) => {
             _this.loadingAce = false;
+            clearInterval(_this.liquidCheckTimer);
             _this.$message({
               message: err.data || _this.$t("text.systemError"),
               type: "error",
@@ -912,6 +894,7 @@ export default {
       //   }else{
       // this.$emit("compile", true)
       //   this.loadingAce = true;
+     this.loadingText=this.$t("text.contractCompiling")
       let version = this.$store.state.versionData;
       if (this.liquidCheck) {
         this.loadingAce = true;
@@ -926,7 +909,8 @@ export default {
           version: this.version,
           contractId: this.contractId,
           contractAddress: this.contractAddress,
-        };
+        isWasm: true,
+};
         liquidCompile(reqData)
           .then((res) => {
             if (res.data.code === 0 && res.data.data.status == 2) {
@@ -947,12 +931,14 @@ export default {
                 this.data.contractSource = Base64.encode(this.content);
                 this.$set(this.data, "bytecodeBin", this.bytecodeBin);
                 // this.$emit("compile", false)
-
                 Bus.$emit("compile", this.data);
+                this.setMethod();
               }
             } else if (res.data.code === 0 && res.data.data.status == 1) {
+              this.loadingAce = true;
               this.compileCheck();
             } else {
+              this.loadingAce = false;
               this.$message({
                 message: this.$chooseLang(res.data.code),
                 type: "error",

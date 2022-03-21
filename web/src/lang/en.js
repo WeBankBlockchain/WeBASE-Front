@@ -136,6 +136,7 @@ export default {
         copyFailure: 'Copy failed, key is empty'
     },
     dialog: {
+        liquidTip:"the address format of the liquid contract starts with / and is composed of numbers, letters and underscores",
         addUsername: 'Add Username',
         pleaseEnterUserName: 'Please type in username',
         privateKeyVerifyLength: 'The length is between 3 and 32 characters',
@@ -236,6 +237,7 @@ export default {
         exportJavaProject: "Export java project",
     },
     text: {
+        waitingTip:"contract compilation,it will take about a few minutes, please wait...",
         Contractcompiling: "contract compilation, please wait...",
         isRedeploy: 'Has the contract been deployed or redeployed?',
         noContract: 'Please create a new contract',

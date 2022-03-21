@@ -40,16 +40,16 @@
         <td>
           <el-form :model="address" :rules="rules" ref="contractAddress" class="demo-ruleForm">
             <el-form-item prop="contractAddress">
-              <el-input v-model="address.contractAddress" style="width: 310px;" :placeholder="$t('text.contractAddress')">
-                <!-- <template slot="prepend" style="width: 51px;">
-                                    <span class="parame-item-name" title="name">name</span>
-                                </template> -->
+              <el-input v-model="address.contractAddress" style="width: 310px;" :placeholder="$t('dialog.contractAddress')">
               </el-input>
             </el-form-item>
           </el-form>
           <!-- <el-input v-model="contractAddress" style="width: 310px;margin-bottom:15px;" prop='contractAddress'>
                         </el-input> -->
         </td>
+      </tr>
+      <tr><td style="width: 100px;text-align: right"></td>
+      <td><span>{{$t('dialog.liquidTip')}}</span></td>
       </tr>
       <!-- <tr>
                 <td style="width: 100px;text-align: right" class="text-td"><span class="font-color-fff">CNS：</span></td>
@@ -138,8 +138,10 @@ export default {
       console.log(val);
       if (val.substr(0, 1) != "/") {
         callback(new Error("合约地址必须以/开头"));
-      } else {
-        callback();
+      } else if(val.length>64){
+        callback(new Error("合约地址长度不能超过64位"));
+      }else{
+          callback()
       }
     };
     return {

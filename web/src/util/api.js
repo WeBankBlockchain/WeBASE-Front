@@ -555,7 +555,7 @@ export function liquidCompileCheck(data) {
 }
 export function liquidCheck(data) {
     return get({
-        url: `${HANDLE}/contract/liquid/check`,
+        url: `${HANDLE}contract/liquid/check`,
         method: 'get',
         //params: data,
         headers: {
@@ -1041,7 +1041,7 @@ export function batchSaveContract(data) {
 //注册cns
 export function registerCns(data) {
     return post({
-        url: `${HANDLE}contract/registerCns`,
+        url: `${HANDLE}precntauth/precompiled/cns/register`,
         method: 'post',
         data: data
     })
