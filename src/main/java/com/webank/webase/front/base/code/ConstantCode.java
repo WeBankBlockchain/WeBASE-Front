@@ -256,6 +256,12 @@ public class ConstantCode {
 
     public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
 
+    /* proposal */
+    public static final RetCode PROPOSAL_IS_VOTING = RetCode.mark(201622, "Proposal is voting, the previous vote need to be finished");
+    public static final RetCode PROPOSAL_IS_NOT_VOTABLE = RetCode.mark(201623, "The proposal is not votable , please ensure the proposal");
+    public static final RetCode PROPOSAL_IS_ALREADY_VOTED = RetCode.mark(201624, "The acconut address has already voted the proposal");
+    public static final RetCode PROPOSAL_NOT_EXIST = RetCode.mark(201625, "The proposal is not exist");
+
     /* rc2 liquid */
     public static final RetCode EXEC_JAVA_COMMAND_TIMEOUT = RetCode.mark(201631, "Java Command exec timeout");
     public static final RetCode EXEC_JAVA_COMMAND_RETURN_FAILED = RetCode.mark(201632, "Java Command return error");

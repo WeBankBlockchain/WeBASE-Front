@@ -6,13 +6,13 @@ import lombok.Data;
 @Data
 public class ReqRegisterCnsInfo {
 
-  private String groudId;
+  private String groupId;
   private String contractName;
   private String contractVersion;
   private String contractAddress;
   private String abiData;
-  private String signUserId;
   @NotNull
+  private String signUserId;
   private String fromAddress;
 
 }

@@ -84,6 +84,10 @@ public class CommitteeService {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATEUPDATEGOVERNORPROPOSAL, funcParams);
+    if (receipt.getStatus() == 16) {
+      RetCode sdkRetCode = new RetCode();
+      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
+    }
     return this.handleTransactionReceipt(receipt);
   }
 
@@ -108,6 +112,10 @@ public class CommitteeService {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATESETRATEPROPOSAL, funcParams);
+    if (receipt.getStatus() == 16) {
+      RetCode sdkRetCode = new RetCode();
+      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
+    }
     return this.handleTransactionReceipt(receipt);
   }
 
@@ -130,6 +138,10 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATESETDEPLOYAUTHTYPEPROPOSAL,
             funcParams);
+    if (receipt.getStatus() == 16) {
+      RetCode sdkRetCode = new RetCode();
+      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
+    }
     return this.handleTransactionReceipt(receipt);
   }
 
@@ -154,6 +166,10 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATEMODIFYDEPLOYAUTHPROPOSAL,
             funcParams);
+    if (receipt.getStatus() == 16) {
+      RetCode sdkRetCode = new RetCode();
+      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
+    }
     return this.handleTransactionReceipt(receipt);
   }
 
@@ -178,6 +194,10 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATERESETADMINPROPOSAL,
             funcParams);
+    if (receipt.getStatus() == 16) {
+      RetCode sdkRetCode = new RetCode();
+      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
+    }
     return this.handleTransactionReceipt(receipt);
   }
 
@@ -224,6 +244,20 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_VOTEPROPOSAL,
             funcParams);
+    //handle by the return
+    if (receipt.getStatus() == 16) {
+      RetCode sdkRetCode = new RetCode();
+      if (receipt.getMessage().equals("Proposal not exist")) {
+        return new BaseResponse(ConstantCode.PROPOSAL_NOT_EXIST,
+            sdkRetCode.getMessage()).toString();
+      } else if (receipt.getMessage().equals("Already voted")) {
+        return new BaseResponse(ConstantCode.PROPOSAL_IS_ALREADY_VOTED,
+            sdkRetCode.getMessage()).toString();
+      } else if (receipt.getMessage().equals("Proposal is not votable")) {
+        return new BaseResponse(ConstantCode.PROPOSAL_IS_NOT_VOTABLE,
+            sdkRetCode.getMessage()).toString();
+      }
+    }
     return this.handleTransactionReceipt(receipt);
   }
 
@@ -244,4 +278,6 @@ public class CommitteeService {
       throw new FrontException(e.getErrorCode(), e.getMessage());
     }
   }
+
+
 }
