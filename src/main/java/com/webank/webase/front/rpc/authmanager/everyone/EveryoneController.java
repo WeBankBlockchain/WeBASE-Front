@@ -66,6 +66,14 @@ public class EveryoneController {
     return everyoneService.queryProposalInfoList(reqProposalListInfo);
   }
 
+  @ApiOperation(value = "query the proposal info count")
+  @ApiImplicitParam(name = "groupId", value = "proposal info count", required = true)
+  @GetMapping("proposalInfoCount")
+  public BigInteger queryProposalList(String groupId)
+      throws ContractException {
+    return everyoneService.queryProposalInfoCount(groupId);
+  }
+
   /**
    * 检查账号是否具有全局部署权限
    */
