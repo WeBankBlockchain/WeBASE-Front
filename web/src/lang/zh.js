@@ -147,6 +147,7 @@ export default {
         copyFailure: '值为空，不复制'
     },
     dialog: {
+        liquidTip:"liquid合约的地址格式为/开头，由数字字母下划线组成",
         addUsername: '添加用户名',
         pleaseEnterUserName: '请输入用户名',
         privateKeyVerifyLength: '长度在 3 到 32 个字符',
@@ -247,6 +248,7 @@ export default {
         addSDK:'配置SDK'
     },
     text: {
+        waitingTip:"合约编译中，大约需要几分钟，请稍等...",
         contractCompiling:"合约编译中，请稍等...",
         updateSDKsucess:'配置成功',
         isRedeploy: '合约已部署 是否重新部署？',

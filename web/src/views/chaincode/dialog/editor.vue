@@ -448,7 +448,8 @@ export default {
       getFunctionAbi(data)
         .then((res) => {
           if (res.data.code == 0 && res.data.data) {
-            this.decodeInput(param, res.data.data);
+            //注释liquid合约解码
+            //.decodeInput(param, res.data.data);
           } else if (res.data.code !== 0) {
             this.$message({
               type: "error",
@@ -457,6 +458,7 @@ export default {
           }
         })
         .catch((err) => {
+          console.log(err)
           this.$message({
             type: "error",
             message: "系统错误！",

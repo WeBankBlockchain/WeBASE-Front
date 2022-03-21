@@ -1056,6 +1056,26 @@ let errCode = {
         en: "This group not connected with front's rpc peers",
         zh: "节点前置无法通过已连接的rpc节点访问该群组"
     },
+    "201631": {
+        en: "Java Command exec timeout",
+        zh: "Java命令执行超时"
+    },
+    "201632": {
+        en: "Java Command return error",
+        zh: "Java命令返回错误"
+    },
+    "201633": {
+        en: "When deploying liquid, contract address must not be empty",
+        zh: "部署liquid时，合同地址不得为空"
+    },
+    "201609": {
+        en: "This liquid contract already compiling, please wait...",
+        zh: "liquid合同已编译，请稍候..."
+    },
+    "201014": {
+        en: "ContractAddress Already Used",
+        zh: "合约地址已被使用"
+    },
 }
 export function chooseLang(code) {
     let lang = localStorage.getItem('lang')

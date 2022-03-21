@@ -32,9 +32,9 @@
           <el-option v-for="item in Language" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
       </el-select> -->
-        <div>
-          <slot name="footer"></slot>
-        </div>
+      <div>
+        <slot name="footer"></slot>
+      </div>
     </div>
 
     <div class="contract-menu-content">
@@ -135,7 +135,7 @@ import {
   readSolcVersion,
   deletePath,
   liquidCheck,
-  checkIsWasm
+  checkIsWasm,
 } from "@/util/api";
 import Bus from "@/bus";
 import Clickoutside from "element-ui/src/utils/clickoutside";
@@ -151,6 +151,9 @@ export default {
     solcVersion: {
       type: String,
     },
+    liquidChecks:{
+      type: Boolean,
+    }
   },
   components: {
     "add-folder": addFolder,
@@ -161,6 +164,7 @@ export default {
   },
   data() {
     return {
+      liquidCheck: this.liquidChecks,
       foldershow: false,
       fileshow: false,
       filename: "",
@@ -189,14 +193,17 @@ export default {
       selectFolderData: null,
       loading: false,
       importFromDialog: false,
-       Highlight:true,
-      Language:[{
+      Highlight: true,
+      Language: [
+        {
           value: true,
-          label: 'javascript'
-        }, {
+          label: "javascript",
+        },
+        {
           value: false,
-          label: 'rust'
-        }],
+          label: "rust",
+        },
+      ],
     };
   },
   watch: {
@@ -228,7 +235,6 @@ export default {
     });
     Bus.$on("deploy", (data) => {
       this.getContracts("", data);
-      
     });
     Bus.$on("open", (data) => {
       this.contractArry.forEach((value) => {
@@ -653,10 +659,12 @@ export default {
       if (param.id) {
         reqData.contractId = param.id;
       }
+       if (this.liquidCheck) {
+        reqData.isWasm = true;
+      }
       if (param.contractAddress) {
         reqData.contractAddress = param.contractAddress;
       }
-         
       saveChaincode(reqData)
         .then((res) => {
           const { data, status } = res;
@@ -1482,9 +1490,9 @@ export default {
   height: 36px;
   line-height: 36px;
 }
-.langChoose{
-    width: 110px;
-    padding-left: 7px;
+.langChoose {
+  width: 110px;
+  padding-left: 7px;
 }
 </style>
 

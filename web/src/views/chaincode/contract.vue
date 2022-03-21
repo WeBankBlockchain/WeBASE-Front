@@ -17,7 +17,7 @@
   <div class="contract-content" v-loading="loading">
     <v-content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.contractIDE')" @changeGroup="changeGroup"></v-content-head>
     <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}">
-      <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide">
+      <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide"  :liquidChecks='liquidCheck'>
         <template #footer>
           <div class="version-selector">
             <el-select v-model="version" placeholder="请选择" @change="onchangeLoadVersion">
@@ -30,7 +30,7 @@
       <div class="move" @mousedown="dragDetailWeight($event)"></div>
     </div>
     <div :class="[!menuHide ?  'code-detail-wrapper' : 'code-detail-reset-wrapper']" :style="{width: contentWidth}">
-      <v-code :changeStyle="changeWidth" :liquidChecks='liquidCheck' :data="contractData" :show="showCode" @add="add($event)" @compile="compile($event)" @deploy="deploy($event)"></v-code>
+      <v-code :changeStyle="changeWidth" :navShows="navShow" :liquidChecks='liquidCheck' :data="contractData" :show="showCode" @add="add($event)" @compile="compile($event)" @deploy="deploy($event)"></v-code>
     </div>
   </div>
 </template>
@@ -89,6 +89,7 @@ export default {
       allVersionList: [],
       groupId: localStorage.getItem("groupId"),
       liquidCheck: false,
+      navShow:true,
     };
   },
   computed: {
@@ -238,6 +239,7 @@ export default {
           if (res.data.code === 0) {
           } else {
             this.loading = false;
+          this.navShow=false
             this.$message({
               message: this.$chooseLang(res.data.code),
               type: "error",
@@ -246,6 +248,7 @@ export default {
           }
         })
         .catch((err) => {
+          this.navShow=false
           this.loading = false;
           this.$message({
             message: err.data || this.$t("text.systemError"),

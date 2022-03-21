@@ -189,13 +189,13 @@ export default {
             let param = {
                 groupId: localStorage.getItem('groupId'),
                 contractName: this.mgmtCnsItem.contractName,
-                version: this.cnsVersionFrom.cnsVersion,
-                abiInfo: JSON.parse(this.mgmtCnsItem.contractAbi),
-                userAddress: this.cnsVersionFrom.userId,
-                saveEnabled: true,
+                contractVersion: this.cnsVersionFrom.cnsVersion,
+                abiData: this.mgmtCnsItem.contractAbi,
+                fromAddress: '0x2abd2fc35c4553b1f1aa6cf70a4e6ef30b4d53a2',
+                // saveEnabled: true,
                 contractAddress: this.mgmtCnsItem.contractAddress,
-                cnsName: this.cnsVersionFrom.cnsName,
-                contractPath: this.mgmtCnsItem.contractPath
+                //cnsName: this.cnsVersionFrom.cnsName,
+                signUserId:''
             }
             registerCns(param)
                 .then(res => {
@@ -241,6 +241,9 @@ export default {
 
         createUser(){
             this.creatUserNameVisible = true;
+        },
+        closeUserName(){
+            this.creatUserNameVisible = false;
         },
          createUserClose(data){
              this.userList = data; 
