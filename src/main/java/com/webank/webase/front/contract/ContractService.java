@@ -1032,9 +1032,9 @@ public class ContractService {
         }
         // if contractPath is "/"
         String contractPath = contractReq.getContractPath();
-        if ("/".equals(contractPath)) {
-            contractPath = "";
-        }
+//        if ("/".equals(contractPath)) {
+//            contractPath = "";
+//        }
         // check by compile task if already new liquid project
         CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
         log.debug("newAndCompileLiquidContract taskInfo:{}", taskInfo);
@@ -1118,9 +1118,9 @@ public class ContractService {
      */
     public CompileTask getLiquidContract(String groupId, String contractPath, String contractName) {
         // if contractPath is "/"
-        if ("/".equals(contractPath)) {
-            contractPath = "";
-        }
+//        if ("/".equals(contractPath)) {
+//            contractPath = "";
+//        }
         // if not exist
         // check by compile task if already new liquid project
         CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
