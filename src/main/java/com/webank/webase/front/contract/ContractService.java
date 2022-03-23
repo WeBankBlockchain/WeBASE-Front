@@ -281,15 +281,13 @@ public class ContractService {
         String signMsg = transService.signMessage(groupId, client, signUserId, liquidAddress, encodedConstructor, true);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
+        transService.decodeReceipt(client, receipt);
         log.debug("deployWithSign receipt:{}", receipt);
-        log.info("deployWithSign receipt status:{}", receipt.getStatus());
-        log.info("deployWithSign receipt c address:{}", receipt.getContractAddress());
-        log.info("deployWithSign receipt to:{}", receipt.getTo());
         String contractAddress = "";
         int status = receipt.getStatus();
         if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())
             || Address.DEFAULT.getValue().equalsIgnoreCase(receipt.getContractAddress())) {
-            log.error("deployWithSign locally error, receipt status:{},hash:{}", status, receipt.getTransactionHash());
+            log.error("deployWithSign locally error, receipt status:{},receipt:{}", status, receipt);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
         }
         if (client.isWASM()) {
