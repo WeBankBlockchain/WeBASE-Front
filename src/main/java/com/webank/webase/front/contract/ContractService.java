@@ -276,13 +276,18 @@ public class ContractService {
         }
 
         // data sign
-//        String data = bytecodeBin + encodedConstructor;
         String data = encodedConstructor;
         String signMsg = transService.signMessage(groupId, client, signUserId, "", data);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
+        transService.decodeReceipt(receipt);
         String contractAddress = receipt.getContractAddress();
-
+        String status = receipt.getStatus();
+        if (!"0x0".equalsIgnoreCase(status) || StringUtils.isBlank(contractAddress)
+            || !Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress)) {
+            log.error("deployWithSign failed, status:{},receipt:{}", status, receipt);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
+        }
         log.info("success deployWithSign. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -437,7 +442,15 @@ public class ContractService {
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
         TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
-        return receipt.getContractAddress();
+        transService.decodeReceipt(receipt);
+        String contractAddress = receipt.getContractAddress();
+        String status = receipt.getStatus();
+        if (!"0x0".equalsIgnoreCase(status) || StringUtils.isBlank(contractAddress)
+            || !Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress)) {
+            log.error("deployWithSign failed, status:{},receipt:{}", status, receipt);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
+        }
+        return contractAddress;
     }
 
     /**
