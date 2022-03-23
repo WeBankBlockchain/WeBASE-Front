@@ -1058,19 +1058,19 @@ let errCode = {
     },
     "201631": {
         en: "Java Command exec timeout",
-        zh: "Java命令执行超时"
+        zh: "Liquid命令执行超时"
     },
     "201632": {
         en: "Java Command return error",
-        zh: "Java命令返回错误"
+        zh: "Liquid命令返回错误，请检查日志"
     },
     "201633": {
         en: "When deploying liquid, contract address must not be empty",
-        zh: "部署liquid时，合同地址不得为空"
+        zh: "部署liquid时，合约地址不得为空"
     },
     "201609": {
         en: "This liquid contract already compiling, please wait...",
-        zh: "liquid合同已编译，请稍候..."
+        zh: "liquid合约编译中，请稍候..."
     },
     "201014": {
         en: "ContractAddress Already Used",
