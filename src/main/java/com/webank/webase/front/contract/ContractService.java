@@ -228,7 +228,7 @@ public class ContractService {
             contractAddress = deployWithSign(req);
         }
         if (StringUtils.isNotBlank(contractAddress)
-                && !Address.DEFAULT.getValue().equals(contractAddress)) {
+                && !Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress)) {
             // save address
             BeanUtils.copyProperties(req, contract);
             contract.setContractAddress(contractAddress);
@@ -281,19 +281,21 @@ public class ContractService {
         String signMsg = transService.signMessage(groupId, client, signUserId, liquidAddress, encodedConstructor, true);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
-        log.info("deployWithSign receipt:{}", receipt);
-        log.info("deployWithSign receipt status:{}", receipt.getStatus());
-        log.info("deployWithSign receipt c address:{}", receipt.getContractAddress());
-        log.info("deployWithSign receipt to:{}", receipt.getTo());
+        transService.decodeReceipt(client, receipt);
+        log.debug("deployWithSign receipt:{}", receipt);
         String contractAddress = "";
-        if (receipt.getStatus() == 0) {
-            log.info("success deployWithSign. deployedContractAddress:{}", liquidAddress);
-            if (client.isWASM()) {
-                contractAddress = liquidAddress;
-            } else {
-                contractAddress = receipt.getContractAddress();
-            }
+        int status = receipt.getStatus();
+        if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())
+            || Address.DEFAULT.getValue().equalsIgnoreCase(receipt.getContractAddress())) {
+            log.error("deployWithSign locally error, receipt status:{},receipt:{}", status, receipt);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
         }
+        if (client.isWASM()) {
+            contractAddress = liquidAddress;
+        } else {
+            contractAddress = receipt.getContractAddress();
+        }
+        log.info("success deployWithSign. contractAddress:{}", contractAddress);
 
         return contractAddress;
     }
@@ -434,7 +436,8 @@ public class ContractService {
         TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
         transService.decodeReceipt(client, receipt);
         int status = receipt.getStatus();
-        if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())) {
+        if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())
+            || Address.DEFAULT.getValue().equalsIgnoreCase(receipt.getContractAddress())) {
             log.error("deployContract locally error, receipt status:{},hash:{}", status, receipt.getTransactionHash());
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
         }
@@ -469,7 +472,8 @@ public class ContractService {
         TransactionReceipt receipt = response.getTransactionReceipt();
         transService.decodeReceipt(client, receipt);
         int status = receipt.getStatus();
-        if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())) {
+        if (status != 0 || StringUtils.isBlank(receipt.getContractAddress())
+            || Address.DEFAULT.getValue().equalsIgnoreCase(receipt.getContractAddress())) {
             log.error("deployContract locally error, receipt status:{},hash:{}", status, receipt.getTransactionHash());
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
         }
@@ -1032,9 +1036,9 @@ public class ContractService {
         }
         // if contractPath is "/"
         String contractPath = contractReq.getContractPath();
-        if ("/".equals(contractPath)) {
-            contractPath = "";
-        }
+//        if ("/".equals(contractPath)) {
+//            contractPath = "";
+//        }
         // check by compile task if already new liquid project
         CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
         log.debug("newAndCompileLiquidContract taskInfo:{}", taskInfo);
@@ -1118,9 +1122,9 @@ public class ContractService {
      */
     public CompileTask getLiquidContract(String groupId, String contractPath, String contractName) {
         // if contractPath is "/"
-        if ("/".equals(contractPath)) {
-            contractPath = "";
-        }
+//        if ("/".equals(contractPath)) {
+//            contractPath = "";
+//        }
         // if not exist
         // check by compile task if already new liquid project
         CompileTask taskInfo = compileTaskRepository.findByGroupIdAndContractPathAndContractName(groupId, contractPath, contractName);
