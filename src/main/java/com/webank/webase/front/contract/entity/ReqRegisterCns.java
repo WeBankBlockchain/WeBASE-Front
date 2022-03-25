@@ -38,7 +38,7 @@ public class ReqRegisterCns {
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_ADDRESS_EMPTY)
     private String contractAddress;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
-    private List<ABIDefinition> abiInfo;
+    private List<Object> abiInfo;
     private String signUserId;
     private String userAddress;
     private String contractPath;
