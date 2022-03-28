@@ -141,7 +141,7 @@ public class AbiService {
 
     public void delete(Long id) {
         checkAbiIdExist(id);
-        abiRepository.delete(id);
+        abiRepository.deleteById(id);
     }
 
     public AbiInfo getAbiById(Long abiId) {

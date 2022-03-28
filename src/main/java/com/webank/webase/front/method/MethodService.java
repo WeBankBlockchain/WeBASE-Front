@@ -71,7 +71,7 @@ public class MethodService {
         MethodKey pram = new MethodKey();
         pram.setMethodId(methodId);
         pram.setGroupId(groupId);
-        return methodRepository.findOne(pram);
+        return methodRepository.findById(pram).orElse(null);
     }
 
     /**

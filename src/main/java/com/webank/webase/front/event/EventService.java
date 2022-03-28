@@ -298,7 +298,7 @@ public class EventService {
                                                       String queueName) {
         log.debug("unregisterNewBlock appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
-        NewBlockEventInfo eventInfo = newBlockEventInfoRepository.findById(infoId);
+        NewBlockEventInfo eventInfo = newBlockEventInfoRepository.findById(infoId).orElse(null);
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
@@ -317,7 +317,7 @@ public class EventService {
             throw new FrontException(ConstantCode.UNREGISTER_FAILED_ERROR);
         }
         // remove from db
-        newBlockEventInfoRepository.delete(infoId);
+        newBlockEventInfoRepository.deleteById(infoId);
         return newBlockEventInfoRepository.findByAppId(appId);
     }
 
@@ -354,7 +354,7 @@ public class EventService {
                                                       String queueName) {
         log.debug("unregisterContractEvent infoId:{},appId:{},groupId:{},exchangeName:{},queueName:{}",
                 infoId, appId, groupId, exchangeName, queueName);
-        ContractEventInfo eventInfo = contractEventInfoRepository.findById(infoId);
+        ContractEventInfo eventInfo = contractEventInfoRepository.findById(infoId).orElse(null);
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
@@ -375,7 +375,7 @@ public class EventService {
             throw new FrontException(ConstantCode.UNREGISTER_FAILED_ERROR);
         }
         // remove from db
-        contractEventInfoRepository.delete(infoId);
+        contractEventInfoRepository.deleteById(infoId);
         return contractEventInfoRepository.findByAppId(appId);
     }
 

@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 /**
  * deploy interface parameter.
