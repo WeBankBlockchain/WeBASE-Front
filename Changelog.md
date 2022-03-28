@@ -1,3 +1,17 @@
+### v1.5.4(2022-02-22)
+
+**Fix**
+- 优化合约仓库加载方式，通过`conf/warehouse`目录中的.json文件加载合约模板
+- 优化创建随机私钥所调用的JAVASDK的keyFactory问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Node-Manager v1.5.0+
+- WeBASE-Sign v1.5.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.5.3(2021-09-27)
 
 **Add**

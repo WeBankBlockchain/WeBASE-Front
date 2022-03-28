@@ -357,17 +357,15 @@
     border: 1px solid #2f3b52;
     /* box-shadow:0 12px 27px 0 rgba(159,166,189,0.33); */
     border-radius: 8px;
+    background-color: #2f3b52;
 }
 
-.el-dialog, .el-pager li {
-    background: none;
-}
+
 
 .el-dialog__header {
-    padding-bottom: 0;
+    padding: 24px 24px 0 24px;
+    text-align: left;
     background-color: #2f3b52;
-    color: #fff !important;
-    border-color: #2f3b52;
 }
 
 .el-dialog__title {
@@ -380,8 +378,10 @@
 .el-dialog__body {
     background-color: #2f3b52;
     color: #fff !important;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 24px 24px 0 24px !important;
+    max-height: 500px;
+    margin-bottom: 24px;
+    overflow-y: auto;
 }
 
 .el-dialog__footer {
