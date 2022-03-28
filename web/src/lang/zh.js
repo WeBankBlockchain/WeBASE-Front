@@ -400,6 +400,8 @@ export default {
         no: '节点未存活'
     },
     contracts: {
+        toTip:"调用合约的交易中to字段为合约地址",
+        contractAddressTip:"部署合约的交易中contractAddress字段为合约地址",
         createFile: "新建文件",
         createFolder: "新建文件夹",
         upLoadFile: "上传文件",

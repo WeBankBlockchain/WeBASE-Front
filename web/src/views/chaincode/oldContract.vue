@@ -58,8 +58,8 @@
           <el-table-column :label="$t('table.actions')" width="280">
             <template slot-scope="scope">
               <el-button :disabled="!scope.row.contractAddress" :class="{'grayColor': !scope.row.contractAddress}" @click="send(scope.row)" type="text" size="small">{{$t('title.callContract')}}</el-button>
-              <!-- <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress || !scope.row.haveEvent}" @click="handleEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
-                            <el-button @click="handleMgmtCns(scope.row)" type="text" size="small">CNS</el-button> -->
+              <el-button :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress || !scope.row.haveEvent}" @click="handleEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
+                            <el-button @click="handleMgmtCns(scope.row)" type="text" size="small">CNS</el-button>
             </template>
           </el-table-column>
         </el-table>

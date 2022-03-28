@@ -385,6 +385,8 @@ export default {
         addContractAddress: 'Add conctract address'
     },
     contracts: {
+        toTip: "The to field in the transaction calling the contract is the contract address",
+         contractAddressTip: "The contractAddress field in the transaction that deploys the contract is the contract address",
         createFile: "Create File",
         createFolder: "Create Folder",
         upLoadFile: "Upload File",

@@ -214,7 +214,7 @@
     <el-dialog :title="$t('title.selectAccountAddress')" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
       <v-user @change="deployContract(arguments)" @close="userClose" :liquidChecks='liquidCheck' :contractName="contractName" :abi="abiFile"></v-user>
     </el-dialog>
-    <v-editor v-if="editorShow" :show="editorShow" :data="editorData" :sendConstant="sendConstant" @close="editorClose" ref="editor" :input="editorInput" :editorOutput="editorOutput"></v-editor>
+    <v-editor v-if="editorShow" :show="editorShow" :data="editorData" :liquidChecks='liquidCheck'  :sendConstant="sendConstant" @close="editorClose" ref="editor" :input="editorInput" :editorOutput="editorOutput"></v-editor>
     <el-dialog :title="$t('title.writeJavaName')" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
       <el-input v-model="javaClassName" :placeholder="$t('placeholder.javaPackage')"></el-input>
       <span class="font-12 font-color-ed5454" style="margin-left: 5px">{{
