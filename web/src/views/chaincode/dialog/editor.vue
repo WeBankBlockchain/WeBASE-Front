@@ -65,9 +65,8 @@
             </div>
           </div>
           <div class="item">
-            <!-- <div class="item" v-show="inputButtonShow"> -->
             <span class="label"></span>
-            <el-button @click="decodeInputCheck" type="primary">{{inputTitle}}</el-button>
+            <el-button @click="decodeInputCheck" type="primary" :disabled="ifLiquid">{{inputTitle}}</el-button>
           </div>
         </div>
         <div v-else-if="key == 'output'">
@@ -219,9 +218,10 @@ import { getFunctionAbi } from "@/util/api";
 // import func from 'vue-editor-bridge';
 export default {
   name: "editor",
-  props: ["data", "show", "input", "editorOutput", "sendConstant"],
+  props: ["data", "show", "input", "editorOutput", "sendConstant",'liquidChecks'],
   data() {
     return {
+      ifLiquid: this.liquidChecks,
       editorShow: true,
       aceEditor: null,
       transationData: this.data || { logEntries: [""] },
@@ -270,21 +270,6 @@ export default {
         return arr;
       }
       return "[" + arr.toString() + "]";
-      //   var str = "[";
-      //   arr.forEach(function(item,index,arr){
-      //     str += item+',';
-      // })
-      //    var a= str.substring(0,(str.length-1));
-      //  return a+"]";
-
-      //  abc(arr){
-      //     arr.forEach(function(item,index,arrs){
-      //       if(Number(item)){
-      //           arrs[index]=Number(item)
-      //       }
-      //   })
-      // //   return arr
-      // },
     },
     decodeInputCheck: function () {
       if (this.showDecodeInput) {
@@ -424,7 +409,9 @@ export default {
               setTimeout(() => {
                 that.eventSHow = true;
               }, 200);
-             // this.decodeInputApi(this.transationData.input);
+              if(!this.ifLiquid){
+              this.decodeInputApi(this.transationData.input);
+              }
             } else if (res.data.code !== 0) {
               this.$message({
                 type: "error",
@@ -449,7 +436,7 @@ export default {
         .then((res) => {
           if (res.data.code == 0 && res.data.data) {
             //注释liquid合约解码
-            //.decodeInput(param, res.data.data);
+            this.decodeInput(param, res.data.data);
           } else if (res.data.code !== 0) {
             this.$message({
               type: "error",

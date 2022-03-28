@@ -89,7 +89,7 @@ export default {
             groupName: "",
             groupVisible: false,
             groupList: [],
-            version: "3.0.0-rc2",
+            version: "",
             group: null,
             screenWidth: null,
             buttomNone: true,
@@ -191,6 +191,7 @@ export default {
     mounted() {
         if (localStorage.getItem("groupId")) {
             this.group = localStorage.getItem("groupId");
+            this.getClientVersion();
         }
         if (localStorage.getItem("groupName")) {
             this.groupName = localStorage.getItem("groupName");
@@ -223,14 +224,14 @@ export default {
             localStorage.setItem('groupId', this.group);
             localStorage.setItem("groupName", this.groupName);
             Bus.$emit("changeGroup", this.group);
-            //this.getClientVersion();
+            this.getClientVersion();
         },
         getClientVersion() {
             queryClientVersion(this.group)
                 .then(res => {
                     const { data, status, statusText } = res;
                     if (status === 200) {
-                        this.version = data['FISCO-BCOS Version'];
+                        this.version =data;
                         localStorage.setItem('fisco-bcos-version', this.version)
                     } else {
                         this.$message({

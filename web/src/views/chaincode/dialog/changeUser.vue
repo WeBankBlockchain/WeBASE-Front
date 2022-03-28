@@ -48,8 +48,9 @@
                         </el-input> -->
         </td>
       </tr>
-      <tr><td style="width: 100px;text-align: right"></td>
-      <td><span>{{$t('dialog.liquidTip')}}</span></td>
+          <tr v-if='ifLiquid'>
+        <td style="width: 100px;text-align: right"></td>
+        <td><span>{{$t('dialog.liquidTip')}}</span></td>
       </tr>
       <!-- <tr>
                 <td style="width: 100px;text-align: right" class="text-td"><span class="font-color-fff">CNS：</span></td>

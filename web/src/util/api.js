@@ -328,12 +328,23 @@ export function deleteNodes(data) {
 // ==========================================================================
 
 // client version
-export function queryClientVersion(data) {
+export function queryClientVersion() {
     return get({
-        url: `${HANDLE}${data}/web3/clientVersion`,
-        method: 'get'
+        url: `${HANDLE}config/version`,
+        method: "get",
+        responseType: "text",
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
     })
 }
+
+// export function queryClientVersion(data) {
+//     return get({
+//         url: `${HANDLE}${data}/web3/clientVersion`,
+//         method: 'get'
+//     })
+// }
 /**  Collection node metric*/
 export function metricInfo(data, list) {
     const params = reviseParam(data, list);
@@ -920,6 +931,7 @@ export function readSolcVersion(fielName) {
     })
 }
 
+
 //删除solc
 export function deleteSolcId(solcId) {
     return deleted({
@@ -1041,7 +1053,7 @@ export function batchSaveContract(data) {
 //注册cns
 export function registerCns(data) {
     return post({
-        url: `${HANDLE}precntauth/precompiled/cns/register`,
+        url: `${HANDLE}contract/registerCns`,
         method: 'post',
         data: data
     })
