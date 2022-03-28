@@ -100,7 +100,7 @@ public class KeyStoreService {
      * without external user
      */
     public List<KeyStoreInfo> getLocalKeyStoreList() {
-        Sort sort = new Sort(Sort.Direction.ASC, "userName");
+        Sort sort = Sort.by(Sort.Direction.ASC, "userName");
         List<KeyStoreInfo> keyStores = keystoreRepository.findAll(
                 (Root<KeyStoreInfo> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                     Predicate predicate = criteriaBuilder.equal(root.get("type"), KeyTypes.LOCALUSER.getValue());
@@ -179,7 +179,7 @@ public class KeyStoreService {
      * deleteKeyStore.
      */
     public void deleteKeyStore(String address) {
-        keystoreRepository.delete(address);
+        keystoreRepository.deleteById(address);
     }
 
     /**

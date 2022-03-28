@@ -17,7 +17,7 @@
 package com.webank.webase.front.solc.entity;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;

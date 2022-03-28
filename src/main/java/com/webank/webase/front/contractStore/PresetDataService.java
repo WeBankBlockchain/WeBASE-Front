@@ -1,25 +1,24 @@
 package com.webank.webase.front.contractStore;
 
-import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.contractStore.constant.*;
+import com.webank.webase.front.contractStore.constant.EvidenceConstantContext;
+import com.webank.webase.front.contractStore.constant.PointsConstantContext;
+import com.webank.webase.front.contractStore.constant.ProxyConstantContext;
+import com.webank.webase.front.contractStore.constant.SmartDevConstantContext;
+import com.webank.webase.front.contractStore.constant.ToolsConstantContext;
 import com.webank.webase.front.contractStore.entity.ContractFolderItem;
 import com.webank.webase.front.contractStore.entity.ContractItem;
 import com.webank.webase.front.contractStore.entity.StoreItem;
 import com.webank.webase.front.util.JsonUtils;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -84,7 +83,7 @@ public class PresetDataService {
                                 String StoreDetail_en)
     {
         log.info("insert storeItem id:{},storeName:{}", storeId, storeName);
-        if (contractStoreRepository.exists(storeId)) {
+        if (contractStoreRepository.existsById(storeId)) {
             log.info("insertStoreItem skip storeId:{} already exist", storeId);
             return;
         }
@@ -155,7 +154,7 @@ public class PresetDataService {
                                          String contractFolderDesc_en, String contractFolderDetail_en)
     {
         log.info("insert contractFolderItem id:{},contractFolderName:{} ", contractFolderId, contractFolderName);
-        if (contractFolderRepository.exists(contractFolderId)) {
+        if (contractFolderRepository.existsById(contractFolderId)) {
             log.info("insertContractFolderItem skip contractFolderId:{}  already exist", contractFolderId);
             return;
         }
@@ -289,7 +288,7 @@ public class PresetDataService {
                                 String contractDesc, String contractDesc_en)
     {
         log.info("insert contractItem id:{},contractName:{}", contractId, contractName);
-        if (contractItemRepository.exists(contractId)) {
+        if (contractItemRepository.existsById(contractId)) {
             log.info("insertContractItem skip contractId:{} already exist", contractId);
             return;
         }
@@ -327,13 +326,13 @@ public class PresetDataService {
         }
         List<StoreItem> item2Save = new ArrayList<>();
         for (StoreItem item : storeItems) {
-            if (!contractStoreRepository.exists(item.getStoreId())) {
+            if (!contractStoreRepository.existsById(item.getStoreId())) {
                 item.setCreateTime(LocalDateTime.now());
                 item.setModifyTime(item.getCreateTime());
                 item2Save.add(item);
             }
         }
-        contractStoreRepository.save(item2Save);
+        contractStoreRepository.saveAll(item2Save);
         log.info("readAndInitStoreItem save {} items", storeItems.size());
     }
 
@@ -346,13 +345,13 @@ public class PresetDataService {
         }
         List<ContractFolderItem> item2Save = new ArrayList<>();
         for (ContractFolderItem item : folderItems) {
-            if (!contractFolderRepository.exists(item.getContractFolderId())) {
+            if (!contractFolderRepository.existsById(item.getContractFolderId())) {
                 item.setCreateTime(LocalDateTime.now());
                 item.setModifyTime(item.getCreateTime());
                 item2Save.add(item);
             }
         }
-        contractFolderRepository.save(item2Save);
+        contractFolderRepository.saveAll(item2Save);
         log.info("readAndInitFolderItem save {} items", folderItems.size());
     }
 
@@ -365,13 +364,13 @@ public class PresetDataService {
         }
         List<ContractItem> item2Save = new ArrayList<>();
         for (ContractItem item : contractItems) {
-            if (!contractItemRepository.exists(item.getContractId())) {
+            if (!contractItemRepository.existsById(item.getContractId())) {
                 item.setCreateTime(LocalDateTime.now());
                 item.setModifyTime(item.getCreateTime());
                 item2Save.add(item);
             }
         }
-        contractItemRepository.save(item2Save);
+        contractItemRepository.saveAll(item2Save);
         log.info("readAndInitContractItem save {} items", contractItems.size());
     }
 

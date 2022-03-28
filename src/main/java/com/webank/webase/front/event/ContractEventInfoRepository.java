@@ -14,8 +14,6 @@ import java.util.List;
 public interface ContractEventInfoRepository extends CrudRepository<ContractEventInfo, String>,
         JpaSpecificationExecutor<ContractEventInfo> {
 
-    ContractEventInfo findById(String id);
-
     List<ContractEventInfo> findByAppId(String appId);
 
     List<ContractEventInfo> findByGroupId(int groupId);
