@@ -271,8 +271,8 @@ public class ConstantCode {
     public static final RetCode LIQUID_NEW_PROJECT_SED_GITEE_FAILED = RetCode.mark(201636, "Create new liquid project and set gitee url failed");
     public static final RetCode WRITE_CONTRACT_SOURCE_FAILED = RetCode.mark(201637, "Write liquid contract source into lib.rs file failed");
     public static final RetCode LIQUID_COMPILE_FAILED = RetCode.mark(201638, "Compile liquid contract failed, please check contract source");
-    public static final RetCode LIQUID_TARGET_FILE_NOT_EXIST = RetCode.mark(201638, "Liquid compile target file not exist, please check 'liquid' directory in webase-front");
-    public static final RetCode LIQUID_READ_ABI_BIN_FAILED = RetCode.mark(201638, "Read liquid contract's abi and bin file failed, please check 'liquid' directory in webase-front");
+    public static final RetCode LIQUID_TARGET_FILE_NOT_EXIST = RetCode.mark(201639, "Liquid compile target file not exist, please check 'liquid' directory in webase-front");
+    public static final RetCode LIQUID_READ_ABI_BIN_FAILED = RetCode.mark(201640, "Read liquid contract's abi and bin file failed, please check 'liquid' directory in webase-front");
 
     public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
 
