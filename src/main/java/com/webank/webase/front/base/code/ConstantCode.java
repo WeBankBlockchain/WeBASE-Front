@@ -266,6 +266,13 @@ public class ConstantCode {
     public static final RetCode EXEC_JAVA_COMMAND_TIMEOUT = RetCode.mark(201631, "Java Command exec timeout");
     public static final RetCode EXEC_JAVA_COMMAND_RETURN_FAILED = RetCode.mark(201632, "Java Command return error");
     public static final RetCode DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY = RetCode.mark(201633, "When deploying liquid, contract address must not be empty");
+    public static final RetCode LIQUID_ENV_NOT_CONFIG = RetCode.mark(201634, "Liquid environment not configured in the host of webase-front");
+    public static final RetCode LIQUID_NEW_PROJECT_FAILED = RetCode.mark(201635, "Create new liquid project failed, please check 'liquid' directory in webase-front");
+    public static final RetCode LIQUID_NEW_PROJECT_SED_GITEE_FAILED = RetCode.mark(201636, "Create new liquid project and set gitee url failed");
+    public static final RetCode WRITE_CONTRACT_SOURCE_FAILED = RetCode.mark(201637, "Write liquid contract source into lib.rs file failed");
+    public static final RetCode LIQUID_COMPILE_FAILED = RetCode.mark(201638, "Compile liquid contract failed, please check contract source");
+    public static final RetCode LIQUID_TARGET_FILE_NOT_EXIST = RetCode.mark(201638, "Liquid compile target file not exist, please check 'liquid' directory in webase-front");
+    public static final RetCode LIQUID_READ_ABI_BIN_FAILED = RetCode.mark(201638, "Read liquid contract's abi and bin file failed, please check 'liquid' directory in webase-front");
 
     public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
 
