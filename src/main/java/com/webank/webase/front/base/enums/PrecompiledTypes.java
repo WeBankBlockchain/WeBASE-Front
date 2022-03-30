@@ -18,46 +18,53 @@ package com.webank.webase.front.base.enums;
  * @author marsli
  */
 public enum PrecompiledTypes {
-    /**
-     * System Config
-     */
-    SYSTEM_CONFIG(1000),
+  /**
+   * System Config
+   */
+  SYSTEM_CONFIG(1000),
 
-    /**
-     * CRUD
-     */
-    CRUD(1009),
+  /**
+   * CRUD
+   */
+  CRUD(1009),
 
-    /**
-     * Consensus
-     */
-    CONSENSUS(1003),
+  /**
+   * Consensus
+   */
+  CONSENSUS(1003),
 
-    /**
-     * Contract
-     */
-    CNS(1004),
-    /**
-     * CONTRACT AUTH
-     */
-    CONTRACT_AUTH(1005),
-    /**
-     * BFS
-     */
-    BFS(100111),
-    /**
-     * Committee Manager
-     */
-    COMMITTEE_MANAGER(10001);
+  /**
+   * Contract_solidity
+   */
+  CNS(1004),
 
+  /**
+   * Contract_liquid
+   */
+  CNS_LIQUID(01004),
+
+  /**
+   * CONTRACT AUTH
+   */
+  CONTRACT_AUTH(1005),
+
+  /**
+   * BFS
+   */
+  BFS(100111),
+
+  /**
+   * Committee Manager
+   */
+  COMMITTEE_MANAGER(10001);
 
   private int value;
 
-    PrecompiledTypes(Integer type) {
-        this.value = type;
-    }
+  PrecompiledTypes(Integer type) {
+    this.value = type;
+  }
 
-    public int getValue() {
-        return this.value;
-    }
+  public int getValue() {
+    return this.value;
+  }
 }

@@ -21,10 +21,12 @@ import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.ArrayList;
 import java.util.List;
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
+import org.fisco.bcos.sdk.contract.precompiled.model.PrecompiledAddress;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,15 +49,22 @@ public class CNSServiceInWebase {
   public Object registerCNS(String groupId, String signUserId,String contractName, String contractVersion,
       String contractAddress, String abiData)
       throws ContractException {
-    //todo check response address: "0000000000000000000000000000000000000100"
+    TransactionReceipt receipt;
+    String precompiledAddress;
     List<Object> funcParams = new ArrayList<>();
     funcParams.add(contractName);
     funcParams.add(contractVersion);
     funcParams.add(contractAddress);
     funcParams.add(abiData);
-    String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CNS);
+    //wasm or solidity
+    Client client = web3ApiService.getWeb3j(groupId);
+    if (client.isWASM()) {
+      precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CNS_LIQUID);
+    } else {
+      precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CNS);
+    }
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CNS);
-    TransactionReceipt receipt =
+    receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, precompiledAddress, abiStr, CNSPrecompiled.FUNC_INSERT, funcParams);
     return PrecompiledUtil.handleTransactionReceipt(receipt);
