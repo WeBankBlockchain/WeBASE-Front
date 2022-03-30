@@ -75,10 +75,13 @@ public class Constants {
     private Integer syncStatLogTime = 5000;
     private long syncStatLogCountLimit = 10000;
 
+    // rest factory
     private int http_read_timeOut = 10000;
     private int http_connect_timeOut = 10000;
+    // rest todo check
     private int restTemplateMaxTotal = 1000;
     private int restTemplateMaxPerRoute = 100;
+    // tomcat todo check
     private int keepAliveRequests = 100;
     private int KeepAliveTimeout = 10;
 

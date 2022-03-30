@@ -24,7 +24,8 @@ repositories {
 
 }
 
-def spring_version="4.3.29.RELEASE"
+//def spring_version="4.3.29.RELEASE"
+def spring_version="5.2.19.RELEASE"
 List spring =[
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-beans:$spring_version",
@@ -41,7 +42,8 @@ List spring =[
 
 ]
 
-def spring_boot_version="1.5.22.RELEASE"
+//def spring_boot_version="1.5.22.RELEASE"
+def spring_boot_version="2.3.12.RELEASE"
 List spring_boot =[
     "org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
     "org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
@@ -114,6 +116,7 @@ dependencies {
     compile 'com.google.guava:guava:29.0-jre'
     compile 'org.yaml:snakeyaml:1.30'
 //    compile 'org.hibernate:hibernate-core:5.3.6.Final'
+    compile 'javax.validation:validation-api:2.0.1.Final'
 
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'

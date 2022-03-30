@@ -18,7 +18,7 @@ package com.webank.webase.front.rpc.precompiled.consensus.entity;
 import com.webank.webase.front.base.code.ConstantCode;
 import java.math.BigInteger;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 

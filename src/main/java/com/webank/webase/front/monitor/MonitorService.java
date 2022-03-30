@@ -162,7 +162,7 @@ public class MonitorService {
 
     public Page<Monitor> pagingQuery(String groupId, Integer pageNumber, Integer pageSize,
         LocalDateTime beginDate, LocalDateTime endDate) {
-        Pageable pageable = new PageRequest(pageNumber - 1, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
         Specification<Monitor> queryParam = (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
@@ -235,8 +235,8 @@ public class MonitorService {
     public BasePageResponse pagingQueryStat(String groupId, Integer pageNumber, Integer pageSize,
         LocalDateTime beginDate, LocalDateTime endDate) {
         // get larger than endDate
-        Pageable pageableEnd = new PageRequest(pageNumber - 1, pageSize / 2,
-            new Sort(Direction.ASC, "id"));
+        Pageable pageableEnd = PageRequest.of(pageNumber - 1, pageSize / 2,
+            Sort.by(Direction.ASC, "id"));
         Specification<Monitor> queryEndParam = (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
@@ -248,8 +248,8 @@ public class MonitorService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
         // get less than beginDate
-        Pageable pageableBegin = new PageRequest(pageNumber - 1, pageSize / 2,
-            new Sort(Direction.DESC, "id"));
+        Pageable pageableBegin = PageRequest.of(pageNumber - 1, pageSize / 2,
+            Sort.by(Direction.DESC, "id"));
         Specification<Monitor> queryBeginParam = (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(criteriaBuilder.equal(root.get("groupId"), groupId));
