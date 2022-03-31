@@ -68,17 +68,23 @@ public class EveryoneService {
      */
     public List<Object> queryProposalInfoList(ReqProposalListInfo reqProposalListInfo)
         throws ContractException {
-        List<Object> objectList = new LinkedList();
         AuthManager authManager = authManagerService.getAuthManagerService(
             reqProposalListInfo.getGroupId());
         BigInteger proposalCount = authManager.proposalCount();
-        int startIndex = reqProposalListInfo.getPageNum() * reqProposalListInfo.getPageSize();
-        int endIndex = 0;
-        if (startIndex + reqProposalListInfo.getPageSize() < proposalCount.intValue()) {
-            endIndex = startIndex + reqProposalListInfo.getPageSize();
+        int startIndex =
+            (reqProposalListInfo.getPageNum() - 1) * reqProposalListInfo.getPageSize() + 1;
+        int endIndex;
+        if (startIndex + reqProposalListInfo.getPageSize() <= proposalCount.intValue()) {
+            endIndex = startIndex + reqProposalListInfo.getPageSize() - 1;
         } else {
             endIndex = proposalCount.intValue();
         }
+        return this.handleProposalReturnData(authManager, startIndex, endIndex);
+    }
+
+    public List<Object> handleProposalReturnData(AuthManager authManager, int startIndex, int endIndex)
+        throws ContractException {
+        List<Object> objectList = new LinkedList();
         for (int i = startIndex; i <= endIndex; i++) {
             ProposalInfo proposalInfo = authManager.getProposalInfo(BigInteger.valueOf(i));
             NewProposalInfo info = new NewProposalInfo();
