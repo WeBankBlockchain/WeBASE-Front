@@ -149,7 +149,7 @@ public class LiquidCompileService {
      */
     public void execLiquidCompile(String contractDir, int compileTimeout) {
         // cargo liquid build
-        String testCommand = "cargo liquid build";
+        String testCommand = "cargo liquid build --skip-analysis";
         String command = String.format("cd %s && %s", getLiquidContractPath(contractDir), testCommand);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, compileTimeout);
         log.info("execCompile result:{}", result);
