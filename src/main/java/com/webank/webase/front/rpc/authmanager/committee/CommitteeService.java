@@ -59,7 +59,6 @@ public class CommitteeService {
 
   private BigInteger DEFAULT_BLOCK_NUMBER_INTERVAL = BigInteger.valueOf(3600 * 24 * 7);
 
-  private Client client;
   @Autowired
   TransService transService;
 
@@ -84,11 +83,7 @@ public class CommitteeService {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATEUPDATEGOVERNORPROPOSAL, funcParams);
-    if (receipt.getStatus() == 16) {
-      RetCode sdkRetCode = new RetCode();
-      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
-    }
-    return this.handleTransactionReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt);
   }
 
   /**
@@ -112,11 +107,7 @@ public class CommitteeService {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATESETRATEPROPOSAL, funcParams);
-    if (receipt.getStatus() == 16) {
-      RetCode sdkRetCode = new RetCode();
-      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
-    }
-    return this.handleTransactionReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt);
   }
 
   /**
@@ -138,11 +129,7 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATESETDEPLOYAUTHTYPEPROPOSAL,
             funcParams);
-    if (receipt.getStatus() == 16) {
-      RetCode sdkRetCode = new RetCode();
-      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
-    }
-    return this.handleTransactionReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt);
   }
 
   /**
@@ -166,11 +153,7 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATEMODIFYDEPLOYAUTHPROPOSAL,
             funcParams);
-    if (receipt.getStatus() == 16) {
-      RetCode sdkRetCode = new RetCode();
-      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
-    }
-    return this.handleTransactionReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt);
   }
 
   /**
@@ -194,11 +177,7 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATERESETADMINPROPOSAL,
             funcParams);
-    if (receipt.getStatus() == 16) {
-      RetCode sdkRetCode = new RetCode();
-      return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING, sdkRetCode.getMessage()).toString();
-    }
-    return this.handleTransactionReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt);
   }
 
   /**
@@ -219,9 +198,8 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_REVOKEPROPOSAL,
             funcParams);
-    return this.handleTransactionReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt);
   }
-
 
   /**
    * 向某个提案进行投票
@@ -244,7 +222,10 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_VOTEPROPOSAL,
             funcParams);
-    //handle by the return
+    return this.handleRetcodeAndReceipt(receipt);
+  }
+
+  public String handleRetcodeAndReceipt(TransactionReceipt receipt) {
     if (receipt.getStatus() == 16) {
       RetCode sdkRetCode = new RetCode();
       if (receipt.getMessage().equals("Proposal not exist")) {
@@ -256,11 +237,20 @@ public class CommitteeService {
       } else if (receipt.getMessage().equals("Proposal is not votable")) {
         return new BaseResponse(ConstantCode.PROPOSAL_IS_NOT_VOTABLE,
             sdkRetCode.getMessage()).toString();
+      } else if (receipt.getMessage()
+          .equals("The proposal is not votable , please ensure the proposal")) {
+        return new BaseResponse(ConstantCode.PROPOSAL_IS_VOTING,
+            sdkRetCode.getMessage()).toString();
+      } else if (receipt.getMessage().equals("Only newly created proposal can be revoked")) {
+        return new BaseResponse(ConstantCode.PROPOSAL_NOT_NEW_CREATED,
+            sdkRetCode.getMessage()).toString();
+      } else if (receipt.getMessage().equals("Current proposal not end")) {
+        return new BaseResponse(ConstantCode.PROPOSAL_NOT_END,
+            sdkRetCode.getMessage()).toString();
       }
     }
     return this.handleTransactionReceipt(receipt);
   }
-
 
   private String handleTransactionReceipt(TransactionReceipt receipt) {
     log.debug("handle tx receipt of precompiled");
@@ -278,6 +268,5 @@ public class CommitteeService {
       throw new FrontException(e.getErrorCode(), e.getMessage());
     }
   }
-
 
 }

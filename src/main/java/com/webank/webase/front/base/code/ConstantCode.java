@@ -261,6 +261,9 @@ public class ConstantCode {
     public static final RetCode PROPOSAL_IS_NOT_VOTABLE = RetCode.mark(201623, "The proposal is not votable , please ensure the proposal");
     public static final RetCode PROPOSAL_IS_ALREADY_VOTED = RetCode.mark(201624, "The acconut address has already voted the proposal");
     public static final RetCode PROPOSAL_NOT_EXIST = RetCode.mark(201625, "The proposal is not exist");
+    public static final RetCode PROPOSAL_NOT_NEW_CREATED = RetCode.mark(201626,"Only newly created proposal can be revoked");
+    public static final RetCode PROPOSAL_NOT_END = RetCode.mark(201627," Current proposal not end");
+
 
     /* rc2 liquid */
     public static final RetCode EXEC_JAVA_COMMAND_TIMEOUT = RetCode.mark(201631, "Java Command exec timeout");

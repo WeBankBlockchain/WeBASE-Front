@@ -50,6 +50,8 @@ public class PrecompiledCommonInfo {
                 return PrecompiledAddress.CONSENSUS_PRECOMPILED_ADDRESS;
             case CNS:
                 return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
+            case CNS_LIQUID:
+                return PrecompiledAddress.CNS_PRECOMPILED_NAME;
             case CONTRACT_AUTH:
                 return PrecompiledAddress.CONTRACT_AUTH_ADDRESS;
             case BFS:
