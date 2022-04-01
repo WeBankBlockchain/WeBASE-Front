@@ -499,11 +499,10 @@ public class TransService {
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress);
 
         Client client = web3ApiService.getWeb3j(groupId);
-
         if (isTxConstant) {
-            if (StringUtils.isBlank(userAddress)) {
-                userAddress = cryptoKeyPair.getAddress();
-            }
+//            if (StringUtils.isBlank(userAddress)) {
+//                userAddress = cryptoKeyPair.getAddress();
+//            }
             return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
         } else {
             return this.handleTransaction(client, cryptoKeyPair, contractAddress, encodeFunction);
@@ -624,11 +623,16 @@ public class TransService {
     private CryptoKeyPair getCredentials(boolean constant, String keyUser) {
         // get privateKey
         CryptoKeyPair credentials;
-        if (constant) {
+        // TODO constant不能使用msg.sender调用合约问题。
+        // 注释了constant随机生成秘钥
+        System.out.println("修改了constant不能使用msg.sender调用合约问题");
+        if (StringUtils.isBlank(keyUser)) {
+//        if (constant) {
             credentials = keyStoreService.getCredentialsForQuery();
         } else {
             credentials = keyStoreService.getCredentials(keyUser);
         }
+
         return credentials;
     }
 
@@ -836,10 +840,20 @@ public class TransService {
 
     public List<String> handleCall(int groupId, String userAddress, String contractAddress,
         String encodedFunction, String abiStr, String funcName) {
+        // TODO constant不能使用msg.sender调用合约问题。
+        // 注释掉随机生成秘钥，采用用户地址生成
+        System.out.println("修改了constant不能使用msg.sender调用合约问题");
+        TransactionProcessor transactionProcessor;
+        if (StringUtils.isBlank(userAddress)) {
+            transactionProcessor = new TransactionProcessor(
+                    web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(),
+                    groupId, Constants.chainId);
+        }else{
+            transactionProcessor = new TransactionProcessor(
+                    web3ApiService.getWeb3j(groupId), keyStoreService.getCredentials(userAddress),
+                    groupId, Constants.chainId);
+        }
 
-        TransactionProcessor transactionProcessor = new TransactionProcessor(
-            web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(),
-            groupId, Constants.chainId);
         CallOutput callOutput = transactionProcessor
             .executeCall(userAddress, contractAddress, encodedFunction)
             .getCallResult();
