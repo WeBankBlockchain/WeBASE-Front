@@ -625,6 +625,7 @@ public class TransService {
         CryptoKeyPair credentials;
         // TODO constant不能使用msg.sender调用合约问题。
         // 注释了constant随机生成秘钥
+        
         System.out.println("修改了constant不能使用msg.sender调用合约问题");
         if (StringUtils.isBlank(keyUser)) {
 //        if (constant) {
