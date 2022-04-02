@@ -2,7 +2,7 @@ package com.webank.webase.front.rpc.authmanager.committee.entity;
 
 import java.math.BigInteger;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 @Data
 public class ReqSetRateInfo {

@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -556,7 +557,7 @@ public class ContractService {
         // check contract id
         verifyContractIdExist(contractId, groupId);
         // remove
-        contractRepository.delete(contractId);
+        contractRepository.deleteById(contractId);
         log.debug("end deleteContract");
     }
 
@@ -660,7 +661,7 @@ public class ContractService {
         // page start from index 1 instead of 0
         int pageNumber = param.getPageNumber() - 1;
         Pageable pageable =
-                new PageRequest(pageNumber, param.getPageSize(), Direction.DESC, "modifyTime");
+                PageRequest.of(pageNumber, param.getPageSize(), Direction.DESC, "modifyTime");
         Page<Contract> contractPage = contractRepository.findAll(
                 (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                     // v1.4.2, param add contractPath to filter
@@ -909,7 +910,7 @@ public class ContractService {
      */
     public ContractPath addContractPath(ReqContractPath req) {
         ContractPathKey pathKey = new ContractPathKey(req.getGroupId(), req.getContractPath());
-        ContractPath check = contractPathRepository.findOne(pathKey);
+        ContractPath check = contractPathRepository.findById(pathKey).orElse(null);
         if (check != null) {
             log.error("addContractPath fail, path exists check:{}", check);
             throw new FrontException(ConstantCode.CONTRACT_PATH_IS_EXISTS);
@@ -930,7 +931,7 @@ public class ContractService {
         // init default contracts and dir
         initDefaultContract(groupId);
         // get from database
-        Sort sort = new Sort(Sort.Direction.DESC, "modifyTime");
+        Sort sort = Sort.by(Sort.Direction.DESC, "modifyTime");
         List<ContractPath> contractPaths = contractPathRepository.findAll((Root<ContractPath> root,
                 CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
@@ -946,7 +947,7 @@ public class ContractService {
         ContractPathKey contractPathKey = new ContractPathKey();
         contractPathKey.setGroupId(groupId);
         contractPathKey.setContractPath(contractPath);
-        contractPathRepository.delete(contractPathKey);
+        contractPathRepository.deleteById(contractPathKey);
     }
 
     /**
@@ -973,14 +974,14 @@ public class ContractService {
         List<Contract> contractList =
                 contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
         log.debug("batchDeleteByPath delete contracts");
-        contractList.forEach(c -> contractRepository.delete(c.getId()));
+        contractList.forEach(c -> contractRepository.deleteById(c.getId()));
         log.debug("batchDeleteByPath delete contracts");
-        contractPathRepository.delete(new ContractPathKey(groupId, contractPath));
+        contractPathRepository.deleteById(new ContractPathKey(groupId, contractPath));
         log.debug("batchDeleteByPath delete contract path");
     }
 
     public Contract findById(Long contractId) {
-        Contract contract = contractRepository.findOne(contractId);
+        Contract contract = contractRepository.findById(contractId).orElse(null);
         if (Objects.isNull(contract)) {
             throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
         }

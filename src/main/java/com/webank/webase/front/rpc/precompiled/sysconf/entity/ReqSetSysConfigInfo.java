@@ -17,7 +17,7 @@ package com.webank.webase.front.rpc.precompiled.sysconf.entity;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 

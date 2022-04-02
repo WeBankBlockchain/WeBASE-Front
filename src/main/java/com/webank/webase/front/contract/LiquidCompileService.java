@@ -55,12 +55,12 @@ public class LiquidCompileService {
 
         ExecuteResult result = JavaCommandExecutor.executeCommand(commandCargo, constants.getCommandLineTimeout());
         if (result.failed()) {
-            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
+            throw new FrontException(ConstantCode.LIQUID_ENV_NOT_CONFIG.attach(result.getExecuteOut()));
         }
 
        ExecuteResult resultRustc = JavaCommandExecutor.executeCommand(commandRustc, constants.getCommandLineTimeout());
         if (resultRustc.failed()) {
-            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(resultRustc.getExecuteOut()));
+            throw new FrontException(ConstantCode.LIQUID_ENV_NOT_CONFIG.attach(resultRustc.getExecuteOut()));
         }
         this.mkdirIfNotExist();
 
@@ -103,7 +103,7 @@ public class LiquidCompileService {
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, constants.getCommandLineTimeout());
         log.info("execNewContract new contract Result:{}", result);
         if (result.failed()) {
-            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
+            throw new FrontException(ConstantCode.LIQUID_NEW_PROJECT_FAILED.attach(result.getExecuteOut()));
         }
 
         // cd $contractDir
@@ -118,7 +118,7 @@ public class LiquidCompileService {
         ExecuteResult sedResult2 = JavaCommandExecutor.executeCommand(sed2, constants.getCommandLineTimeout());
         log.info("execNewContract sedResult:{},sedResult2:{}", sedResult, sedResult2);
         if (sedResult.failed()||sedResult2.failed()) {
-            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(sedResult.getExecuteOut()));
+            throw new FrontException(ConstantCode.LIQUID_NEW_PROJECT_SED_GITEE_FAILED.attach(sedResult.getExecuteOut()));
         }
 
         //  write contract source: lib.rs
@@ -127,21 +127,21 @@ public class LiquidCompileService {
             FileUtils.write(contractFile, CommonUtils.base64Decode(contractSourceBase64), StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error("execNewContract save contract source code error:", e);
-            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED);
+            throw new FrontException(ConstantCode.WRITE_CONTRACT_SOURCE_FAILED.attach(e.getMessage()));
         }
 
     }
 
-    public void execCargoTest(String groupId, String contractName, int compileTimeout) {
-        String contractDir = groupId + "_" + contractName;
-        String testCommand = "cargo test";
-        String command = String.format("cd %s && %s", getLiquidContractPath(contractDir), testCommand);
-        ExecuteResult result = JavaCommandExecutor.executeCommand(command, compileTimeout);
-        log.info("execTest result:{}", result);
-        if (result.failed()) {
-            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
-        }
-    }
+//    public void execCargoTest(String groupId, String contractName, int compileTimeout) {
+//        String contractDir = groupId + "_" + contractName;
+//        String testCommand = "cargo test";
+//        String command = String.format("cd %s && %s", getLiquidContractPath(contractDir), testCommand);
+//        ExecuteResult result = JavaCommandExecutor.executeCommand(command, compileTimeout);
+//        log.info("execTest result:{}", result);
+//        if (result.failed()) {
+//            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
+//        }
+//    }
 
     /**
      * cargo liquid build
@@ -149,12 +149,12 @@ public class LiquidCompileService {
      */
     public void execLiquidCompile(String contractDir, int compileTimeout) {
         // cargo liquid build
-        String testCommand = "cargo liquid build";
+        String testCommand = "cargo liquid build --skip-analysis";
         String command = String.format("cd %s && %s", getLiquidContractPath(contractDir), testCommand);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, compileTimeout);
         log.info("execCompile result:{}", result);
         if (result.failed()) {
-            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED.attach(result.getExecuteOut()));
+            throw new FrontException(ConstantCode.LIQUID_COMPILE_FAILED.attach(result.getExecuteOut()));
         }
     }
 
@@ -173,7 +173,7 @@ public class LiquidCompileService {
         File targetDirFile = new File(targetPath);
         if (!targetDirFile.exists()) {
             log.error("compileAndReturn target directory not exist, compile failed!");
-            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED);
+            throw new FrontException(ConstantCode.LIQUID_TARGET_FILE_NOT_EXIST);
         }
 
         // read .abi and .wasm(byte to hexString)
@@ -190,13 +190,8 @@ public class LiquidCompileService {
             return abiBinInfo;
         } catch (IOException e) {
             log.error("compileAndReturn get abi and bin error:", e);
-            throw new FrontException(ConstantCode.EXEC_JAVA_COMMAND_RETURN_FAILED);
+            throw new FrontException(ConstantCode.LIQUID_READ_ABI_BIN_FAILED.attach(e.getMessage()));
         }
-//        finally {
-//            boolean result = CommonUtils.deleteFiles(targetPath);
-//            log.warn("delete file [{}],result:{} after compiling", targetPath, result);
-//        }
-
     }
 
 
@@ -217,7 +212,6 @@ public class LiquidCompileService {
     public static String getLiquidTargetPath(String groupId, String contractPath, String contractName) {
         String contractDir = getContractDir(groupId, contractPath, contractName);
         // check target dir exist, 如果已存在则删除，因为此时要重新编译
-        String targetPath = Paths.get(LIQUID_DIR, contractDir, "target").toString();
-        return targetPath;
+        return Paths.get(LIQUID_DIR, contractDir, "target").toString();
     }
 }

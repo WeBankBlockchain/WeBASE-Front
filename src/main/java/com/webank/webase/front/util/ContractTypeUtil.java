@@ -19,7 +19,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Hex;
 import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
 import org.fisco.bcos.sdk.codec.datatypes.Bool;
 import org.fisco.bcos.sdk.codec.datatypes.Bytes;
@@ -30,6 +29,7 @@ import org.fisco.bcos.sdk.codec.datatypes.NumericType;
 import org.fisco.bcos.sdk.codec.datatypes.Type;
 import org.fisco.bcos.sdk.codec.datatypes.Utf8String;
 import org.fisco.bcos.sdk.codec.datatypes.generated.*;
+import org.fisco.bcos.sdk.utils.Hex;
 import org.fisco.bcos.sdk.utils.Numeric;
 
 /**
@@ -94,7 +94,7 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return decodeBytes((Bytes) result);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return "0x" + Hex.encodeHexString((byte[]) result.getValue());
+                return "0x" + Numeric.toHexString((byte[]) result.getValue());
             } else {
                 throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR.getCode(),
                         String.format("type:%s unsupported decoding", type.getName()));

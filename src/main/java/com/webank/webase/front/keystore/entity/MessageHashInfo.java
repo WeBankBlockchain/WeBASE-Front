@@ -15,7 +15,7 @@
 package com.webank.webase.front.keystore.entity;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 /**
  * EncodeInfo

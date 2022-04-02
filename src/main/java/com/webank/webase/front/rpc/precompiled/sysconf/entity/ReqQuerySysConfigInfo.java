@@ -16,7 +16,7 @@ package com.webank.webase.front.rpc.precompiled.sysconf.entity;
 import com.webank.webase.front.base.code.ConstantCode;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 /**
  * handle POST request to manage system config value check param's validation

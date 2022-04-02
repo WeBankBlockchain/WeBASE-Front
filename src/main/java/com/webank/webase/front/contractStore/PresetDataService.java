@@ -73,7 +73,7 @@ public class PresetDataService {
                                 String StoreDetail_en)
     {
         log.debug("insert storeItem id:{},storeName:{}", storeId, storeName);
-        if (contractStoreRepository.exists(storeId)) {
+        if (contractStoreRepository.existsById(storeId)) {
             log.debug("insertStoreItem skip storeId:{} already exist", storeId);
             return;
         }
@@ -144,7 +144,7 @@ public class PresetDataService {
                                          String contractFolderDesc_en, String contractFolderDetail_en)
     {
         log.debug("insert contractFolderItem id:{},contractFolderName:{} ", contractFolderId, contractFolderName);
-        if (contractFolderRepository.exists(contractFolderId)) {
+        if (contractFolderRepository.existsById(contractFolderId)) {
             log.debug("insertContractFolderItem skip contractFolderId:{}  already exist", contractFolderId);
             return;
         }
@@ -284,7 +284,7 @@ public class PresetDataService {
                                 String contractDesc, String contractDesc_en)
     {
         log.debug("insert contractItem id:{},contractName:{}", contractId, contractName);
-        if (contractItemRepository.exists(contractId)) {
+        if (contractItemRepository.existsById(contractId)) {
             log.debug("insertContractItem skip contractId:{} already exist", contractId);
             return;
         }
