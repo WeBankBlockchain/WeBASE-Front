@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.response.BcosGroupNodeInfo.GroupNodeInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
 import org.fisco.bcos.sdk.model.PrecompiledRetCode;
@@ -74,15 +75,23 @@ public class ConsensusServiceInWebase {
       log.error("nodeId is not connected with others, cannot added as sealer");
       return ConstantCode.PEERS_NOT_CONNECTED.toString();
     }
-    // check group file
     if (!containsGroupFile(groupId)) {
       throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
     }
-    // trans
+    return this.addSealerHandle(nodeId, signUserId, groupId, weight);
+  }
+
+  public String addSealerHandle(String groupId, String signUserId, String nodeId,
+      BigInteger weight) {
     List<Object> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
     funcParams.add(weight);
-    String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
+    String contractAddress;
+    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS_LIQUID);
+    } else {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
+    }
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
@@ -130,10 +139,19 @@ public class ConsensusServiceInWebase {
       return ConstantCode.ALREADY_EXISTS_IN_OBSERVER_LIST.toString();
     }
 
+    return this.addObserverHandle(groupId, signUserId, nodeId);
+  }
+
+  private String addObserverHandle(String groupId, String signUserId, String nodeId) {
     // trans
     List<Object> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
-    String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
+    String contractAddress;
+    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS_LIQUID);
+    } else {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
+    }
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
@@ -149,9 +167,14 @@ public class ConsensusServiceInWebase {
     // trans
     List<Object> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
-    String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
+    String contractAddress;
+    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS_LIQUID);
+    } else {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
+    }
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
-    TransactionReceipt receipt = new TransactionReceipt();
+    TransactionReceipt receipt;
     try {
       receipt = (TransactionReceipt) transService.transHandleWithSign(groupId,
           signUserId, contractAddress, abiStr, FUNC_REMOVE, funcParams);

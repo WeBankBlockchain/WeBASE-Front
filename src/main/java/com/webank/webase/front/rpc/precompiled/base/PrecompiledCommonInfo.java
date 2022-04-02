@@ -34,30 +34,33 @@ import org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled
  */
 public class PrecompiledCommonInfo {
 
-//            public static final String SYS_CONFIG_PRECOMPILED_NAME = "/sys/status";
-//            public static final String CONSENSUS_PRECOMPILED_NAME = "/sys/consensus";
-//            public static final String CNS_PRECOMPILED_NAME = "/sys/cns";
-//            public static final String BFS_PRECOMPILED_NAME = "/sys/bfs";
-//            public static final String KV_TABLE_PRECOMPILED_NAME = "/sys/kv_storage";
 
     public static String getAddress(PrecompiledTypes types) {
         switch (types) {
             case SYSTEM_CONFIG:
                 return PrecompiledAddress.SYS_CONFIG_PRECOMPILED_ADDRESS;
+            case SYSTEM_CONFIG_LIQUID:
+                return PrecompiledAddress.SYS_CONFIG_PRECOMPILED_NAME;
             case CRUD:
                 return PrecompiledAddress.KV_TABLE_PRECOMPILED_ADDRESS;
+            case CRUD_LIQUID:
+                return PrecompiledAddress.KV_TABLE_PRECOMPILED_NAME;
             case CONSENSUS:
                 return PrecompiledAddress.CONSENSUS_PRECOMPILED_ADDRESS;
+            case CONSENSUS_LIQUID:
+                return PrecompiledAddress.CONSENSUS_PRECOMPILED_NAME;
             case CNS:
                 return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
             case CNS_LIQUID:
                 return PrecompiledAddress.CNS_PRECOMPILED_NAME;
-            case CONTRACT_AUTH:
-                return PrecompiledAddress.CONTRACT_AUTH_ADDRESS;
             case BFS:
                 return PrecompiledAddress.BFS_PRECOMPILED_ADDRESS;
+            case BFS_LIQUID:
+                return PrecompiledAddress.BFS_PRECOMPILED_NAME;
             case COMMITTEE_MANAGER:
                 return PrecompiledAddress.COMMITTEE_MANAGER_ADDRESS;
+            case CONTRACT_AUTH:
+                return PrecompiledAddress.CONTRACT_AUTH_ADDRESS;
             default:
                 return "";
         }

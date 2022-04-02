@@ -24,9 +24,19 @@ public enum PrecompiledTypes {
   SYSTEM_CONFIG(1000),
 
   /**
+   * System Config Liquid
+   */
+  SYSTEM_CONFIG_LIQUID(11000),
+
+  /**
    * CRUD
    */
   CRUD(1009),
+
+  /**
+   * CRUD Liquid
+   */
+  CRUD_LIQUID(11009),
 
   /**
    * Consensus
@@ -34,24 +44,34 @@ public enum PrecompiledTypes {
   CONSENSUS(1003),
 
   /**
-   * Contract_solidity
+   * Consensus Liquid
+   */
+  CONSENSUS_LIQUID(11003),
+
+  /**
+   * Contract
    */
   CNS(1004),
 
   /**
-   * Contract_liquid
+   * Contract Liquid
    */
-  CNS_LIQUID(01004),
-
-  /**
-   * CONTRACT AUTH
-   */
-  CONTRACT_AUTH(1005),
+  CNS_LIQUID(11004),
 
   /**
    * BFS
    */
   BFS(100111),
+
+  /**
+   * BFS Liquid
+   */
+  BFS_LIQUID(1100111),
+
+  /**
+   * CONTRACT AUTH
+   */
+  CONTRACT_AUTH(1005),
 
   /**
    * Committee Manager
