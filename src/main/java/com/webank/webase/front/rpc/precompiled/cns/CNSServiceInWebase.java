@@ -17,6 +17,7 @@ import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.rpc.precompiled.base.PrecompiledCommonInfo;
 import com.webank.webase.front.rpc.precompiled.base.PrecompiledUtil;
+import com.webank.webase.front.rpc.precompiled.cns.entity.ResCnsInfo;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.ArrayList;
@@ -46,7 +47,8 @@ public class CNSServiceInWebase {
   @Autowired
   private TransService transService;
 
-  public Object registerCNS(String groupId, String signUserId,String contractName, String contractVersion,
+  public Object registerCNS(String groupId, String signUserId, String contractName,
+      String contractVersion,
       String contractAddress, String abiData)
       throws ContractException {
     TransactionReceipt receipt;
@@ -82,6 +84,17 @@ public class CNSServiceInWebase {
     CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
         keyStoreService.getCredentialsForQuery(groupId));
     return cnsService.selectByNameAndVersion(contractName, version);
+  }
+
+  public ResCnsInfo queryCnsByNameAndVersion2(String groupId, String contractName,
+      String version) throws ContractException {
+    ResCnsInfo resCnsInfo = new ResCnsInfo();
+    CnsService cnsService = new CnsService(web3ApiService.getWeb3j(groupId),
+        keyStoreService.getCredentialsForQuery(groupId));
+    Tuple2<String, String> tuple2 = cnsService.selectByNameAndVersion(contractName, version);
+    resCnsInfo.setAddress(tuple2.getValue1());
+    resCnsInfo.setAbi(tuple2.getValue2());
+    return resCnsInfo;
   }
 
   public String getAddressByContractNameAndVersion(String groupId, String contractName,
