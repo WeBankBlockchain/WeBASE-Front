@@ -271,6 +271,10 @@ public class CommitteeService {
       } else if (receipt.getMessage().equals("Current proposal not end")) {
         return new BaseResponse(ConstantCode.PROPOSAL_NOT_END,
             sdkRetCode.getMessage()).toString();
+      } else if (receipt.getMessage()
+          .equals("the account has been the admin of concurrt contract.")) {
+        return new BaseResponse(ConstantCode.ALREADY_ADMIN_OF_CONTRACT,
+            sdkRetCode.getMessage()).toString();
       }
     }
     return this.handleTransactionReceipt(receipt);

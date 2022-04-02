@@ -90,7 +90,7 @@ public class AdminService {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_SETMETHODAUTHTYPE, funcParams);
-    return this.handleTransactionReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt);
   }
 
 
@@ -128,9 +128,22 @@ public class AdminService {
           (TransactionReceipt) transService.transHandleWithSign(groupId,
               signUserId, contractAddress, abiStr, FUNC_CLOSEMETHODAUTH, funcParams);
     }
-    return this.handleTransactionReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt);
   }
 
+  public String handleRetcodeAndReceipt(TransactionReceipt receipt) {
+    if (receipt.getStatus() == 16) {
+      RetCode sdkRetCode = new RetCode();
+      if (receipt.getMessage().equals("Proposal not exist")) {
+        return new BaseResponse(ConstantCode.PROPOSAL_NOT_EXIST,
+            sdkRetCode.getMessage()).toString();
+      } else if (receipt.getMessage().equals("Current proposal not end")) {
+        return new BaseResponse(ConstantCode.PROPOSAL_NOT_END,
+            sdkRetCode.getMessage()).toString();
+      }
+    }
+    return this.handleTransactionReceipt(receipt);
+  }
 
   private String handleTransactionReceipt(TransactionReceipt receipt) {
     log.debug("handle tx receipt of precompiled");

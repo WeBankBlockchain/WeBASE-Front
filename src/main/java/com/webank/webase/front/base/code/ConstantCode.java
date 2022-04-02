@@ -146,6 +146,7 @@ public class ConstantCode {
     // permission
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied, please check chain administrator permission");
     public static final RetCode EXEC_ENV_IS_WASM = RetCode.mark(201203, "exec env is wasm, don't support");
+    public static final RetCode ALREADY_ADMIN_OF_CONTRACT = RetCode.mark(201204, "the account has been the admin of concurrt contract.");
 
     // sys config
     public static final RetCode UNSUPPORTED_SYSTEM_CONFIG_KEY = RetCode.mark(201208, "unsupported for this system config key");
