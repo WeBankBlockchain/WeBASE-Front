@@ -75,7 +75,12 @@ public class KVTableServiceInWebase {
     funcParams.add(keyFieldName);
     String valueFieldsString = convertValueFieldsToString(valueFields);
     funcParams.add(valueFieldsString);
-    String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD);
+    String contractAddress;
+    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD_LIQUID);
+    } else {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD);
+    }
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CRUD);
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
@@ -110,7 +115,12 @@ public class KVTableServiceInWebase {
     entry.setFieldNameToValue(fieldNameToValue);
     //be careful ：entry.getKVPrecompiledEntry()
     funcParams.add(entry.getKVPrecompiledEntry());
-    String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD);
+    String contractAddress;
+    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD_LIQUID);
+    } else {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD);
+    }
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CRUD);
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
@@ -120,6 +130,7 @@ public class KVTableServiceInWebase {
 
   /**
    * read data
+   *
    * @param groupId
    * @param tableName
    * @param key
@@ -136,6 +147,7 @@ public class KVTableServiceInWebase {
 
   /**
    * desc info of table
+   *
    * @param groupId
    * @param tableName
    * @return

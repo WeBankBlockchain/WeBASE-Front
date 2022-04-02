@@ -63,7 +63,6 @@ public class SysConfigServiceInWebase {
 
     private List<Object> getConfigList(String groupId) {
         List<Object> list = new ArrayList<>();
-
         String txCountLimit = web3ApiService.getWeb3j(groupId)
             .getSystemConfigByKey(PrecompiledUtils.TxCountLimit).getSystemConfig().getValue();
         ReqQuerySysConfigInfo systemConfigCount = new ReqQuerySysConfigInfo();
@@ -112,7 +111,13 @@ public class SysConfigServiceInWebase {
         funcParams.add(key);
         funcParams.add(value);
         // get address and abi of precompiled contract
-        String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.SYSTEM_CONFIG);
+        String contractAddress;
+        if (web3ApiService.getWeb3j(groupId).isWASM()) {
+            contractAddress = PrecompiledCommonInfo.getAddress(
+                PrecompiledTypes.SYSTEM_CONFIG_LIQUID);
+        } else {
+            contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.SYSTEM_CONFIG);
+        }
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.SYSTEM_CONFIG);
         // execute set method
         TransactionReceipt receipt =
@@ -122,7 +127,8 @@ public class SysConfigServiceInWebase {
     }
 
     public String getSysConfigByKey(String groupId, String key) {
-        String result = web3ApiService.getWeb3j(groupId).getSystemConfigByKey(key).getSystemConfig().getValue();
+        String result = web3ApiService.getWeb3j(groupId).getSystemConfigByKey(key).getSystemConfig()
+            .getValue();
         return result;
     }
 

@@ -27,6 +27,7 @@ import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.rpc.authmanager.base.AuthMgrBaseService;
 import com.webank.webase.front.rpc.precompiled.base.PrecompiledCommonInfo;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.web3api.Web3ApiService;
@@ -61,6 +62,8 @@ public class CommitteeService {
 
   @Autowired
   TransService transService;
+  @Autowired
+  private AuthMgrBaseService authMgrBaseService;
 
   /**
    * 更新治理委员信息。 如果是新加治理委员，新增地址和权重即可。如果是删除治理委员，将一个治理委员的权重设置为0 即可
@@ -68,6 +71,9 @@ public class CommitteeService {
   public Object updateGovernor(String groupId, String signUserId, String accountAddress,
       BigInteger weight)
       throws ContractException, ABICodecException, TransactionException, IOException {
+    if (authMgrBaseService.execEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
+    }
     return this.updateGovernorHandle(groupId, signUserId, accountAddress, weight);
   }
 
@@ -92,6 +98,9 @@ public class CommitteeService {
   public Object setRate(String groupId, String signUserId, BigInteger participatesRate,
       BigInteger winRate)
       throws ABICodecException, TransactionException, IOException, ContractException {
+    if (authMgrBaseService.execEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
+    }
     return this.setRateHandle(groupId, signUserId, participatesRate, winRate);
   }
 
@@ -114,6 +123,9 @@ public class CommitteeService {
    * 设置部署的ACL策略 只支持 white_list 和 black_list 两种策略 type为1时，设置为白名单，type为2时，设置为黑名单。
    */
   public Object setDeployAuthType(String groupId, String signUserId, BigInteger deployAuthType) {
+    if (authMgrBaseService.execEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
+    }
     return this.setDeployAuthTypeHandle(groupId, signUserId, deployAuthType);
   }
 
@@ -137,6 +149,9 @@ public class CommitteeService {
    */
   public Object modifyDeployAuth(String groupId, String signUserId, Boolean openFlag,
       String userAddress) {
+    if (authMgrBaseService.execEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
+    }
     return this.modifyDeployAuthHandle(groupId, signUserId, userAddress, openFlag);
   }
 
@@ -161,6 +176,9 @@ public class CommitteeService {
    */
   public Object resetAdmin(String groupId, String signUserId, String newAdmin, String contractAddr)
       throws ContractException, ABICodecException, TransactionException, IOException {
+    if (authMgrBaseService.execEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
+    }
     return this.resetAdminHandle(groupId, signUserId, newAdmin, contractAddr);
   }
 
@@ -185,6 +203,9 @@ public class CommitteeService {
    */
   public Object revokeProposal(String groupId, String signUserId, BigInteger proposalId)
       throws ContractException, ABICodecException, TransactionException, IOException {
+    if (authMgrBaseService.execEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
+    }
     return this.revokeProposalHandle(groupId, signUserId, proposalId);
   }
 
@@ -207,6 +228,9 @@ public class CommitteeService {
   public Object voteProposal(String groupId, String signUserId, BigInteger proposalId,
       Boolean agree)
       throws ContractException {
+    if (authMgrBaseService.execEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
+    }
     return this.voteProposalHandle(groupId, signUserId, proposalId, agree);
   }
 

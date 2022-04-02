@@ -22,6 +22,7 @@ import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.rpc.authmanager.base.AuthMgrBaseService;
 import com.webank.webase.front.rpc.precompiled.base.PrecompiledCommonInfo;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
@@ -57,6 +58,8 @@ public class AdminService {
   private Web3ApiService web3ApiService;
   @Autowired
   private TransService transService;
+  @Autowired
+  private AuthMgrBaseService authMgrBaseService;
 
 
   /**
@@ -65,6 +68,9 @@ public class AdminService {
   public Object setMethodAuthType(String groupId, String signUserId, String contractAddr,
       byte[] func, BigInteger authType)
       throws ContractException {
+    if (authMgrBaseService.execEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
+    }
     return this.setMethodAuthTypeHandle(groupId, signUserId, contractAddr, func, authType);
   }
 
@@ -93,6 +99,9 @@ public class AdminService {
    */
   public Object setMethodAuth(String groupId, String signUserId, String contractAddr,
       byte[] func, String accountAddress, Boolean bool) throws ContractException {
+    if (authMgrBaseService.execEnvIsWasm(groupId)) {
+      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
+    }
     return this.setMethodAuthHandle(groupId, signUserId, contractAddr, func, accountAddress, bool);
   }
 
