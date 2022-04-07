@@ -145,7 +145,6 @@ public class ConstantCode {
     public static final RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
     // permission
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied, please check chain administrator permission");
-    public static final RetCode EXEC_ENV_IS_WASM = RetCode.mark(201203, "exec env is wasm, don't support");
     public static final RetCode ALREADY_ADMIN_OF_CONTRACT = RetCode.mark(201204, "the account has been the admin of concurrt contract.");
 
     // sys config
@@ -281,5 +280,9 @@ public class ConstantCode {
     public static final RetCode LIQUID_READ_ABI_BIN_FAILED = RetCode.mark(201640, "Read liquid contract's abi and bin file failed, please check 'liquid' directory in webase-front");
 
     public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
+
+    /* permission */
+    public static final RetCode EXEC_ENV_IS_WASM = RetCode.mark(201670, "exec env is wasm, don't support");
+    public static final RetCode MUST_BE_GOVERNOR = RetCode.mark(201671, "the account must be the governor.");
 
 }

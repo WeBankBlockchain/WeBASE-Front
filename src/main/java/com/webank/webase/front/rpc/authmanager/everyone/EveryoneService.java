@@ -44,8 +44,6 @@ public class EveryoneService {
 
     @Autowired
     private AuthManagerService authManagerService;
-    @Autowired
-    private AuthMgrBaseService authMgrBaseService;
 
     /**
      * 查询治理委员会的详细信息
@@ -53,12 +51,8 @@ public class EveryoneService {
     public List<Object> queryCommitteeInfo(String groupId)
         throws ContractException {
         List<Object> objectList = new LinkedList<>();
-        if (authMgrBaseService.execEnvIsWasm(groupId)) {
-            objectList.add(new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM));
-        } else {
-            AuthManager authManager = authManagerService.getAuthManagerService(groupId);
-            objectList.add(authManager.getCommitteeInfo());
-        }
+        AuthManager authManager = authManagerService.getAuthManagerService(groupId);
+        objectList.add(authManager.getCommitteeInfo());
         return objectList;
     }
 
@@ -68,12 +62,8 @@ public class EveryoneService {
     public List<Object> queryProposalInfo(String groupId, BigInteger proposalId)
         throws ContractException {
         List<Object> objectList = new LinkedList();
-        if (authMgrBaseService.execEnvIsWasm(groupId)) {
-            objectList.add(new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM));
-        } else {
-            AuthManager authManager = authManagerService.getAuthManagerService(groupId);
-            objectList.add(authManager.getProposalInfo(proposalId));
-        }
+        AuthManager authManager = authManagerService.getAuthManagerService(groupId);
+        objectList.add(authManager.getProposalInfo(proposalId));
         return objectList;
     }
 
@@ -82,11 +72,6 @@ public class EveryoneService {
      */
     public List<Object> queryProposalInfoList(ReqProposalListInfo reqProposalListInfo)
         throws ContractException {
-        List<Object> objectList = new LinkedList();
-        if (authMgrBaseService.execEnvIsWasm(reqProposalListInfo.getGroupId())) {
-            objectList.add(new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM));
-            return objectList;
-        }
         AuthManager authManager = authManagerService.getAuthManagerService(
             reqProposalListInfo.getGroupId());
         BigInteger proposalCount = authManager.proposalCount();
@@ -126,10 +111,6 @@ public class EveryoneService {
      */
     public BigInteger queryProposalInfoCount(String groupId)
         throws ContractException {
-        if (authMgrBaseService.execEnvIsWasm(groupId)) {
-            BaseResponse baseResponse = new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
-            return BigInteger.valueOf(baseResponse.getCode());
-        }
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
         BigInteger proposalCount = authManager.proposalCount();
         return proposalCount;
@@ -140,10 +121,6 @@ public class EveryoneService {
      */
     public BigInteger queryDeployAuthType(String groupId)
         throws ContractException {
-        if (authMgrBaseService.execEnvIsWasm(groupId)) {
-            BaseResponse baseResponse = new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM);
-            return BigInteger.valueOf(baseResponse.getCode());
-        }
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
         return authManager.getDeployAuthType();
     }
@@ -153,10 +130,6 @@ public class EveryoneService {
      */
     public boolean checkDeployAuth(String groupId, String userAddress)
         throws ContractException {
-        if (authMgrBaseService.execEnvIsWasm(groupId)) {
-            log.info("exec env is wasm, don't support auth permission");
-            return false;
-        }
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
         return authManager.checkDeployAuth(userAddress);
     }
@@ -167,10 +140,6 @@ public class EveryoneService {
     public Boolean checkMethodAuth(String groupId, String contractAddr, String func,
         String userAddress)
         throws ContractException {
-        if (authMgrBaseService.execEnvIsWasm(groupId)) {
-            log.info("exec env is wasm, don't support auth permission");
-            return false;
-        }
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
         byte[] hash = authManagerService.getWeb3ApiService().getWeb3j(groupId).getCryptoSuite()
             .hash(func.getBytes());
@@ -183,9 +152,6 @@ public class EveryoneService {
      */
     public String queryAdmin(String groupId, String contractAddr)
         throws ContractException {
-        if (authMgrBaseService.execEnvIsWasm(groupId)) {
-            return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
-        }
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
         return authManager.getAdmin(contractAddr);
     }
