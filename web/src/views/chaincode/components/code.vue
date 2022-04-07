@@ -94,7 +94,7 @@
         </div>
         <div class="ace-editor" ref="ace" v-show="codeShow"></div>
       </div>
-      <div class="contract-info" v-show="successHide" :style="{ height: infoHeight + 'px' }">
+      <div class="contract-info" v-show="successHide"  :style="{ height: 100% - codeHight }">
         <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
         <div class="contract-info-title" @mouseover="mouseHover = true" @mouseleave="mouseHover = false" v-show="abiFile || contractAddress" @click="collapse">
           <i :class="[
@@ -232,9 +232,12 @@
     </el-dialog>
 
     <el-dialog :visible.sync="addContractAddressVisible" :title="$t('dialog.addContractAddress')" width="400px" class="dialog-wrapper" center v-if="addContractAddressVisible">
-      <el-form ref="contractForm" :model="contractForm">
-        <el-form-item label="" prop="contractAddress">
+      <el-form ref="contractForm" :rules="rules" :model="contractForm">
+        <el-form-item label="" prop="contractAddress" v-if="!liquidCheck">
           <el-input v-model="contractForm.contractAddress" :placeholder="$t('contracts.contractAddressInput')"></el-input>
+        </el-form-item>
+        <el-form-item label="" prop="contractAddressLiquid" v-else>
+          <el-input v-model="contractForm.contractAddressLiquid" :placeholder="$t('contracts.contractAddressInput')"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="text-right">
@@ -287,6 +290,18 @@ export default {
     mgmtCns,
   },
   data: function () {
+       var paramRule = (rule, value, callback) => {
+      let val = value.trim().replace(/\s+/g, " ");
+      let valArr = val.split("/");
+      let valArr2 = val.substr(1).split("/");
+      if (!/^[/][0-9a-zA-Z_/.]{0,}$/.test(val)) {
+        callback(new Error(this.$t("rule.contractAddressHexLiquid")));
+      } else if (valArr2.includes("")) {
+        callback(new Error(this.$t("rule.contractAddressHexLiquid")));
+      } else {
+        callback();
+      }
+    };
     return {
       liquidCheck: this.liquidChecks,
       navShow:this.navShows,
@@ -306,6 +321,7 @@ export default {
       contractAddress: "",
       contractName: "",
       infoHeight: 250,
+      infoShow:false,
       contractList: [],
       dialogUser: false,
       compileinfo: "",
@@ -352,6 +368,44 @@ export default {
       liquidCheckTimer: null,
       firstCall: true,
       loadingText: this.$t("text.contractCompiling"),
+      rules: {
+        contractAddress: [
+          {
+            required: true,
+            message: this.$t("rule.contractAddress"),
+            trigger: "blur",
+          },
+          {
+            pattern: /^[0x|0X]+[A-Fa-f0-9]+$/,
+            message: this.$t("rule.contractAddressHex"),
+            trigger: "blur",
+          },
+          {
+            min: 42,
+            max: 42,
+            message: this.$t("rule.contractAddressLong"),
+            trigger: "blur",
+          },
+        ],
+        contractAddressLiquid: [
+          {
+            required: true,
+            message: this.$t("rule.contractAddress"),
+            trigger: "blur",
+          },
+          {
+            required: true,
+            validator: paramRule,
+            trigger: "blur",
+          },
+          {
+            min: 2,
+            max: 64,
+            message: this.$t("rule.contractAddressLiquidLong"),
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   watch: {
@@ -1494,7 +1548,7 @@ export default {
       if (this.showCompileText) {
         this.infoHeight = 250;
       } else if (!this.showCompileText) {
-        this.infoHeight = 50;
+        this.infoHeight = 40;
       }
       this.$nextTick(() => {
         this.resizeCode();
@@ -1640,26 +1694,8 @@ export default {
     sureContractAddress(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          if (
-            this.contractForm.contractAddress == "" ||
-            this.contractForm.contractAddress == null
-          ) {
-            this.$message({
-              type: "error",
-              message: this.$t("contracts.contractAddressInput"),
-            });
-          } else {
-            let web3Utils = require("web3-utils");
-            if (web3Utils.isAddress(this.contractForm.contractAddress)) {
-              this.addContractAddressVisible = false;
-              this.addContract();
-            } else {
-              this.$message({
-                type: "error",
-                message: this.$t("contracts.contractAddressInput"),
-              });
-            }
-          }
+            this.addContractAddressVisible = false;
+            this.addContract();
         } else {
           return false;
         }
@@ -1768,10 +1804,11 @@ export default {
 .contract-code-mirror {
   width: 100%;
   height: 70%;
+  transition: all 0.6s ease-in;
 }
 .contract-info {
   position: relative;
-  padding-top: 10px;
+  /* padding-top: 10px; */
   text-align: left;
   border-top: 1px solid #242e42;
   box-sizing: border-box;
@@ -1797,6 +1834,7 @@ export default {
   text-align: center;
   cursor: pointer;
   padding: 5px 0px;
+  padding-bottom: 15px;
 }
 .contract-info-title:hover > i {
   color: #fff;
@@ -1872,6 +1910,7 @@ export default {
 .contract-info {
   background-color: #2b374d;
   color: #fff;
+   transition: all 1s ease-in ;
 }
 .titleActive {
   padding-left: 40px;
