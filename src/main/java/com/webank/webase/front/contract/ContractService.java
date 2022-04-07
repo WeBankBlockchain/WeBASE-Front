@@ -1064,12 +1064,15 @@ public class ContractService {
         }
         // check if host check success
         String finalContractPath = contractPath;
+        boolean useSm2 = web3ApiService.getCryptoType(groupId) == CryptoType.SM_TYPE;
         Future<?> task = threadPoolTaskScheduler.submit(() -> {
             try {
                 Instant now = Instant.now();
                 log.info("start thread to compile");
                 // compile
-                AbiBinInfo abiBinInfo = liquidCompileService.compileAndReturn(groupId, finalContractPath, contractName, constants.getLiquidCompileTimeout());
+                AbiBinInfo abiBinInfo = liquidCompileService.compileAndReturn(groupId,
+                    finalContractPath, contractName, constants.getLiquidCompileTimeout(),
+                    useSm2);
                 log.info("finish compile, now start to update db status, duration:{}", Duration.between(now, Instant.now()).toMillis());
 
                 // update contract and task info
