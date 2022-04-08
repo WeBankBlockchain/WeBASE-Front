@@ -1,6 +1,7 @@
 package com.webank.webase.front.rpc.authmanager.base;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
@@ -19,14 +20,16 @@ public class AuthMgrBaseController {
   private AuthMgrBaseService authMgrService;
 
   @ApiOperation(value = "query exec env is wasm")
+  @ApiImplicitParam(name = "groupId", value = "groupId info", required = true)
   @GetMapping("queryExecEnvIsWasm")
-  public Object queryExecEnvIsWasm(String groupId) {
+  public Boolean queryExecEnvIsWasm(String groupId) {
     return authMgrService.execEnvIsWasm(groupId);
   }
 
   @ApiOperation(value = "query if node support wasm")
+  @ApiImplicitParam(name = "groupId", value = "groupId info", required = true)
   @GetMapping("queryChainHasAuth")
-  public Object queryChainHasAuth(String groupId) throws ContractException {
+  public Boolean queryChainHasAuth(String groupId) throws ContractException {
     return authMgrService.chainHasAuth(groupId);
   }
 

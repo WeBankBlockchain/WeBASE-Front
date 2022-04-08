@@ -49,7 +49,7 @@ public class CNSController {
   public Object queryCnsByNameVersion(
       @Valid @RequestBody ReqInfoByNameVersion reqCnsInfoByNameVersion)
       throws ContractException {
-    return cnsServiceInWebase.queryCnsByNameAndVersion(reqCnsInfoByNameVersion.getGroupId(),
+    return cnsServiceInWebase.queryCnsByNameAndVersion2(reqCnsInfoByNameVersion.getGroupId(),
         reqCnsInfoByNameVersion.getContractName(), reqCnsInfoByNameVersion.getVersion());
   }
 

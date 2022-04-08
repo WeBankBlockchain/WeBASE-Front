@@ -58,8 +58,6 @@ public class AdminService {
   private Web3ApiService web3ApiService;
   @Autowired
   private TransService transService;
-  @Autowired
-  private AuthMgrBaseService authMgrBaseService;
 
 
   /**
@@ -68,9 +66,6 @@ public class AdminService {
   public Object setMethodAuthType(String groupId, String signUserId, String contractAddr,
       byte[] func, BigInteger authType)
       throws ContractException {
-    if (authMgrBaseService.execEnvIsWasm(groupId)) {
-      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
-    }
     return this.setMethodAuthTypeHandle(groupId, signUserId, contractAddr, func, authType);
   }
 
@@ -99,9 +94,6 @@ public class AdminService {
    */
   public Object setMethodAuth(String groupId, String signUserId, String contractAddr,
       byte[] func, String accountAddress, Boolean bool) throws ContractException {
-    if (authMgrBaseService.execEnvIsWasm(groupId)) {
-      return new BaseResponse(ConstantCode.EXEC_ENV_IS_WASM).toString();
-    }
     return this.setMethodAuthHandle(groupId, signUserId, contractAddr, func, accountAddress, bool);
   }
 
