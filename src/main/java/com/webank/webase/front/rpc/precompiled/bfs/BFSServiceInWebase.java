@@ -48,11 +48,12 @@ public class BFSServiceInWebase {
   /**
    * BFS创建某个目录
    */
-  public Object mkdir(String groupId, String path, String signUserId){
+  public Object mkdir(String groupId, String path, String signUserId) {
     List<Object> funcParams = new ArrayList<>();
     funcParams.add(path);
     String contractAddress;
-    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.BFS_LIQUID);
     } else {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.BFS);
@@ -60,7 +61,7 @@ public class BFSServiceInWebase {
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.BFS);
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
-            signUserId, contractAddress, abiStr, BFSPrecompiled.FUNC_MKDIR, funcParams);
+            signUserId, contractAddress, abiStr, BFSPrecompiled.FUNC_MKDIR, funcParams, isWasm);
     return PrecompiledUtil.handleTransactionReceipt(receipt);
   }
 

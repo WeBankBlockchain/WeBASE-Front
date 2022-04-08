@@ -76,7 +76,8 @@ public class KVTableServiceInWebase {
     String valueFieldsString = convertValueFieldsToString(valueFields);
     funcParams.add(valueFieldsString);
     String contractAddress;
-    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD_LIQUID);
     } else {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD);
@@ -84,7 +85,7 @@ public class KVTableServiceInWebase {
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CRUD);
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
-            signUserId, contractAddress, abiStr, FUNC_CREATETABLE, funcParams);
+            signUserId, contractAddress, abiStr, FUNC_CREATETABLE, funcParams, isWasm);
     return PrecompiledUtil.handleTransactionReceipt(receipt);
   }
 
@@ -116,7 +117,8 @@ public class KVTableServiceInWebase {
     //be careful ：entry.getKVPrecompiledEntry()
     funcParams.add(entry.getKVPrecompiledEntry());
     String contractAddress;
-    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD_LIQUID);
     } else {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CRUD);
@@ -124,7 +126,7 @@ public class KVTableServiceInWebase {
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CRUD);
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
-            signUserId, contractAddress, abiStr, FUNC_SET, funcParams);
+            signUserId, contractAddress, abiStr, FUNC_SET, funcParams, isWasm);
     return PrecompiledUtil.handleTransactionReceipt(receipt);
   }
 
