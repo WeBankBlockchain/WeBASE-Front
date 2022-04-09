@@ -71,7 +71,7 @@ public class WasmServiceTest extends SpringTestBase {
 
     @Test
     public void testCompileLiquid() {
-        AbiBinInfo abiBinInfo = liquidCompileService.compileAndReturn(groupId, contractPath, contractName, 120000);
+        AbiBinInfo abiBinInfo = liquidCompileService.compileAndReturn(groupId, contractPath, contractName, 120000, true);
         System.out.println(JsonUtils.objToString(abiBinInfo));
     }
 
