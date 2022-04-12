@@ -209,6 +209,7 @@ export default {
             this.liquidList();
             this.liquidCheck = true;
           } else {
+            this.liquidCheck = false;
             this.getEncryption(this.querySolcList);
           }
         })
@@ -415,10 +416,11 @@ export default {
       localStorage.removeItem("solcName");
     },
     changeGroup: function () {
-      this.initVersion();
-      this.versionList = [];
-      this.getEncryption(this.querySolcList);
-      this.$refs.menu.getContractPaths();
+       this.initVersion();
+       this.versionList = [];
+       //this.getEncryption(this.querySolcList);
+       this.$refs.menu.getContractPaths();
+      this.liquidCheckMethod()
     },
     dragDetailWeight: function (e) {
       let startX = e.clientX,
@@ -511,6 +513,7 @@ export default {
   padding-right: 20px;
   font-size: 12px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 .menu-drag {
   position: absolute;

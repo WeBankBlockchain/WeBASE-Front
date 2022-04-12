@@ -94,7 +94,7 @@
         </div>
         <div class="ace-editor" ref="ace" v-show="codeShow"></div>
       </div>
-      <div class="contract-info" v-show="successHide" :style="{ height: infoHeight + 'px' }">
+      <div class="contract-info" v-show="successHide"  :style="{ height: 100% - codeHight }">
         <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
         <div class="contract-info-title" @mouseover="mouseHover = true" @mouseleave="mouseHover = false" v-show="abiFile || contractAddress" @click="collapse">
           <i :class="[
@@ -232,9 +232,12 @@
     </el-dialog>
 
     <el-dialog :visible.sync="addContractAddressVisible" :title="$t('dialog.addContractAddress')" width="400px" class="dialog-wrapper" center v-if="addContractAddressVisible">
-      <el-form ref="contractForm" :model="contractForm">
-        <el-form-item label="" prop="contractAddress">
+      <el-form ref="contractForm" :rules="rules" :model="contractForm">
+        <el-form-item label="" prop="contractAddress" v-if="!liquidCheck">
           <el-input v-model="contractForm.contractAddress" :placeholder="$t('contracts.contractAddressInput')"></el-input>
+        </el-form-item>
+        <el-form-item label="" prop="contractAddressLiquid" v-else>
+          <el-input v-model="contractForm.contractAddressLiquid" :placeholder="$t('contracts.contractAddressInput')"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="text-right">
@@ -287,6 +290,18 @@ export default {
     mgmtCns,
   },
   data: function () {
+       var paramRule = (rule, value, callback) => {
+      let val = value.trim().replace(/\s+/g, " ");
+      let valArr = val.split("/");
+      let valArr2 = val.substr(1).split("/");
+      if (!/^[/][0-9a-zA-Z_/.]{0,}$/.test(val)) {
+        callback(new Error(this.$t("rule.contractAddressHexLiquid")));
+      } else if (valArr2.includes("")) {
+        callback(new Error(this.$t("rule.contractAddressHexLiquid")));
+      } else {
+        callback();
+      }
+    };
     return {
       liquidCheck: this.liquidChecks,
       navShow:this.navShows,
@@ -306,6 +321,7 @@ export default {
       contractAddress: "",
       contractName: "",
       infoHeight: 250,
+      infoShow:false,
       contractList: [],
       dialogUser: false,
       compileinfo: "",
@@ -352,6 +368,44 @@ export default {
       liquidCheckTimer: null,
       firstCall: true,
       loadingText: this.$t("text.contractCompiling"),
+      rules: {
+        contractAddress: [
+          {
+            required: true,
+            message: this.$t("rule.contractAddress"),
+            trigger: "blur",
+          },
+          {
+            pattern: /^[0x|0X]+[A-Fa-f0-9]+$/,
+            message: this.$t("rule.contractAddressHex"),
+            trigger: "blur",
+          },
+          {
+            min: 42,
+            max: 42,
+            message: this.$t("rule.contractAddressLong"),
+            trigger: "blur",
+          },
+        ],
+        contractAddressLiquid: [
+          {
+            required: true,
+            message: this.$t("rule.contractAddress"),
+            trigger: "blur",
+          },
+          {
+            required: true,
+            validator: paramRule,
+            trigger: "blur",
+          },
+          {
+            min: 2,
+            max: 64,
+            message: this.$t("rule.contractAddressLiquidLong"),
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   watch: {
@@ -506,7 +560,7 @@ export default {
         return false;
       };
     });
-  },
+ },
 
   methods: {
     initEditor: function () {
@@ -793,6 +847,7 @@ export default {
         .then((res) => {
           if (res.data.code === 0 && res.data.data.status == 1) {
             _this.loadingAce = true;
+            Bus.$emit("compileLiquid",true);
             this.compileCheck();
             // _this.$message({
             //   message: _this.$t("text.compiling"),
@@ -848,11 +903,13 @@ export default {
                 _this.$set(_this.data, "bytecodeBin", _this.bytecodeBin);
                 // this.$emit("compile", false)
                 Bus.$emit("compile", _this.data);
+                Bus.$emit("compileLiquid",false);
                 clearInterval(_this.liquidCheckTimer);
               }
             } else if ((res.data.code === 0 && res.data.data.status == 3)||(res.data.code === 0 && res.data.data.status == 4)) {
               _this.loadingAce = false;
               clearInterval(_this.liquidCheckTimer);
+                Bus.$emit("compileLiquid",false);
               _this.$message({
                 message: _this.$chooseLang(res.data.code),
                 type: "error",
@@ -867,6 +924,7 @@ export default {
               // });
             } else {
                 clearInterval(_this.liquidCheckTimer);
+                Bus.$emit("compileLiquid",false);
               _this.loadingAce = false;
               _this.$message({
                 message: _this.$chooseLang(res.data.code),
@@ -877,6 +935,7 @@ export default {
           })
           .catch((err) => {
             _this.loadingAce = false;
+                Bus.$emit("compileLiquid",false);
             clearInterval(_this.liquidCheckTimer);
             _this.$message({
               message: err.data || _this.$t("text.systemError"),
@@ -894,6 +953,7 @@ export default {
       //   }else{
       // this.$emit("compile", true)
       //   this.loadingAce = true;
+      Bus.$emit("compileLiquid",true);
      this.loadingText=this.$t("text.contractCompiling")
       let version = this.$store.state.versionData;
       if (this.liquidCheck) {
@@ -932,6 +992,7 @@ export default {
                 this.$set(this.data, "bytecodeBin", this.bytecodeBin);
                 // this.$emit("compile", false)
                 Bus.$emit("compile", this.data);
+                Bus.$emit("compileLiquid", false);
                 this.setMethod();
               }
             } else if (res.data.code === 0 && res.data.data.status == 1) {
@@ -939,6 +1000,7 @@ export default {
               this.compileCheck();
             } else {
               this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
               this.$message({
                 message: this.$chooseLang(res.data.code),
                 type: "error",
@@ -948,6 +1010,7 @@ export default {
           })
           .catch((err) => {
             this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
             this.$message({
               message: err.data || this.$t("text.systemError"),
               type: "error",
@@ -1020,6 +1083,7 @@ export default {
             that.errorMessage = output.errors;
             that.errorInfo = that.$t("contracts.contractCompileFail");
             that.loadingAce = false;
+            Bus.$emit("compileLiquid", false);
           }
         } else {
           console.log(ev.data);
@@ -1031,6 +1095,7 @@ export default {
         that.errorMessage = ev;
         that.compileShow = true;
         that.loadingAce = false;
+        Bus.$emit("compileLiquid", false);
       });
     },
     //v0.4.25 v0.5.1
@@ -1072,6 +1137,7 @@ export default {
         this.errorMessage = error;
         this.compileShow = true;
         this.loadingAce = false;
+        Bus.$emit("compileLiquid", false);
       }
       setTimeout(() => {
         if (output && JSON.stringify(output.contracts) != "{}") {
@@ -1089,6 +1155,7 @@ export default {
           });
           this.errorInfo = this.$t("text.compilationFailed");
           this.loadingAce = false;
+          Bus.$emit("compileLiquid", false);
         }
       }, 500);
     },
@@ -1111,6 +1178,7 @@ export default {
           this.$set(this.data, "bytecodeBin", this.bytecodeBin);
           // this.$emit("compile", false)
           this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
           if (callback && !callback.type) {
             callback();
           }
@@ -1124,11 +1192,13 @@ export default {
           this.errorInfo = this.$t("text.compilationFailed");
           this.compileShow = true;
           this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
         }
       } else {
         this.errorInfo = this.$t("text.compilationFailed");
         this.compileShow = true;
         this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
       }
     },
     refreshMessage: function () {
@@ -1283,6 +1353,7 @@ export default {
         };
       }
       this.loadingAce = true;
+                Bus.$emit("compileLiquid", true);
       // let reqData = {
       //   groupId: localStorage.getItem("groupId"),
       //   contractBin: this.bin,
@@ -1301,6 +1372,7 @@ export default {
       }
       getDeployStatus(reqData).then((res) => {
         this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
         const { data, status } = res;
         if (status === 200) {
           this.abiFileShow = true;
@@ -1325,7 +1397,17 @@ export default {
             type: "error",
           });
         }
-      });
+      })
+       .catch((err) => {
+          Bus.$emit("compileLiquid", false);
+          this.status = 3;
+          this.loading = false;
+          this.$message({
+            message: err.data || this.$t("text.systemError"),
+            type: "error",
+            duration: 2000,
+          });
+        });
     },
     queryRegisterCns(val, cns) {
       let param = {
@@ -1494,11 +1576,15 @@ export default {
       if (this.showCompileText) {
         this.infoHeight = 250;
       } else if (!this.showCompileText) {
-        this.infoHeight = 50;
+        this.infoHeight = 40;
       }
-      this.$nextTick(() => {
-        this.resizeCode();
-      });
+      let _this=this
+      let resizeTime=  setInterval(function(){
+        _this.resizeCode();
+      },10)
+      setTimeout(function(){
+        clearInterval(resizeTime)
+      },600)
     },
     searchKeyword() {
       this.searchVisibility = true;
@@ -1640,26 +1726,8 @@ export default {
     sureContractAddress(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          if (
-            this.contractForm.contractAddress == "" ||
-            this.contractForm.contractAddress == null
-          ) {
-            this.$message({
-              type: "error",
-              message: this.$t("contracts.contractAddressInput"),
-            });
-          } else {
-            let web3Utils = require("web3-utils");
-            if (web3Utils.isAddress(this.contractForm.contractAddress)) {
-              this.addContractAddressVisible = false;
-              this.addContract();
-            } else {
-              this.$message({
-                type: "error",
-                message: this.$t("contracts.contractAddressInput"),
-              });
-            }
-          }
+            this.addContractAddressVisible = false;
+            this.addContract();
         } else {
           return false;
         }
@@ -1768,6 +1836,7 @@ export default {
 .contract-code-mirror {
   width: 100%;
   height: 70%;
+  transition: all 0.6s ease-in;
 }
 .contract-info {
   position: relative;
@@ -1797,6 +1866,7 @@ export default {
   text-align: center;
   cursor: pointer;
   padding: 5px 0px;
+  padding-bottom: 15px;
 }
 .contract-info-title:hover > i {
   color: #fff;
@@ -1872,6 +1942,8 @@ export default {
 .contract-info {
   background-color: #2b374d;
   color: #fff;
+   transition: all 1s ease-in ;
+   height: 250px;
 }
 .titleActive {
   padding-left: 40px;
