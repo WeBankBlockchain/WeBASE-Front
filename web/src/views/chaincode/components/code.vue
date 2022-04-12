@@ -560,7 +560,7 @@ export default {
         return false;
       };
     });
-  },
+ },
 
   methods: {
     initEditor: function () {
@@ -847,6 +847,7 @@ export default {
         .then((res) => {
           if (res.data.code === 0 && res.data.data.status == 1) {
             _this.loadingAce = true;
+            Bus.$emit("compileLiquid",true);
             this.compileCheck();
             // _this.$message({
             //   message: _this.$t("text.compiling"),
@@ -902,11 +903,13 @@ export default {
                 _this.$set(_this.data, "bytecodeBin", _this.bytecodeBin);
                 // this.$emit("compile", false)
                 Bus.$emit("compile", _this.data);
+                Bus.$emit("compileLiquid",false);
                 clearInterval(_this.liquidCheckTimer);
               }
             } else if ((res.data.code === 0 && res.data.data.status == 3)||(res.data.code === 0 && res.data.data.status == 4)) {
               _this.loadingAce = false;
               clearInterval(_this.liquidCheckTimer);
+                Bus.$emit("compileLiquid",false);
               _this.$message({
                 message: _this.$chooseLang(res.data.code),
                 type: "error",
@@ -921,6 +924,7 @@ export default {
               // });
             } else {
                 clearInterval(_this.liquidCheckTimer);
+                Bus.$emit("compileLiquid",false);
               _this.loadingAce = false;
               _this.$message({
                 message: _this.$chooseLang(res.data.code),
@@ -931,6 +935,7 @@ export default {
           })
           .catch((err) => {
             _this.loadingAce = false;
+                Bus.$emit("compileLiquid",false);
             clearInterval(_this.liquidCheckTimer);
             _this.$message({
               message: err.data || _this.$t("text.systemError"),
@@ -948,6 +953,7 @@ export default {
       //   }else{
       // this.$emit("compile", true)
       //   this.loadingAce = true;
+      Bus.$emit("compileLiquid",true);
      this.loadingText=this.$t("text.contractCompiling")
       let version = this.$store.state.versionData;
       if (this.liquidCheck) {
@@ -986,6 +992,7 @@ export default {
                 this.$set(this.data, "bytecodeBin", this.bytecodeBin);
                 // this.$emit("compile", false)
                 Bus.$emit("compile", this.data);
+                Bus.$emit("compileLiquid", false);
                 this.setMethod();
               }
             } else if (res.data.code === 0 && res.data.data.status == 1) {
@@ -993,6 +1000,7 @@ export default {
               this.compileCheck();
             } else {
               this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
               this.$message({
                 message: this.$chooseLang(res.data.code),
                 type: "error",
@@ -1002,6 +1010,7 @@ export default {
           })
           .catch((err) => {
             this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
             this.$message({
               message: err.data || this.$t("text.systemError"),
               type: "error",
@@ -1074,6 +1083,7 @@ export default {
             that.errorMessage = output.errors;
             that.errorInfo = that.$t("contracts.contractCompileFail");
             that.loadingAce = false;
+            Bus.$emit("compileLiquid", false);
           }
         } else {
           console.log(ev.data);
@@ -1085,6 +1095,7 @@ export default {
         that.errorMessage = ev;
         that.compileShow = true;
         that.loadingAce = false;
+        Bus.$emit("compileLiquid", false);
       });
     },
     //v0.4.25 v0.5.1
@@ -1126,6 +1137,7 @@ export default {
         this.errorMessage = error;
         this.compileShow = true;
         this.loadingAce = false;
+        Bus.$emit("compileLiquid", false);
       }
       setTimeout(() => {
         if (output && JSON.stringify(output.contracts) != "{}") {
@@ -1143,6 +1155,7 @@ export default {
           });
           this.errorInfo = this.$t("text.compilationFailed");
           this.loadingAce = false;
+          Bus.$emit("compileLiquid", false);
         }
       }, 500);
     },
@@ -1165,6 +1178,7 @@ export default {
           this.$set(this.data, "bytecodeBin", this.bytecodeBin);
           // this.$emit("compile", false)
           this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
           if (callback && !callback.type) {
             callback();
           }
@@ -1178,11 +1192,13 @@ export default {
           this.errorInfo = this.$t("text.compilationFailed");
           this.compileShow = true;
           this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
         }
       } else {
         this.errorInfo = this.$t("text.compilationFailed");
         this.compileShow = true;
         this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
       }
     },
     refreshMessage: function () {
@@ -1337,6 +1353,7 @@ export default {
         };
       }
       this.loadingAce = true;
+                Bus.$emit("compileLiquid", true);
       // let reqData = {
       //   groupId: localStorage.getItem("groupId"),
       //   contractBin: this.bin,
@@ -1355,6 +1372,7 @@ export default {
       }
       getDeployStatus(reqData).then((res) => {
         this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
         const { data, status } = res;
         if (status === 200) {
           this.abiFileShow = true;
@@ -1379,7 +1397,17 @@ export default {
             type: "error",
           });
         }
-      });
+      })
+       .catch((err) => {
+          Bus.$emit("compileLiquid", false);
+          this.status = 3;
+          this.loading = false;
+          this.$message({
+            message: err.data || this.$t("text.systemError"),
+            type: "error",
+            duration: 2000,
+          });
+        });
     },
     queryRegisterCns(val, cns) {
       let param = {
@@ -1550,9 +1578,13 @@ export default {
       } else if (!this.showCompileText) {
         this.infoHeight = 40;
       }
-      this.$nextTick(() => {
-        this.resizeCode();
-      });
+      let _this=this
+      let resizeTime=  setInterval(function(){
+        _this.resizeCode();
+      },10)
+      setTimeout(function(){
+        clearInterval(resizeTime)
+      },600)
     },
     searchKeyword() {
       this.searchVisibility = true;
@@ -1808,7 +1840,7 @@ export default {
 }
 .contract-info {
   position: relative;
-  /* padding-top: 10px; */
+  padding-top: 10px;
   text-align: left;
   border-top: 1px solid #242e42;
   box-sizing: border-box;
@@ -1911,6 +1943,7 @@ export default {
   background-color: #2b374d;
   color: #fff;
    transition: all 1s ease-in ;
+   height: 250px;
 }
 .titleActive {
   padding-left: 40px;
