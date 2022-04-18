@@ -32,6 +32,7 @@ import io.swagger.annotations.ApiOperation;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.validation.Valid;
+import java.math.BigInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.ABICodec;
