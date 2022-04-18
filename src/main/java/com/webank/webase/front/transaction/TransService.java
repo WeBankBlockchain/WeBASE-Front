@@ -500,9 +500,9 @@ public class TransService {
 
         Client client = web3ApiService.getWeb3j(groupId);
         if (isTxConstant) {
-//            if (StringUtils.isBlank(userAddress)) {
-//                userAddress = cryptoKeyPair.getAddress();
-//            }
+            if (StringUtils.isBlank(userAddress)) {
+                userAddress = cryptoKeyPair.getAddress();
+            }
             return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
         } else {
             return this.handleTransaction(client, cryptoKeyPair, contractAddress, encodeFunction);
@@ -621,15 +621,21 @@ public class TransService {
      * get CryptoKeyPair by keyUser locally
      */
     private CryptoKeyPair getCredentials(boolean constant, String keyUser) {
+        log.info("getCredentials constant:{},keyUser:{}", constant, keyUser);
         // get privateKey
         CryptoKeyPair credentials;
-        // TODO constant不能使用msg.sender调用合约问题。
-        // 注释了constant随机生成秘钥
-        
-        System.out.println("修改了constant不能使用msg.sender调用合约问题");
-        if (StringUtils.isBlank(keyUser)) {
-//        if (constant) {
+        // TODO constant不能使用msg.sender调用合约问题
+        if (constant) {
             credentials = keyStoreService.getCredentialsForQuery();
+            // 非空，尝试从db获取user的credential，否则就随机
+            if (StringUtils.isNotBlank(keyUser)) {
+                try {
+                    credentials = keyStoreService.getCredentials(keyUser);
+                    log.info("getCredentials constant, now return db keyUser:{}", credentials.getAddress());
+                } catch (FrontException ex) {
+                    log.warn("getCredentials constant, now return random:{}", credentials.getAddress());
+                }
+            }
         } else {
             credentials = keyStoreService.getCredentials(keyUser);
         }
@@ -842,19 +848,10 @@ public class TransService {
     public List<String> handleCall(int groupId, String userAddress, String contractAddress,
         String encodedFunction, String abiStr, String funcName) {
         // TODO constant不能使用msg.sender调用合约问题。
-        // 注释掉随机生成秘钥，采用用户地址生成
-        System.out.println("修改了constant不能使用msg.sender调用合约问题");
-        TransactionProcessor transactionProcessor;
-        if (StringUtils.isBlank(userAddress)) {
-            transactionProcessor = new TransactionProcessor(
-                    web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(),
-                    groupId, Constants.chainId);
-        }else{
-            transactionProcessor = new TransactionProcessor(
-                    web3ApiService.getWeb3j(groupId), keyStoreService.getCredentials(userAddress),
-                    groupId, Constants.chainId);
-        }
-
+        TransactionProcessor transactionProcessor = new TransactionProcessor(
+                web3ApiService.getWeb3j(groupId),
+                getCredentials(true, userAddress), // 尝试db获取该address的私钥，否则随机创建
+                groupId, Constants.chainId);
         CallOutput callOutput = transactionProcessor
             .executeCall(userAddress, contractAddress, encodedFunction)
             .getCallResult();
