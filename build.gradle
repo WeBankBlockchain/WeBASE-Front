@@ -113,7 +113,6 @@ dependencies {
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
     compile 'com.google.guava:guava:29.0-jre'
     compile 'org.yaml:snakeyaml:1.30'
-//    compile 'org.hibernate:hibernate-core:5.3.6.Final'
     compile 'javax.validation:validation-api:2.0.1.Final'
 
     testCompile('org.springframework.boot:spring-boot-starter-test') {

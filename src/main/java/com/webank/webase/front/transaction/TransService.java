@@ -26,10 +26,16 @@ import com.webank.webase.front.rpc.precompiled.sysconf.SysConfigServiceInWebase;
 import com.webank.webase.front.transaction.entity.ReqSignMessageHash;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
-import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -69,15 +75,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
-
-import static com.webank.webase.front.base.code.ConstantCode.IN_FUNCTION_ERROR;
-
 /**
  * TransService. handle transactions of deploy/call contract
  */
@@ -115,7 +112,6 @@ public class TransService {
      *
      * @param req request
      */
-
     public Object transHandleWithSign(ReqTransHandleWithSign req) throws FrontException {
         String groupId = req.getGroupId();
         String signUserId = req.getSignUserId();
@@ -263,18 +259,18 @@ public class TransService {
                         encodeStr))
             .getCallResult().getOutput();
 
-        ABIDefinition abiDefinition = getFunctionAbiDefinition(funcName, JsonUtils.toJSONString(contractAbi));
+        ABIDefinition abiDefinition = getABIDefinition(funcName, JsonUtils.toJSONString(contractAbi), groupId);
         if (Objects.isNull(abiDefinition)) {
-            throw new FrontException(IN_FUNCTION_ERROR);
+            throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
-        List<String> funOutputTypes = AbiUtil.getFuncOutputType(abiDefinition);
-        List<TypeReference<?>> finalOutputs = AbiUtil.outputFormat(funOutputTypes);
+        List<String> funOutputTypes = ContractAbiUtil.getFuncOutputType(abiDefinition);
+        List<TypeReference<?>> finalOutputs = ContractAbiUtil.outputFormat(funOutputTypes);
 
         FunctionReturnDecoder functionReturnDecoder = new FunctionReturnDecoder();
         List<Type> typeList = functionReturnDecoder.decode(callOutput, Utils.convert(finalOutputs));
         Object response;
         if (typeList.size() > 0) {
-            response = AbiUtil.callResultParse(funOutputTypes, typeList);
+            response = ContractAbiUtil.callResultParse(funOutputTypes, typeList);
         } else {
             response = typeList;
         }
@@ -283,7 +279,7 @@ public class TransService {
 
     public static ABIDefinition getFunctionAbiDefinition(String functionName, String contractAbi) {
         if (functionName == null) {
-            throw new FrontException(IN_FUNCTION_ERROR);
+            throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
         List<ABIDefinition> abiDefinitionList =
                 JsonUtils.toJavaObjectList(contractAbi, ABIDefinition.class);
@@ -293,7 +289,7 @@ public class TransService {
         ABIDefinition result = null;
         for (ABIDefinition abiDefinition : abiDefinitionList) {
             if (abiDefinition == null) {
-                throw new FrontException(IN_FUNCTION_ERROR);
+                throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
             }
             if (Constants.TYPE_FUNCTION.equals(abiDefinition.getType())
                     && functionName.equals(abiDefinition.getName())) {

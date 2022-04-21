@@ -30,8 +30,8 @@ import com.webank.webase.front.event.entity.ReqEventLogList;
 import com.webank.webase.front.event.entity.ReqNewBlockEventRegister;
 import com.webank.webase.front.event.entity.ReqUnregister;
 import com.webank.webase.front.event.entity.RspContractInfo;
-import com.webank.webase.front.util.AbiUtil;
 import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import io.swagger.annotations.Api;
@@ -123,7 +123,7 @@ public class EventController extends BaseController {
         List<String> topicList = reqContractEventRegister.getTopicList();
         List<Object> contractAbi = reqContractEventRegister.getContractAbi();
         String abiStr = JsonUtils.toJSONString(contractAbi);
-        AbiUtil.checkAbi(abiStr);
+        ContractAbiUtil.checkAbi(abiStr);
         String exchangeName = reqContractEventRegister.getExchangeName();
         // username as queue name
         String queueName = reqContractEventRegister.getQueueName();
@@ -279,7 +279,7 @@ public class EventController extends BaseController {
         EventTopicParam eventTopicParam = reqEventLogList.getTopics();
         List<Object> contractAbi = reqEventLogList.getContractAbi();
         String abiStr = JsonUtils.toJSONString(contractAbi);
-        AbiUtil.checkAbi(abiStr);
+        ContractAbiUtil.checkAbi(abiStr);
         // get event log from each block's tx receipts
         List<DecodedEventLog> resList = eventService.getContractEventLog(groupId, contractAddress, abiStr,
             fromBlock, toBlock, eventTopicParam);

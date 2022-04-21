@@ -26,7 +26,7 @@ public interface ContractRepository extends CrudRepository<Contract, Long>,
 
     Contract findByGroupIdAndContractPathAndContractName(String groupId, String contractPath,
         String contractName);
-    
+
     List<Contract> findByGroupIdAndContractPath(String groupId, String contractPath);
 
     Contract findByGroupIdAndId(String groupId, Long contractId);
