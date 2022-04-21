@@ -46,12 +46,6 @@ public class RestTemplateConfig {
 
 
     /**
-     * httpRequestFactory.
-     * 
-     * @return
-     */
-
-    /**
      * factory for deploy.
      */
     @Bean()
