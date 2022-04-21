@@ -147,9 +147,12 @@ public class LiquidCompileService {
      * cargo liquid build
      * @param contractDir
      */
-    public void execLiquidCompile(String contractDir, int compileTimeout) {
+    public void execLiquidCompile(boolean useSm2, String contractDir, int compileTimeout) {
         // cargo liquid build
         String testCommand = "cargo liquid build --skip-analysis";
+        if (useSm2) {
+            testCommand = "cargo liquid build -g --skip-analysis";
+        }
         String command = String.format("cd %s && %s", getLiquidContractPath(contractDir), testCommand);
         ExecuteResult result = JavaCommandExecutor.executeCommand(command, compileTimeout);
         log.info("execCompile result:{}", result);
@@ -164,10 +167,11 @@ public class LiquidCompileService {
      * @param contractName
      * @return
      */
-    public AbiBinInfo compileAndReturn(String groupId, String contractPath, String contractName, int compileTimeout) {
+    public AbiBinInfo compileAndReturn(String groupId, String contractPath,
+                                       String contractName, int compileTimeout, boolean useSm2) {
         String contractDir = getContractDir(groupId, contractPath, contractName);
         // compile
-        this.execLiquidCompile(contractDir, compileTimeout);
+        this.execLiquidCompile(useSm2, contractDir, compileTimeout);
         // check target dir exist, 如果已存在则删除，因为此时要重新编译
         String targetPath = Paths.get(LIQUID_DIR, contractDir, "target").toString();
         File targetDirFile = new File(targetPath);
@@ -179,6 +183,10 @@ public class LiquidCompileService {
         // read .abi and .wasm(byte to hexString)
         String abiPath = Paths.get(LIQUID_DIR, contractDir, "target", contractDir + ".abi").toString();
         String wasmBinPath = Paths.get(LIQUID_DIR, contractDir, "target", contractDir + ".wasm").toString();
+        if (useSm2) {
+            // xxx + _gm.wasm
+            wasmBinPath = Paths.get(LIQUID_DIR, contractDir, "target", contractDir + "_gm.wasm").toString();
+        }
         File abiFile = new File(abiPath);
         File binFile = new File(wasmBinPath);
         try {
