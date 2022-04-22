@@ -59,8 +59,8 @@ public class CNSServiceInWebase {
     funcParams.add(contractAddress);
     funcParams.add(abiData);
     //wasm or solidity
-    Client client = web3ApiService.getWeb3j(groupId);
-    if (client.isWASM()) {
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
       precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CNS_LIQUID);
     } else {
       precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CNS);
@@ -68,7 +68,8 @@ public class CNSServiceInWebase {
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CNS);
     receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
-            signUserId, precompiledAddress, abiStr, CNSPrecompiled.FUNC_INSERT, funcParams);
+            signUserId, precompiledAddress, abiStr, CNSPrecompiled.FUNC_INSERT, funcParams,
+            isWasm);
     return PrecompiledUtil.handleTransactionReceipt(receipt);
   }
 

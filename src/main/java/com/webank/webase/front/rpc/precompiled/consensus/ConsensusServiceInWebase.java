@@ -87,7 +87,8 @@ public class ConsensusServiceInWebase {
     funcParams.add(nodeId);
     funcParams.add(weight);
     String contractAddress;
-    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS_LIQUID);
     } else {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
@@ -95,7 +96,7 @@ public class ConsensusServiceInWebase {
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
-            signUserId, contractAddress, abiStr, FUNC_ADDSEALER, funcParams);
+            signUserId, contractAddress, abiStr, FUNC_ADDSEALER, funcParams, isWasm);
     return this.handleTransactionReceipt(receipt);
   }
 
@@ -147,7 +148,8 @@ public class ConsensusServiceInWebase {
     List<Object> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
     String contractAddress;
-    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS_LIQUID);
     } else {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
@@ -155,7 +157,7 @@ public class ConsensusServiceInWebase {
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
-            signUserId, contractAddress, abiStr, FUNC_ADDOBSERVER, funcParams);
+            signUserId, contractAddress, abiStr, FUNC_ADDOBSERVER, funcParams, isWasm);
     return this.handleTransactionReceipt(receipt);
   }
 
@@ -168,7 +170,8 @@ public class ConsensusServiceInWebase {
     List<Object> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
     String contractAddress;
-    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS_LIQUID);
     } else {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
@@ -177,7 +180,7 @@ public class ConsensusServiceInWebase {
     TransactionReceipt receipt;
     try {
       receipt = (TransactionReceipt) transService.transHandleWithSign(groupId,
-          signUserId, contractAddress, abiStr, FUNC_REMOVE, funcParams);
+          signUserId, contractAddress, abiStr, FUNC_REMOVE, funcParams, isWasm);
     } catch (RuntimeException e) {
       // firstly remove node that sdk connected to the node, return the request that present
       // susscces

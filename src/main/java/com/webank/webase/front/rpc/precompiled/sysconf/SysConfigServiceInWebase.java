@@ -112,7 +112,8 @@ public class SysConfigServiceInWebase {
         funcParams.add(value);
         // get address and abi of precompiled contract
         String contractAddress;
-        if (web3ApiService.getWeb3j(groupId).isWASM()) {
+        boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+        if (isWasm) {
             contractAddress = PrecompiledCommonInfo.getAddress(
                 PrecompiledTypes.SYSTEM_CONFIG_LIQUID);
         } else {
@@ -122,7 +123,7 @@ public class SysConfigServiceInWebase {
         // execute set method
         TransactionReceipt receipt =
             (TransactionReceipt) transService.transHandleWithSign(groupId,
-                signUserId, contractAddress, abiStr, FUNC_SETVALUEBYKEY, funcParams);
+                signUserId, contractAddress, abiStr, FUNC_SETVALUEBYKEY, funcParams, isWasm);
         return this.handleTransactionReceipt(receipt);
     }
 
