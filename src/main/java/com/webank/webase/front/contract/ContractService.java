@@ -304,12 +304,9 @@ public class ContractService {
     /**
      * deploy locally, not through webase-sign
      */
-    public String deployLocally(ReqDeploy req) throws ContractException {
+    public String deployLocally(ReqDeploy req) {
         String groupId = req.getGroupId();
         String userAddress = req.getUser();
-        // check deploy permission
-        checkDeployPermission(groupId, userAddress);
-
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
@@ -956,8 +953,12 @@ public class ContractService {
     private boolean checkDeployPermission(String groupId, String userAddress)
         throws ContractException {
         log.info("civilian service check deploy permission");
-        Boolean res = everyoneService.checkDeployAuth(groupId,
-            userAddress);
+        Client client = web3ApiService.getWeb3j(groupId);
+        if (client.isWASM()) {
+            log.info("civilian service in wasm skip");
+            return true;
+        }
+        Boolean res = everyoneService.checkDeployAuth(groupId, userAddress);
         log.info("check deploy permission result is {}", res.toString());
         return res;
     }

@@ -79,6 +79,7 @@ public class CommonUtils {
      * byte array: [v + r + s + pub]
      * 2021/08/05 webase-sign <=1.4.3, v=27 >=1.5.0, v=0
      * if using web3sdk, Signature's v default 27, if using java-sdk, SignatureResult's v default 0, and add 27 in RLP encode
+     * 2022/04/22 add byteArr length check, ecdsa: 65, sm2: 129
      * @param signatureData signatureData
      * @return
      */
@@ -91,42 +92,19 @@ public class CommonUtils {
         byte[] signS = new byte[32];
         System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
         if (encryptType == CryptoType.SM_TYPE) {
+            if (byteArr.length != 129) {
+                throw new RuntimeException("stringToSignatureData byteArray length not equal [SM2] SignatureResult length of 129");
+            }
             byte[] pub = new byte[64];
             System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
             return new SM2SignatureResult(pub, signR, signS);
         } else {
+            if (byteArr.length != 65) {
+                throw new RuntimeException("stringToSignatureData byteArray length not equal [ECDSA] SignatureResult length of 65");
+            }
             return new ECDSASignatureResult(signV, signR, signS);
         }
     }
-
-    /**
-     * stringToSignatureData. 19/12/24 support guomi： add byte[] pub in signatureData
-     * @param signatureData signatureData
-     * @return
-     */
-//    public static SignatureResult stringToSM2SignatureData(String signatureData) {
-//        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
-//        // 从1开始，因为此处byteArr第0位是v； 注: 在java sdk中, v放在了最后一位
-//        byte[] signR = new byte[32];
-//        System.arraycopy(byteArr, 1, signR, 0, signR.length);
-//        byte[] signS = new byte[32];
-//        System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
-//        byte[] pub = new byte[64];
-//        System.arraycopy(byteArr, 1 + signR.length + signS.length, pub, 0, pub.length);
-//        // return new SignatureData(byteArr[0], signR, signS, pub);
-//        return new SM2SignatureResult(pub, signR, signS);
-//    }
-//
-//    public static SignatureResult stringToECDSASignatureData(String signatureData) {
-//        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
-//        // 从1开始，因为0是v；注：在javasdk中v放在了最后一位
-//        byte[] signR = new byte[32];
-//        System.arraycopy(byteArr, 1, signR, 0, signR.length);
-//        byte[] signS = new byte[32];
-//        System.arraycopy(byteArr, 1 + signR.length, signS, 0, signS.length);
-//        // return new SignatureData(byteArr[0], signR, signS, pub);
-//        return new ECDSASignatureResult(byteArr[0], signR, signS);
-//    }
 
     /**
      * signatureDataToString. 19/12/24 support guomi： add byte[] pub in signatureData
