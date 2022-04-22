@@ -67,8 +67,7 @@ public class CommitteeService {
    * 更新治理委员信息。 如果是新加治理委员，新增地址和权重即可。如果是删除治理委员，将一个治理委员的权重设置为0 即可
    */
   public Object updateGovernor(String groupId, String signUserId, String accountAddress,
-      BigInteger weight)
-      throws ContractException, ABICodecException, TransactionException, IOException {
+      BigInteger weight) {
     return this.updateGovernorHandle(groupId, signUserId, accountAddress, weight);
   }
 
@@ -91,8 +90,7 @@ public class CommitteeService {
    * 设置提案阈值，提案阈值分为参与阈值和权重阈值。
    */
   public Object setRate(String groupId, String signUserId, BigInteger participatesRate,
-      BigInteger winRate)
-      throws ABICodecException, TransactionException, IOException, ContractException {
+      BigInteger winRate) throws ContractException {
     return this.setRateHandle(groupId, signUserId, participatesRate, winRate);
   }
 
