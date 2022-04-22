@@ -254,7 +254,12 @@ public class CommitteeService {
           .equals("you must be governor")) {
         return new BaseResponse(ConstantCode.MUST_BE_GOVERNOR,
             sdkRetCode.getMessage()).toString();
+      }else if (receipt.getMessage()
+          .equals("Only proposer can revoke")) {
+        return new BaseResponse(ConstantCode.MUST_BE_PROPOSER,
+            sdkRetCode.getMessage()).toString();
       }
+
     }
     return this.handleTransactionReceipt(receipt);
   }
