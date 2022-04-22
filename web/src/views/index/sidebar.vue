@@ -73,7 +73,8 @@
 import router from "@/router";
 import {
     queryGroup,
-    queryClientVersion
+    queryClientVersion,
+    checkIsWasm
 } from "@/util/api";
 import Bus from "@/bus"
 export default {
@@ -93,6 +94,7 @@ export default {
             group: null,
             screenWidth: null,
             buttomNone: true,
+            liquidCheck: false,
         };
     },
     computed: {
@@ -165,6 +167,11 @@ export default {
                                 it.name = this.$t('route.contractWarehouse')
                                 break;
                         }
+                    if(it.enName=='blockEvent'){
+                        if(this.liquidCheck){
+                            it.menuShow=false
+                        }
+                    }
                     })
                 }
             }))
@@ -196,6 +203,7 @@ export default {
         if (localStorage.getItem("groupName")) {
             this.groupName = localStorage.getItem("groupName");
         }
+        this.liquidCheckMethod();
         this.$nextTick(function () {
             this.getGroup();
             localStorage.setItem("sidebarHide", false);
@@ -328,7 +336,24 @@ export default {
         },
         toggleHover() {
             this.groupVisible = false
-        }
+        },
+        liquidCheckMethod() {
+      let group = localStorage.getItem("groupId");
+      checkIsWasm(group)
+        .then((res) => {
+          if (res.data == true) {
+            this.liquidCheck = true;
+          } else {
+            this.liquidCheck = false;
+          }
+        })
+        .catch((err) => {
+          this.$message({
+            type: "error",
+            message: err.data || this.$t("text.systemError"),
+          });
+        });
+    },
     }
 };
 </script>
