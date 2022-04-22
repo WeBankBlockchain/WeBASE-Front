@@ -183,6 +183,10 @@ public class LiquidCompileService {
         // read .abi and .wasm(byte to hexString)
         String abiPath = Paths.get(LIQUID_DIR, contractDir, "target", contractDir + ".abi").toString();
         String wasmBinPath = Paths.get(LIQUID_DIR, contractDir, "target", contractDir + ".wasm").toString();
+        if (useSm2) {
+            // xxx + _gm.wasm
+            wasmBinPath = Paths.get(LIQUID_DIR, contractDir, "target", contractDir + "_gm.wasm").toString();
+        }
         File abiFile = new File(abiPath);
         File binFile = new File(wasmBinPath);
         try {
