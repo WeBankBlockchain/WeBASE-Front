@@ -284,5 +284,10 @@ public class ConstantCode {
     /* permission */
     public static final RetCode EXEC_ENV_IS_WASM = RetCode.mark(201670, "exec env is wasm, don't support");
     public static final RetCode MUST_BE_GOVERNOR = RetCode.mark(201671, "the account must be the governor.");
+    public static final RetCode MUST_BE_PROPOSER = RetCode.mark(201672, "the account must be the proposer of proposal.");
+
+    /* bfs path */
+    public static final RetCode BFS_INVALID_PATH = RetCode.mark(201680, "the PATH is invalid.");
+
 
 }
