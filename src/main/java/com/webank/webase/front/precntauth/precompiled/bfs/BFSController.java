@@ -1,5 +1,7 @@
 package com.webank.webase.front.precntauth.precompiled.bfs;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precntauth.precompiled.bfs.entity.ReqCreateBFSInfo;
 import com.webank.webase.front.precntauth.precompiled.bfs.entity.ReqQueryBFSInfo;
 import io.swagger.annotations.Api;
@@ -7,6 +9,8 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.model.RetCode;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

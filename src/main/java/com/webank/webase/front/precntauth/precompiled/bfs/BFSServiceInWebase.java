@@ -13,7 +13,9 @@
  */
 package com.webank.webase.front.precntauth.precompiled.bfs;
 
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtil;
@@ -25,6 +27,7 @@ import java.util.Locale;
 import org.fisco.bcos.sdk.contract.precompiled.bfs.BFSPrecompiled;
 import org.fisco.bcos.sdk.contract.precompiled.bfs.BFSService;
 import org.fisco.bcos.sdk.contract.precompiled.bfs.FileInfo;
+import org.fisco.bcos.sdk.model.RetCode;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +64,7 @@ public class BFSServiceInWebase {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, BFSPrecompiled.FUNC_MKDIR, funcParams, isWasm);
-    return PrecompiledUtil.handleTransactionReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt);
   }
 
   /**
@@ -79,5 +82,15 @@ public class BFSServiceInWebase {
     return resList;
   }
 
+  public String handleRetcodeAndReceipt(TransactionReceipt receipt) {
+    if (receipt.getStatus() == -53005) {
+      RetCode sdkRetCode = new RetCode();
+      if (receipt.getMessage().equals("Invalid path")) {
+        return new BaseResponse(ConstantCode.BFS_INVALID_PATH,
+            sdkRetCode.getMessage()).toString();
+      }
+    }
+    return PrecompiledUtil.handleTransactionReceipt(receipt);
+  }
 
 }
