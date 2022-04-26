@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 <template>
-  <el-dialog :title="$t('title.transactionReceipt')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
+  <el-dialog :title="$t('title.transactionReceipt')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh" z-index='1000'>
     <div v-if="!transationData">{{ $t("text.noData") }}</div>
     <div v-if="transationData && !transationData.logEntries" slot :style="{ height: editorHeight + 'px' }" style="overflow-y: auto">
       <json-viewer :value="transationData" :expand-depth="5" copyable></json-viewer>
@@ -69,7 +69,7 @@
           </div>
           <div class="item">
             <span class="label"></span>
-            <el-button @click="decodeInputCheck" type="primary" v-if="ifLiquid">{{inputTitle}}</el-button>
+            <el-button @click="decodeInputCheck" type="primary" v-if="!ifLiquid">{{inputTitle}}</el-button>
           </div>
         </div>
         <div v-else-if="key == 'output'">
@@ -439,7 +439,10 @@ export default {
         .then((res) => {
           if (res.data.code == 0 && res.data.data) {
             //注释liquid合约解码
-            this.decodeInput(param, res.data.data);
+            if(!this.ifLiquid){
+            this.decodeInput(param, res.data.data); 
+            }
+            // this.decodeInput(param, res.data.data);
           } else if (res.data.code !== 0) {
             this.$message({
               type: "error",

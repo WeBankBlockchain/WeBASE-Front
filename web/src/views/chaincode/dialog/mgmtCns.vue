@@ -186,11 +186,13 @@ export default {
         contractName: this.mgmtCnsItem.contractName,
         version: this.cnsVersionFrom.cnsVersion,
         abiInfo: JSON.parse(this.mgmtCnsItem.contractAbi),
+        // contractAbi: this.mgmtCnsItem.contractAbi,
         userAddress: this.cnsVersionFrom.userId,
         saveEnabled: true,
         contractAddress: this.mgmtCnsItem.contractAddress,
         cnsName: this.cnsVersionFrom.cnsName,
         contractPath: this.mgmtCnsItem.contractPath,
+        signUserId:""
       };
       registerCns(param).then((res) => {
         const { data, status } = res;
