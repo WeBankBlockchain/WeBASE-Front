@@ -496,7 +496,6 @@ export default {
                             var arr = [];
                             this.blockData = []
                             this.transactionList = [];
-                            debugger
                             if (this.keyword.length == 66) {
                                 this.searchMap = data;
                                 arr.push({
