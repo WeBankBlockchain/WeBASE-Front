@@ -289,5 +289,7 @@ public class ConstantCode {
     /* bfs path */
     public static final RetCode BFS_INVALID_PATH = RetCode.mark(201680, "the PATH is invalid.");
 
+    /* cns path */
+    public static final RetCode CONTRACT_NAME_VERSION_EXIST = RetCode.mark(201685, "contract name and version already exist");
 
 }
