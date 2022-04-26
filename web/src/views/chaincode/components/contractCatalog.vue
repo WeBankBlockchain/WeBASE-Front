@@ -217,6 +217,9 @@ export default {
     solcVersion(val) {
       this.version = this.solcVersion;
     },
+    liquidChecks(val){
+      this.liquidCheck=val
+    }
   },
   create() {
     Bus.$off("compile");
