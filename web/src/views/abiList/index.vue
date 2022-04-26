@@ -46,7 +46,7 @@
         <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
             <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :liquidChecks='liquidCheck' :data="data" :abi='abiData' :version='version'></send-transation>
         </el-dialog>
-        <editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' :input="editorInput" :editorOutput="editorOutput"></editor>
+        <editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' :input="editorInput" :liquidChecks='liquidCheck' :editorOutput="editorOutput"></editor>
         <el-dialog :title="$t('nodes.addAbi')" :visible.sync="importVisibility" width="500px" v-if="importVisibility" center class="send-dialog">
             <import-abi @importSuccess="importSuccess" @closeImport="closeImport"></import-abi>
         </el-dialog>
@@ -177,6 +177,7 @@ export default {
         });
     },
         changeGroup() {
+        this.liquidCheckMethod()
             this.queryAbiList()
         },
         closeImport() {

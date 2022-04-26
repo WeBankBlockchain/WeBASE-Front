@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 <template>
-  <el-dialog :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
+  <el-dialog :title="$t('title.detailsTxn')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh" z-index='1000'>
     <div v-if='!transationData'>{{$t('text.noData')}}</div>
     <!-- <div v-if='transationData && !transationData.logs' slot :style="{'height':editorHeight + 'px'}" style="overflow-y:auto">
             <json-viewer :value="transationData" :expand-depth='5' copyable></json-viewer>

@@ -108,7 +108,9 @@
         </li>
       </ul>
     </div>
-    <div class="el-loading-mask" v-show="liquidLoad"><div class="el-loading-spinner"></div></div>
+    <div class="el-loading-mask" v-show="liquidLoad">
+      <div class="el-loading-spinner"></div>
+    </div>
     <add-folder v-if="foldershow" :foldershow="foldershow" @close="folderClose" @success="folderSuccess"></add-folder>
     <add-file v-if="fileshow" :data="selectFolderData" :fileshow="fileshow" @close="fileClose" @success="fileSucccess($event)" :id="folderId"></add-file>
     <select-catalog v-if="cataLogShow" :show="cataLogShow" @success="catalogSuccess($event)" @close="catalogClose"></select-catalog>
@@ -152,9 +154,9 @@ export default {
     solcVersion: {
       type: String,
     },
-    liquidChecks:{
+    liquidChecks: {
       type: Boolean,
-    }
+    },
   },
   components: {
     "add-folder": addFolder,
@@ -205,7 +207,7 @@ export default {
           label: "rust",
         },
       ],
-      liquidLoad:false
+      liquidLoad: false,
     };
   },
   watch: {
@@ -223,7 +225,6 @@ export default {
     Bus.$off("save");
     Bus.$off("modifyState");
     Bus.$off("compileLiquid");
-
   },
   mounted() {
     this.$nextTick(function () {
@@ -237,7 +238,7 @@ export default {
     Bus.$on("save", (data) => {
       this.saveContract(data);
     });
-     Bus.$on("compileLiquid", (data) => {
+    Bus.$on("compileLiquid", (data) => {
       this.compileLiquid(data);
     });
     Bus.$on("deploy", (data) => {
@@ -275,8 +276,8 @@ export default {
     },
   },
   methods: {
-     compileLiquid:function(val){
-      this.liquidLoad= val
+    compileLiquid: function (val) {
+      this.liquidLoad = val;
     },
     checkNull(list) {
       this.contractArry.forEach((value) => {
@@ -669,7 +670,7 @@ export default {
       if (param.id) {
         reqData.contractId = param.id;
       }
-       if (this.liquidCheck) {
+      if (this.liquidCheck) {
         reqData.isWasm = true;
       }
       if (param.contractAddress) {
@@ -1298,7 +1299,15 @@ export default {
       var blobContractBin = new Blob([contractBin], {
         type: "text;charset=utf-8",
       });
-      zip.file(`${val.contractName}.sol`, blobContractSource, { binary: true });
+      if (this.liquidCheck) {
+        zip.file(`${val.contractName}.rs`, blobContractSource, {
+          binary: true,
+        });
+      } else {
+        zip.file(`${val.contractName}.sol`, blobContractSource, {
+          binary: true,
+        });
+      }
       zip.file(`${val.contractName}.abi`, blobContractAbi, { binary: true });
       zip.file(`${val.contractName}.bin`, blobContractBin, { binary: true });
       zip.generateAsync({ type: "blob" }).then((content) => {
@@ -1335,9 +1344,15 @@ export default {
               var blobContractBin = new Blob([item.contractBin], {
                 type: "text;charset=utf-8",
               });
-              zip.file(`${item.contractName}.sol`, blobContractSource, {
-                binary: true,
-              });
+              if (this.liquidCheck) {
+                zip.file(`${val.contractName}.rs`, blobContractSource, {
+                  binary: true,
+                });
+              } else {
+                zip.file(`${val.contractName}.sol`, blobContractSource, {
+                  binary: true,
+                });
+              }
               zip.file(`${item.contractName}.abi`, blobContractAbi, {
                 binary: true,
               });
@@ -1504,16 +1519,16 @@ export default {
   width: 110px;
   padding-left: 7px;
 }
-.el-loading-mask{
+.el-loading-mask {
   position: absolute;
-    z-index: 2000;
-    margin: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    -webkit-transition: opacity .3s;
-    transition: opacity .3s;
+  z-index: 2000;
+  margin: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-transition: opacity 0.3s;
+  transition: opacity 0.3s;
 }
 </style>
 

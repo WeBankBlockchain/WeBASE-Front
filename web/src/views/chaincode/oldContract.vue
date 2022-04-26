@@ -168,6 +168,7 @@ export default {
         });
     },
     changeGroup: function () {
+    this.liquidCheckMethod();
       this.getContracts();
     },
     getContracts: function () {
