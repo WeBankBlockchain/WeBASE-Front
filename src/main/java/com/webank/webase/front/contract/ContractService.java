@@ -366,13 +366,6 @@ public class ContractService {
      * registerCns.
      */
     public void registerCns(ReqRegisterCns req) throws Exception {
-        if (StringUtils.isBlank(req.getContractPath())) {
-            throw new FrontException(ConstantCode.PARAM_FAIL_CONTRACT_PATH_IS_EMPTY_STRING);
-        }
-        if (StringUtils.isBlank(req.getUserAddress())) {
-            throw new FrontException(ConstantCode.PARAM_FAIL_USER_IS_EMPTY);
-        }
-
         String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
         if (req.isSaveEnabled()) {
             registerCnsByFrontDirectly(req, abiInfo);
