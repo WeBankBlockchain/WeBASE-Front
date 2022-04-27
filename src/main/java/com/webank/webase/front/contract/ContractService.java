@@ -374,16 +374,10 @@ public class ContractService {
         }
 
         String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
-        // front service directly
         if (req.isSaveEnabled()) {
             registerCnsByFrontDirectly(req, abiInfo);
         } else {
-            // node mgr service transfer
-            if (StringUtils.isBlank(req.getSignUserId())) {
-                throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
-            }
-            cnsServiceInWebase.registerCNS(req.getGroupId(), req.getSignUserId(), req.getCnsName(),
-                req.getVersion(), req.getContractAddress(), abiInfo);
+            registerCnsByNodeManager(req, abiInfo);
         }
     }
 
@@ -410,6 +404,14 @@ public class ContractService {
             BeanUtils.copyProperties(req, cns);
             cnsRepository.save(cns);
         }
+    }
+
+    private void registerCnsByNodeManager(ReqRegisterCns req, String abiInfo) throws Exception {
+        if (StringUtils.isBlank(req.getSignUserId())) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_SIGN_USER_ID_IS_EMPTY);
+        }
+        cnsServiceInWebase.registerCNS(req.getGroupId(), req.getSignUserId(), req.getCnsName(),
+            req.getVersion(), req.getContractAddress(), abiInfo);
     }
 
     private void checkContractAbiExistedAndSave(String contractName, String version,
