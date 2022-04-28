@@ -167,9 +167,11 @@ export default {
                                 it.name = this.$t('route.contractWarehouse')
                                 break;
                         }
-                    if(it.enName=='blockEvent'){
+                    if(it.enName=='contractEvent'){
                         if(this.liquidCheck){
                             it.menuShow=false
+                        }else{
+                            it.menuShow=true
                         }
                     }
                     })
@@ -233,6 +235,7 @@ export default {
             localStorage.setItem("groupName", this.groupName);
             Bus.$emit("changeGroup", this.group);
             this.getClientVersion();
+            this.liquidCheckMethod();
         },
         getClientVersion() {
             queryClientVersion(this.group)
