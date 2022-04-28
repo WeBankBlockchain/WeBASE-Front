@@ -26,6 +26,9 @@ public class NodeStatusInfo {
 
     private String nodeId;
     private long blockNumber;
+    /**
+     * 1-normal, 2-abnormal, 3-syncing
+     */
     private Integer status;
     private LocalDateTime modifyTime;
 

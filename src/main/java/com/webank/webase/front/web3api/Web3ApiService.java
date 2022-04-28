@@ -63,9 +63,9 @@ public class Web3ApiService {
     @Autowired
     @Qualifier("rpcClient")
     private Client rpcWeb3j;
-    @Autowired
-    @Qualifier("clientMap")
-    private Map<String, Client> clientMap;
+//    @Autowired
+//    @Qualifier("clientMap")
+//    private Map<String, Client> clientMap;
     @Autowired
     private BcosSDK bcosSDK;
     @Autowired
@@ -74,7 +74,6 @@ public class Web3ApiService {
     /**
      * nodes connected with front, key:nodeId, value:nodeName
      */
-//    private static Map<String, String> NODE_ID_2_NODE_NAME = new ConcurrentHashMap<>();
     private static final int HASH_OF_TRANSACTION_LENGTH = 66;
     /**
      * key: nodeId, value: nodeStatusInfo cached
@@ -116,24 +115,25 @@ public class Web3ApiService {
      * @return
      */
     private Client getWeb3jRaw(String groupId) throws FrontException {
-        Client client = clientMap.get(groupId);
-        if (client == null) {
-            List<String> groupList = this.getGroupList();
-            if (!groupList.contains(groupId)) {
-                log.error("getClient group id not exist! groupId:{}", groupId);
-                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-            }
-            // else, groupList contains this groupId, try to build new client
-            try {
-                Client clientNew = Client.build(groupId, web3ConfigConstants.getConfigOptionFromFile());
-                log.info("getClient clientNew:{}", clientNew);
-                clientMap.put(groupId, clientNew);
-                return clientNew;
-            } catch (ConfigException | JniException e) {
-                log.error("build new client of groupId:{} failed:{}", groupId, e);
-                throw new FrontException(ConstantCode.BUILD_NEW_CLIENT_FAILED);
-            }
-        }
+        Client client = bcosSDK.getClient(groupId);
+//        Client client = clientMap.get(groupId);
+//        if (client == null) {
+//            List<String> groupList = this.getGroupList();
+//            if (!groupList.contains(groupId)) {
+//                log.error("getClient group id not exist! groupId:{}", groupId);
+//                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+//            }
+//            // else, groupList contains this groupId, try to build new client
+//            try {
+//                Client clientNew = Client.build(groupId, web3ConfigConstants.getConfigOptionFromFile());
+//                log.info("getClient clientNew:{}", clientNew);
+//                clientMap.put(groupId, clientNew);
+//                return clientNew;
+//            } catch (ConfigException | JniException e) {
+//                log.error("build new client of groupId:{} failed:{}", groupId, e);
+//                throw new FrontException(ConstantCode.BUILD_NEW_CLIENT_FAILED);
+//            }
+//        }
         return client;
     }
 
