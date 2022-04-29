@@ -98,7 +98,7 @@
           </div>
           <div class="item" v-show="inputButtonShow">
             <span class="label"></span>
-            <el-button @click="decodeOutput" type="primary">{{
+            <el-button @click="decodeOutput" type="primary" v-if='!ifLiquid'>{{
               buttonTitle
             }}</el-button>
           </div>
@@ -107,7 +107,7 @@
           <span>{{ key }}:</span>
           <span v-if="!val.length">{{ val }}</span>
           <span v-if="val.length">[
-            <div v-for="item in val" style="padding-left: 10px">
+            <div v-for="(item,index) in val" style="padding-left: 10px">
               <div>{</div>
               <div style="padding-left: 10px">
                 <!-- <div>
@@ -177,8 +177,8 @@
                   </div>
                   <div class="item">
                     <span class="label"></span>
-                    <el-button @click="decode(item)" type="primary">{{
-                      eventTitle
+                    <el-button @click="decode(item,index)" type="primary">{{
+                      eventTitle[index]
                     }}</el-button>
                   </div>
                 </div>
@@ -189,11 +189,11 @@
                   <span v-else class="transation-content">{{ item.type }}</span>
                 </div> -->
                 <div>
-                  <span class="transation-title">topic:</span>
-                  <span v-if="typeof item.topic == 'string'" class="transation-content string-color">{{ item.topic }}</span>
-                  <span v-else-if="item.topic === null" class="transation-content null-color">{{ item.topic }}null</span>
+                  <span class="transation-title">topics:</span>
+                  <span v-if="typeof item.topics == 'string'" class="transation-content string-color">{{ item.topics }}</span>
+                  <span v-else-if="item.topics === null" class="transation-content null-color">{{ item.topics }}null</span>
                   <span v-else class="transation-content">{{
-                    item.topic
+                    item.topics[0]
                   }}</span>
                 </div>
                 <!-- <div>
@@ -231,7 +231,7 @@ export default {
       modePath: "ace/mode/solidity",
       editorDialog: this.show || false,
       eventSHow: false,
-      eventTitle: this.$t("text.txnEncodeBtn"),
+      eventTitle: [this.$t("text.txnEncodeBtn")],
       funcData: "",
       methodId: "",
       abiType: "",
@@ -256,7 +256,7 @@ export default {
     } else {
       this.inputButtonShow = true;
     }
-    this.decodeInputApi(this.transationData.input);
+    //this.decodeInputApi(this.transationData.input);
     if (this.transationData && this.transationData.logEntries) {
       this.decodeEvent();
     }
@@ -395,11 +395,12 @@ export default {
     },
     decodeEvent() {
       for (let i = 0; i < this.transationData.logEntries.length; i++) {
+        this.eventTitle[i]=this.$t("text.txnEncodeBtn")
         console.log(this.transationData.logEntries);
-        console.log(this.transationData.logEntries[i].topic[0]);
+        console.log(this.transationData.logEntries[i].topics[0]);
         let data = {
           groupId: localStorage.getItem("groupId"),
-          data: this.transationData.logEntries[i].topic[0],
+          data: this.transationData.logEntries[i].topics[0],
         };
         getFunctionAbi(data)
           .then((res) => {
@@ -464,7 +465,7 @@ export default {
       let abi = "";
       eventData.abiInfo = JSON.parse(eventData.abiInfo);
       let list = data;
-      list.eventTitle = this.$t("text.txnEncodeBtn");
+      list.eventTitle = [this.$t("text.txnEncodeBtn")];
       list.eventDataShow = true;
       list.eventButtonShow = true;
       list.eventName = eventData.abiInfo.name + "(";
@@ -509,7 +510,7 @@ export default {
       let eventResult = Web3EthAbi.decodeLog(
         eventData.abiInfo.inputs,
         list.data,
-        list.topic.slice(1)
+        list.topics.slice(1)
       );
       list.outData = {};
       list.eventLgData = [];
@@ -553,13 +554,13 @@ export default {
         });
       }
     },
-    decode(val) {
+    decode(val,index) {
       if (val.eventDataShow) {
         this.$set(val, "eventDataShow", false);
-        this.eventTitle = this.$t("text.txnDecodeBtn");
+        this.$set(this.eventTitle, index, this.$t("text.txnDecodeBtn"));
       } else {
         this.$set(val, "eventDataShow", true);
-        this.eventTitle = this.$t("text.txnEncodeBtn");
+        this.$set(this.eventTitle, index, this.$t("text.txnEncodeBtn"));
       }
     },
     txStatusColor(val) {
