@@ -72,14 +72,10 @@ public class BFSServiceInWebase {
    */
   public Object list(String groupId, String path)
       throws ContractException {
-    List<String> resList = new ArrayList<>();
     BFSService bfsService = new BFSService(web3ApiService.getWeb3j(groupId),
         keyStoreService.getCredentialsForQuery(groupId));
     List<FileInfo> fileInfoList = bfsService.list(path);
-    for (FileInfo fileInfo : fileInfoList) {
-      resList.add(fileInfo.getName().toLowerCase(Locale.ROOT));
-    }
-    return resList;
+    return fileInfoList;
   }
 
   public String handleRetcodeAndReceipt(TransactionReceipt receipt) {
