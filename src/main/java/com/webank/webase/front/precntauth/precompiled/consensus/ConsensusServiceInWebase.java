@@ -214,7 +214,7 @@ public class ConsensusServiceInWebase {
 
     List<String> sealerStrList = sealerList.stream().map(Sealer::getNodeID)
         .collect(Collectors.toList());
-    ;
+
     List<String> observerList = web3ApiService.getObserverList(groupId);
     List<String> peerList = web3ApiService.getGroupPeers(groupId);
     // process nodeList

@@ -21,6 +21,7 @@ import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.TransactionInfo;
+import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.BcosSDK;
@@ -387,8 +388,11 @@ public class Web3ApiService {
      * node id list
      */
     public List<String> getGroupPeers(String groupId) {
-        return getWeb3j(groupId)
+        Instant startTime = Instant.now();
+        List<String> groupPeers = getWeb3j(groupId)
             .getGroupPeers().getGroupPeers();
+        log.info("getGroupPeers groupId:{},{}", groupId, Duration.between(startTime, Instant.now()).toMillis());
+        return groupPeers;
     }
 
     // get all peers of chain
@@ -415,12 +419,18 @@ public class Web3ApiService {
      * @return
      */
     private ConsensusStatusInfo getConsensusStatus(String groupId, String nodeName) {
+        Instant startTime = Instant.now();
         log.info("getConsensusStatus groupId{},nodeName:{}", groupId, nodeName);
-        return getWeb3j(groupId).getConsensusStatus(nodeName).getConsensusStatus();
+        ConsensusStatusInfo consensusStatusInfo = getWeb3j(groupId).getConsensusStatus(nodeName).getConsensusStatus();
+        log.info("getConsensusStatus groupId{},nodeName:{},{}", groupId, nodeName, Duration.between(startTime, Instant.now()).toMillis());
+        return consensusStatusInfo;
     }
 
     public SyncStatusInfo getSyncStatus(String groupId) {
-        return getWeb3j(groupId).getSyncStatus().getSyncStatus();
+        Instant startTime = Instant.now();
+        SyncStatusInfo syncStatusInfo = getWeb3j(groupId).getSyncStatus().getSyncStatus();
+        log.info("getSyncStatus groupId{},{}", groupId, Duration.between(startTime, Instant.now()).toMillis());
+        return syncStatusInfo;
     }
 
     /**
@@ -451,7 +461,10 @@ public class Web3ApiService {
     }
 
     public List<Sealer> getSealerList(String groupId) {
-        return getWeb3j(groupId).getSealerList().getSealerList();
+        Instant startTime = Instant.now();
+        List<Sealer> sealerList = getWeb3j(groupId).getSealerList().getSealerList();
+        log.info("getSealerList groupId:{},{}", groupId, Duration.between(startTime, Instant.now()).toMillis());
+        return sealerList;
     }
 
     public List<String> getSealerStrList(String groupId) {
@@ -461,7 +474,10 @@ public class Web3ApiService {
     }
 
     public List<String> getObserverList(String groupId) {
-        return getWeb3j(groupId).getObserverList().getObserverList();
+        Instant startTime = Instant.now();
+        List<String> observerList = getWeb3j(groupId).getObserverList().getObserverList();
+        log.info("getObserverList groupId:{},{}", groupId, Duration.between(startTime, Instant.now()).toMillis());
+        return observerList;
     }
 
     /**
@@ -530,6 +546,7 @@ public class Web3ApiService {
     }
 
     public Map<String, String> getNodeIdNameMap(String groupId) {
+        Instant startTime = Instant.now();
         log.debug("refreshAndGetNodeNameMap groupId:{}", groupId);
         Map<String, String> nodeIdNameMap = new HashMap<>();
         List<GroupNodeInfo> nodeInfoList = this.getGroupNodeInfo(groupId);
@@ -538,6 +555,7 @@ public class Web3ApiService {
             nodeIdNameMap.put(nodeId, node.getName());
         }
         log.debug("end refreshAndGetNodeNameMap groupId:{},nodeIdNameMap:{}", groupId, nodeIdNameMap);
+        log.info("refreshAndGetNodeNameMap groupId{},{}", groupId, Duration.between(startTime, Instant.now()).toMillis());
         return nodeIdNameMap;
     }
 
