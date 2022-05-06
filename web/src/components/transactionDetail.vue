@@ -24,7 +24,7 @@
                         </template>
                         <template v-else-if="item=='to'">
                             <span class="base-p">{{txInfoMap[item]}} </span><span v-if="txInfoMap[item]">{{txInfoMap[item] | contractSource}}</span>
-                                 <el-tooltip v-if="transactionData.to==''||transactionData.to=='0x0000000000000000000000000000000000000000'" class="tip" effect="dark" :content="$t('contracts.toTip')" placement="top-start">
+                                 <el-tooltip v-if="txInfoMap.to==''||txInfoMap.to=='0x0000000000000000000000000000000000000000'" class="tip" effect="dark" :content="$t('contracts.toTip')" placement="top-start">
                                 <i class="el-icon-info"></i> 
                             </el-tooltip>
                         </template>

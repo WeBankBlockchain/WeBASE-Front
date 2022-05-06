@@ -188,6 +188,7 @@ export default {
     },
   },
   mounted: function () {
+    console.log(this.liquidChecks)
     this.getLocalKeyStores();
     this.formatAbi();
     this.changeFunc();
