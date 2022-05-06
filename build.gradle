@@ -24,7 +24,7 @@ repositories {
 
 }
 
-def spring_version="5.2.19.RELEASE"
+def spring_version="5.2.20.RELEASE"
 List spring =[
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-beans:$spring_version",

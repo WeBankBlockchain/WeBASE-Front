@@ -16,6 +16,7 @@ package com.webank.webase.front.precntauth.authmanager.everyone;
 import com.webank.webase.front.precntauth.authmanager.everyone.entity.NewProposalInfo;
 import com.webank.webase.front.precntauth.authmanager.everyone.entity.ReqProposalListInfo;
 import com.webank.webase.front.precntauth.authmanager.util.AuthManagerService;
+import com.webank.webase.front.web3api.Web3ApiService;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -38,6 +39,8 @@ public class EveryoneService {
 
     @Autowired
     private AuthManagerService authManagerService;
+    @Autowired
+    private Web3ApiService web3ApiService;
 
     /**
      * 查询治理委员会的详细信息
@@ -135,7 +138,7 @@ public class EveryoneService {
         String userAddress)
         throws ContractException {
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
-        byte[] hash = authManagerService.getWeb3ApiService().getWeb3j(groupId).getCryptoSuite()
+        byte[] hash = web3ApiService.getCryptoSuite(groupId)
             .hash(func.getBytes());
         byte[] newFunc = Arrays.copyOfRange(hash, 0, 4);
         return authManager.checkMethodAuth(contractAddr, newFunc, userAddress);
