@@ -58,7 +58,7 @@
           <el-table-column :label="$t('table.actions')" width="280">
             <template slot-scope="scope">
               <el-button :disabled="!scope.row.contractAddress" :class="{'grayColor': !scope.row.contractAddress}" @click="send(scope.row)" type="text" size="small">{{$t('title.callContract')}}</el-button>
-              <el-button v-if="!liquidCheck" :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress || !scope.row.haveEvent}" @click="handleEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
+              <el-button v-show="!liquidCheck" :disabled="!scope.row.contractAddress || !scope.row.haveEvent" :class="{'grayColor': !scope.row.contractAddress || !scope.row.haveEvent}" @click="handleEvent(scope.row)" type="text" size="small">{{$t('title.checkEvent')}}</el-button>
                             <el-button @click="handleMgmtCns(scope.row)" type="text" size="small">CNS</el-button>
             </template>
           </el-table-column>
@@ -68,18 +68,18 @@
         </el-pagination>
       </div>
     </div>
-    <abi-dialog :show="abiDialogShow" v-if="abiDialogShow" :data='abiData' @close="abiClose"></abi-dialog>
-    <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
+    <abi-dialog :show="abiDialogShow" v-show="abiDialogShow" :data='abiData' @close="abiClose"></abi-dialog>
+    <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-show="dialogVisible" center class="send-dialog">
       <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :liquidChecks='liquidCheck' :data="data" :abi='abiData' :version='version'></send-transation>
     </el-dialog>
     <v-editor v-if='editorShow' :show='editorShow' :data='editorData'  :liquidChecks='liquidCheck' :sendConstant="sendConstant" @close='editorClose' :input='editorInput' :editorOutput="editorOutput"></v-editor>
     <el-dialog :title="$t('title.checkEvent')" :visible.sync="checkEventVisible" width="470px" center class="send-dialog">
       <check-event-dialog @checkEventSuccess="checkEventSuccess(arguments)" @checkEventClose="checkEventClose" :contractInfo="contractInfo"></check-event-dialog>
     </el-dialog>
-    <el-dialog v-if="checkEventResultVisible" :title="$t('table.checkEventResult')" :visible.sync="checkEventResultVisible" width="1070px" center class="send-dialog">
+    <el-dialog v-show="checkEventResultVisible" :title="$t('table.checkEventResult')" :visible.sync="checkEventResultVisible" width="1070px" center class="send-dialog">
       <check-event-result @checkEventResultSuccess="checkEventResultSuccess($event)" @checkEventResultClose="checkEventResultClose" :checkEventResult="checkEventResult" :contractInfo="contractInfo"></check-event-result>
     </el-dialog>
-    <el-dialog v-if="mgmtCnsVisible" :title="$t('text.cns')" :visible.sync="mgmtCnsVisible" width="470px" center class="send-dialog">
+    <el-dialog v-show="mgmtCnsVisible" :title="$t('text.cns')" :visible.sync="mgmtCnsVisible" width="470px" center class="send-dialog">
       <mgmt-cns :mgmtCnsItem="mgmtCnsItem" @mgmtCnsResultSuccess="mgmtCnsResultSuccess($event)" @mgmtCnsResultClose="mgmtCnsResultClose"></mgmt-cns>
     </el-dialog>
   </div>
@@ -158,6 +158,8 @@ export default {
         .then((res) => {
           if (res.data == true) {
             this.liquidCheck = true;
+          }else{
+          this.liquidCheck = false;    
           }
         })
         .catch((err) => {
@@ -168,6 +170,7 @@ export default {
         });
     },
     changeGroup: function () {
+    this.liquidCheckMethod();
       this.getContracts();
     },
     getContracts: function () {

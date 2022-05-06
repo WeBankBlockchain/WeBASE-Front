@@ -1581,7 +1581,7 @@ export default {
       let _this=this
       let resizeTime=  setInterval(function(){
         _this.resizeCode();
-      },10)
+      },1)
       setTimeout(function(){
         clearInterval(resizeTime)
       },600)
@@ -1742,10 +1742,14 @@ export default {
         contractAbi: this.data.contractAbi,
         contractBin: this.data.contractBin,
         bytecodeBin: this.data.bytecodeBin,
-        contractAddress: this.contractForm.contractAddress,
       };
       if (this.data.id) {
         reqData.id = this.data.id;
+      }
+      if(this.liquidCheck){
+          reqData.contractAddress = this.contractForm.contractAddressLiquid;
+      }else{
+          reqData.contractAddress = this.contractForm.contractAddress;
       }
       Bus.$emit("save", reqData);
     },
@@ -1836,7 +1840,7 @@ export default {
 .contract-code-mirror {
   width: 100%;
   height: 70%;
-  transition: all 0.6s ease-in;
+  transition: all 0.5s;
 }
 .contract-info {
   position: relative;
@@ -1942,7 +1946,6 @@ export default {
 .contract-info {
   background-color: #2b374d;
   color: #fff;
-   transition: all 1s ease-in ;
    height: 250px;
 }
 .titleActive {

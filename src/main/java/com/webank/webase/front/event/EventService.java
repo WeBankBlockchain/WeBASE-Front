@@ -77,8 +77,8 @@ public class EventService {
     private Web3Config web3Config;
     @Autowired
     private BcosSDK bcosSDK;
-    @Autowired
-    private Map<String ,EventSubscribe> eventSubscribeMap;
+//    @Autowired
+//    private Map<String ,EventSubscribe> eventSubscribeMap;
     @Autowired
     private Constants constants;
     @Autowired
@@ -450,25 +450,25 @@ public class EventService {
     }
 
     public EventSubscribe getEventSubscribe(String groupId) {
-//        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
-        EventSubscribe eventSubscribe = eventSubscribeMap.get(groupId);
-        if (eventSubscribe == null) {
-            List<String> groupList = web3ApiService.getGroupList();
-            if (!groupList.contains(groupId)) {
-                log.error("getEventSubscribe group id not exist! groupId:{}", groupId);
-                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-            }
-            // else, groupList contains this groupId, try to build new eventSubscribe
-            try {
-                EventSubscribe eventSubscribeNew = EventSubscribe.build(groupId, web3Config.getConfigOptionFromFile());
-                log.info("getEventSubscribe eventSubscribeNew:{}", eventSubscribeNew);
-                eventSubscribeMap.put(groupId, eventSubscribeNew);
-                return eventSubscribeNew;
-            } catch (ConfigException | JniException e) {
-                log.error("build new eventSubscribe of groupId:{} failed:{}", groupId, e);
-                throw new FrontException(ConstantCode.BUILD_NEW_EVENT_SUBSCRIBE_FAILED);
-            }
-        }
+        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
+//        EventSubscribe eventSubscribe = eventSubscribeMap.get(groupId);
+//        if (eventSubscribe == null) {
+//            List<String> groupList = web3ApiService.getGroupList();
+//            if (!groupList.contains(groupId)) {
+//                log.error("getEventSubscribe group id not exist! groupId:{}", groupId);
+//                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+//            }
+//            // else, groupList contains this groupId, try to build new eventSubscribe
+//            try {
+//                EventSubscribe eventSubscribeNew = EventSubscribe.build(groupId, web3Config.getConfigOptionFromFile());
+//                log.info("getEventSubscribe eventSubscribeNew:{}", eventSubscribeNew);
+//                eventSubscribeMap.put(groupId, eventSubscribeNew);
+//                return eventSubscribeNew;
+//            } catch (ConfigException | JniException e) {
+//                log.error("build new eventSubscribe of groupId:{} failed:{}", groupId, e);
+//                throw new FrontException(ConstantCode.BUILD_NEW_EVENT_SUBSCRIBE_FAILED);
+//            }
+//        }
         return eventSubscribe;
     }
 }
