@@ -76,6 +76,8 @@ public class PrecompiledCommonInfo {
                 return ConsensusPrecompiled.ABI;
             case CNS:
                 return CNSPrecompiled.ABI;
+            case CNS_LIQUID:
+                return CNSPrecompiled.WASM_ABI;
             case CONTRACT_AUTH:
                 return ContractAuthPrecompiled.ABI;
             case BFS:
