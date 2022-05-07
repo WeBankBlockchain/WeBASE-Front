@@ -245,7 +245,8 @@ export default {
             trigger: "change",
           },
           {
-            validator: isAddress,
+            pattern: `^0[xX][0-9a-fA-F]{40}$`,
+            message: this.$t("rule.contractAddressCorrect"),
             trigger: "blur",
           },
         ],

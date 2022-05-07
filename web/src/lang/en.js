@@ -493,6 +493,7 @@ export default {
         OverGroupMemoryLimit: 'Exceeded group memory limit exception',
     },
     rule: {
+        contractAddressCorrect: "Please enter the correct contract address",
         textLong: "1 to 32 characters in length",
         textLong1_12: "1 to 12 digits in length",
         textLong1_100: "100 characters or less",

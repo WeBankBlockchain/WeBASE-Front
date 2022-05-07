@@ -174,6 +174,11 @@ export default {
       isWasm: this.liquidChecks,
     };
   },
+  watch:{
+    data(n,o){ //n为新值,o为旧值;
+      this.contractAddress = n.contractAddress;
+    }
+},
   computed: {
     showUser() {
       let showUser = true;

@@ -565,12 +565,12 @@ let errCode = {
         zh: '签名服务并返回异常'
     },
     "201510": {
-        en: "transaction receipt status return error",
-        zh: '交易回执状态码非0x0，交易执行失败'
+        en: "transaction receipt of this hash not exist",
+        zh: '此哈希的交易回执不存在'
     },
     "201511": {
-        en: "contract abi parse json error",
-        zh: '合约ABI转JSON失败'
+        en: "block of this hash not exist",
+        zh: '此哈希块不存在'
     },
     "201512": {
         en: "call contract error for io exception",
