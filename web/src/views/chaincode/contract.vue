@@ -30,7 +30,7 @@
       <div class="move" @mousedown="dragDetailWeight($event)"></div>
     </div>
     <div :class="[!menuHide ?  'code-detail-wrapper' : 'code-detail-reset-wrapper']" :style="{width: contentWidth}">
-      <v-code :changeStyle="changeWidth" :navShows="navShow" :liquidChecks='liquidCheck' :data="contractData" :show="showCode" @add="add($event)" @compile="compile($event)" @deploy="deploy($event)"></v-code>
+      <v-code :key="key" :changeStyle="changeWidth" :navShows="navShow" :liquidChecks='liquidCheck' :data="contractData" :show="showCode" @add="add($event)" @compile="compile($event)" @deploy="deploy($event)"></v-code>
     </div>
   </div>
 </template>
@@ -90,6 +90,7 @@ export default {
       groupId: localStorage.getItem("groupId"),
       liquidCheck: false,
       navShow:true,
+      key:0
     };
   },
   computed: {
@@ -421,6 +422,8 @@ export default {
        //this.getEncryption(this.querySolcList);
        this.$refs.menu.getContractPaths();
       this.liquidCheckMethod()
+      this.key++
+
     },
     dragDetailWeight: function (e) {
       let startX = e.clientX,

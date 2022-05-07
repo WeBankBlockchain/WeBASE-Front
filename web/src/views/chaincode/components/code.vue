@@ -866,6 +866,10 @@ export default {
           });
         });
     },
+     clearIntervals(){
+       this.loadingAce = false;
+        clearInterval(this.liquidCheckTimer);
+    },
     compileCheck() {
       let reqData = {
         groupId: localStorage.getItem("groupId"),
