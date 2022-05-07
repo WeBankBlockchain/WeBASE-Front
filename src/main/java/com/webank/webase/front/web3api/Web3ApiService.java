@@ -242,7 +242,7 @@ public class Web3ApiService {
         String code = getWeb3j(groupId)
                 .getCode(address).getCode();
         log.debug("getCode code:{}", code);
-        return code;
+        return code == null ? "" : code;
     }
 
     /**
