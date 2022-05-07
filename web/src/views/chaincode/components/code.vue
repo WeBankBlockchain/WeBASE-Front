@@ -409,6 +409,11 @@ export default {
     };
   },
   watch: {
+     contractName: function (val) {
+        if (this.contractName && this.firstCall) {
+        this.compileCheckEnter();
+      }
+    },
     liquidChecks: function (val) {
       this.liquidCheck = val;
       if (this.liquidCheck == true) {
@@ -462,13 +467,10 @@ export default {
     },
   },
 
-  created() {
+  beforeDestroy() {
     clearInterval(this.liquidCheckTimer);
     Bus.$off("select");
     Bus.$off("noData");
-  },
-  beforeDestroy() {
-    clearInterval(this.liquidCheckTimer);
   },
   beforeMount() {},
   mounted: function () {
@@ -528,9 +530,9 @@ export default {
         } else {
           this.aceEditor.setReadOnly(false);
         }
-        if (this.contractName && this.firstCall && this.liquidCheck) {
-          this.compileCheckEnter();
-        }
+        // if (this.contractName && this.firstCall && this.liquidCheck) {
+        //   this.compileCheckEnter();
+        // }
       });
       if (this.data.contractAddress) {
         this.queryFindCnsInfo();
@@ -846,7 +848,7 @@ export default {
       liquidCompileCheck(reqData)
         .then((res) => {
           if (res.data.code === 0 && res.data.data.status == 1) {
-            _this.loadingAce = true;
+            this.loadingAce = true;
             Bus.$emit("compileLiquid",true);
             this.compileCheck();
             // _this.$message({
@@ -856,9 +858,9 @@ export default {
           }
         })
         .catch((err) => {
-          _this.loadingAce = false;
-          _this.$message({
-            message: err.data || _this.$t("text.systemError"),
+          this.loadingAce = false;
+          this.$message({
+            message: err.data || this.$t("text.systemError"),
             type: "error",
             duration: 2000,
           });

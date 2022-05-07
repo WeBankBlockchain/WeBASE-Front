@@ -444,6 +444,7 @@ export default {
     color: #9da2ab;
 }
 .contract-info >>> .v-note-wrapper {
-    border: inherit
+    border: inherit;
+    z-index: 500;
 }
 </style>

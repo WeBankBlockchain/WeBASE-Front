@@ -221,7 +221,7 @@ export default {
       this.liquidCheck=val
     }
   },
-  create() {
+  beforeDestroy() {
     Bus.$off("compile");
     Bus.$off("deploy");
     Bus.$off("open");

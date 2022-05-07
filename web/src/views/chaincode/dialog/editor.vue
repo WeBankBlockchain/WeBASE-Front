@@ -67,9 +67,9 @@
               </el-table>
             </div>
           </div>
-          <div class="item">
+          <div class="item" v-if="!ifLiquid">
             <span class="label"></span>
-            <el-button @click="decodeInputCheck" type="primary" v-if="!ifLiquid">{{inputTitle}}</el-button>
+            <el-button @click="decodeInputCheck" type="primary">{{inputTitle}}</el-button>
           </div>
         </div>
         <div v-else-if="key == 'output'">
@@ -96,9 +96,9 @@
               </el-table>
             </div>
           </div>
-          <div class="item" v-show="inputButtonShow">
+          <div class="item" v-if="inputButtonShow&&!ifLiquid">
             <span class="label"></span>
-            <el-button @click="decodeOutput" type="primary" v-if='!ifLiquid'>{{
+            <el-button @click="decodeOutput" type="primary">{{
               buttonTitle
             }}</el-button>
           </div>
