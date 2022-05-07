@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.exceptions.ClientException;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
@@ -167,10 +168,14 @@ public class Web3ApiService {
      * @param blockHash blockHash
      */
     public BcosBlock.Block getBlockByHash(String groupId, String blockHash, boolean fullTrans) {
-        BcosBlock.Block block = getWeb3j(groupId).getBlockByHash(blockHash,
-            false, fullTrans)
+        try {
+            BcosBlock.Block block = getWeb3j(groupId).getBlockByHash(blockHash,
+                false, fullTrans)
                 .getBlock();
-        return block;
+            return block;
+        } catch (ClientException ex) {
+            throw new FrontException(ConstantCode.BLOCK_NOT_EXIST_ERROR);
+        }
     }
 
     /**
@@ -206,10 +211,13 @@ public class Web3ApiService {
      * @param transHash transHash
      */
     public TransactionReceipt getTransactionReceipt(String groupId, String transHash) {
-
-        TransactionReceipt transactionReceipt = getWeb3j(groupId)
-                .getTransactionReceipt(transHash,false).getTransactionReceipt();
-        return transactionReceipt;
+        try {
+            TransactionReceipt transactionReceipt = getWeb3j(groupId)
+                .getTransactionReceipt(transHash, false).getTransactionReceipt();
+            return transactionReceipt;
+        } catch (ClientException ex) {
+            throw new FrontException(ConstantCode.TX_RECEIPT_NOT_EXIST_ERROR);
+        }
     }
 
     /**
@@ -242,7 +250,7 @@ public class Web3ApiService {
         String code = getWeb3j(groupId)
                 .getCode(address).getCode();
         log.debug("getCode code:{}", code);
-        return code;
+        return code == null ? "" : code;
     }
 
     /**
