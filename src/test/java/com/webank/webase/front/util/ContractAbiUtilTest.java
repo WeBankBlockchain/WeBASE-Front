@@ -15,26 +15,23 @@
  */
 package com.webank.webase.front.util;
 
-import static com.webank.webase.front.util.AbiUtil.outputFormat;
 import static com.webank.webase.front.util.ContractAbiUtil.contractEventMap;
 import static org.junit.Assert.assertEquals;
 
 import com.webank.webase.front.base.TestBase;
 import com.webank.webase.front.contract.CommonContract;
-import com.webank.webase.front.contract.ContractService;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.codec.ABICodec;
-import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
 import org.fisco.bcos.sdk.codec.datatypes.Function;
 import org.fisco.bcos.sdk.codec.datatypes.Type;
+import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
-import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
 import org.fisco.bcos.sdk.model.RetCode;
-import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Test;
 
 public class ContractAbiUtilTest extends TestBase {
@@ -85,9 +82,9 @@ public class ContractAbiUtilTest extends TestBase {
         ArrayList a = new ArrayList();
         a.add("123");
         List<Object> params = a;
-        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
+        List<Type> finalInputs = ContractAbiUtil.inputFormat(funcInputTypes, params);
         List<String> funOutputTypes = ContractAbiUtil.getFuncOutputType(contractName, "trans", version);
-        List<TypeReference<?>> finalOutputs = outputFormat(funOutputTypes);
+        List<TypeReference<?>> finalOutputs = ContractAbiUtil.outputFormat(funOutputTypes);
         Function function = new Function(funcName, finalInputs, finalOutputs);
 
 //        Ok okDemo = Ok.deploy(web3j, credentials, gasPrice, gasLimit).send();
@@ -124,9 +121,9 @@ public class ContractAbiUtilTest extends TestBase {
 //        a.add("12345");
         a.add("12,23,34,45");
         List<Object> params = a;
-        List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
+        List<Type> finalInputs = ContractAbiUtil.inputFormat(funcInputTypes, params);
         List<String> funOutputTypes = ContractAbiUtil.getFuncOutputType(contractName, "set", version);
-        List<TypeReference<?>> finalOutputs = outputFormat(funOutputTypes);
+        List<TypeReference<?>> finalOutputs = ContractAbiUtil.outputFormat(funOutputTypes);
         Function function = new Function(funcName, finalInputs, finalOutputs);
 
 //        HelloWorld okDemo = HelloWorld.deploy(web3j, credentials, gasPrice, gasLimit).send();

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 /**
  * transHandleWithSign interface parameter.
@@ -46,4 +46,5 @@ public class ReqTransHandleWithSign {
     // 1.4.3
     private boolean useCns = false;
     private String cnsName;
+    private Boolean isWasm = false;
 }

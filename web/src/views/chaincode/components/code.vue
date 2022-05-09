@@ -15,12 +15,14 @@
  */
  
 <template>
-  <div class="contract-code" :class="{ changeActive: changeWidth }" v-loading="loadingAce">
+  <div class="contract-code" :class="{ changeActive: changeWidth }" v-loading="loadingAce" :element-loading-text="loadingText">
     <div class="contract-code-head">
       <span class="contract-code-title" v-show="codeShow" :class="{ titleActive: changeWidth }">
-        <span ref="setReadOnly">{{ contractName + ".sol" }}</span>
+        <!-- <span ref="setReadOnly">{{ contractName + ".sol" }}</span> -->
+        <span ref="setReadOnly" v-if="liquidCheck==false">{{contractName + '.sol'}}</span>
+        <span v-else>{{contractName + '.rs'}}</span>
       </span>
-      <span class="contract-code-handle" v-show="codeShow">
+      <span class="contract-code-handle" v-show="navShow">
         <span class="contract-code-done noBlur" @click="saveCode" id="saveId">
           <el-tooltip class="item" effect="dark" :content="$t('title.handleSave')" placement="top-start">
             <i class="wbs-icon-baocun contract-icon-style font-16"></i>
@@ -45,10 +47,10 @@
           </el-tooltip>
           <span>{{ $t("title.callContract") }}</span>
         </span>
-        <span class="contract-code-done" @click="downloadJavaClass">
+        <!-- <span class="contract-code-done" @click="downloadJavaClass">
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportJavaFile") }}</span>
-        </span>
+        </span> -->
         <span class="contract-code-done" @click="exportSdk">
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportSdk") }}</span>
@@ -92,7 +94,7 @@
         </div>
         <div class="ace-editor" ref="ace" v-show="codeShow"></div>
       </div>
-      <div class="contract-info" v-show="successHide" :style="{ height: infoHeight + 'px' }">
+      <div class="contract-info" v-show="successHide"  :style="{ height: 100% - codeHight }">
         <div class="move" @mousedown="dragDetailWeight($event)" @mouseup="resizeCode"></div>
         <div class="contract-info-title" @mouseover="mouseHover = true" @mouseleave="mouseHover = false" v-show="abiFile || contractAddress" @click="collapse">
           <i :class="[
@@ -154,15 +156,8 @@
                 word-wrap: break-word;
               ">
               {{ contractAddress }}
-              <!-- <span v-if="reqVersion" style="margin-left: 10px"
-                >(CNS: {{ cnsName }} {{ reqVersion }})</span
-              >
-              <span
-                v-else
-                style="color: #1f83e7; cursor: pointer; margin-left: 10px"
-                @click="handleRegisterCns"
-                >{{ $t("text.register") }}</span
-              > -->
+              <span v-if="reqVersion" style="margin-left: 10px">(CNS: {{ cnsName }} {{ reqVersion }})</span>
+              <span v-else style="color: #1f83e7; cursor: pointer; margin-left: 10px" @click="handleRegisterCns">{{ $t("text.register") }}</span>
             </span>
           </div>
           <div v-else v-show="abiFile" class="contract-info-list">
@@ -214,12 +209,12 @@
       </div>
     </div>
     <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
-      <v-transaction @success="sendSuccess($event)" @close="handleClose" ref="send" :sendErrorMessage="sendErrorMessage" :data="data" :abi="abiFile" :version="version"></v-transaction>
+      <v-transaction @success="sendSuccess($event)" @close="handleClose" ref="send" :liquidChecks='liquidCheck' :sendErrorMessage="sendErrorMessage" :data="data" :abi="abiFile" :version="version"></v-transaction>
     </el-dialog>
     <el-dialog :title="$t('title.selectAccountAddress')" :visible.sync="dialogUser" width="550px" v-if="dialogUser" center class="send-dialog">
-      <v-user @change="deployContract(arguments)" @close="userClose" :contractName="contractName" :abi="abiFile"></v-user>
+      <v-user @change="deployContract(arguments)" @close="userClose" :liquidChecks='liquidCheck' :contractName="contractName" :abi="abiFile"></v-user>
     </el-dialog>
-    <v-editor v-if="editorShow" :show="editorShow" :data="editorData" :sendConstant="sendConstant" @close="editorClose" ref="editor" :input="editorInput" :editorOutput="editorOutput"></v-editor>
+    <v-editor v-if="editorShow" :show="editorShow" :data="editorData" :liquidChecks='liquidCheck'  :sendConstant="sendConstant" @close="editorClose" ref="editor" :input="editorInput" :editorOutput="editorOutput"></v-editor>
     <el-dialog :title="$t('title.writeJavaName')" :visible.sync="javaClassDialogVisible" width="500px" center class="send-dialog" @close="initJavaClass">
       <el-input v-model="javaClassName" :placeholder="$t('placeholder.javaPackage')"></el-input>
       <span class="font-12 font-color-ed5454" style="margin-left: 5px">{{
@@ -237,9 +232,12 @@
     </el-dialog>
 
     <el-dialog :visible.sync="addContractAddressVisible" :title="$t('dialog.addContractAddress')" width="400px" class="dialog-wrapper" center v-if="addContractAddressVisible">
-      <el-form ref="contractForm" :model="contractForm">
-        <el-form-item label=""  prop="contractAddress">
+      <el-form ref="contractForm" :rules="rules" :model="contractForm">
+        <el-form-item label="" prop="contractAddress" v-if="!liquidCheck">
           <el-input v-model="contractForm.contractAddress" :placeholder="$t('contracts.contractAddressInput')"></el-input>
+        </el-form-item>
+        <el-form-item label="" prop="contractAddressLiquid" v-else>
+          <el-input v-model="contractForm.contractAddressLiquid" :placeholder="$t('contracts.contractAddressInput')"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="text-right">
@@ -257,6 +255,7 @@ import ace from "ace-builds";
 import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/theme-tomorrow";
 import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/mode-rust";
 import "ace-builds/src-noconflict/ext-language_tools";
 require("ace-mode-solidity/build/remix-ide/mode-solidity");
 let Mode = require("ace-mode-solidity/build/remix-ide/mode-solidity").Mode;
@@ -274,6 +273,8 @@ import {
   findCnsInfo,
   exportCertSdk,
   saveChaincode,
+  liquidCompile,
+  liquidCompileCheck,
 } from "@/util/api";
 import transaction from "@/components/sendTransaction";
 import changeUser from "../dialog/changeUser";
@@ -281,7 +282,7 @@ import web3 from "@/util/ethAbi";
 import mgmtCns from "../dialog/mgmtCns";
 export default {
   name: "codes",
-  props: ["show", "changeStyle"],
+  props: ["show", "changeStyle", "liquidChecks",'navShows'],
   components: {
     "v-transaction": transaction,
     "v-user": changeUser,
@@ -289,7 +290,21 @@ export default {
     mgmtCns,
   },
   data: function () {
+       var paramRule = (rule, value, callback) => {
+      let val = value.trim().replace(/\s+/g, " ");
+      let valArr = val.split("/");
+      let valArr2 = val.substr(1).split("/");
+      if (!/^[/][0-9a-zA-Z_/.]{0,}$/.test(val)) {
+        callback(new Error(this.$t("rule.contractAddressHexLiquid")));
+      } else if (valArr2.includes("")) {
+        callback(new Error(this.$t("rule.contractAddressHexLiquid")));
+      } else {
+        callback();
+      }
+    };
     return {
+      liquidCheck: this.liquidChecks,
+      navShow:this.navShows,
       successHide: true,
       loadingAce: false,
       content: "",
@@ -306,6 +321,7 @@ export default {
       contractAddress: "",
       contractName: "",
       infoHeight: 250,
+      infoShow:false,
       contractList: [],
       dialogUser: false,
       compileinfo: "",
@@ -343,33 +359,69 @@ export default {
       mgmtCnsVisible: false,
       mgmtCnsItem: {},
       activeNames: [],
+      loadingLocal: false,
       addContractAddressVisible: false,
       contractForm: {
         contractAddress: "",
       },
-       rules: {
-                contractAddress: [
-                     {
-                        required: true,
-                        message: this.$t("rule.contractAddress"),
-                        trigger: "blur",
-                    },
-                    {
-                        pattern: /^[0x|0X]+[A-Fa-f0-9]+$/,
-                        message: this.$t("rule.contractAddressHex"),
-                        trigger: "blur",
-                    },
-                    {
-                        min: 42,
-                        max: 42,
-                        message: this.$t("rule.contractAddressLong"),
-                        trigger: "blur",
-                    },
-                ]
-            }
+      contractType: true,
+      liquidCheckTimer: null,
+      firstCall: true,
+      loadingText: this.$t("text.contractCompiling"),
+      rules: {
+        contractAddress: [
+          {
+            required: true,
+            message: this.$t("rule.contractAddress"),
+            trigger: "blur",
+          },
+          {
+            pattern: /^[0x|0X]+[A-Fa-f0-9]+$/,
+            message: this.$t("rule.contractAddressHex"),
+            trigger: "blur",
+          },
+          {
+            min: 42,
+            max: 42,
+            message: this.$t("rule.contractAddressLong"),
+            trigger: "blur",
+          },
+        ],
+        contractAddressLiquid: [
+          {
+            required: true,
+            message: this.$t("rule.contractAddress"),
+            trigger: "blur",
+          },
+          {
+            required: true,
+            validator: paramRule,
+            trigger: "blur",
+          },
+          {
+            min: 2,
+            max: 64,
+            message: this.$t("rule.contractAddressLiquidLong"),
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   watch: {
+     contractName: function (val) {
+        if (this.contractName && this.firstCall) {
+        this.compileCheckEnter();
+      }
+    },
+    liquidChecks: function (val) {
+      this.liquidCheck = val;
+      if (this.liquidCheck == true) {
+        this.aceEditor.session.setMode("ace/mode/rust");
+      } else {
+        this.aceEditor.session.setMode("ace/mode/solidity");
+      }
+    },
     content: function (val) {
       let data = Base64.decode(this.data.contractSource);
       if (data != val) {
@@ -415,11 +467,17 @@ export default {
     },
   },
 
-  created() {},
+  beforeDestroy() {
+    clearInterval(this.liquidCheckTimer);
+    Bus.$off("select");
+    Bus.$off("noData");
+  },
   beforeMount() {},
   mounted: function () {
     this.initEditor();
+    let _this = this;
     Bus.$on("select", (data) => {
+      console.log(data);
       this.codeShow = true;
       this.refreshMessage();
       this.code = "";
@@ -446,8 +504,20 @@ export default {
       this.bin = data.contractBin;
       this.bytecodeBin = data.bytecodeBin || "";
       this.version = data.version;
+      this.contractPath = data.contractPath;
       this.complieAbiTextHeight = false;
       this.complieBinTextHeight = false;
+      // if(this.contractType==false){
+      //        this.aceEditor.session.setMode("ace/mode/rust");
+      //       }else{
+      //        this.aceEditor.session.setMode("ace/mode/solidity");
+      //       }
+      // if(this.contractType!=data.contractStatus){
+      //     this.$message({
+      //     message: '合约语法不匹配,请切换语言',
+      //     type: 'warning'
+      //   });
+      //       }
       this.$nextTick(() => {
         if (
           (this.contractName === "Asset" && data.contractPath === "template") ||
@@ -460,10 +530,13 @@ export default {
         } else {
           this.aceEditor.setReadOnly(false);
         }
+        // if (this.contractName && this.firstCall && this.liquidCheck) {
+        //   this.compileCheckEnter();
+        // }
       });
-      // if (this.data.contractAddress) {
-      //   this.queryFindCnsInfo();
-      // }
+      if (this.data.contractAddress) {
+        this.queryFindCnsInfo();
+      }
     });
     Bus.$on("noData", (data) => {
       this.codeShow = false;
@@ -489,11 +562,12 @@ export default {
         return false;
       };
     });
-  },
+ },
 
   methods: {
     initEditor: function () {
       let _this = this;
+      ace.require("ace/ext/language_tools");
       this.aceEditor = ace.edit(this.$refs.ace, {
         fontSize: 14,
         fontFamily: "Consolas,Monaco,monospace",
@@ -755,6 +829,128 @@ export default {
         }
       }
     },
+    compileCheckEnter() {
+      this.firstCall = false;
+      let reqData = {
+        groupId: localStorage.getItem("groupId"),
+        contractName: this.contractName,
+        contractPath: this.contractPath,
+        contractSource: Base64.encode(this.code),
+        contractAbi: this.abiFile,
+        contractBin: this.bin,
+        bytecodeBin: this.bytecodeBin,
+        version: this.version,
+        contractId: this.contractId,
+        contractAddress: this.contractAddress,
+        isWasm: true,
+      };
+      let _this = this;
+      liquidCompileCheck(reqData)
+        .then((res) => {
+          if (res.data.code === 0 && res.data.data.status == 1) {
+            this.loadingAce = true;
+            Bus.$emit("compileLiquid",true);
+            this.compileCheck();
+            // _this.$message({
+            //   message: _this.$t("text.compiling"),
+            //   duration: 2000,
+            // });
+          }
+        })
+        .catch((err) => {
+          this.loadingAce = false;
+          this.$message({
+            message: err.data || this.$t("text.systemError"),
+            type: "error",
+            duration: 2000,
+          });
+        });
+    },
+     clearIntervals(){
+       this.loadingAce = false;
+        clearInterval(this.liquidCheckTimer);
+    },
+    compileCheck() {
+      let reqData = {
+        groupId: localStorage.getItem("groupId"),
+        contractName: this.contractName,
+        contractPath: this.contractPath,
+        contractSource: Base64.encode(this.code),
+        contractAbi: this.abiFile,
+        contractBin: this.bin,
+        bytecodeBin: this.bytecodeBin,
+        version: this.version,
+        contractId: this.contractId,
+        contractAddress: this.contractAddress,
+        isWasm: true,
+      };
+      let _this = this;
+      _this.liquidCheckTimer = setInterval(function () {
+        liquidCompileCheck(reqData)
+          .then((res) => {
+            if (res.data.code === 0 && res.data.data.status == 2) {
+              _this.loadingAce = false;
+              if (res.data.data != {}) {
+                let compiledMap = res.data.data;
+                _this.abiFileShow = true;
+                _this.successInfo = `< ${_this.$t(
+                  "text.compilationSucceeded"
+                )}`;
+                _this.abiFile = compiledMap.abi;
+                // this.abiFile = JSON.parse(this.abiFile);
+                if (!(!_this.abiFile || _this.abiFile == "[]")) {
+                  _this.abiEmpty = false;
+                }
+                _this.bin = compiledMap.bin;
+                _this.bytecodeBin = compiledMap.bin;
+                _this.data.contractAbi = _this.abiFile;
+                _this.data.contractBin = _this.bin;
+                _this.data.contractSource = Base64.encode(_this.content);
+                _this.$set(_this.data, "bytecodeBin", _this.bytecodeBin);
+                // this.$emit("compile", false)
+                Bus.$emit("compile", _this.data);
+                Bus.$emit("compileLiquid",false);
+                clearInterval(_this.liquidCheckTimer);
+              }
+            } else if ((res.data.code === 0 && res.data.data.status == 3)||(res.data.code === 0 && res.data.data.status == 4)) {
+              _this.loadingAce = false;
+              clearInterval(_this.liquidCheckTimer);
+                Bus.$emit("compileLiquid",false);
+              _this.$message({
+                message: _this.$chooseLang(res.data.code),
+                type: "error",
+                duration: 2000,
+              });
+            } else if (res.data.code === 0 && res.data.data.status == 1) {
+              _this.loadingAce = true;
+              _this.loadingText = _this.$t("text.waitingTip");
+              // _this.$message({
+              //   message: _this.$t("text.compiling"),
+              //   duration: 2000,
+              // });
+            } else {
+                clearInterval(_this.liquidCheckTimer);
+                Bus.$emit("compileLiquid",false);
+              _this.loadingAce = false;
+              _this.$message({
+                message: _this.$chooseLang(res.data.code),
+                type: "error",
+                duration: 2000,
+              });
+            }
+          })
+          .catch((err) => {
+            _this.loadingAce = false;
+                Bus.$emit("compileLiquid",false);
+            clearInterval(_this.liquidCheckTimer);
+            _this.$message({
+              message: err.data || _this.$t("text.systemError"),
+              type: "error",
+              duration: 2000,
+            });
+          });
+      }, 5000);
+    },
     compile(callback) {
       //  let data = Base64.encode(this.content);
       //   if (this.data.contractSource != data) {
@@ -763,14 +959,80 @@ export default {
       //   }else{
       // this.$emit("compile", true)
       //   this.loadingAce = true;
+      Bus.$emit("compileLiquid",true);
+     this.loadingText=this.$t("text.contractCompiling")
       let version = this.$store.state.versionData;
-      if (version && version.net !== 0) {
-        this.compileHighVersion(callback);
+      if (this.liquidCheck) {
+        this.loadingAce = true;
+        let reqData = {
+          groupId: localStorage.getItem("groupId"),
+          contractName: this.contractName,
+          contractPath: this.contractPath,
+          contractSource: Base64.encode(this.code),
+          contractAbi: this.abiFile,
+          contractBin: this.bin,
+          bytecodeBin: this.bytecodeBin,
+          version: this.version,
+          contractId: this.contractId,
+          contractAddress: this.contractAddress,
+        isWasm: true,
+};
+        liquidCompile(reqData)
+          .then((res) => {
+            if (res.data.code === 0 && res.data.data.status == 2) {
+              this.loadingAce = false;
+              if (res.data.data != {}) {
+                let compiledMap = res.data.data;
+                this.abiFileShow = true;
+                this.successInfo = `< ${this.$t("text.compilationSucceeded")}`;
+                this.abiFile = compiledMap.abi;
+                // this.abiFile = JSON.parse(this.abiFile);
+                if (!(!this.abiFile || this.abiFile == "[]")) {
+                  this.abiEmpty = false;
+                }
+                this.bin = compiledMap.bin;
+                this.bytecodeBin = compiledMap.bin;
+                this.data.contractAbi = this.abiFile;
+                this.data.contractBin = this.bin;
+                this.data.contractSource = Base64.encode(this.content);
+                this.$set(this.data, "bytecodeBin", this.bytecodeBin);
+                // this.$emit("compile", false)
+                Bus.$emit("compile", this.data);
+                Bus.$emit("compileLiquid", false);
+                this.setMethod();
+              }
+            } else if (res.data.code === 0 && res.data.data.status == 1) {
+              this.loadingAce = true;
+              this.compileCheck();
+            } else {
+              this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
+              this.$message({
+                message: this.$chooseLang(res.data.code),
+                type: "error",
+                duration: 2000,
+              });
+            }
+          })
+          .catch((err) => {
+            this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
+            this.$message({
+              message: err.data || this.$t("text.systemError"),
+              type: "error",
+              duration: 2000,
+            });
+          });
       } else {
-        setTimeout(() => {
-          this.compileLowVersion(callback);
-        }, 500);
+        if (version && version.net !== 0) {
+          this.compileHighVersion(callback);
+        } else {
+          setTimeout(() => {
+            this.compileLowVersion(callback);
+          }, 500);
+        }
       }
+
       //   }
     },
     //v0.6.10
@@ -825,25 +1087,21 @@ export default {
             }
           } else {
             that.errorMessage = output.errors;
-            if (output.error) {
-              that.errorMessage = [
-                { component: "general", formattedMessage: output.error },
-              ];
-            }
             that.errorInfo = that.$t("contracts.contractCompileFail");
             that.loadingAce = false;
+            Bus.$emit("compileLiquid", false);
           }
         } else {
           console.log(ev.data);
           console.log(JSON.parse(ev.data.data));
         }
       };
-
       w.addEventListener("error", function (ev) {
         that.errorInfo = ev;
         that.errorMessage = ev;
         that.compileShow = true;
         that.loadingAce = false;
+        Bus.$emit("compileLiquid", false);
       });
     },
     //v0.4.25 v0.5.1
@@ -885,6 +1143,7 @@ export default {
         this.errorMessage = error;
         this.compileShow = true;
         this.loadingAce = false;
+        Bus.$emit("compileLiquid", false);
       }
       setTimeout(() => {
         if (output && JSON.stringify(output.contracts) != "{}") {
@@ -902,6 +1161,7 @@ export default {
           });
           this.errorInfo = this.$t("text.compilationFailed");
           this.loadingAce = false;
+          Bus.$emit("compileLiquid", false);
         }
       }, 500);
     },
@@ -924,6 +1184,7 @@ export default {
           this.$set(this.data, "bytecodeBin", this.bytecodeBin);
           // this.$emit("compile", false)
           this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
           if (callback && !callback.type) {
             callback();
           }
@@ -937,11 +1198,13 @@ export default {
           this.errorInfo = this.$t("text.compilationFailed");
           this.compileShow = true;
           this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
         }
       } else {
         this.errorInfo = this.$t("text.compilationFailed");
         this.compileShow = true;
         this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
       }
     },
     refreshMessage: function () {
@@ -968,8 +1231,10 @@ export default {
           message: this.$t("text.haveAbi"),
         });
       } else {
-        if (this.abiFile) {
+        if (this.abiFile && !this.liquidCheck) {
           this.compile(this.deploy);
+        } else if (this.abiFile && this.liquidCheck) {
+          this.deploy();
         } else {
           this.$message.error(`${this.$t("text.compilationFailed")}`);
         }
@@ -1059,27 +1324,61 @@ export default {
         });
     },
     deployContract($event) {
+      this.loadingText = "";
       var val = $event[0],
-        cns = $event[1];
+        cns = $event[1],
+        liquid = $event[2];
+      let reqData;
+      if (liquid.ifLiquid) {
+        reqData = {
+          groupId: localStorage.getItem("groupId"),
+          contractBin: this.bin,
+          bytecodeBin: this.bytecodeBin,
+          abiInfo: JSON.parse(this.abiFile),
+          contractSource: Base64.encode(this.content),
+          user: val.userId,
+          contractName: this.contractName,
+          contractId: this.data.id,
+          contractPath: this.data.contractPath,
+          useAes: false,
+          isWasm: true,
+          contractAddress: liquid.contractAddress,
+        };
+      } else {
+        reqData = {
+          groupId: localStorage.getItem("groupId"),
+          contractBin: this.bin,
+          bytecodeBin: this.bytecodeBin,
+          abiInfo: JSON.parse(this.abiFile),
+          contractSource: Base64.encode(this.content),
+          user: val.userId,
+          contractName: this.contractName,
+          contractId: this.data.id,
+          contractPath: this.data.contractPath,
+          useAes: false,
+        };
+      }
       this.loadingAce = true;
-      let reqData = {
-        groupId: localStorage.getItem("groupId"),
-        contractBin: this.bin,
-        bytecodeBin: this.bytecodeBin,
-        abiInfo: JSON.parse(this.abiFile),
-        contractSource: Base64.encode(this.content),
-        user: val.userId,
-        contractName: this.contractName,
-        contractId: this.data.id,
-        contractPath: this.data.contractPath,
-        useAes: false,
-      };
+                Bus.$emit("compileLiquid", true);
+      // let reqData = {
+      //   groupId: localStorage.getItem("groupId"),
+      //   contractBin: this.bin,
+      //   bytecodeBin: this.bytecodeBin,
+      //   abiInfo: JSON.parse(this.abiFile),
+      //   contractSource: Base64.encode(this.content),
+      //   user: val.userId,
+      //   contractName: this.contractName,
+      //   contractId: this.data.id,
+      //   contractPath: this.data.contractPath,
+      //   useAes: false,
+      // };
       this.version = val.version;
       if (val.params.length) {
         reqData.funcParam = val.params;
       }
       getDeployStatus(reqData).then((res) => {
         this.loadingAce = false;
+                Bus.$emit("compileLiquid", false);
         const { data, status } = res;
         if (status === 200) {
           this.abiFileShow = true;
@@ -1093,9 +1392,9 @@ export default {
           this.data.contractSource = Base64.encode(this.content);
           this.data.contractAddress = this.contractAddress;
           this.data.contractVersion = this.version;
-          // if (cns.saveEnabled) {
-          //   this.queryRegisterCns(val, cns);
-          // }
+          if (cns.saveEnabled) {
+            this.queryRegisterCns(val, cns);
+          }
           Bus.$emit("deploy", this.data);
         } else {
           this.status = 3;
@@ -1104,7 +1403,17 @@ export default {
             type: "error",
           });
         }
-      });
+      })
+       .catch((err) => {
+          Bus.$emit("compileLiquid", false);
+          this.status = 3;
+          this.loading = false;
+          this.$message({
+            message: err.data || this.$t("text.systemError"),
+            type: "error",
+            duration: 2000,
+          });
+        });
     },
     queryRegisterCns(val, cns) {
       let param = {
@@ -1273,11 +1582,15 @@ export default {
       if (this.showCompileText) {
         this.infoHeight = 250;
       } else if (!this.showCompileText) {
-        this.infoHeight = 50;
+        this.infoHeight = 40;
       }
-      this.$nextTick(() => {
-        this.resizeCode();
-      });
+      let _this=this
+      let resizeTime=  setInterval(function(){
+        _this.resizeCode();
+      },1)
+      setTimeout(function(){
+        clearInterval(resizeTime)
+      },600)
     },
     searchKeyword() {
       this.searchVisibility = true;
@@ -1417,22 +1730,15 @@ export default {
       this.contractForm.contractAddress = "";
     },
     sureContractAddress(formName) {
-            this.$refs[formName].validate(valid => {
-                if (valid) {
-                    if (this.contractForm.contractAddress=='' || this.contractForm.contractAddress==null) {
-                        this.$message({
-                            type: "error",
-                            message: this.$t('contracts.contractAddressInput')
-                        });
-                    } else {
-                        this.addContractAddressVisible = false;
-                        this.addContract()
-                    }
-                } else {
-                    return false;
-                }
-            });
-        },
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+            this.addContractAddressVisible = false;
+            this.addContract();
+        } else {
+          return false;
+        }
+      });
+    },
     addContract: function () {
       let reqData = {
         groupId: localStorage.getItem("groupId"),
@@ -1442,10 +1748,14 @@ export default {
         contractAbi: this.data.contractAbi,
         contractBin: this.data.contractBin,
         bytecodeBin: this.data.bytecodeBin,
-        contractAddress: this.contractForm.contractAddress,
       };
       if (this.data.id) {
         reqData.id = this.data.id;
+      }
+      if(this.liquidCheck){
+          reqData.contractAddress = this.contractForm.contractAddressLiquid;
+      }else{
+          reqData.contractAddress = this.contractForm.contractAddress;
       }
       Bus.$emit("save", reqData);
     },
@@ -1532,12 +1842,11 @@ export default {
   border-left: 1px solid #242e42;
   height: calc(100% - 50px);
   box-sizing: border-box;
-  min-width: 960px;
-
 }
 .contract-code-mirror {
   width: 100%;
   height: 70%;
+  transition: all 0.5s;
 }
 .contract-info {
   position: relative;
@@ -1567,6 +1876,7 @@ export default {
   text-align: center;
   cursor: pointer;
   padding: 5px 0px;
+  padding-bottom: 15px;
 }
 .contract-info-title:hover > i {
   color: #fff;
@@ -1642,6 +1952,7 @@ export default {
 .contract-info {
   background-color: #2b374d;
   color: #fff;
+   height: 250px;
 }
 .titleActive {
   padding-left: 40px;

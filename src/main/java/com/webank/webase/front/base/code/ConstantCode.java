@@ -145,6 +145,8 @@ public class ConstantCode {
     public static final RetCode PARAM_ADDRESS_IS_INVALID = RetCode.mark(201201, "address is invalid");
     // permission
     public static final RetCode PERMISSION_DENIED = RetCode.mark(201202, "permission denied, please check chain administrator permission");
+    public static final RetCode ALREADY_ADMIN_OF_CONTRACT = RetCode.mark(201204, "the account has been the admin of concurrt contract.");
+
     // sys config
     public static final RetCode UNSUPPORTED_SYSTEM_CONFIG_KEY = RetCode.mark(201208, "unsupported for this system config key");
     public static final RetCode SET_SYSTEM_CONFIG_GAS_RANGE_ERROR =  RetCode.mark(201209,
@@ -193,13 +195,6 @@ public class ConstantCode {
     public static final RetCode ABI_INFO_NOT_EXISTS = RetCode.mark(201256, "abi info of this id not exists");
     public static final RetCode PARAM_FAIL_ABI_ID_EMPTY = RetCode.mark(201257, "Abi Id cannot be empty");
 
-    // upload solc js file
-    public static final RetCode PARAM_FAIL_SOLC_FILE_EMPTY = RetCode.mark(201261, "Solc js file cannot be empty");
-    public static final RetCode PARAM_FAIL_SOLC_FILE_NAME_EMPTY = RetCode.mark(201262, "Solc js file name cannot be empty");
-    public static final RetCode PARAM_FAIL_FILE_NAME_EXISTS = RetCode.mark(201263, "Solc js file name already exist");
-    public static final RetCode PARAM_FAIL_FILE_NAME_NOT_EXISTS = RetCode.mark(201263, "Solc js file name not exist in db");
-    public static final RetCode SAVE_SOLC_FILE_ERROR = RetCode.mark(201264, "Save solc js file error");
-    public static final RetCode READ_SOLC_FILE_ERROR = RetCode.mark(201265, "read solc js file error, please check if file deleted");
 
     // chain governance
     public static final RetCode CHAIN_THRESHOLD_PARAM_ERROR = RetCode.mark(201301, "threshold must be greater than zero");
@@ -224,8 +219,8 @@ public class ConstantCode {
     public static final RetCode WEB3J_PEM_P12_MANAGER_DEPENDENCY_ERROR = RetCode.mark(201503, "pem/p12 manager get key pair error for bc dependency error");
     public static final RetCode REQUEST_SIGN_RETURN_ERROR = RetCode.mark(201504, "sign service return error");
     // transaction
-    public static final RetCode TX_RECEIPT_CODE_ERROR = RetCode.mark(201510, "transaction receipt status return error");
-    public static final RetCode CONTRACT_ABI_PARSE_JSON_ERROR = RetCode.mark(201511, "contract abi parse json error");
+    public static final RetCode TX_RECEIPT_NOT_EXIST_ERROR = RetCode.mark(201510, "transaction receipt of this hash not exist");
+    public static final RetCode BLOCK_NOT_EXIST_ERROR = RetCode.mark(201511, "block of this hash not exist");
     public static final RetCode CALL_CONTRACT_IO_EXCEPTION = RetCode.mark(201512, "call contract error for io exception");
     public static final RetCode GET_TX_RECEIPT_EXEC_ERROR = RetCode.mark(201513, "get transaction receipt fail for exec");
     public static final RetCode GET_TX_RECEIPT_TIMEOUT_ERROR = RetCode.mark(201514, "get transaction receipt fail for time out");
@@ -244,6 +239,9 @@ public class ConstantCode {
     public static final RetCode ALREADY_EXISTS_IN_SEALER_LIST = RetCode.mark(-51104, "The node already exists in the sealerList");
     public static final RetCode ALREADY_EXISTS_IN_OBSERVER_LIST = RetCode.mark(-51105, "The node already exists in the observerList");
     //public static final RetCode ALREADY_EXISTS_IN_OBSERVER_LIST = RetCode.mark(51105, "The");
+    public static final RetCode PEERS_NOT_CONNECTED = RetCode.mark(201128, "group peers not connected");
+    public static final RetCode GENESIS_CONF_NOT_FOUND = RetCode.mark(201131, "group genesis conf not found");
+
 
     /* fit in 3.0 */
     public static final RetCode BCOS_SDK_EMPTY = RetCode.mark(201600, "BcosSDK is empty, call config api to init one bcosSDK");
@@ -254,10 +252,46 @@ public class ConstantCode {
     public static final RetCode BUILD_NEW_CLIENT_FAILED = RetCode.mark(201605, "Build client instance of new group failed");
     public static final RetCode CLIENT_ONLY_SUPPORT_WASM = RetCode.mark(201606, "This group only support Liquid contract of wasm");
     public static final RetCode CLIENT_NOT_CONNECTED_WITH_THIS_GROUP = RetCode.mark(201607, "This group not connected with front's rpc peers");
-
-    public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
+    public static final RetCode GROUP_SOL_WASM_NOT_MATCH = RetCode.mark(201608, "Deploying contract not match with the group(solidity/liquid)");
+    public static final RetCode LIQUID_CONTRACT_ALREADY_COMPILING = RetCode.mark(201609, "This liquid contract already compiling, please wait...");
+    public static final RetCode LIQUID_CONTRACT_TASK_NOT_EXIST = RetCode.mark(201610, "Contract compile task not exist");
 
     public static final RetCode ADD_SEALER_WEIGHT_CANNOT_NULL = RetCode.mark(201621, "Sealer's weight cannot be null");
 
+    /* proposal */
+    public static final RetCode PROPOSAL_IS_VOTING = RetCode.mark(201622, "Proposal is voting, the previous vote need to be finished");
+    public static final RetCode PROPOSAL_IS_NOT_VOTABLE = RetCode.mark(201623, "The proposal is not votable , please ensure the proposal");
+    public static final RetCode PROPOSAL_IS_ALREADY_VOTED = RetCode.mark(201624, "The acconut address has already voted the proposal");
+    public static final RetCode PROPOSAL_NOT_EXIST = RetCode.mark(201625, "The proposal is not exist");
+    public static final RetCode PROPOSAL_NOT_NEW_CREATED = RetCode.mark(201626,"Only newly created proposal can be revoked");
+    public static final RetCode PROPOSAL_NOT_END = RetCode.mark(201627," Current proposal not end");
+
+
+    /* rc2 liquid */
+    public static final RetCode EXEC_JAVA_COMMAND_TIMEOUT = RetCode.mark(201631, "Java Command exec timeout");
+    public static final RetCode EXEC_JAVA_COMMAND_RETURN_FAILED = RetCode.mark(201632, "Java Command return error");
+    public static final RetCode DEPLOY_LIQUID_ADDRESS_CANNOT_EMPTY = RetCode.mark(201633, "When deploying liquid, contract address must not be empty");
+    public static final RetCode LIQUID_ENV_NOT_CONFIG = RetCode.mark(201634, "Liquid environment not configured in the host of webase-front");
+    public static final RetCode LIQUID_NEW_PROJECT_FAILED = RetCode.mark(201635, "Create new liquid project failed, please check 'liquid' directory in webase-front");
+    public static final RetCode LIQUID_NEW_PROJECT_SED_GITEE_FAILED = RetCode.mark(201636, "Create new liquid project and set gitee url failed");
+    public static final RetCode WRITE_CONTRACT_SOURCE_FAILED = RetCode.mark(201637, "Write liquid contract source into lib.rs file failed");
+    public static final RetCode LIQUID_COMPILE_FAILED = RetCode.mark(201638, "Compile liquid contract failed, please check contract source");
+    public static final RetCode LIQUID_TARGET_FILE_NOT_EXIST = RetCode.mark(201639, "Liquid compile target file not exist, please check 'liquid' directory in webase-front");
+    public static final RetCode LIQUID_READ_ABI_BIN_FAILED = RetCode.mark(201640, "Read liquid contract's abi and bin file failed, please check 'liquid' directory in webase-front");
+
+    public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
+
+    /* permission */
+    public static final RetCode EXEC_ENV_IS_WASM = RetCode.mark(201670, "exec env is wasm, don't support");
+    public static final RetCode MUST_BE_GOVERNOR = RetCode.mark(201671, "the account must be the governor.");
+    public static final RetCode MUST_BE_PROPOSER = RetCode.mark(201672, "the account must be the proposer of proposal.");
+    public static final RetCode OPEN_TABLE_FAILED = RetCode.mark(201673,"Open table failed, please check the existence of the table");
+    public static final RetCode NOT_SET_METHOD_AUTH_TYPE = RetCode.mark(201674,"The contract method auth type not set, please set method auth type first.");
+
+    /* bfs path */
+    public static final RetCode BFS_INVALID_PATH = RetCode.mark(201680, "the PATH is invalid.");
+
+    /* cns path */
+    public static final RetCode CONTRACT_NAME_VERSION_EXIST = RetCode.mark(201685, "contract name and version already exist");
 
 }

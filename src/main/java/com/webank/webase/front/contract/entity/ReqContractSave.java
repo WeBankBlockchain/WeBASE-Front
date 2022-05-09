@@ -16,7 +16,7 @@ package com.webank.webase.front.contract.entity;
 
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 @Data
 public class ReqContractSave {
@@ -41,4 +41,6 @@ public class ReqContractSave {
     private String contractBin;
 
     private String contractAddress;
+
+    private Boolean isWasm = false;
 }

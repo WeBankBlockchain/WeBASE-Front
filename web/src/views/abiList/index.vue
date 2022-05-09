@@ -44,9 +44,9 @@
         </div>
         <abi-dialog :show="abiDialogShow" v-if="abiDialogShow" :data='abiData' @close="abiClose"></abi-dialog>
         <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
-            <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :data="data" :abi='abiData' :version='version'></send-transation>
+            <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :liquidChecks='liquidCheck' :data="data" :abi='abiData' :version='version'></send-transation>
         </el-dialog>
-        <editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' :input="editorInput" :editorOutput="editorOutput"></editor>
+        <editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose' :input="editorInput" :liquidChecks='liquidCheck' :editorOutput="editorOutput"></editor>
         <el-dialog :title="$t('nodes.addAbi')" :visible.sync="importVisibility" width="500px" v-if="importVisibility" center class="send-dialog">
             <import-abi @importSuccess="importSuccess" @closeImport="closeImport"></import-abi>
         </el-dialog>
@@ -64,7 +64,7 @@ import editor from "@/views/chaincode/dialog/editor"
 // import editor from "@/components/editor"
 import importAbi from "./components/importAbi"
 import updateAbi from "./components/updateAbi"
-import { getAbiList, deleteImportAbi } from "@/util/api"
+import { getAbiList, deleteImportAbi,checkIsWasm } from "@/util/api"
 import Bus from "@/bus"
 export default {
     name: 'nodeList',
@@ -101,7 +101,8 @@ export default {
             editorData: null,
             editorInput: null,
             editorOutput: null,
-            groupId: localStorage.getItem('groupId')
+            groupId: localStorage.getItem('groupId'),
+            liquidCheck:false
         }
     },
 
@@ -155,10 +156,28 @@ export default {
         if (localStorage.getItem('groupId')) {
             this.queryAbiList()
         }
+        this.liquidCheckMethod()
+
     },
 
     methods: {
+         liquidCheckMethod() {
+      let group = localStorage.getItem("groupId");
+      checkIsWasm(group)
+        .then((res) => {
+          if (res.data == true) {
+            this.liquidCheck = true;
+          }
+        })
+        .catch((err) => {
+          this.$message({
+            type: "error",
+            message: err.data || this.$t("text.systemError"),
+          });
+        });
+    },
         changeGroup() {
+        this.liquidCheckMethod()
             this.queryAbiList()
         },
         closeImport() {

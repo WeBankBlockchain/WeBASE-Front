@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -43,6 +45,8 @@ public class JsonUtils {
         objectMapper.setSerializationInclusion(Include.ALWAYS);
         // timestamp
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        // LocalDatetime
+        objectMapper.registerModule(new JavaTimeModule());
         // date format
         objectMapper.setDateFormat(new SimpleDateFormat(STANDARD_FORMAT));
         return objectMapper;

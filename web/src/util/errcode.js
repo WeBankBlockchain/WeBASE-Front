@@ -565,12 +565,12 @@ let errCode = {
         zh: '签名服务并返回异常'
     },
     "201510": {
-        en: "transaction receipt status return error",
-        zh: '交易回执状态码非0x0，交易执行失败'
+        en: "transaction receipt of this hash not exist",
+        zh: '此哈希的交易回执不存在'
     },
     "201511": {
-        en: "contract abi parse json error",
-        zh: '合约ABI转JSON失败'
+        en: "block of this hash not exist",
+        zh: '此哈希块不存在'
     },
     "201512": {
         en: "call contract error for io exception",
@@ -1055,6 +1055,26 @@ let errCode = {
     "201607": {
         en: "This group not connected with front's rpc peers",
         zh: "节点前置无法通过已连接的rpc节点访问该群组"
+    },
+    "201631": {
+        en: "Java Command exec timeout",
+        zh: "Liquid命令执行超时"
+    },
+    "201632": {
+        en: "Java Command return error",
+        zh: "Liquid命令返回错误，请检查日志"
+    },
+    "201633": {
+        en: "When deploying liquid, contract address must not be empty",
+        zh: "部署liquid时，合约地址不得为空"
+    },
+    "201609": {
+        en: "This liquid contract already compiling, please wait...",
+        zh: "liquid合约编译中，请稍候..."
+    },
+    "201014": {
+        en: "ContractAddress Already Used",
+        zh: "合约地址已被使用"
     },
 }
 export function chooseLang(code) {

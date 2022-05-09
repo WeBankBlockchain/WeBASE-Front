@@ -17,7 +17,7 @@ package com.webank.webase.front.transaction.entity;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 /**
  * get encoded function string
@@ -33,4 +33,5 @@ public class ReqEncodeFunction {
     private List<Object> funcParam;
     @NotBlank
     private String groupId;
+    private Boolean isWasm = false;
 }

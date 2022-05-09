@@ -16,10 +16,6 @@
 
 package com.webank.webase.front.event;
 
-import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
-import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_BLOCK;
-import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_EVENT;
-
 import com.webank.webase.front.abi.AbiService;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
@@ -30,27 +26,14 @@ import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.ContractService;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.event.callback.ContractEventCallback;
+import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.event.callback.SyncEventLogCallback;
-import com.webank.webase.front.event.entity.ContractEventInfo;
-import com.webank.webase.front.event.entity.DecodedEventLog;
-import com.webank.webase.front.event.entity.EventTopicParam;
-import com.webank.webase.front.event.entity.NewBlockEventInfo;
-import com.webank.webase.front.event.entity.RspContractInfo;
+import com.webank.webase.front.event.entity.*;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.codec.ABICodec;
 import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.eventsub.EventSubParams;
@@ -60,6 +43,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static com.webank.webase.front.util.RabbitMQUtils.*;
 
 /**
  * event notify in message queue service
@@ -81,9 +74,11 @@ public class EventService {
     @Autowired
     private Web3ApiService web3ApiService;
     @Autowired
-    private Map<String, EventSubscribe> eventSubscribeMap;
-    @Autowired
     private Web3Config web3Config;
+    @Autowired
+    private BcosSDK bcosSDK;
+//    @Autowired
+//    private Map<String ,EventSubscribe> eventSubscribeMap;
     @Autowired
     private Constants constants;
     @Autowired
@@ -105,6 +100,7 @@ public class EventService {
         // String blockRoutingKey = queueName + "_" + ROUTING_KEY_BLOCK + "_" + appId;
         String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4);
         String routingKey = appId + "_" + ROUTING_KEY_BLOCK + "_" + randomStr;
+        this.checkNewBlockEventExist(appId, exchangeName, queueName);
         this.handleRegNewBlock(appId, groupId, exchangeName, queueName, routingKey);
         return newBlockEventInfoRepository.findByAppId(appId);
     }
@@ -113,26 +109,24 @@ public class EventService {
     public void handleRegNewBlock(String appId, String groupId, String exchangeName, String queueName,
         String routingKey) {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
-        // to register or unregister todo register block notify
-//        GroupServiceImpl groupManagerService = bcosSDK.getGroupManagerService();
 //        String registerId = null;
-//        try {
-//            log.info("registerNewBlockEvent saved to db successfully");
-//            NewBlockEventCallback callback = new NewBlockEventCallback(mqPublisher, groupId,
-//                new PublisherHelper(groupId, exchangeName, routingKey));
-//            registerId = groupManagerService.registerBlockNotifyCallback(callback);
-//            // save to db 通过db来保证不重复注册
-//            String infoId = addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
-//                appId, groupId, exchangeName, queueName, routingKey, registerId);
-//            // record groupId, exchange, routingKey for all block notify
-//            BLOCK_ROUTING_KEY_MAP.put(registerId, callback);
-//            log.info("end registerNewBlockEvent, infoId:{}, registerId:{}", infoId, registerId);
-//        } catch (Exception e) {
-//            log.error("register newBlockEvent error:[]", e);
-//            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
-//            groupManagerService.eraseBlockNotifyCallback(registerId);
-//            throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
-//        }
+        try {
+            NewBlockEventCallback callback = new NewBlockEventCallback(mqPublisher, groupId,
+                new PublisherHelper(groupId, exchangeName, routingKey), true);
+            bcosSDK.registerBlockNotifier(groupId, callback);
+            // save to db 通过db来保证不重复注册
+            String infoId = addNewBlockEventInfo(EventTypes.BLOCK_NOTIFY.getValue(),
+                appId, groupId, exchangeName, queueName, routingKey, null);
+            log.info("registerNewBlockEvent saved to db successfully");
+            // record groupId, exchange, routingKey for all block notify
+            BLOCK_ROUTING_KEY_MAP.put(infoId, callback);
+            log.info("end registerNewBlockEvent, infoId:{}", infoId);
+        } catch (Exception e) {
+            log.error("register newBlockEvent error:[]", e);
+            mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
+//            groupManagerService.eraseBlockNotifyCallback(registerId); todo
+            throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
+        }
     }
 
 
@@ -148,11 +142,12 @@ public class EventService {
     public List<ContractEventInfo> registerContractEvent(String appId, String groupId, String exchangeName, String queueName,
                                                          String abi, String fromBlock, String toBlock,
                                                          String contractAddress, List<String> topicList) {
-        log.info("start registerContractEvent appId:{},groupId:{},contractAddress:{},params:{},exchangeName:{},queueName:{}",
-                appId, groupId, abi, contractAddress , exchangeName, queueName);
+        log.info("start registerContractEvent appId:{},groupId:{},abi:{},contractAddress:{},exchangeName:{},queueName:{},topicList:{}",
+                appId, groupId, abi, contractAddress, exchangeName, queueName, topicList);
         // String eventRoutingKey = queueName + "_" + ROUTING_KEY_EVENT + "_" + appId;
         String randomStr = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 4);
         String routingKey = appId + "_" + ROUTING_KEY_EVENT + "_" + randomStr;
+        this.checkContractEventExist(appId, exchangeName, queueName, contractAddress);
         this.handleRegContract(appId, groupId, exchangeName, queueName, routingKey,
             abi, fromBlock, toBlock, contractAddress, topicList);
         return contractEventInfoRepository.findByAppId(appId);
@@ -164,28 +159,29 @@ public class EventService {
         mqService.bindQueue2Exchange(exchangeName, queueName, routingKey);
         // to register or unregister
         EventSubscribe eventSubscribe = this.getEventSubscribe(String.valueOf(groupId));
-        ContractEventCallback callback = null;
-        String registerId = "";
+        String registerId = null;
         try {
-            log.info("registerContractEvent saved to db successfully");
             // init EventLogUserParams for register
             EventSubParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
                 toBlock, contractAddress, topicList, web3ApiService.getWeb3j(groupId).getCryptoSuite());
-            callback = new ContractEventCallback(mqPublisher, exchangeName, routingKey, groupId, appId,
+            ContractEventCallback callback = new ContractEventCallback(mqPublisher, exchangeName, routingKey, groupId, appId,
                 new ABICodec(web3ApiService.getCryptoSuite(groupId), false), abi, topicList);
-            registerId = "";// todo add registerId
-            eventSubscribe.subscribeEvent(params, callback);
+            // register
+            registerId = eventSubscribe.subscribeEvent(params, callback);
             // save to db first
             String infoId = addContractEventInfo(EventTypes.EVENT_LOG_PUSH.getValue(), appId, groupId,
                 exchangeName, queueName, routingKey, abi, fromBlock, toBlock, contractAddress, topicList,
                 registerId);
+            log.info("registerContractEvent saved to db successfully");
             CONTRACT_EVENT_CALLBACK_MAP.put(registerId, callback);
             log.info("end registerContractEvent infoId:{}, registerId:{}", infoId, registerId);
         } catch (Exception e) {
             log.error("Register contractEvent failed: ", e);
             // make transactional
             mqService.unbindQueueFromExchange(exchangeName, queueName, routingKey);
-            eventSubscribe.unsubscribeEvent(registerId);
+            if (registerId != null) {
+                eventSubscribe.unsubscribeEvent(registerId);
+            }
             throw new FrontException(ConstantCode.REGISTER_FAILED_ERROR);
         }
     }
@@ -193,7 +189,13 @@ public class EventService {
     @Transactional
     public String addNewBlockEventInfo(int eventType, String appId, String groupId,
         String exchangeName, String queueName, String routingKey, String registerId) {
-        checkNewBlockEventExist(appId, exchangeName, queueName);
+
+        NewBlockEventInfo eventRow = newBlockEventInfoRepository
+            .findNewBlockEventInfo(appId, exchangeName, queueName);
+        if (Objects.nonNull(eventRow)) {
+            log.warn("addNewBlockEventInfo already exist: eventRow:{}", eventRow);
+            return eventRow.getId();
+        }
         NewBlockEventInfo registerInfo = new NewBlockEventInfo();
         registerInfo.setAppId(appId);
         registerInfo.setExchangeName(exchangeName);
@@ -222,7 +224,13 @@ public class EventService {
         String exchangeName, String queueName, String routingKey, String abi,
         String fromBlock, String toBlock, String contractAddress, List<String> topicList,
         String registerId) throws FrontException {
-        checkContractEventExist(appId, exchangeName, queueName, contractAddress);
+
+        ContractEventInfo eventRow = contractEventInfoRepository
+            .findContractEventInfo(appId, exchangeName, queueName, contractAddress);
+        if (Objects.nonNull(eventRow)) {
+            log.warn("addContractEventInfo already exist: eventRow:{}", eventRow);
+            return eventRow.getId();
+        }
         ContractEventInfo registerInfo = new ContractEventInfo();
         registerInfo.setEventType(eventType);
         registerInfo.setAppId(appId);
@@ -290,22 +298,26 @@ public class EventService {
                                                       String queueName) {
         log.debug("unregisterNewBlock appId:{},groupId:{},exchangeName:{},queueName:{}",
                 appId, groupId, exchangeName, queueName);
-        NewBlockEventInfo eventInfo = newBlockEventInfoRepository.findById(infoId);
+        NewBlockEventInfo eventInfo = newBlockEventInfoRepository.findById(infoId).orElse(null);
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
-//        GroupServiceImpl groupManagerService = bcosSDK.getGroupManagerService(); todo 取消注册出块
-//        try {
-//            String registerId = eventInfo.getRegisterId();
+        try {
+//            String registerId = eventInfo.getRegisterId(); todo 加上取消注册
 //            groupManagerService.eraseBlockNotifyCallback(registerId);
 //            BLOCK_ROUTING_KEY_MAP.remove(registerId);
-//            mqService.unbindQueueFromExchange(exchangeName, queueName, eventInfo.getRoutingKey());
-//        } catch (Exception e) {
-//            log.error("unregisterNewBlock error: ", e);
-//            throw new FrontException(ConstantCode.UNREGISTER_FAILED_ERROR);
-//        }
+            NewBlockEventCallback callback = BLOCK_ROUTING_KEY_MAP.get(infoId);
+            if (callback != null) {
+                callback.setRunning(false);
+            }
+            BLOCK_ROUTING_KEY_MAP.remove(infoId);
+            mqService.unbindQueueFromExchange(exchangeName, queueName, eventInfo.getRoutingKey());
+        } catch (Exception e) {
+            log.error("unregisterNewBlock error: ", e);
+            throw new FrontException(ConstantCode.UNREGISTER_FAILED_ERROR);
+        }
         // remove from db
-        newBlockEventInfoRepository.delete(infoId);
+        newBlockEventInfoRepository.deleteById(infoId);
         return newBlockEventInfoRepository.findByAppId(appId);
     }
 
@@ -342,7 +354,7 @@ public class EventService {
                                                       String queueName) {
         log.debug("unregisterContractEvent infoId:{},appId:{},groupId:{},exchangeName:{},queueName:{}",
                 infoId, appId, groupId, exchangeName, queueName);
-        ContractEventInfo eventInfo = contractEventInfoRepository.findById(infoId);
+        ContractEventInfo eventInfo = contractEventInfoRepository.findById(infoId).orElse(null);
         if (Objects.isNull(eventInfo)) {
             throw new FrontException(ConstantCode.DATA_NOT_EXIST_ERROR);
         }
@@ -363,7 +375,7 @@ public class EventService {
             throw new FrontException(ConstantCode.UNREGISTER_FAILED_ERROR);
         }
         // remove from db
-        contractEventInfoRepository.delete(infoId);
+        contractEventInfoRepository.deleteById(infoId);
         return contractEventInfoRepository.findByAppId(appId);
     }
 
@@ -391,8 +403,7 @@ public class EventService {
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
         EventSubscribe eventSubscribe = this.getEventSubscribe(String.valueOf(groupId));
-        String registerId = "";
-        eventSubscribe.subscribeEvent(eventParam, callback);
+        String registerId = eventSubscribe.subscribeEvent(eventParam, callback);
 
         List<DecodedEventLog> resultList;
         try {
@@ -439,24 +450,25 @@ public class EventService {
     }
 
     public EventSubscribe getEventSubscribe(String groupId) {
-        EventSubscribe eventSubscribe = eventSubscribeMap.get(groupId);
-        if (eventSubscribe == null) {
-            List<String> groupList = web3ApiService.getGroupList();
-            if (!groupList.contains(groupId)) {
-                log.error("getEventSubscribe group id not exist! groupId:{}", groupId);
-                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
-            }
-            // else, groupList contains this groupId, try to build new eventSubscribe
-            try {
-                EventSubscribe eventSubscribeNew = EventSubscribe.build(groupId, web3Config.getConfigOptionFromFile());
-                log.info("getEventSubscribe eventSubscribeNew:{}", eventSubscribeNew);
-                eventSubscribeMap.put(groupId, eventSubscribeNew);
-                return eventSubscribeNew;
-            } catch (ConfigException | JniException e) {
-                log.error("build new eventSubscribe of groupId:{} failed:{}", groupId, e);
-                throw new FrontException(ConstantCode.BUILD_NEW_EVENT_SUBSCRIBE_FAILED);
-            }
-        }
+        EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
+//        EventSubscribe eventSubscribe = eventSubscribeMap.get(groupId);
+//        if (eventSubscribe == null) {
+//            List<String> groupList = web3ApiService.getGroupList();
+//            if (!groupList.contains(groupId)) {
+//                log.error("getEventSubscribe group id not exist! groupId:{}", groupId);
+//                throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
+//            }
+//            // else, groupList contains this groupId, try to build new eventSubscribe
+//            try {
+//                EventSubscribe eventSubscribeNew = EventSubscribe.build(groupId, web3Config.getConfigOptionFromFile());
+//                log.info("getEventSubscribe eventSubscribeNew:{}", eventSubscribeNew);
+//                eventSubscribeMap.put(groupId, eventSubscribeNew);
+//                return eventSubscribeNew;
+//            } catch (ConfigException | JniException e) {
+//                log.error("build new eventSubscribe of groupId:{} failed:{}", groupId, e);
+//                throw new FrontException(ConstantCode.BUILD_NEW_EVENT_SUBSCRIBE_FAILED);
+//            }
+//        }
         return eventSubscribe;
     }
 }

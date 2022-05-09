@@ -55,6 +55,10 @@ public class Contract {
     private String contractAddress;
     private LocalDateTime deployTime;
     private String description;
+    /**
+     * 0-solidity, 1-liquid
+     */
+    private Integer isWasm;
     private LocalDateTime createTime;
     private LocalDateTime modifyTime;
 }

@@ -22,21 +22,25 @@ import com.squareup.javapoet.TypeName;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.codec.datatypes.DynamicArray;
 import org.fisco.bcos.sdk.codec.datatypes.StaticArray;
 import org.fisco.bcos.sdk.codec.datatypes.Type;
+import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition.NamedType;
-import org.fisco.bcos.sdk.model.PrecompiledConstant;
 import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 
 /**
@@ -356,6 +360,22 @@ public class ContractAbiUtil {
         return target.getFuncOutputs().get(funcName);
     }
 
+
+    /**
+     * getFuncOutputType.
+     *
+     * @param abiDefinition abiDefinition
+     * @return
+     */
+    public static List<String> getFuncOutputType(ABIDefinition abiDefinition) {
+        List<String> outputList = new ArrayList<>();
+        List<ABIDefinition.NamedType> outputs = abiDefinition.getOutputs();
+        for (ABIDefinition.NamedType output : outputs) {
+            outputList.add(output.getType());
+        }
+        return outputList;
+    }
+
     /**
      * get all contract from contractEventMap.
      */
@@ -443,6 +463,121 @@ public class ContractAbiUtil {
             }
         }
         return target;
+    }
+
+    /**
+     * output parameter format.
+     *
+     * @param funOutputTypes list
+     * @return
+     */
+    public static List<TypeReference<?>> outputFormat(List<String> funOutputTypes)
+        throws FrontException {
+        List<TypeReference<?>> finalOutputs = new ArrayList<>();
+        for (int i = 0; i < funOutputTypes.size(); i++) {
+            Class<? extends Type> outputType = null;
+            TypeReference<?> typeReference = null;
+            if (funOutputTypes.get(i).contains("[")
+                && funOutputTypes.get(i).contains("]")) {
+                typeReference = ContractTypeUtil.getArrayType(
+                    funOutputTypes.get(i).substring(0, funOutputTypes.get(i).indexOf("[")));
+            } else {
+                outputType = ContractTypeUtil.getType(funOutputTypes.get(i));
+                typeReference = TypeReference.create(outputType);
+            }
+            finalOutputs.add(typeReference);
+        }
+        return finalOutputs;
+    }
+
+
+    /**
+     * ethCall Result Parse.
+     *
+     * @param funOutputTypes list
+     * @param typeList list
+     * @return
+     */
+    public static Object callResultParse(List<String> funOutputTypes, List<Type> typeList)
+        throws FrontException {
+        if (funOutputTypes.size() == typeList.size()) {
+            List<Object> result = new ArrayList<>();
+            for (int i = 0; i < funOutputTypes.size(); i++) {
+                Class<? extends Type> outputType = null;
+                Object value = null;
+                if (funOutputTypes.get(i).contains("[")
+                    && funOutputTypes.get(i).contains("]")) {
+                    List<Object> values = new ArrayList<>();
+                    List<Type> results = (List<Type>) typeList.get(i).getValue();
+                    for (int j = 0; j < results.size(); j++) {
+                        outputType = ContractTypeUtil.getType(funOutputTypes.get(i).substring(0,
+                            funOutputTypes.get(i).indexOf("[")));
+                        value = ContractTypeUtil.decodeResult(results.get(j), outputType);
+                        values.add(value);
+                    }
+                    result.add(values);
+                } else {
+                    outputType = ContractTypeUtil.getType(funOutputTypes.get(i));
+                    value = ContractTypeUtil.decodeResult(typeList.get(i), outputType);
+                    result.add(value);
+                }
+            }
+            return JsonUtils.toJavaObject(JsonUtils.toJSONString(result), Object.class);
+        }
+        return null;
+    }
+
+
+    /**
+     * check abi valid
+     *
+     * @param contractAbi
+     */
+    public static List<ABIDefinition> checkAbi(String contractAbi) {
+        try {
+            List<ABIDefinition> abiArr =
+                JsonUtils.toJavaObjectList(contractAbi, ABIDefinition.class);
+            return abiArr;
+        } catch (Exception ex) {
+            throw new FrontException(ConstantCode.PARAM_FAIL_ABI_INVALID);
+        }
+    }
+
+
+    /**
+     * input parameter format.
+     *
+     * @param funcInputTypes list
+     * @param params list
+     * @return
+     */
+    public static List<Type> inputFormat(List<String> funcInputTypes, List<Object> params) {
+        List<Type> finalInputs = new ArrayList<>();
+        for (int i = 0; i < funcInputTypes.size(); i++) {
+            Class<? extends Type> inputType = null;
+            Object input = null;
+            if (funcInputTypes.get(i).contains("[")
+                && funcInputTypes.get(i).contains("]")) {
+                List<Object> arrList =
+                    new ArrayList<>(Arrays.asList(params.get(i).toString().split(",")));
+                inputType = ContractTypeUtil.getType(
+                    funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")));
+                List<Type> arrParams = new ArrayList<>();
+                for (int j = 0; j < arrList.size(); j++) {
+                    input = ContractTypeUtil.parseByType(
+                        funcInputTypes.get(i).substring(0, funcInputTypes.get(i).indexOf("[")),
+                        arrList.get(j).toString());
+                    arrParams.add(ContractTypeUtil.encodeString(input.toString(), inputType));
+                }
+                finalInputs.add(new DynamicArray<>(arrParams));
+            } else {
+                inputType = ContractTypeUtil.getType(funcInputTypes.get(i));
+                input = ContractTypeUtil.parseByType(funcInputTypes.get(i),
+                    params.get(i).toString());
+                finalInputs.add(ContractTypeUtil.encodeString(input.toString(), inputType));
+            }
+        }
+        return finalInputs;
     }
 
 }

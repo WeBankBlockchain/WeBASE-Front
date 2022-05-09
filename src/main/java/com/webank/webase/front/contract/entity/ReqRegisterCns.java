@@ -20,8 +20,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 /**
  * ReqRegisterCns.
@@ -30,7 +30,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class ReqRegisterCns {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUP_ID_IS_EMPTY_STRING)
     private String groupId;
-    @Deprecated
     private String contractName;
     @NotBlank(message = ConstantCode.PARAM_FAIL_CNS_NAME_IS_EMPTY_STRING)
     private String cnsName;
@@ -39,7 +38,7 @@ public class ReqRegisterCns {
     @NotBlank(message = ConstantCode.PARAM_FAIL_CONTRACT_ADDRESS_EMPTY)
     private String contractAddress;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
-    private List<ABIDefinition> abiInfo;
+    private List<Object> abiInfo;
     private String signUserId;
     private String userAddress;
     private String contractPath;

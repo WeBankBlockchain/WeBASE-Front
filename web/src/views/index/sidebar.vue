@@ -73,7 +73,8 @@
 import router from "@/router";
 import {
     queryGroup,
-    queryClientVersion
+    queryClientVersion,
+    checkIsWasm
 } from "@/util/api";
 import Bus from "@/bus"
 export default {
@@ -93,6 +94,7 @@ export default {
             group: null,
             screenWidth: null,
             buttomNone: true,
+            liquidCheck: false,
         };
     },
     computed: {
@@ -115,7 +117,7 @@ export default {
                         break;
                     case 'subscribeEvent':
                         item.name = this.$t('route.subscribeEvent')
-                        item.menuShow = false
+                        item.menuShow = true
                         break;
 
                 }
@@ -165,6 +167,13 @@ export default {
                                 it.name = this.$t('route.contractWarehouse')
                                 break;
                         }
+                    if(it.enName=='contractEvent'){
+                        if(this.liquidCheck){
+                            it.menuShow=false
+                        }else{
+                            it.menuShow=true
+                        }
+                    }
                     })
                 }
             }))
@@ -191,10 +200,12 @@ export default {
     mounted() {
         if (localStorage.getItem("groupId")) {
             this.group = localStorage.getItem("groupId");
+            this.getClientVersion();
         }
         if (localStorage.getItem("groupName")) {
             this.groupName = localStorage.getItem("groupName");
         }
+        this.liquidCheckMethod();
         this.$nextTick(function () {
             this.getGroup();
             localStorage.setItem("sidebarHide", false);
@@ -223,14 +234,15 @@ export default {
             localStorage.setItem('groupId', this.group);
             localStorage.setItem("groupName", this.groupName);
             Bus.$emit("changeGroup", this.group);
-            //this.getClientVersion();
+            this.getClientVersion();
+            this.liquidCheckMethod();
         },
         getClientVersion() {
             queryClientVersion(this.group)
                 .then(res => {
                     const { data, status, statusText } = res;
                     if (status === 200) {
-                        this.version = data['FISCO-BCOS Version'];
+                        this.version =data;
                         localStorage.setItem('fisco-bcos-version', this.version)
                     } else {
                         this.$message({
@@ -327,7 +339,24 @@ export default {
         },
         toggleHover() {
             this.groupVisible = false
-        }
+        },
+        liquidCheckMethod() {
+      let group = localStorage.getItem("groupId");
+      checkIsWasm(group)
+        .then((res) => {
+          if (res.data == true) {
+            this.liquidCheck = true;
+          } else {
+            this.liquidCheck = false;
+          }
+        })
+        .catch((err) => {
+          this.$message({
+            type: "error",
+            message: err.data || this.$t("text.systemError"),
+          });
+        });
+    },
     }
 };
 </script>

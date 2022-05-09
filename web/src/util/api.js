@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019 the original author or authors.
+liquidCompileliquidCompile* Copyright 2014-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -328,12 +328,23 @@ export function deleteNodes(data) {
 // ==========================================================================
 
 // client version
-export function queryClientVersion(data) {
+export function queryClientVersion() {
     return get({
-        url: `${HANDLE}${data}/web3/clientVersion`,
-        method: 'get'
+        url: `${HANDLE}config/version`,
+        method: "get",
+        responseType: "text",
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
     })
 }
+
+// export function queryClientVersion(data) {
+//     return get({
+//         url: `${HANDLE}${data}/web3/clientVersion`,
+//         method: 'get'
+//     })
+// }
 /**  Collection node metric*/
 export function metricInfo(data, list) {
     const params = reviseParam(data, list);
@@ -520,7 +531,49 @@ export function queryTxReceiptInfo(group, txHash) {
         method: 'get'
     })
 }
-
+/**Contract check */
+export function checkIsWasm(groupId) {
+    return get({
+        url: `${HANDLE}${groupId}/web3/isWasm`,
+        method: 'get',
+       // params: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+/**Contract check */
+export function liquidCompile(data) {
+    return post({
+        url: `${HANDLE}contract/liquid/compile`,
+        method: 'post',
+        data: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+/**Contract check */
+export function liquidCompileCheck(data) {
+    return post({
+        url: `${HANDLE}contract/liquid/compile/check`,
+        method: 'post',
+        data: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
+export function liquidCheck(data) {
+    return get({
+        url: `${HANDLE}contract/liquid/check`,
+        method: 'get',
+        //params: data,
+        headers: {
+            AuthorizationToken: "Token " + localStorage.getItem("token") || ""
+        }
+    })
+}
 // block info 
 export function queryBlockInfo(group, blockNumber) {
     return get({
@@ -877,6 +930,7 @@ export function readSolcVersion(fielName) {
         }
     })
 }
+
 
 //删除solc
 export function deleteSolcId(solcId) {

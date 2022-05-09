@@ -41,7 +41,7 @@ public class VersionControllerTest extends SpringTestBase {
     @Test
     public void testGetVersion() throws Exception {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.get("/version").
-            contentType(MediaType.APPLICATION_JSON_UTF8)
+            contentType(MediaType.APPLICATION_JSON)
         );
         resultActions.
             andExpect(MockMvcResultMatchers.status().isOk()).

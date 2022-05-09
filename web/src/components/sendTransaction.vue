@@ -135,7 +135,14 @@ export default {
     "v-createUser": createUser,
   },
   name: "sendTransation",
-  props: ["data", "dialogClose", "abi", "version", "sendErrorMessage"],
+  props: [
+    "data",
+    "dialogClose",
+    "abi",
+    "version",
+    "sendErrorMessage",
+    "liquidChecks",
+  ],
   data: function () {
     return {
       transation: {
@@ -164,8 +171,14 @@ export default {
       cnsName: "",
       isShowAddUserBtn: false,
       creatUserNameVisible: false,
+      isWasm: this.liquidChecks,
     };
   },
+  watch:{
+    data(n,o){ //n为新值,o为旧值;
+      this.contractAddress = n.contractAddress;
+    }
+},
   computed: {
     showUser() {
       let showUser = true;
@@ -180,6 +193,7 @@ export default {
     },
   },
   mounted: function () {
+    console.log(this.liquidChecks)
     this.getLocalKeyStores();
     this.formatAbi();
     this.changeFunc();
@@ -335,6 +349,9 @@ export default {
         useCns: this.isCNS,
         cnsName: this.isCNS && this.cnsName ? this.cnsName : "",
       };
+      if (this.isWasm) {
+        data.isWasm = true;
+      }
       sendTransation(data)
         .then((res) => {
           this.buttonClick = false;
@@ -366,7 +383,7 @@ export default {
                 message: this.$t("text.searchSucceeded"),
               });
             } else {
-              if (resData.status == "0x0") {
+              if (resData.status == 0) {
                 this.$message({
                   type: "success",
                   message: this.$t("text.txnSucceeded"),

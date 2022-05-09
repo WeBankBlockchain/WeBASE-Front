@@ -108,18 +108,18 @@ const routes = [
             { path: '/contractEvent', component: contractEvent, name: '合约Event事件', enName: 'contractEvent', menuShow: true, meta: { requireAuth: false } }
         ]
     },
-    {
-        path: '/',
-        component: main,
-        name: '订阅事件',
-        enName: 'subscribeEvent',
-        menuShow: false,
-        iconCls: 'wbs-icon-dingyue sidebar-icon',
-        children: [
-            { path: '/blank', component: blank, name: '出块事件', enName: 'blank', menuShow: true, meta: { requireAuth: false } },
+    // {
+    //     path: '/',
+    //     component: main,
+    //     name: '订阅事件',
+    //     enName: 'subscribeEvent',
+    //     menuShow: false,
+    //     iconCls: 'wbs-icon-dingyue sidebar-icon',
+    //     children: [
+    //         { path: '/blank', component: blank, name: '出块事件', enName: 'blank', menuShow: true, meta: { requireAuth: false } },
         
-        ]
-    },
+    //     ]
+    // },
 ]
 const router = new Router({
     routes

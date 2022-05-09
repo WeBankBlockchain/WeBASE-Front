@@ -61,12 +61,9 @@ public class Constants {
     public static final String ACCOUNT1_PATH = "node.key";
     public static final String CONSTANT_PREFIX = "constant";
     public static final String SOLC_DIR_PATH_CONFIG = "solcjs";
-    public static final String SOLC_DIR_PATH = "./conf/solcjs";
     public static final String SOLC_JS_SUFFIX = ".js";
     public static final String RECEIPT_STATUS_0X0 = "0x0";
 
-//    public static String version;
-//    public static String chainId;
     private String keyServer = "127.0.0.1:8080";
     private int transMaxWait = 30;
     private String monitorDisk = "/";
@@ -78,14 +75,19 @@ public class Constants {
     private Integer syncStatLogTime = 5000;
     private long syncStatLogCountLimit = 10000;
 
+    // rest factory
     private int http_read_timeOut = 10000;
     private int http_connect_timeOut = 10000;
+    // rest todo check
     private int restTemplateMaxTotal = 1000;
     private int restTemplateMaxPerRoute = 100;
+    // tomcat todo check
     private int keepAliveRequests = 100;
     private int KeepAliveTimeout = 10;
 
     // second
     private Integer eventCallbackWait = 10;
+    private Integer liquidCompileTimeout = 50000;
+    private Integer commandLineTimeout = 50000;
 
 }

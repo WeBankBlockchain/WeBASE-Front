@@ -128,9 +128,14 @@ public class Web3ApiController {
     @GetMapping("/code/{address}/{blockNumber}")
     public String getCode(@PathVariable String groupId, @PathVariable String address,
             @PathVariable BigInteger blockNumber) {
-//        if (address.length() != Address.ValidLen) { todo
-//            throw new FrontException(ConstantCode.PARAM_ADDRESS_IS_INVALID);
-//        }
+        return web3ApiService.getCode(groupId, address, blockNumber);
+    }
+
+    @ApiOperation(value = "getCode",
+        notes = "Get the binary code of the specified contract for the specified block")
+    @GetMapping("/code")
+    public String getCodeWasm(@PathVariable String groupId, @RequestParam String address,
+                          @RequestParam BigInteger blockNumber) {
         return web3ApiService.getCode(groupId, address, blockNumber);
     }
 
@@ -271,6 +276,11 @@ public class Web3ApiController {
     public Integer getEncryptType(@PathVariable("groupId") String groupId) {
         int encrypt = web3ApiService.getCryptoType(groupId);
         return encrypt;
+    }
+
+    @GetMapping("isWasm")
+    public Boolean getIsWasmApi(@PathVariable("groupId") String groupId) {
+        return web3ApiService.getIsWasm(groupId);
     }
 
 }

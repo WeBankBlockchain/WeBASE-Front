@@ -167,7 +167,7 @@ public class FrontUtils {
 
     public static HttpHeaders headers(String fileName) {
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
             "attachment;filename*=UTF-8''" + encode(fileName));
         return httpHeaders;

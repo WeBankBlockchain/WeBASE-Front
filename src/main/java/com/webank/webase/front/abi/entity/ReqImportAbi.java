@@ -17,7 +17,7 @@
 package com.webank.webase.front.abi.entity;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -37,4 +37,6 @@ public class ReqImportAbi {
     private String contractAddress;
     @NotNull
     private List<Object> contractAbi;
+
+    private Boolean isWasm = false;
 }

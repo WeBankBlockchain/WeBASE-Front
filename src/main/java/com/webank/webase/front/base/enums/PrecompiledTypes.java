@@ -18,54 +18,73 @@ package com.webank.webase.front.base.enums;
  * @author marsli
  */
 public enum PrecompiledTypes {
-    /**
-     * System Config Precompile
-     */
-    SYSTEM_CONFIG(1000),
+  /**
+   * System Config
+   */
+  SYSTEM_CONFIG(1000),
 
-    /**
-     * Table Factory Precompile
-     */
-    TABLE_FACTORY(1001),
+  /**
+   * System Config Liquid
+   */
+  SYSTEM_CONFIG_LIQUID(11000),
 
-    /**
-     * CRUD Precompile
-     */
-    CRUD(1002),
+  /**
+   * CRUD
+   */
+  CRUD(1009),
 
-    /**
-     * Consensus Precompile
-     */
-    CONSENSUS(1003),
+  /**
+   * CRUD Liquid
+   */
+  CRUD_LIQUID(11009),
 
-    /**
-     * Registry Contract
-     */
-    CNS(1004),
-    /**
-     * Permission Precompile
-     */
-    PERMISSION(1005),
-    /**
-     * Contract status Manage (Contract life cycle)
-     */
-    CSM(1007),
-    /**
-     * Chain governance
-     */
-    CHAIN_GOVERN(1008),
-    /**
-     * Chain governance
-     */
-    KV_TABLE(1010);
+  /**
+   * Consensus
+   */
+  CONSENSUS(1003),
 
-    private int value;
+  /**
+   * Consensus Liquid
+   */
+  CONSENSUS_LIQUID(11003),
 
-    PrecompiledTypes(Integer type) {
-        this.value = type;
-    }
+  /**
+   * Contract
+   */
+  CNS(1004),
 
-    public int getValue() {
-        return this.value;
-    }
+  /**
+   * Contract Liquid
+   */
+  CNS_LIQUID(11004),
+
+  /**
+   * BFS
+   */
+  BFS(100111),
+
+  /**
+   * BFS Liquid
+   */
+  BFS_LIQUID(1100111),
+
+  /**
+   * CONTRACT AUTH
+   */
+  CONTRACT_AUTH(1005),
+
+  /**
+   * Committee Manager
+   */
+  COMMITTEE_MANAGER(10001);
+
+  private int value;
+
+  PrecompiledTypes(Integer type) {
+    this.value = type;
+  }
+
+  public int getValue() {
+    return this.value;
+  }
 }

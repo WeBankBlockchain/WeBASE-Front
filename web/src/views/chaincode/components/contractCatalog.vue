@@ -28,6 +28,10 @@
         </i>
       </el-tooltip>
       <!-- <el-button type="text" @click="fromGitHub">GitHub</el-button> -->
+      <!-- <el-select v-model="Highlight" class="langChoose" @change="langChange">
+          <el-option v-for="item in Language" :key="item.value" :label="item.label" :value="item.value">
+          </el-option>
+      </el-select> -->
       <div>
         <slot name="footer"></slot>
       </div>
@@ -104,6 +108,9 @@
         </li>
       </ul>
     </div>
+    <div class="el-loading-mask" v-show="liquidLoad">
+      <div class="el-loading-spinner"></div>
+    </div>
     <add-folder v-if="foldershow" :foldershow="foldershow" @close="folderClose" @success="folderSuccess"></add-folder>
     <add-file v-if="fileshow" :data="selectFolderData" :fileshow="fileshow" @close="fileClose" @success="fileSucccess($event)" :id="folderId"></add-file>
     <select-catalog v-if="cataLogShow" :show="cataLogShow" @success="catalogSuccess($event)" @close="catalogClose"></select-catalog>
@@ -130,6 +137,8 @@ import {
   deleteSolcId,
   readSolcVersion,
   deletePath,
+  liquidCheck,
+  checkIsWasm,
 } from "@/util/api";
 import Bus from "@/bus";
 import Clickoutside from "element-ui/src/utils/clickoutside";
@@ -145,6 +154,9 @@ export default {
     solcVersion: {
       type: String,
     },
+    liquidChecks: {
+      type: Boolean,
+    },
   },
   components: {
     "add-folder": addFolder,
@@ -155,6 +167,7 @@ export default {
   },
   data() {
     return {
+      liquidCheck: this.liquidChecks,
       foldershow: false,
       fileshow: false,
       filename: "",
@@ -183,6 +196,18 @@ export default {
       selectFolderData: null,
       loading: false,
       importFromDialog: false,
+      Highlight: true,
+      Language: [
+        {
+          value: true,
+          label: "javascript",
+        },
+        {
+          value: false,
+          label: "rust",
+        },
+      ],
+      liquidLoad: false,
     };
   },
   watch: {
@@ -192,13 +217,17 @@ export default {
     solcVersion(val) {
       this.version = this.solcVersion;
     },
+    liquidChecks(val){
+      this.liquidCheck=val
+    }
   },
-  create() {
+  beforeDestroy() {
     Bus.$off("compile");
     Bus.$off("deploy");
     Bus.$off("open");
     Bus.$off("save");
     Bus.$off("modifyState");
+    Bus.$off("compileLiquid");
   },
   mounted() {
     this.$nextTick(function () {
@@ -211,6 +240,9 @@ export default {
     });
     Bus.$on("save", (data) => {
       this.saveContract(data);
+    });
+    Bus.$on("compileLiquid", (data) => {
+      this.compileLiquid(data);
     });
     Bus.$on("deploy", (data) => {
       this.getContracts("", data);
@@ -247,6 +279,9 @@ export default {
     },
   },
   methods: {
+    compileLiquid: function (val) {
+      this.liquidLoad = val;
+    },
     checkNull(list) {
       this.contractArry.forEach((value) => {
         value.handleModel = false;
@@ -638,10 +673,12 @@ export default {
       if (param.id) {
         reqData.contractId = param.id;
       }
+      if (this.liquidCheck) {
+        reqData.isWasm = true;
+      }
       if (param.contractAddress) {
         reqData.contractAddress = param.contractAddress;
       }
-         
       saveChaincode(reqData)
         .then((res) => {
           const { data, status } = res;
@@ -1265,7 +1302,15 @@ export default {
       var blobContractBin = new Blob([contractBin], {
         type: "text;charset=utf-8",
       });
-      zip.file(`${val.contractName}.sol`, blobContractSource, { binary: true });
+      if (this.liquidCheck) {
+        zip.file(`${val.contractName}.rs`, blobContractSource, {
+          binary: true,
+        });
+      } else {
+        zip.file(`${val.contractName}.sol`, blobContractSource, {
+          binary: true,
+        });
+      }
       zip.file(`${val.contractName}.abi`, blobContractAbi, { binary: true });
       zip.file(`${val.contractName}.bin`, blobContractBin, { binary: true });
       zip.generateAsync({ type: "blob" }).then((content) => {
@@ -1302,9 +1347,15 @@ export default {
               var blobContractBin = new Blob([item.contractBin], {
                 type: "text;charset=utf-8",
               });
-              zip.file(`${item.contractName}.sol`, blobContractSource, {
-                binary: true,
-              });
+              if (this.liquidCheck) {
+                zip.file(`${val.contractName}.rs`, blobContractSource, {
+                  binary: true,
+                });
+              } else {
+                zip.file(`${val.contractName}.sol`, blobContractSource, {
+                  binary: true,
+                });
+              }
               zip.file(`${item.contractName}.abi`, blobContractAbi, {
                 binary: true,
               });
@@ -1466,6 +1517,21 @@ export default {
   border: 1px solid;
   height: 36px;
   line-height: 36px;
+}
+.langChoose {
+  width: 110px;
+  padding-left: 7px;
+}
+.el-loading-mask {
+  position: absolute;
+  z-index: 2000;
+  margin: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-transition: opacity 0.3s;
+  transition: opacity 0.3s;
 }
 </style>
 
