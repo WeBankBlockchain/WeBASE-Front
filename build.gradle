@@ -23,7 +23,7 @@ repositories {
 
 }
 
-def spring_version="5.2.19.RELEASE"
+def spring_version="5.2.21.RELEASE"
 List spring =[
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-beans:$spring_version",
@@ -40,7 +40,7 @@ List spring =[
 
 ]
 
-def spring_boot_version="2.3.12.RELEASE"
+def spring_boot_version="2.5.12"
 List spring_boot =[
     "org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
     "org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
@@ -71,7 +71,7 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-def jackson_version = "2.11.4"
+def jackson_version = "2.13.3"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
     "com.fasterxml.jackson.core:jackson-core:$jackson_version",
