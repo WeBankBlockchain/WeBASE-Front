@@ -23,24 +23,7 @@ repositories {
 
 }
 
-def spring_version="5.2.19.RELEASE"
-List spring =[
-    "org.springframework:spring-core:$spring_version",
-    "org.springframework:spring-beans:$spring_version",
-    "org.springframework:spring-context:$spring_version",
-    "org.springframework:spring-tx:$spring_version",
-    "org.springframework:spring-web:$spring_version",
-    "org.springframework:spring-webmvc:$spring_version",
-    "org.springframework:spring-jdbc:$spring_version",
-    // cover old version
-    "org.springframework:spring-aspects:$spring_version",
-    "org.springframework:spring-messaging:$spring_version",
-    "org.springframework:spring-orm:$spring_version",
-    "org.springframework:spring-test:$spring_version"
-
-]
-
-def spring_boot_version="2.3.12.RELEASE"
+def spring_boot_version="2.5.12"
 List spring_boot =[
     "org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
     "org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
@@ -71,22 +54,12 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-def jackson_version = "2.11.4"
+def jackson_version = "2.13.3"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
     "com.fasterxml.jackson.core:jackson-core:$jackson_version",
     "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
     "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
-]
-
-// cover old version
-def tomcat_version = "8.5.56"
-List tomcat = [
-    "org.apache.tomcat.embed:tomcat-embed-core:$tomcat_version",
-    "org.apache.tomcat.embed:tomcat-embed-el:$tomcat_version",
-    "org.apache.tomcat.embed:tomcat-embed-websocket:$tomcat_version",
-    "org.apache.tomcat:tomcat-jdbc:$tomcat_version",
-    "org.apache.tomcat:tomcat-juli:$tomcat_version"
 ]
 
 List scaffold = [
@@ -96,8 +69,8 @@ List scaffold = [
 ]
 
 dependencies {
-    compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat,scaffold
-    compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2'
+    compile spring_boot,swagger,logger,jaxb,jackson,scaffold
+    compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.0'
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
     compile 'com.h2database:h2:1.4.200'
