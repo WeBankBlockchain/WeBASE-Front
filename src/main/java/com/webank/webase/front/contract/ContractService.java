@@ -284,7 +284,7 @@ public class ContractService {
         String contractAddress = receipt.getContractAddress();
         String status = receipt.getStatus();
         if (!"0x0".equalsIgnoreCase(status) || StringUtils.isBlank(contractAddress)
-            || !Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress)) {
+            || Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress)) {
             log.error("deployWithSign failed, status:{},receipt:{}", status, receipt);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
         }
@@ -446,7 +446,7 @@ public class ContractService {
         String contractAddress = receipt.getContractAddress();
         String status = receipt.getStatus();
         if (!"0x0".equalsIgnoreCase(status) || StringUtils.isBlank(contractAddress)
-            || !Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress)) {
+            || Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress)) {
             log.error("deployWithSign failed, status:{},receipt:{}", status, receipt);
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
         }
