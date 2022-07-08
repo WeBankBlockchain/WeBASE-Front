@@ -423,6 +423,7 @@ export default {
     padding-right: 20px;
     font-size: 12px;
     box-sizing: border-box;
+        overflow-y: scroll;
 }
 .code-detail-reset-wrapper {
     float: left;
