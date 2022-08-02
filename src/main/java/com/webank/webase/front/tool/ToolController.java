@@ -35,19 +35,19 @@
 //import javax.validation.Valid;
 //import lombok.extern.slf4j.Slf4j;
 //import org.apache.commons.lang3.StringUtils;
-//import org.fisco.bcos.sdk.codec.ABICodec;
-//import org.fisco.bcos.sdk.codec.ABICodecException;
-//import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes32;
-//import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-//import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
-//import org.fisco.bcos.sdk.crypto.keypair.SM2KeyPair;
-//import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
-//import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
-//import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
-//import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
-//import org.fisco.bcos.sdk.model.CryptoType;
-//import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
-//import org.fisco.bcos.sdk.utils.Numeric;
+//import org.fisco.bcos.sdk.v3.codec.ContractCodec;
+//import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
+//import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Bytes32;
+//import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+//import org.fisco.bcos.sdk.v3.crypto.keypair.ECDSAKeyPair;
+//import org.fisco.bcos.sdk.v3.crypto.keypair.SM2KeyPair;
+//import org.fisco.bcos.sdk.v3.crypto.keystore.KeyTool;
+//import org.fisco.bcos.sdk.v3.crypto.keystore.P12KeyStore;
+//import org.fisco.bcos.sdk.v3.crypto.keystore.PEMKeyStore;
+//import org.fisco.bcos.sdk.v3.crypto.signature.SignatureResult;
+//import org.fisco.bcos.sdk.v3.model.CryptoType;
+//import org.fisco.bcos.sdk.v3.transaction.codec.decode.TransactionDecoderService;
+//import org.fisco.bcos.sdk.v3.utils.Numeric;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.beans.factory.annotation.Qualifier;
 //import org.springframework.web.bind.annotation.GetMapping;
@@ -80,12 +80,12 @@
 //            return txDecoder.decodeReceiptMessage(param.getInput());
 //        } else if (param.getDecodeType() == 2) {
 //            String abi = JsonUtils.objToString(param.getAbiList());
-//            ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
+//            ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), false);
 //            // decode output
 //            try {
 //                return abiCodec.decodeMethodAndGetOutputObject(abi, param.getMethodName(),
 //                    param.getOutput());
-//            } catch (ABICodecException e) {
+//            } catch (ContractCodecException e) {
 //                log.error("abi decode fail:{}", e.getMessage());
 //                throw new FrontException(ConstantCode.CONTRACT_ABI_PARSE_JSON_ERROR);
 //            }

@@ -18,10 +18,10 @@ import com.webank.webase.front.event.entity.DecodedEventLog;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import org.fisco.bcos.sdk.codec.ABICodec;
-import org.fisco.bcos.sdk.codec.ABICodecException;
-import org.fisco.bcos.sdk.eventsub.EventSubCallback;
-import org.fisco.bcos.sdk.model.EventLog;
+import org.fisco.bcos.sdk.v3.codec.ContractCodec;
+import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
+import org.fisco.bcos.sdk.v3.eventsub.EventSubCallback;
+import org.fisco.bcos.sdk.v3.model.EventLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class SyncEventLogCallback implements EventSubCallback {
     private static final Logger logger =
         LoggerFactory.getLogger(SyncEventLogCallback.class);
 
-    private ABICodec abiCodec;
+    private ContractCodec abiCodec;
     private String contractAbi;
     private String eventName;
 
@@ -42,7 +42,7 @@ public class SyncEventLogCallback implements EventSubCallback {
     // private List<EventLog> finalList;
     private List<DecodedEventLog> finalList;
 
-    public SyncEventLogCallback(ABICodec abiCodec, String contractAbi, String eventName,
+    public SyncEventLogCallback(ContractCodec abiCodec, String contractAbi, String eventName,
         final CompletableFuture<List<DecodedEventLog>> future) {
         this.abiCodec = abiCodec;
         this.contractAbi = contractAbi;
@@ -106,7 +106,7 @@ public class SyncEventLogCallback implements EventSubCallback {
                 DecodedEventLog decodedEventLog = new DecodedEventLog(log, list);
                 logger.debug("decode event of :{}, log content:{} ", eventName, list);
                 decodedLogList.add(decodedEventLog);
-            } catch (ABICodecException e) {
+            } catch (ContractCodecException e) {
                 logger.error("decode event log error:{} ", e.getMessage());
             }
         }

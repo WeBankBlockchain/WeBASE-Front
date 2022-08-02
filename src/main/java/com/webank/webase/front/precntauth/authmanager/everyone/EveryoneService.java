@@ -22,11 +22,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.contract.auth.manager.AuthManager;
-import org.fisco.bcos.sdk.contract.auth.po.ProposalInfo;
-import org.fisco.bcos.sdk.contract.auth.po.ProposalStatus;
-import org.fisco.bcos.sdk.contract.auth.po.ProposalType;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.contract.auth.manager.AuthManager;
+import org.fisco.bcos.sdk.v3.contract.auth.po.ProposalInfo;
+import org.fisco.bcos.sdk.v3.contract.auth.po.ProposalStatus;
+import org.fisco.bcos.sdk.v3.contract.auth.po.ProposalType;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -93,7 +93,7 @@ public class EveryoneService {
             info.setResourceId(proposalInfo.getResourceId());
             info.setProposer(proposalInfo.getProposer());
             info.setProposalType(ProposalType.fromInt(proposalInfo.getProposalType()).getValue());
-            info.setBlockNumberInterval(proposalInfo.getBlockNumberInterval());
+            info.setBlockNumberInterval(proposalInfo.getBlockNumberInterval().longValue());
             info.setStatus(ProposalStatus.fromInt(proposalInfo.getStatus()).getValue());
             info.setAgreeVoters(proposalInfo.getAgreeVoters());
             info.setAgainstVoters(proposalInfo.getAgainstVoters());

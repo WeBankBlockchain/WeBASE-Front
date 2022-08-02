@@ -18,7 +18,7 @@ package com.webank.webase.front.precntauth;
 import static org.junit.Assert.assertNotNull;
 
 import com.webank.webase.front.base.TestBase;
-import org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigService;
+import org.fisco.bcos.sdk.v3.contract.precompiled.sysconfig.SystemConfigService;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 

@@ -15,12 +15,8 @@
  */
 package com.webank.webase.front.util;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.model.PrecompiledConstant;
+import org.fisco.bcos.sdk.v3.model.PrecompiledConstant;
 
 /**
  * Constants and tool function related with Precompiled module
@@ -48,12 +44,9 @@ public class PrecompiledUtils {
     public static int USER_TABLE_FIELD_NAME_MAX_LENGTH = 64;
     public static int USER_TABLE_FIELD_VALUE_MAX_LENGTH = 16 * 1024 * 1024 - 1;
 
-
     public static boolean checkVersion(String version) {
 
         if (StringUtils.isBlank(version)) {
-            return false;
-        }else if (version.length() > PrecompiledConstant.CNS_MAX_VERSION_LENGTH) { // length exceeds
             return false;
         }else if (!version.matches("^[A-Za-z0-9.]+$")) { // check version's character
             return false;

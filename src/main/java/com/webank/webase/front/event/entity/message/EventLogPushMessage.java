@@ -20,7 +20,7 @@ import com.webank.webase.front.util.JsonUtils;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.fisco.bcos.sdk.model.EventLog;
+import org.fisco.bcos.sdk.v3.model.EventLog;
 
 /**
  * @author marsli

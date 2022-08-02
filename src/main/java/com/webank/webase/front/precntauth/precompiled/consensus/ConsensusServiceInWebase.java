@@ -16,15 +16,16 @@ package com.webank.webase.front.precntauth.precompiled.consensus;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
-import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDOBSERVER;
-import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDSEALER;
-import static org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_REMOVE;
+import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDOBSERVER;
+import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDSEALER;
+import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_REMOVE;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
+import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils;
 import com.webank.webase.front.precntauth.precompiled.consensus.entity.NodeInfo;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.web3api.Web3ApiService;
@@ -33,12 +34,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.client.protocol.response.SealerList.Sealer;
-import org.fisco.bcos.sdk.model.PrecompiledRetCode;
-import org.fisco.bcos.sdk.model.RetCode;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.client.protocol.response.SealerList.Sealer;
+import org.fisco.bcos.sdk.v3.model.PrecompiledRetCode;
+import org.fisco.bcos.sdk.v3.model.RetCode;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.transaction.codec.decode.ReceiptParser;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -94,7 +95,7 @@ public class ConsensusServiceInWebase {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_ADDSEALER, funcParams, isWasm);
-    return this.handleTransactionReceipt(receipt);
+    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
   }
 
   private boolean isValidNodeID(String _nodeID, String groupId) {
@@ -155,7 +156,7 @@ public class ConsensusServiceInWebase {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_ADDOBSERVER, funcParams, isWasm);
-    return this.handleTransactionReceipt(receipt);
+    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
   }
 
   public String removeNode(String groupId, String signUserId, String nodeId) {
@@ -188,25 +189,9 @@ public class ConsensusServiceInWebase {
         throw e;
       }
     }
-    return this.handleTransactionReceipt(receipt);
+    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
   }
 
-  private String handleTransactionReceipt(TransactionReceipt receipt) {
-    log.debug("handle tx receipt of precompiled");
-    try {
-      RetCode sdkRetCode = ReceiptParser.parseTransactionReceipt(receipt);
-      log.info("handleTransactionReceipt sdkRetCode:{}", sdkRetCode);
-      if (sdkRetCode.getCode() >= 0) {
-        return new BaseResponse(ConstantCode.RET_SUCCESS,
-            sdkRetCode.getMessage()).toString();
-      } else {
-        throw new FrontException(sdkRetCode.getCode(), sdkRetCode.getMessage());
-      }
-    } catch (ContractException e) {
-      log.error("handleTransactionReceipt e:[]", e);
-      throw new FrontException(e.getErrorCode(), e.getMessage());
-    }
-  }
 
   public List<NodeInfo> getNodeList(String groupId) {
     // nodeListWithType 组合多个带有类型的nodeid list

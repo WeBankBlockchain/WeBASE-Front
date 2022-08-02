@@ -16,7 +16,7 @@ package com.webank.webase.front.tool.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.v3.crypto.signature.SignatureResult;
 
 @Data
 @AllArgsConstructor

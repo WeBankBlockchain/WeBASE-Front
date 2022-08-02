@@ -35,13 +35,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.codec.datatypes.DynamicArray;
-import org.fisco.bcos.sdk.codec.datatypes.StaticArray;
-import org.fisco.bcos.sdk.codec.datatypes.Type;
-import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
-import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
-import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition.NamedType;
-import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
+import org.fisco.bcos.sdk.v3.codec.datatypes.DynamicArray;
+import org.fisco.bcos.sdk.v3.codec.datatypes.StaticArray;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Type;
+import org.fisco.bcos.sdk.v3.codec.datatypes.TypeReference;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition.NamedType;
+import org.fisco.bcos.sdk.v3.utils.ObjectMapperFactory;
 
 /**
  * ContractAbiUtil.
@@ -397,7 +397,7 @@ public class ContractAbiUtil {
         String type = trimStorageDeclaration(typeDeclaration);
         Matcher matcher = PATTERN.matcher(type);
         if (matcher.find()) {
-            Class<?> baseType = org.fisco.bcos.sdk.codec.datatypes.AbiTypes
+            Class<?> baseType = org.fisco.bcos.sdk.v3.codec.datatypes.AbiTypes
                     .getType(matcher.group(1));
             String firstArrayDimension = matcher.group(2);
             String secondArrayDimension = matcher.group(3);

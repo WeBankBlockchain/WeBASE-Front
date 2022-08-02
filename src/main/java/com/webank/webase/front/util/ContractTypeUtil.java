@@ -19,19 +19,19 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.codec.datatypes.Address;
-import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
-import org.fisco.bcos.sdk.codec.datatypes.Bool;
-import org.fisco.bcos.sdk.codec.datatypes.Bytes;
-import org.fisco.bcos.sdk.codec.datatypes.BytesType;
-import org.fisco.bcos.sdk.codec.datatypes.DynamicArray;
-import org.fisco.bcos.sdk.codec.datatypes.DynamicBytes;
-import org.fisco.bcos.sdk.codec.datatypes.NumericType;
-import org.fisco.bcos.sdk.codec.datatypes.Type;
-import org.fisco.bcos.sdk.codec.datatypes.Utf8String;
-import org.fisco.bcos.sdk.codec.datatypes.generated.*;
-import org.fisco.bcos.sdk.utils.Hex;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Address;
+import org.fisco.bcos.sdk.v3.codec.datatypes.TypeReference;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Bool;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Bytes;
+import org.fisco.bcos.sdk.v3.codec.datatypes.BytesType;
+import org.fisco.bcos.sdk.v3.codec.datatypes.DynamicArray;
+import org.fisco.bcos.sdk.v3.codec.datatypes.DynamicBytes;
+import org.fisco.bcos.sdk.v3.codec.datatypes.NumericType;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Type;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Utf8String;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.*;
+import org.fisco.bcos.sdk.v3.utils.Hex;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 
 /**
  * ContractTypeUtil.
@@ -51,8 +51,8 @@ public class ContractTypeUtil {
     public static <T extends Type> T generateClassFromInput(String input, Class<T> type)
             throws FrontException {
         try {
-            if (org.fisco.bcos.sdk.codec.datatypes.Address.class.isAssignableFrom(type)) {
-                return (T) new org.fisco.bcos.sdk.codec.datatypes.Address(input);
+            if (org.fisco.bcos.sdk.v3.codec.datatypes.Address.class.isAssignableFrom(type)) {
+                return (T) new org.fisco.bcos.sdk.v3.codec.datatypes.Address(input);
             } else if (NumericType.class.isAssignableFrom(type)) {
                 return (T) encodeNumeric(input, (Class<NumericType>) type);
             } else if (Bool.class.isAssignableFrom(type)) {
@@ -84,7 +84,7 @@ public class ContractTypeUtil {
      */
     public static <T> Object decodeResult(Type result, Class<T> type) throws FrontException {
         try {
-            if (org.fisco.bcos.sdk.codec.datatypes.Address.class.isAssignableFrom(type)) {
+            if (org.fisco.bcos.sdk.v3.codec.datatypes.Address.class.isAssignableFrom(type)) {
                 return result.toString();
             } else if (NumericType.class.isAssignableFrom(type)) {
                 return result.getValue();
@@ -145,8 +145,8 @@ public class ContractTypeUtil {
     public static <T extends Type> T encodeString(String input, Class<T> type)
         throws FrontException {
         try {
-            if (org.fisco.bcos.sdk.codec.datatypes.Address.class.isAssignableFrom(type)) {
-                return (T) new org.fisco.bcos.sdk.codec.datatypes.Address(input);
+            if (org.fisco.bcos.sdk.v3.codec.datatypes.Address.class.isAssignableFrom(type)) {
+                return (T) new org.fisco.bcos.sdk.v3.codec.datatypes.Address(input);
             } else if (NumericType.class.isAssignableFrom(type)) {
                 return (T) encodeNumeric(input, (Class<NumericType>) type);
             } else if (Bool.class.isAssignableFrom(type)) {
@@ -221,7 +221,7 @@ public class ContractTypeUtil {
     public static TypeReference<?> getArrayType(String type) throws FrontException {
         switch (type) {
             case "address":
-                return new TypeReference<DynamicArray<org.fisco.bcos.sdk.codec.datatypes.Address>>() {};
+                return new TypeReference<DynamicArray<org.fisco.bcos.sdk.v3.codec.datatypes.Address>>() {};
             case "bool":
                 return new TypeReference<DynamicArray<Bool>>() {};
             case "string":

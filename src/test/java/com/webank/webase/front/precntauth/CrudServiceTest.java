@@ -31,12 +31,12 @@
 //import java.util.List;
 //import java.util.Map;
 //import java.util.Set;
-//import org.fisco.bcos.sdk.contract.precompiled.crud.TableCRUDService;
-//import org.fisco.bcos.sdk.contract.precompiled.crud.common.Condition;
-//import org.fisco.bcos.sdk.contract.precompiled.crud.common.ConditionOperator;
-//import org.fisco.bcos.sdk.contract.precompiled.crud.common.Entry;
-//import org.fisco.bcos.sdk.model.PrecompiledConstant;
-//import org.fisco.bcos.sdk.model.RetCode;
+//import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TableCRUDService;
+//import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.Condition;
+//import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.ConditionOperator;
+//import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.Entry;
+//import org.fisco.bcos.sdk.v3.model.PrecompiledConstant;
+//import org.fisco.bcos.sdk.v3.model.RetCode;
 //import org.junit.Test;
 //import org.springframework.context.ApplicationContext;
 //

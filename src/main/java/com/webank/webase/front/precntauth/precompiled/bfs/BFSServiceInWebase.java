@@ -18,18 +18,17 @@ import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
-import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtil;
+import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import org.fisco.bcos.sdk.contract.precompiled.bfs.BFSPrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.bfs.BFSService;
-import org.fisco.bcos.sdk.contract.precompiled.bfs.FileInfo;
-import org.fisco.bcos.sdk.model.RetCode;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSPrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSPrecompiled.BfsInfo;
+import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSService;
+import org.fisco.bcos.sdk.v3.model.RetCode;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,21 +63,59 @@ public class BFSServiceInWebase {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, BFSPrecompiled.FUNC_MKDIR, funcParams, isWasm);
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, isWasm);
   }
 
   /**
    * BFS获取某个目录信息
    */
-  public Object list(String groupId, String path)
+  public List<BfsInfo> list(String groupId, String path)
       throws ContractException {
     BFSService bfsService = new BFSService(web3ApiService.getWeb3j(groupId),
         keyStoreService.getCredentialsForQuery(groupId));
-    List<FileInfo> fileInfoList = bfsService.list(path);
+    List<BfsInfo> fileInfoList = bfsService.list(path);
     return fileInfoList;
   }
 
-  public String handleRetcodeAndReceipt(TransactionReceipt receipt) {
+  /**
+   * BFS link
+   */
+  public String link(String groupId, String signUserId, String contractName,
+      String contractVersion,
+      String contractAddress, String abiData) {
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(contractName);
+    funcParams.add(contractVersion);
+    funcParams.add(contractAddress);
+    funcParams.add(abiData);
+
+    String bfsAddress;
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
+      bfsAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.BFS_LIQUID);
+    } else {
+      bfsAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.BFS);
+    }
+    String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.BFS);
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, bfsAddress, abiStr, BFSPrecompiled.FUNC_LINK, funcParams, isWasm);
+    return this.handleRetcodeAndReceipt(receipt, isWasm);
+  }
+
+  /**
+   * BFS readlink 获取某个目录信息
+   */
+  public Object readlink(String groupId, String path)
+      throws ContractException {
+    BFSService bfsService = new BFSService(web3ApiService.getWeb3j(groupId),
+        keyStoreService.getCredentialsForQuery(groupId));
+    String readlink = bfsService.readlink(path);
+    return readlink;
+  }
+
+
+  public String handleRetcodeAndReceipt(TransactionReceipt receipt, boolean isWasm) {
     if (receipt.getStatus() == -53005) {
       RetCode sdkRetCode = new RetCode();
       if (receipt.getMessage().equals("Invalid path")) {
@@ -86,7 +123,7 @@ public class BFSServiceInWebase {
             sdkRetCode.getMessage()).toString();
       }
     }
-    return PrecompiledUtil.handleTransactionReceipt(receipt);
+    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
   }
 
 }

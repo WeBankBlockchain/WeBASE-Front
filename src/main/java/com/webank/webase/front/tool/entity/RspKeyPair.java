@@ -16,7 +16,7 @@ package com.webank.webase.front.tool.entity;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
 
 @Data
 @NoArgsConstructor

@@ -24,7 +24,7 @@ import com.webank.webase.front.contract.entity.wasm.CompileTask;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
 import com.webank.webase.front.util.JsonUtils;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

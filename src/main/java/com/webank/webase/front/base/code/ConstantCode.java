@@ -280,6 +280,7 @@ public class ConstantCode {
     public static final RetCode LIQUID_READ_ABI_BIN_FAILED = RetCode.mark(201640, "Read liquid contract's abi and bin file failed, please check 'liquid' directory in webase-front");
 
     public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
+    public static final RetCode ENCODE_TX_JNI_ERROR = RetCode.mark(201666, "Encode transaction in jni failed");
 
     /* permission */
     public static final RetCode EXEC_ENV_IS_WASM = RetCode.mark(201670, "exec env is wasm, don't support");
