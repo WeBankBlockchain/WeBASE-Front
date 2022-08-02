@@ -128,7 +128,12 @@ public class EveryoneService {
     public boolean checkDeployAuth(String groupId, String userAddress)
         throws ContractException {
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
-        return authManager.checkDeployAuth(userAddress);
+        try {
+            return authManager.checkDeployAuth(userAddress);
+        } catch (ContractException ex) {
+            log.error("checkDeployAuth error:{}", ex.getMessage());
+        }
+        return true;
     }
 
     /**

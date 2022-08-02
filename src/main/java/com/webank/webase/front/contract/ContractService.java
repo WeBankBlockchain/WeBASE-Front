@@ -970,6 +970,7 @@ public class ContractService {
             return true;
         }
         Boolean res = everyoneService.checkDeployAuth(groupId, userAddress);
+        // todo if res, throw
         log.info("check deploy permission result is {}", res.toString());
         return res;
     }

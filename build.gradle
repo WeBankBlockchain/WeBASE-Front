@@ -24,7 +24,7 @@ repositories {
 
 }
 
-def spring_version="5.2.20.RELEASE"
+def spring_version="5.2.22.RELEASE"
 List spring =[
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-beans:$spring_version",
@@ -57,7 +57,7 @@ List swagger = [
 ]
 
 
-def log4j_version="2.17.1"
+def log4j_version="2.18.0"
 List logger = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -72,24 +72,14 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-def jackson_version = "2.13.2"
+def jackson_version = "2.13.3"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
     "com.fasterxml.jackson.core:jackson-core:$jackson_version",
-//    "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
-    "com.fasterxml.jackson.core:jackson-databind:2.13.2.2",
+    "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
     "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
 ]
 
-// cover old version
-def tomcat_version = "8.5.56"
-List tomcat = [
-    "org.apache.tomcat.embed:tomcat-embed-core:$tomcat_version",
-    "org.apache.tomcat.embed:tomcat-embed-el:$tomcat_version",
-    "org.apache.tomcat.embed:tomcat-embed-websocket:$tomcat_version",
-    "org.apache.tomcat:tomcat-jdbc:$tomcat_version",
-    "org.apache.tomcat:tomcat-juli:$tomcat_version"
-]
 
 List scaffold = [
     'com.webank.webase:solscaffold:1.0.2',
@@ -98,7 +88,7 @@ List scaffold = [
 ]
 
 dependencies {
-    compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat,scaffold
+    compile spring,spring_boot,swagger,logger,jaxb,jackson,scaffold
     compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc4')
     // cover
     compile 'javax.servlet:javax.servlet-api:4.0.1'
@@ -116,7 +106,7 @@ dependencies {
     compile 'org.yaml:snakeyaml:1.30'
     compile 'javax.validation:validation-api:2.0.1.Final'
 
-    testCompile('org.springframework.boot:spring-boot-starter-test') {
+    testCompile('org.springframework.boot:spring-boot-starter-test:$spring_boot_version') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testCompile 'junit:junit:4.12',
