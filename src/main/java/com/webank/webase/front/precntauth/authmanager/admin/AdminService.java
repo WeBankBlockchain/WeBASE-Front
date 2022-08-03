@@ -59,8 +59,7 @@ public class AdminService {
    * set contract acl: white_list(type=1) or black_list(type=2)
    */
   public Object setMethodAuthType(String groupId, String signUserId, String contractAddr,
-      byte[] func, BigInteger authType)
-      throws ContractException {
+      byte[] func, BigInteger authType) {
     return this.setMethodAuthTypeHandle(groupId, signUserId, contractAddr, func, authType);
   }
 
@@ -93,7 +92,7 @@ public class AdminService {
   }
 
   public Object setMethodAuthHandle(String groupId, String signUserId, String contractAddr,
-      byte[] func, String accountAddress, Boolean bool) throws ContractException {
+      byte[] func, String accountAddress, Boolean bool) {
     TransactionReceipt receipt;
     List<Object> funcParams = new ArrayList<>();
     funcParams.add(contractAddr);
@@ -127,8 +126,10 @@ public class AdminService {
     funcParams.add(isFreeze);
     // get address and abi of precompiled contract
     String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONTRACT_AUTH);
-    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
-    if (isWasm) {
+    if (!web3ApiService.getWeb3j(groupId).isAuthCheck()) {
+      throw new FrontException(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+    }
+    if (web3ApiService.getWeb3j(groupId).isWASM()) {
       throw new FrontException(ConstantCode.EXEC_ENV_IS_WASM);
     }
     String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONTRACT_AUTH);
@@ -136,7 +137,7 @@ public class AdminService {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, precompiledAddress, abiStr, FUNC_SETCONTRACTSTATUS, funcParams);
-    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+    return PrecompiledUtils.handleTransactionReceipt(receipt, false);
   }
 
 

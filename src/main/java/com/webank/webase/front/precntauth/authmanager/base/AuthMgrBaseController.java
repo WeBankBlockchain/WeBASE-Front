@@ -29,7 +29,7 @@ public class AuthMgrBaseController {
   @ApiOperation(value = "query if node support wasm")
   @ApiImplicitParam(name = "groupId", value = "groupId info", required = true)
   @GetMapping("queryChainHasAuth")
-  public Boolean queryChainHasAuth(String groupId) throws ContractException {
+  public Boolean queryChainHasAuth(String groupId) {
     return authMgrService.chainHasAuth(groupId);
   }
 

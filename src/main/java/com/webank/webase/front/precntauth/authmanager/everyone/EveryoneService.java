@@ -13,6 +13,8 @@
  */
 package com.webank.webase.front.precntauth.authmanager.everyone;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.precntauth.authmanager.everyone.entity.NewProposalInfo;
 import com.webank.webase.front.precntauth.authmanager.everyone.entity.ReqProposalListInfo;
 import com.webank.webase.front.precntauth.authmanager.util.AuthManagerService;
@@ -163,6 +165,9 @@ public class EveryoneService {
      */
     public Boolean isContractAvailable(String groupId, String contractAddr)
         throws ContractException {
+        if (!web3ApiService.getWeb3j(groupId).isAuthCheck()) {
+            throw new FrontException(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+        }
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
         return authManager.contractAvailable(contractAddr);
     }
