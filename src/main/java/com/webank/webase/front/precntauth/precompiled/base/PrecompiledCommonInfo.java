@@ -48,10 +48,6 @@ public class PrecompiledCommonInfo {
                 return PrecompiledAddress.CONSENSUS_PRECOMPILED_ADDRESS;
             case CONSENSUS_LIQUID:
                 return PrecompiledAddress.CONSENSUS_PRECOMPILED_NAME;
-//            case CNS:
-//                return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
-//            case CNS_LIQUID:
-//                return PrecompiledAddress.CNS_PRECOMPILED_NAME;
             case BFS:
                 return PrecompiledAddress.BFS_PRECOMPILED_ADDRESS;
             case BFS_LIQUID:
@@ -73,8 +69,6 @@ public class PrecompiledCommonInfo {
                 return KVTablePrecompiled.ABI;
             case CONSENSUS:
                 return ConsensusPrecompiled.ABI;
-//            case CNS:
-//                return CNSPrecompiled.ABI;
             case CONTRACT_AUTH:
                 return ContractAuthPrecompiled.ABI;
             case BFS:

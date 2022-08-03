@@ -15,7 +15,10 @@ package com.webank.webase.front.precntauth.authmanager.admin;
 
 import static org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled.FUNC_CLOSEMETHODAUTH;
 import static org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled.FUNC_OPENMETHODAUTH;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled.FUNC_SETCONTRACTSTATUS;
 import static org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled.FUNC_SETMETHODAUTHTYPE;
+import static org.fisco.bcos.sdk.v3.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
+
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
@@ -114,6 +117,28 @@ public class AdminService {
     }
     return this.handleRetcodeAndReceipt(receipt, false);
   }
+
+
+  public String setContractStatus(String groupId, String signUserId,
+      String contractAddress, boolean isFreeze) {
+
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(contractAddress);
+    funcParams.add(isFreeze);
+    // get address and abi of precompiled contract
+    String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONTRACT_AUTH);
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
+      throw new FrontException(ConstantCode.EXEC_ENV_IS_WASM);
+    }
+    String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONTRACT_AUTH);
+    // execute set method
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, precompiledAddress, abiStr, FUNC_SETCONTRACTSTATUS, funcParams);
+    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+  }
+
 
   public String handleRetcodeAndReceipt(TransactionReceipt receipt, boolean isWasm) {
     if (receipt.getStatus() == 16) {

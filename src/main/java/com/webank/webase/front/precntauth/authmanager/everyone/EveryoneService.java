@@ -157,4 +157,13 @@ public class EveryoneService {
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
         return authManager.getAdmin(contractAddr);
     }
+
+    /**
+     * 获取合约是否被冻结, true: available, 即not frozen
+     */
+    public Boolean isContractAvailable(String groupId, String contractAddr)
+        throws ContractException {
+        AuthManager authManager = authManagerService.getAuthManagerService(groupId);
+        return authManager.contractAvailable(contractAddr);
+    }
 }

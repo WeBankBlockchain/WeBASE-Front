@@ -116,4 +116,19 @@ public class EveryoneController {
         reqCheckMethodAuthInfo.getUserAddress());
   }
 
+
+  /**
+   * 查询某用户地址对合约函数的访问是否有权限
+   */
+  @ApiOperation(value = "query the contract address whether available")
+  @ApiImplicitParam(name = "reqContractAdminInfo", value = "contractAdmin info", required = true,
+      dataType = "ReqContractAdminInfo")
+  @PostMapping("contract/status")
+  public Boolean checkContractAvailable(@Valid @RequestBody ReqContractAdminInfo reqContractAdminInfo)
+      throws ContractException {
+    return everyoneService.isContractAvailable(reqContractAdminInfo.getGroupId(),
+        reqContractAdminInfo.getContractAddr());
+  }
+
+
 }
