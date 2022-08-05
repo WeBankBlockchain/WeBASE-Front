@@ -253,7 +253,7 @@ public class ContractService {
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         boolean isWasm = req.getIsWasm() != null && req.getIsWasm();
-        String liquidAddress = null;
+        String liquidAddress = "";
         if (isWasm) {
             liquidAddress = req.getContractAddress();
             if (StringUtils.isBlank(liquidAddress)) {
