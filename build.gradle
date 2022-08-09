@@ -91,11 +91,15 @@ List scaffold = [
 
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb,jackson,scaffold
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-rc4')
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-SNAPSHOT')
     // cover
     compile 'javax.servlet:javax.servlet-api:4.0.1'
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
+    compile('org.fisco-bcos.code-generator:bcos-code-generator:1.0.0-SNAPSHOT') {
+        exclude group: "org.fisco-bcos.java-sdk"
+        exclude group: "org.slf4j"
+    }
     compile 'com.h2database:h2:1.4.200'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
     compile 'org.projectlombok:lombok:1.18.6'

@@ -175,7 +175,7 @@ public class TransService {
         String transactionDataHash = "";
         try {
             transactionData = TransactionBuilderJniObj
-                .createTransactionData(String.valueOf(groupId), chainIdAndGroupId.getLeft(),
+                .createTransactionData(groupId, chainIdAndGroupId.getLeft(),
                     contractAddress, Numeric.toHexString(data), "", client.getBlockLimit().longValue());
             encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
             transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);

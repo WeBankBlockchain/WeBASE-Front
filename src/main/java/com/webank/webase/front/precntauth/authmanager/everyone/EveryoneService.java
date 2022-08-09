@@ -21,8 +21,10 @@ import com.webank.webase.front.precntauth.authmanager.util.AuthManagerService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.v3.contract.auth.manager.AuthManager;
 import org.fisco.bcos.sdk.v3.contract.auth.po.ProposalInfo;
@@ -170,5 +172,26 @@ public class EveryoneService {
         }
         AuthManager authManager = authManagerService.getAuthManagerService(groupId);
         return authManager.contractAvailable(contractAddr);
+    }
+
+    /**
+     * 获取合约是否被冻结, true: available, 即not frozen
+     */
+    public Map<String, Boolean> listContractStatus(String groupId, List<String> contractAddrList)
+        throws ContractException {
+        if (!web3ApiService.getWeb3j(groupId).isAuthCheck()) {
+            throw new FrontException(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+        }
+        Map<String, Boolean> resultMap = new HashMap<>();
+        if (contractAddrList.isEmpty()) {
+            return resultMap;
+        }
+        AuthManager authManager = authManagerService.getAuthManagerService(groupId);
+
+        for (String contractAddr : contractAddrList) {
+            Boolean available = authManager.contractAvailable(contractAddr);
+            resultMap.put(contractAddr, available);
+        }
+        return resultMap;
     }
 }

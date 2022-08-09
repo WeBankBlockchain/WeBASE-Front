@@ -15,6 +15,7 @@ package com.webank.webase.front.precntauth.precompiled.cns;
 
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precntauth.precompiled.bfs.BFSServiceInWebase;
+import com.webank.webase.front.precntauth.precompiled.cns.entity.CnsInfo;
 import com.webank.webase.front.precntauth.precompiled.cns.entity.ResCnsInfo;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.web3api.Web3ApiService;
@@ -57,9 +58,17 @@ public class CNSServiceInWebase {
     return bfsServiceInWebase.link(groupId, signUserId, contractName, contractVersion, contractAddress, abiData);
   }
 
-  public List<BfsInfo> queryCnsInfoByName(String groupId, String contractName)
+  public List<CnsInfo> queryCnsInfoByName(String groupId, String contractName)
       throws ContractException {
-    return bfsServiceInWebase.list(groupId, CONTRACT_PREFIX + contractName);
+    List<BfsInfo> bfsInfoList = bfsServiceInWebase.list(groupId, CONTRACT_PREFIX + contractName);
+    log.info("queryCnsByNameAndVersion bfsInfoList:{}", bfsInfoList);
+    // 只有link是cns的
+    List<CnsInfo> cnsInfos = bfsInfoList.stream()
+        .filter(bfs -> CNS_FILE_TYPE.equals(bfs.getFileType()))
+        .map(bfs -> new CnsInfo(contractName, bfs.getFileName(), bfs.getExt().get(0), bfs.getExt().get(1)))
+        .collect(Collectors.toList());
+    log.info("queryCnsByNameAndVersion cnsInfos:{}", cnsInfos);
+    return cnsInfos;
   }
 
   public Tuple2<String, String> queryCnsByNameAndVersion(String groupId, String contractName,
