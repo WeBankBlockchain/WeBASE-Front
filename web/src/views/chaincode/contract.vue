@@ -186,14 +186,14 @@ export default {
       {
         solcName: "v0.8.11",
         versionId: 6,
-        url: `http://${this.host}/WeBASE-Front/static/js/v0.8.11".js`,
+        url: `http://${this.host}/WeBASE-Front/static/js/v0.8.11.js`,
         encryptType: 0,
         net: 1,
       },
       {
         solcName: "v0.8.11-gm",
         versionId: 7,
-        url: `http://${this.host}/WeBASE-Front/static/js/v0.8.11"-gm.js`,
+        url: `http://${this.host}/WeBASE-Front/static/js/v0.8.11-gm.js`,
         encryptType: 1,
         net: 1,
       },
