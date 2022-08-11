@@ -151,6 +151,20 @@ public class AdminService {
         return new BaseResponse(ConstantCode.PROPOSAL_NOT_END,
             sdkRetCode.getMessage()).toString();
       }
+    } else if (receipt.getStatus() == -50100) {
+      RetCode sdkRetCode = new RetCode();
+      if (receipt.getMessage()
+          .equals("Open table failed, please check the existence of the table")) {
+        return new BaseResponse(ConstantCode.OPEN_TABLE_FAILED,
+            sdkRetCode.getMessage()).toString();
+      }
+    }else if (receipt.getStatus() == -51002) {
+      RetCode sdkRetCode = new RetCode();
+      if (receipt.getMessage()
+          .equals("The contract method auth type not set, please set method auth type first.")) {
+        return new BaseResponse(ConstantCode.NOT_SET_METHOD_AUTH_TYPE,
+            sdkRetCode.getMessage()).toString();
+      }
     }
     return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
   }

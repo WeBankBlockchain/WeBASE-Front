@@ -76,7 +76,7 @@ public class ConsensusServiceInWebase {
     if (!containsGroupFile(groupId)) {
       throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
     }
-    return this.addSealerHandle(nodeId, signUserId, groupId, weight);
+    return this.addSealerHandle(groupId, signUserId, nodeId, weight);
   }
 
   public String addSealerHandle(String groupId, String signUserId, String nodeId,

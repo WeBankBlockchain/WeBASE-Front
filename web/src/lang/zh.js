@@ -189,6 +189,7 @@ export default {
     },
     dialog: {
         liquidTip:"liquid合约的地址格式为/开头，由数字字母下划线组成",
+        liquidTip1:"Liquid合约需要手动指定合约地址，且地址唯一",
         addUsername: '添加用户名',
         pleaseEnterUserName: '请输入用户名',
         privateKeyVerifyLength: '长度在 3 到 32 个字符',
@@ -528,6 +529,7 @@ export default {
         nodeType: "请选择节点类型",
         contractName: "请输入合约名称",
         contractAddress: "请输入合约地址",
+        contractAddressCorrect: "请输入正确的合约地址",
         contractAbi: "请输入合约ABI",
         contractLong: "长度在 1 到 32 个字符",
         contractRule: "包含字母, 数字和‘_’，以字母开头，不能以“_”结尾,如com_webank",
