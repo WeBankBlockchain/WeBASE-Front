@@ -65,7 +65,16 @@ public class CNSServiceInWebase {
     // 只有link是cns的
     List<CnsInfo> cnsInfos = bfsInfoList.stream()
         .filter(bfs -> CNS_FILE_TYPE.equals(bfs.getFileType()))
-        .map(bfs -> new CnsInfo(contractName, bfs.getFileName(), bfs.getExt().get(0), bfs.getExt().get(1)))
+        .map(bfs -> {
+              String version = bfs.getFileName();
+              try {
+                Tuple2<String, String> addressAbi = queryCnsByNameAndVersion(groupId, contractName, version);
+                return new CnsInfo(contractName, bfs.getFileName(), addressAbi.getValue1(), addressAbi.getValue2());
+              } catch (ContractException e) {
+                log.error("query cns name version failed:{}|{}", contractName, version);
+                return new CnsInfo(contractName, bfs.getFileName(), "", "");
+              }
+        })
         .collect(Collectors.toList());
     log.info("queryCnsByNameAndVersion cnsInfos:{}", cnsInfos);
     return cnsInfos;
