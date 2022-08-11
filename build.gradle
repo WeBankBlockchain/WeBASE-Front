@@ -191,12 +191,16 @@ def downloadJs() {
     String solc05gmPath = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.5.2-gm.js";
     String solc06Path = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10.js";
     String solc06gmPath = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.6.10-gm.js";
+    String solc08Path = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.8.11.js";
+    String solc08gmPath = "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator + "static"+ File.separator + "static"+ File.separator + "js"+ File.separator + "v0.8.11-gm.js";
     File solc04 = new File(solc04Path);
     File solc04gm = new File(solc04gmPath);
     File solc05 = new File(solc05Path);
     File solc05gm = new File(solc05gmPath);
     File solc06 = new File(solc06Path);
     File solc06gm = new File(solc06gmPath);
+    File solc08 = new File(solc08Path);
+    File solc08gm = new File(solc08gmPath);
     if (!solc04.exists()) {
         exec {
             ExecSpec execSpec ->
@@ -243,6 +247,22 @@ def downloadJs() {
                 executable 'curl'
                 args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10-gm.js",
                         "-o", solc06gmPath
+        }
+    }
+    if (!solc08.exists()) {
+        exec {
+            ExecSpec execSpec ->
+                executable 'curl'
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.8.11.js",
+                        "-o", solc08Path
+        }
+    }
+    if (!solc08gm.exists()) {
+        exec {
+            ExecSpec execSpec ->
+                executable 'curl'
+                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.8.11-gm.js",
+                        "-o", solc08gmPath
         }
     }
 }
