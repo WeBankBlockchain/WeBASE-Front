@@ -293,7 +293,6 @@ export default {
     },
     initSolc(versionId) {
       let that = this;
-      debugger
       for (let i = 0; i < this.versionList.length; i++) {
         if (this.versionList[i].versionId == versionId) {
           this.versionData = this.versionList[i];
