@@ -15,13 +15,14 @@ package com.webank.webase.front.precntauth.authmanager.admin;
 
 import com.webank.webase.front.precntauth.authmanager.admin.entity.ReqAclAuthTypeInfo;
 import com.webank.webase.front.precntauth.authmanager.admin.entity.ReqAclUsrInfo;
+import com.webank.webase.front.precntauth.authmanager.admin.entity.ReqContractStatus;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import java.math.BigInteger;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,6 +72,23 @@ public class AdminController {
     Boolean bool = reqAclUsrInfo.getIsOpen();
     Object res = adminService.setMethodAuth(groupId, signUserId, contractAddr, func,
         accountAddress,bool);
+    return res;
+  }
+
+
+  /**
+   * 冻结、解冻合约
+   * openMethodAuth contractAdd(0xCcEeF68C9b4811b32c75df284a1396C7C5509561) set(string) accountAdd(0x7fb008862ff69353a02ddabbc6cb7dc31683d0f6)
+   */
+  @ApiOperation(value = "set contract status")
+  @ApiImplicitParam(name = "reqContractStatus", value = "contract status info", required = true, dataType = "ReqContractStatus")
+  @PostMapping("contract/status/set")
+  public String setContractStatus(@Valid @RequestBody ReqContractStatus reqContractStatus) {
+    String groupId = reqContractStatus.getGroupId();
+    String contractAddr = reqContractStatus.getContractAddr();
+    String signUserId = reqContractStatus.getSignUserId();
+    Boolean isFreeze = reqContractStatus.getIsFreeze();
+    String res = adminService.setContractStatus(groupId, signUserId, contractAddr, isFreeze);
     return res;
   }
 

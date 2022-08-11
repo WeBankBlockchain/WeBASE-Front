@@ -1,5 +1,5 @@
 /**
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -12,16 +12,14 @@
  * the License.
  */
 
-package com.webank.webase.front.event.entity;
+package com.webank.webase.front.precntauth.authmanager.admin.entity;
 
-import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.fisco.bcos.sdk.v3.model.EventLog;
 
 @Data
-@AllArgsConstructor
-public class DecodedEventLog {
-    private EventLog log;
-    private List<String> data;
+public class ReqContractStatus {
+    private String groupId;
+    private String signUserId;
+    private String contractAddr;
+    private Boolean isFreeze;
 }

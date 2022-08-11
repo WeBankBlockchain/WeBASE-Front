@@ -16,10 +16,10 @@
 package com.webank.webase.front.base;
 
 import java.math.BigInteger;
-import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.BcosSDK;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -30,6 +30,7 @@ public class TestBase {
   protected static CryptoKeyPair cryptoKeyPair;
   protected static BigInteger chainId = new BigInteger("1");
   protected static String groupId = "1";
+  protected static String groupIdV3 = "group0";
 
   protected static String address;
   protected static BigInteger blockNumber;
@@ -40,12 +41,13 @@ public class TestBase {
     // 绝对路径
     String configFile = ".\\src\\test\\resources\\config-example.toml";
     bcosSDK =  BcosSDK.build(configFile);
-    web3j = bcosSDK.getClient(groupId);
+//    web3j = bcosSDK.getClient(groupId);
+    web3j = bcosSDK.getClient(groupIdV3);
     cryptoSuite = web3j.getCryptoSuite();
     cryptoKeyPair = web3j.getCryptoSuite().getKeyPairFactory().createKeyPair("71f1479d9051e8d6b141a3b3ef9c01a7756da823a0af280c6bf62d18ee0cc978");
 
     //todo deploy ok.sol
-    // blockHash = web3j.getBlockHashByNumber(blockNumber).getBlockHashByNumber();
+     blockHash = web3j.getBlockHashByNumber(blockNumber).getBlockHashByNumber();
   }
 
 }

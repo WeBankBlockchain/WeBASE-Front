@@ -44,8 +44,8 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -83,7 +83,7 @@ public class TransController extends BaseController {
         }
         if (StringUtils.isNotBlank(address)
             && ( (!reqTransHandle.getIsWasm() && address.length() != Address.ValidLen)
-                || (!reqTransHandle.getIsWasm() && org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address)) )
+                || (!reqTransHandle.getIsWasm() && org.fisco.bcos.sdk.v3.codec.datatypes.Address.DEFAULT.toString().equals(address)) )
         ) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }

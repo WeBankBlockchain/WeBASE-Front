@@ -13,22 +13,19 @@
  */
 package com.webank.webase.front.base.config;
 
-
-import com.webank.webase.front.configapi.ConfigService;
 import com.webank.webase.front.util.JsonUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.config.ConfigOption;
-import org.fisco.bcos.sdk.config.exceptions.ConfigException;
-import org.fisco.bcos.sdk.config.model.ConfigProperty;
-import org.fisco.bcos.sdk.eventsub.EventSubscribe;
 import org.fisco.bcos.sdk.jni.common.JniException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.fisco.bcos.sdk.v3.BcosSDK;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.config.ConfigOption;
+import org.fisco.bcos.sdk.v3.config.exceptions.ConfigException;
+import org.fisco.bcos.sdk.v3.config.model.ConfigProperty;
+import org.fisco.bcos.sdk.v3.eventsub.EventSubscribe;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

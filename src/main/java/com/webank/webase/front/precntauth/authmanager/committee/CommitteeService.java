@@ -13,32 +13,33 @@
  */
 package com.webank.webase.front.precntauth.authmanager.committee;
 
-import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATEMODIFYDEPLOYAUTHPROPOSAL;
-import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATERESETADMINPROPOSAL;
-import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATESETDEPLOYAUTHTYPEPROPOSAL;
-import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATESETRATEPROPOSAL;
-import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_CREATEUPDATEGOVERNORPROPOSAL;
-import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_REVOKEPROPOSAL;
-import static org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager.FUNC_VOTEPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATEMODIFYDEPLOYAUTHPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATERESETADMINPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETDEPLOYAUTHTYPEPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETRATEPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATEUPDATEGOVERNORPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_REVOKEPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_VOTEPROPOSAL;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
+import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils;
 import com.webank.webase.front.transaction.TransService;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.codec.ABICodecException;
-import org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager;
-import org.fisco.bcos.sdk.model.RetCode;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
-import org.fisco.bcos.sdk.transaction.model.exception.TransactionException;
+import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
+import org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager;
+import org.fisco.bcos.sdk.v3.model.RetCode;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.transaction.codec.decode.ReceiptParser;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.TransactionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +75,7 @@ public class CommitteeService {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATEUPDATEGOVERNORPROPOSAL, funcParams);
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, false);
   }
 
   /**
@@ -97,7 +98,7 @@ public class CommitteeService {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATESETRATEPROPOSAL, funcParams);
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, false);
   }
 
   /**
@@ -119,7 +120,7 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATESETDEPLOYAUTHTYPEPROPOSAL,
             funcParams);
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, false);
   }
 
   /**
@@ -143,14 +144,14 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATEMODIFYDEPLOYAUTHPROPOSAL,
             funcParams);
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, false);
   }
 
   /**
    * 重置某个合约的管理员账号提案
    */
   public Object resetAdmin(String groupId, String signUserId, String newAdmin, String contractAddr)
-      throws ContractException, ABICodecException, TransactionException, IOException {
+      throws ContractException, ContractCodecException, TransactionException, IOException {
     return this.resetAdminHandle(groupId, signUserId, newAdmin, contractAddr);
   }
 
@@ -167,14 +168,14 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_CREATERESETADMINPROPOSAL,
             funcParams);
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, false);
   }
 
   /**
    * 撤销提案的发起，该操作只有发起提案的治理委员才能操作
    */
   public Object revokeProposal(String groupId, String signUserId, BigInteger proposalId)
-      throws ContractException, ABICodecException, TransactionException, IOException {
+      throws ContractException, ContractCodecException, TransactionException, IOException {
     return this.revokeProposalHandle(groupId, signUserId, proposalId);
   }
 
@@ -188,7 +189,7 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_REVOKEPROPOSAL,
             funcParams);
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, false);
   }
 
   /**
@@ -212,10 +213,10 @@ public class CommitteeService {
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_VOTEPROPOSAL,
             funcParams);
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, false);
   }
 
-  public String handleRetcodeAndReceipt(TransactionReceipt receipt) {
+  public String handleRetcodeAndReceipt(TransactionReceipt receipt, boolean isWasm) {
     if (receipt.getStatus() == 16) {
       RetCode sdkRetCode = new RetCode();
       if (receipt.getMessage().equals("Proposal not exist")) {
@@ -252,24 +253,7 @@ public class CommitteeService {
       }
 
     }
-    return this.handleTransactionReceipt(receipt);
-  }
-
-  private String handleTransactionReceipt(TransactionReceipt receipt) {
-    log.debug("handle tx receipt of precompiled");
-    try {
-      RetCode sdkRetCode = ReceiptParser.parseTransactionReceipt(receipt);
-      log.info("handleTransactionReceipt sdkRetCode:{}", sdkRetCode);
-      if (sdkRetCode.getCode() >= 0) {
-        return new BaseResponse(ConstantCode.RET_SUCCESS,
-            sdkRetCode.getMessage()).toString();
-      } else {
-        throw new FrontException(sdkRetCode.getCode(), sdkRetCode.getMessage());
-      }
-    } catch (ContractException e) {
-      log.error("handleTransactionReceipt e:[]", e);
-      throw new FrontException(e.getErrorCode(), e.getMessage());
-    }
+    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
   }
 
 }

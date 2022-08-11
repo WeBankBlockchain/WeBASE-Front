@@ -2,7 +2,7 @@ package com.webank.webase.front.precntauth.authmanager.base;
 
 import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.v3.client.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

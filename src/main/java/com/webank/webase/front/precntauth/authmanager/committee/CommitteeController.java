@@ -13,9 +13,9 @@ import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.codec.ABICodecException;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
-import org.fisco.bcos.sdk.transaction.model.exception.TransactionException;
+import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.TransactionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +37,7 @@ public class CommitteeController {
       , dataType = "ReqUpdateGovernorInfo")
   @PostMapping("governor")
   public Object updateGovernor(@Valid @RequestBody ReqUpdateGovernorInfo reqUpdateGovernorInfo)
-      throws ContractException, ABICodecException, TransactionException, IOException {
+      throws ContractException, ContractCodecException, TransactionException, IOException {
     return committeeService.updateGovernor(reqUpdateGovernorInfo.getGroupId(),
         reqUpdateGovernorInfo.getSignUserId(), reqUpdateGovernorInfo.getAccountAddress(),
         reqUpdateGovernorInfo.getWeight());
@@ -48,7 +48,7 @@ public class CommitteeController {
       dataType = "ReqSetRateInfo")
   @PostMapping("rate")
   public Object setRate(@Valid @RequestBody ReqSetRateInfo reqSetRateInfo)
-      throws ContractException, ABICodecException, TransactionException, IOException {
+      throws ContractException, ContractCodecException, TransactionException, IOException {
     return committeeService.setRate(reqSetRateInfo.getGroupId(), reqSetRateInfo.getSignUserId(),
         reqSetRateInfo.getParticipatesRate(),
         reqSetRateInfo.getWinRate());
@@ -78,7 +78,7 @@ public class CommitteeController {
       dataType = "ReqResetAdminInfo")
   @PostMapping("contract/admin")
   public Object resetAdmin(@Valid @RequestBody ReqResetAdminInfo reqResetAdminInfo)
-      throws ABICodecException, TransactionException, ContractException, IOException {
+      throws ContractCodecException, TransactionException, ContractException, IOException {
     return committeeService.resetAdmin(reqResetAdminInfo.getGroupId(),
         reqResetAdminInfo.getSignUserId(), reqResetAdminInfo.getNewAdmin(),
         reqResetAdminInfo.getContractAddr());
@@ -89,7 +89,7 @@ public class CommitteeController {
       dataType = "ReqRevokeProposalInfo")
   @PostMapping("proposal/revoke")
   public Object revokeProposal(@Valid @RequestBody ReqRevokeProposalInfo reqRevokeProposalInfo)
-      throws ABICodecException, TransactionException, ContractException, IOException {
+      throws ContractCodecException, TransactionException, ContractException, IOException {
     return committeeService.revokeProposal(reqRevokeProposalInfo.getGroupId(),
         reqRevokeProposalInfo.getSignUserId(), reqRevokeProposalInfo.getProposalId());
   }
@@ -99,7 +99,7 @@ public class CommitteeController {
       dataType = "ReqVoteProposalInfo")
   @PostMapping("proposal/vote")
   public Object voteProposal(@Valid @RequestBody ReqVoteProposalInfo reqVoteProposalInfo)
-      throws ABICodecException, TransactionException, ContractException, IOException {
+      throws ContractCodecException, TransactionException, ContractException, IOException {
     return committeeService.voteProposal(reqVoteProposalInfo.getGroupId(),
         reqVoteProposalInfo.getSignUserId(), reqVoteProposalInfo.getProposalId(),
         reqVoteProposalInfo.getAgree());

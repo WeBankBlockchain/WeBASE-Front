@@ -16,6 +16,11 @@
 
 package com.webank.webase.front.event;
 
+import static com.webank.webase.front.util.RabbitMQUtils.BLOCK_ROUTING_KEY_MAP;
+import static com.webank.webase.front.util.RabbitMQUtils.CONTRACT_EVENT_CALLBACK_MAP;
+import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_BLOCK;
+import static com.webank.webase.front.util.RabbitMQUtils.ROUTING_KEY_EVENT;
+
 import com.webank.webase.front.abi.AbiService;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
@@ -28,31 +33,34 @@ import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.event.callback.ContractEventCallback;
 import com.webank.webase.front.event.callback.NewBlockEventCallback;
 import com.webank.webase.front.event.callback.SyncEventLogCallback;
-import com.webank.webase.front.event.entity.*;
+import com.webank.webase.front.event.entity.ContractEventInfo;
+import com.webank.webase.front.event.entity.DecodedEventLog;
+import com.webank.webase.front.event.entity.EventTopicParam;
+import com.webank.webase.front.event.entity.NewBlockEventInfo;
+import com.webank.webase.front.event.entity.PublisherHelper;
+import com.webank.webase.front.event.entity.RspContractInfo;
 import com.webank.webase.front.util.FrontUtils;
 import com.webank.webase.front.util.RabbitMQUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
-import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.codec.ABICodec;
-import org.fisco.bcos.sdk.config.exceptions.ConfigException;
-import org.fisco.bcos.sdk.eventsub.EventSubParams;
-import org.fisco.bcos.sdk.eventsub.EventSubscribe;
-import org.fisco.bcos.sdk.jni.common.JniException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static com.webank.webase.front.util.RabbitMQUtils.*;
+import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.v3.BcosSDK;
+import org.fisco.bcos.sdk.v3.codec.ContractCodec;
+import org.fisco.bcos.sdk.v3.eventsub.EventSubParams;
+import org.fisco.bcos.sdk.v3.eventsub.EventSubscribe;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * event notify in message queue service
@@ -165,7 +173,7 @@ public class EventService {
             EventSubParams params = RabbitMQUtils.initSingleEventLogUserParams(fromBlock,
                 toBlock, contractAddress, topicList, web3ApiService.getWeb3j(groupId).getCryptoSuite());
             ContractEventCallback callback = new ContractEventCallback(mqPublisher, exchangeName, routingKey, groupId, appId,
-                new ABICodec(web3ApiService.getCryptoSuite(groupId), false), abi, topicList);
+                new ContractCodec(web3ApiService.getCryptoSuite(groupId), false), abi, topicList);
             // register
             registerId = eventSubscribe.subscribeEvent(params, callback);
             // save to db first
@@ -399,7 +407,7 @@ public class EventService {
         log.info("getContractEventLog eventParam:{}", eventParam);
         // final CompletableFuture<List<EventLog>> callbackFuture = new CompletableFuture<>();
         final CompletableFuture<List<DecodedEventLog>> callbackFuture = new CompletableFuture<>();
-        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), false);
+        ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), false);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
         EventSubscribe eventSubscribe = this.getEventSubscribe(String.valueOf(groupId));

@@ -18,14 +18,13 @@ package com.webank.webase.front.precntauth.precompiled.base;
 
 
 import com.webank.webase.front.base.enums.PrecompiledTypes;
-import org.fisco.bcos.sdk.contract.auth.contracts.CommitteeManager;
-import org.fisco.bcos.sdk.contract.auth.contracts.ContractAuthPrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.bfs.BFSPrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CNSPrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusPrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.crud.KVTablePrecompiled;
-import org.fisco.bcos.sdk.contract.precompiled.model.PrecompiledAddress;
-import org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled;
+import org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager;
+import org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSPrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.crud.KVTablePrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.model.PrecompiledAddress;
+import org.fisco.bcos.sdk.v3.contract.precompiled.sysconfig.SystemConfigPrecompiled;
 
 /**
  * precompiled contract address, function name, abi
@@ -41,18 +40,14 @@ public class PrecompiledCommonInfo {
                 return PrecompiledAddress.SYS_CONFIG_PRECOMPILED_ADDRESS;
             case SYSTEM_CONFIG_LIQUID:
                 return PrecompiledAddress.SYS_CONFIG_PRECOMPILED_NAME;
-            case CRUD:
-                return PrecompiledAddress.KV_TABLE_PRECOMPILED_ADDRESS;
-            case CRUD_LIQUID:
-                return PrecompiledAddress.KV_TABLE_PRECOMPILED_NAME;
+//            case CRUD:
+//                return PrecompiledAddress.KV_TABLE_PRECOMPILED_ADDRESS;
+//            case CRUD_LIQUID:
+//                return PrecompiledAddress.KV_TABLE_PRECOMPILED_NAME;
             case CONSENSUS:
                 return PrecompiledAddress.CONSENSUS_PRECOMPILED_ADDRESS;
             case CONSENSUS_LIQUID:
                 return PrecompiledAddress.CONSENSUS_PRECOMPILED_NAME;
-            case CNS:
-                return PrecompiledAddress.CNS_PRECOMPILED_ADDRESS;
-            case CNS_LIQUID:
-                return PrecompiledAddress.CNS_PRECOMPILED_NAME;
             case BFS:
                 return PrecompiledAddress.BFS_PRECOMPILED_ADDRESS;
             case BFS_LIQUID:
@@ -74,10 +69,6 @@ public class PrecompiledCommonInfo {
                 return KVTablePrecompiled.ABI;
             case CONSENSUS:
                 return ConsensusPrecompiled.ABI;
-            case CNS:
-                return CNSPrecompiled.ABI;
-            case CNS_LIQUID:
-                return CNSPrecompiled.WASM_ABI;
             case CONTRACT_AUTH:
                 return ContractAuthPrecompiled.ABI;
             case BFS:

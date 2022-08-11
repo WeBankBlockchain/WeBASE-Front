@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

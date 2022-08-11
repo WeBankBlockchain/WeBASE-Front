@@ -280,6 +280,7 @@ public class ConstantCode {
     public static final RetCode LIQUID_READ_ABI_BIN_FAILED = RetCode.mark(201640, "Read liquid contract's abi and bin file failed, please check 'liquid' directory in webase-front");
 
     public static final RetCode BUILD_NEW_EVENT_SUBSCRIBE_FAILED = RetCode.mark(201665, "Build eventSubscribe instance of new group failed");
+    public static final RetCode ENCODE_TX_JNI_ERROR = RetCode.mark(201666, "Encode transaction in jni failed");
 
     /* permission */
     public static final RetCode EXEC_ENV_IS_WASM = RetCode.mark(201670, "exec env is wasm, don't support");
@@ -287,6 +288,7 @@ public class ConstantCode {
     public static final RetCode MUST_BE_PROPOSER = RetCode.mark(201672, "the account must be the proposer of proposal.");
     public static final RetCode OPEN_TABLE_FAILED = RetCode.mark(201673,"Open table failed, please check the existence of the table");
     public static final RetCode NOT_SET_METHOD_AUTH_TYPE = RetCode.mark(201674,"The contract method auth type not set, please set method auth type first.");
+    public static final RetCode CHAIN_AUTH_NOT_ENABLE = RetCode.mark(201675, "auth of the chain not enable");
 
     /* bfs path */
     public static final RetCode BFS_INVALID_PATH = RetCode.mark(201680, "the PATH is invalid.");
