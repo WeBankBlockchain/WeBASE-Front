@@ -147,6 +147,7 @@ export default {
 <style scoped>
 .content-head-wrapper {
     width: calc(100%);
+    min-width: 400px;
 }
 .content-head-wrapper::after {
     display: block;
