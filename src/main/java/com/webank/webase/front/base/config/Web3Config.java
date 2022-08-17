@@ -38,9 +38,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "sdk")
 public class Web3Config {
-//    @Autowired
-//    private ConfigService configService;
-//    private boolean loadFromDb;
 
     private String threadPoolSize;
     private String certPath;
