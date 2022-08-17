@@ -209,6 +209,7 @@ export default {
       this.allVersion[7].url = `http://${this.host}/static/js/v0.8.11-gm.js`;
     }
     console.log(process.env);
+    console.log('lab3.0');
     // if(this.menuHide){
     //  this.getEncryption(this.querySolcList);
     // }else{
@@ -282,6 +283,7 @@ export default {
         ) {
           this.versionList.push(this.allVersion[i]);
         }
+       console.log(this.allVersion[i]);
       }
       //if (!localStorage.getItem('solcName')) {
       this.version = this.versionList[0]["solcName"];
