@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.v3.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.v3.transaction.codec.encode.TransactionEncoderService;
+import org.fisco.bcos.sdk.v3.utils.Hex;
 import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.junit.Test;
 
@@ -26,7 +27,7 @@ public class TransactionEncoderTest extends TestBase {
 //            groupId, chainId);
 //        byte[] encodedMsg = encoderService.encode(createContractTransaction(), null);
 //        SignatureResult signedMessage = cryptoSuite.sign(encodedMsg, cryptoKeyPair);
-//        String hexMessage = Numeric.toHexString(signedMessage.getSignatureBytes());
+//        String hexMessage = Hex.toHexString(signedMessage.getSignatureBytes());
 //        assertThat(hexMessage,
 //            is("0xf85a8201f4010a8201f5840add5355887fffffffffffffff801ba01cf44d4680e1ecaf11a9a997b08055ae84c5d417b1fc7c2bdbaffc3fd4a7659aa07a424ef2ad019c599a24309c97f4cd10d0e4293a51d8c1abb095052bf54a7ba7"));
 //    }
@@ -36,7 +37,7 @@ public class TransactionEncoderTest extends TestBase {
     @Test
     public void testBytes32() {
         String input = "123";
-        String utf82Hex = Numeric.toHexStringNoPrefix(input.getBytes(StandardCharsets.UTF_8));
+        String utf82Hex = Hex.toHexString(input.getBytes(StandardCharsets.UTF_8));
         System.out.println("input " + input);
         // expected: 0x313233
         System.out.println("utf82Hex " + utf82Hex);
@@ -48,13 +49,13 @@ public class TransactionEncoderTest extends TestBase {
         System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
         Bytes32 res1 = new Bytes32(byteValueLen32);
         System.out.println("res1:");
-        System.out.println(Numeric.toHexString(res1.getValue()));
+        System.out.println(Hex.toHexString(res1.getValue()));
 
         byte[] byteValueLen32_1 = new byte[32];
         System.arraycopy(byteValueUtf8, 0, byteValueLen32_1, 0, byteValue.length);
         Bytes32 res2 = new Bytes32(byteValueLen32);
         System.out.println("res2:");
-        System.out.println(Numeric.toHexString(res2.getValue()));
+        System.out.println(Hex.toHexString(res2.getValue()));
     }
 
 

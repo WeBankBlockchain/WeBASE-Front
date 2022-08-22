@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.fisco.bcos.sdk.v3.utils.Hex;
 import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -190,7 +191,7 @@ public class LiquidCompileService {
         File binFile = new File(wasmBinPath);
         try {
             byte[] bin = CommonUtils.readBytes(binFile);
-            String binStr = Numeric.toHexString(bin);
+            String binStr = Hex.toHexString(bin);
             String abi = FileUtils.readFileToString(abiFile);
             AbiBinInfo abiBinInfo = new AbiBinInfo(abi, binStr);
             log.info("compileAndReturn abiBin:{}", abiBinInfo);
