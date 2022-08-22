@@ -33,7 +33,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table(uniqueConstraints = {
-    @UniqueConstraint(name = "unique_config", columnNames = {"type","key"})
+    @UniqueConstraint(name = "unique_config", columnNames = {"type","config_key"})
 })
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,11 +48,12 @@ public class ConfigInfo {
     /**
      * example: key is "peers"
      */
+    @Column(name = "config_key")
     private String key;
     /**
      * example: value is ["127.0.0.1:20200"]
      */
-    @Column(columnDefinition = "text")
+    @Column(name = "config_value", columnDefinition = "text")
     private String value;
     private Integer version;
 

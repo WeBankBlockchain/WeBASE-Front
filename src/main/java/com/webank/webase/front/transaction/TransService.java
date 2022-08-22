@@ -189,19 +189,21 @@ public class TransService {
                 transactionData, encodedTransaction, transactionDataHash);
             throw new FrontException(ConstantCode.ENCODE_TX_JNI_ERROR);
         }
-
+//        SignatureResult signData = web3ApiService.getCryptoSuite(groupId).sign(transactionDataHash,
+//            web3ApiService.getCryptoSuite(groupId).getCryptoKeyPair()
+//        );
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
         int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
         if (client.isWASM() && isDeploy) {
             mark = USE_WASM_DEPLOY;
         }
         log.info("mark {}", mark);
-        String transactionDataHashSignedData = signData.convertToString();
+        String transactionDataHashSignedData = Hex.toHexString(signData.encode());
         String signedMessage = null;
         try {
             signedMessage = TransactionBuilderJniObj.createSignedTransaction(transactionData,
                 transactionDataHashSignedData,
-                transactionDataHash, mark);
+                transactionDataHash, 0);
         } catch (JniException e) {
             log.error("createSignedTransactionData jni error:", e);
         }

@@ -92,31 +92,29 @@ List scaffold = [
 dependencies {
     compile spring,spring_boot,swagger,logger,jaxb,jackson,scaffold
     compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0-SNAPSHOT')
-    // cover
-    compile 'javax.servlet:javax.servlet-api:4.0.1'
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
     compile('org.fisco-bcos.code-generator:bcos-code-generator:1.0.0-SNAPSHOT') {
         exclude group: "org.fisco-bcos.java-sdk"
         exclude group: "org.slf4j"
     }
-    compile 'com.h2database:h2:1.4.200'
+    compile 'com.h2database:h2:2.1.214'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
     compile 'org.projectlombok:lombok:1.18.6'
-    compile 'com.github.jsqlparser:jsqlparser:2.0'
+//    compile 'com.github.jsqlparser:jsqlparser:2.0'
     compile 'org.apache.commons:commons-lang3:3.8.1'
     compile 'org.apache.commons:commons-configuration2:2.8.0'
 
     // cover low version
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
-    compile 'com.google.guava:guava:29.0-jre'
+    compile 'com.google.guava:guava:30.0-jre'
     compile 'org.yaml:snakeyaml:1.30'
     compile 'javax.validation:validation-api:2.0.1.Final'
 
     testCompile('org.springframework.boot:spring-boot-starter-test:$spring_boot_version') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    testCompile 'junit:junit:4.12',
+    testCompile 'junit:junit:4.13.1',
                 'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
                 'com.github.macdao:moscow:0.1.0',
                 'com.squareup.okhttp3:okhttp:3.1.2'
