@@ -410,7 +410,7 @@ export default {
   },
   watch: {
      contractName: function (val) {
-        if (this.contractName && this.firstCall) {
+        if (this.contractName && this.firstCall&&this.liquidChecks) {
         this.compileCheckEnter();
       }
     },
@@ -474,6 +474,7 @@ export default {
   },
   beforeMount() {},
   mounted: function () {
+    console.log('verison:lab3.0')
     this.initEditor();
     let _this = this;
     Bus.$on("select", (data) => {
