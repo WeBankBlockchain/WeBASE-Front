@@ -200,7 +200,7 @@
 //        } else {
 //            throw new FrontException(ConstantCode.PARAM_ERROR);
 //        }
-//        return Numeric.toHexString(bytes32.getValue());
+//        return Hex.toHexString(bytes32.getValue());
 //    }
 //
 //    @ApiOperation(value = "get utf8's hex string", notes = "get hex string")
@@ -217,7 +217,7 @@
 //        String privateKey = reqSign.getPrivateKey();
 //        String rawData = reqSign.getRawData();
 //        CryptoKeyPair cryptoKeyPair = web3ApiService.getCryptoSuite(groupId).getKeyPairFactory().createKeyPair(privateKey);
-//        SignatureResult signatureData = web3ApiService.getCryptoSuite(groupId).sign(Numeric.toHexString(rawData.getBytes()), cryptoKeyPair);
+//        SignatureResult signatureData = web3ApiService.getCryptoSuite(groupId).sign(Hex.toHexString(rawData.getBytes()), cryptoKeyPair);
 //        return new RspSignData(signatureData, web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
 //    }
 //

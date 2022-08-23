@@ -176,9 +176,11 @@ public class TransService {
         try {
             transactionData = TransactionBuilderJniObj
                 .createTransactionData(groupId, chainIdAndGroupId.getLeft(),
-                    contractAddress, Numeric.toHexString(data), "", client.getBlockLimit().longValue());
+                    contractAddress, Hex.toHexString(data), "", client.getBlockLimit().longValue());
             encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
-            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
+            // 使用encodeTx的hash，和sign的hash保持一致
+            transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
+//            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
         } catch (JniException e) {
             log.error("createTransactionData jni error ", e);
         }
@@ -189,14 +191,14 @@ public class TransService {
                 transactionData, encodedTransaction, transactionDataHash);
             throw new FrontException(ConstantCode.ENCODE_TX_JNI_ERROR);
         }
-
+        log.info("transactionDataHash after:{}", transactionDataHash);
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
         int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
         if (client.isWASM() && isDeploy) {
             mark = USE_WASM_DEPLOY;
         }
         log.info("mark {}", mark);
-        String transactionDataHashSignedData = signData.convertToString();
+        String transactionDataHashSignedData = Hex.toHexString(signData.encode());
         String signedMessage = null;
         try {
             signedMessage = TransactionBuilderJniObj.createSignedTransaction(transactionData,
@@ -368,18 +370,18 @@ public class TransService {
         if (web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE) {
             SM2SignatureResult sm2SignatureResult = (SM2SignatureResult) signResult;
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
-            rspMessageHashSignature.setP(Numeric.toHexString(sm2SignatureResult.getPub()));
-            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
-            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setP(Hex.toHexString(sm2SignatureResult.getPub()));
+            rspMessageHashSignature.setR(Hex.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Hex.toHexString(sm2SignatureResult.getS()));
             rspMessageHashSignature.setV((byte) 0);
             return rspMessageHashSignature;
         } else {
-            ECDSASignatureResult sm2SignatureResult = (ECDSASignatureResult) signResult;
+            ECDSASignatureResult ecdsaSignatureResult = (ECDSASignatureResult) signResult;
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
             rspMessageHashSignature.setP("0x");
-            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
-            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
-            rspMessageHashSignature.setV((byte) (sm2SignatureResult.getV()+27));
+            rspMessageHashSignature.setR(Hex.toHexString(ecdsaSignatureResult.getR()));
+            rspMessageHashSignature.setS(Hex.toHexString(ecdsaSignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) (ecdsaSignatureResult.getV()+27));
             return rspMessageHashSignature;
         }
     }
@@ -403,18 +405,18 @@ public class TransService {
         if (web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE) {
             SM2SignatureResult sm2SignatureResult = (SM2SignatureResult) signResult;
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
-            rspMessageHashSignature.setP(Numeric.toHexString(sm2SignatureResult.getPub()));
-            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
-            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setP(Hex.toHexString(sm2SignatureResult.getPub()));
+            rspMessageHashSignature.setR(Hex.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Hex.toHexString(sm2SignatureResult.getS()));
             rspMessageHashSignature.setV((byte) 0);
             return rspMessageHashSignature;
         } else {
-            ECDSASignatureResult sm2SignatureResult = (ECDSASignatureResult) signResult;
+            ECDSASignatureResult ecdsaSignatureResult = (ECDSASignatureResult) signResult;
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
             rspMessageHashSignature.setP("0x");
-            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
-            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
-            rspMessageHashSignature.setV((byte) (sm2SignatureResult.getV()+27));
+            rspMessageHashSignature.setR(Hex.toHexString(ecdsaSignatureResult.getR()));
+            rspMessageHashSignature.setS(Hex.toHexString(ecdsaSignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) (ecdsaSignatureResult.getV()+27));
             return rspMessageHashSignature;
         }
     }
@@ -447,7 +449,7 @@ public class TransService {
 
     public String encodeFunction2Str(String abiStr, String funcName, List<Object> funcParam, String groupId, boolean isWasm) {
         byte[] encodeFunctionByteArr = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
-        return Numeric.toHexString(encodeFunctionByteArr);
+        return Hex.toHexString(encodeFunctionByteArr);
     }
     /**
      * get encoded function for /trans/query-transaction
@@ -499,9 +501,10 @@ public class TransService {
         try {
             transactionData = TransactionBuilderJniObj
                 .createTransactionData(String.valueOf(groupId), chainIdAndGroupId.getLeft(),
-                    contractAddress, Numeric.toHexString(data), "", client.getBlockLimit().longValue());
+                    contractAddress, Hex.toHexString(data), "", client.getBlockLimit().longValue());
             encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
-            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
+            transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
+//            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
         } catch (JniException e) {
             log.error("createTransactionData jni error ", e);
         }
@@ -522,8 +525,7 @@ public class TransService {
         } else {
             log.info("createRawTxEncoded use key of address [{}] to sign", user);
             // hash encoded, to sign locally
-            byte[] hashMessage = client.getCryptoSuite().hash(Numeric.hexStringToByteArray(encodedTransaction));
-            String hashMessageStr = Numeric.toHexString(hashMessage);
+            String hashMessageStr = client.getCryptoSuite().hash(encodedTransaction);
             log.info("createRawTxEncoded encoded tx of hex str:{}", hashMessageStr);
             // if local, sign locally
             log.info("createRawTxEncoded isLocal:{}", isLocal);
@@ -611,7 +613,7 @@ public class TransService {
                 //]
                 List<Type> typeList = abiCodec.decodeMethodAndGetOutputObject(abiStr, funcName, callOutput.getOutput());
                 // bytes类型转十六进制
-                // todo output is byte[] or string  Numeric.hexStringToByteArray
+                // todo output is byte[] or string  Hex.decode
                 log.info("call contract res:{}", JsonUtils.objToString(typeList));
                 return typeList;
             } catch (ContractCodecException e) {
@@ -726,7 +728,7 @@ public class TransService {
                 if (!type.endsWith("[]")) {
                     // update funcParam
                     String bytesHexStr = (String) (funcParam.get(i));
-                    byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                    byte[] inputArray = Hex.decode(bytesHexStr);
                     // bytesN: bytes1, bytes32 etc.
                     if (type.length() > "bytes".length()) {
                         int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
@@ -743,7 +745,7 @@ public class TransService {
                     List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
                     for (int j = 0; j < hexStrArray.size(); j++) {
                         String bytesHexStr = hexStrArray.get(j);
-                        byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                        byte[] inputArray = Hex.decode(bytesHexStr);
                         // check: bytesN: bytes1, bytes32 etc.
                         if (type.length() > "bytes[]".length()) {
                             // bytes32[] => 32[]

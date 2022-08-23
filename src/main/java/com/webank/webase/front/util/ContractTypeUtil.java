@@ -62,7 +62,7 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return (T) encodeBytes(input, (Class<Bytes>) type);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return (T) new DynamicBytes(Numeric.hexStringToByteArray(input));
+                return (T) new DynamicBytes(Hex.decode(input));
             } else {
                 throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
                         String.format("type:%s unsupported encoding", type.getName()));
@@ -95,7 +95,7 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return decodeBytes((Bytes) result);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return "0x" + Numeric.toHexString((byte[]) result.getValue());
+                return "0x" + Hex.toHexString((byte[]) result.getValue());
             } else {
                 throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR.getCode(),
                         String.format("type:%s unsupported decoding", type.getName()));
@@ -123,7 +123,7 @@ public class ContractTypeUtil {
 
     static <T extends Bytes> T encodeBytes(String input, Class<T> type) throws FrontException {
         try {
-            byte[] bytes = Numeric.hexStringToByteArray(input);
+            byte[] bytes = Hex.decode(input);
             return type.getConstructor(byte[].class).newInstance(bytes);
         } catch (NoSuchMethodException | SecurityException | InstantiationException
                 | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -156,7 +156,7 @@ public class ContractTypeUtil {
             } else if (Bytes.class.isAssignableFrom(type)) {
                 return (T) encodeBytes(input, (Class<Bytes>) type);
             } else if (DynamicBytes.class.isAssignableFrom(type)) {
-                return (T) new DynamicBytes(Numeric.hexStringToByteArray(input));
+                return (T) new DynamicBytes(Hex.decode(input));
             } else {
                 throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(),
                     String.format("type:%s unsupported encoding", type.getName()));
@@ -192,7 +192,7 @@ public class ContractTypeUtil {
 
     static String decodeBytes(BytesType bytesType) {
         byte[] value = bytesType.getValue();
-        return Numeric.toHexString(value);
+        return Hex.toHexString(value);
     }
 
     /**

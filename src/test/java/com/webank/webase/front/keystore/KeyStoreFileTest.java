@@ -31,6 +31,7 @@ import org.fisco.bcos.sdk.v3.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.v3.crypto.keystore.P12KeyStore;
 import org.fisco.bcos.sdk.v3.crypto.keystore.PEMKeyStore;
 import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.fisco.bcos.sdk.v3.utils.Hex;
 import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class KeyStoreFileTest {
 
     @Test
     public void testLoadPem() {
-        System.out.println(Numeric.toHexString(pemContent.getBytes()));
+        System.out.println(Hex.toHexString(pemContent.getBytes()));
         PEMKeyStore pemManager0 = new PEMKeyStore(new ByteArrayInputStream(pemContent.getBytes()));
 
         System.out.println(KeyTool.getHexedPrivateKey(pemManager0.getKeyPair().getPrivate()));

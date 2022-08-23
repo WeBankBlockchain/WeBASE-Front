@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.utils.Hex;
 import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.fisco.bcos.sdk.v3.utils.ObjectMapperFactory;
 import org.springframework.beans.BeanUtils;
@@ -113,10 +114,10 @@ public class MethodService {
         // 2019/11/27 support guomi
         byte[] hash = cryptoSuite.hash(inputs);
         if ("function".equals(abiDefinition.getType())) {
-            return Numeric.toHexString(hash).substring(0, 10);
+            return Hex.toHexString(hash).substring(0, 10);
         }
         // event save whole topic hash
-        return Numeric.toHexString(hash);
+        return Hex.toHexString(hash);
     }
     /**
      * get methodId bytes from ABIDefinition
