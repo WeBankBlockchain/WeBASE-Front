@@ -422,7 +422,7 @@ export default {
         folderSameFail: "新建文件夹与已存在的文件夹名称相同",
         user: "用户",
         params: "参数",
-        paramsInfo: '如果参数类型是数组，请按照以下格式输入，以逗号分隔，非数值和布尔值须使用双引号，例如：["aaa","bbb"]和[100,101]；如果数组参数包含双引号，需转义，例如：["aaa\\"bbb","ccc"]。',
+        paramsInfo: '如果参数类型是数组、Struct或Tuple，请按照以下格式输入，以逗号分隔，非数值和布尔值须使用双引号，例如：["aaa","bbb"]和[100,101]；如果数组、Struct或Tuple参数包含双引号，需转义，例如：["aaa\\"bbb","ccc"]。',
         contractAddress: "合约地址",
         method: "方法",
         contractAddressInput: "请输入正确的合约地址",
