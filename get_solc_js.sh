@@ -64,6 +64,12 @@ get_solc_js(){
         if [[ ! -f "${STATIC_JS_DIR}/v0.6.10-gm.js" ]]; then
             curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10-gm.js -o "${STATIC_JS_DIR}"/v0.6.10-gm.js
         fi
+        if [[ ! -f "${STATIC_JS_DIR}/v0.8.11.js" ]]; then
+            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.8.11.js -o "${STATIC_JS_DIR}"/v0.8.11.js
+        fi
+        if [[ ! -f "${STATIC_JS_DIR}/v0.8.11-gm.js" ]]; then
+            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.8.11-gm.js -o "${STATIC_JS_DIR}"/v0.8.11-gm.js
+        fi
     fi
 }
 get_solc_js
