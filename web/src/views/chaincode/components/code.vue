@@ -474,7 +474,6 @@ export default {
   },
   beforeMount() {},
   mounted: function () {
-    console.log('verison:lab3.0')
     this.initEditor();
     let _this = this;
     Bus.$on("select", (data) => {
