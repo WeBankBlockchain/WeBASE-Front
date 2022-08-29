@@ -13,14 +13,18 @@
  */
 package com.webank.webase.front.precntauth.authmanager.admin;
 
-import static org.fisco.bcos.sdk.contract.auth.contracts.ContractAuthPrecompiled.FUNC_CLOSEMETHODAUTH;
-import static org.fisco.bcos.sdk.contract.auth.contracts.ContractAuthPrecompiled.FUNC_OPENMETHODAUTH;
-import static org.fisco.bcos.sdk.contract.auth.contracts.ContractAuthPrecompiled.FUNC_SETMETHODAUTHTYPE;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled.FUNC_CLOSEMETHODAUTH;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled.FUNC_OPENMETHODAUTH;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled.FUNC_SETCONTRACTSTATUS;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled.FUNC_SETMETHODAUTHTYPE;
+import static org.fisco.bcos.sdk.v3.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
+
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
+import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
@@ -29,11 +33,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.contract.auth.contracts.ContractAuthPrecompiled;
-import org.fisco.bcos.sdk.model.RetCode;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.contract.auth.contracts.ContractAuthPrecompiled;
+import org.fisco.bcos.sdk.v3.model.RetCode;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.transaction.codec.decode.ReceiptParser;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,8 +59,7 @@ public class AdminService {
    * set contract acl: white_list(type=1) or black_list(type=2)
    */
   public Object setMethodAuthType(String groupId, String signUserId, String contractAddr,
-      byte[] func, BigInteger authType)
-      throws ContractException {
+      byte[] func, BigInteger authType) {
     return this.setMethodAuthTypeHandle(groupId, signUserId, contractAddr, func, authType);
   }
 
@@ -76,7 +79,7 @@ public class AdminService {
     TransactionReceipt receipt =
         (TransactionReceipt) transService.transHandleWithSign(groupId,
             signUserId, contractAddress, abiStr, FUNC_SETMETHODAUTHTYPE, funcParams);
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, false);
   }
 
 
@@ -89,7 +92,7 @@ public class AdminService {
   }
 
   public Object setMethodAuthHandle(String groupId, String signUserId, String contractAddr,
-      byte[] func, String accountAddress, Boolean bool) throws ContractException {
+      byte[] func, String accountAddress, Boolean bool) {
     TransactionReceipt receipt;
     List<Object> funcParams = new ArrayList<>();
     funcParams.add(contractAddr);
@@ -111,10 +114,34 @@ public class AdminService {
           (TransactionReceipt) transService.transHandleWithSign(groupId,
               signUserId, contractAddress, abiStr, FUNC_CLOSEMETHODAUTH, funcParams);
     }
-    return this.handleRetcodeAndReceipt(receipt);
+    return this.handleRetcodeAndReceipt(receipt, false);
   }
 
-  public String handleRetcodeAndReceipt(TransactionReceipt receipt) {
+
+  public String setContractStatus(String groupId, String signUserId,
+      String contractAddress, boolean isFreeze) {
+
+    List<Object> funcParams = new ArrayList<>();
+    funcParams.add(contractAddress);
+    funcParams.add(isFreeze);
+    // get address and abi of precompiled contract
+    String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONTRACT_AUTH);
+    if (!web3ApiService.getWeb3j(groupId).isAuthCheck()) {
+      throw new FrontException(ConstantCode.CHAIN_AUTH_NOT_ENABLE);
+    }
+    if (web3ApiService.getWeb3j(groupId).isWASM()) {
+      throw new FrontException(ConstantCode.EXEC_ENV_IS_WASM);
+    }
+    String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONTRACT_AUTH);
+    // execute set method
+    TransactionReceipt receipt =
+        (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, precompiledAddress, abiStr, FUNC_SETCONTRACTSTATUS, funcParams);
+    return PrecompiledUtils.handleTransactionReceipt(receipt, false);
+  }
+
+
+  public String handleRetcodeAndReceipt(TransactionReceipt receipt, boolean isWasm) {
     if (receipt.getStatus() == 16) {
       RetCode sdkRetCode = new RetCode();
       if (receipt.getMessage().equals("Proposal not exist")) {
@@ -139,24 +166,7 @@ public class AdminService {
             sdkRetCode.getMessage()).toString();
       }
     }
-    return this.handleTransactionReceipt(receipt);
-  }
-
-  private String handleTransactionReceipt(TransactionReceipt receipt) {
-    log.debug("handle tx receipt of precompiled");
-    try {
-      RetCode sdkRetCode = ReceiptParser.parseTransactionReceipt(receipt);
-      log.info("handleTransactionReceipt sdkRetCode:{}", sdkRetCode);
-      if (sdkRetCode.getCode() >= 0) {
-        return new BaseResponse(ConstantCode.RET_SUCCESS,
-            sdkRetCode.getMessage()).toString();
-      } else {
-        throw new FrontException(sdkRetCode.getCode(), sdkRetCode.getMessage());
-      }
-    } catch (ContractException e) {
-      log.error("handleTransactionReceipt e:[]", e);
-      throw new FrontException(e.getErrorCode(), e.getMessage());
-    }
+    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
   }
 
 }

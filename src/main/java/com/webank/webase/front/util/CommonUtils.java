@@ -47,15 +47,16 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.codec.datatypes.generated.Bytes32;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
-import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
-import org.fisco.bcos.sdk.model.CryptoType;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.v3.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.v3.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.utils.Hex;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -84,7 +85,7 @@ public class CommonUtils {
      * @return
      */
     public static SignatureResult stringToSignatureData(String signatureData, int encryptType) {
-        byte[] byteArr = Numeric.hexStringToByteArray(signatureData);
+        byte[] byteArr = Hex.decode(signatureData);
         // 从1开始，因为此处webase-sign返回的byteArr第0位是v
         byte signV = byteArr[0];
         byte[] signR = new byte[32];
@@ -125,7 +126,7 @@ public class CommonUtils {
                 signatureData.getS().length + signatureData.getR().length + 1,
                 signatureData.getPub().length);
 
-        return Numeric.toHexString(byteArr, 0, byteArr.length, false);
+        return Hex.toHexString(byteArr);
     }
 
     public static String signatureDataToString(ECDSASignatureResult signatureData) {
@@ -135,7 +136,7 @@ public class CommonUtils {
         System.arraycopy(signatureData.getR(), 0, byteArr, 1, signatureData.getR().length);
         System.arraycopy(signatureData.getS(), 0, byteArr, signatureData.getR().length + 1,
             signatureData.getS().length);
-        return Numeric.toHexString(byteArr, 0, byteArr.length, false);
+        return Hex.toHexString(byteArr);
     }
 
     /**
@@ -629,14 +630,14 @@ public class CommonUtils {
     }
 
     public static Bytes32 hexStrToBytes32(String hexStr) {
-        byte[] byteValue = Numeric.hexStringToByteArray(hexStr);
+        byte[] byteValue = Hex.decode(hexStr);
         byte[] byteValueLen32 = new byte[32];
         System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
         return new Bytes32(byteValueLen32);
     }
 
     public static String utf8StringToHex(String utf8String) {
-        return Numeric.toHexStringNoPrefix(utf8String.getBytes(StandardCharsets.UTF_8));
+        return Hex.toHexString(utf8String.getBytes(StandardCharsets.UTF_8));
     }
 
     private static boolean isHexNumber(byte value) {

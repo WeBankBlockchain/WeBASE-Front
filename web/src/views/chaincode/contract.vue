@@ -18,7 +18,7 @@
     <v-content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.contractIDE')" @changeGroup="changeGroup"></v-content-head>
     <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}">
       <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide"  :liquidChecks='liquidCheck'>
-        <template #footer>
+        <template slot="footer">
           <div class="version-selector">
             <el-select v-model="version" placeholder="请选择" @change="onchangeLoadVersion">
               <el-option v-for="item in versionList" :key="item.versionId" :label="item.solcName" :value="item.solcName">
@@ -183,6 +183,20 @@ export default {
         encryptType: 1,
         net: 1,
       },
+      {
+        solcName: "v0.8.11",
+        versionId: 6,
+        url: `http://${this.host}/WeBASE-Front/static/js/v0.8.11.js`,
+        encryptType: 0,
+        net: 1,
+      },
+      {
+        solcName: "v0.8.11-gm",
+        versionId: 7,
+        url: `http://${this.host}/WeBASE-Front/static/js/v0.8.11-gm.js`,
+        encryptType: 1,
+        net: 1,
+      },
     ];
     if (process.env.NODE_ENV === "development") {
       this.allVersion[0].url = `http://${this.host}/static/js/v0.4.25.js`;
@@ -191,8 +205,11 @@ export default {
       this.allVersion[3].url = `http://${this.host}/static/js/v0.5.2-gm.js`;
       this.allVersion[4].url = `http://${this.host}/static/js/v0.6.10.js`;
       this.allVersion[5].url = `http://${this.host}/static/js/v0.6.10-gm.js`;
+      this.allVersion[6].url = `http://${this.host}/static/js/v0.8.11.js`;
+      this.allVersion[7].url = `http://${this.host}/static/js/v0.8.11-gm.js`;
     }
     console.log(process.env);
+    console.log('lab3.0');
     // if(this.menuHide){
     //  this.getEncryption(this.querySolcList);
     // }else{

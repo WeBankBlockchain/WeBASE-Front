@@ -1,4 +1,21 @@
 
+### v3.0.0(2022-08-24)
+
+**Add**
+- 支持FISCO BCOS v3.0.0
+- 支持solidity v0.8.11
+
+**Fix**
+- 支持基于BFS的CNS
+
+**兼容性**
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Node-Manager v3.0.0
+- WeBASE-Sign v3.0.0
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
+
+
 ### lab-rc2(2022-05-07)
 
 **Add**

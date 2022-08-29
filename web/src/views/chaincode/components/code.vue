@@ -47,10 +47,10 @@
           </el-tooltip>
           <span>{{ $t("title.callContract") }}</span>
         </span>
-        <!-- <span class="contract-code-done" @click="downloadJavaClass">
+        <span class="contract-code-done" @click="downloadJavaClass">
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportJavaFile") }}</span>
-        </span> -->
+        </span>
         <span class="contract-code-done" @click="exportSdk">
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportSdk") }}</span>
@@ -410,7 +410,7 @@ export default {
   },
   watch: {
      contractName: function (val) {
-        if (this.contractName && this.firstCall) {
+        if (this.contractName && this.firstCall&&this.liquidChecks) {
         this.compileCheckEnter();
       }
     },

@@ -25,13 +25,14 @@ import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
-import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
-import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
-import org.fisco.bcos.sdk.model.CryptoType;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.v3.crypto.keystore.P12KeyStore;
+import org.fisco.bcos.sdk.v3.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.fisco.bcos.sdk.v3.utils.Hex;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -47,7 +48,7 @@ public class KeyStoreFileTest {
 
     @Test
     public void testLoadPem() {
-        System.out.println(Numeric.toHexString(pemContent.getBytes()));
+        System.out.println(Hex.toHexString(pemContent.getBytes()));
         PEMKeyStore pemManager0 = new PEMKeyStore(new ByteArrayInputStream(pemContent.getBytes()));
 
         System.out.println(KeyTool.getHexedPrivateKey(pemManager0.getKeyPair().getPrivate()));

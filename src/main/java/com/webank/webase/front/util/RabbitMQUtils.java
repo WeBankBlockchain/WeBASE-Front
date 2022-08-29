@@ -28,10 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import org.fisco.bcos.sdk.codec.abi.tools.TopicTools;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.eventsub.EventSubParams;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.codec.abi.tools.TopicTools;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.eventsub.EventSubParams;
+import org.fisco.bcos.sdk.v3.utils.Hex;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -176,10 +177,10 @@ public class RabbitMQUtils {
             return tool.addressToTopic(value);
         } else if (type.contains("bytes")) {
             if ("bytes".equals(type)) {
-                return tool.bytesToTopic(Numeric.hexStringToByteArray(value));
+                return tool.bytesToTopic(Hex.decode(value));
             } else {
                 // bytesN
-                return tool.byteNToTopic(Numeric.hexStringToByteArray(value));
+                return tool.byteNToTopic(Hex.decode(value));
             }
         } else {
             return null;

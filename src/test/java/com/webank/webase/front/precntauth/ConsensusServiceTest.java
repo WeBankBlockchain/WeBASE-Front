@@ -18,8 +18,8 @@ package com.webank.webase.front.precntauth;
 import static org.junit.Assert.assertNotNull;
 
 import com.webank.webase.front.base.TestBase;
-import org.fisco.bcos.sdk.contract.precompiled.consensus.ConsensusService;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusService;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

@@ -21,16 +21,16 @@ import com.webank.webase.front.contract.entity.wasm.AbiBinInfo;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.cmd.ExecuteResult;
 import com.webank.webase.front.util.cmd.JavaCommandExecutor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.fisco.bcos.sdk.utils.Hex;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.fisco.bcos.sdk.v3.utils.Hex;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * use command line to compile liquid contract and return abi & bin

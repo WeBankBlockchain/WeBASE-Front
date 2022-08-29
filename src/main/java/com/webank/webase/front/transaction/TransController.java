@@ -44,8 +44,9 @@ import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.utils.Hex;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -83,7 +84,7 @@ public class TransController extends BaseController {
         }
         if (StringUtils.isNotBlank(address)
             && ( (!reqTransHandle.getIsWasm() && address.length() != Address.ValidLen)
-                || (!reqTransHandle.getIsWasm() && org.fisco.bcos.sdk.codec.datatypes.Address.DEFAULT.toString().equals(address)) )
+                || (!reqTransHandle.getIsWasm() && org.fisco.bcos.sdk.v3.codec.datatypes.Address.DEFAULT.toString().equals(address)) )
         ) {
             throw new FrontException(PARAM_ADDRESS_IS_INVALID);
         }
@@ -165,7 +166,7 @@ public class TransController extends BaseController {
         if (StringUtils.isBlank(reqQueryTransHandle.getEncodeStr())) {
             throw new FrontException(ENCODE_STR_CANNOT_BE_NULL);
         }
-        byte[] encodeStr = Numeric.hexStringToByteArray(reqQueryTransHandle.getEncodeStr());
+        byte[] encodeStr = Hex.decode(reqQueryTransHandle.getEncodeStr());
         List<Object> contractAbi = JsonUtils.toJavaObjectList(reqQueryTransHandle.getContractAbi(), Object.class);
         Object obj =  transServiceImpl.sendQueryTransaction(encodeStr, reqQueryTransHandle.getContractAddress(),
             reqQueryTransHandle.getFuncName(), contractAbi, reqQueryTransHandle.getGroupId(),

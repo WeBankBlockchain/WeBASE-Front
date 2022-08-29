@@ -48,16 +48,17 @@ import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.exceptions.LoadKeyStoreException;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
-import org.fisco.bcos.sdk.crypto.keystore.P12KeyStore;
-import org.fisco.bcos.sdk.crypto.keystore.PEMKeyStore;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
-import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
-import org.fisco.bcos.sdk.model.CryptoType;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.exceptions.LoadKeyStoreException;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.v3.crypto.keystore.P12KeyStore;
+import org.fisco.bcos.sdk.v3.crypto.keystore.PEMKeyStore;
+import org.fisco.bcos.sdk.v3.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.v3.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.fisco.bcos.sdk.v3.utils.Hex;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
@@ -301,16 +302,16 @@ public class KeyStoreService {
                 SM2SignatureResult signData = (SM2SignatureResult) CommonUtils.stringToSignatureData(signDataStr,
                     web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
                 // SM2SignatureResult signData = CommonUtils.stringToSM2SignatureData(signDataStr);
-                rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
-                rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
+                rspMessageHashSignature.setR(Hex.toHexString(signData.getR()));
+                rspMessageHashSignature.setS(Hex.toHexString(signData.getS()));
                 rspMessageHashSignature.setV(new Byte("0"));
-                rspMessageHashSignature.setP(Numeric.toHexString(signData.getPub()));
+                rspMessageHashSignature.setP(Hex.toHexString(signData.getPub()));
             } else {
                 ECDSASignatureResult signData = (ECDSASignatureResult) CommonUtils.stringToSignatureData(signDataStr,
                     web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
                 // ECDSASignatureResult signData = CommonUtils.stringToECDSASignatureData(signDataStr);
-                rspMessageHashSignature.setR(Numeric.toHexString(signData.getR()));
-                rspMessageHashSignature.setS(Numeric.toHexString(signData.getS()));
+                rspMessageHashSignature.setR(Hex.toHexString(signData.getR()));
+                rspMessageHashSignature.setS(Hex.toHexString(signData.getS()));
                 rspMessageHashSignature.setV(signData.getV());
                 rspMessageHashSignature.setP(null);
             }

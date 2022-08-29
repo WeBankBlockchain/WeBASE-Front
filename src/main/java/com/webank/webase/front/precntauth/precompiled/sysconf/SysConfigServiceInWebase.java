@@ -13,12 +13,11 @@
  */
 package com.webank.webase.front.precntauth.precompiled.sysconf;
 
-import static org.fisco.bcos.sdk.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
+
+import static org.fisco.bcos.sdk.v3.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
-import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
 import com.webank.webase.front.precntauth.precompiled.sysconf.entity.ReqQuerySysConfigInfo;
 import com.webank.webase.front.precntauth.precompiled.sysconf.entity.ReqSetSysConfigInfo;
@@ -29,10 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.model.RetCode;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -94,9 +90,9 @@ public class SysConfigServiceInWebase {
 
         // check system value
         // check gas limit
-        if (PrecompiledUtils.TxGasLimit.equals(key)) {
-            if (Long.parseLong(value) < PrecompiledUtils.TxGasLimitMin ||
-                Long.parseLong(value) > PrecompiledUtils.TxGasLimitMax) {
+        if (com.webank.webase.front.util.PrecompiledUtils.TxGasLimit.equals(key)) {
+            if (Long.parseLong(value) < com.webank.webase.front.util.PrecompiledUtils.TxGasLimitMin ||
+                Long.parseLong(value) > com.webank.webase.front.util.PrecompiledUtils.TxGasLimitMax) {
                 return ConstantCode.SET_SYSTEM_CONFIG_GAS_RANGE_ERROR;
             }
         }
@@ -124,7 +120,8 @@ public class SysConfigServiceInWebase {
         TransactionReceipt receipt =
             (TransactionReceipt) transService.transHandleWithSign(groupId,
                 signUserId, contractAddress, abiStr, FUNC_SETVALUEBYKEY, funcParams, isWasm);
-        return this.handleTransactionReceipt(receipt);
+        return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
+            .handleTransactionReceipt(receipt, isWasm);
     }
 
     public String getSysConfigByKey(String groupId, String key) {
@@ -133,20 +130,4 @@ public class SysConfigServiceInWebase {
         return result;
     }
 
-    private String handleTransactionReceipt(TransactionReceipt receipt) {
-        log.debug("handle tx receipt of precompiled");
-        try {
-            RetCode sdkRetCode = ReceiptParser.parseTransactionReceipt(receipt);
-            log.info("handleTransactionReceipt sdkRetCode:{}", sdkRetCode);
-            if (sdkRetCode.getCode() >= 0) {
-                return new BaseResponse(ConstantCode.RET_SUCCESS,
-                    sdkRetCode.getMessage()).toString();
-            } else {
-                throw new FrontException(sdkRetCode.getCode(), sdkRetCode.getMessage());
-            }
-        } catch (ContractException e) {
-            log.error("handleTransactionReceipt e:[]", e);
-            throw new FrontException(e.getErrorCode(), e.getMessage());
-        }
-    }
 }

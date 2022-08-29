@@ -2,6 +2,7 @@ package com.webank.webase.front.precntauth.authmanager.everyone;
 
 import com.webank.webase.front.precntauth.authmanager.everyone.entity.ReqCheckMethodAuthInfo;
 import com.webank.webase.front.precntauth.authmanager.everyone.entity.ReqContractAdminInfo;
+import com.webank.webase.front.precntauth.authmanager.everyone.entity.ReqContractStatusList;
 import com.webank.webase.front.precntauth.authmanager.everyone.entity.ReqProposalInfo;
 import com.webank.webase.front.precntauth.authmanager.everyone.entity.ReqProposalListInfo;
 import com.webank.webase.front.precntauth.authmanager.everyone.entity.ReqUsrDeployAuthInfo;
@@ -10,9 +11,10 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -115,5 +117,33 @@ public class EveryoneController {
         reqCheckMethodAuthInfo.getContractAddr(), reqCheckMethodAuthInfo.getFunc(),
         reqCheckMethodAuthInfo.getUserAddress());
   }
+
+
+  /**
+   * 查询某用户地址对合约函数的访问是否有权限
+   */
+  @ApiOperation(value = "query the contract address whether available")
+  @ApiImplicitParam(name = "reqContractAdminInfo", value = "contractAdmin info", required = true,
+      dataType = "ReqContractAdminInfo")
+  @PostMapping("contract/status")
+  public Boolean checkContractAvailable(@Valid @RequestBody ReqContractAdminInfo reqContractAdminInfo)
+      throws ContractException {
+    return everyoneService.isContractAvailable(reqContractAdminInfo.getGroupId(),
+        reqContractAdminInfo.getContractAddr());
+  }
+
+  /**
+   * 查询某用户地址对合约函数的访问是否有权限
+   */
+  @ApiOperation(value = "query list of the contract address whether available")
+  @ApiImplicitParam(name = "reqContractStatusList", value = "contract status info", required = true,
+      dataType = "ReqContractStatusList")
+  @PostMapping("contract/status/list")
+  public Map<String, Boolean> checkContractListAvailable(@Valid @RequestBody ReqContractStatusList reqContractStatusList)
+      throws ContractException {
+    return everyoneService.listContractStatus(reqContractStatusList.getGroupId(),
+        reqContractStatusList.getContractAddressList());
+  }
+
 
 }

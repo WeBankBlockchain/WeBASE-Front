@@ -22,10 +22,10 @@ import com.webank.webase.front.event.entity.message.EventLogPushMessage;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
-import org.fisco.bcos.sdk.codec.ABICodec;
-import org.fisco.bcos.sdk.codec.ABICodecException;
-import org.fisco.bcos.sdk.eventsub.EventSubCallback;
-import org.fisco.bcos.sdk.model.EventLog;
+import org.fisco.bcos.sdk.v3.codec.ContractCodec;
+import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
+import org.fisco.bcos.sdk.v3.eventsub.EventSubCallback;
+import org.fisco.bcos.sdk.v3.model.EventLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +46,13 @@ public class ContractEventCallback implements EventSubCallback {
     private String routingKey;
     private String groupId;
     private String appId;
-    private ABICodec abiCodec;
+    private ContractCodec abiCodec;
     private String contractAbi;
     private List<String> eventNameList;
 
     public ContractEventCallback(MQPublisher mqPublisher,
         String exchangeName, String routingKey, String groupId, String appId,
-        ABICodec abiCodec, String contractAbi, List<String> eventNameList) {
+        ContractCodec abiCodec, String contractAbi, List<String> eventNameList) {
         this.MQPublisher = mqPublisher;
         this.exchangeName = exchangeName;
         this.routingKey = routingKey;
@@ -87,7 +87,7 @@ public class ContractEventCallback implements EventSubCallback {
 //                    try {
 //                        List<Object> list = abiCodec.decodeEvent(contractAbi, eventName, log);
 //                        logger.debug("decode event of :{}, log content:{} ", eventName, list);
-//                    } catch (ABICodecException e) {
+//                    } catch (ContractCodecException e) {
 //                        logger.error("decode event log error:{} ", e.getMessage());
 //                    }
 //                }

@@ -17,10 +17,10 @@ package com.webank.webase.front.precntauth;
 
 import com.webank.webase.front.base.TestBase;
 import java.util.List;
-import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSPrecompiled.BfsInfo;
+import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSService;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 
@@ -34,7 +34,7 @@ public class CnsServiceTest extends TestBase {
     public static String version;
     public static String address;
     public static String abi;
-    //
+
     @Test
     public void testRegCns() throws ContractException {
         contractName = "Evidence1";
@@ -42,14 +42,15 @@ public class CnsServiceTest extends TestBase {
         address = "0x8acf30e511c885163b8b9d85f34b806c216da6cc";
         abi = "{\"constant\":true,\"inputs\":[{\"name\":\"id\",\"type\":\"bytes32\"}],\"name\":\"get\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"bytes32\"},{\"name\":\"decription\",\"type\":\"string\"}],\"name\":\"set\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"evidence\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]";
 
-        CnsService cnsService = new CnsService(web3j, cryptoKeyPair);
-        System.out.println(cnsService.registerCNS(contractName, version, address, abi));
+        BFSService cnsService = new BFSService(web3j, cryptoKeyPair);
+        System.out.println(cnsService.link(contractName, version, address, abi));
 
         // 默认获取最新版本
-        Tuple2<String, String> res = cnsService.selectByNameAndVersion(contractName, version);
-        List<CnsInfo> list = cnsService.selectByName(contractName);
-        System.out.println(res);
+        List<BfsInfo> list = cnsService.list("/apps/" + contractName);
+        List<BfsInfo> res = cnsService.list("/apps/" + contractName + "/" + version);
+
         System.out.println(list);
+        System.out.println(res);
 
     }
 }

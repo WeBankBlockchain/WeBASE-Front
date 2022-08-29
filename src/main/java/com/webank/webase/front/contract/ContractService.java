@@ -51,7 +51,11 @@ import com.webank.webase.front.precntauth.authmanager.everyone.EveryoneService;
 import com.webank.webase.front.precntauth.precompiled.cns.CNSServiceInWebase;
 import com.webank.webase.front.precntauth.precompiled.sysconf.SysConfigServiceInWebase;
 import com.webank.webase.front.transaction.TransService;
-import com.webank.webase.front.util.*;
+import com.webank.webase.front.util.CleanPathUtil;
+import com.webank.webase.front.util.CommonUtils;
+import com.webank.webase.front.util.ContractAbiUtil;
+import com.webank.webase.front.util.FrontUtils;
+import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.io.File;
 import java.io.FileInputStream;
@@ -74,23 +78,22 @@ import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.codec.ABICodec;
-import org.fisco.bcos.sdk.codec.ABICodecException;
-import org.fisco.bcos.sdk.codec.datatypes.Address;
-import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
-import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
-import org.fisco.bcos.sdk.codegen.ContractGenerator;
-import org.fisco.bcos.sdk.codegen.exceptions.CodeGenException;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.model.CryptoType;
-import org.fisco.bcos.sdk.model.RetCode;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.manager.AssembleTransactionProcessor;
-import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
-import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.codegen.v3.exceptions.CodeGenException;
+import org.fisco.bcos.codegen.v3.wrapper.ContractGenerator;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.codec.ContractCodec;
+import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Address;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSService;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.fisco.bcos.sdk.v3.model.RetCode;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.transaction.manager.AssembleTransactionProcessor;
+import org.fisco.bcos.sdk.v3.transaction.manager.TransactionProcessorFactory;
+import org.fisco.bcos.sdk.v3.transaction.model.dto.TransactionResponse;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
@@ -253,7 +256,7 @@ public class ContractService {
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         boolean isWasm = req.getIsWasm() != null && req.getIsWasm();
-        String liquidAddress = null;
+        String liquidAddress = "";
         if (isWasm) {
             liquidAddress = req.getContractAddress();
             if (StringUtils.isBlank(liquidAddress)) {
@@ -270,11 +273,11 @@ public class ContractService {
             throw new FrontException(ConstantCode.GROUP_SOL_WASM_NOT_MATCH);
         }
 
-        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), isWasm);
+        ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), isWasm);
         byte[] encodedConstructor;
         try {
             encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
-        } catch (ABICodecException e) {
+        } catch (ContractCodecException e) {
             log.error("deployWithSign encode fail:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
         }
@@ -337,17 +340,17 @@ public class ContractService {
             try {
                 contractAddress = deployContract(client, abiStr, bytecodeBin,
                     req.getContractAddress(), paramStrList, cryptoKeyPair);
-            } catch (ABICodecException e) {
+            } catch (ContractCodecException e) {
                 log.error("deployLocally encode fail:[]", e);
                 throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
             }
         } else {
-            ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId),
+            ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId),
                 req.getIsWasm());
             byte[] encodedConstructor;
             try {
                 encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
-            } catch (ABICodecException e) {
+            } catch (ContractCodecException e) {
                 log.error("deployLocally encode fail:[]", e);
                 throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
             }
@@ -376,10 +379,10 @@ public class ContractService {
 
     private void registerCnsByFrontDirectly(ReqRegisterCns req, String abiInfo)
         throws Exception {
-        CnsService cnsService = new CnsService(web3ApiService.getWeb3j(req.getGroupId()),
+        BFSService cnsService = new BFSService(web3ApiService.getWeb3j(req.getGroupId()),
             keyStoreService.getCredentials(req.getUserAddress(),
                 req.getGroupId()));
-        RetCode retCode = cnsService.registerCNS(req.getCnsName(), req.getVersion(),
+        RetCode retCode = cnsService.link(req.getCnsName(), req.getVersion(),
             req.getContractAddress(), abiInfo);
         log.info("registerCNS and retCode is: {}, errorMsg is: {} " + retCode.getCode(),
             retCode.getMessage());
@@ -456,10 +459,10 @@ public class ContractService {
      * @param params
      * @param cryptoKeyPair
      * @return
-     * @throws ABICodecException
+     * @throws ContractCodecException
      */
     private String deployContract(Client client, String abi, String binStr, String path,
-        List<String> params, CryptoKeyPair cryptoKeyPair) throws ABICodecException {
+        List<String> params, CryptoKeyPair cryptoKeyPair) throws ContractCodecException {
         AssembleTransactionProcessor assembleTxProcessor = null;
         try {
             assembleTxProcessor = TransactionProcessorFactory
@@ -970,6 +973,7 @@ public class ContractService {
             return true;
         }
         Boolean res = everyoneService.checkDeployAuth(groupId, userAddress);
+        // todo if res, throw
         log.info("check deploy permission result is {}", res.toString());
         return res;
     }

@@ -19,9 +19,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosGroupList;
-import org.fisco.bcos.sdk.client.protocol.response.Peers;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosGroupList;
+import org.fisco.bcos.sdk.v3.client.protocol.response.Peers;
 import org.junit.Ignore;
 import org.junit.Test;
 

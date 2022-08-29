@@ -39,38 +39,37 @@ import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.model.tars.TransactionData;
-import org.fisco.bcos.sdk.client.protocol.request.Transaction;
-import org.fisco.bcos.sdk.client.protocol.response.Call.CallOutput;
-import org.fisco.bcos.sdk.codec.ABICodec;
-import org.fisco.bcos.sdk.codec.ABICodecException;
-import org.fisco.bcos.sdk.codec.Utils;
-import org.fisco.bcos.sdk.codec.abi.FunctionReturnDecoder;
-import org.fisco.bcos.sdk.codec.datatypes.Type;
-import org.fisco.bcos.sdk.codec.datatypes.TypeReference;
-import org.fisco.bcos.sdk.codec.datatypes.generated.tuples.generated.Tuple2;
-import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition;
-import org.fisco.bcos.sdk.codec.wrapper.ABIDefinition.NamedType;
-import org.fisco.bcos.sdk.codec.wrapper.ABIDefinitionFactory;
-import org.fisco.bcos.sdk.codec.wrapper.ContractABIDefinition;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
-import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
-import org.fisco.bcos.sdk.model.CryptoType;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.builder.TransactionBuilderInterface;
-import org.fisco.bcos.sdk.transaction.builder.TransactionBuilderService;
-import org.fisco.bcos.sdk.transaction.codec.decode.RevertMessageParser;
-import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
-import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
-import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
-import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
-import org.fisco.bcos.sdk.transaction.pusher.TransactionPusherService;
-import org.fisco.bcos.sdk.utils.Hex;
-import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.jni.common.JniException;
+import org.fisco.bcos.sdk.jni.utilities.tx.TransactionBuilderJniObj;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.client.protocol.request.Transaction;
+import org.fisco.bcos.sdk.v3.client.protocol.response.Call.CallOutput;
+import org.fisco.bcos.sdk.v3.codec.ContractCodec;
+import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
+import org.fisco.bcos.sdk.v3.codec.Utils;
+import org.fisco.bcos.sdk.v3.codec.abi.FunctionReturnDecoder;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Type;
+import org.fisco.bcos.sdk.v3.codec.datatypes.TypeReference;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinition.NamedType;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ABIDefinitionFactory;
+import org.fisco.bcos.sdk.v3.codec.wrapper.ContractABIDefinition;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.v3.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.v3.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.transaction.codec.decode.RevertMessageParser;
+import org.fisco.bcos.sdk.v3.transaction.codec.decode.TransactionDecoderService;
+import org.fisco.bcos.sdk.v3.transaction.codec.encode.TransactionEncoderService;
+import org.fisco.bcos.sdk.v3.transaction.manager.TransactionProcessor;
+import org.fisco.bcos.sdk.v3.transaction.manager.TransactionProcessorFactory;
+import org.fisco.bcos.sdk.v3.transaction.pusher.TransactionPusherService;
+import org.fisco.bcos.sdk.v3.utils.Hex;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -168,23 +167,52 @@ public class TransService {
     public String signMessage(String groupId, Client client, String signUserId, String contractAddress,
             byte[] data, boolean isDeploy) {
         log.info("signMessage data:{}", Hex.toHexString(data));
+        Instant nodeStartTime = Instant.now();
         // to encode raw tx
         Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
-        TransactionBuilderService txBuilderService = new TransactionBuilderService(web3ApiService.getWeb3j(groupId));
-        TransactionData rawTransaction = txBuilderService
-            .createTransaction(contractAddress, data, chainIdAndGroupId.getLeft(), String.valueOf(groupId));
-        log.debug("signMessage rawTransaction:{}", JsonUtils.objToString(rawTransaction));
-        TransactionEncoderService encoderService = new TransactionEncoderService(web3ApiService.getCryptoSuite(groupId));
-        byte[] encodedTransaction = encoderService.encode(rawTransaction);
-
+        long transactionData = 0L;
+        String encodedTransaction = "";
+        String transactionDataHash = "";
+        try {
+            transactionData = TransactionBuilderJniObj
+                .createTransactionData(groupId, chainIdAndGroupId.getLeft(),
+                    contractAddress, Hex.toHexString(data), "", client.getBlockLimit().longValue());
+            encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
+            // 使用encodeTx的hash，和sign的hash保持一致
+            transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
+//            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
+        } catch (JniException e) {
+            log.error("createTransactionData jni error ", e);
+        }
+        if (transactionData == 0L
+            || StringUtils.isBlank(encodedTransaction)
+            || StringUtils.isBlank(transactionDataHash)) {
+            log.error("signMessage encodedTransaction:{}|{}|{}",
+                transactionData, encodedTransaction, transactionDataHash);
+            throw new FrontException(ConstantCode.ENCODE_TX_JNI_ERROR);
+        }
+        log.info("transactionDataHash after:{}", transactionDataHash);
         SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
         int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
         if (client.isWASM() && isDeploy) {
             mark = USE_WASM_DEPLOY;
         }
         log.info("mark {}", mark);
-        byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, mark);
-        return Numeric.toHexString(signedMessage);
+        String transactionDataHashSignedData = Hex.toHexString(signData.encode());
+        String signedMessage = null;
+        try {
+            signedMessage = TransactionBuilderJniObj.createSignedTransaction(transactionData,
+                transactionDataHashSignedData,
+                transactionDataHash, mark);
+        } catch (JniException e) {
+            log.error("createSignedTransactionData jni error:", e);
+        }
+        log.info("***signMessage cost time***: {}",
+            Duration.between(nodeStartTime, Instant.now()).toMillis());
+        if (StringUtils.isBlank(signedMessage)) {
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+        return signedMessage;
     }
 
 
@@ -342,18 +370,18 @@ public class TransService {
         if (web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE) {
             SM2SignatureResult sm2SignatureResult = (SM2SignatureResult) signResult;
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
-            rspMessageHashSignature.setP(Numeric.toHexString(sm2SignatureResult.getPub()));
-            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
-            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setP(Hex.toHexString(sm2SignatureResult.getPub()));
+            rspMessageHashSignature.setR(Hex.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Hex.toHexString(sm2SignatureResult.getS()));
             rspMessageHashSignature.setV((byte) 0);
             return rspMessageHashSignature;
         } else {
-            ECDSASignatureResult sm2SignatureResult = (ECDSASignatureResult) signResult;
+            ECDSASignatureResult ecdsaSignatureResult = (ECDSASignatureResult) signResult;
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
             rspMessageHashSignature.setP("0x");
-            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
-            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
-            rspMessageHashSignature.setV((byte) (sm2SignatureResult.getV()+27));
+            rspMessageHashSignature.setR(Hex.toHexString(ecdsaSignatureResult.getR()));
+            rspMessageHashSignature.setS(Hex.toHexString(ecdsaSignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) (ecdsaSignatureResult.getV()+27));
             return rspMessageHashSignature;
         }
     }
@@ -370,25 +398,25 @@ public class TransService {
         String privateKeyRaw = new String(Base64.getDecoder().decode(rspUserInfo.getPrivateKey()));
         CryptoKeyPair cryptoKeyPair = web3ApiService.getCryptoSuite(groupId).getKeyPairFactory().createKeyPair(privateKeyRaw);
         SignatureResult signResult = signMessageHashByType(
-                org.fisco.bcos.sdk.utils.Numeric.cleanHexPrefix(req.getHash()),cryptoKeyPair,
+                org.fisco.bcos.sdk.v3.utils.Numeric.cleanHexPrefix(req.getHash()),cryptoKeyPair,
                 web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig
         );
 
         if (web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE) {
             SM2SignatureResult sm2SignatureResult = (SM2SignatureResult) signResult;
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
-            rspMessageHashSignature.setP(Numeric.toHexString(sm2SignatureResult.getPub()));
-            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
-            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
+            rspMessageHashSignature.setP(Hex.toHexString(sm2SignatureResult.getPub()));
+            rspMessageHashSignature.setR(Hex.toHexString(sm2SignatureResult.getR()));
+            rspMessageHashSignature.setS(Hex.toHexString(sm2SignatureResult.getS()));
             rspMessageHashSignature.setV((byte) 0);
             return rspMessageHashSignature;
         } else {
-            ECDSASignatureResult sm2SignatureResult = (ECDSASignatureResult) signResult;
+            ECDSASignatureResult ecdsaSignatureResult = (ECDSASignatureResult) signResult;
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
             rspMessageHashSignature.setP("0x");
-            rspMessageHashSignature.setR(Numeric.toHexString(sm2SignatureResult.getR()));
-            rspMessageHashSignature.setS(Numeric.toHexString(sm2SignatureResult.getS()));
-            rspMessageHashSignature.setV((byte) (sm2SignatureResult.getV()+27));
+            rspMessageHashSignature.setR(Hex.toHexString(ecdsaSignatureResult.getR()));
+            rspMessageHashSignature.setS(Hex.toHexString(ecdsaSignatureResult.getS()));
+            rspMessageHashSignature.setV((byte) (ecdsaSignatureResult.getV()+27));
             return rspMessageHashSignature;
         }
     }
@@ -421,7 +449,7 @@ public class TransService {
 
     public String encodeFunction2Str(String abiStr, String funcName, List<Object> funcParam, String groupId, boolean isWasm) {
         byte[] encodeFunctionByteArr = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
-        return Numeric.toHexString(encodeFunctionByteArr);
+        return Hex.toHexString(encodeFunctionByteArr);
     }
     /**
      * get encoded function for /trans/query-transaction
@@ -437,11 +465,11 @@ public class TransService {
         this.validFuncParam(abiStr, funcName, funcParam, groupId);
         log.debug("abiStr:{} ,funcName:{},funcParam {},groupID {}", abiStr, funcName,
            funcParam, groupId);
-        ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), isWasm);
+        ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), isWasm);
         byte[] encodeFunction;
         try {
             encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
-        } catch (ABICodecException e) {
+        } catch (ContractCodecException e) {
             log.error("transHandleWithSign encode fail:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
         }
@@ -462,53 +490,83 @@ public class TransService {
      *         }
      */
     private String convertRawTx2Str(Client client, String contractAddress,
-        byte[] encodeFunction, String user, boolean isLocal) {
+        byte[] data, String user, boolean isLocal) {
+        Instant startTime = Instant.now();
         String groupId = client.getGroup();
         // to encode raw tx
         Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
-        TransactionBuilderInterface transactionBuilder = new TransactionBuilderService(client);
-        TransactionData rawTransaction = transactionBuilder.createTransaction(contractAddress,
-            encodeFunction, chainIdAndGroupId.getLeft(),
-            chainIdAndGroupId.getRight());
+        long transactionData = 0L;
+        String encodedTransaction = "";
+        String transactionDataHash = "";
+        try {
+            transactionData = TransactionBuilderJniObj
+                .createTransactionData(String.valueOf(groupId), chainIdAndGroupId.getLeft(),
+                    contractAddress, Hex.toHexString(data), "", client.getBlockLimit().longValue());
+            encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
+            transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
+//            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
+        } catch (JniException e) {
+            log.error("createTransactionData jni error ", e);
+        }
+        if (transactionData == 0L
+            || StringUtils.isBlank(encodedTransaction)
+            || StringUtils.isBlank(transactionDataHash)) {
+            log.error("signMessage encodedTransaction:{}|{}|{}",
+                transactionData, encodedTransaction, transactionDataHash);
+            throw new FrontException(ConstantCode.ENCODE_TX_JNI_ERROR);
+        }
 
-        TransactionEncoderService encoderService = new TransactionEncoderService(client.getCryptoSuite());
-        byte[] encodedTransaction = encoderService.encode(rawTransaction);
         // if user not null: sign, else, not sign
         if (StringUtils.isBlank(user)) {
             // return unsigned raw tx encoded str
-            String unsignedResultStr = Numeric.toHexString(encodedTransaction);
+            String unsignedResultStr = encodedTransaction;
             log.info("createRawTxEncoded unsignedResultStr:{}", unsignedResultStr);
             return unsignedResultStr;
         } else {
             log.info("createRawTxEncoded use key of address [{}] to sign", user);
             // hash encoded, to sign locally
-            byte[] hashMessage = client.getCryptoSuite().hash(encodedTransaction);
-            String hashMessageStr = Numeric.toHexString(hashMessage);
+            String hashMessageStr = client.getCryptoSuite().hash(encodedTransaction);
             log.info("createRawTxEncoded encoded tx of hex str:{}", hashMessageStr);
             // if local, sign locally
             log.info("createRawTxEncoded isLocal:{}", isLocal);
-            String signResultStr;
+            String signResultStr = null;
             if (isLocal) {
                 CryptoKeyPair cryptoKeyPair = this.getCredentials(false, user, groupId);
                 SignatureResult signData = signMessageHashByType(hashMessageStr,
                     cryptoKeyPair, client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, client.isWASM() ? USE_WASM : USE_SOLIDITY);
-                signResultStr = Numeric.toHexString(signedMessage);
+                String transactionDataHashSignedData = signData.convertToString();
+                try {
+                    signResultStr = TransactionBuilderJniObj.createSignedTransaction(transactionData,
+                        transactionDataHashSignedData,
+                        transactionDataHash, client.isWASM() ? USE_WASM : USE_SOLIDITY);
+                } catch (JniException e) {
+                    log.error("createSignedTransactionData jni error:", e);
+                }
             } else {
                 // sign by webase-sign
                 // convert encoded to hex string (no need to hash then toHex)
-                hashMessageStr = Numeric.toHexString(encodedTransaction);
-                EncodeInfo encodeInfo = new EncodeInfo(user, hashMessageStr);
+                EncodeInfo encodeInfo = new EncodeInfo(user, encodedTransaction);
                 String signDataStr = keyStoreService.getSignData(encodeInfo);
                 SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, client.getCryptoSuite().cryptoTypeConfig);
-                byte[] signedMessage = encoderService.encodeToTransactionBytes(rawTransaction, signData, client.isWASM() ? USE_WASM : USE_SOLIDITY);
-                signResultStr = Numeric.toHexString(signedMessage);
+                // encode again
+                String transactionDataHashSignedData = signData.convertToString();
+                try {
+                    signResultStr = TransactionBuilderJniObj.createSignedTransaction(transactionData,
+                        transactionDataHashSignedData,
+                        transactionDataHash, client.isWASM() ? USE_WASM : USE_SOLIDITY);
+                } catch (JniException e) {
+                    log.error("createSignedTransactionData jni error:", e);
+                }
+            }
+            log.info("***signMessage cost time***: {}",
+                Duration.between(startTime, Instant.now()).toMillis());
+            if (StringUtils.isBlank(signResultStr)) {
+                throw new FrontException(ConstantCode.ENCODE_TX_JNI_ERROR);
             }
             log.info("createRawTxEncoded signResultStr:{}", signResultStr);
             return signResultStr;
         }
-        // trans hash is web3ApiService.getCryptoSuite(groupId).hash(signedStr)
     }
 
     private ABIDefinition getABIDefinition(String abiStr, String functionName, String groupId) {
@@ -544,7 +602,7 @@ public class TransService {
             String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
             throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR.getCode(), parseResultStr);
         } else {
-            ABICodec abiCodec = new ABICodec(web3ApiService.getCryptoSuite(groupId), client.isWASM());
+            ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), client.isWASM());
             try {
                 log.debug("========= callOutput.getOutput():{}", callOutput.getOutput());
                 //  [
@@ -555,10 +613,10 @@ public class TransService {
                 //]
                 List<Type> typeList = abiCodec.decodeMethodAndGetOutputObject(abiStr, funcName, callOutput.getOutput());
                 // bytes类型转十六进制
-                // todo output is byte[] or string  Numeric.hexStringToByteArray
+                // todo output is byte[] or string  Hex.decode
                 log.info("call contract res:{}", JsonUtils.objToString(typeList));
                 return typeList;
-            } catch (ABICodecException e) {
+            } catch (ContractCodecException e) {
                 log.error("handleCall decode call output fail:[]", e);
                 throw new FrontException(ConstantCode.CONTRACT_TYPE_DECODED_ERROR);
             }
@@ -613,12 +671,11 @@ public class TransService {
 
     /**
      * sign by
-     * @param encodedTransaction
+     * @param encodedDataStr
      * @param signUserId
      * @return
      */
-    public SignatureResult requestSignForSign(byte[] encodedTransaction, String signUserId, String groupId) {
-        String encodedDataStr = Numeric.toHexString(encodedTransaction);
+    public SignatureResult requestSignForSign(String encodedDataStr, String signUserId, String groupId) {
         EncodeInfo encodeInfo = new EncodeInfo();
         encodeInfo.setSignUserId(signUserId);
         encodeInfo.setEncodedDataStr(encodedDataStr);
@@ -671,7 +728,7 @@ public class TransService {
                 if (!type.endsWith("[]")) {
                     // update funcParam
                     String bytesHexStr = (String) (funcParam.get(i));
-                    byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                    byte[] inputArray = Hex.decode(bytesHexStr);
                     // bytesN: bytes1, bytes32 etc.
                     if (type.length() > "bytes".length()) {
                         int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
@@ -688,7 +745,7 @@ public class TransService {
                     List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
                     for (int j = 0; j < hexStrArray.size(); j++) {
                         String bytesHexStr = hexStrArray.get(j);
-                        byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
+                        byte[] inputArray = Hex.decode(bytesHexStr);
                         // check: bytesN: bytes1, bytes32 etc.
                         if (type.length() > "bytes[]".length()) {
                             // bytes32[] => 32[]

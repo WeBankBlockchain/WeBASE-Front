@@ -16,8 +16,8 @@
 
 package com.webank.webase.front.base.config;
 
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
