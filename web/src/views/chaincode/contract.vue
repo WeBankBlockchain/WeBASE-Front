@@ -41,6 +41,7 @@ import codes from "./components/code";
 import contentHead from "@/components/contentHead";
 import { encryption, getSolcList, checkIsWasm, liquidCheck } from "@/util/api";
 import Bus from "@/bus";
+
 import webworkify from "webworkify-webpack";
 export default {
   name: "contract",
