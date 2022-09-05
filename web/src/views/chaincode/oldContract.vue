@@ -70,7 +70,7 @@
       </div>
     </div>
     <abi-dialog :show="abiDialogShow" v-show="abiDialogShow" :data='abiData' @close="abiClose"></abi-dialog>
-    <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-show="dialogVisible" center class="send-dialog">
+    <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="500px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
       <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :liquidChecks='liquidCheck' :data="data" :abi='abiData' :version='version'></send-transation>
     </el-dialog>
     <v-editor v-if='editorShow' :show='editorShow' :data='editorData' :liquidChecks='liquidCheck' :sendConstant="sendConstant" @close='editorClose' :input='editorInput' :editorOutput="editorOutput"></v-editor>
