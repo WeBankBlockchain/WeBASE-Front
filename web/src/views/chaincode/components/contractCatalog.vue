@@ -259,7 +259,6 @@ export default {
     Bus.$on("modifyState", (data) => {
       this.contractList.forEach((value) => {
         if (value.id === data.id && data.modifyState) {
-          console.log(this);
           this.modifyState = data.modifyState;
           this.modifyParam = data;
           this.$set(value, "modifyState", true);
