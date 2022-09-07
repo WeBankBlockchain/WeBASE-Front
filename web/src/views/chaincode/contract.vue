@@ -72,7 +72,7 @@ export default {
             menuHide: true,
             changeWidth: false,
             contractHide: false,
-            menuWidth: 290,
+            menuWidth: 240,
             urlQuery: this.$root.$route.query,
             loading: false,
             allVersion: [],
@@ -426,6 +426,7 @@ export default {
         overflow-y: scroll;
 }
 .code-detail-reset-wrapper {
+    overflow: auto;
     float: left;
     height: calc(100% - 57px);
     padding-right: 20px;
