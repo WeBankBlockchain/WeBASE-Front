@@ -274,7 +274,7 @@ export default {
     -o-transition: width 2s;
 }
 .view-show {
-    overflow-y: auto;
+    overflow:hidden;
     width: calc(100% - 200px);
     transition: width 0.5s;
     -moz-transition: width 0.5s;
