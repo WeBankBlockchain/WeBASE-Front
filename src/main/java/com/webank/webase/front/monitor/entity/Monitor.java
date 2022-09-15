@@ -27,7 +27,7 @@ import lombok.Data;
  */
 @Data
 @Entity
-@Table(indexes = {@Index(columnList = "groupId", name = "idx_group", unique = true)})
+@Table(indexes = {@Index(columnList = "groupId", name = "idx_group", unique = false)})
 public class Monitor {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

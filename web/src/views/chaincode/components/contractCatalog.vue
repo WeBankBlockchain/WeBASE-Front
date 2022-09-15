@@ -23,7 +23,7 @@
         <i class="wbs-icon-Addfolder icon contract-icon" @click="addFolder"></i>
       </el-tooltip>
       <el-tooltip class="item" effect="dark" :content="$t('title.upload')" placement="top-start">
-        <i class="wbs-icon-shangchuan contract-icon" style="position: relative">
+        <i class="wbs-icon-shangchuan contract-icon" style="position: relative"  @click="uploading">
           <input multiple type="file" id="file" ref="file" name="chaincodes" class="uploads" @change="upload($event)" />
         </i>
       </el-tooltip>
@@ -259,7 +259,6 @@ export default {
     Bus.$on("modifyState", (data) => {
       this.contractList.forEach((value) => {
         if (value.id === data.id && data.modifyState) {
-          console.log(this);
           this.modifyState = data.modifyState;
           this.modifyParam = data;
           this.$set(value, "modifyState", true);
@@ -1396,6 +1395,9 @@ export default {
       this.importFromDialog = false;
       this.getContractPaths();
     },
+     uploading(){
+     this.$refs.file.click()   
+    }
   },
 };
 </script>
@@ -1446,8 +1448,8 @@ export default {
 }
 .uploads {
   position: absolute;
-  width: 18px;
-  height: 18px;
+  width: 0px;
+  height: 0px;
   left: 10px;
   top: 0;
   opacity: 0;
