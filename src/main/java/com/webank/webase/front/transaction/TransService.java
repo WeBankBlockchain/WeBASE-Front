@@ -180,7 +180,6 @@ public class TransService {
             encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
             // 使用encodeTx的hash，和sign的hash保持一致
             transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
-//            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
         } catch (JniException e) {
             log.error("createTransactionData jni error ", e);
         }
@@ -504,7 +503,6 @@ public class TransService {
                     contractAddress, Hex.toHexString(data), "", client.getBlockLimit().longValue());
             encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
             transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
-//            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
         } catch (JniException e) {
             log.error("createTransactionData jni error ", e);
         }
@@ -535,7 +533,7 @@ public class TransService {
                 SignatureResult signData = signMessageHashByType(hashMessageStr,
                     cryptoKeyPair, client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                String transactionDataHashSignedData = signData.convertToString();
+                String transactionDataHashSignedData = Hex.toHexString(signData.encode());
                 try {
                     signResultStr = TransactionBuilderJniObj.createSignedTransaction(transactionData,
                         transactionDataHashSignedData,
@@ -550,7 +548,7 @@ public class TransService {
                 String signDataStr = keyStoreService.getSignData(encodeInfo);
                 SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                String transactionDataHashSignedData = signData.convertToString();
+                String transactionDataHashSignedData = Hex.toHexString(signData.encode());
                 try {
                     signResultStr = TransactionBuilderJniObj.createSignedTransaction(transactionData,
                         transactionDataHashSignedData,
