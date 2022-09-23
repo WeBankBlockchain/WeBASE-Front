@@ -792,10 +792,17 @@ export default {
         if (ev.data.cmd == "compiled" && num == 1) {
           that.loadingAce = false;
           output = JSON.parse(ev.data.data);
+          let error=false
+          output.errors.forEach((item,index)=>{
+          if(item.severity=='error'){
+            error=true
+          }
+          })
           if (
             output &&
             output.contracts &&
-            JSON.stringify(output.contracts) != "{}"
+            JSON.stringify(output.contracts) != "{}"&&
+            !error
           ) {
             that.status = 1;
             if (output.contracts[that.contractName + ".sol"]) {
