@@ -249,6 +249,7 @@ public class ContractService {
     public String deployWithSign(ReqDeploy req) {
         int groupId = req.getGroupId();
         String signUserId = req.getSignUserId();
+        String extraData = req.getExtraData();
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
@@ -278,7 +279,7 @@ public class ContractService {
         // data sign
 //        String data = bytecodeBin + encodedConstructor;
         String data = encodedConstructor;
-        String signMsg = transService.signMessage(groupId, client, signUserId, "", data);
+        String signMsg = transService.signMessage(groupId, client, signUserId, "", data, extraData);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
         String contractAddress = receipt.getContractAddress();
@@ -297,6 +298,7 @@ public class ContractService {
         checkDeployPermission(groupId, userAddress);
 
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
+        String extraData = req.getExtraData();
         String bytecodeBin = req.getBytecodeBin();
         List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
 

@@ -59,4 +59,8 @@ public class ReqDeploy {
     private boolean useAes;
     @Deprecated
     private String version;
+    /**
+     * support wbbc, hexString of String.getBytes(UTF8)
+     */
+    private String extraData;
 }
