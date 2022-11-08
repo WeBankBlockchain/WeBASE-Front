@@ -96,6 +96,7 @@ import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.transaction.model.gas.DefaultGasProvider;
 import org.fisco.bcos.sdk.transaction.model.po.RawTransaction;
 import org.fisco.bcos.sdk.transaction.pusher.TransactionPusherService;
+import org.fisco.bcos.sdk.utils.Hex;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,11 +136,7 @@ public class TransService {
     public Object transHandleWithSign(ReqTransHandleWithSign req) throws FrontException {
         int groupId = req.getGroupId();
         String signUserId = req.getSignUserId();
-        String userAddress = keyStoreService.getAddressBySignUserId(signUserId);
-        if (StringUtils.isBlank(userAddress)) {
-            log.warn("transHandleWithSign this signUser [{}] not record in webase-front", signUserId);
-            userAddress = keyStoreService.getCredentialsForQuery().getAddress();
-        }
+        String extraData = req.getExtraData();
         String abiStr = JsonUtils.objToString(req.getContractAbi());
         String funcName = req.getFuncName();
         List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
@@ -159,15 +156,22 @@ public class TransService {
                 throw new FrontException(ConstantCode.CNS_QUERY_FAIL);
             }
         }
-        return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam);
+        return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, extraData);
     }
-
 
     /**
      * send tx with sign (support precomnpiled contract)
      */
     public Object transHandleWithSign(int groupId, String signUserId,
-        String contractAddress, String abiStr, String funcName, List<Object> funcParam)
+        String contractAddress, String abiStr, String funcName, List<Object> funcParam) {
+        return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, "");
+    }
+
+    /**
+     * send tx with sign (support precomnpiled contract)
+     */
+    public Object transHandleWithSign(int groupId, String signUserId,
+        String contractAddress, String abiStr, String funcName, List<Object> funcParam, String extraData)
         throws FrontException {
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
@@ -183,61 +187,9 @@ public class TransService {
         if (isTxConstant) {
             return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
         } else {
-            return this.handleTransaction(client, signUserId, contractAddress, encodeFunction);
+            return this.handleTransaction(client, signUserId, contractAddress, encodeFunction, extraData);
         }
 
-    }
-
-    /**
-     * handleTransByFunction by whether is constant
-     */
-    @Deprecated
-    private Object handleTransByFunction(int groupId, Client client, String signUserId,
-            String contractAddress, Function function, ContractFunction contractFunction) {
-
-        FunctionEncoder functionEncoder = new FunctionEncoder(cryptoSuite);
-        String encodedFunction = functionEncoder.encode(function);
-        Object response;
-        Instant startTime = Instant.now();
-        // if constant, signUserId can be ""
-        if (contractFunction.getConstant()) {
-            KeyStoreInfo keyStoreInfo = keyStoreService.getKeyStoreInfoForQuery();
-            TransactionProcessor transactionProcessor = new TransactionProcessor(
-                web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(),
-                groupId, Constants.chainId);
-            CallOutput callOutput = transactionProcessor
-                .executeCall(keyStoreInfo.getAddress(), contractAddress, encodedFunction)
-                .getCallResult();
-            if (!RECEIPT_STATUS_0X0.equals(callOutput.getStatus())) {
-                Tuple2<Boolean, String> parseResult =
-                    RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
-                log.error("call contract error:{}", parseResult);
-                String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
-                response = Collections.singletonList("Call contract return error: " + parseResultStr);
-            } else {
-                List<Type> typeList = FunctionReturnDecoder
-                        .decode(callOutput.getOutput(), function.getOutputParameters());
-                if (typeList.size() > 0) {
-                    response = AbiUtil.callResultParse(contractFunction.getOutputList(), typeList);
-                } else {
-                    response = typeList;
-                }
-            }
-        } else {
-            // data sign
-            String signMsg = signMessage(groupId, client, signUserId, contractAddress, encodedFunction);
-            Instant nodeStartTime = Instant.now();
-            // send transaction
-            TransactionReceipt responseReceipt = sendMessage(client, signMsg);
-            response = responseReceipt;
-            log.info("***node cost time***: {}",
-                    Duration.between(nodeStartTime, Instant.now()).toMillis());
-        }
-        log.info("***transaction total cost time***: {}",
-                Duration.between(startTime, Instant.now()).toMillis());
-        log.info("transHandleWithSign end. func:{} baseRsp:{}", contractFunction.getFuncName(),
-                JsonUtils.toJSONString(response));
-        return response;
     }
 
     /**
@@ -323,10 +275,13 @@ public class TransService {
      * @return
      */
     public String signMessage(int groupId, Client client, String signUserId, String contractAddress,
-            String data) {
+            String data, String extraData) {
+        if (StringUtils.isNotBlank(extraData)) {
+            String appIdName = new String(Hex.decode(Numeric.cleanHexPrefix(extraData)));
+            log.info("signMessage extraData :{}, decoded:{}", extraData, appIdName);
+        }
         Random r = new SecureRandom();
         BigInteger randomid = new BigInteger(250, r);
-
         BigInteger blockLimit = client.getBlockLimit();
 
         // v1.5.0 no longer support 2.0.0-rc1 or 2.0.1
@@ -338,7 +293,7 @@ public class TransService {
         RawTransaction rawTransaction =
             RawTransaction.createTransaction(randomid, Constants.GAS_PRICE,
                 Constants.GAS_LIMIT, blockLimit, contractAddress, BigInteger.ZERO, data,
-                new BigInteger(chainId), BigInteger.valueOf(groupId), "");
+                new BigInteger(chainId), BigInteger.valueOf(groupId), extraData);
 
         byte[] encodedTransaction = encoderService.encode(rawTransaction, null);
 
@@ -475,6 +430,7 @@ public class TransService {
         String funcName = req.getFuncName();
         List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         String userAddress = req.getUser();
+        String extraData = req.getExtraData();
 
         String contractAddress = req.getContractAddress();
         if (req.isUseCns()) {
@@ -506,7 +462,7 @@ public class TransService {
             }
             return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
         } else {
-            return this.handleTransaction(client, cryptoKeyPair, contractAddress, encodeFunction);
+            return this.handleTransaction(client, cryptoKeyPair, contractAddress, encodeFunction, extraData);
         }
     }
 
@@ -876,16 +832,34 @@ public class TransService {
      * @return
      */
     public TransactionReceipt handleTransaction(Client client, CryptoKeyPair cryptoKeyPair, String contractAddress,
-        String encodeFunction) {
+        String encodeFunction, String extraData) {
         Instant startTime = Instant.now();
         log.info("handleTransaction start startTime:{}", startTime.toEpochMilli());
+        if (StringUtils.isNotBlank(extraData)) {
+            String appIdName = new String(Hex.decode(Numeric.cleanHexPrefix(extraData)));
+            log.info("handleTransaction extraData :{}, decoded:{}", extraData, appIdName);
+        }
+        // 传入extraData
+        // raw tx
+        Pair<String, Integer> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
+        TransactionBuilderInterface transactionBuilder = new TransactionBuilderService(client);
+        RawTransaction rawTransaction = transactionBuilder.createTransaction(DefaultGasProvider.GAS_PRICE,
+            DefaultGasProvider.GAS_LIMIT, contractAddress, encodeFunction,
+            BigInteger.ZERO, new BigInteger(chainIdAndGroupId.getLeft()),
+            BigInteger.valueOf(chainIdAndGroupId.getRight()), extraData);
+        // encode
+        TransactionEncoderInterface transactionEncoder = new TransactionEncoderService(cryptoSuite);
+        String signedMessageStr = transactionEncoder.encodeAndSign(rawTransaction, cryptoKeyPair);
+
         // send tx
-        TransactionProcessor txProcessor = TransactionProcessorFactory.createTransactionProcessor(client, cryptoKeyPair);
-        TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair);
+        Instant nodeStartTime = Instant.now();
+        // send transaction
+        TransactionReceipt receipt = sendMessage(client, signedMessageStr);
         // cover null message through statusCode
         this.decodeReceipt(receipt);
-        log.info("execTransaction end  useTime:{}",
-            Duration.between(startTime, Instant.now()).toMillis());
+        log.info("execTransaction end useTime:{}, chainTime:{}",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            Duration.between(nodeStartTime, Instant.now()).toMillis());
         return receipt;
     }
 
@@ -898,15 +872,21 @@ public class TransService {
      * @param encodeFunction
      * @return
      */
-    public TransactionReceipt handleTransaction(Client client, String signUserId, String contractAddress, String encodeFunction) {
+    public TransactionReceipt handleTransaction(Client client, String signUserId, String contractAddress, String encodeFunction,
+        String extraData) {
         log.debug("handleTransaction signUserId:{},contractAddress:{},encodeFunction:{}",signUserId,contractAddress, encodeFunction);
+        if (StringUtils.isNotBlank(extraData)) {
+            String appIdName = new String(Hex.decode(Numeric.cleanHexPrefix(extraData)));
+            log.info("handleTransaction extraData :{}, decoded:{}", extraData, appIdName);
+        }
+
         // raw tx
         Pair<String, Integer> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
         TransactionBuilderInterface transactionBuilder = new TransactionBuilderService(client);
         RawTransaction rawTransaction = transactionBuilder.createTransaction(DefaultGasProvider.GAS_PRICE,
             DefaultGasProvider.GAS_LIMIT, contractAddress, encodeFunction,
             BigInteger.ZERO, new BigInteger(chainIdAndGroupId.getLeft()),
-            BigInteger.valueOf(chainIdAndGroupId.getRight()), "");
+            BigInteger.valueOf(chainIdAndGroupId.getRight()), extraData);
         // encode
         TransactionEncoderInterface transactionEncoder = new TransactionEncoderService(cryptoSuite);
         byte[] encodedTransaction = transactionEncoder.encode(rawTransaction, null);

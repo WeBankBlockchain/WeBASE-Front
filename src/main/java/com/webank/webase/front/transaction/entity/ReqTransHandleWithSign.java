@@ -46,4 +46,9 @@ public class ReqTransHandleWithSign {
     // 1.4.3
     private boolean useCns = false;
     private String cnsName;
+    /**
+     * support wbbc, hexString of String.getBytes(UTF8)
+     */
+    private String extraData;
+
 }
