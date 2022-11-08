@@ -276,8 +276,10 @@ public class TransService {
      */
     public String signMessage(int groupId, Client client, String signUserId, String contractAddress,
             String data, String extraData) {
-        String appIdName = new String(Hex.decode(extraData));
-        log.info("signMessage extraData :{}, decoded:{}", extraData, appIdName);
+        if (StringUtils.isNotBlank(extraData)) {
+            String appIdName = new String(Hex.decode(Numeric.cleanHexPrefix(extraData)));
+            log.info("signMessage extraData :{}, decoded:{}", extraData, appIdName);
+        }
         Random r = new SecureRandom();
         BigInteger randomid = new BigInteger(250, r);
         BigInteger blockLimit = client.getBlockLimit();
@@ -833,8 +835,10 @@ public class TransService {
         String encodeFunction, String extraData) {
         Instant startTime = Instant.now();
         log.info("handleTransaction start startTime:{}", startTime.toEpochMilli());
-        String appIdName = new String(Hex.decode(extraData));
-        log.info("handleTransaction extraData :{}, decoded:{}", extraData, appIdName);
+        if (StringUtils.isNotBlank(extraData)) {
+            String appIdName = new String(Hex.decode(Numeric.cleanHexPrefix(extraData)));
+            log.info("handleTransaction extraData :{}, decoded:{}", extraData, appIdName);
+        }
         // 传入extraData
         // raw tx
         Pair<String, Integer> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
@@ -871,8 +875,10 @@ public class TransService {
     public TransactionReceipt handleTransaction(Client client, String signUserId, String contractAddress, String encodeFunction,
         String extraData) {
         log.debug("handleTransaction signUserId:{},contractAddress:{},encodeFunction:{}",signUserId,contractAddress, encodeFunction);
-        String appIdName = new String(Hex.decode(extraData));
-        log.info("handleTransaction extraData :{}, decoded:{}", extraData, appIdName);
+        if (StringUtils.isNotBlank(extraData)) {
+            String appIdName = new String(Hex.decode(Numeric.cleanHexPrefix(extraData)));
+            log.info("handleTransaction extraData :{}, decoded:{}", extraData, appIdName);
+        }
 
         // raw tx
         Pair<String, Integer> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);

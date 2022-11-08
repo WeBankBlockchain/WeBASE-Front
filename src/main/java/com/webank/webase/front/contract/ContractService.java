@@ -61,11 +61,13 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -87,13 +89,18 @@ import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
 import org.fisco.bcos.sdk.contract.precompiled.permission.PermissionInfo;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
+import org.fisco.bcos.sdk.transaction.codec.encode.TransactionEncoderService;
 import org.fisco.bcos.sdk.transaction.manager.AssembleTransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessor;
 import org.fisco.bcos.sdk.transaction.manager.TransactionProcessorFactory;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
+import org.fisco.bcos.sdk.transaction.model.po.RawTransaction;
+import org.fisco.bcos.sdk.utils.Hex;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.fisco.solc.compiler.CompilationResult;
 import org.fisco.solc.compiler.SolidityCompiler;
 import org.springframework.beans.BeanUtils;
@@ -313,9 +320,10 @@ public class ContractService {
         }
         // get privateKey
         CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress);
+
         // contract deploy
         String contractAddress =
-                deployContract(groupId, encodedConstructor, cryptoKeyPair);
+                deployContract(groupId, encodedConstructor, cryptoKeyPair, extraData);
 
         log.info("success deployLocally. contractAddress:{}", contractAddress);
         return contractAddress;
@@ -425,20 +433,32 @@ public class ContractService {
     }
 
     private String deployContract(int groupId, String encodedConstructor,
-            CryptoKeyPair cryptoKeyPair) throws FrontException {
+            CryptoKeyPair cryptoKeyPair, String extraData) throws FrontException {
         Client client = web3ApiService.getWeb3j(groupId);
         if (client == null) {
             throw new FrontException(ConstantCode.GROUPID_NOT_EXIST);
         }
-        AssembleTransactionProcessor assembleTxProcessor = null;
-        try {
-            assembleTxProcessor = TransactionProcessorFactory
-                .createAssembleTransactionProcessor(client, cryptoKeyPair);
-        } catch (Exception e) {
-            log.error("deployContract getAssembleTransactionProcessor error:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+
+        if (StringUtils.isNotBlank(extraData)) {
+            String appIdName = new String(Hex.decode(Numeric.cleanHexPrefix(extraData)));
+            log.info("deployContract extraData :{}, decoded:{}", extraData, appIdName);
         }
-        TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
+        Random r = new SecureRandom();
+        BigInteger randomid = new BigInteger(250, r);
+        BigInteger blockLimit = client.getBlockLimit();
+
+        // to encode raw tx
+        TransactionEncoderService encoderService = new TransactionEncoderService(cryptoSuite);
+        String chainId = Constants.chainId;
+        RawTransaction rawTransaction =
+            RawTransaction.createTransaction(randomid, Constants.GAS_PRICE,
+                Constants.GAS_LIMIT, blockLimit, "", BigInteger.ZERO, encodedConstructor,
+                new BigInteger(chainId), BigInteger.valueOf(groupId), extraData);
+
+        String signedMessageStr = encoderService.encodeAndSign(rawTransaction, cryptoKeyPair);
+
+        TransactionReceipt receipt = transService.sendMessage(client, signedMessageStr);
+
         return receipt.getContractAddress();
     }
 
