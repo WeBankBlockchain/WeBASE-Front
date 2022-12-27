@@ -23,22 +23,22 @@ repositories {
 
 }
 
-def spring_version="5.2.22.RELEASE"
-List spring =[
-    "org.springframework:spring-core:$spring_version",
-    "org.springframework:spring-beans:$spring_version",
-    "org.springframework:spring-context:$spring_version",
-    "org.springframework:spring-tx:$spring_version",
-    "org.springframework:spring-web:$spring_version",
-    "org.springframework:spring-webmvc:$spring_version",
-    "org.springframework:spring-jdbc:$spring_version",
-    // cover old version
-    "org.springframework:spring-aspects:$spring_version",
-    "org.springframework:spring-messaging:$spring_version",
-    "org.springframework:spring-orm:$spring_version",
-    "org.springframework:spring-test:$spring_version"
-
-]
+//def spring_version="5.2.22.RELEASE"
+//List spring =[
+//    "org.springframework:spring-core:$spring_version",
+//    "org.springframework:spring-beans:$spring_version",
+//    "org.springframework:spring-context:$spring_version",
+//    "org.springframework:spring-tx:$spring_version",
+//    "org.springframework:spring-web:$spring_version",
+//    "org.springframework:spring-webmvc:$spring_version",
+//    "org.springframework:spring-jdbc:$spring_version",
+//    // cover old version
+//    "org.springframework:spring-aspects:$spring_version",
+//    "org.springframework:spring-messaging:$spring_version",
+//    "org.springframework:spring-orm:$spring_version",
+//    "org.springframework:spring-test:$spring_version"
+//
+//]
 
 def spring_boot_version="2.7.0"
 List spring_boot =[
