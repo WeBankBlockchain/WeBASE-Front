@@ -60,8 +60,8 @@ sdk:
   corePoolSize: 50
   maxPoolSize: 100
   queueCapacity: 100
-  ip: 10.107.120.121
-  channelPort: 21201
+  ip: 127.0.0.1
+  channelPort: 20200
   certPath: conf  # cert path of relative or absolute
 
 logging:
