@@ -43,7 +43,6 @@ import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.keystore.KeyStoreService;
-import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import com.webank.webase.front.transaction.TransService;
@@ -133,8 +132,8 @@ public class ContractService {
     private PermissionManageService permissionManageService;
     @Autowired
     private PrecompiledWithSignService precompiledWithSignService;
-    @Autowired
-    private PrecompiledService precompiledService;
+//    @Autowired
+//    private PrecompiledService precompiledService;
     @Autowired
     @Qualifier(value = "common")
     private CryptoSuite cryptoSuite;
@@ -328,12 +327,12 @@ public class ContractService {
         String version = req.getVersion();
         String contractAddress = req.getContractAddress();
         String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
-        List<CnsInfo> cnsList =
-                precompiledService.queryCnsByNameAndVersion(groupId, cnsName, version);
-        if (!CollectionUtils.isEmpty(cnsList)) {
-            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
-            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
-        }
+//        List<CnsInfo> cnsList =
+//                precompiledService.queryCnsByNameAndVersion(groupId, cnsName, version);
+//        if (!CollectionUtils.isEmpty(cnsList)) {
+//            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
+//            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
+//        }
         // locally
         if (req.isSaveEnabled()) {
             if (StringUtils.isBlank(req.getContractPath())) {
@@ -516,7 +515,7 @@ public class ContractService {
         // check contract id
         verifyContractIdExist(contractId, groupId);
         // remove
-        contractRepository.delete(contractId);
+        contractRepository.deleteById(contractId);
         log.debug("end deleteContract");
     }
 
@@ -619,7 +618,7 @@ public class ContractService {
         // page start from index 1 instead of 0
         int pageNumber = param.getPageNumber() - 1;
         Pageable pageable =
-                new PageRequest(pageNumber, param.getPageSize(), Direction.DESC, "modifyTime");
+                PageRequest.of(pageNumber, param.getPageSize(), Direction.DESC, "modifyTime");
         Page<Contract> contractPage = contractRepository.findAll(
                 (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                     // v1.4.2, param add contractPath to filter
@@ -867,7 +866,7 @@ public class ContractService {
      */
     public ContractPath addContractPath(ReqContractPath req) {
         ContractPathKey pathKey = new ContractPathKey(req.getGroupId(), req.getContractPath());
-        ContractPath check = contractPathRepository.findOne(pathKey);
+        ContractPath check = contractPathRepository.findById(pathKey).orElse(null);
         if (check != null) {
             log.error("addContractPath fail, path exists check:{}", check);
             throw new FrontException(ConstantCode.CONTRACT_PATH_IS_EXISTS);
@@ -888,7 +887,7 @@ public class ContractService {
         // init default contracts and dir
         initDefaultContract(groupId);
         // get from database
-        Sort sort = new Sort(Sort.Direction.DESC, "modifyTime");
+        Sort sort = Sort.by(Sort.Direction.DESC, "modifyTime");
         List<ContractPath> contractPaths = contractPathRepository.findAll((Root<ContractPath> root,
                 CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
@@ -904,7 +903,7 @@ public class ContractService {
         ContractPathKey contractPathKey = new ContractPathKey();
         contractPathKey.setGroupId(groupId);
         contractPathKey.setContractPath(contractPath);
-        contractPathRepository.delete(contractPathKey);
+        contractPathRepository.deleteById(contractPathKey);
     }
 
     /**
@@ -943,14 +942,14 @@ public class ContractService {
         List<Contract> contractList =
                 contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
         log.debug("batchDeleteByPath delete contracts");
-        contractList.forEach(c -> contractRepository.delete(c.getId()));
+        contractList.forEach(c -> contractRepository.deleteById(c.getId()));
         log.debug("batchDeleteByPath delete contracts");
-        contractPathRepository.delete(new ContractPathKey(groupId, contractPath));
+        contractPathRepository.deleteById(new ContractPathKey(groupId, contractPath));
         log.debug("batchDeleteByPath delete contract path");
     }
 
     public Contract findById(Long contractId) {
-        Contract contract = contractRepository.findOne(contractId);
+        Contract contract = contractRepository.findById(contractId).orElse(null);
         if (Objects.isNull(contract)) {
             throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
         }

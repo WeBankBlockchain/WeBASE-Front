@@ -168,8 +168,8 @@ public class EventController extends BaseController {
             if (pageNumber < 1) {
                 return new BasePageResponse(ConstantCode.PARAM_ERROR, null, 0);
             }
-            Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
-                    new Sort(Sort.Direction.DESC, "createTime"));
+            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize,
+                    Sort.by(Sort.Direction.DESC, "createTime"));
             resList = eventService.getNewBlockInfoList(groupId, pageable);
         }
         log.debug("end getNewBlockEventInfo resList count. {}", resList.size());
@@ -227,8 +227,8 @@ public class EventController extends BaseController {
             if (pageNumber < 1) {
                 return new BasePageResponse(ConstantCode.PARAM_ERROR, null, 0);
             }
-            Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
-                    new Sort(Sort.Direction.DESC, "createTime"));
+            Pageable pageable = PageRequest.of(pageNumber - 1, pageSize,
+                    Sort.by(Sort.Direction.DESC, "createTime"));
             resList = eventService.getContractEventInfoList(groupId, pageable);
         }
         log.debug("end getContractEventInfo resList count. {}", resList.size());
