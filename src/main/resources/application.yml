@@ -44,7 +44,9 @@ spring:
     multipart:
       max-request-size: 30MB # request max size
       max-file-size: 20MB # single file size
-
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 server:
   port: 5002
@@ -58,8 +60,8 @@ sdk:
   corePoolSize: 50
   maxPoolSize: 100
   queueCapacity: 100
-  ip: 127.0.0.1
-  channelPort: 20200
+  ip: 10.107.120.121
+  channelPort: 21201
   certPath: conf  # cert path of relative or absolute
 
 logging:

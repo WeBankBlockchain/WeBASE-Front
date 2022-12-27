@@ -23,7 +23,7 @@ repositories {
 
 }
 
-def spring_version="4.3.29.RELEASE"
+def spring_version="5.2.22.RELEASE"
 List spring =[
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-beans:$spring_version",
@@ -40,13 +40,14 @@ List spring =[
 
 ]
 
-def spring_boot_version="1.5.22.RELEASE"
+def spring_boot_version="2.7.0"
 List spring_boot =[
     "org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
     "org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
     "org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
     "org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version",
-    "org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version"
+    "org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version",
+    "org.springframework.boot:spring-boot-starter-validation:$spring_boot_version"
 ]
 
 
@@ -56,7 +57,7 @@ List swagger = [
 ]
 
 
-def log4j_version="2.15.0"
+def log4j_version="2.18.0"
 List logger = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -71,12 +72,13 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-def jackson_version = "2.11.4"
+def jackson_version = "2.14.1"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
     "com.fasterxml.jackson.core:jackson-core:$jackson_version",
     "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
-    "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
+    "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version",
+    "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
 ]
 
 // cover old version
@@ -96,7 +98,7 @@ List scaffold = [
 ]
 
 dependencies {
-    compile spring,spring_boot,swagger,logger,jaxb,jackson,tomcat,scaffold
+    compile spring_boot,swagger,logger,jaxb,jackson,tomcat,scaffold
     compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.7.2'
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
@@ -104,9 +106,9 @@ dependencies {
     compile 'org.fusesource:sigar:1.6.4'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'
     compile 'org.projectlombok:lombok:1.18.6'
-    compile 'com.github.jsqlparser:jsqlparser:2.0'
     compile 'org.apache.commons:commons-lang3:3.8.1'
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
+    compile 'org.apache.httpcomponents:httpclient:4.5.14'
     // cover low version guava
     compile 'com.google.guava:guava:29.0-jre'
     testCompile('org.springframework.boot:spring-boot-starter-test') {

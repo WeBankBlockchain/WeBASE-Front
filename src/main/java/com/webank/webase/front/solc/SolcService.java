@@ -199,7 +199,7 @@ public class SolcService {
 
     @Transactional
     public boolean deleteFile(Integer solcId) {
-        SolcInfo solcInfo = solcRepository.findOne(solcId);
+        SolcInfo solcInfo = solcRepository.findById(solcId).orElse(null);
         String fileName = solcInfo.getSolcName();
         File solcDir = getSolcDir();
         String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
@@ -212,10 +212,10 @@ public class SolcService {
     }
 
     private void removeSolcInfo(Integer solcId) {
-        SolcInfo checkExist = solcRepository.findOne(solcId);
+        SolcInfo checkExist = solcRepository.findById(solcId).orElse(null);
         if (Objects.isNull(checkExist)) {
             throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
         }
-        solcRepository.delete(solcId);
+        solcRepository.deleteById(solcId);
     }
 }

@@ -34,7 +34,6 @@ import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
-import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.transaction.entity.ContractFunction;
 import com.webank.webase.front.transaction.entity.ReqSignMessageHash;
 import com.webank.webase.front.transaction.entity.ReqTransHandle;
@@ -122,8 +121,8 @@ public class TransService {
     @Autowired
     @Qualifier(value = "common")
     private CryptoSuite cryptoSuite;
-    @Autowired
-    private PrecompiledService precompiledService;
+//    @Autowired
+//    private PrecompiledService precompiledService;
     @Autowired
     private BcosSDK bcosSDK;
     /**
@@ -145,20 +144,20 @@ public class TransService {
         List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         String contractAddress = req.getContractAddress();
         // handle cns
-        if (req.isUseCns()) {
-            try {
-                List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
-                        req.getCnsName(), req.getVersion());
-                if (CollectionUtils.isEmpty(cnsList)) {
-                    throw new FrontException(VERSION_NOT_EXISTS);
-                }
-                contractAddress = cnsList.iterator().next().getAddress();
-                log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
-            } catch (ContractException e) {
-                log.error("queryCnsByNameAndVersion ContractException fail:[]", e);
-                throw new FrontException(ConstantCode.CNS_QUERY_FAIL);
-            }
-        }
+//        if (req.isUseCns()) {
+//            try {
+//                List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
+//                        req.getCnsName(), req.getVersion());
+//                if (CollectionUtils.isEmpty(cnsList)) {
+//                    throw new FrontException(VERSION_NOT_EXISTS);
+//                }
+//                contractAddress = cnsList.iterator().next().getAddress();
+//                log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
+//            } catch (ContractException e) {
+//                log.error("queryCnsByNameAndVersion ContractException fail:[]", e);
+//                throw new FrontException(ConstantCode.CNS_QUERY_FAIL);
+//            }
+//        }
         return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam);
     }
 
@@ -477,20 +476,20 @@ public class TransService {
         String userAddress = req.getUser();
 
         String contractAddress = req.getContractAddress();
-        if (req.isUseCns()) {
-            try {
-                List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(groupId,
-                    req.getCnsName(), req.getVersion());
-                if (CollectionUtils.isEmpty(cnsList)) {
-                    throw new FrontException(VERSION_NOT_EXISTS);
-                }
-                contractAddress = cnsList.iterator().next().getAddress();
-                log.info("transHandleLocal cns contractAddress:{}", contractAddress);
-            } catch (ContractException e) {
-                log.error("queryCnsByNameAndVersion ContractException fail:[]", e);
-                throw new FrontException(ConstantCode.CNS_QUERY_FAIL);
-            }
-        }
+//        if (req.isUseCns()) {
+//            try {
+//                List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(groupId,
+//                    req.getCnsName(), req.getVersion());
+//                if (CollectionUtils.isEmpty(cnsList)) {
+//                    throw new FrontException(VERSION_NOT_EXISTS);
+//                }
+//                contractAddress = cnsList.iterator().next().getAddress();
+//                log.info("transHandleLocal cns contractAddress:{}", contractAddress);
+//            } catch (ContractException e) {
+//                log.error("queryCnsByNameAndVersion ContractException fail:[]", e);
+//                throw new FrontException(ConstantCode.CNS_QUERY_FAIL);
+//            }
+//        }
 
         String encodeFunction = this.encodeFunction2Str(abiStr, funcName, funcParam);
 
@@ -720,14 +719,14 @@ public class TransService {
         boolean isUseCns, String cnsName, String cnsVersion,
         String funcName, List<Object> funcParam) throws Exception {
 
-        if (isUseCns) {
-            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
-            if (CollectionUtils.isEmpty(cnsList)) {
-                throw new FrontException(VERSION_NOT_EXISTS);
-            }
-            contractAddress = cnsList.iterator().next().getAddress();
-            log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
-        }
+//        if (isUseCns) {
+//            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
+//            if (CollectionUtils.isEmpty(cnsList)) {
+//                throw new FrontException(VERSION_NOT_EXISTS);
+//            }
+//            contractAddress = cnsList.iterator().next().getAddress();
+//            log.info("transHandleWithSign cns contractAddress:{}", contractAddress);
+//        }
         // encode function
         String encodeFunction = this.encodeFunction2Str(JsonUtils.objToString(contractAbi), funcName, funcParam);
         // check groupId
