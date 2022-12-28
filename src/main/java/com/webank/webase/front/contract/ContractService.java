@@ -43,6 +43,7 @@ import com.webank.webase.front.contract.entity.RspContractCompile;
 import com.webank.webase.front.contract.entity.RspContractNoAbi;
 import com.webank.webase.front.contract.entity.RspMultiContractCompile;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precompiledapi.PrecompiledService;
 import com.webank.webase.front.precompiledapi.PrecompiledWithSignService;
 import com.webank.webase.front.precompiledapi.permission.PermissionManageService;
 import com.webank.webase.front.transaction.TransService;
@@ -132,8 +133,8 @@ public class ContractService {
     private PermissionManageService permissionManageService;
     @Autowired
     private PrecompiledWithSignService precompiledWithSignService;
-//    @Autowired
-//    private PrecompiledService precompiledService;
+    @Autowired
+    private PrecompiledService precompiledService;
     @Autowired
     @Qualifier(value = "common")
     private CryptoSuite cryptoSuite;
@@ -327,12 +328,12 @@ public class ContractService {
         String version = req.getVersion();
         String contractAddress = req.getContractAddress();
         String abiInfo = JsonUtils.toJSONString(req.getAbiInfo());
-//        List<CnsInfo> cnsList =
-//                precompiledService.queryCnsByNameAndVersion(groupId, cnsName, version);
-//        if (!CollectionUtils.isEmpty(cnsList)) {
-//            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
-//            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
-//        }
+        List<CnsInfo> cnsList =
+                precompiledService.queryCnsByNameAndVersion(groupId, cnsName, version);
+        if (!CollectionUtils.isEmpty(cnsList)) {
+            log.error("registerCns. cnsName:{} version:{} exists", cnsName, version);
+            throw new FrontException(ErrorCodeHandleUtils.PRECOMPILED_CONTRACT_NAME_VERSION_EXIST);
+        }
         // locally
         if (req.isSaveEnabled()) {
             if (StringUtils.isBlank(req.getContractPath())) {

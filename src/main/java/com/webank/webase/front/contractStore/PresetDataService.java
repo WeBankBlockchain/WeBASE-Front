@@ -372,7 +372,7 @@ public class PresetDataService {
                 item2Save.add(item);
             }
         }
-        contractItemRepository.exists((Specification<ContractItem>) item2Save);
+        contractItemRepository.saveAll(item2Save);
         log.info("readAndInitContractItem save {} items", contractItems.size());
     }
 
