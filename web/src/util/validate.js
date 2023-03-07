@@ -19,7 +19,8 @@ export function validate(type, value) {
             return result
             break;
         default:
-            
+            var result = { is: Web3Utils.isHexStrict(value), msg: Web3Utils.isHexStrict(value) ? '' : 'Invalid input: Unexpected end of '+type+' input' };
+            return result
             break;
     }
 }

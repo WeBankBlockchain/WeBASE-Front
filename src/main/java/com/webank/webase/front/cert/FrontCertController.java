@@ -56,7 +56,7 @@ public class FrontCertController {
     public Object getFrontCerts() {
         Instant startTime = Instant.now();
         log.info("start getFrontCerts. startTime:{}", startTime.toEpochMilli());
-        String chainCertStr;
+        String chainCertStr = "";
         String nodeCrtStr;
         String agencyCrtStr;
         String sdkChainCrtStr;
@@ -70,11 +70,21 @@ public class FrontCertController {
         List<String> sdkCertList = new ArrayList<>();
         try {
             sdkCertList = certService.getSDKNodeCert();
+        }catch (FrontException e) {
+            log.error("FrontCertController load [sdk] cert error: e:[]", e);
+//            return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getMessage());
+        }
+        try {
             nodeCertList = certService.getNodeCerts();
+        }catch (FrontException e) {
+            log.error("FrontCertController load [node] cert error: e:[]", e);
+//            return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getMessage());
+        }
+        try {
             chainCertStr = certService.getChainCert();
         }catch (FrontException e) {
-            log.error("FrontCertController load cert error: e:[]", e);
-            return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getMessage());
+            log.error("FrontCertController load [chain] cert error: e:[]", e);
+//            return new BaseResponse(ConstantCode.CERT_FILE_NOT_FOUND, e.getMessage());
         }
         Map<String, String> map = new HashMap<>();
 

@@ -120,6 +120,10 @@ const routes = [
         
         ]
     },
+    {
+        path:'*',
+        redirect: '/home',
+    }
 ]
 const router = new Router({
     routes

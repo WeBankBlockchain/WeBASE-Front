@@ -1,0 +1,74 @@
+[
+  {
+    "storeId" : 1,
+    "storeName" : "工具箱",
+    "storeName_en" : "Toolbox",
+    "storeType" : "1",
+    "storeIcon" : "toolboxId",
+    "storeDesc" : "工具箱中有常用的工具合约",
+    "storeDetail" : "工具箱中有常用的工具合约",
+    "storeDesc_en" : "Toolbox Contract suite",
+    "storeDetail_en" : "Toolbox Contract suite"
+  }, {
+    "storeId" : 2,
+    "storeName" : "存证应用",
+    "storeName_en" : "Evidence",
+    "storeType" : "2",
+    "storeIcon" : "evidenceId",
+    "storeDesc" : "一套区块链存证合约，实现区块链存证、取证",
+    "storeDetail" : "一套区块链存证合约，实现区块链存证、取证",
+    "storeDesc_en" : "Evidence Contract suite",
+    "storeDetail_en" : "Evidence Contract suite"
+  }, {
+    "storeId" : 3,
+    "storeName" : "积分应用",
+    "storeName_en" : "Points",
+    "storeType" : "3",
+    "storeIcon" : "pointsId",
+    "storeDesc" : "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+    "storeDetail" : "一套积分合约，具有积分相关的增发，销毁，暂停合约，黑白名单等权限控制等功能",
+    "storeDesc_en" : "Points Contract suite",
+    "storeDetail_en" : "Points Contract suite"
+  }, {
+    "storeId" : 4,
+    "storeName" : "SmartDev存证应用",
+    "storeName_en" : "Smart_Dev_Evidence",
+    "storeType" : "4",
+    "storeIcon" : "evidenceId",
+    "storeDesc" : "Smart-Dev-Contract仓库中的存证应用模板",
+    "storeDetail" : "Smart-Dev-Contract's Evidence Contract suite of business_template",
+    "storeDesc_en" : "Smart-Dev-Contracts仓库中的存证应用模板",
+    "storeDetail_en" : "Smart-Dev-Contract's Evidence Contract suite of business_template"
+
+  }, {
+    "storeId" : 6,
+    "storeName" : "资产应用",
+    "storeName_en" : "Asset",
+    "storeType" : "4",
+    "storeIcon" : "pointsId",
+    "storeDesc" : "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
+    "storeDetail" : "Asset Contract Suite",
+    "storeDesc_en" : "一套非同质化资产合约，具有于唯一性资产类型，如房产、汽车、道具、版权等",
+    "storeDetail_en" : "Asset Contract Suite"
+  }, {
+    "storeId" : 7,
+    "storeName" : "溯源应用",
+    "storeName_en" : "Traceability",
+    "storeType" : "4",
+    "storeIcon" : "traceId",
+    "storeDesc" : "一套溯源应用合约模板（Smart-Dev-Contract）",
+    "storeDetail" : "Traceability Contract Suite",
+    "storeDesc_en" : "一套溯源应用合约模板（Smart-Dev-Contract）",
+    "storeDetail_en" : "Traceability Contract Suite"
+  }, {
+    "storeId" : 8,
+    "storeName" : "代理合约模板",
+    "storeName_en" : "Proxy",
+    "storeType" : "4",
+    "storeIcon" : "toolboxId",
+    "storeDesc" : "一套可升级的业务、数据分离的代理合约模板",
+    "storeDetail" : "Proxy Contract Suite",
+    "storeDesc_en" : "一套可升级的业务、数据分离的代理合约模板",
+    "storeDetail_en" : "Proxy Contract Suite"
+  }
+]

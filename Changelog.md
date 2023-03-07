@@ -1,3 +1,38 @@
+### v1.5.4(2022-02-22)
+
+**Fix**
+- 优化合约仓库加载方式，通过`conf/warehouse`目录中的.json文件加载合约模板
+- 优化创建随机私钥所调用的JAVASDK的keyFactory问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Node-Manager v1.5.0+
+- WeBASE-Sign v1.5.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+### v1.5.3(2021-09-27)
+
+**Add**
+- 新增节点前置Docker镜像，`webasepro/webase-front:v1.5.3`
+- 合约仓库新增代理合约模板、溯源合约模板
+
+**Fix**
+- 优化组装交易代码，支持struct交易返回值
+- 优化节点证书与sdk证书读取逻辑
+- 优化合约IDE回退问题，仅回退到后台记录版本
+- 修复合约IDE创建文件夹未自动刷新问题、修复IDE菜单栏宽度问题
+- 修复交易回执解析失败问题
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Node-Manager v1.5.0+
+- WeBASE-Sign v1.5.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
 ### v1.5.2(2021-07-16)
 
 **Add**

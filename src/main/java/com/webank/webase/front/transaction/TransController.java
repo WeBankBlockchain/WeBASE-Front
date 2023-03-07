@@ -292,7 +292,7 @@ public class TransController extends BaseController {
         }
         String encodedOrSignedResult =  transServiceImpl.createRawTxEncoded(false, reqTransHandle.getSignUserId(),
             reqTransHandle.getGroupId(), reqTransHandle.getContractAddress(), reqTransHandle.getContractAbi(),
-            reqTransHandle.isUseCns(), reqTransHandle.getVersion(), reqTransHandle.getVersion(),
+            reqTransHandle.isUseCns(), reqTransHandle.getCnsName(), reqTransHandle.getVersion(),
             reqTransHandle.getFuncName(), reqTransHandle.getFuncParam());
         log.info("transToRawTxStrWithSign end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);
@@ -316,7 +316,7 @@ public class TransController extends BaseController {
 
         checkParamResult(result);
 
-        String encodedOrSignedResult =  transServiceImpl.convertEncodedFunction2Str(reqEncodeFunction.getContractAbi(),
+        String encodedOrSignedResult =  transServiceImpl.encodeFunction2Str(JsonUtils.objToString(reqEncodeFunction.getContractAbi()),
             reqEncodeFunction.getFuncName(), reqEncodeFunction.getFuncParam());
         log.info("transEncoded2Str end useTime:{},encodedOrSignedResult:{}",
             Duration.between(startTime, Instant.now()).toMillis(), encodedOrSignedResult);

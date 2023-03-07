@@ -167,6 +167,7 @@ public class ConstantCode {
     public static final RetCode FAIL_SET_SYSTEM_CONFIG_TOO_SMALL =  RetCode.mark(201209,
             "provide value by positive integer mode, from 100000 to 2147483647");
     public static final RetCode FAIL_SET_SYSTEM_CONFIG = RetCode.mark(201210, "set system config value fail for params error or permission denied ");
+    public static final RetCode FAIL_SET_CONSENSUS_TIMEOUT_TOO_SMALL = RetCode.mark(201211, "set consensus_timeout failed, must greater than 3 seconds");
     // consensus (node manager)
     public static final RetCode INVALID_NODE_ID = RetCode.mark(201216,"node id is invalid");
     public static final RetCode INVALID_NODE_TYPE = RetCode.mark(201217,"invalid node type: sealer, observer, remove ");
@@ -225,6 +226,14 @@ public class ConstantCode {
     // event callback
     public static final RetCode GET_EVENT_CALLBACK_TIMEOUT_ERROR = RetCode.mark(201311, "get event callback fail for time out");
     public static final RetCode GET_EVENT_CALLBACK_ERROR = RetCode.mark(201312, "get event callback error");
+
+    // v1.5.3
+    public static final RetCode CNS_QUERY_FAIL = RetCode.mark(201321,"query cns info fail");
+    public static final RetCode FUNC_PARAM_SIZE_NOT_MATCH = RetCode.mark(201322, "contract funcParam size not match with ABI");
+    public static final RetCode FUNC_PARAM_BYTES_SIZE_NOT_MATCH = RetCode.mark(201323, "contract funcParam bytes array size not match");
+    public static final RetCode FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D = RetCode.mark(201324, "contract funcParam bytes array not support high dimensional array");
+
+
 
     /* classify common error of web3j*/
     // keystore

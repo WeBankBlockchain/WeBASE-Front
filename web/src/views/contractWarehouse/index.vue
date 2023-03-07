@@ -12,7 +12,7 @@
                     <el-col :span="12" v-for="(item, index) in wareHouseList" :key="index">
                         <li class="item-warehouse">
                             <div class="left-warehouse">
-                                <svg-icon :icon-class='item.iconName' class="font-120" style=""></svg-icon>
+                                <svg-icon :icon-class='item.storeIcon' class="font-120" style=""></svg-icon>
                                 <!-- <el-image style="width: 120px; height: 120px" :src="item.storeIcon">
                                     <div slot="error" class="image-slot">
                                         <i class="el-icon-picture-outline"></i>
@@ -104,27 +104,16 @@ export default {
     methods: {
         queryContractStore() {
             this.loading = true;
+
+
+
+
+            
             getContractStore()
                 .then(res => {
                     this.loading = false;
-                    if (res.data.code === 0) {
+                     if (res.data.code === 0) {
                         var list = res.data.data;
-                        var iconList = ["tools", "supply", "points"];
-                        list.forEach((item, index) => {
-                            switch (item.storeIcon) {
-                                case "toolboxId":
-                                    item.iconName = "tools"
-                                    break;
-                                case "evidenceId":
-                                    item.iconName = "supply"
-                                    break;
-                                case "pointsId":
-                                    item.iconName = "points"
-                                    break;
-                                default:
-                                    break;
-                            }
-                        });
                         this.wareHouseList = list;
 
                     } else {

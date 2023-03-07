@@ -44,7 +44,7 @@ public class ZipUtils {
         // 用于存放压缩文件的文件夹
         File compress = new File(outputDir);
         // 如果文件夹不存在，进行创建
-        if (!compress.exists()) {
+        if (!compress.exists() ){
             compress.mkdirs();
         }
         // 目的压缩文件，已存在则先删除
@@ -82,9 +82,10 @@ public class ZipUtils {
         if (file.isDirectory()) {
             //得到文件列表信息
             File[] files = file.listFiles();
-            dir = dir.length() == 0 ? "" : dir + "/";
             //将文件夹添加到下一级打包目录
-            out.putNextEntry(new ZipEntry(dir));
+            out.putNextEntry(new ZipEntry(dir + "/"));
+
+            dir = dir.length() == 0 ? "" : dir + "/";
 
             //循环将文件夹中的文件打包
             for (int i = 0; i < files.length; i++) {

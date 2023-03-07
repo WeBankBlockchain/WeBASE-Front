@@ -124,7 +124,7 @@ public class ContractStoreController extends BaseController {
     @GetMapping(value = "/getContractItemByFolderId/{folderId}")
     public BaseResponse getContractItemByFolderId(@PathVariable("folderId") Integer folderId) {
         log.info("getContractItemByFolderId start. storeId:{}", folderId);
-        List<ContractItem> contractItemList = contractStoreService.getFolderItemListByFolderId(folderId.longValue());
+        List<ContractItem> contractItemList = contractStoreService.getContractItemListByFolderId(folderId.longValue());
         BaseResponse response = new BaseResponse(ConstantCode.RET_SUCCEED);
         response.setData(contractItemList);
         return response;

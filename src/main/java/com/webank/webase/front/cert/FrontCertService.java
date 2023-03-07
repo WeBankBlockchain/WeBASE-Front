@@ -23,11 +23,9 @@ import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.util.CleanPathUtil;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ZipUtils;
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -36,11 +34,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -373,7 +368,7 @@ public class FrontCertService {
         //├── sdk.crt
         //└── sdk.key
         try {
-            ZipUtils.generateZipFile(TEMP_SDK_DIR, TEMP_ZIP_DIR, "", TEMP_ZIP_FILE_NAME);
+            ZipUtils.generateZipFile(TEMP_SDK_DIR, TEMP_ZIP_DIR, TEMP_SDK_DIR, TEMP_ZIP_FILE_NAME);
         } catch (Exception e) {
             log.error("writeSdkAsFile generateZipFile fail:[]", e);
             throw new FrontException(ConstantCode.WRITE_SDK_CRT_KEY_FILE_FAIL);

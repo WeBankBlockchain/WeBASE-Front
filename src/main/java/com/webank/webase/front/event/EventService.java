@@ -51,6 +51,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.abi.ABICodec;
@@ -97,6 +98,7 @@ public class EventService {
     private CryptoSuite cryptoSuite;
     private static final String TYPE_CONTRACT = "contract";
     private static final String TYPE_ABI_INFO = "abi";
+
 
     /**
      * register NewBlockEventCallBack
@@ -377,12 +379,6 @@ public class EventService {
         Integer fromBlock, Integer toBlock, EventTopicParam eventTopicParam) {
         log.info("start getContractEventLog groupId:{},contractAddress:{},fromBlock:{},toBlock:{},eventTopicParam:{}",
             groupId, contractAddress, fromBlock, toBlock, eventTopicParam);
-        // check block height
-        Integer blockHeight = web3ApiService.getBlockNumber(groupId).intValue();
-        if (blockHeight < toBlock) {
-            log.error("getContractEventLog error for request blockHeight greater than blockHeight.");
-            throw new FrontException(ConstantCode.BLOCK_NUMBER_ERROR);
-        }
 
         EventLogParams eventParam = RabbitMQUtils.initEventTopicParam(fromBlock, toBlock,
             contractAddress, eventTopicParam, cryptoSuite);
@@ -395,9 +391,9 @@ public class EventService {
         EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
         String registerId = eventSubscribe.subscribeEvent(eventParam, callback);
 
-        List<DecodedEventLog> resultList;
+        List<DecodedEventLog> tempList; // 可能包含空对象的列表
         try {
-            resultList = callbackFuture.get(constants.getEventCallbackWait(), TimeUnit.SECONDS);
+            tempList = callbackFuture.get(constants.getEventCallbackWait(), TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException e) {
             log.error("getContractEventLog callbackFuture error: e", e);
             throw new FrontException(ConstantCode.GET_EVENT_CALLBACK_ERROR);
@@ -408,6 +404,10 @@ public class EventService {
             log.info("end get event log callback and unsubscribe registerId:{}", registerId);
             eventSubscribe.unsubscribeEvent(registerId, callback);
         }
+        // 去除null的Log
+        List<DecodedEventLog> resultList = tempList.stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
         return resultList;
     }
 
@@ -423,6 +423,7 @@ public class EventService {
 
     /**
      * get abi info from both
+     * different from webase-node-mgr, abi and contract data is separated
      * @param groupId
      * @return
      * @throws IOException

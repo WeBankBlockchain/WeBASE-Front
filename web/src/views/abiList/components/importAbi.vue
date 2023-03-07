@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="addAbi">
         <el-form :model="abiForm" :rules="rules" ref="abiForm" label-width="90px">
             <el-form-item :label="$t('contracts.contractName')" prop="contractName">
                 <el-input v-model="abiForm.contractName"></el-input>
@@ -7,8 +7,8 @@
             <el-form-item :label="$t('contracts.contractAddress')" prop="contractAddress">
                 <el-input v-model="abiForm.contractAddress"></el-input>
             </el-form-item>
-            <el-form-item :label="$t('contracts.contractAbi')" prop="contractAbi">
-                <el-input v-model="abiForm.contractAbi" type="textarea" :autosize="{ minRows: 4}"></el-input>
+            <el-form-item :label="$t('contracts.contractAbi')" prop="contractAbi" >
+                <el-input v-model="abiForm.contractAbi" type="textarea" :autosize="{ minRows: 4}" style=" overflow-y: scroll;max-height:300px;"></el-input>
             </el-form-item>
         </el-form>
         <div class="text-right send-btn">
@@ -172,7 +172,7 @@ export default {
                                 inputs: value.inputs
                             });
                         }
-                        data.methodId = methodId;
+                        data.methodId = methodId.substr(0,10);
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
                         arry.push(data);
@@ -192,7 +192,7 @@ export default {
                                 inputs: value.inputs
                             });
                         }
-                        data.methodId = methodId;
+                        data.methodId = methodId.substr(0,10);
                         data.abiInfo = JSON.stringify(value);
                         data.methodType = value.type;
                         arry.push(data);
@@ -231,4 +231,7 @@ export default {
 </script>
 
 <style scoped>
-</style>
+.addAbi .el-form-item {
+    margin-bottom: 24px;
+}
+</style> 

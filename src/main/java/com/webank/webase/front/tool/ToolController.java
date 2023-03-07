@@ -76,12 +76,12 @@ public class ToolController {
         log.info("decode output start. param:{}", JsonUtils.toJSONString(param));
         // todo 自测返回值
         TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
         // decode input
         if (param.getDecodeType() == 1) {
             return txDecoder.decodeReceiptMessage(param.getInput());
         } else if (param.getDecodeType() == 2) {
             String abi = JsonUtils.objToString(param.getAbiList());
+            ABICodec abiCodec = new ABICodec(cryptoSuite);
             // decode output
             try {
                 return abiCodec.decodeMethodAndGetOutputObject(abi, param.getMethodName(),
@@ -101,9 +101,9 @@ public class ToolController {
         String privateKey = param.getPrivateKey();
         CryptoKeyPair keyPair;
         if (StringUtils.isNotBlank(privateKey)) {
-            keyPair = cryptoSuite.createKeyPair(privateKey);
+            keyPair = cryptoSuite.getKeyPairFactory().createKeyPair(privateKey);
         } else {
-            keyPair = cryptoSuite.createKeyPair();
+            keyPair = cryptoSuite.getKeyPairFactory().generateKeyPair();
         }
         return new RspKeyPair(keyPair, cryptoSuite.cryptoTypeConfig);
     }
@@ -180,7 +180,7 @@ public class ToolController {
     }
     
     private RspKeyPair getRspKeyPair(String privateKey) {
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair(privateKey);
+        CryptoKeyPair keyPair = cryptoSuite.getKeyPairFactory().createKeyPair(privateKey);
         return new RspKeyPair(keyPair, cryptoSuite.cryptoTypeConfig);
     }
 
@@ -217,7 +217,7 @@ public class ToolController {
     public RspSignData getSignedData(@Valid @RequestBody ReqSign reqSign) {
         String privateKey = reqSign.getPrivateKey();
         String rawData = reqSign.getRawData();
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.createKeyPair(privateKey);
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(privateKey);
         SignatureResult signatureData = cryptoSuite.sign(Numeric.toHexString(rawData.getBytes()), cryptoKeyPair);
         return new RspSignData(signatureData, cryptoSuite.cryptoTypeConfig);
     }

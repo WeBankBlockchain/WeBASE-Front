@@ -85,7 +85,7 @@ public class ContractStoreService {
     /**
      *
      */
-    public List<ContractItem> getFolderItemListByFolderId(Long folderId) {
+    public List<ContractItem> getContractItemListByFolderId(Long folderId) {
         List<ContractItem> contractItemList = contractItemRepository.findByContractFolderId(folderId);
         return contractItemList;
     }

@@ -38,10 +38,9 @@ public class ReqDeploy {
      */
     private String signUserId;
     private String contractName;
-    @Deprecated
-    private String version;
+
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
-    private List<ABIDefinition> abiInfo;
+    private List<Object> abiInfo;
     /**
      * 合约编译的bytecode(bin)，用于部署合约
      */
@@ -58,4 +57,6 @@ public class ReqDeploy {
     private List<Object> funcParam = new ArrayList<>();
     @Deprecated
     private boolean useAes;
+    @Deprecated
+    private String version;
 }
