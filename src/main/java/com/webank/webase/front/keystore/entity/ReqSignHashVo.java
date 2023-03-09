@@ -16,20 +16,19 @@ package com.webank.webase.front.keystore.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import javax.validation.constraints.NotBlank;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 /**
  * EncodeInfo
  */
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class MessageHashInfo extends ReqSignHashVo {
-    @NotBlank
-    private String groupId;
+public class ReqSignHashVo {
+    /**
+     * userId deprecated, use signUserId instead
+     */
+    private String signUserId;
+    private String messageHash;
+
 }

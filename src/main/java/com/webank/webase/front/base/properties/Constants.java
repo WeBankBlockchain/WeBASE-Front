@@ -52,6 +52,7 @@ public class Constants {
     public static final String MGR_PRIVATE_KEY_URI =
             "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
     public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
+    public static final String WEBASE_SIGN_HASH_URI = "http://%s/WeBASE-Sign/sign/hash";
     public static final String WEBASE_SIGN_USER_URI =
             "http://%s/WeBASE-Sign/user/newUser?encryptType=%s&signUserId=%s&appId=%s&returnPrivateKey=%s";
     public static final String WEBASE_SIGN_USER_INFO_URI =

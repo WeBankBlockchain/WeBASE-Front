@@ -19,6 +19,7 @@ import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.ContractRepository;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
+import com.webank.webase.front.keystore.entity.ReqSignHashVo;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.precntauth.precompiled.cns.CNSServiceInWebase;
@@ -171,37 +172,32 @@ public class TransService {
         // to encode raw tx
         Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
         long transactionData = 0L;
-        String encodedTransaction = "";
         String transactionDataHash = "";
         try {
             transactionData = TransactionBuilderJniObj
                 .createTransactionData(groupId, chainIdAndGroupId.getLeft(),
                     contractAddress, Hex.toHexString(data), "", client.getBlockLimit().longValue());
-            encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
-            // 使用encodeTx的hash，和sign的hash保持一致
-            transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
+            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
         } catch (JniException e) {
             log.error("createTransactionData jni error ", e);
         }
         if (transactionData == 0L
-            || StringUtils.isBlank(encodedTransaction)
             || StringUtils.isBlank(transactionDataHash)) {
-            log.error("signMessage encodedTransaction:{}|{}|{}",
-                transactionData, encodedTransaction, transactionDataHash);
+            log.error("signMessage encodedTransaction:{}|{}",
+                transactionData, transactionDataHash);
             throw new FrontException(ConstantCode.ENCODE_TX_JNI_ERROR);
         }
         log.info("transactionDataHash after:{}", transactionDataHash);
-        SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
+        SignatureResult signData = this.requestSignHashFromSign(transactionDataHash, signUserId, groupId);
         int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
         if (client.isWASM() && isDeploy) {
             mark = USE_WASM_DEPLOY;
         }
         log.info("mark {}", mark);
-        String transactionDataHashSignedData = Hex.toHexString(signData.encode());
         String signedMessage = null;
         try {
             signedMessage = TransactionBuilderJniObj.createSignedTransaction(transactionData,
-                transactionDataHashSignedData,
+                Hex.toHexString(signData.encode()),
                 transactionDataHash, mark);
         } catch (JniException e) {
             log.error("createSignedTransactionData jni error:", e);
@@ -482,7 +478,6 @@ public class TransService {
      * if use signed data to send tx, call @send-signed-transaction api
      * @case1 if @userAddress is blank, return not signed raw tx encoded str
      * @case2 if @userAddress not blank, return signed str
-     * todo support deploy
      * int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
      *         if (client.isWASM() && isDeploy) {
      *             mark = USE_WASM_DEPLOY;
@@ -495,48 +490,40 @@ public class TransService {
         // to encode raw tx
         Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
         long transactionData = 0L;
-        String encodedTransaction = "";
         String transactionDataHash = "";
         try {
             transactionData = TransactionBuilderJniObj
                 .createTransactionData(String.valueOf(groupId), chainIdAndGroupId.getLeft(),
                     contractAddress, Hex.toHexString(data), "", client.getBlockLimit().longValue());
-            encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
-            transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
+            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
         } catch (JniException e) {
             log.error("createTransactionData jni error ", e);
         }
         if (transactionData == 0L
-            || StringUtils.isBlank(encodedTransaction)
             || StringUtils.isBlank(transactionDataHash)) {
-            log.error("signMessage encodedTransaction:{}|{}|{}",
-                transactionData, encodedTransaction, transactionDataHash);
+            log.error("signMessage encodedTransaction:{}|{}",
+                transactionData, transactionDataHash);
             throw new FrontException(ConstantCode.ENCODE_TX_JNI_ERROR);
         }
 
         // if user not null: sign, else, not sign
+        // 3.0 only return signed tx data
         if (StringUtils.isBlank(user)) {
-            // return unsigned raw tx encoded str
-            String unsignedResultStr = encodedTransaction;
-            log.info("createRawTxEncoded unsignedResultStr:{}", unsignedResultStr);
-            return unsignedResultStr;
+            log.error("return transaction data hash for sign:{}", transactionDataHash);
+            return transactionDataHash;
         } else {
-            log.info("createRawTxEncoded use key of address [{}] to sign", user);
-            // hash encoded, to sign locally
-            String hashMessageStr = client.getCryptoSuite().hash(encodedTransaction);
-            log.info("createRawTxEncoded encoded tx of hex str:{}", hashMessageStr);
+            log.info("createRawTxEncoded use key of address [{}] to sign, hash:{}", user, transactionDataHash);
             // if local, sign locally
             log.info("createRawTxEncoded isLocal:{}", isLocal);
             String signResultStr = null;
             if (isLocal) {
                 CryptoKeyPair cryptoKeyPair = this.getCredentials(false, user, groupId);
-                SignatureResult signData = signMessageHashByType(hashMessageStr,
+                SignatureResult signData = signMessageHashByType(transactionDataHash,
                     cryptoKeyPair, client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                String transactionDataHashSignedData = Hex.toHexString(signData.encode());
                 try {
                     signResultStr = TransactionBuilderJniObj.createSignedTransaction(transactionData,
-                        transactionDataHashSignedData,
+                        Hex.toHexString(signData.encode()),
                         transactionDataHash, client.isWASM() ? USE_WASM : USE_SOLIDITY);
                 } catch (JniException e) {
                     log.error("createSignedTransactionData jni error:", e);
@@ -544,14 +531,14 @@ public class TransService {
             } else {
                 // sign by webase-sign
                 // convert encoded to hex string (no need to hash then toHex)
-                EncodeInfo encodeInfo = new EncodeInfo(user, encodedTransaction);
-                String signDataStr = keyStoreService.getSignData(encodeInfo);
-                SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, client.getCryptoSuite().cryptoTypeConfig);
+                ReqSignHashVo reqSignHashVo = new ReqSignHashVo(user, transactionDataHash);
+                String signDataStr = keyStoreService.getSignData(reqSignHashVo);
+                SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr,
+                    client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                String transactionDataHashSignedData = Hex.toHexString(signData.encode());
                 try {
                     signResultStr = TransactionBuilderJniObj.createSignedTransaction(transactionData,
-                        transactionDataHashSignedData,
+                        Hex.toHexString(signData.encode()),
                         transactionDataHash, client.isWASM() ? USE_WASM : USE_SOLIDITY);
                 } catch (JniException e) {
                     log.error("createSignedTransactionData jni error:", e);
@@ -681,6 +668,23 @@ public class TransService {
         Instant startTime = Instant.now();
         String signDataStr = keyStoreService.getSignData(encodeInfo);
         log.info("get requestSignForSign cost time: {}",
+            Duration.between(startTime, Instant.now()).toMillis());
+        SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr,
+            web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
+        return signData;
+    }
+
+    /**
+     * sign by
+     * @param messageHash
+     * @param signUserId
+     * @return
+     */
+    public SignatureResult requestSignHashFromSign(String messageHash, String signUserId, String groupId) {
+        ReqSignHashVo signHashVo = new ReqSignHashVo(signUserId, messageHash);
+        Instant startTime = Instant.now();
+        String signDataStr = keyStoreService.getSignData(signHashVo);
+        log.info("get requestSignHashFromSign cost time: {}",
             Duration.between(startTime, Instant.now()).toMillis());
         SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr,
             web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
