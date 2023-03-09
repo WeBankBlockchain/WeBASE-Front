@@ -167,7 +167,7 @@ public class WasmServiceTest extends SpringTestBase {
 
         // todo test set
         transHandle.setFuncName("set");
-        List<Object> param = new ArrayList<>();
+        List<String> param = new ArrayList<>();
         param.add("Bob");
 
         transHandle.setFuncParam(param);

@@ -50,7 +50,7 @@ public class BFSServiceInWebase {
    * BFS创建某个目录
    */
   public Object mkdir(String groupId, String path, String signUserId) {
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(path);
     String contractAddress;
     boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
@@ -83,7 +83,7 @@ public class BFSServiceInWebase {
   public String link(String groupId, String signUserId, String contractName,
       String contractVersion,
       String contractAddress, String abiData) {
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(contractName);
     funcParams.add(contractVersion);
     funcParams.add(contractAddress);

@@ -103,7 +103,7 @@ public class SysConfigServiceInWebase {
     }
 
     public String setValueByKey(String groupId, String signUserId, String key, String value) {
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(key);
         funcParams.add(value);
         // get address and abi of precompiled contract
