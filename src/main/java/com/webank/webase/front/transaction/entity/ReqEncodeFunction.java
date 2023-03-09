@@ -30,5 +30,5 @@ public class ReqEncodeFunction {
     @NotNull
     private List<Object> contractAbi;
     @NotNull
-    private List<Object> funcParam;
+    private List<String> funcParam;
 }

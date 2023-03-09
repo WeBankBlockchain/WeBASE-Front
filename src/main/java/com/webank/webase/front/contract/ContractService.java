@@ -251,7 +251,7 @@ public class ContractService {
         String signUserId = req.getSignUserId();
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        List<String> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
 
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
@@ -269,7 +269,7 @@ public class ContractService {
         ABICodec abiCodec = new ABICodec(cryptoSuite);
         String encodedConstructor;
         try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+            encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
         } catch (ABICodecException e) {
             log.error("deployWithSign encode fail:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
@@ -303,13 +303,15 @@ public class ContractService {
 
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
-
+        List<String> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+//        List<String> paramStrList = JsonUtils.toJavaObjectList(JsonUtils.toJSONString(params), String.class);
+        log.info("params :{}|{}", JsonUtils.toJSONString(params));
         ABICodec abiCodec = new ABICodec(cryptoSuite);
 
         String encodedConstructor;
         try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+//            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+            encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
         } catch (ABICodecException e) {
             log.error("deployLocally encode fail:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
