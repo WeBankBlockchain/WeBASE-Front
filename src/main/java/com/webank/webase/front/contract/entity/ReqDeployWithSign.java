@@ -38,5 +38,5 @@ public class ReqDeployWithSign {
     private String bytecodeBin;
     @NotEmpty(message = ConstantCode.PARAM_FAIL_ABIINFO_IS_EMPTY)
     private List<Object> contractAbi;
-    private List<Object> funcParam = new ArrayList<>();
+    private List<String> funcParam = new ArrayList<>();
 }

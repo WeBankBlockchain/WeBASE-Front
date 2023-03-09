@@ -121,13 +121,13 @@ public class TransService {
         }
         String abiStr = JsonUtils.objToString(req.getContractAbi());
         String funcName = req.getFuncName();
-        List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        List<String> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         String contractAddress = req.getContractAddress();
         return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, req.getIsWasm());
     }
 
     public Object transHandleWithSign(String groupId, String signUserId,
-                                      String contractAddress, String abiStr, String funcName, List<Object> funcParam) {
+                                      String contractAddress, String abiStr, String funcName, List<String> funcParam) {
         return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, false);
     }
 
@@ -135,7 +135,7 @@ public class TransService {
      * send tx with sign (support precomnpiled contract)
      */
     public Object transHandleWithSign(String groupId, String signUserId,
-        String contractAddress, String abiStr, String funcName, List<Object> funcParam, boolean isWasm)
+        String contractAddress, String abiStr, String funcName, List<String> funcParam, boolean isWasm)
         throws FrontException {
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
@@ -236,7 +236,7 @@ public class TransService {
         String groupId = req.getGroupId();
         String abiStr = JsonUtils.objToString(req.getContractAbi());
         String funcName = req.getFuncName();
-        List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        List<String> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         String userAddress = req.getUser();
         boolean isWasm = req.getIsWasm();
         String contractAddress = req.getContractAddress();
@@ -428,7 +428,7 @@ public class TransService {
     public String createRawTxEncoded(boolean isLocal, String user,
         String groupId, String contractAddress, List<Object> contractAbi,
         boolean isUseCns, String cnsName, String cnsVersion,
-        String funcName, List<Object> funcParam, boolean isWasm) throws Exception {
+        String funcName, List<String> funcParam, boolean isWasm) throws Exception {
 
         if (isUseCns) {
             Tuple2<String, String> cnsInfo = cnsServiceInWebase.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
@@ -446,7 +446,7 @@ public class TransService {
     }
 
 
-    public String encodeFunction2Str(String abiStr, String funcName, List<Object> funcParam, String groupId, boolean isWasm) {
+    public String encodeFunction2Str(String abiStr, String funcName, List<String> funcParam, String groupId, boolean isWasm) {
         byte[] encodeFunctionByteArr = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
         return Hex.toHexString(encodeFunctionByteArr);
     }
@@ -457,17 +457,17 @@ public class TransService {
      * @param funcParam
      * @return
      */
-    public byte[] encodeFunction2ByteArr(String abiStr, String funcName, List<Object> funcParam, String groupId,
+    public byte[] encodeFunction2ByteArr(String abiStr, String funcName, List<String> funcParam, String groupId,
                                          boolean isWasm) {
 
         funcParam = funcParam == null ? new ArrayList<>() : funcParam;
-        this.validFuncParam(abiStr, funcName, funcParam, groupId);
+//        this.validFuncParam(abiStr, funcName, funcParam, groupId);
         log.debug("abiStr:{} ,funcName:{},funcParam {},groupID {}", abiStr, funcName,
            funcParam, groupId);
         ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), isWasm);
         byte[] encodeFunction;
         try {
-            encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
+            encodeFunction = abiCodec.encodeMethodFromString(abiStr, funcName, funcParam);
         } catch (ContractCodecException e) {
             log.error("transHandleWithSign encode fail:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
@@ -706,65 +706,65 @@ public class TransService {
      * @param funcParam
      * @param groupId
      */
-    private void validFuncParam(String contractAbiStr, String funcName, List<Object> funcParam, String groupId) {
-        ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName, groupId);
-        List<NamedType> inputTypeList = abiDefinition.getInputs();
-        if (inputTypeList.size() != funcParam.size()) {
-            log.error("validFuncParam param not match");
-            throw new FrontException(ConstantCode.FUNC_PARAM_SIZE_NOT_MATCH);
-        }
-        for (int i = 0; i < inputTypeList.size(); i++) {
-            String type = inputTypeList.get(i).getType();
-            if (type.startsWith("bytes")) {
-                if (type.contains("[][]")) {
-                    // todo bytes[][]
-                    log.warn("validFuncParam param, not support bytes 2d array or more");
-//                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
-                    return;
-                }
-                // if not bytes[], bytes or bytesN
-                if (!type.endsWith("[]")) {
-                    // update funcParam
-                    String bytesHexStr = (String) (funcParam.get(i));
-                    byte[] inputArray = Hex.decode(bytesHexStr);
-                    // bytesN: bytes1, bytes32 etc.
-                    if (type.length() > "bytes".length()) {
-                        int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
-                        if (inputArray.length != bytesNLength) {
-                            log.error("validFuncParam param of bytesN size not match");
-                            throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-                        }
-                    }
-                    // replace hexString with array
-                    funcParam.set(i, inputArray);
-                } else {
-                    // if bytes[] or bytes32[]
-                    List<String> hexStrArray = (List<String>) (funcParam.get(i));
-                    List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
-                    for (int j = 0; j < hexStrArray.size(); j++) {
-                        String bytesHexStr = hexStrArray.get(j);
-                        byte[] inputArray = Hex.decode(bytesHexStr);
-                        // check: bytesN: bytes1, bytes32 etc.
-                        if (type.length() > "bytes[]".length()) {
-                            // bytes32[] => 32[]
-                            String temp = type.substring("bytes".length());
-                            // 32[] => 32
-                            int bytesNLength = Integer
-                                .parseInt(temp.substring(0, temp.length() - 2));
-                            if (inputArray.length != bytesNLength) {
-                                log.error("validFuncParam param of bytesN size not match");
-                                throw new FrontException(
-                                    ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-                            }
-                        }
-                        bytesArray.add(inputArray);
-                    }
-                    // replace hexString with array
-                    funcParam.set(i, bytesArray);
-                }
-            }
-        }
-    }
+//    private void validFuncParam(String contractAbiStr, String funcName, List<String> funcParam, String groupId) {
+//        ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName, groupId);
+//        List<NamedType> inputTypeList = abiDefinition.getInputs();
+//        if (inputTypeList.size() != funcParam.size()) {
+//            log.error("validFuncParam param not match");
+//            throw new FrontException(ConstantCode.FUNC_PARAM_SIZE_NOT_MATCH);
+//        }
+//        for (int i = 0; i < inputTypeList.size(); i++) {
+//            String type = inputTypeList.get(i).getType();
+//            if (type.startsWith("bytes")) {
+//                if (type.contains("[][]")) {
+//                    // todo bytes[][]
+//                    log.warn("validFuncParam param, not support bytes 2d array or more");
+////                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
+//                    return;
+//                }
+//                // if not bytes[], bytes or bytesN
+//                if (!type.endsWith("[]")) {
+//                    // update funcParam
+//                    String bytesHexStr = (String) (funcParam.get(i));
+//                    byte[] inputArray = Hex.decode(bytesHexStr);
+//                    // bytesN: bytes1, bytes32 etc.
+//                    if (type.length() > "bytes".length()) {
+//                        int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
+//                        if (inputArray.length != bytesNLength) {
+//                            log.error("validFuncParam param of bytesN size not match");
+//                            throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
+//                        }
+//                    }
+//                    // replace hexString with array
+//                    funcParam.set(i, inputArray);
+//                } else {
+//                    // if bytes[] or bytes32[]
+//                    List<String> hexStrArray = (List<String>) (funcParam.get(i));
+//                    List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
+//                    for (int j = 0; j < hexStrArray.size(); j++) {
+//                        String bytesHexStr = hexStrArray.get(j);
+//                        byte[] inputArray = Hex.decode(bytesHexStr);
+//                        // check: bytesN: bytes1, bytes32 etc.
+//                        if (type.length() > "bytes[]".length()) {
+//                            // bytes32[] => 32[]
+//                            String temp = type.substring("bytes".length());
+//                            // 32[] => 32
+//                            int bytesNLength = Integer
+//                                .parseInt(temp.substring(0, temp.length() - 2));
+//                            if (inputArray.length != bytesNLength) {
+//                                log.error("validFuncParam param of bytesN size not match");
+//                                throw new FrontException(
+//                                    ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
+//                            }
+//                        }
+//                        bytesArray.add(inputArray);
+//                    }
+//                    // replace hexString with array
+//                    funcParam.set(i, bytesArray);
+//                }
+//            }
+//        }
+//    }
 
 
 }
