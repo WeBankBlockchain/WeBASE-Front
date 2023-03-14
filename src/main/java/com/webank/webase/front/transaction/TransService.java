@@ -31,6 +31,7 @@ import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.jni.utilities.tx.TransactionBuilderJniObj;
 import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.v3.client.protocol.request.Transaction;
 import org.fisco.bcos.sdk.v3.client.protocol.response.Call.CallOutput;
 import org.fisco.bcos.sdk.v3.codec.ContractCodec;
@@ -220,6 +222,15 @@ public class TransService {
         TransactionPusherService txPusher = new TransactionPusherService(client);
         log.info("sendMessage signMsg:{}", signMsg);
         TransactionReceipt receipt = txPusher.push(signMsg);
+        // todo 此处的receipt input为空，需要encodeFunction才能补上，需要sdk支持解码tars encode的signedStr的方法
+//        try {
+//            if (StringUtils.isBlank(receipt.getInput())) {
+//                JsonTransactionResponse jsonTransactionResponse = JsonTransactionResponse.readFromHexString(signMsg);
+//                receipt.setInput(jsonTransactionResponse.getInput());
+//            }
+//        } catch (JniException | IOException e) {
+//            log.error("readFromSignedTx for input error []", e);
+//        }
         log.info("sendMessage receipt:{}", JsonUtils.objToString(receipt));
         this.decodeReceipt(client, receipt);
         return receipt;
@@ -259,17 +270,26 @@ public class TransService {
     public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, String groupId) {
 
         Client client = web3ApiService.getWeb3j(groupId);
+        TransactionReceipt receipt;
         if (sync) {
-            TransactionReceipt receipt = sendMessage(client, signedStr);
+            receipt = sendMessage(client, signedStr);
             this.decodeReceipt(client, receipt);
-            return receipt;
         } else {
             TransactionPusherService txPusher = new TransactionPusherService(client);
             txPusher.pushOnly(signedStr);
-            TransactionReceipt transactionReceipt = new TransactionReceipt();
-            transactionReceipt.setTransactionHash(web3ApiService.getCryptoSuite(groupId).hash(signedStr));
-            return transactionReceipt;
+            receipt = new TransactionReceipt();
+            receipt.setTransactionHash(web3ApiService.getCryptoSuite(groupId).hash(signedStr));
         }
+        // todo 此处的receipt input为空，需要encodeFunction才能补上，需要sdk支持解码tars encode的signedStr的方法
+//        try {
+//            if (StringUtils.isBlank(receipt.getInput())) {
+//                JsonTransactionResponse jsonTransactionResponse = JsonTransactionResponse.readFromHexString(signedStr);
+//                receipt.setInput(jsonTransactionResponse.getInput());
+//            }
+//        } catch (JniException | IOException e) {
+//            log.error("readFromSignedTx for input error []", e);
+//        }
+        return receipt;
     }
 
 
@@ -621,7 +641,11 @@ public class TransService {
         log.info("handleTransaction start startTime:{}", startTime.toEpochMilli());
         // send tx
         TransactionProcessor txProcessor = TransactionProcessorFactory.createTransactionProcessor(client, cryptoKeyPair);
+        log.debug("handleTransaction input:{}", Hex.toHexStringWithPrefix(encodeFunction));
         TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair, client.isWASM() ? USE_WASM : USE_SOLIDITY);
+        if (StringUtils.isBlank(receipt.getInput())) {
+            receipt.setInput(Hex.toHexStringWithPrefix(encodeFunction));
+        }
         // cover null message through statusCode
         this.decodeReceipt(client, receipt);
         log.info("execTransaction end useTime:{},receipt:{}",
@@ -646,31 +670,14 @@ public class TransService {
         Instant nodeStartTime = Instant.now();
         // send transaction
         TransactionReceipt receipt = sendMessage(client, signedMessageStr);
+        if (StringUtils.isBlank(receipt.getInput())) {
+            receipt.setInput(Hex.toHexStringWithPrefix(encodeFunction));
+        }
         this.decodeReceipt(client, receipt);
         log.info("***node cost time***: {}",
             Duration.between(nodeStartTime, Instant.now()).toMillis());
         return receipt;
 
-    }
-
-    /**
-     * sign by
-     * @param encodedDataStr
-     * @param signUserId
-     * @return
-     */
-    public SignatureResult requestSignForSign(String encodedDataStr, String signUserId, String groupId) {
-        EncodeInfo encodeInfo = new EncodeInfo();
-        encodeInfo.setSignUserId(signUserId);
-        encodeInfo.setEncodedDataStr(encodedDataStr);
-
-        Instant startTime = Instant.now();
-        String signDataStr = keyStoreService.getSignData(encodeInfo);
-        log.info("get requestSignForSign cost time: {}",
-            Duration.between(startTime, Instant.now()).toMillis());
-        SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr,
-            web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
-        return signData;
     }
 
     /**
@@ -701,74 +708,6 @@ public class TransService {
         String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
         receipt.setMessage(receiptMsg);
     }
-
-    /**
-     * check input
-     * @param contractAbiStr
-     * @param funcName
-     * @param funcParam
-     * @param groupId
-     */
-//    private void validFuncParam(String contractAbiStr, String funcName, List<String> funcParam, String groupId) {
-//        ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName, groupId);
-//        List<NamedType> inputTypeList = abiDefinition.getInputs();
-//        if (inputTypeList.size() != funcParam.size()) {
-//            log.error("validFuncParam param not match");
-//            throw new FrontException(ConstantCode.FUNC_PARAM_SIZE_NOT_MATCH);
-//        }
-//        for (int i = 0; i < inputTypeList.size(); i++) {
-//            String type = inputTypeList.get(i).getType();
-//            if (type.startsWith("bytes")) {
-//                if (type.contains("[][]")) {
-//                    // todo bytes[][]
-//                    log.warn("validFuncParam param, not support bytes 2d array or more");
-////                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
-//                    return;
-//                }
-//                // if not bytes[], bytes or bytesN
-//                if (!type.endsWith("[]")) {
-//                    // update funcParam
-//                    String bytesHexStr = (String) (funcParam.get(i));
-//                    byte[] inputArray = Hex.decode(bytesHexStr);
-//                    // bytesN: bytes1, bytes32 etc.
-//                    if (type.length() > "bytes".length()) {
-//                        int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
-//                        if (inputArray.length != bytesNLength) {
-//                            log.error("validFuncParam param of bytesN size not match");
-//                            throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-//                        }
-//                    }
-//                    // replace hexString with array
-//                    funcParam.set(i, inputArray);
-//                } else {
-//                    // if bytes[] or bytes32[]
-//                    List<String> hexStrArray = (List<String>) (funcParam.get(i));
-//                    List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
-//                    for (int j = 0; j < hexStrArray.size(); j++) {
-//                        String bytesHexStr = hexStrArray.get(j);
-//                        byte[] inputArray = Hex.decode(bytesHexStr);
-//                        // check: bytesN: bytes1, bytes32 etc.
-//                        if (type.length() > "bytes[]".length()) {
-//                            // bytes32[] => 32[]
-//                            String temp = type.substring("bytes".length());
-//                            // 32[] => 32
-//                            int bytesNLength = Integer
-//                                .parseInt(temp.substring(0, temp.length() - 2));
-//                            if (inputArray.length != bytesNLength) {
-//                                log.error("validFuncParam param of bytesN size not match");
-//                                throw new FrontException(
-//                                    ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-//                            }
-//                        }
-//                        bytesArray.add(inputArray);
-//                    }
-//                    // replace hexString with array
-//                    funcParam.set(i, bytesArray);
-//                }
-//            }
-//        }
-//    }
-
 
 }
 

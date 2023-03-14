@@ -342,7 +342,7 @@ public class ContractService {
                     req.getContractAddress(), paramStrList, cryptoKeyPair);
             } catch (ContractCodecException e) {
                 log.error("deployLocally encode fail:[]", e);
-                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
             }
         } else {
             ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId),
@@ -436,7 +436,7 @@ public class ContractService {
                 .createAssembleTransactionProcessor(client, cryptoKeyPair);
         } catch (Exception e) {
             log.error("deployContract getAssembleTransactionProcessor error:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), e.getMessage());
         }
         TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
         transService.decodeReceipt(client, receipt);
@@ -469,7 +469,7 @@ public class ContractService {
                 .createAssembleTransactionProcessor(client, cryptoKeyPair);
         } catch (Exception e) {
             log.error("deployContract getAssembleTransactionProcessor error:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), e.getMessage());
         }
         TransactionResponse response =
             assembleTxProcessor.deployAndGetResponseWithStringParams(
