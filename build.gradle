@@ -101,7 +101,6 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testCompile 'junit:junit:4.13.1',
-                'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
                 'com.github.macdao:moscow:0.1.0',
                 'com.squareup.okhttp3:okhttp:3.1.2'
                 'org.springframework.amqp:spring-rabbit-test'

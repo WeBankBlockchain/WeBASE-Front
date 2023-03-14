@@ -279,7 +279,7 @@ public class ContractService {
             encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
         } catch (ContractCodecException e) {
             log.error("deployWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
 
         // data sign
@@ -352,7 +352,7 @@ public class ContractService {
                 encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
             } catch (ContractCodecException e) {
                 log.error("deployLocally encode fail:[]", e);
-                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
             }
             // get privateKey
             CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);

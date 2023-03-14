@@ -457,7 +457,6 @@ public class TransService {
                                          boolean isWasm) {
 
         funcParam = funcParam == null ? new ArrayList<>() : funcParam;
-//        this.validFuncParam(abiStr, funcName, funcParam, groupId);
         log.debug("abiStr:{} ,funcName:{},funcParam {},groupID {}", abiStr, funcName,
            funcParam, groupId);
         ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), isWasm);
@@ -466,7 +465,7 @@ public class TransService {
             encodeFunction = abiCodec.encodeMethodFromString(abiStr, funcName, funcParam);
         } catch (ContractCodecException e) {
             log.error("transHandleWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
         log.debug("encodeFunction2Str encodeFunction:{}", encodeFunction);
         return encodeFunction;
