@@ -17,7 +17,7 @@ package com.webank.webase.front.event.entity;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 /**
  * sync get event logs of exactly block

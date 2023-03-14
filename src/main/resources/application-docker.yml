@@ -48,7 +48,8 @@ spring:
 
 server:
   port: ${SERVER_PORT:5002}
-  context-path: /WeBASE-Front
+  servlet:
+    context-path: /WeBASE-Front
   connection-timeout: 30000
   tomcat:
     max-threads: 200

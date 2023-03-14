@@ -158,8 +158,8 @@ public class LogParseService {
 
     public Page<NetWorkData> getNetWorkData(Integer groupId, Integer pageNumber, Integer pageSize,
             LocalDateTime beginDate, LocalDateTime endDate) {
-        Sort sort = new Sort(Sort.Direction.ASC, "id");
-        Pageable pageable = new PageRequest(pageNumber - 1, pageSize, sort);
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sort);
         Specification<NetWorkData> queryParam = new Specification<NetWorkData>() {
             @Override
             public Predicate toPredicate(Root<NetWorkData> root, CriteriaQuery<?> criteriaQuery,
@@ -182,8 +182,8 @@ public class LogParseService {
 
     public Page<TxGasData> getTxGasData(int groupId, Integer pageNumber, Integer pageSize,
             LocalDateTime beginDate, LocalDateTime endDate, String transHash) {
-        Sort sort = new Sort(Sort.Direction.ASC, "id");
-        Pageable pageable = new PageRequest(pageNumber - 1, pageSize, sort);
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, sort);
         Specification<TxGasData> queryParam = new Specification<TxGasData>() {
             @Override
             public Predicate toPredicate(Root<TxGasData> root, CriteriaQuery<?> criteriaQuery,
@@ -221,7 +221,7 @@ public class LogParseService {
     }
 
     private CurrentState getCurrentState() {
-        CurrentState currentState = currentStateRepository.findOne(1);
+        CurrentState currentState = currentStateRepository.findById(1).orElse(null);
         return currentState;
     }
 
