@@ -305,48 +305,6 @@ public class TransService {
         }
     }
 
-//
-//    public Object transHandleLocal(ReqTransHandle req) throws Exception {
-//        log.info("transHandle start. ReqTransHandle:[{}]", JsonUtils.toJSONString(req));
-//        // check param and build function
-//        ContractFunction contractFunction = buildContractFunctionWithAbi(req.getContractAbi(),
-//            req.getFuncName(), req.getFuncParam());
-//
-//        // address
-//        String address = req.getContractAddress();
-//        if (req.isUseCns()) {
-//            List<CnsInfo> cnsList = precompiledService.queryCnsByNameAndVersion(req.getGroupId(),
-//                    req.getCnsName(), req.getVersion());
-//            if (CollectionUtils.isEmpty(cnsList)) {
-//                throw new FrontException(VERSION_NOT_EXISTS);
-//            }
-//            address = cnsList.iterator().next().getAddress();
-//            log.info("transHandleLocal cns contractAddress:{}", address);
-//        }
-//
-//        // client
-//        Client client = web3ApiService.getWeb3j(req.getGroupId());
-//        // get privateKey
-//        CryptoKeyPair credentials = getCredentials(contractFunction.getConstant(), req.getUser());
-//        CommonContract commonContract =
-//                CommonContract.load(address, client, credentials);
-//        // tx decoder
-//        TransactionDecoderService txDecoder = new TransactionDecoderService(cryptoSuite);
-//        // request
-//        Object result;
-//        Function function = new Function(req.getFuncName(), contractFunction.getFinalInputs(),
-//                contractFunction.getFinalOutputs());
-//        if (contractFunction.getConstant()) {
-//            result = execCall(contractFunction.getOutputList(), function, commonContract);
-//        } else {
-//            result = execTransaction(function, commonContract, txDecoder);
-//        }
-//
-//        log.info("transHandle end. name:{} func:{} result:{}", req.getContractName(),
-//            req.getFuncName(), JsonUtils.toJSONString(result));
-//        return result;
-//    }
-
 
     public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, int groupId) {
 
@@ -544,16 +502,13 @@ public class TransService {
     public String encodeFunction2Str(String abiStr, String funcName, List<String> funcParam) {
 
         funcParam = funcParam == null ? new ArrayList<>() : funcParam;
-//        this.validFuncParam(abiStr, funcName, funcParam);
         ABICodec abiCodec = new ABICodec(cryptoSuite);
         String encodeFunction;
         try {
-//            encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
             encodeFunction = abiCodec.encodeMethodFromString(abiStr, funcName, funcParam);
         } catch (ABICodecException e) {
-            // todo 在exception的message中判断错误类型：size不匹配，类型不对
-            log.error("transHandleWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            log.error("deployWithSign encode fail:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
         log.info("encodeFunction2Str encodeFunction:{}", encodeFunction);
         return encodeFunction;
