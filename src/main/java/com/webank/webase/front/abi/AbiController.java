@@ -61,8 +61,8 @@ public class AbiController extends BaseController {
         if (pageNumber < 1) {
             throw new FrontException(ConstantCode.PARAM_ERROR);
         }
-        Pageable pageable = new PageRequest(pageNumber - 1, pageSize,
-                new Sort(Sort.Direction.DESC, "createTime"));
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize,
+                Sort.by(Sort.Direction.DESC, "createTime"));
         resList = abiService.getListByGroupId(groupId, pageable);
 
         log.debug("end getAbiListByGroupId resList count. {}", resList.size());

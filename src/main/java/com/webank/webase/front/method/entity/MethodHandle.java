@@ -15,7 +15,7 @@
  */
 package com.webank.webase.front.method.entity;
 
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**

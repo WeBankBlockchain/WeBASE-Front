@@ -27,8 +27,6 @@ import java.util.List;
 public interface NewBlockEventInfoRepository extends CrudRepository<NewBlockEventInfo, String>,
         JpaSpecificationExecutor<NewBlockEventInfo> {
 
-    NewBlockEventInfo findById(String id);
-
     List<NewBlockEventInfo> findByGroupIdAndAppId(int groupId, String appId);
 
     List<NewBlockEventInfo> findByAppId(String appId);
