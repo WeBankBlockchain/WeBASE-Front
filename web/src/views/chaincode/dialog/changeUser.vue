@@ -254,7 +254,7 @@ export default {
             for (let i = 0; i < this.parameter.length; i++) {
                 if (this.parameter[i] && isJson(this.parameter[i])) {
                     try {
-                        params[i] = JSON.parse(this.parameter[i])
+                        params[i] = this.parameter[i]
                     } catch (error) {
                         console.log(error)
                     }
