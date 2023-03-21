@@ -18,7 +18,11 @@
         <v-content-head :headTitle="$t('route.contractManagementQ')" :headSubTitle="$t('route.contractIDE')" @changeGroup="changeGroup"></v-content-head>
         <div class="code-menu-wrapper" :style="{width: menuWidth+'px'}">
             <v-menu @change="changeCode($event)" ref="menu" v-show="menuHide">
+<<<<<<< HEAD
                 <template slot="footer">
+=======
+                <template slot='footer'>
+>>>>>>> 99197045868f656ecdbee89cf18a479928094eb6
                     <div class="version-selector">
                         <el-select v-model="version" placeholder="请选择" @change="onchangeLoadVersion">
                             <el-option v-for="item in versionList" :key="item.versionId" :label="item.solcName" :value="item.solcName">
