@@ -1,5 +1,20 @@
 version '1.0'
 
+println "======Gradle version:" + gradle.gradleVersion
+if (gradle.gradleVersion.startsWith("7")) {
+    println "Gradle 7.x not support yet!\n ====== please use Gradle version from 4.6.x to 6.9.x "
+} else if (gradle.gradleVersion.startsWith("6")
+        || gradle.gradleVersion.startsWith("5")
+        || gradle.gradleVersion.startsWith("4.10")
+        || gradle.gradleVersion.startsWith("4.9")
+        || gradle.gradleVersion.startsWith("4.8")
+        || gradle.gradleVersion.startsWith("4.7")
+) {
+    println "Gradle with version >= 4.6 detected"
+} else {
+    println "Gradle with version < 4.6 detected"
+}
+
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'idea'

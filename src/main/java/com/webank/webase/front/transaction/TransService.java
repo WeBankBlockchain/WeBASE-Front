@@ -36,6 +36,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -587,7 +588,7 @@ public class TransService {
         return function;
     }
 
-    public List<Type> handleCall(String groupId, String userAddress, String contractAddress,
+    public Object handleCall(String groupId, String userAddress, String contractAddress,
         byte[] encodedFunction, String abiStr, String funcName, boolean isWasm) {
 
         Client client = web3ApiService.getWeb3j(groupId);
@@ -603,8 +604,9 @@ public class TransService {
             Tuple2<Boolean, String> parseResult =
                 RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
             log.error("call contract error:{}", parseResult);
-            String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
-            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR.getCode(), parseResultStr);
+            String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status:" + callOutput.getStatus();
+//            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR.getCode(), parseResultStr);
+            return Collections.singletonList("Call contract return error: " + parseResultStr);
         } else {
             ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), client.isWASM());
             try {
@@ -615,9 +617,10 @@ public class TransService {
                 //    "typeAsString": "string"
                 //  }
                 //]
-                List<Type> typeList = abiCodec.decodeMethodAndGetOutputObject(abiStr, funcName, callOutput.getOutput());
+                // List<Type> typeList = abiCodec.decodeMethodAndGetOutputObject(abiStr, funcName, callOutput.getOutput());
+                List<String> typeList = abiCodec.decodeMethodToString(abiStr, funcName, Hex.decode(callOutput.getOutput()));
                 // bytes类型转十六进制
-                // todo output is byte[] or string  Hex.decode
+                log.info("call contract res before decode:{}", JsonUtils.objToString(callOutput.getOutput()));
                 log.info("call contract res:{}", JsonUtils.objToString(typeList));
                 return typeList;
             } catch (ContractCodecException e) {
