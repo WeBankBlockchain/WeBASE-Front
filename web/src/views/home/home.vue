@@ -71,7 +71,7 @@
                 <el-button slot="append" icon="el-icon-search" v-loading="searchLoading" @click="submit"></el-button>
             </el-input>
         </div>
-        <div class="module-wrapper-small" style="padding: 30px 31px 26px 32px;" v-show="blockData.length > 0" v-loading="loadingBlock">
+        <div class="module-wrapper-small json-view" style="padding: 30px 31px 26px 32px;" v-show="blockData.length > 0" v-loading="loadingBlock">
             <json-viewer :value="searchMap" :expand-depth="2" copyable>
 
             </json-viewer>
@@ -944,5 +944,9 @@ export default {
 }
 .block-table-content >>> .el-table__row {
     cursor: pointer;
+}
+.json-view{
+    max-height: 550px;
+    overflow-y: scroll;
 }
 </style>
