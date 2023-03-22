@@ -5,9 +5,9 @@
   "author": "",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "set NODE_OPTIONS=--openssl-legacy-provider&&webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
-    "build": "node build/build.js",
+    "build": "set NODE_OPTIONS=--openssl-legacy-provider&&node build/build.js",
     "update": "node build/update_module.js"
   },
   "dependencies": {
