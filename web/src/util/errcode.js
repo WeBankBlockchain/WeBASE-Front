@@ -419,7 +419,7 @@ let errCode = {
     },
     "201151": {
         en: "Unsupported contract param type to encoded",
-        zh: '不支持合约参数类型编码'
+        zh: '合约交易入参错误，请检查入参个数与入参值是否与ABI匹配'
     },
     "201152": {
         en: "Unsupported contract param type to decoded",
