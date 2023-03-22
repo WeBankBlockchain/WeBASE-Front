@@ -84,6 +84,7 @@ dependencies {
     // cover low version guava
     compile 'com.google.guava:guava:29.0-jre'
     compile 'javax.validation:validation-api:2.0.1.Final'
+    compile 'com.google.code.gson:gson:2.10.1'
 
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'

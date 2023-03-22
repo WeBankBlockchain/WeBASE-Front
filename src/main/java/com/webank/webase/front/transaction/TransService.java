@@ -72,6 +72,7 @@ import org.fisco.bcos.sdk.abi.wrapper.ABICodecJsonWrapper;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition.NamedType;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinitionFactory;
+import org.fisco.bcos.sdk.abi.wrapper.ABIObject;
 import org.fisco.bcos.sdk.abi.wrapper.ContractABIDefinition;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.request.Transaction;
@@ -586,7 +587,7 @@ public class TransService {
         return function;
     }
 
-    public List<String> handleCall(int groupId, String userAddress, String contractAddress,
+    public Object handleCall(int groupId, String userAddress, String contractAddress,
         String encodedFunction, String abiStr, String funcName) {
 
         TransactionProcessor transactionProcessor = new TransactionProcessor(
@@ -605,11 +606,10 @@ public class TransService {
         } else {
             ABICodec abiCodec = new ABICodec(cryptoSuite);
             try {
-                List<String> res = abiCodec
-                    .decodeMethodToString(abiStr, funcName, callOutput.getOutput());
-                log.info("call contract res before decode:{}", res);
-                // bytes类型转十六进制
-                this.handleFuncOutput(abiStr, funcName, res);
+                List<String> res = abiCodec.decodeMethodToString(abiStr, funcName, callOutput.getOutput());
+                // list object会出现bytes32乱码（因为是二进制）
+                //  List<Object> res = abiCodec.decodeMethodAndGetOutputObject(abiStr, funcName, callOutput.getOutput()).getLeft();
+                log.info("call contract res before decode:{}", callOutput.getOutput());
                 log.info("call contract res:{}", res);
                 return res;
             } catch (ABICodecException e) {
@@ -764,51 +764,51 @@ public class TransService {
 //        }
 //    }
 
-    /**
-     * parse bytes, bytesN, bytesN[], bytes[] from base64 string to hex string
-     * @param abiStr
-     * @param funcName
-     * @param outputValues
-     */
-    private void handleFuncOutput(String abiStr, String funcName, List<String> outputValues) {
-        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
-        ABICodecJsonWrapper jsonWrapper = new ABICodecJsonWrapper();
-        List<NamedType> outputTypeList = abiDefinition.getOutputs();
-        for (int i = 0; i < outputTypeList.size(); i++) {
-            String type = outputTypeList.get(i).getType();
-            if (type.startsWith("bytes")) {
-                if (type.contains("[][]")) { // todo bytes[][]
-                    log.warn("validFuncParam param, not support bytes 2d array or more");
-                    continue;
-                }
-                // if not bytes[], bytes or bytesN
-                if (!type.endsWith("[]")) {
-                    // update funcParam
-                    String bytesBase64Str = outputValues.get(i);
-                    if (bytesBase64Str.startsWith("base64://")) {
-                        bytesBase64Str = bytesBase64Str.substring("base64://".length());
-                    }
-                    byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
-                    // replace hexString with array
-                    outputValues.set(i, Numeric.toHexString(inputArray));
-                } else {
-                    // if bytes[] or bytes32[]
-                    List<String> base64StrArray = JsonUtils.toJavaObject(outputValues.get(i), List.class);
-                    List<String> bytesArray = new ArrayList<>(base64StrArray.size());
-                    for (int j = 0; j < base64StrArray.size(); j++) {
-                        String bytesBase64Str = base64StrArray.get(j);
-                        if (bytesBase64Str.startsWith("base64://")) {
-                            bytesBase64Str = bytesBase64Str.substring("base64://".length());
-                        }
-                        byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
-                        bytesArray.add(Numeric.toHexString(inputArray));
-                    }
-                    // replace hexString with array
-                    outputValues.set(i, JsonUtils.objToString(bytesArray));
-                }
-            }
-        }
-    }
+//    /**
+//     * parse bytes, bytesN, bytesN[], bytes[] from base64 string to hex string
+//     * @param abiStr
+//     * @param funcName
+//     * @param outputValues
+//     */
+//    private void handleFuncOutput(String abiStr, String funcName, List<String> outputValues) {
+//        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
+//        ABICodecJsonWrapper jsonWrapper = new ABICodecJsonWrapper();
+//        List<NamedType> outputTypeList = abiDefinition.getOutputs();
+//        for (int i = 0; i < outputTypeList.size(); i++) {
+//            String type = outputTypeList.get(i).getType();
+//            if (type.startsWith("bytes")) {
+//                if (type.contains("[][]")) { // todo bytes[][]
+//                    log.warn("validFuncParam param, not support bytes 2d array or more");
+//                    continue;
+//                }
+//                // if not bytes[], bytes or bytesN
+//                if (!type.endsWith("[]")) {
+//                    // update funcParam
+//                    String bytesBase64Str = outputValues.get(i);
+//                    if (bytesBase64Str.startsWith("base64://")) {
+//                        bytesBase64Str = bytesBase64Str.substring("base64://".length());
+//                    }
+//                    byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
+//                    // replace hexString with array
+//                    outputValues.set(i, Numeric.toHexString(inputArray));
+//                } else {
+//                    // if bytes[] or bytes32[]
+//                    List<String> base64StrArray = JsonUtils.toJavaObject(outputValues.get(i), List.class);
+//                    List<String> bytesArray = new ArrayList<>(base64StrArray.size());
+//                    for (int j = 0; j < base64StrArray.size(); j++) {
+//                        String bytesBase64Str = base64StrArray.get(j);
+//                        if (bytesBase64Str.startsWith("base64://")) {
+//                            bytesBase64Str = bytesBase64Str.substring("base64://".length());
+//                        }
+//                        byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
+//                        bytesArray.add(Numeric.toHexString(inputArray));
+//                    }
+//                    // replace hexString with array
+//                    outputValues.set(i, JsonUtils.objToString(bytesArray));
+//                }
+//            }
+//        }
+//    }
 
 }
 
