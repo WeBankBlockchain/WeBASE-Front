@@ -20,6 +20,7 @@ package com.webank.webase.front.transaction;
 import com.webank.webase.front.base.SpringTestBase;
 import com.webank.webase.front.transaction.entity.ReqTransHandleWithSign;
 import com.webank.webase.front.util.JsonUtils;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class TransactionServiceTest extends SpringTestBase {
         param.setContractAbi(abiList);
         param.setFuncName("set");
         String funParam = " [\"22\"]";
-        List<Object> funParamList = JsonUtils.toJavaObjectList(funParam, Object.class);
+        List<String> funParamList = Arrays.asList(funParam);
         param.setFuncParam(funParamList);
         param.setContractAddress(contractAddr);
         Object res = transService.transHandleWithSign(param);

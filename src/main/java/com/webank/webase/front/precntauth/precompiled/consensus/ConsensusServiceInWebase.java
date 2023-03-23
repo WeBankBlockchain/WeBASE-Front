@@ -81,9 +81,9 @@ public class ConsensusServiceInWebase {
 
   public String addSealerHandle(String groupId, String signUserId, String nodeId,
       BigInteger weight) {
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
-    funcParams.add(weight);
+    funcParams.add(weight.toString(10));
     String contractAddress;
     boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
     if (isWasm) {
@@ -143,7 +143,7 @@ public class ConsensusServiceInWebase {
 
   private String addObserverHandle(String groupId, String signUserId, String nodeId) {
     // trans
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
     String contractAddress;
     boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
@@ -165,7 +165,7 @@ public class ConsensusServiceInWebase {
       return ConstantCode.ALREADY_REMOVED_FROM_THE_GROUP.toString();
     }
     // trans
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
     String contractAddress;
     boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();

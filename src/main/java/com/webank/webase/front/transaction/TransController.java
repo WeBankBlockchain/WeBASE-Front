@@ -202,7 +202,6 @@ public class TransController extends BaseController {
     @PostMapping("/signMessageHashExternal")
     public Object signMessageHashExternal(@Valid @RequestBody ReqSignMessageHash reqSignMessageHash, BindingResult result) {
         log.info("transHandleLocal start. ReqTransHandle:[{}]", JsonUtils.toJSONString(reqSignMessageHash));
-//        checkParamResult(result);
         Instant startTime = Instant.now();
         log.info("signMessageHashExternal start startTime:{}", startTime.toEpochMilli());
 

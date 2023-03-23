@@ -19,6 +19,7 @@ import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.contract.ContractRepository;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
+import com.webank.webase.front.keystore.entity.ReqSignHashVo;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
 import com.webank.webase.front.precntauth.precompiled.cns.CNSServiceInWebase;
@@ -30,10 +31,12 @@ import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.ContractAbiUtil;
 import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.web3api.Web3ApiService;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +45,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.fisco.bcos.sdk.jni.common.JniException;
 import org.fisco.bcos.sdk.jni.utilities.tx.TransactionBuilderJniObj;
 import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.v3.client.protocol.request.Transaction;
 import org.fisco.bcos.sdk.v3.client.protocol.response.Call.CallOutput;
 import org.fisco.bcos.sdk.v3.codec.ContractCodec;
@@ -121,13 +125,13 @@ public class TransService {
         }
         String abiStr = JsonUtils.objToString(req.getContractAbi());
         String funcName = req.getFuncName();
-        List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        List<String> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         String contractAddress = req.getContractAddress();
         return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, req.getIsWasm());
     }
 
     public Object transHandleWithSign(String groupId, String signUserId,
-                                      String contractAddress, String abiStr, String funcName, List<Object> funcParam) {
+                                      String contractAddress, String abiStr, String funcName, List<String> funcParam) {
         return this.transHandleWithSign(groupId, signUserId, contractAddress, abiStr, funcName, funcParam, false);
     }
 
@@ -135,7 +139,7 @@ public class TransService {
      * send tx with sign (support precomnpiled contract)
      */
     public Object transHandleWithSign(String groupId, String signUserId,
-        String contractAddress, String abiStr, String funcName, List<Object> funcParam, boolean isWasm)
+        String contractAddress, String abiStr, String funcName, List<String> funcParam, boolean isWasm)
         throws FrontException {
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
@@ -171,37 +175,32 @@ public class TransService {
         // to encode raw tx
         Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
         long transactionData = 0L;
-        String encodedTransaction = "";
         String transactionDataHash = "";
         try {
             transactionData = TransactionBuilderJniObj
                 .createTransactionData(groupId, chainIdAndGroupId.getLeft(),
                     contractAddress, Hex.toHexString(data), "", client.getBlockLimit().longValue());
-            encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
-            // 使用encodeTx的hash，和sign的hash保持一致
-            transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
+            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
         } catch (JniException e) {
             log.error("createTransactionData jni error ", e);
         }
         if (transactionData == 0L
-            || StringUtils.isBlank(encodedTransaction)
             || StringUtils.isBlank(transactionDataHash)) {
-            log.error("signMessage encodedTransaction:{}|{}|{}",
-                transactionData, encodedTransaction, transactionDataHash);
+            log.error("signMessage encodedTransaction:{}|{}",
+                transactionData, transactionDataHash);
             throw new FrontException(ConstantCode.ENCODE_TX_JNI_ERROR);
         }
         log.info("transactionDataHash after:{}", transactionDataHash);
-        SignatureResult signData = this.requestSignForSign(encodedTransaction, signUserId, groupId);
+        SignatureResult signData = this.requestSignHashFromSign(transactionDataHash, signUserId, groupId);
         int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
         if (client.isWASM() && isDeploy) {
             mark = USE_WASM_DEPLOY;
         }
         log.info("mark {}", mark);
-        String transactionDataHashSignedData = Hex.toHexString(signData.encode());
         String signedMessage = null;
         try {
             signedMessage = TransactionBuilderJniObj.createSignedTransaction(transactionData,
-                transactionDataHashSignedData,
+                Hex.toHexString(signData.encode()),
                 transactionDataHash, mark);
         } catch (JniException e) {
             log.error("createSignedTransactionData jni error:", e);
@@ -224,6 +223,15 @@ public class TransService {
         TransactionPusherService txPusher = new TransactionPusherService(client);
         log.info("sendMessage signMsg:{}", signMsg);
         TransactionReceipt receipt = txPusher.push(signMsg);
+        // todo 此处的receipt input为空，需要encodeFunction才能补上，需要sdk支持解码tars encode的signedStr的方法
+//        try {
+//            if (StringUtils.isBlank(receipt.getInput())) {
+//                JsonTransactionResponse jsonTransactionResponse = JsonTransactionResponse.readFromHexString(signMsg);
+//                receipt.setInput(jsonTransactionResponse.getInput());
+//            }
+//        } catch (JniException | IOException e) {
+//            log.error("readFromSignedTx for input error []", e);
+//        }
         log.info("sendMessage receipt:{}", JsonUtils.objToString(receipt));
         this.decodeReceipt(client, receipt);
         return receipt;
@@ -236,7 +244,7 @@ public class TransService {
         String groupId = req.getGroupId();
         String abiStr = JsonUtils.objToString(req.getContractAbi());
         String funcName = req.getFuncName();
-        List<Object> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        List<String> funcParam = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         String userAddress = req.getUser();
         boolean isWasm = req.getIsWasm();
         String contractAddress = req.getContractAddress();
@@ -263,17 +271,26 @@ public class TransService {
     public TransactionReceipt sendSignedTransaction(String signedStr, Boolean sync, String groupId) {
 
         Client client = web3ApiService.getWeb3j(groupId);
+        TransactionReceipt receipt;
         if (sync) {
-            TransactionReceipt receipt = sendMessage(client, signedStr);
+            receipt = sendMessage(client, signedStr);
             this.decodeReceipt(client, receipt);
-            return receipt;
         } else {
             TransactionPusherService txPusher = new TransactionPusherService(client);
             txPusher.pushOnly(signedStr);
-            TransactionReceipt transactionReceipt = new TransactionReceipt();
-            transactionReceipt.setTransactionHash(web3ApiService.getCryptoSuite(groupId).hash(signedStr));
-            return transactionReceipt;
+            receipt = new TransactionReceipt();
+            receipt.setTransactionHash(web3ApiService.getCryptoSuite(groupId).hash(signedStr));
         }
+        // todo 此处已签名的交易，receipt input为空，需要encodeFunction才能补上，需要sdk支持解码tars encode的signedStr的方法
+//        try {
+//            if (StringUtils.isBlank(receipt.getInput())) {
+//                JsonTransactionResponse jsonTransactionResponse = JsonTransactionResponse.readFromHexString(signedStr);
+//                receipt.setInput(jsonTransactionResponse.getInput());
+//            }
+//        } catch (JniException | IOException e) {
+//            log.error("readFromSignedTx for input error []", e);
+//        }
+        return receipt;
     }
 
 
@@ -428,7 +445,7 @@ public class TransService {
     public String createRawTxEncoded(boolean isLocal, String user,
         String groupId, String contractAddress, List<Object> contractAbi,
         boolean isUseCns, String cnsName, String cnsVersion,
-        String funcName, List<Object> funcParam, boolean isWasm) throws Exception {
+        String funcName, List<String> funcParam, boolean isWasm) throws Exception {
 
         if (isUseCns) {
             Tuple2<String, String> cnsInfo = cnsServiceInWebase.queryCnsByNameAndVersion(groupId, cnsName, cnsVersion);
@@ -446,7 +463,7 @@ public class TransService {
     }
 
 
-    public String encodeFunction2Str(String abiStr, String funcName, List<Object> funcParam, String groupId, boolean isWasm) {
+    public String encodeFunction2Str(String abiStr, String funcName, List<String> funcParam, String groupId, boolean isWasm) {
         byte[] encodeFunctionByteArr = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
         return Hex.toHexString(encodeFunctionByteArr);
     }
@@ -457,20 +474,19 @@ public class TransService {
      * @param funcParam
      * @return
      */
-    public byte[] encodeFunction2ByteArr(String abiStr, String funcName, List<Object> funcParam, String groupId,
+    public byte[] encodeFunction2ByteArr(String abiStr, String funcName, List<String> funcParam, String groupId,
                                          boolean isWasm) {
 
         funcParam = funcParam == null ? new ArrayList<>() : funcParam;
-        this.validFuncParam(abiStr, funcName, funcParam, groupId);
         log.debug("abiStr:{} ,funcName:{},funcParam {},groupID {}", abiStr, funcName,
            funcParam, groupId);
         ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), isWasm);
         byte[] encodeFunction;
         try {
-            encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
+            encodeFunction = abiCodec.encodeMethodFromString(abiStr, funcName, funcParam);
         } catch (ContractCodecException e) {
             log.error("transHandleWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
         log.debug("encodeFunction2Str encodeFunction:{}", encodeFunction);
         return encodeFunction;
@@ -482,7 +498,6 @@ public class TransService {
      * if use signed data to send tx, call @send-signed-transaction api
      * @case1 if @userAddress is blank, return not signed raw tx encoded str
      * @case2 if @userAddress not blank, return signed str
-     * todo support deploy
      * int mark = client.isWASM() ? USE_WASM : USE_SOLIDITY;
      *         if (client.isWASM() && isDeploy) {
      *             mark = USE_WASM_DEPLOY;
@@ -495,48 +510,40 @@ public class TransService {
         // to encode raw tx
         Pair<String, String> chainIdAndGroupId = TransactionProcessorFactory.getChainIdAndGroupId(client);
         long transactionData = 0L;
-        String encodedTransaction = "";
         String transactionDataHash = "";
         try {
             transactionData = TransactionBuilderJniObj
                 .createTransactionData(String.valueOf(groupId), chainIdAndGroupId.getLeft(),
                     contractAddress, Hex.toHexString(data), "", client.getBlockLimit().longValue());
-            encodedTransaction = TransactionBuilderJniObj.encodeTransactionData(transactionData);
-            transactionDataHash = client.getCryptoSuite().hash(encodedTransaction);
+            transactionDataHash = TransactionBuilderJniObj.calcTransactionDataHash(client.getCryptoType(), transactionData);
         } catch (JniException e) {
             log.error("createTransactionData jni error ", e);
         }
         if (transactionData == 0L
-            || StringUtils.isBlank(encodedTransaction)
             || StringUtils.isBlank(transactionDataHash)) {
-            log.error("signMessage encodedTransaction:{}|{}|{}",
-                transactionData, encodedTransaction, transactionDataHash);
+            log.error("signMessage encodedTransaction:{}|{}",
+                transactionData, transactionDataHash);
             throw new FrontException(ConstantCode.ENCODE_TX_JNI_ERROR);
         }
 
         // if user not null: sign, else, not sign
+        // 3.0 only return signed tx data
         if (StringUtils.isBlank(user)) {
-            // return unsigned raw tx encoded str
-            String unsignedResultStr = encodedTransaction;
-            log.info("createRawTxEncoded unsignedResultStr:{}", unsignedResultStr);
-            return unsignedResultStr;
+            log.error("return transaction data hash for sign:{}", transactionDataHash);
+            return transactionDataHash;
         } else {
-            log.info("createRawTxEncoded use key of address [{}] to sign", user);
-            // hash encoded, to sign locally
-            String hashMessageStr = client.getCryptoSuite().hash(encodedTransaction);
-            log.info("createRawTxEncoded encoded tx of hex str:{}", hashMessageStr);
+            log.info("createRawTxEncoded use key of address [{}] to sign, hash:{}", user, transactionDataHash);
             // if local, sign locally
             log.info("createRawTxEncoded isLocal:{}", isLocal);
             String signResultStr = null;
             if (isLocal) {
                 CryptoKeyPair cryptoKeyPair = this.getCredentials(false, user, groupId);
-                SignatureResult signData = signMessageHashByType(hashMessageStr,
+                SignatureResult signData = signMessageHashByType(transactionDataHash,
                     cryptoKeyPair, client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                String transactionDataHashSignedData = Hex.toHexString(signData.encode());
                 try {
                     signResultStr = TransactionBuilderJniObj.createSignedTransaction(transactionData,
-                        transactionDataHashSignedData,
+                        Hex.toHexString(signData.encode()),
                         transactionDataHash, client.isWASM() ? USE_WASM : USE_SOLIDITY);
                 } catch (JniException e) {
                     log.error("createSignedTransactionData jni error:", e);
@@ -544,14 +551,14 @@ public class TransService {
             } else {
                 // sign by webase-sign
                 // convert encoded to hex string (no need to hash then toHex)
-                EncodeInfo encodeInfo = new EncodeInfo(user, encodedTransaction);
-                String signDataStr = keyStoreService.getSignData(encodeInfo);
-                SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr, client.getCryptoSuite().cryptoTypeConfig);
+                ReqSignHashVo reqSignHashVo = new ReqSignHashVo(user, transactionDataHash);
+                String signDataStr = keyStoreService.getSignData(reqSignHashVo);
+                SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr,
+                    client.getCryptoSuite().cryptoTypeConfig);
                 // encode again
-                String transactionDataHashSignedData = Hex.toHexString(signData.encode());
                 try {
                     signResultStr = TransactionBuilderJniObj.createSignedTransaction(transactionData,
-                        transactionDataHashSignedData,
+                        Hex.toHexString(signData.encode()),
                         transactionDataHash, client.isWASM() ? USE_WASM : USE_SOLIDITY);
                 } catch (JniException e) {
                     log.error("createSignedTransactionData jni error:", e);
@@ -581,7 +588,7 @@ public class TransService {
         return function;
     }
 
-    public List<Type> handleCall(String groupId, String userAddress, String contractAddress,
+    public Object handleCall(String groupId, String userAddress, String contractAddress,
         byte[] encodedFunction, String abiStr, String funcName, boolean isWasm) {
 
         Client client = web3ApiService.getWeb3j(groupId);
@@ -597,8 +604,9 @@ public class TransService {
             Tuple2<Boolean, String> parseResult =
                 RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
             log.error("call contract error:{}", parseResult);
-            String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
-            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR.getCode(), parseResultStr);
+            String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status:" + callOutput.getStatus();
+//            throw new FrontException(ConstantCode.CALL_CONTRACT_ERROR.getCode(), parseResultStr);
+            return Collections.singletonList("Call contract return error: " + parseResultStr);
         } else {
             ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), client.isWASM());
             try {
@@ -609,9 +617,10 @@ public class TransService {
                 //    "typeAsString": "string"
                 //  }
                 //]
-                List<Type> typeList = abiCodec.decodeMethodAndGetOutputObject(abiStr, funcName, callOutput.getOutput());
+                // List<Type> typeList = abiCodec.decodeMethodAndGetOutputObject(abiStr, funcName, callOutput.getOutput());
+                List<String> typeList = abiCodec.decodeMethodToString(abiStr, funcName, Hex.decode(callOutput.getOutput()));
                 // bytes类型转十六进制
-                // todo output is byte[] or string  Hex.decode
+                log.info("call contract res before decode:{}", JsonUtils.objToString(callOutput.getOutput()));
                 log.info("call contract res:{}", JsonUtils.objToString(typeList));
                 return typeList;
             } catch (ContractCodecException e) {
@@ -635,7 +644,11 @@ public class TransService {
         log.info("handleTransaction start startTime:{}", startTime.toEpochMilli());
         // send tx
         TransactionProcessor txProcessor = TransactionProcessorFactory.createTransactionProcessor(client, cryptoKeyPair);
+        log.debug("handleTransaction input:{}", Hex.toHexStringWithPrefix(encodeFunction));
         TransactionReceipt receipt = txProcessor.sendTransactionAndGetReceipt(contractAddress, encodeFunction, cryptoKeyPair, client.isWASM() ? USE_WASM : USE_SOLIDITY);
+        if (StringUtils.isBlank(receipt.getInput())) {
+            receipt.setInput(Hex.toHexStringWithPrefix(encodeFunction));
+        }
         // cover null message through statusCode
         this.decodeReceipt(client, receipt);
         log.info("execTransaction end useTime:{},receipt:{}",
@@ -660,6 +673,10 @@ public class TransService {
         Instant nodeStartTime = Instant.now();
         // send transaction
         TransactionReceipt receipt = sendMessage(client, signedMessageStr);
+        // 如果是front本地签名，可以拿到input
+        if (StringUtils.isBlank(receipt.getInput())) {
+            receipt.setInput(Hex.toHexStringWithPrefix(encodeFunction));
+        }
         this.decodeReceipt(client, receipt);
         log.info("***node cost time***: {}",
             Duration.between(nodeStartTime, Instant.now()).toMillis());
@@ -669,18 +686,15 @@ public class TransService {
 
     /**
      * sign by
-     * @param encodedDataStr
+     * @param messageHash
      * @param signUserId
      * @return
      */
-    public SignatureResult requestSignForSign(String encodedDataStr, String signUserId, String groupId) {
-        EncodeInfo encodeInfo = new EncodeInfo();
-        encodeInfo.setSignUserId(signUserId);
-        encodeInfo.setEncodedDataStr(encodedDataStr);
-
+    public SignatureResult requestSignHashFromSign(String messageHash, String signUserId, String groupId) {
+        ReqSignHashVo signHashVo = new ReqSignHashVo(signUserId, messageHash);
         Instant startTime = Instant.now();
-        String signDataStr = keyStoreService.getSignData(encodeInfo);
-        log.info("get requestSignForSign cost time: {}",
+        String signDataStr = keyStoreService.getSignData(signHashVo);
+        log.info("get requestSignHashFromSign cost time: {}",
             Duration.between(startTime, Instant.now()).toMillis());
         SignatureResult signData = CommonUtils.stringToSignatureData(signDataStr,
             web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);
@@ -698,74 +712,6 @@ public class TransService {
         String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
         receipt.setMessage(receiptMsg);
     }
-
-    /**
-     * check input
-     * @param contractAbiStr
-     * @param funcName
-     * @param funcParam
-     * @param groupId
-     */
-    private void validFuncParam(String contractAbiStr, String funcName, List<Object> funcParam, String groupId) {
-        ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName, groupId);
-        List<NamedType> inputTypeList = abiDefinition.getInputs();
-        if (inputTypeList.size() != funcParam.size()) {
-            log.error("validFuncParam param not match");
-            throw new FrontException(ConstantCode.FUNC_PARAM_SIZE_NOT_MATCH);
-        }
-        for (int i = 0; i < inputTypeList.size(); i++) {
-            String type = inputTypeList.get(i).getType();
-            if (type.startsWith("bytes")) {
-                if (type.contains("[][]")) {
-                    // todo bytes[][]
-                    log.warn("validFuncParam param, not support bytes 2d array or more");
-//                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
-                    return;
-                }
-                // if not bytes[], bytes or bytesN
-                if (!type.endsWith("[]")) {
-                    // update funcParam
-                    String bytesHexStr = (String) (funcParam.get(i));
-                    byte[] inputArray = Hex.decode(bytesHexStr);
-                    // bytesN: bytes1, bytes32 etc.
-                    if (type.length() > "bytes".length()) {
-                        int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
-                        if (inputArray.length != bytesNLength) {
-                            log.error("validFuncParam param of bytesN size not match");
-                            throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-                        }
-                    }
-                    // replace hexString with array
-                    funcParam.set(i, inputArray);
-                } else {
-                    // if bytes[] or bytes32[]
-                    List<String> hexStrArray = (List<String>) (funcParam.get(i));
-                    List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
-                    for (int j = 0; j < hexStrArray.size(); j++) {
-                        String bytesHexStr = hexStrArray.get(j);
-                        byte[] inputArray = Hex.decode(bytesHexStr);
-                        // check: bytesN: bytes1, bytes32 etc.
-                        if (type.length() > "bytes[]".length()) {
-                            // bytes32[] => 32[]
-                            String temp = type.substring("bytes".length());
-                            // 32[] => 32
-                            int bytesNLength = Integer
-                                .parseInt(temp.substring(0, temp.length() - 2));
-                            if (inputArray.length != bytesNLength) {
-                                log.error("validFuncParam param of bytesN size not match");
-                                throw new FrontException(
-                                    ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-                            }
-                        }
-                        bytesArray.add(inputArray);
-                    }
-                    // replace hexString with array
-                    funcParam.set(i, bytesArray);
-                }
-            }
-        }
-    }
-
 
 }
 

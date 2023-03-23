@@ -30,7 +30,7 @@ public class ReqEncodeFunction {
     @NotNull
     private List<Object> contractAbi;
     @NotNull
-    private List<Object> funcParam;
+    private List<String> funcParam;
     @NotBlank
     private String groupId;
     private Boolean isWasm = false;

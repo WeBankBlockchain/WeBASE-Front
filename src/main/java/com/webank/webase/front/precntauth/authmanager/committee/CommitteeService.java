@@ -65,10 +65,10 @@ public class CommitteeService {
 
   public Object updateGovernorHandle(String groupId, String signUserId, String account,
       BigInteger weight) {
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(account);
-    funcParams.add(weight);
-    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    funcParams.add(weight.toString(10));
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
     String contractAddress = PrecompiledCommonInfo.getAddress(
         PrecompiledTypes.COMMITTEE_MANAGER);
     String abiStr = CommitteeManager.getABI();
@@ -88,10 +88,10 @@ public class CommitteeService {
 
   public Object setRateHandle(String groupId, String signUserId, BigInteger participatesRate,
       BigInteger winRate) throws ContractException {
-    List<Object> funcParams = new ArrayList<>();
-    funcParams.add(participatesRate);
-    funcParams.add(winRate);
-    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    List<String> funcParams = new ArrayList<>();
+    funcParams.add(participatesRate.toString(10));
+    funcParams.add(winRate.toString(10));
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
     String contractAddress = PrecompiledCommonInfo.getAddress(
         PrecompiledTypes.COMMITTEE_MANAGER);
     String abiStr = CommitteeManager.getABI();
@@ -110,9 +110,9 @@ public class CommitteeService {
 
   public String setDeployAuthTypeHandle(String groupId, String signUserId,
       BigInteger deployAuthType) {
-    List<Object> funcParams = new ArrayList<>();
-    funcParams.add(deployAuthType);
-    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    List<String> funcParams = new ArrayList<>();
+    funcParams.add(deployAuthType.toString(10));
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
     String contractAddress = PrecompiledCommonInfo.getAddress(
         PrecompiledTypes.COMMITTEE_MANAGER);
     String abiStr = CommitteeManager.getABI();
@@ -133,10 +133,10 @@ public class CommitteeService {
 
   public Object modifyDeployAuthHandle(String groupId, String signUserId, String userAddress,
       Boolean openFlag) {
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(userAddress);
-    funcParams.add(openFlag);
-    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    funcParams.add(openFlag.toString());
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
     String contractAddress = PrecompiledCommonInfo.getAddress(
         PrecompiledTypes.COMMITTEE_MANAGER);
     String abiStr = CommitteeManager.getABI();
@@ -157,10 +157,10 @@ public class CommitteeService {
 
   public Object resetAdminHandle(String groupId, String signUserId, String newAdmin,
       String contractAddr) {
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(newAdmin);
     funcParams.add(contractAddr);
-    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL);
+    funcParams.add(DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
     String contractAddress = PrecompiledCommonInfo.getAddress(
         PrecompiledTypes.COMMITTEE_MANAGER);
     String abiStr = CommitteeManager.getABI();
@@ -180,8 +180,8 @@ public class CommitteeService {
   }
 
   public Object revokeProposalHandle(String groupId, String signUserId, BigInteger proposalId) {
-    List<Object> funcParams = new ArrayList<>();
-    funcParams.add(proposalId);
+    List<String> funcParams = new ArrayList<>();
+    funcParams.add(proposalId.toString(10));
     String contractAddress = PrecompiledCommonInfo.getAddress(
         PrecompiledTypes.COMMITTEE_MANAGER);
     String abiStr = CommitteeManager.getABI();
@@ -203,9 +203,9 @@ public class CommitteeService {
 
   public String voteProposalHandle(String groupId, String signUserId, BigInteger proposalId,
       Boolean agree) {
-    List<Object> funcParams = new ArrayList<>();
-    funcParams.add(proposalId);
-    funcParams.add(agree);
+    List<String> funcParams = new ArrayList<>();
+    funcParams.add(proposalId.toString(10));
+    funcParams.add(agree.toString());
     String contractAddress = PrecompiledCommonInfo.getAddress(
         PrecompiledTypes.COMMITTEE_MANAGER);
     String abiStr = CommitteeManager.getABI();
