@@ -601,7 +601,7 @@ public class TransService {
             Tuple2<Boolean, String> parseResult =
                 RevertMessageParser.tryResolveRevertMessage(callOutput.getStatus(), callOutput.getOutput());
             log.error("call contract error:{}", parseResult);
-            String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status" + callOutput.getStatus();
+            String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status: " + callOutput.getStatus();
             return Collections.singletonList("Call contract return error: " + parseResultStr);
         } else {
             ABICodec abiCodec = new ABICodec(cryptoSuite);
