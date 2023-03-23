@@ -251,7 +251,7 @@ public class ContractService {
         String signUserId = req.getSignUserId();
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        List<String> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
 
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
@@ -269,10 +269,11 @@ public class ContractService {
         ABICodec abiCodec = new ABICodec(cryptoSuite);
         String encodedConstructor;
         try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+            encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
         } catch (ABICodecException e) {
+            // todo 根据message抛出不同的错误
             log.error("deployWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
 
         // data sign
@@ -303,16 +304,17 @@ public class ContractService {
 
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
-
+        List<String> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        log.info("params :{}|{}", JsonUtils.toJSONString(params));
         ABICodec abiCodec = new ABICodec(cryptoSuite);
 
         String encodedConstructor;
         try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+            encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
         } catch (ABICodecException e) {
-            log.error("deployLocally encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            // todo 根据message抛出不同的错误
+            log.error("deployWithSign encode fail:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
         // get privateKey
         CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress);
@@ -370,54 +372,6 @@ public class ContractService {
                     req.getVersion(), contractAddress, abiInfo);
         }
     }
-
-    @Deprecated
-    public static String constructorEncodedByContractNameAndVersion(String contractName,
-            String version, List<Object> params) throws FrontException {
-        // Constructor encoded
-        String encodedConstructor = "";
-        String functionName = contractName;
-        // input handle
-        List<String> funcInputTypes =
-                ContractAbiUtil.getFuncInputType(contractName, functionName, version);
-        if (funcInputTypes != null && funcInputTypes.size() > 0) {
-            if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deploy encodedConstructor:{}", encodedConstructor);
-            } else {
-                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-            }
-        }
-        return encodedConstructor;
-    }
-
-    /**
-     * encode constructor function
-     */
-    @Deprecated
-    private static String constructorEncoded(String contractName,
-            ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
-        // Constructor encoded
-        String encodedConstructor = "";
-        String functionName = contractName;
-        // input handle
-        List<String> funcInputTypes = versionEvent.getFuncInputs().get(functionName);
-
-        if (funcInputTypes != null && funcInputTypes.size() > 0) {
-            if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deploy encodedConstructor:{}", encodedConstructor);
-            } else {
-                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-            }
-        }
-        return encodedConstructor;
-    }
-
 
     private void checkContractAbiExistedAndSave(String contractName, String version,
             List<ABIDefinition> abiInfos) throws FrontException {

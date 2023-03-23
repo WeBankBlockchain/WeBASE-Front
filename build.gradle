@@ -1,5 +1,20 @@
 version '1.0'
 
+println "======Gradle version:" + gradle.gradleVersion
+if (gradle.gradleVersion.startsWith("7")) {
+    println "Gradle 7.x not support yet!\n ====== please use Gradle version from 4.6.x to 6.9.x "
+} else if (gradle.gradleVersion.startsWith("6")
+        || gradle.gradleVersion.startsWith("5")
+        || gradle.gradleVersion.startsWith("4.10")
+        || gradle.gradleVersion.startsWith("4.9")
+        || gradle.gradleVersion.startsWith("4.8")
+        || gradle.gradleVersion.startsWith("4.7")
+) {
+    println "Gradle with version >= 4.6 detected"
+} else {
+    println "Gradle with version < 4.6 detected"
+}
+
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -29,7 +44,8 @@ List spring_boot =[
     "org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
     "org.springframework.boot:spring-boot-configuration-processor:$spring_boot_version",
     "org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version",
-    "org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version"
+    "org.springframework.boot:spring-boot-starter-amqp:$spring_boot_version",
+    "org.springframework.boot:spring-boot-starter-validation:$spring_boot_version"
 ]
 
 
@@ -39,7 +55,7 @@ List swagger = [
 ]
 
 
-def log4j_version="2.17.1"
+def log4j_version="2.18.0"
 List logger = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
@@ -54,7 +70,7 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-def jackson_version = "2.13.3"
+def jackson_version = "2.14.2"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
     "com.fasterxml.jackson.core:jackson-core:$jackson_version",
@@ -70,7 +86,7 @@ List scaffold = [
 
 dependencies {
     compile spring_boot,swagger,logger,jaxb,jackson,scaffold
-    compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.0'
+    compile 'org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:2.9.2'
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
     compile 'com.h2database:h2:1.4.200'
@@ -83,6 +99,7 @@ dependencies {
     // cover low version guava
     compile 'com.google.guava:guava:29.0-jre'
     compile 'javax.validation:validation-api:2.0.1.Final'
+    compile 'com.google.code.gson:gson:2.10.1'
 
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
