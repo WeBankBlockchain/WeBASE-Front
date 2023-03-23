@@ -281,7 +281,7 @@ public class TransService {
             receipt = new TransactionReceipt();
             receipt.setTransactionHash(web3ApiService.getCryptoSuite(groupId).hash(signedStr));
         }
-        // todo 此处的receipt input为空，需要encodeFunction才能补上，需要sdk支持解码tars encode的signedStr的方法
+        // todo 此处已签名的交易，receipt input为空，需要encodeFunction才能补上，需要sdk支持解码tars encode的signedStr的方法
 //        try {
 //            if (StringUtils.isBlank(receipt.getInput())) {
 //                JsonTransactionResponse jsonTransactionResponse = JsonTransactionResponse.readFromHexString(signedStr);
@@ -673,6 +673,7 @@ public class TransService {
         Instant nodeStartTime = Instant.now();
         // send transaction
         TransactionReceipt receipt = sendMessage(client, signedMessageStr);
+        // 如果是front本地签名，可以拿到input
         if (StringUtils.isBlank(receipt.getInput())) {
             receipt.setInput(Hex.toHexStringWithPrefix(encodeFunction));
         }
