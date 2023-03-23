@@ -293,7 +293,15 @@ export default {
       this.funcList.forEach((value) => {
         if (value.funcId === this.transation.funcName) {
           this.pramasData = value.inputs;
-          this.constant = value.constant;
+          if (
+            value.stateMutability == "view" ||
+            value.stateMutability == "pure" ||
+            value.stateMutability == "constant"
+          ) {
+            this.constant = true;
+          } else {
+            this.constant = false;
+          }
           this.pramasObj = value;
           this.stateMutability = value.stateMutability;
         }
@@ -311,17 +319,18 @@ export default {
       if (this.transation.funcValue.length) {
         for (let i = 0; i < this.transation.funcValue.length; i++) {
           let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
-          if (data && isJson(data)) {
-            try {
-              this.transation.reqVal[i] = JSON.parse(data);
-            } catch (error) {
-              console.log(error);
-            }
-          } else if (data === "true" || data === "false") {
-            this.transation.reqVal[i] = eval(data.toLowerCase());
-          } else {
-            this.transation.reqVal[i] = data;
-          }
+          this.transation.reqVal[i] = data;
+          // if (data && isJson(data)) {
+          //   try {
+          //     this.transation.reqVal[i] = JSON.parse(data);
+          //   } catch (error) {
+          //     console.log(error);
+          //   }
+          // } else if (data === "true" || data === "false") {
+          //   this.transation.reqVal[i] = eval(data.toLowerCase());
+          // } else {
+          //   this.transation.reqVal[i] = data;
+          // }
         }
       }
       let functionName = "";
@@ -400,6 +409,14 @@ export default {
               type: "error",
               message: this.$chooseLang(res.data.code),
             });
+            if (data.code === 201151 || data.code === 201014) {
+              setTimeout(() => {
+                this.$notify({
+                  title: "提示",
+                  message: res.data.errorMessage,
+                });
+              }, 2000);
+            }
             this.close();
           }
         })

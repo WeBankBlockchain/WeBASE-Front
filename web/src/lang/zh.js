@@ -473,7 +473,9 @@ export default {
         folderSameFail: "新建文件夹与已存在的文件夹名称相同",
         user: "用户",
         params: "参数",
-        paramsInfo: '如果参数类型是数组，请按照以下格式输入，以逗号分隔，非数值和布尔值须使用双引号，例如：["aaa","bbb"]和[100,101]；如果数组参数包含双引号，需转义，例如：["aaa\\"bbb","ccc"]。',
+        paramsInfo: `如果参数类型是数组，请按照以下格式输入，以逗号分隔，非数值和布尔值须使用双引号，例如：["aaa","bbb"]和[100,101]；如果数组参数包含双引号，需转义，例如：["aaa\"bbb","ccc"]。
+        如果参数类型是bytesN，则入参格式为十六进制字符串，且字符长度应为2N，如bytes2入参为：0x1234。若长度不足，则在十六进制字符后补0。
+        如果参数是struct类型，在输入框中参数类型会根据ABI显示为tuple类型，入参格式需要在struct参数的外部用方括号括起来，如struct中包含bool和string，则入参格式是[true,"test string"]。`,
         contractAddress: "合约地址",
         method: "方法",
         contractAddressInput: "请输入正确的合约地址",
