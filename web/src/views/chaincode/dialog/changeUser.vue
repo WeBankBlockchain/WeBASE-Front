@@ -222,118 +222,6 @@ export default {
         });
       }
     },
-<<<<<<< HEAD
-    methods: {
-        getLocalKeyStores() {
-            queryLocalKeyStores()
-                .then(res => {
-                    const { data, status } = res;
-                    if (status === 200) {
-                        this.userList = data
-                        if (this.userList.length) {
-                            this.userId = this.userList[0].address
-                            this.userName = this.userList[0].userName
-                        } else {
-                            this.isShowAddUserBtn = true;
-                            this.placeholderText = this.$t('placeholder.selectedNoUser')
-                        }
-                    } else {
-                        this.$message({
-                            type: "error",
-                            message: this.$chooseLang(res.data.code)
-                        });
-                    }
-                })
-                .catch(err => {
-                    this.$message({
-                        type: "error",
-                        message: err.data || this.$t('text.systemError')
-                    });
-                })
-        },
-        changeConstructor: function () {
-            if (this.abifile.length) {
-                this.abifile.forEach(value => {
-                    if (value.type === "constructor") {
-                        this.inputs = value.inputs;
-                    }
-                });
-            }
-        },
-        changeId: function (val) {
-            this.userList.forEach(value => {
-                if (val === value.address) {
-                    this.userName = value.userName;
-                }
-            });
-        },
-        close: function () {
-            this.$emit("close");
-        },
-        submit: function () {
-            if (this.isCNS) {
-                if (!this.cnsVersionFrom.cnsName) return;
-                this.$refs['cnsVersionFrom'].validate((valid) => {
-                    if (valid) {
-                        this.queryDeploy()
-                    } else {
-                        return false;
-                    }
-                });
-            } else {
-                this.queryDeploy()
-            }
-        },
-        queryDeploy() {
-            this.versionShow = false;
-            this.errorInfo = "";
-            var params = []
-            for (let i = 0; i < this.parameter.length; i++) {
-                if (this.parameter[i] && isJson(this.parameter[i])) {
-                    try {
-                        params[i] = this.parameter[i]
-                    } catch (error) {
-                        console.log(error)
-                    }
-                } else {
-                    params[i] = this.parameter[i];
-                }
-            }
-            let data = {
-                userId: this.userId,
-                params: params
-            };
-            let cnsObj = {
-                version: this.cnsVersionFrom.cnsVersion,
-                saveEnabled: this.isCNS,
-                cnsName: this.cnsVersionFrom.cnsName
-            }
-            this.$emit("change", data, cnsObj);
-            this.$emit("close");
-        },
-        changeCns(val) {
-            if (!val) {
-                this.cnsVersionFrom.cnsVersion = "";
-                this.cnsVersionFrom.cnsName = "";
-            } else {
-                this.cnsVersionFrom.cnsName = this.contractName;
-            }
-        },
-        createUser(){
-            this.creatUserNameVisible = true;
-        },
-         createUserClose(data){
-             console.log(data);
-             this.userList = data;
-             if(this.userList.length > 0 ){
-                this.userId = this.userList[0].address
-                this.userName = this.userList[0].userName
-                this.isShowAddUserBtn = false;
-             } 
-             this.creatUserNameVisible = false;
-        },
-    }
-=======
     changeId: function (val) {
       this.userList.forEach((value) => {
         if (val === value.address) {
@@ -407,7 +295,6 @@ export default {
       this.creatUserNameVisible = false;
     },
   },
->>>>>>> 99197045868f656ecdbee89cf18a479928094eb6
 };
 </script>
 <style scoped>
