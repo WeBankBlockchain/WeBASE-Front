@@ -81,7 +81,7 @@ public class ToolController {
             return txDecoder.decodeReceiptMessage(param.getInput());
         } else if (param.getDecodeType() == 2) {
             String abi = JsonUtils.objToString(param.getAbiList());
-            ABICodec abiCodec = new ABICodec(cryptoSuite);
+            ABICodec abiCodec = new ABICodec(cryptoSuite, true);
             // decode output
             try {
                 return abiCodec.decodeMethodAndGetOutputObject(abi, param.getMethodName(),

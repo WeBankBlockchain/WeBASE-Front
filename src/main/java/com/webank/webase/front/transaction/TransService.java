@@ -503,7 +503,7 @@ public class TransService {
     public String encodeFunction2Str(String abiStr, String funcName, List<String> funcParam) {
 
         funcParam = funcParam == null ? new ArrayList<>() : funcParam;
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        ABICodec abiCodec = new ABICodec(cryptoSuite, true);
         String encodeFunction;
         try {
             encodeFunction = abiCodec.encodeMethodFromString(abiStr, funcName, funcParam);
@@ -604,7 +604,7 @@ public class TransService {
             String parseResultStr = parseResult.getValue1() ? parseResult.getValue2() : "call contract error of status: " + callOutput.getStatus();
             return Collections.singletonList("Call contract return error: " + parseResultStr);
         } else {
-            ABICodec abiCodec = new ABICodec(cryptoSuite);
+            ABICodec abiCodec = new ABICodec(cryptoSuite, true);
             try {
                 List<String> res = abiCodec.decodeMethodToString(abiStr, funcName, callOutput.getOutput());
                 // list object会出现bytes32乱码（因为是二进制）

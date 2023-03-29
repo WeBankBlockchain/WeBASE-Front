@@ -266,12 +266,12 @@ public class ContractService {
             checkDeployPermission(req.getGroupId(), userAddress);
         }
 
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        ABICodec abiCodec = new ABICodec(cryptoSuite, true);
         String encodedConstructor;
         try {
             encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
         } catch (ABICodecException e) {
-            // todo 根据message抛出不同的错误
+            // 根据message抛出不同的错误
             log.error("deployWithSign encode fail:[]", e);
             throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
@@ -306,7 +306,7 @@ public class ContractService {
         String bytecodeBin = req.getBytecodeBin();
         List<String> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         log.info("params :{}|{}", JsonUtils.toJSONString(params));
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        ABICodec abiCodec = new ABICodec(cryptoSuite, true);
 
         String encodedConstructor;
         try {
