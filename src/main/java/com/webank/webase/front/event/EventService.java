@@ -385,7 +385,7 @@ public class EventService {
         log.info("getContractEventLog eventParam:{}", eventParam);
         // final CompletableFuture<List<EventLog>> callbackFuture = new CompletableFuture<>();
         final CompletableFuture<List<DecodedEventLog>> callbackFuture = new CompletableFuture<>();
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        ABICodec abiCodec = new ABICodec(cryptoSuite, true);
         SyncEventLogCallback callback = new SyncEventLogCallback(abiCodec, abi,
             eventTopicParam.getEventName().split("\\(")[0], callbackFuture);
         EventSubscribe eventSubscribe = bcosSDK.getEventSubscribe(groupId);
