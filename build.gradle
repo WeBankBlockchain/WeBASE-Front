@@ -12,7 +12,6 @@ if (gradle.gradleVersion.startsWith("7")) {
 ) {
     println "Gradle with version >= 4.6 detected"
 } else {
-    println "Gradle with version < 4.6 detected"
 }
 
 apply plugin: 'maven'
