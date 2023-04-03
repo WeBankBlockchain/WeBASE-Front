@@ -54,7 +54,7 @@
         <span class="send-item-title">{{ $t("text.sendFunction") }}:</span>
         <el-select v-model="transation.funcName" filterable :placeholder="$t('placeholder.functionName')" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width: 400px">
           <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList">
-            <span :class="{ 'func-color': !item.constant }">{{
+            <span :class="{ 'func-color':  checkFunction(item) }">{{
               item.name
             }}</span>
           </el-option>
@@ -650,6 +650,9 @@ export default {
         this.userId = this.userList[0]["userName"];
       }
       this.creatUserNameVisible = false;
+    },
+    checkFunction(item) {
+      return (item.stateMutability==='view'||item.stateMutability==='cosntant'||item.stateMutability==='pure') ? false : true;
     },
   },
 };
