@@ -65,7 +65,7 @@
         <td>
           <el-select v-model="transation.funcName" filterable :placeholder="$t('placeholder.functionName')" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width: 260px">
             <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList">
-              <span :class=" {'func-color': !item.constant}">{{item.name}}</span>
+              <span :class=" {'func-color': checkFunction(item)}">{{item.name}}</span>
             </el-option>
           </el-select>
         </td>
@@ -174,11 +174,12 @@ export default {
       isWasm: this.liquidChecks,
     };
   },
-  watch:{
-    data(n,o){ //n为新值,o为旧值;
+  watch: {
+    data(n, o) {
+      //n为新值,o为旧值;
       this.contractAddress = n.contractAddress;
-    }
-},
+    },
+  },
   computed: {
     showUser() {
       let showUser = true;
@@ -193,7 +194,7 @@ export default {
     },
   },
   mounted: function () {
-    console.log(this.liquidChecks)
+    console.log(this.liquidChecks);
     this.getLocalKeyStores();
     this.formatAbi();
     this.changeFunc();
@@ -465,6 +466,9 @@ export default {
         this.userId = this.userList[0]["userName"];
       }
       this.creatUserNameVisible = false;
+    },
+    checkFunction(item) {
+      return (item.stateMutability==='view'||item.stateMutability==='cosntant'||item.stateMutability==='pure') ? false : true;
     },
   },
 };
