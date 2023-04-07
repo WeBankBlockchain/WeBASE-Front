@@ -570,28 +570,12 @@ export default {
         return "#F56C6C";
       }
     },
-     txStatusMessage(val) {
+    txStatusMessage(val) {
       switch (val) {
         case 0:
           return this.$t("editor.None");
         case 1:
           return this.$t("editor.Unknown");
-        case 2:
-          return this.$t("editor.BadRLP");
-        case 3:
-          return this.$t("editor.InvalidFormat");
-        case 4:
-          return this.$t("editor.OutOfGasIntrinsic");
-        case 5:
-          return this.$t("editor.InvalidSignature");
-        case 6:
-          return this.$t("editor.InvalidNonce");
-        case 7:
-          return this.$t("editor.NotEnoughCash");
-        case 8:
-          return this.$t("editor.OutOfGasBase");
-        case 9:
-          return this.$t("editor.BlockGasLimitReached");
         case 10:
           return this.$t("editor.BadInstruction");
         case 11:
@@ -603,53 +587,31 @@ export default {
         case 14:
           return this.$t("editor.StackUnderflow");
         case 15:
-          return this.$t("editor.NonceCheckFail");
-        case 16:
-          return this.$t("editor.BlockLimitCheckFail");
-        case 17:
-          return this.$t("editor.FilterCheckFail");
-        case 18:
-          return this.$t("editor.NoDeployPermission");
-        case 19:
-          return this.$t("editor.NoCallPermission");
-        case 20:
-          return this.$t("editor.NoTxPermission");
-        case 21:
           return this.$t("editor.PrecompiledError");
-        case 22:
+        case 16:
           return this.$t("editor.RevertInstruction");
-        case 23:
-          return this.$t("editor.InvalidZeroSignatureFormat");
-        case 24:
-          return this.$t("editor.AddressAlreadyUsed");
-        case 25:
+        case 17:
+          return this.$t("editor.ContractAddressAlreadyUsed");
+        case 18:
           return this.$t("editor.PermissionDenied");
-        case 26:
+        case 19:
           return this.$t("editor.CallAddressError");
-        case 27:
-          return this.$t("editor.GasOverflow");
-        case 28:
-          return this.$t("editor.TxPoolIsFull");
-        case 29:
-          return this.$t("editor.TransactionRefused");
-        case 30:
+        case 21:
           return this.$t("editor.ContractFrozen");
-        case 31:
+        case 22:
           return this.$t("editor.AccountFrozen");
-        case 10000:
-          return this.$t("editor.AlreadyKnown");
-        case 10001:
-          return this.$t("editor.AlreadyInChain");
-        case 10002:
-          return this.$t("editor.InvalidChainId");
-        case 10003:
-          return this.$t("editor.InvalidGroupId");
-        case 10004:
-          return this.$t("editor.RequestNotBelongToTheGroup");
-        case 10005:
-          return this.$t("editor.MalformedTx");
-        case 10006:
-          return this.$t("editor.OverGroupMemoryLimit");
+        case 23:
+          return this.$t("editor.AccountAbolished");
+        case 24:
+          return this.$t("editor.ContractAbolished");
+        case 32:
+          return this.$t("editor.WASMValidationFailure");
+        case 33:
+          return this.$t("editor.WASMArgumentOutOfRange");
+        case 34:
+          return this.$t("editor.WASMUnreachableInstruction");
+        case 35:
+          return this.$t("editor.WASMTrap");
         default:
           return this.$t("editor.None");
       }
