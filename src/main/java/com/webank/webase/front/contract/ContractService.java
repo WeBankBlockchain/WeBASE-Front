@@ -254,7 +254,7 @@ public class ContractService {
         String signUserId = req.getSignUserId();
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        List<String> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         boolean isWasm = req.getIsWasm() != null && req.getIsWasm();
         String liquidAddress = "";
         if (isWasm) {
@@ -276,10 +276,10 @@ public class ContractService {
         ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), isWasm);
         byte[] encodedConstructor;
         try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+            encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
         } catch (ContractCodecException e) {
             log.error("deployWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
 
         // data sign
@@ -316,7 +316,7 @@ public class ContractService {
         String userAddress = req.getUser();
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        List<String> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
         boolean isWasm = req.getIsWasm() != null && req.getIsWasm();
 
         Client client = web3ApiService.getWeb3j(groupId);
@@ -342,17 +342,17 @@ public class ContractService {
                     req.getContractAddress(), paramStrList, cryptoKeyPair);
             } catch (ContractCodecException e) {
                 log.error("deployLocally encode fail:[]", e);
-                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
             }
         } else {
             ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId),
                 req.getIsWasm());
             byte[] encodedConstructor;
             try {
-                encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+                encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
             } catch (ContractCodecException e) {
                 log.error("deployLocally encode fail:[]", e);
-                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+                throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
             }
             // get privateKey
             CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress, groupId);
@@ -436,7 +436,7 @@ public class ContractService {
                 .createAssembleTransactionProcessor(client, cryptoKeyPair);
         } catch (Exception e) {
             log.error("deployContract getAssembleTransactionProcessor error:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), e.getMessage());
         }
         TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
         transService.decodeReceipt(client, receipt);
@@ -469,7 +469,7 @@ public class ContractService {
                 .createAssembleTransactionProcessor(client, cryptoKeyPair);
         } catch (Exception e) {
             log.error("deployContract getAssembleTransactionProcessor error:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), e.getMessage());
         }
         TransactionResponse response =
             assembleTxProcessor.deployAndGetResponseWithStringParams(

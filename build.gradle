@@ -1,5 +1,19 @@
 version '1.0'
 
+println "======Gradle version:" + gradle.gradleVersion
+if (gradle.gradleVersion.startsWith("7")) {
+    println "Gradle 7.x not support yet!\n ====== please use Gradle version from 4.6.x to 6.9.x "
+} else if (gradle.gradleVersion.startsWith("6")
+        || gradle.gradleVersion.startsWith("5")
+        || gradle.gradleVersion.startsWith("4.10")
+        || gradle.gradleVersion.startsWith("4.9")
+        || gradle.gradleVersion.startsWith("4.8")
+        || gradle.gradleVersion.startsWith("4.7")
+) {
+    println "Gradle with version >= 4.6 detected"
+} else {
+}
+
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -24,24 +38,8 @@ repositories {
 
 }
 
-def spring_version="5.2.22.RELEASE"
-List spring =[
-    "org.springframework:spring-core:$spring_version",
-    "org.springframework:spring-beans:$spring_version",
-    "org.springframework:spring-context:$spring_version",
-    "org.springframework:spring-tx:$spring_version",
-    "org.springframework:spring-web:$spring_version",
-    "org.springframework:spring-webmvc:$spring_version",
-    "org.springframework:spring-jdbc:$spring_version",
-    // cover old version
-    "org.springframework:spring-aspects:$spring_version",
-    "org.springframework:spring-messaging:$spring_version",
-    "org.springframework:spring-orm:$spring_version",
-    "org.springframework:spring-test:$spring_version"
 
-]
-
-def spring_boot_version="2.3.12.RELEASE"
+def spring_boot_version="2.5.12"
 List spring_boot =[
     "org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
     "org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
@@ -74,7 +72,7 @@ List jaxb = [
      "javax.activation:activation:1.1.1"
 ]
 
-def jackson_version = "2.13.3"
+def jackson_version = "2.14.2"
 List jackson = [
     "com.fasterxml.jackson.core:jackson-annotations:$jackson_version",
     "com.fasterxml.jackson.core:jackson-core:$jackson_version",
@@ -90,8 +88,11 @@ List scaffold = [
 ]
 
 dependencies {
-    compile spring,spring_boot,swagger,logger,jaxb,jackson,scaffold
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.0.0')
+    compile spring_boot,swagger,logger,jaxb,jackson,scaffold
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0-SNAPSHOT') {
+        exclude group: "org.fisco-bcos.java-sdk"
+        exclude group: "org.slf4j"
+    }
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
     compile('org.fisco-bcos.code-generator:bcos-code-generator:1.0.0-SNAPSHOT') {
@@ -107,14 +108,13 @@ dependencies {
     // cover low version
     compile 'org.slf4j:jcl-over-slf4j:1.7.30'
     compile 'com.google.guava:guava:30.0-jre'
-    compile 'org.yaml:snakeyaml:1.30'
+    compile 'org.yaml:snakeyaml:1.31'
     compile 'javax.validation:validation-api:2.0.1.Final'
 
     testCompile('org.springframework.boot:spring-boot-starter-test:$spring_boot_version') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testCompile 'junit:junit:4.13.1',
-                'org.springframework.boot:spring-boot-starter-test:1.5.9.RELEASE',
                 'com.github.macdao:moscow:0.1.0',
                 'com.squareup.okhttp3:okhttp:3.1.2'
                 'org.springframework.amqp:spring-rabbit-test'

@@ -65,14 +65,14 @@ public class AdminService {
 
   public Object setMethodAuthTypeHandle(String groupId, String signUserId, String contractAddr,
       byte[] func, BigInteger authType) {
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(contractAddr);
     byte[] hash = web3ApiService.getWeb3j(groupId).getCryptoSuite().hash(func);
     byte[] Func = Arrays.copyOfRange(hash, 0, 4);
     //byte[] to 0xFF
     String newFunc = CommonUtils.parseByte2HexStr(Func);
     funcParams.add(newFunc);
-    funcParams.add(authType);
+    funcParams.add(authType.toString(10));
     String contractAddress = PrecompiledCommonInfo.getAddress(
         PrecompiledTypes.CONTRACT_AUTH);
     String abiStr = ContractAuthPrecompiled.getABI();
@@ -94,7 +94,7 @@ public class AdminService {
   public Object setMethodAuthHandle(String groupId, String signUserId, String contractAddr,
       byte[] func, String accountAddress, Boolean bool) {
     TransactionReceipt receipt;
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(contractAddr);
     byte[] hash = web3ApiService.getWeb3j(groupId).getCryptoSuite().hash(func);
     byte[] Func = Arrays.copyOfRange(hash, 0, 4);
@@ -121,9 +121,9 @@ public class AdminService {
   public String setContractStatus(String groupId, String signUserId,
       String contractAddress, boolean isFreeze) {
 
-    List<Object> funcParams = new ArrayList<>();
+    List<String> funcParams = new ArrayList<>();
     funcParams.add(contractAddress);
-    funcParams.add(isFreeze);
+    funcParams.add(String.valueOf(isFreeze));
     // get address and abi of precompiled contract
     String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONTRACT_AUTH);
     if (!web3ApiService.getWeb3j(groupId).isAuthCheck()) {

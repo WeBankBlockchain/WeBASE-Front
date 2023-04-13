@@ -65,7 +65,7 @@
         <td>
           <el-select v-model="transation.funcName" filterable :placeholder="$t('placeholder.functionName')" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width: 260px">
             <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList">
-              <span :class=" {'func-color': !item.constant}">{{item.name}}</span>
+              <span :class=" {'func-color': checkFunction(item)}">{{item.name}}</span>
             </el-option>
           </el-select>
         </td>
@@ -174,11 +174,12 @@ export default {
       isWasm: this.liquidChecks,
     };
   },
-  watch:{
-    data(n,o){ //n为新值,o为旧值;
+  watch: {
+    data(n, o) {
+      //n为新值,o为旧值;
       this.contractAddress = n.contractAddress;
-    }
-},
+    },
+  },
   computed: {
     showUser() {
       let showUser = true;
@@ -193,7 +194,7 @@ export default {
     },
   },
   mounted: function () {
-    console.log(this.liquidChecks)
+    console.log(this.liquidChecks);
     this.getLocalKeyStores();
     this.formatAbi();
     this.changeFunc();
@@ -293,7 +294,15 @@ export default {
       this.funcList.forEach((value) => {
         if (value.funcId === this.transation.funcName) {
           this.pramasData = value.inputs;
-          this.constant = value.constant;
+          if (
+            value.stateMutability == "view" ||
+            value.stateMutability == "pure" ||
+            value.stateMutability == "constant"
+          ) {
+            this.constant = true;
+          } else {
+            this.constant = false;
+          }
           this.pramasObj = value;
           this.stateMutability = value.stateMutability;
         }
@@ -311,17 +320,18 @@ export default {
       if (this.transation.funcValue.length) {
         for (let i = 0; i < this.transation.funcValue.length; i++) {
           let data = this.transation.funcValue[i].replace(/^\s+|\s+$/g, "");
-          if (data && isJson(data)) {
-            try {
-              this.transation.reqVal[i] = JSON.parse(data);
-            } catch (error) {
-              console.log(error);
-            }
-          } else if (data === "true" || data === "false") {
-            this.transation.reqVal[i] = eval(data.toLowerCase());
-          } else {
-            this.transation.reqVal[i] = data;
-          }
+          this.transation.reqVal[i] = data;
+          // if (data && isJson(data)) {
+          //   try {
+          //     this.transation.reqVal[i] = JSON.parse(data);
+          //   } catch (error) {
+          //     console.log(error);
+          //   }
+          // } else if (data === "true" || data === "false") {
+          //   this.transation.reqVal[i] = eval(data.toLowerCase());
+          // } else {
+          //   this.transation.reqVal[i] = data;
+          // }
         }
       }
       let functionName = "";
@@ -400,6 +410,14 @@ export default {
               type: "error",
               message: this.$chooseLang(res.data.code),
             });
+            if (data.code === 201151 || data.code === 201014) {
+              setTimeout(() => {
+                this.$notify({
+                  title: "提示",
+                  message: res.data.errorMessage,
+                });
+              }, 2000);
+            }
             this.close();
           }
         })
@@ -448,6 +466,9 @@ export default {
         this.userId = this.userList[0]["userName"];
       }
       this.creatUserNameVisible = false;
+    },
+    checkFunction(item) {
+      return (item.stateMutability==='view'||item.stateMutability==='cosntant'||item.stateMutability==='pure') ? false : true;
     },
   },
 };

@@ -504,7 +504,7 @@ public class Web3ApiService {
             TransactionReceipt receipt = getTransactionReceipt(groupId, input);
 
             TransactionInfo transactionInfo = new TransactionInfo(txResponse,
-                receipt.getBlockNumber());
+                receipt.getBlockNumber().toString(10));
             return transactionInfo;
         }
         return null;

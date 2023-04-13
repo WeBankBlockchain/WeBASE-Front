@@ -23,6 +23,7 @@ import com.webank.webase.front.contract.entity.FileContentHandle;
 import com.webank.webase.front.keystore.entity.EncodeInfo;
 import com.webank.webase.front.keystore.entity.KeyStoreInfo;
 import com.webank.webase.front.keystore.entity.MessageHashInfo;
+import com.webank.webase.front.keystore.entity.ReqSignHashVo;
 import com.webank.webase.front.keystore.entity.RspKeyFile;
 import com.webank.webase.front.keystore.entity.RspMessageHashSignature;
 import com.webank.webase.front.keystore.entity.RspUserInfo;
@@ -268,6 +269,33 @@ public class KeyStoreService {
     }
 
     /**
+     * sign hash in webase-sign
+     */
+    public String getSignData(ReqSignHashVo params) {
+        String url = String.format(Constants.WEBASE_SIGN_HASH_URI, constants.getKeyServer());
+        log.info("getSignData url:{}", url);
+        HttpHeaders headers = CommonUtils.buildHeaders();
+        HttpEntity<String> formEntity =
+            new HttpEntity<String>(JsonUtils.toJSONString(params), headers);
+        BaseResponse response =
+            restTemplate.postForObject(url, formEntity, BaseResponse.class);
+        log.info("getSignData response:{}", JsonUtils.toJSONString(response));
+        SignInfo signInfo = new SignInfo();
+        if (response.getCode() == 0) {
+            signInfo = JsonUtils.toJavaObject(response.getData(), SignInfo.class);
+        } else {
+            log.error("getSignData fail for error response:{}", response);
+            throw new FrontException(response.getCode(), response.getMessage());
+        }
+        String signDataStr = signInfo.getSignDataStr();
+
+        if (StringUtils.isBlank(signDataStr)) {
+            log.warn("get sign data error and get blank string.");
+            throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
+        }
+        return signDataStr;
+    }
+    /**
      * getMessageHashSignData from sign service. (webase-sign)
      * @param params params
      * @return RspMessageHashSignature
@@ -275,29 +303,8 @@ public class KeyStoreService {
     public RspMessageHashSignature getMessageHashSignData(MessageHashInfo params) throws FrontException {
         try {
             String groupId = params.getGroupId();
-            String url = String.format(Constants.WEBASE_SIGN_URI, constants.getKeyServer());
-            log.info("getSignData url:{}", url);
-            HttpHeaders headers = CommonUtils.buildHeaders();
-            HttpEntity<String> formEntity =
-                    new HttpEntity<String>(JsonUtils.toJSONString(params), headers);
-            BaseResponse response =
-                    restTemplate.postForObject(url, formEntity, BaseResponse.class);
-            log.info("getSignData response:{}", JsonUtils.toJSONString(response));
-            SignInfo signInfo = new SignInfo();
-            if (response.getCode() == 0) {
-                signInfo = JsonUtils.toJavaObject(response.getData(), SignInfo.class);
-            } else {
-                log.error("getSignData fail for error response:{}", response);
-                throw new FrontException(response.getCode(), response.getMessage());
-            }
-            String signDataStr = signInfo.getSignDataStr();
-
-            if (StringUtils.isBlank(signDataStr)) {
-                log.warn("get sign data error and get blank string.");
-                throw new FrontException(ConstantCode.DATA_SIGN_ERROR);
-            }
             RspMessageHashSignature rspMessageHashSignature = new RspMessageHashSignature();
-
+            String signDataStr = getSignData(params);
             if (web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig == CryptoType.SM_TYPE) {
                 SM2SignatureResult signData = (SM2SignatureResult) CommonUtils.stringToSignatureData(signDataStr,
                     web3ApiService.getCryptoSuite(groupId).cryptoTypeConfig);

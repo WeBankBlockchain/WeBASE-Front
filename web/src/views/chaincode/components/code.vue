@@ -1402,6 +1402,14 @@ export default {
             message: this.$chooseLang(res.data.code),
             type: "error",
           });
+          if (data.code === 201151 || data.code === 201014) {
+              setTimeout(() => {
+                this.$notify({
+                  title: "提示",
+                  message: res.data.errorMessage,
+                });
+              }, 2000);
+            }
         }
       })
        .catch((err) => {

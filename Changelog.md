@@ -1,4 +1,17 @@
 
+### v3.0.2(2023-03-09)
+
+**Fix**
+- `/trans/convertRawTxStr`接口返回未签名交易体的哈希值或签名后的交易体字符串
+- 修改发交易入参中的`funcParam`，从`List<Object>`改为`List<String>`
+
+**兼容性**
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Node-Manager v3.0.0
+- WeBASE-Sign v3.0.0
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
+
 ### v3.0.0(2022-08-24)
 
 **Add**
