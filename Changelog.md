@@ -7,8 +7,8 @@
 
 **兼容性**
 - 支持FISCO-BCOS v3.0.0 及以上版本
-- WeBASE-Node-Manager v3.0.0
-- WeBASE-Sign v3.0.0
+- WeBASE-Node-Manager v3.0.2
+- WeBASE-Sign v3.0.2
 
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
 
