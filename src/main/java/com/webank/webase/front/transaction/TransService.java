@@ -76,6 +76,7 @@ import org.fisco.bcos.sdk.v3.utils.Hex;
 import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -100,8 +101,7 @@ public class TransService {
     @Qualifier(value = "ecdsa")
     private CryptoSuite ecdsaCryptoSuite;
     @Autowired
-    private SysConfigServiceInWebase sysConfigServiceInWebase;
-    @Autowired
+    @Lazy
     private CNSServiceInWebase cnsServiceInWebase;
     /**
      * if use wasm(liquid), use 2
