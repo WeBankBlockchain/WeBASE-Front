@@ -38,7 +38,7 @@ repositories {
 
 }
 
-def spring_boot_version="2.5.12"
+def spring_boot_version="2.7.10"
 List spring_boot =[
     "org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
     "org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
