@@ -61,6 +61,7 @@ import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -73,6 +74,7 @@ import org.springframework.stereotype.Service;
 public class PrecompiledWithSignService {
 
     @Autowired
+    @Lazy
     TransService transService;
     @Autowired
     private Web3ApiService web3ApiService;
