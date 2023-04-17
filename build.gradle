@@ -101,7 +101,7 @@ dependencies {
     compile 'javax.validation:validation-api:2.0.1.Final'
     compile 'com.google.code.gson:gson:2.10.1'
 
-    testCompile('org.springframework.boot:spring-boot-starter-test') {
+    testCompile("org.springframework.boot:spring-boot-starter-test:$spring_boot_version") {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testCompile 'junit:junit:4.12',
