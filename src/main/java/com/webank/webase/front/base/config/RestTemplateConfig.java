@@ -17,20 +17,12 @@ package com.webank.webase.front.base.config;
 
 import com.webank.webase.front.base.properties.Constants;
 import lombok.Data;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Restful request template configuration
@@ -38,36 +30,53 @@ import java.util.concurrent.TimeUnit;
 @Data
 @Configuration
 public class RestTemplateConfig {
-    @Bean
-    public RestTemplate restTemplate(ClientHttpRequestFactory factory) {
-        return new RestTemplate(factory);
-    }
     @Autowired
     private Constants constants;
-    /**
-     * httpRequestFactory.
-     * 
-     * @return
-     */
+
     @Bean
-    public ClientHttpRequestFactory simpleClientHttpRequestFactory() {
-
-        PoolingHttpClientConnectionManager pollingConnectionManager = new PoolingHttpClientConnectionManager(
-                30, TimeUnit.SECONDS);
-        // max connection
-        pollingConnectionManager.setMaxTotal(constants.getRestTemplateMaxTotal());
-
-        pollingConnectionManager.setDefaultMaxPerRoute(constants.getRestTemplateMaxPerRoute());
-        HttpClientBuilder httpClientBuilder = HttpClients.custom();
-        httpClientBuilder.setConnectionManager(pollingConnectionManager);
-        // add Keep-Alive
-        httpClientBuilder
-                .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy());
-        HttpClient httpClient = httpClientBuilder.build();
-        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory =
-                new HttpComponentsClientHttpRequestFactory(httpClient);
-        clientHttpRequestFactory.setReadTimeout(constants.getHttp_read_timeOut());
-        clientHttpRequestFactory.setConnectTimeout(constants.getHttp_connect_timeOut());
-        return clientHttpRequestFactory;
+    public RestTemplate restTemplate() {
+        SimpleClientHttpRequestFactory factory = getHttpFactoryForDeploy();
+        // ms
+        factory.setReadTimeout(constants.getHttp_read_timeOut());
+        // ms
+        factory.setConnectTimeout(constants.getHttp_connect_timeOut());
+        return new RestTemplate(factory);
     }
+
+    /**
+     * factory for deploy.
+     */
+    @Bean()
+    @Scope("prototype")
+    public SimpleClientHttpRequestFactory getHttpFactoryForDeploy() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        return factory;
+    }
+
+//    /**
+//     * httpRequestFactory.
+//     *
+//     * @return
+//     */
+//    @Bean
+//    public ClientHttpRequestFactory simpleClientHttpRequestFactory() {
+//
+//        PoolingHttpClientConnectionManager pollingConnectionManager = new PoolingHttpClientConnectionManager(
+//                30, TimeUnit.SECONDS);
+//        // max connection
+//        pollingConnectionManager.setMaxTotal(constants.getRestTemplateMaxTotal());
+//
+//        pollingConnectionManager.setDefaultMaxPerRoute(constants.getRestTemplateMaxPerRoute());
+//        HttpClientBuilder httpClientBuilder = HttpClients.custom();
+//        httpClientBuilder.setConnectionManager(pollingConnectionManager);
+//        // add Keep-Alive
+//        httpClientBuilder
+//                .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy());
+//        HttpClient httpClient = httpClientBuilder.build();
+//        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory =
+//                new HttpComponentsClientHttpRequestFactory(httpClient);
+//        clientHttpRequestFactory.setReadTimeout(constants.getHttp_read_timeOut());
+//        clientHttpRequestFactory.setConnectTimeout(constants.getHttp_connect_timeOut());
+//        return clientHttpRequestFactory;
+//    }
 }

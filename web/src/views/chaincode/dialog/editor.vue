@@ -14,61 +14,58 @@
  * limitations under the License.
  */
 <template>
-  <el-dialog
-    :title="$t('title.transactionReceipt')"
-    :visible.sync="editorDialog"
-    @close="modelClose"
-    width="650px"
-    top="10vh"
-  >
+  <el-dialog :title="$t('title.transactionReceipt')" :visible.sync="editorDialog" @close="modelClose" width="650px" top="10vh">
     <div v-if="!transationData">{{ $t("text.noData") }}</div>
-    <div
-      v-if="transationData && !transationData.logs"
-      slot
-      style="overflow-y: scroll; height: 500px"
-    >
-      <json-viewer
-        :value="transationData"
-        :expand-depth="5"
-        copyable
-      ></json-viewer>
+    <div v-if="transationData && !transationData.logs" slot style="overflow-y: scroll; height: 500px">
+      <json-viewer :value="transationData" :expand-depth="5" copyable></json-viewer>
     </div>
-    <div
-      v-if="transationData && transationData.logs"
-      slot
-      style="overflow-y: scroll; height: 500px"
-    >
+    <div v-if="transationData && transationData.logs" slot style="overflow-y: scroll; height: 500px">
       <div>{</div>
       <div v-for="(val, key) in transationData" style="padding-left: 10px">
-        <div v-if="key != 'logs' && key != 'output'">
+        <div v-if="key != 'logs' && key != 'output'&& key != 'input'">
           <template v-if="key == 'status'">
             <span class="transation-title">{{ key }}:</span>
             <span :style="{ color: txStatusColor(val) }">{{ val }}</span>
           </template>
           <template v-else>
             <span class="transation-title">{{ key }}:</span>
-            <span
-              class="transation-content string-color"
-              v-if="typeof val == 'string'"
-              >"{{ val }}"</span
-            >
-            <span class="transation-content null-color" v-else-if="val === null"
-              >{{ val }}null</span
-            >
-            <span
-              class="transation-content"
-              v-else-if="typeof val == 'object'"
-              >{{ val }}</span
-            >
+            <span class="transation-content string-color" v-if="typeof val == 'string'">"{{ val }}"</span>
+            <span class="transation-content null-color" v-else-if="val === null">{{ val }}null</span>
+            <span class="transation-content" v-else-if="typeof val == 'object'">{{ val }}</span>
             <span class="transation-content other-color" v-else>{{ val }}</span>
           </template>
         </div>
-
+        <div v-else-if='key == "input"'>
+          <span class="transation-title">{{key}}:</span>
+          <span class="transation-content string-color" v-if="showDecodeInput">"{{val}}"</span>
+          <div v-if="!showDecodeInput" class="transation-data" style="width: 500px">
+            <div class="input-label">
+              <span class="label">function</span>
+              <span>{{funcData + "(" + abiType   +' ' +inputType+")"}}</span>
+            </div>
+            <div class="input-label">
+              <span class="label">data:</span>
+              <el-table :data="inputDatas" v-if="inputDatas.length" style="display:inline-block;width:350px">
+                <el-table-column prop="name" label="name" align="left"></el-table-column>
+                <el-table-column prop="type" label="type" align="left"></el-table-column>
+                <el-table-column prop="data" label="data" align="left" :show-overflow-tooltip="true">
+                  <template slot-scope="scope">
+                    <i class="wbs-icon-baocun font-12 copy-public-key" @click="copyPubilcKey(scope.row.data)" :title="$t('text.copy')"></i>
+                    <span>{{abc(scope.row.data)}}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <div class="item" v-if='inputButtonShow'>
+            <!-- <div class="item" v-show="inputButtonShow"> -->
+            <span class="label"></span>
+            <el-button @click="decodeInputCheck" type="primary">{{inputTitle}}</el-button>
+          </div>
+        </div>
         <div v-else-if="key == 'output'">
           <span class="transation-title">{{ key }}:</span>
-          <span class="transation-content string-color" v-if="showDecode"
-            >"{{ val }}"</span
-          >
+          <span class="transation-content string-color" v-if="showDecode">"{{ val }}"</span>
           <div v-if="!showDecode" class="transation-data" style="width: 500px">
             <div class="input-label">
               <span class="label">function</span>
@@ -78,40 +75,19 @@
             </div>
             <div class="input-label">
               <span class="label">data:</span>
-              <el-table
-                :data="inputData"
-                v-if="inputData.length"
-                style="display: inline-block; width: 350px"
-              >
-                <el-table-column
-                  prop="name"
-                  label="name"
-                  align="left"
-                ></el-table-column>
-                <el-table-column
-                  prop="type"
-                  label="type"
-                  align="left"
-                ></el-table-column>
-                <el-table-column
-                  prop="data"
-                  label="data"
-                  align="left"
-                  :show-overflow-tooltip="true"
-                >
+              <el-table :data="inputData" v-if="inputData.length" style="display: inline-block; width: 350px">
+                <el-table-column prop="name" label="name" align="left"></el-table-column>
+                <el-table-column prop="type" label="type" align="left"></el-table-column>
+                <el-table-column prop="data" label="data" align="left" :show-overflow-tooltip="true">
                   <template slot-scope="scope">
-                    <i
-                      class="wbs-icon-baocun font-12 copy-public-key"
-                      @click="copyPubilcKey(scope.row.data)"
-                      :title="$t('title.copy')"
-                    ></i>
+                    <i class="wbs-icon-baocun font-12 copy-public-key" @click="copyPubilcKey(scope.row.data)" :title="$t('title.copy')"></i>
                     <span>{{ scope.row.data }}</span>
                   </template>
                 </el-table-column>
               </el-table>
             </div>
           </div>
-          <div class="item" v-show="inputButtonShow">
+          <div class="item" v-show="outputButtonShow">
             <span class="label"></span>
             <el-button @click="decodeOutput" type="primary">{{
               buttonTitle
@@ -121,8 +97,7 @@
         <div v-if="key == 'logs'">
           <span>{{ key }}:</span>
           <span v-if="!val.length">{{ val }}</span>
-          <span v-if="val.length"
-            >[
+          <span v-if="val.length">[
             <div v-for="item in val" style="padding-left: 10px">
               <div>{</div>
               <div style="padding-left: 10px">
@@ -159,59 +134,31 @@
                 </div>
                 <div>
                   <span class="transation-title">transactionHash:</span>
-                  <span
-                    v-if="typeof item.transactionHash == 'string'"
-                    class="transation-content string-color"
-                    >{{ item.transactionHash }}</span
-                  >
-                  <span
-                    v-else-if="item.transactionHash === null"
-                    class="transation-content null-color"
-                    >{{ item.transactionHash }}null</span
-                  >
+                  <span v-if="typeof item.transactionHash == 'string'" class="transation-content string-color">{{ item.transactionHash }}</span>
+                  <span v-else-if="item.transactionHash === null" class="transation-content null-color">{{ item.transactionHash }}null</span>
                   <span v-else class="transation-content">{{
                     item.transactionHash
                   }}</span>
                 </div>
                 <div>
                   <span class="transation-title">blockHash:</span>
-                  <span
-                    v-if="typeof item.blockHash == 'string'"
-                    class="transation-content string-color"
-                    >{{ item.blockHash }}</span
-                  >
-                  <span
-                    v-else-if="item.blockHash === null"
-                    class="transation-content null-color"
-                    >{{ item.blockHash }}null</span
-                  >
+                  <span v-if="typeof item.blockHash == 'string'" class="transation-content string-color">{{ item.blockHash }}</span>
+                  <span v-else-if="item.blockHash === null" class="transation-content null-color">{{ item.blockHash }}null</span>
                   <span v-else class="transation-content">{{
                     item.blockHash
                   }}</span>
                 </div>
                 <div>
                   <span class="transation-title">blockNumber:</span>
-                  <span
-                    v-if="item.blockNumber === null"
-                    class="transation-content null-color"
-                    >{{ item.blockNumber }}null</span
-                  >
+                  <span v-if="item.blockNumber === null" class="transation-content null-color">{{ item.blockNumber }}null</span>
                   <span v-else class="transation-content">{{
                     item.blockNumber
                   }}</span>
                 </div>
                 <div>
                   <span class="transation-title">address:</span>
-                  <span
-                    v-if="typeof item.address == 'string'"
-                    class="transation-content string-color"
-                    >{{ item.address }}</span
-                  >
-                  <span
-                    v-else-if="item.address === null"
-                    class="transation-content null-color"
-                    >{{ item.address }}null</span
-                  >
+                  <span v-if="typeof item.address == 'string'" class="transation-content string-color">{{ item.address }}</span>
+                  <span v-else-if="item.address === null" class="transation-content null-color">{{ item.address }}null</span>
                   <span v-else class="transation-content">{{
                     item.address
                   }}</span>
@@ -222,38 +169,13 @@
                 </div>
                 <div>
                   <span class="transation-title">data:</span>
-                  <span
-                    class="transation-content string-color"
-                    v-show="!item.eventDataShow && eventSHow"
-                    >{{ item.data }}</span
-                  >
-                  <div
-                    class="transation-data"
-                    v-show="item.eventDataShow && eventSHow"
-                  >
-                    <el-table
-                      class="input-data"
-                      :data="item.eventLgData"
-                      style="display: inline-block; width: 100%"
-                    >
-                      <el-table-column
-                        prop="name"
-                        width="150"
-                        label="name"
-                        align="left"
-                      ></el-table-column>
-                      <el-table-column
-                        prop="data"
-                        label="data"
-                        align="left"
-                        :show-overflow-tooltip="true"
-                      >
+                  <span class="transation-content string-color" v-show="!item.eventDataShow && eventSHow">{{ item.data }}</span>
+                  <div class="transation-data" v-show="item.eventDataShow && eventSHow">
+                    <el-table class="input-data" :data="item.eventLgData" style="display: inline-block; width: 100%">
+                      <el-table-column prop="name" width="150" label="name" align="left"></el-table-column>
+                      <el-table-column prop="data" label="data" align="left" :show-overflow-tooltip="true">
                         <template slot-scope="scope">
-                          <i
-                            class="wbs-icon-baocun font-12 copy-public-key"
-                            @click="copyPubilcKey(scope.row.data)"
-                            :title="$t('title.copy')"
-                          ></i>
+                          <i class="wbs-icon-baocun font-12 copy-public-key" @click="copyPubilcKey(scope.row.data)" :title="$t('title.copy')"></i>
                           <span>{{ abc(scope.row.data) }}</span>
                         </template>
                       </el-table-column>
@@ -268,46 +190,22 @@
                 </div>
                 <div>
                   <span class="transation-title">type:</span>
-                  <span
-                    v-if="typeof item.type == 'string'"
-                    class="transation-content string-color"
-                    >{{ item.type }}</span
-                  >
-                  <span
-                    v-else-if="item.type === null"
-                    class="transation-content null-color"
-                    >{{ item.type }}null</span
-                  >
+                  <span v-if="typeof item.type == 'string'" class="transation-content string-color">{{ item.type }}</span>
+                  <span v-else-if="item.type === null" class="transation-content null-color">{{ item.type }}null</span>
                   <span v-else class="transation-content">{{ item.type }}</span>
                 </div>
                 <div>
                   <span class="transation-title">topics:</span>
-                  <span
-                    v-if="typeof item.topics == 'string'"
-                    class="transation-content string-color"
-                    >{{ item.topics }}</span
-                  >
-                  <span
-                    v-else-if="item.topics === null"
-                    class="transation-content null-color"
-                    >{{ item.topics }}null</span
-                  >
+                  <span v-if="typeof item.topics == 'string'" class="transation-content string-color">{{ item.topics }}</span>
+                  <span v-else-if="item.topics === null" class="transation-content null-color">{{ item.topics }}null</span>
                   <span v-else class="transation-content">{{
                     item.topics
                   }}</span>
                 </div>
                 <div>
                   <span class="transation-title">logIndexRaw:</span>
-                  <span
-                    v-if="typeof item.logIndexRaw == 'string'"
-                    class="transation-content string-color"
-                    >{{ item.logIndexRaw }}</span
-                  >
-                  <span
-                    v-else-if="item.logIndexRaw === null"
-                    class="transation-content null-color"
-                    >{{ item.logIndexRaw }}null</span
-                  >
+                  <span v-if="typeof item.logIndexRaw == 'string'" class="transation-content string-color">{{ item.logIndexRaw }}</span>
+                  <span v-else-if="item.logIndexRaw === null" class="transation-content null-color">{{ item.logIndexRaw }}null</span>
                   <span v-else class="transation-content">{{
                     item.logIndexRaw
                   }}</span>
@@ -342,27 +240,43 @@ export default {
       methodId: "",
       abiType: "",
       inputData: [],
+      inputType: [],
+      inputDatas: [],
       decodeData: "",
       showDecode: true,
       buttonTitle: this.$t("text.txnDecodeBtn"),
+      inputTitle: this.$t("text.txnDecodeBtn"),
       typesArray: this.input,
       inputButtonShow: true,
+      outputButtonShow: true,
       editorHeight: "",
       outputType: null,
+      showDecodeInput: true,
+
     };
   },
   mounted() {
     this.editorHeight = document.body.offsetHeight * 0.75;
     if (this.transationData.output == "0x") {
-      this.inputButtonShow = false;
+      this.outputButtonShow = false;
     } else {
+      this.outputButtonShow = true;
+    }
+    if (this.transationData && this.transationData.input) {
+        this.decodeInputApi(this.transationData.input);
       this.inputButtonShow = true;
+    }else{
+      this.inputButtonShow = false;
     }
     if (this.transationData && this.transationData.logs) {
       this.decodeEvent();
     }
     if (!this.sendConstant) {
-      if (this.typesArray && this.transationData.output != "0x") {
+      if (
+        this.typesArray &&
+        this.transationData.output &&
+        this.transationData.output != "0x"
+      ) {
         this.decodefun();
       }
     }
@@ -400,6 +314,88 @@ export default {
       } else {
         this.showDecode = true;
         this.buttonTitle = this.$t("text.txnDecodeBtn");
+      }
+    },
+    decodeInputCheck: function () {
+      if (this.showDecodeInput) {
+        this.showDecodeInput = false;
+        this.inputTitle = this.$t("text.txnEncodeBtn");
+      } else {
+        this.showDecodeInput = true;
+        this.inputTitle = this.$t("text.txnDecodeBtn");
+      }
+    },
+      //transactionDecode
+      decodeInputApi(param) {
+      let data = {
+        groupId: localStorage.getItem("groupId"),
+        data: param,
+      };
+      getFunctionAbi(data)
+        .then((res) => {
+          if (res.data.code == 0 && res.data.data) {
+            this.decodeInput(param, res.data.data);
+          } else if (res.data.code !== 0) {
+            this.$message({
+              type: "error",
+              message: errcode.errCode[res.data.code].cn,
+            });
+          }
+        })
+        .catch((err) => {
+          this.$message({
+            type: "error",
+            message: "系统错误！",
+          });
+        });
+    },
+    decodeInput: function (input, abiData) {
+      let Web3EthAbi = require("web3-eth-abi");
+      this.methodId = input.substring(0, 10);
+      // this.methodId = data;
+      let inputDatas = "0x" + input.substring(10);
+      if (abiData) {
+        abiData.abiInfo = JSON.parse(abiData.abiInfo);
+        abiData.abiInfo.inputs.forEach((val, index) => {
+          if (val && val.type && val.name) {
+            this.inputType[index] = val.type + " " + val.name;
+          } else if (val && val.name) {
+            this.inputType[index] = val.name;
+          } else if (val && val.type) {
+            this.inputType[index] = val.type;
+          } else if (val) {
+            this.inputType[index] = val;
+          }
+        });
+        this.funcData = abiData.abiInfo.name;
+        if (abiData.abiInfo.inputs.length) {
+          this.decodeData = Web3EthAbi.decodeParameters(
+            abiData.abiInfo.inputs,
+            inputDatas
+          );
+          if (JSON.stringify(this.decodeData) != "{}") {
+            for (const key in this.decodeData) {
+              abiData.abiInfo.inputs.forEach((val, index) => {
+                if (val && val.name && val.type) {
+                  if (key === val.name) {
+                    this.inputDatas[index] = {};
+                    this.inputDatas[index].name = val.name;
+                    this.inputDatas[index].type = val.type;
+                    this.inputDatas[index].data = this.decodeData[key];
+                  }
+                } else if (val) {
+                  if (index == key) {
+                    this.inputDatas[index] = {};
+                    this.inputDatas[index].type = val;
+                    this.inputDatas[index].data = this.decodeData[key];
+                  }
+                }
+              });
+            }
+          }
+        }
+        this.showDecodeInput = false;
+        this.inputTitle = this.$t("text.txnEncodeBtn");
       }
     },
     decodefun() {

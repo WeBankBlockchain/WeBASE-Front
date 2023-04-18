@@ -16,7 +16,7 @@
 package com.webank.webase.front.contract.entity;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 @Data
 public class ReqMultiContractCompile {

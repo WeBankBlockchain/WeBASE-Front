@@ -1084,6 +1084,14 @@ export default {
             message: this.$chooseLang(res.data.code),
             type: "error",
           });
+          if (res.data.code === 201151||res.data.code === 201014) {
+              setTimeout(() => {
+                this.$notify({
+                  title: "提示",
+                  message: res.data.errorMessage,
+                });
+              }, 2000);
+            }
         }
       });
     },
@@ -1524,7 +1532,7 @@ export default {
   border-left: 1px solid #242e42;
   height: calc(100% - 50px);
   box-sizing: border-box;
-  min-width:960px
+  min-width: 960px;
 }
 .contract-code-mirror {
   width: 100%;

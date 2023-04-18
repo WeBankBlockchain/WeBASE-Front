@@ -61,6 +61,7 @@ import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.utils.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -73,6 +74,7 @@ import org.springframework.stereotype.Service;
 public class PrecompiledWithSignService {
 
     @Autowired
+    @Lazy
     TransService transService;
     @Autowired
     private Web3ApiService web3ApiService;
@@ -85,7 +87,7 @@ public class PrecompiledWithSignService {
      * @return String result {"code":0,"msg":"success"}
      */
     public String setValueByKey(int groupId, String signUserId, String key, String value) {
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(key);
         funcParams.add(value);
         // get address and abi of precompiled contract
@@ -104,7 +106,7 @@ public class PrecompiledWithSignService {
      * @return String result {"code":0,"msg":"success"}
      */
     public String grant(int groupId, String signUserId, String tableName, String toAddress) {
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(tableName);
         funcParams.add(toAddress);
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.PERMISSION);
@@ -121,7 +123,7 @@ public class PrecompiledWithSignService {
      * @return String result {"code":0,"msg":"success"}
      */
     public String revoke(int groupId, String signUserId, String tableName, String toAddress) {
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(tableName);
         funcParams.add(toAddress);
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.PERMISSION);
@@ -138,7 +140,7 @@ public class PrecompiledWithSignService {
      * @return String result {"code":0,"msg":"success"}
      */
     public String grantWrite(int groupId, String signUserId, String tableName, String toAddress) {
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(tableName);
         funcParams.add(toAddress);
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.PERMISSION);
@@ -155,7 +157,7 @@ public class PrecompiledWithSignService {
      * @return String result {"code":0,"msg":"success"}
      */
     public String revokeWrite(int groupId, String signUserId, String tableName, String toAddress) {
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(tableName);
         funcParams.add(toAddress);
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.PERMISSION);
@@ -190,7 +192,7 @@ public class PrecompiledWithSignService {
             throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
         }
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
@@ -214,7 +216,7 @@ public class PrecompiledWithSignService {
         }
 
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
@@ -233,7 +235,7 @@ public class PrecompiledWithSignService {
             return ConstantCode.ALREADY_REMOVED_FROM_THE_GROUP.toString();
         }
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(nodeId);
         String contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
@@ -273,7 +275,7 @@ public class PrecompiledWithSignService {
      * CRUD: create table through webase-sign
      */
     public String createTable(int groupId, String signUserId, Table table) {
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
         funcParams.add(table.getKey());
         String valueFieldsString = TableCRUDService.convertValueFieldsToString(table.getValueFields());
@@ -300,7 +302,7 @@ public class PrecompiledWithSignService {
             log.error("remove JsonProcessingException:[]", e);
             throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
         }
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
         funcParams.add(table.getKey());
         funcParams.add(entryJsonStr);
@@ -330,7 +332,7 @@ public class PrecompiledWithSignService {
             log.error("update JsonProcessingException:[]", e);
             throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
         }
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
         funcParams.add(table.getKey());
         funcParams.add(entryJsonStr);
@@ -358,7 +360,7 @@ public class PrecompiledWithSignService {
             log.error("remove JsonProcessingException:[]", e);
             throw new FrontException(ConstantCode.CRUD_PARSE_CONDITION_ENTRY_FIELD_JSON_ERROR);
         }
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(table.getTableName());
         funcParams.add(table.getKey());
         funcParams.add(conditionStr);
@@ -381,7 +383,7 @@ public class PrecompiledWithSignService {
 
     public String contractFreeze(int groupId, String signUserId, String contractAddress) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(contractAddress);
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CSM);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CSM);
@@ -393,7 +395,7 @@ public class PrecompiledWithSignService {
 
     public String contractUnfreeze(int groupId, String signUserId, String contractAddress) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(contractAddress);
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CSM);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CSM);
@@ -406,7 +408,7 @@ public class PrecompiledWithSignService {
     public String contractGrantManager(int groupId, String signUserId, String contractAddress,
             String grantAddress) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(contractAddress);
         funcParams.add(grantAddress);
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CSM);
@@ -422,7 +424,7 @@ public class PrecompiledWithSignService {
      */
     public String grantChainCommittee(int groupId, String signUserId, String toAddress) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(toAddress);
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CHAIN_GOVERN);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CHAIN_GOVERN);
@@ -435,7 +437,7 @@ public class PrecompiledWithSignService {
 
     public String revokeChainCommittee(int groupId, String signUserId, String toAddress) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(toAddress);
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CHAIN_GOVERN);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CHAIN_GOVERN);
@@ -449,9 +451,9 @@ public class PrecompiledWithSignService {
     public String updateChainCommitteeWeight(int groupId, String signUserId, String toAddress,
             int weight) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(toAddress);
-        funcParams.add(weight);
+        funcParams.add(String.valueOf(weight));
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CHAIN_GOVERN);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CHAIN_GOVERN);
         TransactionReceipt receipt =
@@ -463,8 +465,8 @@ public class PrecompiledWithSignService {
 
     public String updateThreshold(int groupId, String signUserId, int threshold) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
-        funcParams.add(threshold);
+        List<String> funcParams = new ArrayList<>();
+        funcParams.add(String.valueOf(threshold));
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CHAIN_GOVERN);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CHAIN_GOVERN);
         TransactionReceipt receipt =
@@ -476,7 +478,7 @@ public class PrecompiledWithSignService {
 
     public String grantOperator(int groupId, String signUserId, String toAddress) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(toAddress);
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CHAIN_GOVERN);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CHAIN_GOVERN);
@@ -488,7 +490,7 @@ public class PrecompiledWithSignService {
 
     public String revokeOperator(int groupId, String signUserId, String toAddress) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(toAddress);
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CHAIN_GOVERN);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CHAIN_GOVERN);
@@ -500,7 +502,7 @@ public class PrecompiledWithSignService {
 
     public String freezeAccount(int groupId, String signUserId, String toAddress) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(toAddress);
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CHAIN_GOVERN);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CHAIN_GOVERN);
@@ -512,7 +514,7 @@ public class PrecompiledWithSignService {
 
     public String unfreezeAccount(int groupId, String signUserId, String toAddress) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(toAddress);
         String precompiledAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CHAIN_GOVERN);
         String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CHAIN_GOVERN);
@@ -526,7 +528,7 @@ public class PrecompiledWithSignService {
     public String registerCns(int groupId, String signUserId, String cnsContractName, String version,
             String contractAddress, String abiInfo) {
         // trans
-        List<Object> funcParams = new ArrayList<>();
+        List<String> funcParams = new ArrayList<>();
         funcParams.add(cnsContractName);
         funcParams.add(version);
         funcParams.add(contractAddress);

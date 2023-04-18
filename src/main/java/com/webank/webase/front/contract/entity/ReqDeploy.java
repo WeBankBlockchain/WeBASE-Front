@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 /**
  * deploy interface parameter.
@@ -54,7 +54,7 @@ public class ReqDeploy {
     private String contractPath;
     private int groupId;
     private Long contractId;
-    private List<Object> funcParam = new ArrayList<>();
+    private List<String> funcParam = new ArrayList<>();
     @Deprecated
     private boolean useAes;
     @Deprecated

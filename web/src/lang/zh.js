@@ -422,7 +422,9 @@ export default {
         folderSameFail: "新建文件夹与已存在的文件夹名称相同",
         user: "用户",
         params: "参数",
-        paramsInfo: '如果参数类型是数组，请按照以下格式输入，以逗号分隔，非数值和布尔值须使用双引号，例如：["aaa","bbb"]和[100,101]；如果数组参数包含双引号，需转义，例如：["aaa\\"bbb","ccc"]。',
+        paramsInfo:`如果参数类型是数组，使用方括号括起，以逗号分隔，例如：set(uint32[] a) -> [1,2,3], 非数值和布尔值类型则需要使用双引号，例如: set(bytes1[] a) -> ["0x12","0x34"]；如果数组参数包含双引号，需转义，例如：set(string[] s) -> ["aaa\"bbb","ccc"]。
+        如果参数类型是bytesN，则入参格式为十六进制字符串，且字符长度应为2N，如bytes2入参为：0x1234。若长度不足，则在十六进制字符后补0。 
+        如果参数是struct类型，在输入框中参数类型显示为tuple类型，入参格式需要在struct参数的外用方括号括起，如set(StructA a) -> StructA{bool a, string[] b} -> [true,"[\"test string\"]"]。struct中的数组需要放在双引号内，双引号内的双引号需要转义。`,
         contractAddress: "合约地址",
         method: "方法",
         contractAddressInput: "请输入正确的合约地址",

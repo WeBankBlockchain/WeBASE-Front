@@ -17,7 +17,7 @@ package com.webank.webase.front.transaction.entity;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 
 /**
  * get encoded function string
@@ -30,5 +30,5 @@ public class ReqEncodeFunction {
     @NotNull
     private List<Object> contractAbi;
     @NotNull
-    private List<Object> funcParam;
+    private List<String> funcParam;
 }

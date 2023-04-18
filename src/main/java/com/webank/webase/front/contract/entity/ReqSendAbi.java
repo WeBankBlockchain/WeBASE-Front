@@ -17,7 +17,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import java.util.List;
 import lombok.Data;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 
 /**

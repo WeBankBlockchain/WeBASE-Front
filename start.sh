@@ -45,8 +45,8 @@ start(){
         echo "==============================================================================================="
     else
         echo -n "Server $APP_MAIN Port $SERVER_PORT ..."
-        nohup $JAVA_HOME/bin/java -Djdk.tls.namedGroups="secp256k1" $JAVA_OPTS -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1 &
-        
+        nohup $JAVA_HOME/bin/java -Djdk.tls.namedGroups="SM2,secp256k1,x25519,secp256r1,secp384r1,secp521r1" $JAVA_OPTS -Djava.library.path=$CONF_DIR -cp $CLASSPATH $APP_MAIN >> $LOG_DIR/front.out 2>&1 &
+
         count=1
         result=0
         while [ $count -lt $startWaitTime ] ; do

@@ -16,6 +16,7 @@ package com.webank.webase.front.solc;
 
 import static com.webank.webase.front.base.properties.Constants.SOLC_DIR_PATH;
 import static com.webank.webase.front.base.properties.Constants.SOLC_JS_SUFFIX;
+
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.solc.entity.RspDownload;
@@ -32,11 +33,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -78,7 +79,7 @@ public class SolcService {
         }
         // check name and md5 not repeat
         checkSolcInfoNotExist(fileName);
-        String md5 = DigestUtils.md5Hex(solcFileParam.getInputStream());
+        String md5 = DigestUtils.md5DigestAsHex(solcFileParam.getInputStream());
         checkSolcMd5NotExist(md5);
         // save file info db
         saveSolcInfo(fileName, fileDesc, fileSize, md5);
@@ -199,7 +200,7 @@ public class SolcService {
 
     @Transactional
     public boolean deleteFile(Integer solcId) {
-        SolcInfo solcInfo = solcRepository.findOne(solcId);
+        SolcInfo solcInfo = solcRepository.findById(solcId).orElse(null);
         String fileName = solcInfo.getSolcName();
         File solcDir = getSolcDir();
         String solcLocate = solcDir.getAbsolutePath() + File.separator + fileName;
@@ -212,10 +213,10 @@ public class SolcService {
     }
 
     private void removeSolcInfo(Integer solcId) {
-        SolcInfo checkExist = solcRepository.findOne(solcId);
+        SolcInfo checkExist = solcRepository.findById(solcId).orElse(null);
         if (Objects.isNull(checkExist)) {
             throw new FrontException(ConstantCode.FILE_IS_NOT_EXIST);
         }
-        solcRepository.delete(solcId);
+        solcRepository.deleteById(solcId);
     }
 }
