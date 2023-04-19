@@ -652,7 +652,7 @@ export default {
       this.creatUserNameVisible = false;
     },
     checkFunction(item) {
-      return (item.stateMutability==='view'||item.stateMutability==='cosntant'||item.stateMutability==='pure') ? false : true;
+      return (item.stateMutability==='view'||item.stateMutability==='constant'||item.stateMutability==='pure') ? false : true;
     },
   },
 };

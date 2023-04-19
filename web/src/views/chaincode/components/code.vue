@@ -392,6 +392,8 @@ export default {
   created() {},
   beforeMount() {},
   mounted: function () {
+    console.log(this.$chooseLang(201014))
+
     this.initEditor();
     Bus.$on("select", (data) => {
       this.codeShow = true;
@@ -1084,6 +1086,7 @@ export default {
             message: this.$chooseLang(res.data.code),
             type: "error",
           });
+          console.log(this.$chooseLang(res.data.code))
           if (res.data.code === 201151||res.data.code === 201014) {
               setTimeout(() => {
                 this.$notify({
