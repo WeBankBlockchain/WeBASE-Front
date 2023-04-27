@@ -251,7 +251,7 @@ public class ContractService {
         String signUserId = req.getSignUserId();
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        List<String> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
 
         // check groupId
         Client client = web3ApiService.getWeb3j(groupId);
@@ -266,23 +266,29 @@ public class ContractService {
             checkDeployPermission(req.getGroupId(), userAddress);
         }
 
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        ABICodec abiCodec = new ABICodec(cryptoSuite, true);
         String encodedConstructor;
         try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+            encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
         } catch (ABICodecException e) {
+            // 根据message抛出不同的错误
             log.error("deployWithSign encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
 
         // data sign
-//        String data = bytecodeBin + encodedConstructor;
         String data = encodedConstructor;
         String signMsg = transService.signMessage(groupId, client, signUserId, "", data);
         // send transaction
         TransactionReceipt receipt = transService.sendMessage(client, signMsg);
+        transService.decodeReceipt(receipt);
         String contractAddress = receipt.getContractAddress();
-
+        String status = receipt.getStatus();
+        if (!"0x0".equalsIgnoreCase(status) || StringUtils.isBlank(contractAddress)
+            || Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress)) {
+            log.error("deployWithSign failed, status:{},receipt:{}", status, receipt);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
+        }
         log.info("success deployWithSign. contractAddress:{}", contractAddress);
         return contractAddress;
     }
@@ -298,16 +304,17 @@ public class ContractService {
 
         String abiStr = JsonUtils.objToString(req.getAbiInfo());
         String bytecodeBin = req.getBytecodeBin();
-        List<Object> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
-
-        ABICodec abiCodec = new ABICodec(cryptoSuite);
+        List<String> params = req.getFuncParam() == null ? new ArrayList<>() : req.getFuncParam();
+        log.info("params :{}|{}", JsonUtils.toJSONString(params));
+        ABICodec abiCodec = new ABICodec(cryptoSuite, true);
 
         String encodedConstructor;
         try {
-            encodedConstructor = abiCodec.encodeConstructor(abiStr, bytecodeBin, params);
+            encodedConstructor = abiCodec.encodeConstructorFromString(abiStr, bytecodeBin, params);
         } catch (ABICodecException e) {
-            log.error("deployLocally encode fail:[]", e);
-            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR);
+            // todo 根据message抛出不同的错误
+            log.error("deployWithSign encode fail:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
         }
         // get privateKey
         CryptoKeyPair cryptoKeyPair = keyStoreService.getCredentials(userAddress);
@@ -366,54 +373,6 @@ public class ContractService {
         }
     }
 
-    @Deprecated
-    public static String constructorEncodedByContractNameAndVersion(String contractName,
-            String version, List<Object> params) throws FrontException {
-        // Constructor encoded
-        String encodedConstructor = "";
-        String functionName = contractName;
-        // input handle
-        List<String> funcInputTypes =
-                ContractAbiUtil.getFuncInputType(contractName, functionName, version);
-        if (funcInputTypes != null && funcInputTypes.size() > 0) {
-            if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deploy encodedConstructor:{}", encodedConstructor);
-            } else {
-                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-            }
-        }
-        return encodedConstructor;
-    }
-
-    /**
-     * encode constructor function
-     */
-    @Deprecated
-    private static String constructorEncoded(String contractName,
-            ContractAbiUtil.VersionEvent versionEvent, List<Object> params) throws FrontException {
-        // Constructor encoded
-        String encodedConstructor = "";
-        String functionName = contractName;
-        // input handle
-        List<String> funcInputTypes = versionEvent.getFuncInputs().get(functionName);
-
-        if (funcInputTypes != null && funcInputTypes.size() > 0) {
-            if (funcInputTypes.size() == params.size()) {
-                List<Type> finalInputs = AbiUtil.inputFormat(funcInputTypes, params);
-                encodedConstructor = FunctionEncoder.encodeConstructor(finalInputs);
-                log.info("deploy encodedConstructor:{}", encodedConstructor);
-            } else {
-                log.warn("deploy fail. funcInputTypes:{}, params:{}", funcInputTypes, params);
-                throw new FrontException(ConstantCode.IN_FUNCPARAM_ERROR);
-            }
-        }
-        return encodedConstructor;
-    }
-
-
     private void checkContractAbiExistedAndSave(String contractName, String version,
             List<ABIDefinition> abiInfos) throws FrontException {
         boolean ifExisted = ContractAbiUtil.ifContractAbiExisted(contractName, version);
@@ -437,7 +396,15 @@ public class ContractService {
             throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR);
         }
         TransactionReceipt receipt = assembleTxProcessor.deployAndGetReceipt(encodedConstructor);
-        return receipt.getContractAddress();
+        transService.decodeReceipt(receipt);
+        String contractAddress = receipt.getContractAddress();
+        String status = receipt.getStatus();
+        if (!"0x0".equalsIgnoreCase(status) || StringUtils.isBlank(contractAddress)
+            || Address.DEFAULT.getValue().equalsIgnoreCase(contractAddress)) {
+            log.error("deployWithSign failed, status:{},receipt:{}", status, receipt);
+            throw new FrontException(ConstantCode.CONTRACT_DEPLOY_ERROR.getCode(), receipt.getMessage());
+        }
+        return contractAddress;
     }
 
     /**
@@ -516,7 +483,7 @@ public class ContractService {
         // check contract id
         verifyContractIdExist(contractId, groupId);
         // remove
-        contractRepository.delete(contractId);
+        contractRepository.deleteById(contractId);
         log.debug("end deleteContract");
     }
 
@@ -619,7 +586,7 @@ public class ContractService {
         // page start from index 1 instead of 0
         int pageNumber = param.getPageNumber() - 1;
         Pageable pageable =
-                new PageRequest(pageNumber, param.getPageSize(), Direction.DESC, "modifyTime");
+                PageRequest.of(pageNumber, param.getPageSize(), Direction.DESC, "modifyTime");
         Page<Contract> contractPage = contractRepository.findAll(
                 (Root<Contract> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                     // v1.4.2, param add contractPath to filter
@@ -867,7 +834,7 @@ public class ContractService {
      */
     public ContractPath addContractPath(ReqContractPath req) {
         ContractPathKey pathKey = new ContractPathKey(req.getGroupId(), req.getContractPath());
-        ContractPath check = contractPathRepository.findOne(pathKey);
+        ContractPath check = contractPathRepository.findById(pathKey).orElse(null);
         if (check != null) {
             log.error("addContractPath fail, path exists check:{}", check);
             throw new FrontException(ConstantCode.CONTRACT_PATH_IS_EXISTS);
@@ -888,7 +855,7 @@ public class ContractService {
         // init default contracts and dir
         initDefaultContract(groupId);
         // get from database
-        Sort sort = new Sort(Sort.Direction.DESC, "modifyTime");
+        Sort sort = Sort.by(Sort.Direction.DESC, "modifyTime");
         List<ContractPath> contractPaths = contractPathRepository.findAll((Root<ContractPath> root,
                 CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.equal(root.get("groupId"), groupId);
@@ -904,7 +871,7 @@ public class ContractService {
         ContractPathKey contractPathKey = new ContractPathKey();
         contractPathKey.setGroupId(groupId);
         contractPathKey.setContractPath(contractPath);
-        contractPathRepository.delete(contractPathKey);
+        contractPathRepository.deleteById(contractPathKey);
     }
 
     /**
@@ -943,14 +910,14 @@ public class ContractService {
         List<Contract> contractList =
                 contractRepository.findByGroupIdAndContractPath(groupId, contractPath);
         log.debug("batchDeleteByPath delete contracts");
-        contractList.forEach(c -> contractRepository.delete(c.getId()));
+        contractList.forEach(c -> contractRepository.deleteById(c.getId()));
         log.debug("batchDeleteByPath delete contracts");
-        contractPathRepository.delete(new ContractPathKey(groupId, contractPath));
+        contractPathRepository.deleteById(new ContractPathKey(groupId, contractPath));
         log.debug("batchDeleteByPath delete contract path");
     }
 
     public Contract findById(Long contractId) {
-        Contract contract = contractRepository.findOne(contractId);
+        Contract contract = contractRepository.findById(contractId).orElse(null);
         if (Objects.isNull(contract)) {
             throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
         }

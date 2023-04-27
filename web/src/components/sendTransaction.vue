@@ -54,7 +54,7 @@
         <span class="send-item-title">{{ $t("text.sendFunction") }}:</span>
         <el-select v-model="transation.funcName" filterable :placeholder="$t('placeholder.functionName')" v-if="funcList.length > 0" popper-class="func-name" @change="changeFunc" style="width: 400px">
           <el-option :label="item.name" :key="item.funcId" :value="item.funcId" v-for="item in funcList">
-            <span :class="{ 'func-color': !item.constant }">{{
+            <span :class="{ 'func-color':  checkFunction(item) }">{{
               item.name
             }}</span>
           </el-option>
@@ -162,11 +162,11 @@ export default {
           message: this.$t("text.sendInput"),
           trigger: "blur",
         },
-        {
-          pattern: `^0[xX][0-9a-fA-F]{${i * 2}}$`,
-          message: `必须是十六进制的数字或字母，长度是` + 2 * i,
-          trigger: "blur",
-        },
+        // {
+        //   pattern: `^0[xX][0-9a-fA-F]{${i * 2}}$`,
+        //   message: `必须是十六进制的数字或字母，长度是` + 2 * i,
+        //   trigger: "blur",
+        // },
       ];
     }
     return {
@@ -338,8 +338,9 @@ export default {
   },
   mounted: function () {
     this.getLocalKeyStores();
-    this.formatAbi();
     this.changeFunc();
+    this.formatAbi();
+    // this.changeFunc();
   },
   methods: {
        arrayLimit() {
@@ -499,18 +500,20 @@ export default {
       let rules = [];
       for (let item in this.form.pramasData) {
         let data = this.form.pramasData[item].value;
-        if (data && isJson(data)) {
-          try {
-             rules.push(JSON.parse(data))
-          } catch (error) {
-            console.log(error);
-          }
-        } else if (data === "true" || data === "false") {
-             rules.push(eval(data.toLowerCase()))
-        }
-         else {
-          rules.push(data)
-        }
+        rules.push(data)
+
+        // if (data && isJson(data)) {
+        //   try {
+        //      rules.push(JSON.parse(data))
+        //   } catch (error) {
+        //     console.log(error);
+        //   }
+        // } else if (data === "true" || data === "false") {
+        //      rules.push(eval(data.toLowerCase()))
+        // }
+        //  else {
+        //   rules.push(data)
+        // }
       } 
       
       // for (var i in this.form.pramasData) {
@@ -592,6 +595,14 @@ export default {
               type: "error",
               message: this.$chooseLang(res.data.code),
             });
+            if (res.data.code === 201151||res.data.code === 201014) {
+              setTimeout(() => {
+                this.$notify({
+                  title: "提示",
+                  message: res.data.errorMessage,
+                });
+              }, 2000);
+            }
           }
         })
         .catch((err) => {
@@ -639,6 +650,9 @@ export default {
         this.userId = this.userList[0]["userName"];
       }
       this.creatUserNameVisible = false;
+    },
+    checkFunction(item) {
+      return (item.stateMutability==='view'||item.stateMutability==='constant'||item.stateMutability==='pure') ? false : true;
     },
   },
 };

@@ -1,3 +1,17 @@
+### v1.5.5(2023-04-17)
+
+**Fix**
+- 支持合约函数复杂参数如Struct类型的入参与返回值，部署合约与发交易相关接口中`funcParam`类型从`List<Object>`改为`List<String>`
+
+**兼容性**
+- 支持FISCO-BCOS v2.4.x 及以上版本
+- WeBASE-Node-Manager v1.5.5+
+- WeBASE-Sign v1.5.0+
+- WeBASE-Transaction v1.3.0+
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/latest/)。
+
+
 ### v1.5.4(2022-02-22)
 
 **Fix**

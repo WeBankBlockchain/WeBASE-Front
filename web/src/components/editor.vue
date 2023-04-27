@@ -56,7 +56,34 @@
             <span class="transation-content other-color" v-else>{{ val }}</span>
           </template>
         </div>
-
+        <div v-else-if='key == "input"'>
+          <span class="transation-title">{{key}}:</span>
+          <span class="transation-content string-color" v-if="showDecodeInput">"{{val}}"</span>
+          <div v-if="!showDecodeInput" class="transation-data" style="width: 500px">
+            <div class="input-label">
+              <span class="label">function</span>
+              <span>{{funcData + "(" + abiType   +' ' +inputType+")"}}</span>
+            </div>
+            <div class="input-label">
+              <span class="label">data:</span>
+              <el-table :data="inputDatas" v-if="inputDatas.length" style="display:inline-block;width:350px">
+                <el-table-column prop="name" label="name" align="left"></el-table-column>
+                <el-table-column prop="type" label="type" align="left"></el-table-column>
+                <el-table-column prop="data" label="data" align="left" :show-overflow-tooltip="true">
+                  <template slot-scope="scope">
+                    <i class="wbs-icon-baocun font-12 copy-public-key" @click="copyPubilcKey(scope.row.data)" :title="$t('text.copy')"></i>
+                    <span>{{abc(scope.row.data)}}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <div class="item" v-if='inputButtonShow'>
+            <!-- <div class="item" v-show="inputButtonShow"> -->
+            <span class="label"></span>
+            <el-button @click="decodeInputCheck" type="primary">{{inputTitle}}</el-button>
+          </div>
+        </div>
         <div v-else-if="key == 'output'">
           <span class="transation-title">{{ key }}:</span>
           <span class="transation-content string-color" v-if="showDecode"
@@ -104,7 +131,7 @@
               </el-table>
             </div>
           </div>
-          <div class="item" v-show="inputButtonShow">
+          <div class="item" v-show="outputButtonShow">
             <span class="label"></span>
             <el-button @click="decodeOutput" type="primary">{{
               buttonTitle
@@ -341,6 +368,7 @@ export default {
       buttonTitle: this.$t("text.txnDecodeBtn"),
       typesArray: this.input,
       inputButtonShow: true,
+      outputButtonShow: true,
       editorHeight: "",
       outputType: null,
     };
@@ -348,9 +376,15 @@ export default {
   mounted() {
     this.editorHeight = document.body.offsetHeight * 0.75;
     if (this.transationData.output == "0x") {
-      this.inputButtonShow = false;
+      this.outputButtonShow = false;
     } else {
+      this.outputButtonShow = true;
+    }
+    if (this.transationData && this.transationData.input) {
+        this.decodeInputApi(this.transationData.input);
       this.inputButtonShow = true;
+    }else{
+      this.inputButtonShow = false;
     }
     if (this.transationData && this.transationData.logs) {
       this.decodeEvent();

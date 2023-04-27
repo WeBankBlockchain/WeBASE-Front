@@ -46,7 +46,7 @@
         <el-dialog :title="$t('title.callContract')" :visible.sync="dialogVisible" width="600px" :before-close="sendClose" v-if="dialogVisible" center class="send-dialog">
             <send-transation @success="sendSuccess($event)" @close="handleClose" ref="send" :data="data" :abi='abiData' :version='version'></send-transation>
         </el-dialog>
-        <editor v-if='editorShow' :show='editorShow' :data='editorData' @close='editorClose'></editor>
+        <editor v-if='editorShow' :show='editorShow' :data='editorData' :sendConstant="sendConstant" @close="editorClose" ref="editor" :input="editorInput" :editorOutput="editorOutput"></editor>
         <el-dialog :title="$t('nodes.addAbi')" :visible.sync="importVisibility" width="600px" v-if="importVisibility" center class="send-dialog">
             <import-abi @importSuccess="importSuccess" @closeImport="closeImport"></import-abi>
         </el-dialog>
@@ -60,7 +60,7 @@
 import contentHead from "@/components/contentHead";
 import abiDialog from "@/components/abiDialog";
 import sendTransation from "@/components/sendTransaction"
-import editor from "@/components/editor"
+import editor from "../chaincode/dialog/editor"
 import importAbi from "./components/importAbi"
 import updateAbi from "./components/updateAbi"
 import { getAbiList, deleteImportAbi } from "@/util/api"
@@ -100,7 +100,8 @@ export default {
             editorData: null,
             editorInput: null,
             editorOutput: null,
-            groupId: localStorage.getItem('groupId')
+            groupId: localStorage.getItem('groupId'),
+            sendConstant:''
         }
     },
 
@@ -241,6 +242,7 @@ export default {
             this.dialogVisible = false
         },
         sendSuccess(val) {
+            this.sendConstant = val.constant;
             this.dialogVisible = false;
             this.editorShow = true;
             this.editorData = null;
