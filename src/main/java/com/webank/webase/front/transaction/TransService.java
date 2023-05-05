@@ -253,7 +253,7 @@ public class TransService {
 
         //boolean isTxConstant = this.getABIDefinition(abiStr, funcName, groupId).isConstant();
         
-        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
+        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName, groupId);
         boolean isTxConstant = abiDefinition.isConstant();
         if (abiDefinition.getStateMutability().equals("pure")
             || abiDefinition.getStateMutability().equals("constant")
