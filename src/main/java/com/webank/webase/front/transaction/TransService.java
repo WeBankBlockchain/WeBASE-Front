@@ -251,7 +251,16 @@ public class TransService {
 
         byte[] encodeFunction = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
 
-        boolean isTxConstant = this.getABIDefinition(abiStr, funcName, groupId).isConstant();
+        //boolean isTxConstant = this.getABIDefinition(abiStr, funcName, groupId).isConstant();
+        
+        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
+        boolean isTxConstant = abiDefinition.isConstant();
+        if (abiDefinition.getStateMutability().equals("pure")
+            || abiDefinition.getStateMutability().equals("constant")
+            || abiDefinition.getStateMutability().equals("view")) {
+            isTxConstant = true;
+        }
+        
         // get privateKey
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress, groupId);
 
