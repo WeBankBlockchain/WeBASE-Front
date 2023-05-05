@@ -180,7 +180,13 @@ public class TransService {
             userAddress = keyStoreService.getCredentialsForQuery().getAddress();
         }
 
-        boolean isTxConstant = this.getABIDefinition(abiStr, funcName).isConstant();
+        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
+        boolean isTxConstant = abiDefinition.isConstant();
+        if (abiDefinition.getStateMutability().equals("pure")
+            || abiDefinition.getStateMutability().equals("constant")
+            || abiDefinition.getStateMutability().equals("view")) {
+            isTxConstant = true;
+        }
         if (isTxConstant) {
             return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
         } else {
@@ -290,7 +296,13 @@ public class TransService {
 
         String encodeFunction = this.encodeFunction2Str(abiStr, funcName, funcParam);
 
-        boolean isTxConstant = this.getABIDefinition(abiStr, funcName).isConstant();
+        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
+        boolean isTxConstant = abiDefinition.isConstant();
+        if (abiDefinition.getStateMutability().equals("pure")
+            || abiDefinition.getStateMutability().equals("constant")
+            || abiDefinition.getStateMutability().equals("view")) {
+            isTxConstant = true;
+        }
         // get privateKey
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress);
 
