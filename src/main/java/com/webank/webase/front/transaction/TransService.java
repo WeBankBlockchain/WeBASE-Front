@@ -583,8 +583,13 @@ public class TransService {
             throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
         // abi only contain one function, so get first one
-        ABIDefinition function = abiDefinitionList.get(0);
-        return function;
+        ABIDefinition abiDefinition = abiDefinitionList.get(0);
+        if (abiDefinition.getStateMutability().equals("pure")
+            || abiDefinition.getStateMutability().equals("constant")
+            || abiDefinition.getStateMutability().equals("view")) {
+            abiDefinition.setConstant(true);
+        }
+        return abiDefinition;
     }
 
     public Object handleCall(int groupId, String userAddress, String contractAddress,
