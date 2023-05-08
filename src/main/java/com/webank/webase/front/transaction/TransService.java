@@ -180,13 +180,7 @@ public class TransService {
             userAddress = keyStoreService.getCredentialsForQuery().getAddress();
         }
 
-        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
-        boolean isTxConstant = abiDefinition.isConstant();
-        if (abiDefinition.getStateMutability().equals("pure")
-            || abiDefinition.getStateMutability().equals("constant")
-            || abiDefinition.getStateMutability().equals("view")) {
-            isTxConstant = true;
-        }
+        boolean isTxConstant = this.getABIDefinition(abiStr, funcName).isConstant();
         if (isTxConstant) {
             return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName);
         } else {
@@ -296,13 +290,7 @@ public class TransService {
 
         String encodeFunction = this.encodeFunction2Str(abiStr, funcName, funcParam);
 
-        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
-        boolean isTxConstant = abiDefinition.isConstant();
-        if (abiDefinition.getStateMutability().equals("pure")
-            || abiDefinition.getStateMutability().equals("constant")
-            || abiDefinition.getStateMutability().equals("view")) {
-            isTxConstant = true;
-        }
+        boolean isTxConstant = this.getABIDefinition(abiStr, funcName).isConstant();
         // get privateKey
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress);
 
@@ -595,8 +583,13 @@ public class TransService {
             throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
         // abi only contain one function, so get first one
-        ABIDefinition function = abiDefinitionList.get(0);
-        return function;
+        ABIDefinition abiDefinition = abiDefinitionList.get(0);
+        if (abiDefinition.getStateMutability().equals("pure")
+            || abiDefinition.getStateMutability().equals("constant")
+            || abiDefinition.getStateMutability().equals("view")) {
+            abiDefinition.setConstant(true);
+        }
+        return abiDefinition;
     }
 
     public Object handleCall(int groupId, String userAddress, String contractAddress,
