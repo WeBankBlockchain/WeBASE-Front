@@ -252,6 +252,7 @@ public class TransService {
         byte[] encodeFunction = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
 
         boolean isTxConstant = this.getABIDefinition(abiStr, funcName, groupId).isConstant();
+        
         // get privateKey
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress, groupId);
 
@@ -584,8 +585,13 @@ public class TransService {
             throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
         // abi only contain one function, so get first one
-        ABIDefinition function = abiDefinitionList.get(0);
-        return function;
+        ABIDefinition abiDefinition = abiDefinitionList.get(0);
+        if (abiDefinition.getStateMutability().equals("pure")
+                || abiDefinition.getStateMutability().equals("constant")
+                || abiDefinition.getStateMutability().equals("view")) {
+            abiDefinition.setConstant(true);
+        }
+        return abiDefinition;
     }
 
     public Object handleCall(String groupId, String userAddress, String contractAddress,
