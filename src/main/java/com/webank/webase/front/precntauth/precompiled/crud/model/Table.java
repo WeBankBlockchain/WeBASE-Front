@@ -12,20 +12,20 @@
  * the License.
  */
 
-package com.webank.webase.front.precntauth.precompiled.crud;
+package com.webank.webase.front.precntauth.precompiled.crud.model;
 
 import java.util.List;
+import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.Common;
 
 public class Table {
 
     private String tableName;
-    private String key;
     private String keyFieldName;
     private List<String> valueFields;
     private String optional = "";
+    private Common.TableKeyOrder keyOrder = Common.TableKeyOrder.Lexicographic;
 
-    public Table() {
-    }
+    public Table() {}
 
     public String getTableName() {
         return tableName;
@@ -37,10 +37,6 @@ public class Table {
 
     public void setKeyFieldName(String keyFieldName) {
         this.keyFieldName = keyFieldName;
-    }
-
-    public String getKey() {
-        return key;
     }
 
     public List<String> getValueFields() {
@@ -55,15 +51,19 @@ public class Table {
         this.tableName = tableName;
     }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
-
     public void setValueFields(List<String> valueFields) {
         this.valueFields = valueFields;
     }
 
     public void setOptional(String optional) {
         this.optional = optional;
+    }
+
+    public Common.TableKeyOrder getKeyOrder() {
+        return keyOrder;
+    }
+
+    public void setKeyOrder(Common.TableKeyOrder keyOrder) {
+        this.keyOrder = keyOrder;
     }
 }

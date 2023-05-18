@@ -94,6 +94,7 @@ dependencies {
     }
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
+    compile 'com.github.jsqlparser:jsqlparser:2.0'
     compile('org.fisco-bcos.code-generator:bcos-code-generator:1.0.0-SNAPSHOT') {
         exclude group: "org.fisco-bcos.java-sdk"
         exclude group: "org.slf4j"
