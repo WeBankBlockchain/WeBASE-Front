@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 public class ReqUpdateTableSql {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private String groupId;
+    private String signUserId;   //请求的userId,即用户Id
     private String sqlUpdate;  //更新表的SQL, e.g. "update t_demo3 set item_name = orange where name = fruit and item_id = 1"
 
 }

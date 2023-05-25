@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 public class ReqRemoveTableSql {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private String groupId;
+    private String signUserId;   //请求的userId,即用户Id
     private String sqlRemove;  //删除表的SQL, e.g. "delete from t_demo3 where name = fruit and item_id = 1"
 
 }

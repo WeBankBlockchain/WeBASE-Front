@@ -54,13 +54,14 @@ public class CrudServiceInWebase {
      * @throws JSQLParserException JSQLParserException
      * @throws ContractException ContractException
      */
-    public boolean createTable(String groupId, String sqlCreate) throws JSQLParserException,
+    public boolean createTable(String groupId, String signUserId, String sqlCreate) throws JSQLParserException,
             ContractException {
         try {
             Table table = new Table();
 
             TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentialsForQuery(groupId));
+                    keyStoreService.getCredentials(signUserId,groupId));
+
             // sql转换
             CRUDParseUtils.parseCreateTable(sqlCreate, table);
             Map<String, List<String>> tableDesc;
@@ -107,10 +108,10 @@ public class CrudServiceInWebase {
      * @param tableName  目标表的名称, e.g.  "t_demo3"
      * @return String
      */
-    public String descTable(String groupId, String tableName) {
+    public String descTable(String groupId, String signUserId, String tableName) {
         try {
             TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentialsForQuery(groupId));
+                    keyStoreService.getCredentials(signUserId,groupId));
             CRUDParseUtils.invalidSymbol(tableName);
             if (tableName.endsWith(";")) {
                 tableName = tableName.substring(0, tableName.length() - 1);
@@ -144,13 +145,13 @@ public class CrudServiceInWebase {
      * @param sqlInsert   插入表的SQL, e.g.  "insert into t_demo3 values (fruit, 1, apple1)"
      * @return boolean
      */
-    public boolean insertTable(String groupId, String sqlInsert) {
+    public boolean insertTable(String groupId, String signUserId, String sqlInsert) {
         try {
             Table table = new Table();
             String tableName = CRUDParseUtils.parseTableNameFromSql(sqlInsert);
 
             TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentialsForQuery(groupId));
+                    keyStoreService.getCredentials(signUserId,groupId));
             EnumNodeVersion.Version supportedVersion =
                     EnumNodeVersion.valueOf((int) tableCRUDService.getCurrentVersion()).toVersionObj();
             Map<String, List<String>> descTable;
@@ -207,14 +208,14 @@ public class CrudServiceInWebase {
      * @param sqlSelect   查询表的SQL, e.g. "select * from t_demo3 where name = fruit"
      * @return List<Map<String, String>>
      */
-    public List<Map<String, String>> selectTable(String groupId, String sqlSelect) {
+    public List<Map<String, String>> selectTable(String groupId, String signUserId, String sqlSelect) {
         try {
             Table table = new Table();
             List<String> selectColumns = new ArrayList<>();
             String tableName = CRUDParseUtils.parseTableNameFromSql(sqlSelect);
             table.setTableName(tableName);
             TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentialsForQuery(groupId));
+                    keyStoreService.getCredentials(signUserId,groupId));
             Map<String, List<String>> descTable = tableCRUDService.desc(tableName);
             if (checkTableNotExistence(descTable)) {
                 System.out.println("The table \"" + table.getTableName() + "\" doesn't exist!");
@@ -283,13 +284,13 @@ public class CrudServiceInWebase {
      * @param sqlUpdate   更新表的SQL, e.g. "update t_demo3 set item_name = orange where name = fruit and item_id = 1"
      * @return boolean
      */
-    public boolean updateTable(String groupId, String sqlUpdate) {
+    public boolean updateTable(String groupId, String signUserId, String sqlUpdate) {
         try {
             Table table = new Table();
             UpdateFields updateFields = new UpdateFields();
             String tableName = CRUDParseUtils.parseTableNameFromSql(sqlUpdate);
             TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentialsForQuery(groupId));
+                    keyStoreService.getCredentials(signUserId,groupId));
             Map<String, List<String>> descTable = tableCRUDService.desc(tableName);
             if (checkTableNotExistence(descTable)) {
                 System.out.println("The table \"" + tableName + "\" doesn't exist!");
@@ -346,12 +347,12 @@ public class CrudServiceInWebase {
      * @param sqlRemove   删除表的SQL, e.g. "delete from t_demo3 where name = fruit and item_id = 1"
      * @return boolean
      */
-    public boolean removeTable(String groupId, String sqlRemove) {
+    public boolean removeTable(String groupId, String signUserId, String sqlRemove) {
         try {
             Table table = new Table();
             String tableName = CRUDParseUtils.parseTableNameFromSql(sqlRemove);
             TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentialsForQuery(groupId));
+                    keyStoreService.getCredentials(signUserId,groupId));
             Map<String, List<String>> descTable = tableCRUDService.desc(tableName);
             table.setTableName(tableName);
             if (checkTableNotExistence(descTable)) {

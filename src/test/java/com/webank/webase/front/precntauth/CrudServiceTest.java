@@ -249,13 +249,6 @@ public class CrudServiceTest extends TestBase {
             System.out.println("Result of update " + tableNameUpdate + " :");
             PrintUtil.printJson(updateResult.toString());
         }
-
-        if (updateResult.getCode() >= 0) {
-            System.out.println("Update success: " + updateResult.getCode() + " row affected.");
-        } else {
-            System.out.println("Result of update " + tableNameUpdate + " :");
-            PrintUtil.printJson(updateResult.toString());
-        }
     }
 
     @Test

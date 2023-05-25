@@ -38,7 +38,8 @@ public class CrudController {
     public Object createTable(@Valid @RequestBody ReqCreateTableSql reqCreateTableSql)
             throws ContractException, JSQLParserException {
         return crudServiceInWebase.createTable(reqCreateTableSql.getGroupId(),
-                        reqCreateTableSql.getSqlCreate());
+                reqCreateTableSql.getSignUserId(),
+                reqCreateTableSql.getSqlCreate());
     }
 
     @ApiOperation(value = "desc the table")
@@ -48,7 +49,8 @@ public class CrudController {
     public Object descTable(@Valid @RequestBody ReqDescTableSql reqDescTableSql)
             throws ContractException, JSQLParserException {
         return crudServiceInWebase.descTable(reqDescTableSql.getGroupId(),
-                        reqDescTableSql.getTableName());
+                reqDescTableSql.getSignUserId(),
+                reqDescTableSql.getTableName());
     }
 
     @ApiOperation(value = "insert into the table")
@@ -58,7 +60,8 @@ public class CrudController {
     public Object insertTable(@Valid @RequestBody ReqInsertTableSql reqInsertTableSql)
             throws ContractException, JSQLParserException {
         return crudServiceInWebase.insertTable(reqInsertTableSql.getGroupId(),
-                        reqInsertTableSql.getSqlInsert());
+                reqInsertTableSql.getSignUserId(),
+                reqInsertTableSql.getSqlInsert());
     }
 
 
@@ -70,6 +73,7 @@ public class CrudController {
             throws ContractException, JSQLParserException {
         List<Map<String, String>> res =
                 crudServiceInWebase.selectTable(reqSelectTableSql.getGroupId(),
+                        reqSelectTableSql.getSignUserId(),
                         reqSelectTableSql.getSqlSelect());
         return JsonUtils.objToString(res);
     }
@@ -82,7 +86,8 @@ public class CrudController {
     public Object updateTable(@Valid @RequestBody ReqUpdateTableSql reqUpdateTableSql)
             throws ContractException, JSQLParserException {
         return crudServiceInWebase.updateTable(reqUpdateTableSql.getGroupId(),
-                        reqUpdateTableSql.getSqlUpdate());
+                reqUpdateTableSql.getSignUserId(),
+                reqUpdateTableSql.getSqlUpdate());
     }
 
 
@@ -93,7 +98,8 @@ public class CrudController {
     public Object removeTable(@Valid @RequestBody ReqRemoveTableSql reqRemoveTableSql)
             throws ContractException, JSQLParserException {
         return crudServiceInWebase.removeTable(reqRemoveTableSql.getGroupId(),
-                        reqRemoveTableSql.getSqlRemove());
+                reqRemoveTableSql.getSignUserId(),
+                reqRemoveTableSql.getSqlRemove());
     }
 
 }
