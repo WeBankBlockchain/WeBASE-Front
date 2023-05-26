@@ -4,6 +4,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author litieqiao
@@ -15,5 +16,8 @@ public class ReqCreateTableSql {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private String groupId;
     private String signUserId;   //请求的userId,即用户Id
-    private String sqlCreate;   //创建表的SQL, e.g.   "create table t_demo3(name varchar, item_id varchar, item_name varchar, primary key(name))"
+    private String tableName;
+    private String keyFieldName;
+    private List<String> valueFields;
+    private int keyOrder;    //Common.TableKeyOrder: Unknown(-1),Lexicographic(0),Numerical(1)
 }

@@ -6,20 +6,21 @@ import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.precntauth.precompiled.crud.model.CRUDParseUtils;
 import com.webank.webase.front.precntauth.precompiled.crud.model.Table;
 import com.webank.webase.front.transaction.TransService;
-import com.webank.webase.front.util.JsonUtils;
 import com.webank.webase.front.util.PrintUtil;
 import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.codec.datatypes.DynamicArray;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Type;
+import org.fisco.bcos.sdk.v3.codec.datatypes.Utf8String;
 import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TableCRUDService;
-import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.Condition;
-import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.ConditionV320;
-import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.Entry;
-import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.UpdateFields;
-import org.fisco.bcos.sdk.v3.model.EnumNodeVersion;
-import org.fisco.bcos.sdk.v3.model.PrecompiledConstant;
-import org.fisco.bcos.sdk.v3.model.PrecompiledRetCode;
-import org.fisco.bcos.sdk.v3.model.RetCode;
+import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TableManagerPrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TablePrecompiled;
+import org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.*;
+import org.fisco.bcos.sdk.v3.contract.precompiled.model.PrecompiledAddress;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.model.*;
 import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.fisco.bcos.sdk.v3.utils.ObjectMapperFactory;
 import org.slf4j.Logger;
@@ -28,6 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.fisco.bcos.sdk.v3.contract.precompiled.crud.common.Common.TABLE_PREFIX;
 
 /**
  * @author litieqiao
@@ -47,71 +51,61 @@ public class CrudServiceInWebase {
     private static final Logger logger = LoggerFactory.getLogger(CrudServiceInWebase.class);
 
     /**
-     * Function: create Table By sqlCreate
-     * @param groupId   链的group组Id
-     * @param sqlCreate   创建表的SQL, e.g.   "create table t_demo3(name varchar, item_id varchar, item_name varchar, primary key(name))"
-     * @return boolean
+     * Function: create Table By parameters
+     *
+     * @param groupId      链的group组Id
+     * @param signUserId   请求的userId,即用户Id
+     * @param tableName   表名
+     * @param keyFieldName  key字段
+     * @param valueFields   value字段集
+     * @param keyOrder     Common.TableKeyOrder的三种int取值： Unknown(-1),Lexicographic(0),
+     *                     Numerical(1)
+     * @return Object
      * @throws JSQLParserException JSQLParserException
-     * @throws ContractException ContractException
+     * @throws ContractException   ContractException
      */
-    public boolean createTable(String groupId, String signUserId, String sqlCreate) throws JSQLParserException,
-            ContractException {
-        try {
-            Table table = new Table();
+    public Object createTable(String groupId, String signUserId, String tableName,
+                              String keyFieldName, List<String> valueFields, int keyOrder) throws ContractException, JSQLParserException {
+        return this.createTableHandle(groupId, signUserId, tableName, keyFieldName,
+                valueFields, keyOrder);
+    }
 
-            TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentials(signUserId,groupId));
+    private Object createTableHandle(String groupId, String signUserId, String tableName,
+                                     String keyFieldName, List<String> valueFields,
+                                     int keyOrderValue) {
+        Common.TableKeyOrder keyOrder = Common.TableKeyOrder.valueOf(keyOrderValue);
+        // get address and abi of precompiled contract
+        TableManagerPrecompiled.TableInfoV320 tableInfo =
+                new TableManagerPrecompiled.TableInfoV320(
+                        keyOrder.getBigValue(), keyFieldName, valueFields);
 
-            // sql转换
-            CRUDParseUtils.parseCreateTable(sqlCreate, table);
-            Map<String, List<String>> tableDesc;
-            EnumNodeVersion.Version supportedVersion =
-                    EnumNodeVersion.valueOf((int) tableCRUDService.getCurrentVersion()).toVersionObj();
-            RetCode result;
-            if (supportedVersion.compareTo(EnumNodeVersion.BCOS_3_2_0.toVersionObj()) >= 0) {
-                result =
-                        tableCRUDService.createTable(
-                                table.getTableName(),
-                                table.getKeyOrder(),
-                                table.getKeyFieldName(),
-                                table.getValueFields());
-            } else {
-                result =
-                        tableCRUDService.createTable(
-                                table.getTableName(), table.getKeyFieldName(), table.getValueFields());
-            }
-            // parse the result
-            if (result.getCode() == PrecompiledRetCode.CODE_SUCCESS.getCode()) {
-                System.out.println("Create '" + table.getTableName() + "' Ok.");
-            } else {
-                System.out.println("Create '" + table.getTableName() + "' failed ");
-                PrintUtil.printJson(result.toString());
-                return false;
-            }
+        boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
 
-            return true;
-        } catch (FrontException e) {
-            System.out.println(e.getMessage());
-            logger.error(" message: {}, e:", e.getMessage(), e);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
-        } catch (ContractException | JSQLParserException | NullPointerException e) {
-            logger.error(" message: {}, e:", e.getMessage(), e);
-            System.out.println("Could not parse SQL statement.");
-            CRUDParseUtils.invalidSymbol(sqlCreate);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
-        }
+        List<Type> funcParamsList = Arrays.<Type>asList(new Utf8String(tableName), tableInfo);
+        List<String> funcParams =
+                funcParamsList.stream().map(e -> e.toString()).collect(Collectors.toList());
+
+        // execute createtable method
+        TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                        signUserId, PrecompiledAddress.TABLE_MANAGER_PRECOMPILED_ADDRESS,
+                        TableManagerPrecompiled.ABI, TableManagerPrecompiled.FUNC_CREATETABLE,
+                        funcParams, isWasm);
+        return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
+                .handleTransactionReceipt(receipt, isWasm);
     }
 
     /**
-     *  Function: desc Table
+     * Function: desc Table
+     *
      * @param groupId   链的group组Id
-     * @param tableName  目标表的名称, e.g.  "t_demo3"
+     * @param tableName 目标表的名称, e.g.  "t_demo3"
      * @return String
      */
-    public String descTable(String groupId, String signUserId, String tableName) {
+    public String descTable(String groupId, String tableName) {
         try {
             TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentials(signUserId,groupId));
+                    keyStoreService.getCredentialsForQuery(groupId));
             CRUDParseUtils.invalidSymbol(tableName);
             if (tableName.endsWith(";")) {
                 tableName = tableName.substring(0, tableName.length() - 1);
@@ -130,92 +124,79 @@ public class CrudServiceInWebase {
         } catch (FrontException e) {
             System.out.println(e.getMessage());
             logger.error(" message: {}, e:", e.getMessage(), e);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
+            throw new FrontException(" message: {}, e:" + e.getMessage());
         } catch (ContractException | JsonProcessingException | NullPointerException e) {
             logger.error(" message: {}, e:", e.getMessage(), e);
             System.out.println("Could not parse SQL statement.");
             CRUDParseUtils.invalidSymbol(tableName);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
+            throw new FrontException(" message: {}, e:" + e.getMessage());
         }
     }
 
     /**
      * Function: insert Table
-     * @param groupId   链的group组Id
-     * @param sqlInsert   插入表的SQL, e.g.  "insert into t_demo3 values (fruit, 1, apple1)"
+     *
+     * @param groupId    链的group组Id
+     * @param signUserId 请求的userId,即用户Id
+     * @param sqlInsert  插入表的SQL, e.g.  "insert into t_demo3 values (fruit, 1, apple1)"
      * @return boolean
      */
-    public boolean insertTable(String groupId, String signUserId, String sqlInsert) {
-        try {
-            Table table = new Table();
-            String tableName = CRUDParseUtils.parseTableNameFromSql(sqlInsert);
+    public Object insertTable(String groupId, String signUserId, String sqlInsert) throws ContractException, JSQLParserException {
+        return insertTableHandle(groupId, signUserId, sqlInsert);
+    }
 
-            TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentials(signUserId,groupId));
-            EnumNodeVersion.Version supportedVersion =
-                    EnumNodeVersion.valueOf((int) tableCRUDService.getCurrentVersion()).toVersionObj();
-            Map<String, List<String>> descTable;
-            if (supportedVersion.compareTo(EnumNodeVersion.BCOS_3_2_0.toVersionObj()) >= 0) {
-                descTable = tableCRUDService.descWithKeyOrder(tableName);
-            } else {
-                descTable = tableCRUDService.desc(tableName);
-            }
-            table.setTableName(tableName);
-            if (checkTableNotExistence(descTable)) {
-                System.out.println("The table \"" + tableName + "\" doesn't exist!");
-                throw new FrontException("The table \"" + tableName + "\" doesn't exist!");
-            }
-            logger.debug("insert, tableName: {}, descTable: {}", tableName, descTable);
-            Entry entry = CRUDParseUtils.parseInsert(sqlInsert, table, descTable);
-            String keyName = descTable.get(PrecompiledConstant.KEY_FIELD_NAME).get(0);
-            String keyValue = entry.getKey();
-            logger.debug(
-                    "fieldNameToValue: {}, keyName: {}, keyValue: {}",
-                    entry.getFieldNameToValue(),
-                    keyName,
-                    keyValue);
-            if (keyValue == null) {
-                throw new FrontException("Please insert the key field '" + keyName + "'.");
-            }
+    private Object insertTableHandle(String groupId, String signUserId, String sqlInsert) throws JSQLParserException, ContractException {
+        //step1 ,get TablePrecompiled
+        Table table = new Table();
+        String tableName = CRUDParseUtils.parseTableNameFromSql(sqlInsert);
+        table.setTableName(tableName);
 
-            RetCode insertResult = tableCRUDService.insert(table.getTableName(), entry);
-            if (insertResult.getCode() >= 0) {
-                System.out.println("Insert OK: ");
-                System.out.println(insertResult.getCode() + " row(s) affected.");
-            } else {
-                System.out.println("Result of insert for " + table.getTableName() + ":");
-                PrintUtil.printJson(insertResult.toString());
-                return false;
-            }
-            System.out.println("insertResult " + insertResult);
-            return true;
-        } catch (FrontException e) {
-            System.out.println(e.getMessage());
-            logger.error(" message: {}, e:", e.getMessage(), e);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
-        } catch (ContractException | JSQLParserException | NullPointerException e) {
-            logger.error(" message: {}, e:", e.getMessage(), e);
-            System.out.println("Could not parse SQL statement.");
-            CRUDParseUtils.invalidSymbol(sqlInsert);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
+        Client client = web3ApiService.getWeb3j(groupId);
+        CryptoKeyPair credential = keyStoreService.getCredentials(signUserId, groupId);
+        Boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+        String tableAddress = getTableContractAddress(isWasm,tableName,client,credential);
+
+        //step2, call the transHandleWithSign
+        TableCRUDService tableCRUDService = new TableCRUDService(client, credential);
+        EnumNodeVersion.Version supportedVersion =
+                EnumNodeVersion.valueOf((int) tableCRUDService.getCurrentVersion()).toVersionObj();
+        Map<String, List<String>> descTable;
+        if (supportedVersion.compareTo(EnumNodeVersion.BCOS_3_2_0.toVersionObj()) >= 0) {
+            descTable = tableCRUDService.descWithKeyOrder(tableName);
+        } else {
+            descTable = tableCRUDService.desc(tableName);
         }
+
+        Entry entry = CRUDParseUtils.parseInsert(sqlInsert, table, descTable);
+        List<Type> funcParamsList = Arrays.<Type>asList(entry.covertToEntry());
+        List<String> funcParams =
+                funcParamsList.stream().map(e -> e.toString()).collect(Collectors.toList());
+
+        // execute insert method
+        TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                        signUserId, tableAddress, TablePrecompiled.ABI,
+                        TablePrecompiled.FUNC_INSERT, funcParams, isWasm);
+        return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
+                .handleTransactionReceipt(receipt, isWasm);
     }
 
 
     /**
      * Function: selectTable Table By sqlSelect
+     *
      * @param groupId   链的group组Id
-     * @param sqlSelect   查询表的SQL, e.g. "select * from t_demo3 where name = fruit"
-     * @return List<Map<String, String>>
+     * @param sqlSelect 查询表的SQL, e.g. "select * from t_demo3 where name = fruit"
+     * @return List<Map < String, String>>
      */
-    public List<Map<String, String>> selectTable(String groupId, String signUserId, String sqlSelect) {
+    public List<Map<String, String>> selectTable(String groupId, String sqlSelect) {
         try {
             Table table = new Table();
             List<String> selectColumns = new ArrayList<>();
             String tableName = CRUDParseUtils.parseTableNameFromSql(sqlSelect);
             table.setTableName(tableName);
             TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentials(signUserId,groupId));
+                    keyStoreService.getCredentialsForQuery(groupId));
             Map<String, List<String>> descTable = tableCRUDService.desc(tableName);
             if (checkTableNotExistence(descTable)) {
                 System.out.println("The table \"" + table.getTableName() + "\" doesn't exist!");
@@ -269,127 +250,132 @@ public class CrudServiceInWebase {
         } catch (FrontException e) {
             System.out.println(e.getMessage());
             logger.error(" message: {}, e:", e.getMessage(), e);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
+            throw new FrontException(" message: {}, e:" + e.getMessage());
         } catch (ContractException | JSQLParserException | NullPointerException e) {
             logger.error(" message: {}, e:", e.getMessage(), e);
             System.out.println("Could not parse SQL statement.");
             CRUDParseUtils.invalidSymbol(sqlSelect);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
+            throw new FrontException(" message: {}, e:" + e.getMessage());
         }
     }
 
     /**
      * Function: update Table By sqlUpdate
-     * @param groupId   链的group组Id
-     * @param sqlUpdate   更新表的SQL, e.g. "update t_demo3 set item_name = orange where name = fruit and item_id = 1"
+     *
+     * @param groupId    链的group组Id
+     * @param signUserId 请求的userId,即用户Id
+     * @param sqlUpdate  更新表的SQL, e.g. "update t_demo3 set item_name = orange where name = fruit and item_id = 1"
      * @return boolean
      */
-    public boolean updateTable(String groupId, String signUserId, String sqlUpdate) {
-        try {
-            Table table = new Table();
-            UpdateFields updateFields = new UpdateFields();
-            String tableName = CRUDParseUtils.parseTableNameFromSql(sqlUpdate);
-            TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentials(signUserId,groupId));
-            Map<String, List<String>> descTable = tableCRUDService.desc(tableName);
-            if (checkTableNotExistence(descTable)) {
-                System.out.println("The table \"" + tableName + "\" doesn't exist!");
-                return false;
-            }
-            String keyName = descTable.get(PrecompiledConstant.KEY_FIELD_NAME).get(0);
-            if (updateFields.getFieldNameToValue().containsKey(keyName)) {
-                System.out.println("Please don't set the key field \"" + keyName + "\".");
-                return false;
-            }
-            table.setKeyFieldName(keyName);
-            table.setValueFields(descTable.get(PrecompiledConstant.VALUE_FIELD_NAME));
-            EnumNodeVersion.Version supportedVersion =
-                    EnumNodeVersion.valueOf((int) tableCRUDService.getCurrentVersion()).toVersionObj();
-            RetCode updateResult;
-            if (supportedVersion.compareTo(EnumNodeVersion.BCOS_3_2_0.toVersionObj()) >= 0) {
-                ConditionV320 conditionV320 = new ConditionV320();
-                CRUDParseUtils.parseUpdate(sqlUpdate, table, conditionV320, updateFields);
-                updateResult = tableCRUDService.update(tableName, conditionV320, updateFields);
-            } else {
-                Condition condition = new Condition();
-                CRUDParseUtils.parseUpdate(sqlUpdate, table, condition, updateFields);
+    public Object updateTable(String groupId, String signUserId, String sqlUpdate) throws JSQLParserException, ContractException {
+        return updateTableHandle(groupId, signUserId, sqlUpdate);
+    }
 
-                String keyValue = condition.getEqValue();
-                updateResult =
-                        keyValue.isEmpty()
-                                ? tableCRUDService.update(tableName, condition, updateFields)
-                                : tableCRUDService.update(tableName, keyValue, updateFields);
-            }
+    private Object updateTableHandle(String groupId, String signUserId, String sqlUpdate) throws JSQLParserException, ContractException {
+        //step1 ,get TablePrecompiled
+        Table table = new Table();
+        String tableName = CRUDParseUtils.parseTableNameFromSql(sqlUpdate);
+        table.setTableName(tableName);
 
-            if (updateResult.getCode() >= 0) {
-                System.out.println("Update success: " + updateResult.getCode() + " row affected.");
-            } else {
-                System.out.println("Result of update " + tableName + " :");
-                PrintUtil.printJson(updateResult.toString());
-            }
+        Client client = web3ApiService.getWeb3j(groupId);
+        CryptoKeyPair credential = keyStoreService.getCredentials(signUserId, groupId);
+        Boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+        String tableAddress = getTableContractAddress(isWasm,tableName,client,credential);
 
-            return (updateResult.getCode() >= 0);
-        } catch (FrontException e) {
-            System.out.println(e.getMessage());
-            logger.error(" message: {}, e:", e.getMessage(), e);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
-        } catch (ContractException | JSQLParserException | NullPointerException e) {
-            logger.error(" message: {}, e:", e.getMessage(), e);
-            System.out.println("Could not parse SQL statement.");
-            CRUDParseUtils.invalidSymbol(sqlUpdate);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
+        //step2, call the transHandleWithSign
+        TableCRUDService tableCRUDService = new TableCRUDService(client, credential);
+        EnumNodeVersion.Version supportedVersion =
+                EnumNodeVersion.valueOf((int) tableCRUDService.getCurrentVersion()).toVersionObj();
+        Map<String, List<String>> descTable;
+        if (supportedVersion.compareTo(EnumNodeVersion.BCOS_3_2_0.toVersionObj()) >= 0) {
+            descTable = tableCRUDService.descWithKeyOrder(tableName);
+        } else {
+            descTable = tableCRUDService.desc(tableName);
         }
+
+        UpdateFields updateFields = new UpdateFields();
+        ConditionV320 conditionV320 = new ConditionV320();
+        String keyName = descTable.get(PrecompiledConstant.KEY_FIELD_NAME).get(0);
+        if (updateFields.getFieldNameToValue().containsKey(keyName)) {
+            System.out.println("Please don't set the key field \"" + keyName + "\".");
+            return false;
+        }
+        table.setKeyFieldName(keyName);
+        table.setValueFields(descTable.get(PrecompiledConstant.VALUE_FIELD_NAME));
+        CRUDParseUtils.parseUpdate(sqlUpdate, table, conditionV320, updateFields);
+
+        List<Type> funcParamsList = Arrays.<Type>asList(
+                new DynamicArray<TablePrecompiled.ConditionV320>(TablePrecompiled.ConditionV320.class,
+                        conditionV320.getTableConditions()), conditionV320.getLimit(),
+                new DynamicArray<TablePrecompiled.UpdateField>(
+                        TablePrecompiled.UpdateField.class, updateFields.convertToUpdateFields()));
+
+        List<String> funcParams =
+                funcParamsList.stream().map(e -> e.toString()).collect(Collectors.toList());
+
+        // execute update method
+        TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                        signUserId, tableAddress, TablePrecompiled.ABI,
+                        TablePrecompiled.FUNC_UPDATE,
+                        funcParams,isWasm);
+        return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
+                .handleTransactionReceipt(receipt, isWasm);
     }
 
     /**
      * Function: remove Table By sqlRemove
-     * @param groupId   链的group组Id
-     * @param sqlRemove   删除表的SQL, e.g. "delete from t_demo3 where name = fruit and item_id = 1"
+     *
+     * @param groupId    链的group组Id
+     * @param signUserId 请求的userId,即用户Id
+     * @param sqlRemove  删除表的SQL, e.g. "delete from t_demo3 where name = fruit and item_id = 1"
      * @return boolean
      */
-    public boolean removeTable(String groupId, String signUserId, String sqlRemove) {
-        try {
-            Table table = new Table();
-            String tableName = CRUDParseUtils.parseTableNameFromSql(sqlRemove);
-            TableCRUDService tableCRUDService = new TableCRUDService(web3ApiService.getWeb3j(groupId),
-                    keyStoreService.getCredentials(signUserId,groupId));
-            Map<String, List<String>> descTable = tableCRUDService.desc(tableName);
-            table.setTableName(tableName);
-            if (checkTableNotExistence(descTable)) {
-                System.out.println("The table \"" + table.getTableName() + "\" doesn't exist!");
-                return false;
-            }
-            table.setKeyFieldName(descTable.get(PrecompiledConstant.KEY_FIELD_NAME).get(0));
-            table.setValueFields(descTable.get(PrecompiledConstant.VALUE_FIELD_NAME));
+    public Object removeTable(String groupId, String signUserId, String sqlRemove) throws ContractException, JSQLParserException {
+        return removeTableHandle(groupId, signUserId, sqlRemove);
+    }
 
-            EnumNodeVersion.Version supportedVersion = EnumNodeVersion.valueOf((int) tableCRUDService.getCurrentVersion())
-                    .toVersionObj();
-            RetCode removeResult;
-            if (supportedVersion.compareTo(EnumNodeVersion.BCOS_3_2_0.toVersionObj()) >= 0) {
-                ConditionV320 conditionV320 = new ConditionV320();
-                CRUDParseUtils.parseRemove(sqlRemove, table, conditionV320);
-                removeResult = tableCRUDService.remove(table.getTableName(), conditionV320);
-            } else {
-                Condition condition = new Condition();
-                CRUDParseUtils.parseRemove(sqlRemove, table, condition);
-                String keyValue = condition.getEqValue();
-                removeResult =
-                        keyValue.isEmpty()
-                                ? tableCRUDService.remove(table.getTableName(), condition)
-                                : tableCRUDService.remove(table.getTableName(), keyValue);
-            }
+    private Object removeTableHandle(String groupId, String signUserId, String sqlRemove) throws JSQLParserException, ContractException {
+        //step1 ,get TablePrecompiled
+        Table table = new Table();
+        String tableName = CRUDParseUtils.parseTableNameFromSql(sqlRemove);
+        table.setTableName(tableName);
 
-            return (removeResult.getCode() >= 0);
-        } catch (FrontException e) {
-            System.out.println(e.getMessage());
-            logger.error(" message: {}, e:", e.getMessage(), e);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
-        } catch (ContractException | JSQLParserException | NullPointerException e) {
-            logger.error(" message: {}, e:", e.getMessage(), e);
-            System.out.println("Could not parse SQL statement.");
-            CRUDParseUtils.invalidSymbol(sqlRemove);
-            throw new FrontException(" message: {}, e:"+e.getMessage());
+        Client client = web3ApiService.getWeb3j(groupId);
+        CryptoKeyPair credential = keyStoreService.getCredentials(signUserId, groupId);
+        Boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+        String tableAddress = getTableContractAddress(isWasm,tableName,client,credential);
+
+        //step2, call the transHandleWithSign
+        TableCRUDService tableCRUDService = new TableCRUDService(client, credential);
+        Map<String, List<String>> descTable = tableCRUDService.desc(tableName);
+        if (checkTableNotExistence(descTable)) {
+            System.out.println("The table \"" + table.getTableName() + "\" doesn't exist!");
+            return false;
         }
+        table.setKeyFieldName(descTable.get(PrecompiledConstant.KEY_FIELD_NAME).get(0));
+        table.setValueFields(descTable.get(PrecompiledConstant.VALUE_FIELD_NAME));
+
+        ConditionV320 conditionV320 = new ConditionV320();
+        CRUDParseUtils.parseRemove(sqlRemove, table, conditionV320);
+
+        List<Type> funcParamsList = Arrays.<Type>asList(
+                new org.fisco.bcos.sdk.v3.codec.datatypes.DynamicArray<
+                        TablePrecompiled.ConditionV320>(TablePrecompiled.ConditionV320.class,
+                        conditionV320.getTableConditions()),
+                conditionV320.getLimit());
+
+        List<String> funcParams =
+                funcParamsList.stream().map(e -> e.toString()).collect(Collectors.toList());
+
+        // execute remove method
+        TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                        signUserId, tableAddress, TablePrecompiled.ABI,
+                        TablePrecompiled.FUNC_REMOVE,
+                        funcParams, isWasm);
+        return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
+                .handleTransactionReceipt(receipt, isWasm);
     }
 
 
@@ -418,5 +404,29 @@ public class CrudServiceInWebase {
         }
         selectedResult.forEach(System.out::println);
         return selectedResult;
+    }
+
+
+    private String getTableContractAddress(Boolean isWasm, String tableName,Client client,
+                                           CryptoKeyPair credential) throws ContractException {
+        if(isWasm){
+            return  getTableName(tableName);
+        }else{
+            TableManagerPrecompiled tableManagerPrecompiled = TableManagerPrecompiled.load(
+                    isWasm
+                            ? PrecompiledAddress.TABLE_MANAGER_PRECOMPILED_NAME
+                            : PrecompiledAddress.TABLE_MANAGER_PRECOMPILED_ADDRESS,
+                    client, credential
+            );
+            return tableManagerPrecompiled.openTable(tableName);
+        }
+    }
+
+
+    private String getTableName(String tableName) {
+        if (tableName.length() > TABLE_PREFIX.length() && tableName.startsWith(TABLE_PREFIX)) {
+            return tableName;
+        }
+        return TABLE_PREFIX + (tableName.startsWith("/") ? tableName.substring(1) : tableName);
     }
 }

@@ -39,7 +39,10 @@ public class CrudController {
             throws ContractException, JSQLParserException {
         return crudServiceInWebase.createTable(reqCreateTableSql.getGroupId(),
                 reqCreateTableSql.getSignUserId(),
-                reqCreateTableSql.getSqlCreate());
+                reqCreateTableSql.getTableName(),
+                reqCreateTableSql.getKeyFieldName(),
+                reqCreateTableSql.getValueFields(),
+                reqCreateTableSql.getKeyOrder());
     }
 
     @ApiOperation(value = "desc the table")
@@ -49,7 +52,6 @@ public class CrudController {
     public Object descTable(@Valid @RequestBody ReqDescTableSql reqDescTableSql)
             throws ContractException, JSQLParserException {
         return crudServiceInWebase.descTable(reqDescTableSql.getGroupId(),
-                reqDescTableSql.getSignUserId(),
                 reqDescTableSql.getTableName());
     }
 
@@ -73,7 +75,6 @@ public class CrudController {
             throws ContractException, JSQLParserException {
         List<Map<String, String>> res =
                 crudServiceInWebase.selectTable(reqSelectTableSql.getGroupId(),
-                        reqSelectTableSql.getSignUserId(),
                         reqSelectTableSql.getSqlSelect());
         return JsonUtils.objToString(res);
     }

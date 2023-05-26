@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 public class ReqSelectTableSql {
     @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
     private String groupId;
-    private String signUserId;   //请求的userId,即用户Id
     private String sqlSelect;  //查询表的SQL, e.g. "select * from t_demo3 where name = fruit"
 
 }
