@@ -1,8 +1,11 @@
 package com.webank.webase.front.precntauth.precompiled.crud;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.JsonArray;
+import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
+import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils;
 import com.webank.webase.front.precntauth.precompiled.crud.model.CRUDParseUtils;
 import com.webank.webase.front.precntauth.precompiled.crud.model.Table;
 import com.webank.webase.front.transaction.TransService;
@@ -11,9 +14,13 @@ import com.webank.webase.front.web3api.Web3ApiService;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.codec.ContractCodec;
+import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
+import org.fisco.bcos.sdk.v3.codec.abi.Constant;
 import org.fisco.bcos.sdk.v3.codec.datatypes.DynamicArray;
 import org.fisco.bcos.sdk.v3.codec.datatypes.Type;
 import org.fisco.bcos.sdk.v3.codec.datatypes.Utf8String;
+import org.fisco.bcos.sdk.v3.codec.wrapper.*;
 import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TableCRUDService;
 import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TableManagerPrecompiled;
 import org.fisco.bcos.sdk.v3.contract.precompiled.crud.TablePrecompiled;
@@ -28,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,24 +82,32 @@ public class CrudServiceInWebase {
     private Object createTableHandle(String groupId, String signUserId, String tableName,
                                      String keyFieldName, List<String> valueFields,
                                      int keyOrderValue) {
-        Common.TableKeyOrder keyOrder = Common.TableKeyOrder.valueOf(keyOrderValue);
-        // get address and abi of precompiled contract
-        TableManagerPrecompiled.TableInfoV320 tableInfo =
-                new TableManagerPrecompiled.TableInfoV320(
-                        keyOrder.getBigValue(), keyFieldName, valueFields);
+
+        //友好提示：这种TableInfoV320的尚不支持，原因是TableManagerPrecompiled.ABI
+        // 中的createTable这个func的Tableinfo参数中，还不支持keyOrder。
+        // 相当于说能支持TableManagerPrecompiled.TableInfo传参，但TableManagerPrecompiled.TableInfoV320
+        // 目前还不能传。所以创建表这块，keyOrder字段目前无法生效，该预留接口字段的功能，待后续随社区进度进一步完善。
+
+//        Common.TableKeyOrder keyOrder = Common.TableKeyOrder.valueOf(keyOrderValue);
+//        TableManagerPrecompiled.TableInfoV320 tableInfo =
+//                new TableManagerPrecompiled.TableInfoV320(
+//                        keyOrder.getBigValue(), keyFieldName, valueFields);
+
+        TableManagerPrecompiled.TableInfo tableInfo =
+                new TableManagerPrecompiled.TableInfo(
+                        keyFieldName, valueFields);
+
+        List<Object> funcParams=new ArrayList<>();
+        funcParams.add(String.valueOf(tableName));
+        funcParams.add(tableInfo);
 
         boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
-
-        List<Type> funcParamsList = Arrays.<Type>asList(new Utf8String(tableName), tableInfo);
-        List<String> funcParams =
-                funcParamsList.stream().map(e -> e.toString()).collect(Collectors.toList());
-
         // execute createtable method
         TransactionReceipt receipt =
-                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                (TransactionReceipt) transService.transHandleWithSignObj(groupId,
                         signUserId, PrecompiledAddress.TABLE_MANAGER_PRECOMPILED_ADDRESS,
                         TableManagerPrecompiled.ABI, TableManagerPrecompiled.FUNC_CREATETABLE,
-                        funcParams, isWasm);
+                        funcParams);
         return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
                 .handleTransactionReceipt(receipt, isWasm);
     }
@@ -152,7 +169,7 @@ public class CrudServiceInWebase {
         table.setTableName(tableName);
 
         Client client = web3ApiService.getWeb3j(groupId);
-        CryptoKeyPair credential = keyStoreService.getCredentials(signUserId, groupId);
+        CryptoKeyPair credential = keyStoreService.getCredentialsForQuery(groupId);
         Boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
         String tableAddress = getTableContractAddress(isWasm,tableName,client,credential);
 
@@ -168,15 +185,16 @@ public class CrudServiceInWebase {
         }
 
         Entry entry = CRUDParseUtils.parseInsert(sqlInsert, table, descTable);
-        List<Type> funcParamsList = Arrays.<Type>asList(entry.covertToEntry());
-        List<String> funcParams =
-                funcParamsList.stream().map(e -> e.toString()).collect(Collectors.toList());
+        TablePrecompiled.Entry entryResult = entry.covertToEntry();
+
+        List<Object> funcParams=new ArrayList<>();
+        funcParams.add(entryResult);
 
         // execute insert method
         TransactionReceipt receipt =
-                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                (TransactionReceipt) transService.transHandleWithSignObj(groupId,
                         signUserId, tableAddress, TablePrecompiled.ABI,
-                        TablePrecompiled.FUNC_INSERT, funcParams, isWasm);
+                        TablePrecompiled.FUNC_INSERT, funcParams);
         return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
                 .handleTransactionReceipt(receipt, isWasm);
     }
@@ -278,7 +296,7 @@ public class CrudServiceInWebase {
         table.setTableName(tableName);
 
         Client client = web3ApiService.getWeb3j(groupId);
-        CryptoKeyPair credential = keyStoreService.getCredentials(signUserId, groupId);
+        CryptoKeyPair credential = keyStoreService.getCredentialsForQuery(groupId);
         Boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
         String tableAddress = getTableContractAddress(isWasm,tableName,client,credential);
 
@@ -304,23 +322,24 @@ public class CrudServiceInWebase {
         table.setValueFields(descTable.get(PrecompiledConstant.VALUE_FIELD_NAME));
         CRUDParseUtils.parseUpdate(sqlUpdate, table, conditionV320, updateFields);
 
-        List<Type> funcParamsList = Arrays.<Type>asList(
-                new DynamicArray<TablePrecompiled.ConditionV320>(TablePrecompiled.ConditionV320.class,
-                        conditionV320.getTableConditions()), conditionV320.getLimit(),
-                new DynamicArray<TablePrecompiled.UpdateField>(
-                        TablePrecompiled.UpdateField.class, updateFields.convertToUpdateFields()));
+        List<Object> funcParams=new ArrayList<>();
+        //Update也有两种传参，这里采用第二种，即判断条件最完善的一种
+        // Update传参方法一，只传入key值进行进行目标匹配
+//        funcParams.add(conditionV320.getEqValue());
+//        funcParams.add(updateFields.convertToUpdateFields());
 
-        List<String> funcParams =
-                funcParamsList.stream().map(e -> e.toString()).collect(Collectors.toList());
+        //Update传参方法二,用condition条件进行目标匹配
+        funcParams.add(conditionV320.getTableConditions());
+        funcParams.add(conditionV320.getLimit());
+        funcParams.add(updateFields.convertToUpdateFields());
 
         // execute update method
         TransactionReceipt receipt =
-                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                (TransactionReceipt) transService.transHandleWithSignObj(groupId,
                         signUserId, tableAddress, TablePrecompiled.ABI,
                         TablePrecompiled.FUNC_UPDATE,
-                        funcParams,isWasm);
-        return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
-                .handleTransactionReceipt(receipt, isWasm);
+                        funcParams);
+        return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
     }
 
     /**
@@ -342,7 +361,7 @@ public class CrudServiceInWebase {
         table.setTableName(tableName);
 
         Client client = web3ApiService.getWeb3j(groupId);
-        CryptoKeyPair credential = keyStoreService.getCredentials(signUserId, groupId);
+        CryptoKeyPair credential = keyStoreService.getCredentialsForQuery(groupId);
         Boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
         String tableAddress = getTableContractAddress(isWasm,tableName,client,credential);
 
@@ -359,21 +378,21 @@ public class CrudServiceInWebase {
         ConditionV320 conditionV320 = new ConditionV320();
         CRUDParseUtils.parseRemove(sqlRemove, table, conditionV320);
 
-        List<Type> funcParamsList = Arrays.<Type>asList(
-                new org.fisco.bcos.sdk.v3.codec.datatypes.DynamicArray<
-                        TablePrecompiled.ConditionV320>(TablePrecompiled.ConditionV320.class,
-                        conditionV320.getTableConditions()),
-                conditionV320.getLimit());
+        List<Object> funcParams=new ArrayList<>();
+        //Remove也有两种传参，这里采用第二种，即判断条件最完善的一种
+        // Remove传参方法一，只传入key值进行进行目标匹配
+//        funcParams.add(conditionV320.getEqValue());
 
-        List<String> funcParams =
-                funcParamsList.stream().map(e -> e.toString()).collect(Collectors.toList());
+        //Remove传参方法二，用condition条件进行目标匹配
+        funcParams.add(conditionV320.getTableConditions());
+        funcParams.add(conditionV320.getLimit());
 
         // execute remove method
         TransactionReceipt receipt =
-                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                (TransactionReceipt) transService.transHandleWithSignObj(groupId,
                         signUserId, tableAddress, TablePrecompiled.ABI,
                         TablePrecompiled.FUNC_REMOVE,
-                        funcParams, isWasm);
+                        funcParams);
         return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
                 .handleTransactionReceipt(receipt, isWasm);
     }
@@ -406,7 +425,7 @@ public class CrudServiceInWebase {
         return selectedResult;
     }
 
-
+    //查找并获取目标表的合约地址
     private String getTableContractAddress(Boolean isWasm, String tableName,Client client,
                                            CryptoKeyPair credential) throws ContractException {
         if(isWasm){
@@ -422,11 +441,11 @@ public class CrudServiceInWebase {
         }
     }
 
-
     private String getTableName(String tableName) {
         if (tableName.length() > TABLE_PREFIX.length() && tableName.startsWith(TABLE_PREFIX)) {
             return tableName;
         }
         return TABLE_PREFIX + (tableName.startsWith("/") ? tableName.substring(1) : tableName);
     }
+
 }
