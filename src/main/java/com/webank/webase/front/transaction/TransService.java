@@ -252,6 +252,7 @@ public class TransService {
         byte[] encodeFunction = this.encodeFunction2ByteArr(abiStr, funcName, funcParam, groupId, isWasm);
 
         boolean isTxConstant = this.getABIDefinition(abiStr, funcName, groupId).isConstant();
+        
         // get privateKey
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress, groupId);
 
@@ -584,8 +585,13 @@ public class TransService {
             throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
         // abi only contain one function, so get first one
-        ABIDefinition function = abiDefinitionList.get(0);
-        return function;
+        ABIDefinition abiDefinition = abiDefinitionList.get(0);
+        if (abiDefinition.getStateMutability().equals("pure")
+                || abiDefinition.getStateMutability().equals("constant")
+                || abiDefinition.getStateMutability().equals("view")) {
+            abiDefinition.setConstant(true);
+        }
+        return abiDefinition;
     }
 
     public Object handleCall(String groupId, String userAddress, String contractAddress,
@@ -711,6 +717,38 @@ public class TransService {
         TransactionDecoderService txDecoder = new TransactionDecoderService(client.getCryptoSuite(), client.isWASM());
         String receiptMsg = txDecoder.decodeReceiptStatus(receipt).getReceiptMessages();
         receipt.setMessage(receiptMsg);
+    }
+
+
+    public Object transHandleWithSignObj(String groupId, String signUserId,
+                                         String contractAddress, String abiStr,
+                                         String funcName, List<Object> funcParam) {
+        funcParam = funcParam == null ? new ArrayList<>() : funcParam;
+        // check groupId
+        Client client = web3ApiService.getWeb3j(groupId);
+
+        byte[] encodeFunction;
+        log.debug("abiStr:{} ,funcName:{},funcParam {},groupID {}", abiStr, funcName,
+                funcParam, groupId);
+        ContractCodec abiCodec = new ContractCodec(web3ApiService.getCryptoSuite(groupId), client.isWASM());
+        try {
+            encodeFunction = abiCodec.encodeMethod(abiStr, funcName, funcParam);
+        } catch (ContractCodecException e) {
+            log.error("transHandleWithSign encode fail:[]", e);
+            throw new FrontException(ConstantCode.CONTRACT_TYPE_ENCODED_ERROR.getCode(), e.getMessage());
+        }
+        String userAddress = keyStoreService.getAddressBySignUserId(signUserId);
+        if (StringUtils.isBlank(userAddress)) {
+            log.warn("transHandleWithSign this signUser [{}] not record in webase-front", signUserId);
+            userAddress = keyStoreService.getCredentialsForQuery(groupId).getAddress();
+        }
+
+        boolean isTxConstant = this.getABIDefinition(abiStr, funcName, groupId).isConstant();
+        if (isTxConstant) {
+            return this.handleCall(groupId, userAddress, contractAddress, encodeFunction, abiStr, funcName, client.isWASM());
+        } else {
+            return this.handleTransaction(client, signUserId, contractAddress, encodeFunction);
+        }
     }
 
 }
