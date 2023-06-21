@@ -89,12 +89,12 @@ List scaffold = [
 
 dependencies {
     compile spring_boot,swagger,logger,jaxb,jackson,scaffold
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0-SNAPSHOT') {
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk') {
         exclude group: "org.slf4j"
     }
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
-    compile('org.fisco-bcos.code-generator:bcos-code-generator:1.0.0-SNAPSHOT') {
+    compile('org.fisco-bcos.code-generator:bcos-code-generator') {
         exclude group: "org.fisco-bcos.java-sdk"
         exclude group: "org.slf4j"
     }
