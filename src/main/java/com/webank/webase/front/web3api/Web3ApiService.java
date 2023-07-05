@@ -799,15 +799,7 @@ public class Web3ApiService {
      */
     public Client getWeb3j() {
         this.checkConnection();
-        Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList(); //1
-        if (groupIdSet.isEmpty()) {
-            log.error("web3jMap is empty, groupList empty! please check your node status");
-            // get default web3j of integer max value
-            return rpcWeb3j;
-        }
-        // get random index to get web3j
-        Integer index = groupIdSet.iterator().next();
-        return bcosSDK.getClient(index);
+        return rpcWeb3j;
     }
 
     /**
