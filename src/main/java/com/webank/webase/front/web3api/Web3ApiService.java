@@ -800,14 +800,26 @@ public class Web3ApiService {
     public Client getWeb3j() {
         this.checkConnection();
         Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList(); //1
+        log.info("getWeb3j groupIdSet get {}", groupIdSet);
         if (groupIdSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             // get default web3j of integer max value
             return rpcWeb3j;
         }
         // get random index to get web3j
-        Integer index = groupIdSet.iterator().next();
-        return bcosSDK.getClient(index);
+        Client client = null;
+        for (Integer groupId : groupIdSet) {
+            try {
+                client = bcosSDK.getClient(groupId);
+            } catch (BcosSDKException ex) {
+                log.error("getClient failed groupId:{}, ex", groupId, ex);
+            }
+            if (client != null) {
+                return client;
+            }
+        }
+        log.warn("getWeb3j finally get null, now return rpcWeb3j");
+        return rpcWeb3j;
     }
 
     /**
