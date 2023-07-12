@@ -15,7 +15,6 @@ package com.webank.webase.front.contract;
 
 import static org.fisco.solc.compiler.SolidityCompiler.Options.ABI;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.BIN;
-import static org.fisco.solc.compiler.SolidityCompiler.Options.INTERFACE;
 import static org.fisco.solc.compiler.SolidityCompiler.Options.METADATA;
 
 import com.webank.webase.front.base.code.ConstantCode;
@@ -833,8 +832,9 @@ public class ContractService {
             contractFile = new File(CleanPathUtil.cleanString(contractFilePath));
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
             // compile
+            // todo check compile
             SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, useSM2, true, ABI,
-                BIN, INTERFACE, METADATA);
+                BIN, METADATA);
             if ("".equals(res.getOutput())) {
                 log.error("contractCompile error", res.getErrors());
                 throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(),

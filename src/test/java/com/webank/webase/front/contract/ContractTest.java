@@ -70,7 +70,7 @@ public class ContractTest{
             contractFile = new File(contractFilePath);
             FileUtils.writeByteArrayToFile(contractFile, contractSourceByteArr);
             //compile
-            SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, useSM2, true, ABI, BIN, INTERFACE, METADATA);
+            SolidityCompiler.Result res = SolidityCompiler.compile(contractFile, useSM2, true, ABI, BIN, METADATA);
             if ("".equals(res.getOutput())) {
                 throw new FrontException(ConstantCode.CONTRACT_COMPILE_FAIL.getCode(), res.getErrors());
             }

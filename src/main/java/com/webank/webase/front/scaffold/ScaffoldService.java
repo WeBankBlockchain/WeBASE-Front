@@ -25,7 +25,6 @@ import com.webank.webase.front.contract.ContractService;
 import com.webank.webase.front.contract.entity.Contract;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.scaffold.entity.ReqProject;
-import com.webank.webase.front.scaffold.entity.RpcIpPort;
 import com.webank.webase.front.scaffold.entity.RspFile;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.NetUtils;
@@ -40,10 +39,8 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.v3.model.CryptoType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -56,9 +53,6 @@ import org.springframework.stereotype.Service;
 public class ScaffoldService {
     @Autowired
     private ContractService contractService;
-    @Qualifier("common")
-    @Autowired
-    private CryptoSuite cryptoSuite;
     @Autowired
     private FrontCertService certService;
     @Autowired
@@ -156,7 +150,7 @@ public class ScaffoldService {
     public String generateProject(String peers, String projectGroup, String artifactName,
         List<Contract> tbContractList, String groupId, String hexPrivateKeyListStr, Map<String, String> sdkMap) {
         log.info("generateProject sdkMap size:{}", sdkMap.size());
-        List<ContractInfo> contractInfoList = this.handleContractList(tbContractList);
+        List<ContractInfo> contractInfoList = this.handleContractList(groupId, tbContractList);
         String need = contractInfoList.stream().map(ContractInfo::getContractName)
             .collect(Collectors.joining(","));
 
@@ -179,8 +173,8 @@ public class ScaffoldService {
         return projectDir;
     }
 
-    private List<ContractInfo> handleContractList(List<Contract> contractList) {
-        log.info("handleContractList contractList size:{}", contractList.size());
+    private List<ContractInfo> handleContractList(String groupId, List<Contract> contractList) {
+        log.info("handleContractList contractList size:{},groupId:{}", contractList.size(), groupId);
         List<ContractInfo> contractInfoList = new ArrayList<>();
         for (Contract contract : contractList) {
             String sourceCodeBase64 = contract.getContractSource();
@@ -195,7 +189,7 @@ public class ScaffoldService {
             contractInfo.setContractName(contractName);
             contractInfo.setContractAddress(contractAddress);
             contractInfo.setAbiStr(contractAbi);
-            if (cryptoSuite.getCryptoTypeConfig() == CryptoType.SM_TYPE) {
+            if (web3ApiService.getCryptoType(groupId) == CryptoType.SM_TYPE) {
                 contractInfo.setBinStr("");
                 contractInfo.setSmBinStr(bytecodeBin);
             } else {
