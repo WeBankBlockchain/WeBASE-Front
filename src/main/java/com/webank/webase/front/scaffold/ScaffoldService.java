@@ -92,18 +92,9 @@ public class ScaffoldService {
                 log.error("exportProject contract not exist or abi empty, id:{}", id);
                 throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
             }
+            log.info("tbContractList add name:{},abi:{}", contract.getContractName(), contract.getContractAbi());
             tbContractList.add(contract);
         }
-        // get front's p2p ip and channel port
-
-            // set port, if param not null, set as param's port
-        // if param null, response from front not null, set as response's port
-        // else all null, set as 20200 default value
-//        if (reqProject.getChannelPort() != null) {
-//            thisConfig.setChannelPort(String.valueOf(reqProject.getChannelPort()));
-//        } else if (StringUtils.isBlank(nodeConfig.getChannelPort())) {
-//            thisConfig.setChannelPort("20200");
-//        }
         String peersIpPort = String.join(",", web3Config.getPeers());
         log.info("exportProject get thisConfig:{}", peersIpPort);
         // get front's sdk key cert
@@ -154,20 +145,20 @@ public class ScaffoldService {
         String need = contractInfoList.stream().map(ContractInfo::getContractName)
             .collect(Collectors.joining(","));
 
-        try {
-            WebaseProjectFactory projectFactory = new WebaseProjectFactory(
-                projectGroup, artifactName, SOL_OUTPUT_DIR, OUTPUT_DIR,
-                need, ProjectType.Gradle.getName(), GRADLE_VERSION,
-                contractInfoList,
-                peers,
-                groupId, hexPrivateKeyListStr, sdkMap);
-            log.info("generateProject projectGroup:{},artifactName:{},OUTPUT_DIR:{},frontChannelIpPort:{},groupId:{}",
-                projectGroup, artifactName, OUTPUT_DIR, peers, groupId);
-            projectFactory.createProject();
-        } catch (Exception e) {
-            log.error("generateProject error:[]", e);
+        WebaseProjectFactory projectFactory = new WebaseProjectFactory(
+            projectGroup, artifactName, SOL_OUTPUT_DIR, OUTPUT_DIR,
+            need, ProjectType.Gradle.getName(), GRADLE_VERSION,
+            contractInfoList,
+            peers,
+            groupId, hexPrivateKeyListStr, sdkMap);
+        boolean createResult = projectFactory.createProject();
+        if (!createResult) {
+            log.error("generateProject createProject failed");
             throw new FrontException(ConstantCode.GENERATE_CONTRACT_PROJECT_FAIL);
         }
+        log.info("generateProject projectGroup:{},artifactName:{},OUTPUT_DIR:{},frontChannelIpPort:{},groupId:{}",
+            projectGroup, artifactName, OUTPUT_DIR, peers, groupId);
+
         String projectDir = OUTPUT_DIR + File.separator + artifactName;
         log.info("generateProject result:{}", projectDir);
         return projectDir;
