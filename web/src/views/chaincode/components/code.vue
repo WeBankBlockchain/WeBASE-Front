@@ -55,10 +55,10 @@
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportSdk") }}</span>
         </span>
-        <!-- <span class="contract-code-done" @click="exportJava">
+        <span class="contract-code-done" @click="exportJava">
           <i class="el-icon-download contract-icon-style font-16"></i>
           <span>{{ $t("title.exportJavaProject") }}</span>
-        </span> -->
+        </span>
       </span>
       <div class="search-model" v-if="searchVisibility">
         <el-input v-model="keyword" placeholder="搜索" style="width: 266px; margin-left: 10px" ref="searchInput" @keyup.esc.native="closeBtn" @keyup.enter.native="searchBtn" @keyup.down.native="nextBtn"
