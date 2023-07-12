@@ -83,7 +83,6 @@ List jackson = [
 
 List scaffold = [
     'com.webank.webase:solscaffold:3.3.0-SNAPSHOT',
-//    'com.webank:SmartDev-Scaffold:1.0.0.1',
     'com.webank:WeBankBlockchain-SmartDev-Scaffold:3.3.0-SNAPSHOT',
     'com.webank:solc-gradle-plugin:3.3.0-SNAPSHOT'
 ]

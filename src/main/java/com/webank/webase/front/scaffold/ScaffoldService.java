@@ -93,6 +93,7 @@ public class ScaffoldService {
                 throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
             }
             log.info("tbContractList add name:{},abi:{}", contract.getContractName(), contract.getContractAbi());
+            // todo check bin/abi is empty, check 是否已编译
             tbContractList.add(contract);
         }
         String peersIpPort = String.join(",", web3Config.getPeers());
@@ -144,6 +145,7 @@ public class ScaffoldService {
         List<ContractInfo> contractInfoList = this.handleContractList(groupId, tbContractList);
         String need = contractInfoList.stream().map(ContractInfo::getContractName)
             .collect(Collectors.joining(","));
+        log.info("generateProject need:{}", need);
 
         WebaseProjectFactory projectFactory = new WebaseProjectFactory(
             projectGroup, artifactName, SOL_OUTPUT_DIR, OUTPUT_DIR,

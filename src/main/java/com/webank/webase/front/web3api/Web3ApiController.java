@@ -13,6 +13,7 @@
  */
 package com.webank.webase.front.web3api;
 
+import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import io.swagger.annotations.Api;
@@ -50,6 +51,8 @@ public class Web3ApiController {
 
     @Autowired
     private Web3ApiService web3ApiService;
+    @Autowired
+    private Web3Config web3Config;
 
     @ApiOperation(value = "getBlockNumber", notes = "Get the latest block height of the node")
     @GetMapping("/blockNumber")
@@ -227,6 +230,13 @@ public class Web3ApiController {
 //    public Object getNodeConfig() {
 //        return web3ApiService.getNodeConfig();
 //    }
+
+
+    @ApiOperation(value = "getNodeConfig", notes = "Get node config info")
+    @GetMapping("/peersConfig")
+    public List<String> getNodeConfig() {
+        return web3Config.getPeers();
+    }
 
 
     @ApiOperation(value = "getSealerList", notes = "get list of group's sealers")
