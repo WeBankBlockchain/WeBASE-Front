@@ -15,7 +15,6 @@
 package com.webank.webase.front.scaffold;
 
 import com.webank.scaffold.config.WebaseConfig.ContractInfo;
-import com.webank.scaffold.enums.ProjectType;
 import com.webank.scaffold.factory.WebaseProjectFactory;
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
@@ -62,11 +61,9 @@ public class ScaffoldService {
     @Autowired
     private Web3Config web3Config;
 
-    private static final String GRADLE_WRAPPER_DIR = "gradle";
     private static final String GRADLE_VERSION = "6.6.1";
 
     private static final String OUTPUT_DIR = "output";
-    private static final String SOL_OUTPUT_DIR = "scaffoldSolDir";
     private static final String ZIP_SUFFIX = ".zip";
     private static final String OUTPUT_ZIP_DIR = OUTPUT_DIR + File.separator + "zip";
 
@@ -93,7 +90,12 @@ public class ScaffoldService {
                 throw new FrontException(ConstantCode.INVALID_CONTRACT_ID);
             }
             log.info("tbContractList add name:{},abi:{}", contract.getContractName(), contract.getContractAbi());
-            // todo check bin/abi is empty, check 是否已编译
+            // check abi is empty, check 是否已编译
+            if (StringUtils.isBlank(contract.getContractAbi())) {
+                log.error("contract abi is empty, of name:{}, not support lib contract", contract.getContractName());
+                throw new FrontException(ConstantCode.ABI_GET_ERROR.getCode(),
+                    "library contract not support export project, please exclude this contract:" + contract.getContractName());
+            }
             tbContractList.add(contract);
         }
         String peersIpPort = String.join(",", web3Config.getPeers());
@@ -139,7 +141,7 @@ public class ScaffoldService {
      * @param sdkMap
      * @return path string of project
      */
-    public String generateProject(String peers, String projectGroup, String artifactName,
+    private String generateProject(String peers, String projectGroup, String artifactName,
         List<Contract> tbContractList, String groupId, String hexPrivateKeyListStr, Map<String, String> sdkMap) {
         log.info("generateProject sdkMap size:{}", sdkMap.size());
         List<ContractInfo> contractInfoList = this.handleContractList(groupId, tbContractList);
@@ -148,8 +150,8 @@ public class ScaffoldService {
         log.info("generateProject need:{}", need);
 
         WebaseProjectFactory projectFactory = new WebaseProjectFactory(
-            projectGroup, artifactName, SOL_OUTPUT_DIR, OUTPUT_DIR,
-            need, ProjectType.Gradle.getName(), GRADLE_VERSION,
+            projectGroup, artifactName,
+            OUTPUT_DIR, GRADLE_VERSION,
             contractInfoList,
             peers,
             groupId, hexPrivateKeyListStr, sdkMap);
