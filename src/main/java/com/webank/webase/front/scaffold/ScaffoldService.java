@@ -98,7 +98,8 @@ public class ScaffoldService {
             }
             tbContractList.add(contract);
         }
-        String peersIpPort = String.join(",", web3Config.getPeers());
+//        String peersIpPort = String.join(",", web3Config.getPeers());
+        String peersIpPort = reqProject.getChannelIp() + ":" + reqProject.getChannelPort();
         log.info("exportProject get thisConfig:{}", peersIpPort);
         // get front's sdk key cert
         Map<String, String> sdkMap = certService.getSDKCertKeyMap();
