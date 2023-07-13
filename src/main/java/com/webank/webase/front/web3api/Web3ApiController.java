@@ -14,6 +14,7 @@
 package com.webank.webase.front.web3api;
 
 import com.webank.webase.front.base.config.Web3Config;
+import com.webank.webase.front.web3api.entity.FrontNodeConfig;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import io.swagger.annotations.Api;
@@ -51,8 +52,7 @@ public class Web3ApiController {
 
     @Autowired
     private Web3ApiService web3ApiService;
-    @Autowired
-    private Web3Config web3Config;
+
 
     @ApiOperation(value = "getBlockNumber", notes = "Get the latest block height of the node")
     @GetMapping("/blockNumber")
@@ -224,18 +224,18 @@ public class Web3ApiController {
     public String getSystemConfigByKey(@PathVariable String groupId, @PathVariable String key) {
         return web3ApiService.getSystemConfigByKey(groupId, key);
     }
-//
-//    @ApiOperation(value = "getNodeConfig", notes = "Get node config info")
-//    @GetMapping("/nodeConfig")
-//    public Object getNodeConfig() {
-//        return web3ApiService.getNodeConfig();
-//    }
-
 
     @ApiOperation(value = "getNodeConfig", notes = "Get node config info")
+    @GetMapping("/nodeConfig")
+    public Object getNodeConfig() {
+        FrontNodeConfig nodeConfig = web3ApiService.getNodeConfig();
+        return nodeConfig;
+    }
+
+    @ApiOperation(value = "getPeersConfig", notes = "Get node config info list")
     @GetMapping("/peersConfig")
-    public List<String> getNodeConfig() {
-        return web3Config.getPeers();
+    public List<String> getPeersConfig() {
+        return web3ApiService.getPeersConfig();
     }
 
 

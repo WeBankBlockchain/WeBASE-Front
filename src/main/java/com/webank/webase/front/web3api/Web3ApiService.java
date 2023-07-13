@@ -14,9 +14,11 @@
 package com.webank.webase.front.web3api;
 
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.NodeStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.JsonUtils;
+import com.webank.webase.front.web3api.entity.FrontNodeConfig;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.TransactionInfo;
@@ -68,7 +70,8 @@ public class Web3ApiService {
     private Client rpcWeb3j;
     @Autowired
     private BcosSDK bcosSDK;
-
+    @Autowired
+    private Web3Config web3Config;
 
     /**
      * nodes connected with front, key:nodeId, value:nodeName
@@ -589,5 +592,25 @@ public class Web3ApiService {
 
     public boolean getIsWasm(String groupId) {
         return this.getWeb3j(groupId).isWASM();
+    }
+
+    public List<String> getPeersConfig() {
+        List<String> peers = web3Config.getPeers();
+        log.info("getPeersConfig peers:{}", peers);
+        return peers;
+    }
+
+    public FrontNodeConfig getNodeConfig() {
+        FrontNodeConfig nodeConfig = new FrontNodeConfig();
+        List<String> peers = this.getPeersConfig();
+        if (peers == null || peers.isEmpty()) {
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+        }
+        String[] ipPort = peers.get(0).split(":");
+        nodeConfig.setP2pip(ipPort[0]);
+        nodeConfig.setChannelPort(Integer.parseInt(ipPort[1]));
+
+        log.info("getNodeConfig peers:{},nodeConfig:{}", peers, nodeConfig);
+        return nodeConfig;
     }
 }
