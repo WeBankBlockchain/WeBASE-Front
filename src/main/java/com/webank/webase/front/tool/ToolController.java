@@ -227,7 +227,7 @@ public class ToolController {
     @ApiImplicitParam(name = "hexPrivateKey", value = "hex private key", dataType = "String")
     @GetMapping("/hexKey2Dec")
     public String hexKey2Dec(@RequestParam String hexPrivateKey) {
-        if (hexPrivateKey.startsWith("0x")){
+        if (hexPrivateKey.startsWith("0x") || hexPrivateKey.startsWith("0X")){
             hexPrivateKey = hexPrivateKey.substring(2);
         }
         return new BigInteger(hexPrivateKey,16).toString();

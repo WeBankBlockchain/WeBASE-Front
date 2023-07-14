@@ -4,6 +4,7 @@
 
 ### 第一步：克隆WeBASE-Front项目
 
+``git clone https://github.com/WeBankBlockchain/WeBASE-Front.git``
 ``git clone https://gitee.com/WeBank/WeBASE-Front.git``
 
 ### 第二步：修改WeBASE-Front前端项目logo
