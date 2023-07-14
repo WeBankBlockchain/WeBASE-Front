@@ -295,7 +295,6 @@ public class TransService {
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress);
 
         Client client = web3ApiService.getWeb3j(groupId);
-
         if (isTxConstant) {
             if (StringUtils.isBlank(userAddress)) {
                 userAddress = cryptoKeyPair.getAddress();
@@ -376,13 +375,25 @@ public class TransService {
      * get CryptoKeyPair by keyUser locally
      */
     private CryptoKeyPair getCredentials(boolean constant, String keyUser) {
+        log.info("getCredentials constant:{},keyUser:{}", constant, keyUser);
         // get privateKey
         CryptoKeyPair credentials;
+        // TODO constant不能使用msg.sender调用合约问题
         if (constant) {
             credentials = keyStoreService.getCredentialsForQuery();
+            // 非空，尝试从db获取user的credential，否则就随机
+            if (StringUtils.isNotBlank(keyUser)) {
+                try {
+                    credentials = keyStoreService.getCredentials(keyUser);
+                    log.info("getCredentials constant, now return db keyUser:{}", credentials.getAddress());
+                } catch (FrontException ex) {
+                    log.warn("getCredentials constant, now return random:{}", credentials.getAddress());
+                }
+            }
         } else {
             credentials = keyStoreService.getCredentials(keyUser);
         }
+
         return credentials;
     }
 
@@ -594,10 +605,11 @@ public class TransService {
 
     public Object handleCall(int groupId, String userAddress, String contractAddress,
         String encodedFunction, String abiStr, String funcName) {
-
+        // TODO constant不能使用msg.sender调用合约问题。
         TransactionProcessor transactionProcessor = new TransactionProcessor(
-            web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(),
-            groupId, Constants.chainId);
+                web3ApiService.getWeb3j(groupId),
+                getCredentials(true, userAddress), // 尝试db获取该address的私钥，否则随机创建
+                groupId, Constants.chainId);
         CallOutput callOutput = transactionProcessor
             .executeCall(userAddress, contractAddress, encodedFunction)
             .getCallResult();
