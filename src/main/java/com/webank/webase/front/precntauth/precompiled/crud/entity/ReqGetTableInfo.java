@@ -9,7 +9,7 @@ public class ReqGetTableInfo {
 
   @NotNull(message = ConstantCode.PARAM_FAIL_GROUPID_IS_EMPTY)
   private String groupId;
+  private String signUserId;   //请求的userId,即用户Id
   private String tableName;
   private String key;
-
 }
