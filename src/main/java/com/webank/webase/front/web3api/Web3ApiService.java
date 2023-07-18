@@ -594,6 +594,10 @@ public class Web3ApiService {
         return this.getWeb3j(groupId).isWASM();
     }
 
+    public Boolean getUseSmSsl() {
+        return Boolean.parseBoolean(web3Config.getUseSmSsl());
+    }
+
     public List<String> getPeersConfig() {
         List<String> peers = web3Config.getPeers();
         log.info("getPeersConfig peers:{}", peers);

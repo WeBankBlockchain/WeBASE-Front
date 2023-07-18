@@ -293,4 +293,9 @@ public class Web3ApiController {
         return web3ApiService.getIsWasm(groupId);
     }
 
+    @GetMapping("useSmSsl")
+    public Boolean getUseSmSslApi() {
+        return web3ApiService.getUseSmSsl();
+    }
+
 }
