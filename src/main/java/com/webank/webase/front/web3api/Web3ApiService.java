@@ -39,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.v3.BcosSDK;
 import org.fisco.bcos.sdk.v3.client.Client;
 import org.fisco.bcos.sdk.v3.client.exceptions.ClientException;
+import org.fisco.bcos.sdk.v3.client.protocol.model.GroupNodeIniInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.Block;
@@ -53,6 +54,7 @@ import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.v3.model.NodeVersion;
 import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -545,6 +547,11 @@ public class Web3ApiService {
     public List<GroupNodeInfo> getGroupNodeInfo(String groupId) {
         List<GroupNodeInfo> groupNodeInfos = getWeb3j(groupId).getGroupInfo().getResult().getNodeList();
         return groupNodeInfos;
+    }
+
+    public String getOneNodeVersion(String groupId) {
+        String binaryVersion = getWeb3j(groupId).getGroupInfo().getResult().getNodeList().get(0).getIniConfig().getBinaryInfo().getVersion();
+        return binaryVersion;
     }
 
     public List<String> getNodeList(String groupId) {

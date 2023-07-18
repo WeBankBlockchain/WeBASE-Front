@@ -187,6 +187,12 @@ public class Web3ApiController {
         return web3ApiService.getGroupNodeInfo(groupId);
     }
 
+    @ApiOperation(value = "binaryVersion", notes = "get clientVersion info, ex: 3.2.0")
+    @GetMapping("/binaryVersion")
+    public String getOneNodeVersion(@PathVariable String groupId) {
+        return web3ApiService.getOneNodeVersion(groupId);
+    }
+
     @ApiOperation(value = "getGroupList", notes = "get list of group id")
     @GetMapping("/groupList")
     public List<String> getGroupList() {
