@@ -18,15 +18,28 @@ import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.enums.NodeStatus;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.util.JsonUtils;
+import com.webank.webase.front.web3api.entity.FrontNodeConfig;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import com.webank.webase.front.web3api.entity.TransactionInfo;
+import java.math.BigInteger;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.v3.BcosSDK;
 import org.fisco.bcos.sdk.v3.client.Client;
 import org.fisco.bcos.sdk.v3.client.exceptions.ClientException;
+import org.fisco.bcos.sdk.v3.client.protocol.model.GroupNodeIniInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.Block;
@@ -40,20 +53,12 @@ import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.response.SyncStatus.SyncStatusInfo;
 import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.v3.client.protocol.response.TotalTransactionCount.TransactionCountInfo;
-import org.fisco.bcos.sdk.v3.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.jni.common.JniException;
+import org.fisco.bcos.sdk.v3.model.NodeVersion;
 import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.math.BigInteger;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Web3Api manage.
@@ -65,13 +70,10 @@ public class Web3ApiService {
     @Autowired
     @Qualifier("rpcClient")
     private Client rpcWeb3j;
-//    @Autowired
-//    @Qualifier("clientMap")
-//    private Map<String, Client> clientMap;
     @Autowired
     private BcosSDK bcosSDK;
     @Autowired
-    private Web3Config web3ConfigConstants;
+    private Web3Config web3Config;
 
     /**
      * nodes connected with front, key:nodeId, value:nodeName
@@ -547,6 +549,11 @@ public class Web3ApiService {
         return groupNodeInfos;
     }
 
+    public String getOneNodeVersion(String groupId) {
+        String binaryVersion = getWeb3j(groupId).getGroupInfo().getResult().getNodeList().get(0).getIniConfig().getBinaryInfo().getVersion();
+        return binaryVersion;
+    }
+
     public List<String> getNodeList(String groupId) {
         GroupPeers groupPeers = getWeb3j(groupId).getGroupPeers();
         List<String> nodeList =  groupPeers.getGroupPeers();
@@ -592,5 +599,29 @@ public class Web3ApiService {
 
     public boolean getIsWasm(String groupId) {
         return this.getWeb3j(groupId).isWASM();
+    }
+
+    public Boolean getUseSmSsl() {
+        return Boolean.parseBoolean(web3Config.getUseSmSsl());
+    }
+
+    public List<String> getPeersConfig() {
+        List<String> peers = web3Config.getPeers();
+        log.info("getPeersConfig peers:{}", peers);
+        return peers;
+    }
+
+    public FrontNodeConfig getNodeConfig() {
+        FrontNodeConfig nodeConfig = new FrontNodeConfig();
+        List<String> peers = this.getPeersConfig();
+        if (peers == null || peers.isEmpty()) {
+            throw new FrontException(ConstantCode.SYSTEM_ERROR_WEB3J_NULL);
+        }
+        String[] ipPort = peers.get(0).split(":");
+        nodeConfig.setP2pip(ipPort[0]);
+        nodeConfig.setChannelPort(Integer.parseInt(ipPort[1]));
+
+        log.info("getNodeConfig peers:{},nodeConfig:{}", peers, nodeConfig);
+        return nodeConfig;
     }
 }

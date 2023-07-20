@@ -33,7 +33,7 @@ public class CrudController {
     private CrudServiceInWebase crudServiceInWebase;
 
     @ApiOperation(value = "create the table")
-    @ApiImplicitParam(name = "reqCreateTableInfo", value = "create table info", required = true, dataType = "ReqCreateTableInfo")
+    @ApiImplicitParam(name = "reqCreateTableInfo", value = "create table info", required = true, dataType = "ReqCreateTableSql")
     @PostMapping("reqCreateTable")
     public Object createTable(@Valid @RequestBody ReqCreateTableSql reqCreateTableSql)
             throws ContractException, JSQLParserException {
@@ -47,7 +47,7 @@ public class CrudController {
 
     @ApiOperation(value = "desc the table")
     @ApiImplicitParam(name = "reqDescTableSql", value = "desc table info", required = true,
-            dataType = "ReqDescTableInfo")
+            dataType = "ReqDescTableSql")
     @PostMapping("reqDescTable")
     public Object descTable(@Valid @RequestBody ReqDescTableSql reqDescTableSql)
             throws ContractException, JSQLParserException {
@@ -57,7 +57,7 @@ public class CrudController {
 
     @ApiOperation(value = "insert into the table")
     @ApiImplicitParam(name = "reqDescTableSql", value = "insert into table info", required = true,
-            dataType = "ReqInsertTableInfo")
+            dataType = "ReqInsertTableSql")
     @PostMapping("reqInsertTable")
     public Object insertTable(@Valid @RequestBody ReqInsertTableSql reqInsertTableSql)
             throws ContractException, JSQLParserException {
@@ -69,7 +69,7 @@ public class CrudController {
 
     @ApiOperation(value = "select from the table")
     @ApiImplicitParam(name = "reqSelectTable", value = "select from table info", required = true,
-            dataType = "ReqSelectTableInfo")
+            dataType = "ReqSelectTableSql")
     @PostMapping("reqSelectTable")
     public Object selectTable(@Valid @RequestBody ReqSelectTableSql reqSelectTableSql)
             throws ContractException, JSQLParserException {
@@ -82,7 +82,7 @@ public class CrudController {
 
     @ApiOperation(value = "update the table")
     @ApiImplicitParam(name = "reqUpdateTable", value = "update table info", required = true,
-            dataType = "ReqUpdateTableInfo")
+            dataType = "ReqUpdateTableSql")
     @PostMapping("reqUpdateTable")
     public Object updateTable(@Valid @RequestBody ReqUpdateTableSql reqUpdateTableSql)
             throws ContractException, JSQLParserException {
@@ -94,7 +94,7 @@ public class CrudController {
 
     @ApiOperation(value = "remove the table")
     @ApiImplicitParam(name = "reqRemoveTable", value = "remove the table", required = true,
-            dataType = "ReqRemoveTableInfo")
+            dataType = "ReqRemoveTableSql")
     @PostMapping("reqRemoveTable")
     public Object removeTable(@Valid @RequestBody ReqRemoveTableSql reqRemoveTableSql)
             throws ContractException, JSQLParserException {
