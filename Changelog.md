@@ -1,3 +1,19 @@
+### v3.1.0(2023-07-20)
+
+**Add**
+- 支持合约IDE的Java项目导出功能，并支持struct格式参数
+- 社区贡献：新增CRUD相关的节点前置接口`/precntauth/precompiled/crud`
+- 增加`web3/nodeConfig`, `web3/binaryVersion`,`web3/peersConfig`,`web3/useSmSsl`等查询接口
+
+**Fix**
+- 修复合约IDE使用solidity v0.6.10-gm时版本判断问题
+
+**兼容性**
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Node-Manager v3.0.2及以上版本
+- WeBASE-Sign v3.0.2
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
 
 ### v3.0.2(2023-03-09)
 

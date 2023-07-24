@@ -13,6 +13,8 @@
  */
 package com.webank.webase.front.web3api;
 
+import com.webank.webase.front.base.config.Web3Config;
+import com.webank.webase.front.web3api.entity.FrontNodeConfig;
 import com.webank.webase.front.web3api.entity.NodeStatusInfo;
 import com.webank.webase.front.web3api.entity.RspStatBlock;
 import io.swagger.annotations.Api;
@@ -50,6 +52,7 @@ public class Web3ApiController {
 
     @Autowired
     private Web3ApiService web3ApiService;
+
 
     @ApiOperation(value = "getBlockNumber", notes = "Get the latest block height of the node")
     @GetMapping("/blockNumber")
@@ -184,6 +187,12 @@ public class Web3ApiController {
         return web3ApiService.getGroupNodeInfo(groupId);
     }
 
+    @ApiOperation(value = "binaryVersion", notes = "get clientVersion info, ex: 3.2.0")
+    @GetMapping("/binaryVersion")
+    public String getOneNodeVersion(@PathVariable String groupId) {
+        return web3ApiService.getOneNodeVersion(groupId);
+    }
+
     @ApiOperation(value = "getGroupList", notes = "get list of group id")
     @GetMapping("/groupList")
     public List<String> getGroupList() {
@@ -221,12 +230,19 @@ public class Web3ApiController {
     public String getSystemConfigByKey(@PathVariable String groupId, @PathVariable String key) {
         return web3ApiService.getSystemConfigByKey(groupId, key);
     }
-//
-//    @ApiOperation(value = "getNodeConfig", notes = "Get node config info")
-//    @GetMapping("/nodeConfig")
-//    public Object getNodeConfig() {
-//        return web3ApiService.getNodeConfig();
-//    }
+
+    @ApiOperation(value = "getNodeConfig", notes = "Get node config info")
+    @GetMapping("/nodeConfig")
+    public Object getNodeConfig() {
+        FrontNodeConfig nodeConfig = web3ApiService.getNodeConfig();
+        return nodeConfig;
+    }
+
+    @ApiOperation(value = "getPeersConfig", notes = "Get node config info list")
+    @GetMapping("/peersConfig")
+    public List<String> getPeersConfig() {
+        return web3ApiService.getPeersConfig();
+    }
 
 
     @ApiOperation(value = "getSealerList", notes = "get list of group's sealers")
@@ -281,6 +297,11 @@ public class Web3ApiController {
     @GetMapping("isWasm")
     public Boolean getIsWasmApi(@PathVariable("groupId") String groupId) {
         return web3ApiService.getIsWasm(groupId);
+    }
+
+    @GetMapping("useSmSsl")
+    public Boolean getUseSmSslApi() {
+        return web3ApiService.getUseSmSsl();
     }
 
 }

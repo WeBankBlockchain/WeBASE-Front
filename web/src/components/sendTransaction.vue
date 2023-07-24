@@ -291,6 +291,7 @@ export default {
     changeFunc: function () {
       this.transation.funcValue = [];
       this.constant = false;
+      debugger
       this.funcList.forEach((value) => {
         if (value.funcId === this.transation.funcName) {
           this.pramasData = value.inputs;

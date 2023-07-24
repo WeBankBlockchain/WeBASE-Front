@@ -82,18 +82,19 @@ List jackson = [
 
 
 List scaffold = [
-    'com.webank.webase:solscaffold:1.0.2',
-    'com.webank:SmartDev-Scaffold:1.0.0.1',
-    'com.webank:solc-gradle-plugin:1.0.1'
+    'com.webank.webase:solscaffold:3.3.0-SNAPSHOT',
+    'com.webank:WeBankBlockchain-SmartDev-Scaffold:3.3.0-SNAPSHOT',
+    'com.webank:solc-gradle-plugin:3.3.0-SNAPSHOT'
 ]
 
 dependencies {
     compile spring_boot,swagger,logger,jaxb,jackson,scaffold
-    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.3.0') {
+    compile ('org.fisco-bcos.java-sdk:fisco-bcos-java-sdk:3.4.0') {
         exclude group: "org.slf4j"
     }
     // support guomi/ecdsa same time, support solcJ-0.5.2
     compile 'org.fisco-bcos:solcJ:0.4.25-rc1'
+    compile 'com.github.jsqlparser:jsqlparser:2.0'
     compile('org.fisco-bcos.code-generator:bcos-code-generator:1.0.0') {
         exclude group: "org.fisco-bcos.java-sdk"
         exclude group: "org.slf4j"
@@ -123,6 +124,7 @@ dependencies {
 configurations {
     all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    all*.exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
     all*.exclude group: 'log4j', module: 'log4j'
     all*.exclude group: 'com.github.jnr', module: 'jnr-posix'
     all*.exclude group: 'com.mchange', module: '*'
