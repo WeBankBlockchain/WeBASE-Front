@@ -21,12 +21,14 @@ import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUN
 import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDOBSERVER;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDSEALER;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_REMOVE;
+import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_SETWEIGHT;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precntauth.authmanager.base.AuthMgrBaseService;
+import com.webank.webase.front.precntauth.authmanager.committee.CommitteeService;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils;
 import com.webank.webase.front.precntauth.precompiled.consensus.entity.NodeInfo;
@@ -67,15 +69,6 @@ public class ConsensusServiceInWebase {
   public String addSealer(String groupId, String signUserId, String nodeId, BigInteger weight) {
     // check node id
     if (!isValidNodeID(nodeId, groupId)) {
-      return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
-    }
-    List<String> sealerList = web3ApiService.getSealerStrList(groupId);
-    if (sealerList.contains(nodeId)) {
-      return ConstantCode.ALREADY_EXISTS_IN_SEALER_LIST.toString();
-    }
-    List<String> nodeIdList = web3ApiService.getGroupPeers(groupId);
-    if (!nodeIdList.contains(nodeId)) {
-      log.error("nodeId is not connected with others, cannot added as sealer");
       return ConstantCode.PEERS_NOT_CONNECTED.toString();
     }
 
@@ -84,6 +77,9 @@ public class ConsensusServiceInWebase {
 
   public String addSealerHandle(String groupId, String signUserId, String nodeId,
       BigInteger weight) {
+    List<String> sealerList = web3ApiService.getSealerStrList(groupId);
+    boolean existed = sealerList.contains(nodeId);
+    log.info("addSealerHandle sealer existed is:{}|{}", nodeId, existed);
     List<String> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
     funcParams.add(weight.toString(10));
@@ -97,9 +93,11 @@ public class ConsensusServiceInWebase {
     // 如果启用了权限，则一定是solidity且要走Committee合约
     if (authMgrBaseService.chainHasAuth(groupId)) {
       // addFlag
-      funcParams.add("false");
+      // 如果不存在，就是true，用于add；
+      // 如果已存在，则是false，用于更新weight
+      funcParams.add(String.valueOf(!existed));
       // blockInterval
-      funcParams.add(AuthMgrBaseService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
+      funcParams.add(CommitteeService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
       String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.COMMITTEE_MANAGER);
       TransactionReceipt receipt =
           (TransactionReceipt) transService.transHandleWithSign(groupId,
@@ -107,16 +105,24 @@ public class ConsensusServiceInWebase {
       return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
     } else {
       String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
-      TransactionReceipt receipt =
-          (TransactionReceipt) transService.transHandleWithSign(groupId,
-              signUserId, contractAddress, abiStr, FUNC_ADDSEALER, funcParams, isWasm);
+      // 如果已存在，就是setWeight，如果不存在，就是addSealer
+      TransactionReceipt receipt;
+      if (existed) {
+        receipt =
+            (TransactionReceipt) transService.transHandleWithSign(groupId,
+                signUserId, contractAddress, abiStr, FUNC_SETWEIGHT, funcParams, isWasm);
+      } else {
+        receipt =
+            (TransactionReceipt) transService.transHandleWithSign(groupId,
+                signUserId, contractAddress, abiStr, FUNC_ADDSEALER, funcParams, isWasm);
+      }
       return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
     }
   }
 
   private boolean isValidNodeID(String _nodeID, String groupId) {
     boolean flag = false;
-    List<String> nodeList = web3ApiService.getNodeList(groupId);
+    List<String> nodeList = web3ApiService.getGroupPeers(groupId);
     for (String s : nodeList
     ) {
       if (s.equals(_nodeID)) {
@@ -156,9 +162,9 @@ public class ConsensusServiceInWebase {
       // 观察节点weight是 0
       funcParams.add("0");
       // addFlag
-      funcParams.add("false");
+      funcParams.add("true");
       // blockInterval
-      funcParams.add(AuthMgrBaseService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
+      funcParams.add(CommitteeService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
       String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.COMMITTEE_MANAGER);
       TransactionReceipt receipt =
           (TransactionReceipt) transService.transHandleWithSign(groupId,
@@ -191,7 +197,7 @@ public class ConsensusServiceInWebase {
     // 如果启用了权限，则一定是solidity且要走Committee合约
     if (authMgrBaseService.chainHasAuth(groupId)) {
       // blockInterval
-      funcParams.add(AuthMgrBaseService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
+      funcParams.add(CommitteeService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
       String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.COMMITTEE_MANAGER);
       TransactionReceipt receipt =
           (TransactionReceipt) transService.transHandleWithSign(groupId,
