@@ -14,10 +14,14 @@
 package com.webank.webase.front.precntauth.precompiled.sysconf;
 
 
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETCONSENSUSWEIGHTPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETSYSCONFIGPROPOSAL;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
+import com.webank.webase.front.precntauth.authmanager.base.AuthMgrBaseService;
+import com.webank.webase.front.precntauth.authmanager.committee.CommitteeService;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
 import com.webank.webase.front.precntauth.precompiled.sysconf.entity.ReqQuerySysConfigInfo;
 import com.webank.webase.front.precntauth.precompiled.sysconf.entity.ReqSetSysConfigInfo;
@@ -43,7 +47,9 @@ public class SysConfigServiceInWebase {
     @Autowired
     private Web3ApiService web3ApiService;
     @Autowired
-    TransService transService;
+    private TransService transService;
+    @Autowired
+    private AuthMgrBaseService authMgrBaseService;
 
     /**
      * get system config list by groupId directory through web3j instead of Precompiled instance
@@ -115,13 +121,25 @@ public class SysConfigServiceInWebase {
         } else {
             contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.SYSTEM_CONFIG);
         }
-        String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.SYSTEM_CONFIG);
-        // execute set method
-        TransactionReceipt receipt =
-            (TransactionReceipt) transService.transHandleWithSign(groupId,
-                signUserId, contractAddress, abiStr, FUNC_SETVALUEBYKEY, funcParams, isWasm);
-        return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
-            .handleTransactionReceipt(receipt, isWasm);
+        // 如果启用了权限，则一定是solidity且要走Committee合约
+        if (authMgrBaseService.chainHasAuth(groupId)) {
+            // blockInterval
+            funcParams.add(CommitteeService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
+            String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.COMMITTEE_MANAGER);
+            TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                    signUserId, contractAddress, abiStr, FUNC_CREATESETSYSCONFIGPROPOSAL, funcParams, isWasm);
+            return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
+                .handleTransactionReceipt(receipt, isWasm);
+        } else {
+            String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.SYSTEM_CONFIG);
+            // execute set method
+            TransactionReceipt receipt =
+                (TransactionReceipt) transService.transHandleWithSign(groupId,
+                    signUserId, contractAddress, abiStr, FUNC_SETVALUEBYKEY, funcParams, isWasm);
+            return com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils
+                .handleTransactionReceipt(receipt, isWasm);
+        }
     }
 
     public String getSysConfigByKey(String groupId, String key) {
