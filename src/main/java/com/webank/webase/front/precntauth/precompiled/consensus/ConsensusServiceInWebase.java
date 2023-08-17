@@ -16,14 +16,19 @@ package com.webank.webase.front.precntauth.precompiled.consensus;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATERMNODEPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETCONSENSUSWEIGHTPROPOSAL;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDOBSERVER;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDSEALER;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_REMOVE;
+import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_SETWEIGHT;
 
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.precntauth.authmanager.base.AuthMgrBaseService;
+import com.webank.webase.front.precntauth.authmanager.committee.CommitteeService;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils;
 import com.webank.webase.front.precntauth.precompiled.consensus.entity.NodeInfo;
@@ -55,6 +60,8 @@ public class ConsensusServiceInWebase {
   private Web3ApiService web3ApiService;
   @Autowired
   private TransService transService;
+  @Autowired
+  private AuthMgrBaseService authMgrBaseService;
 
   /**
    * consensus: add sealer through webase-sign v1.5.0 增加校验群组文件是否存在，P2P连接存在
@@ -62,25 +69,17 @@ public class ConsensusServiceInWebase {
   public String addSealer(String groupId, String signUserId, String nodeId, BigInteger weight) {
     // check node id
     if (!isValidNodeID(nodeId, groupId)) {
-      return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
-    }
-    List<String> sealerList = web3ApiService.getSealerStrList(groupId);
-    if (sealerList.contains(nodeId)) {
-      return ConstantCode.ALREADY_EXISTS_IN_SEALER_LIST.toString();
-    }
-    List<String> nodeIdList = web3ApiService.getGroupPeers(groupId);
-    if (!nodeIdList.contains(nodeId)) {
-      log.error("nodeId is not connected with others, cannot added as sealer");
       return ConstantCode.PEERS_NOT_CONNECTED.toString();
     }
-    if (!containsGroupFile(groupId)) {
-      throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
-    }
+
     return this.addSealerHandle(groupId, signUserId, nodeId, weight);
   }
 
   public String addSealerHandle(String groupId, String signUserId, String nodeId,
       BigInteger weight) {
+    List<String> sealerList = web3ApiService.getSealerStrList(groupId);
+    boolean existed = sealerList.contains(nodeId);
+    log.info("addSealerHandle sealer existed is:{}|{}", nodeId, existed);
     List<String> funcParams = new ArrayList<>();
     funcParams.add(nodeId);
     funcParams.add(weight.toString(10));
@@ -91,16 +90,39 @@ public class ConsensusServiceInWebase {
     } else {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
     }
-    String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
-    TransactionReceipt receipt =
-        (TransactionReceipt) transService.transHandleWithSign(groupId,
-            signUserId, contractAddress, abiStr, FUNC_ADDSEALER, funcParams, isWasm);
-    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+    // 如果启用了权限，则一定是solidity且要走Committee合约
+    if (authMgrBaseService.chainHasAuth(groupId)) {
+      // addFlag
+      // 如果不存在，就是true，用于add；
+      // 如果已存在，则是false，用于更新weight
+      funcParams.add(String.valueOf(!existed));
+      // blockInterval
+      funcParams.add(CommitteeService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
+      String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.COMMITTEE_MANAGER);
+      TransactionReceipt receipt =
+          (TransactionReceipt) transService.transHandleWithSign(groupId,
+              signUserId, contractAddress, abiStr, FUNC_CREATESETCONSENSUSWEIGHTPROPOSAL, funcParams, isWasm);
+      return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+    } else {
+      String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
+      // 如果已存在，就是setWeight，如果不存在，就是addSealer
+      TransactionReceipt receipt;
+      if (existed) {
+        receipt =
+            (TransactionReceipt) transService.transHandleWithSign(groupId,
+                signUserId, contractAddress, abiStr, FUNC_SETWEIGHT, funcParams, isWasm);
+      } else {
+        receipt =
+            (TransactionReceipt) transService.transHandleWithSign(groupId,
+                signUserId, contractAddress, abiStr, FUNC_ADDSEALER, funcParams, isWasm);
+      }
+      return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+    }
   }
 
   private boolean isValidNodeID(String _nodeID, String groupId) {
     boolean flag = false;
-    List<String> nodeList = web3ApiService.getNodeList(groupId);
+    List<String> nodeList = web3ApiService.getGroupPeers(groupId);
     for (String s : nodeList
     ) {
       if (s.equals(_nodeID)) {
@@ -110,23 +132,6 @@ public class ConsensusServiceInWebase {
     return flag;
   }
 
-  private boolean containsGroupFile(String groupId) {
-    log.info("check front's node contains group file of groupId:{}", groupId);
-    //todo check : 3.0 has no version
-//        ClientVersion clientVersion = web3ApiService.getClientVersion();
-//        int supportVer = CommonUtils.getVersionFromStr(clientVersion.getSupportedVersion());
-//        if (supportVer < 241) {
-//            log.info("client support version not support dynamic group");
-//            return true;
-//        }
-    // INEXISTENT
-//        String groupStatus = (String) web3ApiService.querySingleGroupStatus(groupId).getData();
-//        if (GROUP_FILE_NOT_EXIST.equals(groupStatus)) {
-//            log.error("node contains no group file to add in this group:{}", groupId);
-//            return false;
-//        }
-    return true;
-  }
 
   public String addObserver(String groupId, String signUserId, String nodeId) {
     // check node id
@@ -152,11 +157,26 @@ public class ConsensusServiceInWebase {
     } else {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
     }
-    String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
-    TransactionReceipt receipt =
-        (TransactionReceipt) transService.transHandleWithSign(groupId,
-            signUserId, contractAddress, abiStr, FUNC_ADDOBSERVER, funcParams, isWasm);
-    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+    // 如果启用了权限，则一定是solidity且要走Committee合约
+    if (authMgrBaseService.chainHasAuth(groupId)) {
+      // 观察节点weight是 0
+      funcParams.add("0");
+      // addFlag
+      funcParams.add("true");
+      // blockInterval
+      funcParams.add(CommitteeService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
+      String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.COMMITTEE_MANAGER);
+      TransactionReceipt receipt =
+          (TransactionReceipt) transService.transHandleWithSign(groupId,
+              signUserId, contractAddress, abiStr, FUNC_CREATESETCONSENSUSWEIGHTPROPOSAL, funcParams, isWasm);
+      return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+    } else {
+      String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
+      TransactionReceipt receipt =
+          (TransactionReceipt) transService.transHandleWithSign(groupId,
+              signUserId, contractAddress, abiStr, FUNC_ADDOBSERVER, funcParams, isWasm);
+      return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+    }
   }
 
   public String removeNode(String groupId, String signUserId, String nodeId) {
@@ -174,22 +194,33 @@ public class ConsensusServiceInWebase {
     } else {
       contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
     }
-    String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
-    TransactionReceipt receipt;
-    try {
-      receipt = (TransactionReceipt) transService.transHandleWithSign(groupId,
-          signUserId, contractAddress, abiStr, FUNC_REMOVE, funcParams, isWasm);
-    } catch (RuntimeException e) {
-      // firstly remove node that sdk connected to the node, return the request that present
-      // susscces
-      // because the exception is throwed by getTransactionReceipt, we need ignore it.
-      if (e.getMessage().contains("Don't send requests to this group")) {
-        return ConstantCode.ALREADY_REMOVED_FROM_THE_GROUP.toString();
-      } else {
-        throw e;
+    // 如果启用了权限，则一定是solidity且要走Committee合约
+    if (authMgrBaseService.chainHasAuth(groupId)) {
+      // blockInterval
+      funcParams.add(CommitteeService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
+      String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.COMMITTEE_MANAGER);
+      TransactionReceipt receipt =
+          (TransactionReceipt) transService.transHandleWithSign(groupId,
+              signUserId, contractAddress, abiStr, FUNC_CREATERMNODEPROPOSAL, funcParams, isWasm);
+      return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+    } else {
+      String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
+      TransactionReceipt receipt;
+      try {
+        receipt = (TransactionReceipt) transService.transHandleWithSign(groupId,
+            signUserId, contractAddress, abiStr, FUNC_REMOVE, funcParams, isWasm);
+      } catch (RuntimeException e) {
+        // firstly remove node that sdk connected to the node, return the request that present
+        // susscces
+        // because the exception is throwed by getTransactionReceipt, we need ignore it.
+        if (e.getMessage().contains("Don't send requests to this group")) {
+          return ConstantCode.ALREADY_REMOVED_FROM_THE_GROUP.toString();
+        } else {
+          throw e;
+        }
       }
+      return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
     }
-    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
   }
 
 

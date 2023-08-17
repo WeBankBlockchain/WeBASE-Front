@@ -49,11 +49,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class CommitteeService {
-
-  private BigInteger DEFAULT_BLOCK_NUMBER_INTERVAL = BigInteger.valueOf(3600 * 24 * 7);
-
   @Autowired
   TransService transService;
+  /**
+   * default block number interval. after current block number, it will be outdated. Default value is about a week.
+   */
+  public final static BigInteger DEFAULT_BLOCK_NUMBER_INTERVAL = BigInteger.valueOf(3600 * 24 * 7);
+
 
   /**
    * 更新治理委员信息。 如果是新加治理委员，新增地址和权重即可。如果是删除治理委员，将一个治理委员的权重设置为0 即可

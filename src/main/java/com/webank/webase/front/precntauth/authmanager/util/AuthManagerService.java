@@ -4,16 +4,12 @@ import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.v3.contract.auth.manager.AuthManager;
 import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 /**
