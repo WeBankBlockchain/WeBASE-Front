@@ -22,11 +22,8 @@ import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
-import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
-import com.webank.webase.front.web3api.entity.NodeStatusInfo;
-import com.webank.webase.front.web3api.entity.RspSearchTransaction;
-import com.webank.webase.front.web3api.entity.RspStatBlock;
-import com.webank.webase.front.web3api.entity.RspTransCountInfo;
+import com.webank.webase.front.web3api.entity.*;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
@@ -46,18 +43,14 @@ import org.fisco.bcos.sdk.BcosSDKException;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.GroupStatus;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.*;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock.Block;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ViewInfo;
-import org.fisco.bcos.sdk.client.protocol.response.GroupPeers;
 import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
-import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.PeersInfo;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
-import org.fisco.bcos.sdk.client.protocol.response.TotalTransactionCount;
 import org.fisco.bcos.sdk.model.NodeVersion.ClientVersion;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -854,5 +847,21 @@ public class Web3ApiService {
 
     private String getNodeIpPort() {
         return web3ConfigConstants.getIp() + ":" + web3ConfigConstants.getChannelPort();
+    }
+
+    public AddPeers.AddPeersStatus addPeers(Integer groupId, PeersManageInfo peersInfo) {
+        String peerIpPort = peersInfo.getPeerIpPort();
+        List<String> peers = peersInfo.getPeers();
+        return getWeb3j(groupId).addPeers(peerIpPort, peers).getAddPeersStatus();
+    }
+
+    public ErasePeers.ErasePeersStatus erasePeers(int groupId, PeersManageInfo peersInfo) {
+        String peerIpPort = peersInfo.getPeerIpPort();
+        List<String> peers = peersInfo.getPeers();
+        return getWeb3j(groupId).erasePeers(peerIpPort, peers).getErasePeersStatus();
+    }
+
+    public List<String> queryPeers(int groupId, String peerIpPort) {
+        return getWeb3j(groupId).queryPeers(peerIpPort).getQueryPeers();
     }
 }

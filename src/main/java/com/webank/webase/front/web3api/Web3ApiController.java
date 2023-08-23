@@ -17,11 +17,7 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.util.Address;
-import com.webank.webase.front.web3api.entity.GenerateGroupInfo;
-import com.webank.webase.front.web3api.entity.NodeStatusInfo;
-import com.webank.webase.front.web3api.entity.ReqGroupStatus;
-import com.webank.webase.front.web3api.entity.RspStatBlock;
-import com.webank.webase.front.web3api.entity.RspTransCountInfo;
+import com.webank.webase.front.web3api.entity.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -29,10 +25,11 @@ import io.swagger.annotations.ApiOperation;
 import java.math.BigInteger;
 import java.util.List;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.client.protocol.response.AddPeers;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlockHeader.BlockHeader;
 import org.fisco.bcos.sdk.client.protocol.response.ConsensusStatus.ConsensusInfo;
+import org.fisco.bcos.sdk.client.protocol.response.ErasePeers;
 import org.fisco.bcos.sdk.client.protocol.response.NodeInfo.NodeInformation;
 import org.fisco.bcos.sdk.client.protocol.response.Peers;
 import org.fisco.bcos.sdk.client.protocol.response.SyncStatus.SyncStatusInfo;
@@ -378,4 +375,25 @@ public class Web3ApiController {
     }
 
     /* above 2.7.0 */
+
+    @ApiOperation(value = "addPeers", notes = "Add p2p connection configuration")
+    @PostMapping("/addPeers")
+    public AddPeers.AddPeersStatus addPeers(@PathVariable int groupId,
+                                            @RequestBody PeersManageInfo peersInfo) {
+        return web3ApiService.addPeers(groupId, peersInfo);
+    }
+
+    @ApiOperation(value = "erasePeers", notes = "Remove p2p connection configuration")
+    @PostMapping("/erasePeers")
+    public ErasePeers.ErasePeersStatus erasePeers(@PathVariable int groupId,
+                                                  @RequestBody PeersManageInfo peersInfo) {
+        return web3ApiService.erasePeers(groupId, peersInfo);
+    }
+
+    @ApiOperation(value = "queryPeers", notes = "Query p2p connection List")
+    @PostMapping("/queryPeers")
+    public List<String> queryPeers(@PathVariable int groupId,
+                                   @RequestParam String peerIpPort) {
+        return web3ApiService.queryPeers(groupId, peerIpPort);
+    }
 }
