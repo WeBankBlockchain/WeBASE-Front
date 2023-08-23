@@ -92,6 +92,9 @@ public class ConsensusServiceInWebase {
     }
     // 如果启用了权限，则一定是solidity且要走Committee合约
     if (authMgrBaseService.chainHasAuth(groupId)) {
+      // 开启权限后，用committee预编译合约
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.COMMITTEE_MANAGER);
+      log.info("addSealerHandle enable auth, now proposal groupId:{},signUserId:{},nodeId:{}", groupId, signUserId, nodeId);
       // addFlag
       // 如果不存在，就是true，用于add；
       // 如果已存在，则是false，用于更新weight
@@ -159,6 +162,9 @@ public class ConsensusServiceInWebase {
     }
     // 如果启用了权限，则一定是solidity且要走Committee合约
     if (authMgrBaseService.chainHasAuth(groupId)) {
+      // 开启权限后，用committee预编译合约
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.COMMITTEE_MANAGER);
+      log.info("addObserverHandle enable auth, now proposal groupId:{},signUserId:{},nodeId:{}", groupId, signUserId, nodeId);
       // 观察节点weight是 0
       funcParams.add("0");
       // addFlag
@@ -196,6 +202,9 @@ public class ConsensusServiceInWebase {
     }
     // 如果启用了权限，则一定是solidity且要走Committee合约
     if (authMgrBaseService.chainHasAuth(groupId)) {
+      // 开启权限后，用committee预编译合约
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.COMMITTEE_MANAGER);
+      log.info("removeNode enable auth, now proposal groupId:{},signUserId:{},nodeId:{}", groupId, signUserId, nodeId);
       // blockInterval
       funcParams.add(CommitteeService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
       String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.COMMITTEE_MANAGER);

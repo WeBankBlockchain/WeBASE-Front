@@ -77,8 +77,10 @@ public class SysConfigController {
             startTime.toEpochMilli(), reqSetSysConfigInfo);
         String key = reqSetSysConfigInfo.getConfigKey();
         // tx_count_limit, tx_gas_limit
-        if (!PrecompiledUtils.TxCountLimit.equals(key) && !PrecompiledUtils.TxGasLimit.equals(
-            key)) {
+        if (!PrecompiledUtils.TxCountLimit.equals(key)
+            && !PrecompiledUtils.TxGasLimit.equals(key)
+            && !PrecompiledUtils.AuthCheckStatus.equals(key)
+        ) {
             log.error("end setSysConfigValueByKey. Exception:{}",
                 ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY.getMessage());
             return ConstantCode.UNSUPPORTED_SYSTEM_CONFIG_KEY;
