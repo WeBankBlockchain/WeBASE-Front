@@ -14,7 +14,6 @@
 package com.webank.webase.front.precntauth.precompiled.sysconf;
 
 
-import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETCONSENSUSWEIGHTPROPOSAL;
 import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETSYSCONFIGPROPOSAL;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
 
@@ -79,8 +78,16 @@ public class SysConfigServiceInWebase {
         systemConfigGas.setConfigValue(txGasLimit);
         systemConfigGas.setGroupId(groupId);
 
+        String authCheckStatus = web3ApiService.getWeb3j(groupId)
+            .getSystemConfigByKey(PrecompiledUtils.AuthCheckStatus).getSystemConfig().getValue();
+        ReqQuerySysConfigInfo systemConfigAuth = new ReqQuerySysConfigInfo();
+        systemConfigAuth.setConfigKey(PrecompiledUtils.AuthCheckStatus);
+        systemConfigAuth.setConfigValue(authCheckStatus);
+        systemConfigAuth.setGroupId(groupId);
+
         list.add(systemConfigCount);
         list.add(systemConfigGas);
+        list.add(systemConfigAuth);
         return list;
     }
 
@@ -100,6 +107,15 @@ public class SysConfigServiceInWebase {
             if (Long.parseLong(value) < com.webank.webase.front.util.PrecompiledUtils.TxGasLimitMin ||
                 Long.parseLong(value) > com.webank.webase.front.util.PrecompiledUtils.TxGasLimitMax) {
                 return ConstantCode.SET_SYSTEM_CONFIG_GAS_RANGE_ERROR;
+            }
+        }
+
+        // 如果auth_check_status已经是1，则不能做修改了
+        if (PrecompiledUtils.AuthCheckStatus.equals(key)) {
+            // 校验已有的权限校验是否为1，为1则不允许再修改
+            String oldValue = this.getSysConfigByKey(groupId, key);
+            if (Integer.parseInt(oldValue) == com.webank.webase.front.util.PrecompiledUtils.AuthCheckStatus_Enable) {
+                return ConstantCode.FAIL_SET_SYSTEM_CONFIG_ALREADY_AUTH_CHECK;
             }
         }
 
@@ -123,6 +139,8 @@ public class SysConfigServiceInWebase {
         }
         // 如果启用了权限，则一定是solidity且要走Committee合约
         if (authMgrBaseService.chainHasAuth(groupId)) {
+            // 开启权限后，用committee预编译合约
+            contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.COMMITTEE_MANAGER);
             // blockInterval
             funcParams.add(CommitteeService.DEFAULT_BLOCK_NUMBER_INTERVAL.toString(10));
             String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.COMMITTEE_MANAGER);

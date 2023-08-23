@@ -29,6 +29,7 @@ public class PrecompiledUtils {
     // SystemConfig key
     public static final String TxCountLimit = "tx_count_limit";
     public static final String TxGasLimit = "tx_gas_limit";
+    public static final String AuthCheckStatus = "auth_check_status";
     // node consensus type
     public static final String NODE_TYPE_SEALER = "sealer";
     public static final String NODE_TYPE_OBSERVER = "observer";
@@ -36,6 +37,7 @@ public class PrecompiledUtils {
 
     public static final int TxGasLimitMin = 10000;
     public static final int TxGasLimitMax = 2147483647;
+    public static final int AuthCheckStatus_Enable = 1;
 
     public static int SYS_TABLE_KEY_MAX_LENGTH = 58; // 64- "_user_".length
     public static int SYS_TABLE_KEY_FIELD_NAME_MAX_LENGTH = 64;
