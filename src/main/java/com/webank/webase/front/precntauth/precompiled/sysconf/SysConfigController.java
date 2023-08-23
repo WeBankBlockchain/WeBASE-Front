@@ -92,7 +92,7 @@ public class SysConfigController {
         // post返回透传
         try {
             Object res = SysConfigServiceInWebase.setSysConfigValueByKey(reqSetSysConfigInfo);
-            log.info("end querySystemConfigByGroupId useTime:{} res:{}",
+            log.info("end setSysConfigValueByKey useTime:{} res:{}",
                 Duration.between(startTime, Instant.now()).toMillis(), res);
             return res;
         } catch (Exception e) { //parse error
