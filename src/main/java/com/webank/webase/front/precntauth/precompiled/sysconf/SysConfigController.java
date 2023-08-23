@@ -15,21 +15,25 @@
  */
 package com.webank.webase.front.precntauth.precompiled.sysconf;
 
-import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precntauth.precompiled.sysconf.entity.ReqSetSysConfigInfo;
 import com.webank.webase.front.util.PrecompiledUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import javax.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * System config controller
@@ -73,7 +77,7 @@ public class SysConfigController {
     public Object setSysConfigValueByKey(
         @Valid @RequestBody ReqSetSysConfigInfo reqSetSysConfigInfo) {
         Instant startTime = Instant.now();
-        log.info("start querySystemConfigByGroupId startTime:{}, systemConfigHandle:{}",
+        log.info("start setSysConfigValueByKey startTime:{}, systemConfigHandle:{}",
             startTime.toEpochMilli(), reqSetSysConfigInfo);
         String key = reqSetSysConfigInfo.getConfigKey();
         // tx_count_limit, tx_gas_limit

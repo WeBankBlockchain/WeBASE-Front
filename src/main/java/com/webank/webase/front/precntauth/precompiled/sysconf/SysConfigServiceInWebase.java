@@ -14,7 +14,6 @@
 package com.webank.webase.front.precntauth.precompiled.sysconf;
 
 
-import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETCONSENSUSWEIGHTPROPOSAL;
 import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETSYSCONFIGPROPOSAL;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.sysconfig.SystemConfigPrecompiled.FUNC_SETVALUEBYKEY;
 
