@@ -37,4 +37,6 @@ public class ReqDecodeParam {
      * add in 1.5.0, not null if decode output
      */
     private String methodName;
+    @NotNull
+    private String groupId;
 }

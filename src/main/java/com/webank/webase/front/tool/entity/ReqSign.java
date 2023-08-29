@@ -14,12 +14,15 @@
 
 package com.webank.webase.front.tool.entity;
 
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 public class ReqSign {
+    @NotNull
+    private String groupId;
     private String rawData;
     private String privateKey;
 }
