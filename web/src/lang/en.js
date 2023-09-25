@@ -420,7 +420,7 @@ export default {
         folderSameFail: "The new folder has the same name as the existing folder",
         user: "User",
         params: "Params",
-        paramsInfo: 'If the parameter type is an array, enter the following format, comma separated, with double quotes for non-numeric and Boolean values, such as ["aaa","bbb"] and [100,101]; Escape if array parameters contain double quotes, for example: ["aaa\\"bbb","ccc"].',
+        paramsInfo: 'If the parameter type is an array, struct or tuple, enter the following format, comma separated, with double quotes for non-numeric and Boolean values, such as ["aaa","bbb"] and [100,101]; Escape if array, struct or tuple parameters contain double quotes, for example: ["aaa\\"bbb","ccc"].',
         contractAddress: "Address",
         method: "Method",
         contractAddressInput: "Please enter the correct contract address",
