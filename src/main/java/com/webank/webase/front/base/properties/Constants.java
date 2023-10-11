@@ -51,14 +51,14 @@ public class Constants {
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI =
             "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
-    public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
-    public static final String WEBASE_SIGN_HASH_URI = "http://%s/WeBASE-Sign/sign/hash";
+    public static final String WEBASE_SIGN_URI = "http://%s/sign3/sign";
+    public static final String WEBASE_SIGN_HASH_URI = "http://%s/sign3/sign/hash";
     public static final String WEBASE_SIGN_USER_URI =
-            "http://%s/WeBASE-Sign/user/newUser?encryptType=%s&signUserId=%s&appId=%s&returnPrivateKey=%s";
+            "http://%s/sign3/user/newUser?encryptType=%s&signUserId=%s&appId=%s&returnPrivateKey=%s";
     public static final String WEBASE_SIGN_USER_INFO_URI =
-            "http://%s/WeBASE-Sign/user/%s/userInfo?returnPrivateKey=%s";
+            "http://%s/sign3/user/%s/userInfo?returnPrivateKey=%s";
     public static final String WEBASE_SIGN_VERSION_URI =
-        "http://%s/WeBASE-Sign/version";
+        "http://%s/sign3/version";
     public static final String ACCOUNT1_PATH = "node.key";
     public static final String CONSTANT_PREFIX = "constant";
     public static final String SOLC_DIR_PATH_CONFIG = "solcjs";

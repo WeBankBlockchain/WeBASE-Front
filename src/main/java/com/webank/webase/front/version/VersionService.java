@@ -20,7 +20,9 @@ import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.properties.Constants;
 import com.webank.webase.front.util.CommonUtils;
 import com.webank.webase.front.util.JsonUtils;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,12 +35,18 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
+@Data
 public class VersionService {
 
     @Autowired
     RestTemplate restTemplate;
     @Autowired
     private Constants constants;
+
+    // sa-token
+    private String tokenKey;
+
+    private String tokenValue;
 
     /**
      * get webase-sign version
@@ -49,6 +57,12 @@ public class VersionService {
             String url = String.format(Constants.WEBASE_SIGN_VERSION_URI, constants.getKeyServer());
             log.info("getSignServerVersion url:{}", url);
             HttpHeaders headers = CommonUtils.buildHeaders();
+
+            // 增加sa-token信息
+            if (!StringUtils.isEmpty(this.tokenKey) && !StringUtils.isEmpty(this.tokenValue)) {
+                headers.add(this.tokenKey, this.tokenValue);
+            }
+
             HttpEntity<String> formEntity =
                 new HttpEntity<String>(null, headers);
             ResponseEntity<String> response = restTemplate.exchange(url,
