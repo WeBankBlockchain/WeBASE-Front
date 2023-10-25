@@ -730,5 +730,27 @@ public class KeyStoreService {
 
     }
 
+    public String getPrivateKeyWithSign(String signUserId) {
+        // webase-sign api(v1.4.4) support
+        String url = String.format(Constants.WEBASE_SIGN_USER_INFO_URI, constants.getKeyServer(),
+                signUserId, true);
+        log.info("getPrivateKeyWithSign url:{}", url);
+        BaseResponse baseResponse = getForEntity(url);
+        log.info("getPrivateKeyWithSign response:{}", JsonUtils.toJSONString(baseResponse));
+        RspUserInfo rspUserInfo;
+        if (baseResponse.getCode() == 0) {
+            rspUserInfo = JsonUtils.toJavaObject(baseResponse.getData(), RspUserInfo.class);
+        } else {
+            log.error("getPrivateKeyWithSign fail for:{}", baseResponse.getMessage());
+            throw new FrontException(baseResponse.getCode(), baseResponse.getMessage());
+        }
+        String hexPrivKey = null;
+        if (rspUserInfo.getPrivateKey() != null) {
+            // decrypt private key
+            hexPrivKey = aesUtils.aesDecrypt(rspUserInfo.getPrivateKey());
+        }
+        return hexPrivKey;
+    }
+
 }
 

@@ -25,8 +25,10 @@ import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.base.response.BaseResponse;
+import com.webank.webase.front.precntauth.authmanager.util.AuthManagerService;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils;
+import com.webank.webase.front.precntauth.precompiled.consensus.entity.ConsensusHandle;
 import com.webank.webase.front.transaction.TransService;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -35,6 +37,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
 import org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager;
+import org.fisco.bcos.sdk.v3.contract.auth.manager.AuthManager;
 import org.fisco.bcos.sdk.v3.model.RetCode;
 import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.fisco.bcos.sdk.v3.transaction.codec.decode.ReceiptParser;
@@ -54,6 +57,9 @@ public class CommitteeService {
 
   @Autowired
   TransService transService;
+
+  @Autowired
+  private AuthManagerService authManagerService;
 
   /**
    * 更新治理委员信息。 如果是新加治理委员，新增地址和权重即可。如果是删除治理委员，将一个治理委员的权重设置为0 即可
@@ -254,6 +260,38 @@ public class CommitteeService {
 
     }
     return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
+  }
+
+  public BigInteger createSetConsensusWeightProposal(ConsensusHandle consensusHandle) throws Exception {
+    AuthManager authManager = authManagerService.getAuthManagerByUser(consensusHandle.getGroupId(), consensusHandle.getSignUserId());
+    String nodeId = consensusHandle.getNodeId();
+    BigInteger proposalId = authManager.createSetConsensusWeightProposal(nodeId, consensusHandle.getWeight(), false);
+    log.info("Set consensus weight proposal created, ID is: " + proposalId);
+    return proposalId;
+  }
+
+  public BigInteger createAddSealerProposal(ConsensusHandle consensusHandle) throws Exception {
+    AuthManager authManager = authManagerService.getAuthManagerByUser(consensusHandle.getGroupId(), consensusHandle.getSignUserId());
+    String nodeId = consensusHandle.getNodeId();
+    BigInteger proposalId = authManager.createSetConsensusWeightProposal(nodeId, consensusHandle.getWeight(), true);
+    log.info("Add consensus sealer proposal created, ID is: " + proposalId);
+    return proposalId;
+  }
+
+  public BigInteger createAddObserverProposal(ConsensusHandle consensusHandle) throws Exception {
+    AuthManager authManager = authManagerService.getAuthManagerByUser(consensusHandle.getGroupId(), consensusHandle.getSignUserId());
+    String nodeId = consensusHandle.getNodeId();
+    BigInteger proposalId =
+            authManager.createSetConsensusWeightProposal(nodeId, BigInteger.ZERO, true);
+    log.info("Add observer proposal created, ID is: " + proposalId);
+    return proposalId;
+  }
+  public BigInteger createRemoveNodeProposal(ConsensusHandle consensusHandle) throws Exception {
+    AuthManager authManager = authManagerService.getAuthManagerByUser(consensusHandle.getGroupId(), consensusHandle.getSignUserId());
+    String nodeId = consensusHandle.getNodeId();
+    BigInteger proposalId = authManager.createRmNodeProposal(nodeId);
+    log.info("Remove node proposal created, ID is: " + proposalId);
+    return proposalId;
   }
 
 }

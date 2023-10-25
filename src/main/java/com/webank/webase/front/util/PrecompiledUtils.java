@@ -15,8 +15,10 @@
  */
 package com.webank.webase.front.util;
 
+import com.webank.webase.front.base.exception.FrontException;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.v3.model.PrecompiledConstant;
+
+import java.math.BigInteger;
 
 /**
  * Constants and tool function related with Precompiled module
@@ -34,6 +36,9 @@ public class PrecompiledUtils {
     public static final String NODE_TYPE_OBSERVER = "observer";
     public static final String NODE_TYPE_REMOVE = "remove";
 
+    // 修改共识节点权重
+    public static final String NODE_TYPE_WEIGHT = "weight";
+
     public static final int TxGasLimitMin = 10000;
     public static final int TxGasLimitMax = 2147483647;
 
@@ -48,9 +53,9 @@ public class PrecompiledUtils {
 
         if (StringUtils.isBlank(version)) {
             return false;
-        }else if (!version.matches("^[A-Za-z0-9.]+$")) { // check version's character
+        } else if (!version.matches("^[A-Za-z0-9.]+$")) { // check version's character
             return false;
-        }else {
+        } else {
             return true;
         }
     }
@@ -58,9 +63,30 @@ public class PrecompiledUtils {
     public static boolean checkNodeId(String nodeId) {
         if (nodeId.length() != 128) {
             return false;
-        }else {
+        } else {
             return true;
         }
     }
 
+    public static BigInteger processNonNegativeBigNumber(
+            String name, String intStr, BigInteger minValue, BigInteger maxValue)
+            throws FrontException {
+        BigInteger intParam;
+        try {
+            intParam = new BigInteger(intStr);
+            if (intParam.compareTo(minValue) < 0 || intParam.compareTo(maxValue) > 0) {
+                throw new FrontException(
+                        "Please provide \""
+                                + name
+                                + "\" by non-negative big int mode between "
+                                + minValue
+                                + " and "
+                                + maxValue
+                                + ".");
+            }
+        } catch (NumberFormatException e) {
+            throw new FrontException("Invalid " + name + ": \"" + intStr + "\"!");
+        }
+        return intParam;
+    }
 }
