@@ -152,6 +152,7 @@ public class ConstantCode {
     public static final RetCode SET_SYSTEM_CONFIG_GAS_RANGE_ERROR =  RetCode.mark(201209,
             "provide value by positive integer mode, from 100000 to 2147483647");
     public static final RetCode FAIL_SET_SYSTEM_CONFIG = RetCode.mark(201210, "set system config value fail for params error or permission denied ");
+    public static final RetCode FAIL_SET_SYSTEM_CONFIG_ALREADY_AUTH_CHECK = RetCode.mark(201211, "Auth check status already is 1(enabled), cannot disabled now");
     // consensus (node manager)
     public static final RetCode INVALID_NODE_ID = RetCode.mark(201216,"node id is invalid");
     public static final RetCode INVALID_NODE_TYPE = RetCode.mark(201217,"invalid node type: sealer, observer, remove ");
