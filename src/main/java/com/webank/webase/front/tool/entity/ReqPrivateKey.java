@@ -14,6 +14,7 @@
 
 package com.webank.webase.front.tool.entity;
 
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,4 +26,6 @@ public class ReqPrivateKey {
      * string of BigInteger
      */
     private String privateKey;
+    @NotNull
+    private String groupId;
 }
