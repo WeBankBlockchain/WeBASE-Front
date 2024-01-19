@@ -42,6 +42,7 @@ public class Web3Config {
     private String threadPoolSize;
     private String certPath;
     private String useSmSsl;
+    private String disableSsl;
     private List<String> peers;
 
 
@@ -50,6 +51,7 @@ public class Web3Config {
         log.info("start init ConfigProperty");
         // cert config, encrypt type
         Map<String, Object> cryptoMaterial = new HashMap<>();
+        cryptoMaterial.put("disableSsl", disableSsl);
         cryptoMaterial.put("certPath", certPath);
         cryptoMaterial.put("useSMCrypto", useSmSsl);
         log.info("init cert cryptoMaterial:{}, (using conf as cert path)", JsonUtils.objToString(cryptoMaterial));

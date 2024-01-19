@@ -16,28 +16,18 @@
 
 package com.webank.webase.front.configapi;
 
-import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.config.Web3Config;
 import com.webank.webase.front.base.properties.VersionProperties;
-import com.webank.webase.front.base.response.BaseResponse;
-import com.webank.webase.front.configapi.entity.ConfigInfo;
-import com.webank.webase.front.configapi.entity.ReqSdkConfig;
 import com.webank.webase.front.version.VersionService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Map;
-import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * get or update config local
@@ -57,7 +47,8 @@ public class ConfigController {
     private VersionService versionService;
     @Autowired
     private ConfigService configService;
-
+    @Autowired
+    private RestTemplate restTemplate;
 
     @GetMapping("encrypt/{groupId}")
     public Integer getEncryptType(@PathVariable("groupId") String groupId) {
@@ -115,5 +106,7 @@ public class ConfigController {
     public String getSignVersion() {
         return versionService.getSignServerVersion();
     }
+
+
 
 }

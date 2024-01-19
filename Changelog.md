@@ -1,3 +1,19 @@
+### v3.1.1(2024-01-19)
+
+**Add**
+- 系统配置中增加`auth_check_status`配置，用于启用权限控制功能
+
+**Fix**
+- 修复预编译合约中报错权限不足的bug，如修改共识类型
+
+**兼容性**
+- 支持FISCO-BCOS v3.0.0 及以上版本
+- WeBASE-Web v3.1.1及以上版本
+- WeBASE-Node-Manager v3.1.0
+
+详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。
+
+
 ### v3.1.0(2023-07-20)
 
 **Add**
@@ -10,7 +26,7 @@
 
 **兼容性**
 - 支持FISCO-BCOS v3.0.0 及以上版本
-- WeBASE-Node-Manager v3.0.2及以上版本
+- WeBASE-Node-Manager v3.1.0及以上版本
 - WeBASE-Sign v3.0.2
 
 详细了解,请阅读[**技术文档**](https://webasedoc.readthedocs.io/zh_CN/lab/)。

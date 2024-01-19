@@ -1,5 +1,5 @@
 # server version
-version: v3.0.2
+version: v3.1.1
 
 server:
   port: 5002
@@ -15,6 +15,7 @@ sdk:
   peers: ['127.0.0.1:20200']
   certPath: conf  # sdk cert path of relative or absolute, default 'conf'
   threadPoolSize: 50 # thread pool of sdk
+  disableSsl: false # disable node ssl or not
 
 spring:
   datasource:
