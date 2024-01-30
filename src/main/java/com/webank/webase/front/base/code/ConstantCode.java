@@ -290,6 +290,7 @@ public class ConstantCode {
     public static final RetCode OPEN_TABLE_FAILED = RetCode.mark(201673,"Open table failed, please check the existence of the table");
     public static final RetCode NOT_SET_METHOD_AUTH_TYPE = RetCode.mark(201674,"The contract method auth type not set, please set method auth type first.");
     public static final RetCode CHAIN_AUTH_NOT_ENABLE = RetCode.mark(201675, "auth of the chain not enable");
+    public static final RetCode GOVERNOR_CANNOT_REMOVE_YOURSELF = RetCode.mark(201676, "you cannot remove yourself");
 
     /* bfs path */
     public static final RetCode BFS_INVALID_PATH = RetCode.mark(201680, "the PATH is invalid.");
