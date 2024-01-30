@@ -39,7 +39,7 @@ repositories {
 }
 
 
-def spring_boot_version="2.7.10"
+def spring_boot_version="2.7.17"
 List spring_boot =[
     "org.springframework.boot:spring-boot-starter-web:$spring_boot_version",
     "org.springframework.boot:spring-boot-autoconfigure:$spring_boot_version",
@@ -110,6 +110,8 @@ dependencies {
     compile 'com.google.guava:guava:30.0-jre'
     compile 'org.yaml:snakeyaml:2.0'
     compile 'javax.validation:validation-api:2.0.1.Final'
+    compile 'io.netty:netty-all:4.1.100.Final'
+    compile 'org.apache.commons:commons-text:1.10.0'
 
     testCompile("org.springframework.boot:spring-boot-starter-test:$spring_boot_version") {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
