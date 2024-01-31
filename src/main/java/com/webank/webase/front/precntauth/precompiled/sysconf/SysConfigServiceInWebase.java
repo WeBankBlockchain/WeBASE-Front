@@ -70,6 +70,7 @@ public class SysConfigServiceInWebase {
         systemConfigCount.setConfigKey(PrecompiledUtils.TxCountLimit);
         systemConfigCount.setConfigValue(txCountLimit);
         systemConfigCount.setGroupId(groupId);
+        list.add(systemConfigCount);
 
         String txGasLimit = web3ApiService.getWeb3j(groupId)
             .getSystemConfigByKey(PrecompiledUtils.TxGasLimit).getSystemConfig().getValue();
@@ -77,17 +78,22 @@ public class SysConfigServiceInWebase {
         systemConfigGas.setConfigKey(PrecompiledUtils.TxGasLimit);
         systemConfigGas.setConfigValue(txGasLimit);
         systemConfigGas.setGroupId(groupId);
-
-        String authCheckStatus = web3ApiService.getWeb3j(groupId)
-            .getSystemConfigByKey(PrecompiledUtils.AuthCheckStatus).getSystemConfig().getValue();
-        ReqQuerySysConfigInfo systemConfigAuth = new ReqQuerySysConfigInfo();
-        systemConfigAuth.setConfigKey(PrecompiledUtils.AuthCheckStatus);
-        systemConfigAuth.setConfigValue(authCheckStatus);
-        systemConfigAuth.setGroupId(groupId);
-
-        list.add(systemConfigCount);
         list.add(systemConfigGas);
-        list.add(systemConfigAuth);
+
+        // 3.3.0之后才有该配置
+        try {
+            String authCheckStatus = web3ApiService.getWeb3j(groupId)
+                .getSystemConfigByKey(PrecompiledUtils.AuthCheckStatus).getSystemConfig()
+                .getValue();
+            ReqQuerySysConfigInfo systemConfigAuth = new ReqQuerySysConfigInfo();
+            systemConfigAuth.setConfigKey(PrecompiledUtils.AuthCheckStatus);
+            systemConfigAuth.setConfigValue(authCheckStatus);
+            systemConfigAuth.setGroupId(groupId);
+            list.add(systemConfigAuth);
+        } catch (Exception ex) {
+            log.warn("fisco bcos version lower than 3.3.0 (<3.3.0) not support get auth_check_status config");
+        }
+
         return list;
     }
 
