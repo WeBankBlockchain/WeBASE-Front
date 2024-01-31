@@ -327,6 +327,11 @@ public class Web3ApiService {
 
     /**
      * check node status.
+     * 1 缓存了一份节点的块高和view；每n+3s检查一次，n为节点数。
+     * 2 获取单个节点的块高和view，获取群组的块高
+     * 3 如果是共识节点，节点块高和view 在 n+3s都没变化，则异常；否则正常
+     * 4 如果是观察节点，节点块高和群组最新块高不一样，则异常；否则正常
+     *
      */
     private NodeStatusInfo checkNodeStatus(int groupId, String nodeId, BigInteger chainBlockNumber,
                                            BigInteger chainView, int nodeType) {

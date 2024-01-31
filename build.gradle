@@ -60,7 +60,8 @@ List logger = [
     "org.apache.logging.log4j:log4j-api:$log4j_version",
     "org.apache.logging.log4j:log4j-core:$log4j_version",
     "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version",
-    "org.apache.logging.log4j:log4j-web:$log4j_version"
+    "org.apache.logging.log4j:log4j-web:$log4j_version",
+    "org.apache.logging.log4j:log4j-to-slf4j:$log4j_version"
 ]
 
 List jaxb = [
