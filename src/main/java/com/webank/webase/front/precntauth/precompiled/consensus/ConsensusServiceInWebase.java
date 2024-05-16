@@ -18,6 +18,7 @@ import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
 import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
 import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATERMNODEPROPOSAL;
 import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETCONSENSUSWEIGHTPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.Committee.FUNC_SETWEIGHT;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDOBSERVER;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDSEALER;
 import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_REMOVE;
@@ -257,6 +258,41 @@ public class ConsensusServiceInWebase {
             .add(new NodeInfo(peerToAdd, NODE_TYPE_REMOVE)));
 
     return nodeListWithType;
+  }
+
+  public String setWeight(String groupId, String signUserId, String nodeId, BigInteger weight) {
+    // check node id
+    if (!isValidNodeID(nodeId, groupId)) {
+      return PrecompiledRetCode.CODE_INVALID_NODEID.toString();
+    }
+    List<String> nodeIdList = web3ApiService.getGroupPeers(groupId);
+    if (!nodeIdList.contains(nodeId)) {
+      log.error("nodeId is not connected with others, cannot set weight");
+      return ConstantCode.PEERS_NOT_CONNECTED.toString();
+    }
+    if (!containsGroupFile(groupId)) {
+      throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+    }
+    return this.setWeightHandle(groupId, signUserId, nodeId, weight);
+  }
+
+  public String setWeightHandle(String groupId, String signUserId, String nodeId,
+                                BigInteger weight) {
+    List<String> funcParams = new ArrayList<>();
+    funcParams.add(nodeId);
+    funcParams.add(weight.toString(10));
+    String contractAddress;
+    boolean isWasm = web3ApiService.getWeb3j(groupId).isWASM();
+    if (isWasm) {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS_LIQUID);
+    } else {
+      contractAddress = PrecompiledCommonInfo.getAddress(PrecompiledTypes.CONSENSUS);
+    }
+    String abiStr = PrecompiledCommonInfo.getAbi(PrecompiledTypes.CONSENSUS);
+    TransactionReceipt receipt =
+            (TransactionReceipt) transService.transHandleWithSign(groupId,
+                    signUserId, contractAddress, abiStr, FUNC_SETWEIGHT, funcParams, isWasm);
+    return PrecompiledUtils.handleTransactionReceipt(receipt, isWasm);
   }
 
 }

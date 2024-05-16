@@ -1,5 +1,6 @@
 package com.webank.webase.front.precntauth.authmanager.util;
 
+import com.webank.webase.front.base.exception.FrontException;
 import com.webank.webase.front.keystore.KeyStoreService;
 import com.webank.webase.front.web3api.Web3ApiService;
 import java.time.Duration;
@@ -7,7 +8,10 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.v3.client.Client;
 import org.fisco.bcos.sdk.v3.contract.auth.manager.AuthManager;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,10 +39,32 @@ public class AuthManagerService {
       log.info("getAuthManagerService groupId:{},{}", groupId,
           Duration.between(startTime, Instant.now()).toMillis());
     }
+
     log.info("getAuthManagerService groupId:{},{}", groupId,
         Duration.between(startTime, Instant.now()).toMillis());
     return authManagerMap.get(groupId);
   }
+
+  public AuthManager getAuthManagerByUser(String groupId, String signUserId) throws FrontException {
+    Instant startTime = Instant.now();
+
+    // 从sign server获取私钥
+    String privKey = keyStoreService.getPrivateKeyWithSign(signUserId);
+
+    if (privKey == null || StringUtils.isBlank(privKey)) {
+      throw new FrontException(String.format("transHandleWithSign this signUser [{%s}] not found privkey", signUserId));
+    }
+
+    CryptoKeyPair cryptoKeyPair = web3ApiService.getCryptoSuite(groupId).getKeyPairFactory().createKeyPair(privKey);
+
+    AuthManager authManager = new AuthManager(web3ApiService.getWeb3j(groupId), cryptoKeyPair);
+
+    log.info("getAuthManagerByUser groupId:{},{}", groupId,
+            Duration.between(startTime, Instant.now()).toMillis());
+    return authManager;
+  }
+
+
 
 
 }
