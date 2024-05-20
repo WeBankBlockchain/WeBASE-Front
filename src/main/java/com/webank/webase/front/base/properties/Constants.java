@@ -65,7 +65,7 @@ public class Constants {
     public static final String SOLC_JS_SUFFIX = ".js";
     public static final String RECEIPT_STATUS_0X0 = "0x0";
 
-    private String keyServer = "http://127.0.0.1:80/sign3";
+    private String keyServer = "http://127.0.0.1/WeBASE-Sign";
     private int transMaxWait = 30;
     private String monitorDisk = "/";
     private boolean monitorEnabled = true;

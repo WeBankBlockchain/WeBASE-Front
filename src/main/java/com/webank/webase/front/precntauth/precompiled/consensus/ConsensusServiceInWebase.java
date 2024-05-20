@@ -13,21 +13,9 @@
  */
 package com.webank.webase.front.precntauth.precompiled.consensus;
 
-import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_OBSERVER;
-import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_REMOVE;
-import static com.webank.webase.front.util.PrecompiledUtils.NODE_TYPE_SEALER;
-import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATERMNODEPROPOSAL;
-import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETCONSENSUSWEIGHTPROPOSAL;
-import static org.fisco.bcos.sdk.v3.contract.auth.contracts.Committee.FUNC_SETWEIGHT;
-import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDOBSERVER;
-import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_ADDSEALER;
-import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_REMOVE;
-import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.FUNC_SETWEIGHT;
-
 import com.webank.webase.front.base.code.ConstantCode;
 import com.webank.webase.front.base.enums.PrecompiledTypes;
 import com.webank.webase.front.base.exception.FrontException;
-import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precntauth.authmanager.base.AuthMgrBaseService;
 import com.webank.webase.front.precntauth.authmanager.committee.CommitteeService;
 import com.webank.webase.front.precntauth.precompiled.base.PrecompiledCommonInfo;
@@ -35,19 +23,23 @@ import com.webank.webase.front.precntauth.precompiled.base.PrecompiledUtils;
 import com.webank.webase.front.precntauth.precompiled.consensus.entity.NodeInfo;
 import com.webank.webase.front.transaction.TransService;
 import com.webank.webase.front.web3api.Web3ApiService;
+import lombok.extern.slf4j.Slf4j;
+import org.fisco.bcos.sdk.v3.client.protocol.response.SealerList.Sealer;
+import org.fisco.bcos.sdk.v3.model.PrecompiledRetCode;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.fisco.bcos.sdk.v3.client.protocol.response.SealerList.Sealer;
-import org.fisco.bcos.sdk.v3.model.PrecompiledRetCode;
-import org.fisco.bcos.sdk.v3.model.RetCode;
-import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
-import org.fisco.bcos.sdk.v3.transaction.codec.decode.ReceiptParser;
-import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
+import static com.webank.webase.front.util.PrecompiledUtils.*;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.Committee.FUNC_SETWEIGHT;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATERMNODEPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.auth.contracts.CommitteeManager.FUNC_CREATESETCONSENSUSWEIGHTPROPOSAL;
+import static org.fisco.bcos.sdk.v3.contract.precompiled.consensus.ConsensusPrecompiled.*;
 
 /**
  *  Node consensus status service;
@@ -270,9 +262,9 @@ public class ConsensusServiceInWebase {
       log.error("nodeId is not connected with others, cannot set weight");
       return ConstantCode.PEERS_NOT_CONNECTED.toString();
     }
-    if (!containsGroupFile(groupId)) {
-      throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
-    }
+//    if (!containsGroupFile(groupId)) {
+//      throw new FrontException(ConstantCode.GENESIS_CONF_NOT_FOUND);
+//    }
     return this.setWeightHandle(groupId, signUserId, nodeId, weight);
   }
 
