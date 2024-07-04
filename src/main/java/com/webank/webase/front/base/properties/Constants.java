@@ -51,21 +51,21 @@ public class Constants {
     public static final String FILE_ADDRESS = ".address";
     public static final String MGR_PRIVATE_KEY_URI =
             "http://%s/WeBASE-Node-Manager/user/privateKey/%s";
-    public static final String WEBASE_SIGN_URI = "http://%s/WeBASE-Sign/sign";
-    public static final String WEBASE_SIGN_HASH_URI = "http://%s/WeBASE-Sign/sign/hash";
+    public static final String WEBASE_SIGN_URI = "%s/sign";
+    public static final String WEBASE_SIGN_HASH_URI = "%s/sign/hash";
     public static final String WEBASE_SIGN_USER_URI =
-            "http://%s/WeBASE-Sign/user/newUser?encryptType=%s&signUserId=%s&appId=%s&returnPrivateKey=%s";
+            "%s/user/newUser?encryptType=%s&signUserId=%s&appId=%s&returnPrivateKey=%s";
     public static final String WEBASE_SIGN_USER_INFO_URI =
-            "http://%s/WeBASE-Sign/user/%s/userInfo?returnPrivateKey=%s";
+            "%s/user/%s/userInfo?returnPrivateKey=%s";
     public static final String WEBASE_SIGN_VERSION_URI =
-        "http://%s/WeBASE-Sign/version";
+        "%s/version";
     public static final String ACCOUNT1_PATH = "node.key";
     public static final String CONSTANT_PREFIX = "constant";
     public static final String SOLC_DIR_PATH_CONFIG = "solcjs";
     public static final String SOLC_JS_SUFFIX = ".js";
     public static final String RECEIPT_STATUS_0X0 = "0x0";
 
-    private String keyServer = "127.0.0.1:8080";
+    private String keyServer = "http://127.0.0.1/WeBASE-Sign";
     private int transMaxWait = 30;
     private String monitorDisk = "/";
     private boolean monitorEnabled = true;

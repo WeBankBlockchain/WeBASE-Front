@@ -13,12 +13,12 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
             <Policies>
                 <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="200 MB" />
+                <SizeBasedTriggeringPolicy size="100 MB" />
             </Policies>
             <DefaultRolloverStrategy max="24" >
                 <Delete basePath="${logPath}/" >
                     <IfFileName glob="WeBASE-Front.log.*.log.gz" />
-                    <IfLastModified age="15d" />
+                    <IfLastModified age="7d" />
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
@@ -31,12 +31,12 @@
             </Filters>
             <Policies>
                 <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="200 MB" />
+                <SizeBasedTriggeringPolicy size="100 MB" />
             </Policies>
             <DefaultRolloverStrategy max="24" >
                 <Delete basePath="${logPath}/" >
                     <IfFileName glob="WeBASE-Front-error.log.*.log.gz" />
-                    <IfLastModified age="15d" />
+                    <IfLastModified age="7d" />
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
@@ -46,12 +46,12 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %c{1}(%L) - %m%n" />
             <Policies>
                 <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="200 MB" />
+                <SizeBasedTriggeringPolicy size="100 MB" />
             </Policies>
             <DefaultRolloverStrategy max="24" >
                 <Delete basePath="${logPath}/" >
                     <IfFileName glob="web3sdk.log.*.log.gz" />
-                    <IfLastModified age="15d" />
+                    <IfLastModified age="7d" />
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>

@@ -302,9 +302,9 @@ public class CommonUtils {
     /**
      * build httpEntity.
      */
-    public static HttpEntity buildHttpEntity(Object param) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+    public static HttpEntity buildHttpEntity(HttpHeaders headers, Object param) {
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         String paramStr = null;
         if (Objects.nonNull(param)) {
             paramStr = JsonUtils.toJSONString(param);

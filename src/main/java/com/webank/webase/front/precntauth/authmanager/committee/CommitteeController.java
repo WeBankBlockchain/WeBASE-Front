@@ -1,5 +1,7 @@
 package com.webank.webase.front.precntauth.authmanager.committee;
 
+import com.webank.webase.front.base.code.ConstantCode;
+import com.webank.webase.front.base.response.BaseResponse;
 import com.webank.webase.front.precntauth.authmanager.committee.entity.ReqDeployAuthTypeInfo;
 import com.webank.webase.front.precntauth.authmanager.committee.entity.ReqRevokeProposalInfo;
 import com.webank.webase.front.precntauth.authmanager.committee.entity.ReqVoteProposalInfo;
@@ -7,10 +9,13 @@ import com.webank.webase.front.precntauth.authmanager.committee.entity.ReqResetA
 import com.webank.webase.front.precntauth.authmanager.committee.entity.ReqSetRateInfo;
 import com.webank.webase.front.precntauth.authmanager.committee.entity.ReqUpdateGovernorInfo;
 import com.webank.webase.front.precntauth.authmanager.committee.entity.ReqUsrDeployInfo;
+import com.webank.webase.front.precntauth.precompiled.consensus.entity.ConsensusHandle;
+import com.webank.webase.front.util.PrecompiledUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
+import java.math.BigInteger;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.v3.codec.ContractCodecException;
@@ -105,4 +110,34 @@ public class CommitteeController {
         reqVoteProposalInfo.getAgree());
   }
 
+  @ApiOperation(value = "manage node type proposal", notes = "The proposal of addSealer addObserver removeNode")
+  @ApiImplicitParam(name = "consensusHandle proposal", value = "node consensus info", required = true, dataType = "ConsensusHandle")
+  @PostMapping("proposal/consensus")
+  public Object nodeManageProposal(@Valid @RequestBody ConsensusHandle consensusHandle) throws Exception{
+    log.info("start nodeManageProposal. consensusHandle:{}", consensusHandle);
+    String nodeType = consensusHandle.getNodeType();
+    String nodeId = consensusHandle.getNodeId();
+    if (!PrecompiledUtils.checkNodeId(nodeId)) {
+      return ConstantCode.INVALID_NODE_ID;
+    }
+
+    BigInteger proposalId;
+    switch (nodeType) {
+      case PrecompiledUtils.NODE_TYPE_SEALER:
+        proposalId = committeeService.createAddSealerProposal(consensusHandle);
+        return new BaseResponse(ConstantCode.RET_SUCCESS, proposalId);
+      case PrecompiledUtils.NODE_TYPE_OBSERVER:
+        proposalId = committeeService.createAddObserverProposal(consensusHandle);
+        return new BaseResponse(ConstantCode.RET_SUCCESS, proposalId);
+      case PrecompiledUtils.NODE_TYPE_REMOVE:
+        proposalId = committeeService.createRemoveNodeProposal(consensusHandle);
+        return new BaseResponse(ConstantCode.RET_SUCCESS, proposalId);
+      case PrecompiledUtils.NODE_TYPE_WEIGHT:
+        proposalId = committeeService.createSetConsensusWeightProposal(consensusHandle);
+        return new BaseResponse(ConstantCode.RET_SUCCESS, proposalId);
+      default:
+        log.warn("end nodeManageControl invalid node type");
+        return new BaseResponse(ConstantCode.PARAM_VAILD_FAIL);
+    }
+  }
 }
