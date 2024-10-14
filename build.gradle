@@ -196,7 +196,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25.js",
+                args '-#L', "https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.4.25.js",
                         "-o", solc04Path
         }
     }
@@ -204,7 +204,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25-gm.js",
+                args '-#L', "https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.4.25-gm.js",
                         "-o", solc04gmPath
         }
     }
@@ -212,7 +212,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2.js",
+                args '-#L', "https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.5.2.js",
                         "-o", solc05Path
         }
     }
@@ -220,7 +220,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2-gm.js",
+                args '-#L', "https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.5.2-gm.js",
                         "-o", solc05gmPath
         }
     }
@@ -228,7 +228,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10.js",
+                args '-#L', "https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.6.10.js",
                         "-o", solc06Path
         }
     }
@@ -236,7 +236,7 @@ def downloadJs() {
         exec {
             ExecSpec execSpec ->
                 executable 'curl'
-                args '-#L', "https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10-gm.js",
+                args '-#L', "https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.6.10-gm.js",
                         "-o", solc06gmPath
         }
     }
