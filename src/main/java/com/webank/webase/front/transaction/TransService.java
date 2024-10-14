@@ -304,7 +304,7 @@ public class TransService {
                         encodeStr))
             .getCallResult().getOutput();
 
-        ABIDefinition abiDefinition = getABIDefinition(funcName, JsonUtils.toJSONString(contractAbi), groupId);
+        ABIDefinition abiDefinition = getABIDefinition(JsonUtils.toJSONString(contractAbi), funcName, groupId);
         if (Objects.isNull(abiDefinition)) {
             throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
