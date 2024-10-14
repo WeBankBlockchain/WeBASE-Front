@@ -295,7 +295,6 @@ public class TransService {
         CryptoKeyPair cryptoKeyPair = getCredentials(isTxConstant, userAddress);
 
         Client client = web3ApiService.getWeb3j(groupId);
-
         if (isTxConstant) {
             if (StringUtils.isBlank(userAddress)) {
                 userAddress = cryptoKeyPair.getAddress();
@@ -376,13 +375,25 @@ public class TransService {
      * get CryptoKeyPair by keyUser locally
      */
     private CryptoKeyPair getCredentials(boolean constant, String keyUser) {
+        log.info("getCredentials constant:{},keyUser:{}", constant, keyUser);
         // get privateKey
         CryptoKeyPair credentials;
+        // TODO constant不能使用msg.sender调用合约问题
         if (constant) {
             credentials = keyStoreService.getCredentialsForQuery();
+            // 非空，尝试从db获取user的credential，否则就随机
+            if (StringUtils.isNotBlank(keyUser)) {
+                try {
+                    credentials = keyStoreService.getCredentials(keyUser);
+                    log.info("getCredentials constant, now return db keyUser:{}", credentials.getAddress());
+                } catch (FrontException ex) {
+                    log.warn("getCredentials constant, now return random:{}", credentials.getAddress());
+                }
+            }
         } else {
             credentials = keyStoreService.getCredentials(keyUser);
         }
+
         return credentials;
     }
 
@@ -583,16 +594,22 @@ public class TransService {
             throw new FrontException(ConstantCode.IN_FUNCTION_ERROR);
         }
         // abi only contain one function, so get first one
-        ABIDefinition function = abiDefinitionList.get(0);
-        return function;
+        ABIDefinition abiDefinition = abiDefinitionList.get(0);
+        if (abiDefinition.getStateMutability().equals("pure")
+            || abiDefinition.getStateMutability().equals("constant")
+            || abiDefinition.getStateMutability().equals("view")) {
+            abiDefinition.setConstant(true);
+        }
+        return abiDefinition;
     }
 
     public Object handleCall(int groupId, String userAddress, String contractAddress,
         String encodedFunction, String abiStr, String funcName) {
-
+        // TODO constant不能使用msg.sender调用合约问题。
         TransactionProcessor transactionProcessor = new TransactionProcessor(
-            web3ApiService.getWeb3j(groupId), keyStoreService.getCredentialsForQuery(),
-            groupId, Constants.chainId);
+                web3ApiService.getWeb3j(groupId),
+                getCredentials(true, userAddress), // 尝试db获取该address的私钥，否则随机创建
+                groupId, Constants.chainId);
         CallOutput callOutput = transactionProcessor
             .executeCall(userAddress, contractAddress, encodedFunction)
             .getCallResult();
@@ -704,111 +721,6 @@ public class TransService {
         CommonUtils.processReceiptHexNumber(receipt);
     }
 
-
-//    private void validFuncParam(String contractAbiStr, String funcName, List<String> funcParam) {
-//        ABIDefinition abiDefinition = this.getABIDefinition(contractAbiStr, funcName);
-//        List<NamedType> inputTypeList = abiDefinition.getInputs();
-//        if (inputTypeList.size() != funcParam.size()) {
-//            log.error("validFuncParam param not match");
-//            throw new FrontException(ConstantCode.FUNC_PARAM_SIZE_NOT_MATCH);
-//        }
-//        for (int i = 0; i < inputTypeList.size(); i++) {
-//            String type = inputTypeList.get(i).getType();
-//            if (type.startsWith("bytes")) {
-//                if (type.contains("[][]")) {
-//                    // todo bytes[][]
-//                    log.warn("validFuncParam param, not support bytes 2d array or more");
-//                    throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_NOT_SUPPORT_HIGH_D);
-//                }
-//                // if not bytes[], bytes or bytesN
-//                if (!type.endsWith("[]")) {
-//                    // update funcParam
-//                    String bytesHexStr = funcParam.get(i);
-//                    byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
-//                    // bytesN: bytes1, bytes32 etc.
-//                    if (type.length() > "bytes".length()) {
-//                        int bytesNLength = Integer.parseInt(type.substring("bytes".length()));
-//                        if (inputArray.length != bytesNLength) {
-//                            log.error("validFuncParam param of bytesN size not match");
-//                            throw new FrontException(ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-//                        }
-//                    }
-//                    // replace hexString with array
-//                    funcParam.set(i, bytesHexStr);
-//                } else {
-//                    // if bytes[] or bytes32[]
-//                    List<String> hexStrArray = (List<String>) (funcParam.get(i));
-//                    List<byte[]> bytesArray = new ArrayList<>(hexStrArray.size());
-//                    for (int j = 0; j < hexStrArray.size(); j++) {
-//                        String bytesHexStr = hexStrArray.get(j);
-//                        byte[] inputArray = Numeric.hexStringToByteArray(bytesHexStr);
-//                        // check: bytesN: bytes1, bytes32 etc.
-//                        if (type.length() > "bytes[]".length()) {
-//                            // bytes32[] => 32[]
-//                            String temp = type.substring("bytes".length());
-//                            // 32[] => 32
-//                            int bytesNLength = Integer
-//                                .parseInt(temp.substring(0, temp.length() - 2));
-//                            if (inputArray.length != bytesNLength) {
-//                                log.error("validFuncParam param of bytesN size not match");
-//                                throw new FrontException(
-//                                    ConstantCode.FUNC_PARAM_BYTES_SIZE_NOT_MATCH);
-//                            }
-//                        }
-//                        bytesArray.add(inputArray);
-//                    }
-//                    // replace hexString with array
-//                    funcParam.set(i, bytesArray);
-//                }
-//            }
-//        }
-//    }
-
-//    /**
-//     * parse bytes, bytesN, bytesN[], bytes[] from base64 string to hex string
-//     * @param abiStr
-//     * @param funcName
-//     * @param outputValues
-//     */
-//    private void handleFuncOutput(String abiStr, String funcName, List<String> outputValues) {
-//        ABIDefinition abiDefinition = this.getABIDefinition(abiStr, funcName);
-//        ABICodecJsonWrapper jsonWrapper = new ABICodecJsonWrapper();
-//        List<NamedType> outputTypeList = abiDefinition.getOutputs();
-//        for (int i = 0; i < outputTypeList.size(); i++) {
-//            String type = outputTypeList.get(i).getType();
-//            if (type.startsWith("bytes")) {
-//                if (type.contains("[][]")) { // todo bytes[][]
-//                    log.warn("validFuncParam param, not support bytes 2d array or more");
-//                    continue;
-//                }
-//                // if not bytes[], bytes or bytesN
-//                if (!type.endsWith("[]")) {
-//                    // update funcParam
-//                    String bytesBase64Str = outputValues.get(i);
-//                    if (bytesBase64Str.startsWith("base64://")) {
-//                        bytesBase64Str = bytesBase64Str.substring("base64://".length());
-//                    }
-//                    byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
-//                    // replace hexString with array
-//                    outputValues.set(i, Numeric.toHexString(inputArray));
-//                } else {
-//                    // if bytes[] or bytes32[]
-//                    List<String> base64StrArray = JsonUtils.toJavaObject(outputValues.get(i), List.class);
-//                    List<String> bytesArray = new ArrayList<>(base64StrArray.size());
-//                    for (int j = 0; j < base64StrArray.size(); j++) {
-//                        String bytesBase64Str = base64StrArray.get(j);
-//                        if (bytesBase64Str.startsWith("base64://")) {
-//                            bytesBase64Str = bytesBase64Str.substring("base64://".length());
-//                        }
-//                        byte[] inputArray = Base64.getDecoder().decode(bytesBase64Str);
-//                        bytesArray.add(Numeric.toHexString(inputArray));
-//                    }
-//                    // replace hexString with array
-//                    outputValues.set(i, JsonUtils.objToString(bytesArray));
-//                }
-//            }
-//        }
-//    }
 
 }
 
