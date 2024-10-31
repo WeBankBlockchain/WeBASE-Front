@@ -16,6 +16,7 @@ package com.webank.webase.front.event.callback;
 
 import com.webank.webase.front.event.entity.DecodedEventLog;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.fisco.bcos.sdk.v3.codec.ContractCodec;
@@ -48,7 +49,7 @@ public class SyncEventLogCallback implements EventSubCallback {
         this.contractAbi = contractAbi;
         this.eventName = eventName;
         this.future = future;
-        this.finalList = new ArrayList<>();
+        this.finalList = Collections.synchronizedList(new ArrayList<>());
     }
 
     /**
@@ -75,7 +76,7 @@ public class SyncEventLogCallback implements EventSubCallback {
                 finalList.addAll(decodedList);
             }
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 logger.error("sleep 100ms interrupted:[]", e);
             }

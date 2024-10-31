@@ -47,28 +47,28 @@ get_solc_js(){
     else
         echo "Now download all solidity js in ${STATIC_JS_DIR}, if offline, download js file and put them in this dir"
         if [[ ! -f "${STATIC_JS_DIR}/v0.4.25.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25.js -o "${STATIC_JS_DIR}"/v0.4.25.js
+            curl -#L https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.4.25.js -o "${STATIC_JS_DIR}"/v0.4.25.js
         fi
         if [[ ! -f "${STATIC_JS_DIR}/v0.4.25-gm.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.4.25-gm.js -o "${STATIC_JS_DIR}"/v0.4.25-gm.js
+            curl -#L https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.4.25-gm.js -o "${STATIC_JS_DIR}"/v0.4.25-gm.js
         fi
         if [[ ! -f "${STATIC_JS_DIR}/v0.5.2.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2.js -o "${STATIC_JS_DIR}"/v0.5.2.js
+            curl -#L https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.5.2.js -o "${STATIC_JS_DIR}"/v0.5.2.js
         fi
         if [[ ! -f "${STATIC_JS_DIR}/v0.5.2-gm.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.5.2-gm.js -o "${STATIC_JS_DIR}"/v0.5.2-gm.js
+            curl -#L https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.5.2-gm.js -o "${STATIC_JS_DIR}"/v0.5.2-gm.js
         fi
         if [[ ! -f "${STATIC_JS_DIR}/v0.6.10.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10.js -o "${STATIC_JS_DIR}"/v0.6.10.js
+            curl -#L https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.6.10.js -o "${STATIC_JS_DIR}"/v0.6.10.js
         fi
         if [[ ! -f "${STATIC_JS_DIR}/v0.6.10-gm.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.6.10-gm.js -o "${STATIC_JS_DIR}"/v0.6.10-gm.js
+            curl -#L https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.6.10-gm.js -o "${STATIC_JS_DIR}"/v0.6.10-gm.js
         fi
         if [[ ! -f "${STATIC_JS_DIR}/v0.8.11.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.8.11.js -o "${STATIC_JS_DIR}"/v0.8.11.js
+            curl -#L https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.8.11.js -o "${STATIC_JS_DIR}"/v0.8.11.js
         fi
         if [[ ! -f "${STATIC_JS_DIR}/v0.8.11-gm.js" ]]; then
-            curl -#L https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeBASE/download/solidity/wasm/v0.8.11-gm.js -o "${STATIC_JS_DIR}"/v0.8.11-gm.js
+            curl -#L https://github.com/WeBankBlockchain/WeBASELargeFiles/releases/download/v3.0.0/v0.8.11-gm.js -o "${STATIC_JS_DIR}"/v0.8.11-gm.js
         fi
     fi
 }
