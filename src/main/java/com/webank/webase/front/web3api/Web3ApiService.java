@@ -32,6 +32,7 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -326,6 +327,11 @@ public class Web3ApiService {
 
     /**
      * check node status.
+     * 1 缓存了一份节点的块高和view；每n+3s检查一次，n为节点数。
+     * 2 获取单个节点的块高和view，获取群组的块高
+     * 3 如果是共识节点，节点块高和view 在 n+3s都没变化，则异常；否则正常
+     * 4 如果是观察节点，节点块高和群组最新块高不一样，则异常；否则正常
+     *
      */
     private NodeStatusInfo checkNodeStatus(int groupId, String nodeId, BigInteger chainBlockNumber,
                                            BigInteger chainView, int nodeType) {
@@ -800,14 +806,26 @@ public class Web3ApiService {
     public Client getWeb3j() {
         this.checkConnection();
         Set<Integer> groupIdSet = bcosSDK.getGroupManagerService().getGroupList(); //1
+        log.info("getWeb3j groupIdSet get {}", groupIdSet);
         if (groupIdSet.isEmpty()) {
             log.error("web3jMap is empty, groupList empty! please check your node status");
             // get default web3j of integer max value
             return rpcWeb3j;
         }
         // get random index to get web3j
-        Integer index = groupIdSet.iterator().next();
-        return bcosSDK.getClient(index);
+        Client client = null;
+        for (Integer groupId : groupIdSet) {
+            try {
+                client = bcosSDK.getClient(groupId);
+            } catch (BcosSDKException ex) {
+                log.error("getClient failed groupId:{}, ex", groupId, ex);
+            }
+            if (client != null) {
+                return client;
+            }
+        }
+        log.warn("getWeb3j finally get null, now return rpcWeb3j");
+        return rpcWeb3j;
     }
 
     /**

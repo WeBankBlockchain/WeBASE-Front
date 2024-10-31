@@ -32,6 +32,7 @@ import io.swagger.annotations.ApiOperation;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.validation.Valid;
+import java.math.BigInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.ABICodec;
@@ -222,5 +223,14 @@ public class ToolController {
         return new RspSignData(signatureData, cryptoSuite.cryptoTypeConfig);
     }
 
+    @ApiOperation(value = "hex privateKey to decimal ", notes = "get decimal PrivateKey")
+    @ApiImplicitParam(name = "hexPrivateKey", value = "hex private key", dataType = "String")
+    @GetMapping("/hexKey2Dec")
+    public String hexKey2Dec(@RequestParam String hexPrivateKey) {
+        if (hexPrivateKey.startsWith("0x") || hexPrivateKey.startsWith("0X")){
+            hexPrivateKey = hexPrivateKey.substring(2);
+        }
+        return new BigInteger(hexPrivateKey,16).toString();
+    }
 
 }

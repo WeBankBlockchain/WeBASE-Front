@@ -73,6 +73,8 @@ import javax.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.codegen.v2.wrapper.SolidityContractGenerator;
+import org.fisco.bcos.codegen.v3.wrapper.ContractGenerator;
 import org.fisco.bcos.sdk.abi.ABICodec;
 import org.fisco.bcos.sdk.abi.ABICodecException;
 import org.fisco.bcos.sdk.abi.FunctionEncoder;
@@ -80,7 +82,6 @@ import org.fisco.bcos.sdk.abi.datatypes.Address;
 import org.fisco.bcos.sdk.abi.datatypes.Type;
 import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
 import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.codegen.SolidityContractGenerator;
 import org.fisco.bcos.sdk.codegen.exceptions.CodeGenException;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
@@ -462,13 +463,12 @@ public class ContractService {
         try {
             MySecurityManagerConfig.forbidSystemExitCall();
             // sm bin use same bin
+            // 1.5.6 使用的是codegen 单独的包的类；非fisco sdk内置的类
             SolidityContractGenerator generator = new SolidityContractGenerator(binFile, binFile,
                     abiFile, outputDir, packageName);
             generator.generateJavaFiles();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException | org.fisco.bcos.codegen.v2.exceptions.CodeGenException e) {
             log.error("generateJavaFile error for io error/file not found:[]", e);
-        } catch (CodeGenException e) {
-            log.error("generateJavaFile error code gen:[]", e);
         } finally {
             MySecurityManagerConfig.enableSystemExitCall();
         }
